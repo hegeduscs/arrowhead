@@ -6,15 +6,12 @@ import java.util.List;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 public class ArrowheadService {
 
-	@Id @GeneratedValue(strategy=GenerationType.AUTO)
-    @XmlTransient
+	@Id @GeneratedValue
 	private int id;
 	private String serviceGroup;
 	private String serviceDefinition;
