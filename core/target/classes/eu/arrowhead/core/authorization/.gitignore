@@ -3,3 +3,6 @@
 /Tester.class
 /tester.class
 /AuthorizationRequest.class
+/AuthorizationCheck.class
+/InterCloudAuthRequest.class
+/InterCloudAuthEntry.class

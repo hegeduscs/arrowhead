@@ -5,10 +5,14 @@ import java.util.List;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlTransient;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
 public class ArrowheadService {
@@ -18,7 +22,8 @@ public class ArrowheadService {
 	private int id;
 	private String serviceGroup;
 	private String serviceDefinition;
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.LAZY)
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<String> interfaces = new ArrayList<String>();
 	private String metaData;
 	
@@ -67,5 +72,18 @@ public class ArrowheadService {
 		this.metaData = metaData;
 	}
 	
-	
+	public boolean isEqual(ArrowheadService requestedService){
+		boolean sg = (this.serviceGroup == requestedService.getServiceGroup());
+		boolean sd = (this.serviceDefinition == requestedService.getServiceDefinition());
+		
+		boolean interfaces=false;
+		
+		for (int i =0 ; i < this.interfaces.size(); i++) {
+			for (int j = 0; j < requestedService.getInterfaces().size(); j++ ) {
+				if (this.interfaces.get(i) == requestedService.getInterfaces().get(j)) 
+					interfaces=true;
+			}
+		}
+		return sd&&sg&&interfaces;
+	}
 }

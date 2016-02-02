@@ -62,7 +62,8 @@ public class DatabaseManager {
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = session.beginTransaction();
     	try {
-            session.persist(arrowheadCloud);
+    		session.persist(arrowheadCloud);
+
             transaction.commit();
         }
         catch (Exception e) {

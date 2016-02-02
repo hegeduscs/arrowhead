@@ -5,16 +5,16 @@ import java.util.Collection;
 
 import eu.arrowhead.core.authorization.database.ArrowheadService;
 
-public class AuthorizationRequest {
+public class InterCloudAuthEntry {
 	
 	private String authenticationInfo;
     private Collection<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
 	
-    public AuthorizationRequest(){
+    public InterCloudAuthEntry(){
     	
     }
     
-    public AuthorizationRequest(String authenticationInfo, Collection<ArrowheadService> serviceList) {
+    public InterCloudAuthEntry(String authenticationInfo, Collection<ArrowheadService> serviceList) {
 		super();
 		this.authenticationInfo = authenticationInfo;
 		this.serviceList = serviceList;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -29,11 +30,10 @@ public class ArrowheadCloud {
     @JoinTable (name="Clouds_Services")
     private Collection<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
    
-    
-    
     public ArrowheadCloud(){
        
     }
+    
     public ArrowheadCloud(String operator, String cloudName, String authenticationInfo) {
         super();
         this.operator = operator;
