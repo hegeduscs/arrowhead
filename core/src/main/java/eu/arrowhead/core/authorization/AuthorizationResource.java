@@ -1,10 +1,10 @@
 package eu.arrowhead.core.authorization;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -15,6 +15,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import eu.arrowhead.core.authorization.database.ArrowheadCloud;
 import eu.arrowhead.core.authorization.database.ArrowheadService;
@@ -32,33 +33,30 @@ public class AuthorizationResource {
         return "This is the authorization service!";
     }
     
-    /*
-     * Not working as intended yet.
-     */
     @PUT
     @Path("/operator/{operatorName}/cloud/{cloudName}")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
+    //can check whether a Cloud can use a Service (returns with boolean; or with JSON exception)
     public boolean isCloudAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthRequest request){
     	ArrowheadService requestedService = request.getArrowheadService();
-    	List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
-    	cloudList = databaseManager.getCloudByName(operatorName, cloudName);
+    	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
+    	if(arrowheadCloud == null)
+    		return false;
     	boolean isAuthorized = false;
-    	for (int i = 0; i < cloudList.size(); i++) {
-         	List<ArrowheadService> retrievedcloudServices=(List<ArrowheadService>)cloudList.get(i).getServiceList();
-         	//System.out.println(retrievedcloudServices.size());
-         	for (int j = 0; j < retrievedcloudServices.size(); j++){
-         		 if(retrievedcloudServices.get(j).isEqual(requestedService))
-         			//System.out.println(retrievedcloudServices.get(j).getServiceDefinition());
-         			isAuthorized = true;
-         	}
+        List<ArrowheadService> retrievedCloudServices = (List<ArrowheadService>) arrowheadCloud.getServiceList();
+        for (int j = 0; j < retrievedCloudServices.size(); j++){
+         	if(retrievedCloudServices.get(j).isEqual(requestedService))
+         		isAuthorized = true; 
          }
-    	//System.out.println(cloudList.get(0).getAuthenticationInfo() + cloudList.get(0).getCloudName() + cloudList.get(0).getOperator());
+
     	return isAuthorized;
     }
     
     @POST
     @Path("/operator/{operatorName}/cloud/{cloudName}")
+    //can add new Cloud (and its consumable Services) to the database
+    //or override the whole auth entry
     public Response addCloudToAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry, 
     		@Context UriInfo uriInfo){
@@ -73,4 +71,17 @@ public class AuthorizationResource {
     	URI uri = uriInfo.getAbsolutePathBuilder().build();
     	return Response.created(uri).entity(authorizedCloud).build();
     }
+    
+    @DELETE
+    @Path("/operator/{operatorName}/cloud/{cloudName}")
+    //deletes a Cloud (and its Services!) from the database
+    public Response deleteCloudFromAuthorized(@PathParam("operatorName") String operatorName, 
+    		@PathParam("cloudName") String cloudName){
+    	databaseManager.deleteCloudFromAuthorized(operatorName, cloudName);
+    	
+    	return Response.status(Status.OK)
+				.build();
+    }
+    
+    
 }

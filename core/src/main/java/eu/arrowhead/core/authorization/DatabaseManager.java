@@ -1,15 +1,15 @@
 package eu.arrowhead.core.authorization;
  
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.ConstraintViolationException;
 
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.core.authorization.database.ArrowheadCloud;
  
 public class DatabaseManager {
@@ -31,33 +31,31 @@ public class DatabaseManager {
     	}
     }
     
-    public List<ArrowheadCloud> getCloudByName(String operator, String cloudName){
+    public ArrowheadCloud getCloudByName(String operator, String cloudName){
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = session.beginTransaction();
     	
-    	List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
+    	ArrowheadCloud arrowheadCloud;
     	
     	try {
              Criteria criteria = session.createCriteria(ArrowheadCloud.class);
              criteria.add(Restrictions.eq("operator", operator));
              criteria.add(Restrictions.eq("cloudName", cloudName));
              criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-             cloudList = (List<ArrowheadCloud>) criteria.list();
+             arrowheadCloud = (ArrowheadCloud) criteria.uniqueResult();
              transaction.commit();
          }
          catch (Exception e) {
              if (transaction!=null) transaction.rollback();
-             e.printStackTrace();
+             throw e;
          }
          finally {
              session.close();
          }
-    	return cloudList;
+    	
+    	return arrowheadCloud;
     }
     
-    /*
-     * At the moment duplicate entries possible because of the generated primary key.
-     */
     public ArrowheadCloud addCloudToAuthorized(ArrowheadCloud arrowheadCloud){
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = session.beginTransaction();
@@ -66,9 +64,14 @@ public class DatabaseManager {
 
             transaction.commit();
         }
+    	catch(ConstraintViolationException e){
+    		if (transaction!=null) transaction.rollback();
+    		//update operation could be initiated here
+    		throw new DuplicateEntryException("There is already an entry in the database with these parameters.");
+    	}
         catch (Exception e) {
             if (transaction!=null) transaction.rollback();
-            e.printStackTrace();
+            throw e;
         }
         finally {
             session.close();
@@ -76,5 +79,26 @@ public class DatabaseManager {
     	
     	return arrowheadCloud;
     }
-   
+    
+    public void deleteCloudFromAuthorized(String operator, String cloudName){
+    	ArrowheadCloud arrowheadCloud = getCloudByName(operator, cloudName);
+    	if(arrowheadCloud == null)
+    		throw new DataNotFoundException("Cloud not found in the database.");
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = session.beginTransaction();
+    	try {
+    		session.delete(arrowheadCloud);
+
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    }
+    
 }
