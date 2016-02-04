@@ -1,5 +1,8 @@
 package eu.arrowhead.core.authorization;
  
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -29,6 +32,31 @@ public class DatabaseManager {
     		sessionFactory=new Configuration().configure().buildSessionFactory();
     		return sessionFactory;
     	}
+    }
+    
+    @SuppressWarnings("unchecked")
+	public List<ArrowheadCloud> getClouds(String operator){
+    	List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = session.beginTransaction();
+    	
+    	try {
+            Criteria criteria = session.createCriteria(ArrowheadCloud.class);
+            criteria.add(Restrictions.eq("operator", operator));
+            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+            cloudList = (List<ArrowheadCloud>) criteria.list();
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    	
+    	return cloudList;
     }
     
     public ArrowheadCloud getCloudByName(String operator, String cloudName){
@@ -66,7 +94,6 @@ public class DatabaseManager {
         }
     	catch(ConstraintViolationException e){
     		if (transaction!=null) transaction.rollback();
-    		//update operation could be initiated here
     		throw new DuplicateEntryException("There is already an entry in the database with these parameters.");
     	}
         catch (Exception e) {
@@ -89,6 +116,23 @@ public class DatabaseManager {
     	Transaction transaction = session.beginTransaction();
     	try {
     		session.delete(arrowheadCloud);
+
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    }
+    
+    public void updateAuthorizedCloud(ArrowheadCloud arrowheadCloud){
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = session.beginTransaction();
+    	try {
+    		session.update(arrowheadCloud);
 
             transaction.commit();
         }

@@ -73,18 +73,19 @@ public class ArrowheadService {
 	}
 	
 	public boolean isEqual(ArrowheadService requestedService){
-		Boolean sg = (this.serviceGroup.equals(requestedService.getServiceGroup()));
-		Boolean sd = (this.serviceDefinition.equals(requestedService.getServiceDefinition()));
+		boolean sg = (this.serviceGroup.equals(requestedService.getServiceGroup()));
+		boolean sd = (this.serviceDefinition.equals(requestedService.getServiceDefinition()));
 		
-		Boolean interfaces=false;
+		boolean interfaces = false;
 		
 		for (int i =0 ; i < this.interfaces.size(); i++) {
 			for (int j = 0; j < requestedService.getInterfaces().size(); j++ ) {
 				if (this.interfaces.get(i).equals(requestedService.getInterfaces().get(j))) 
-					interfaces=true;
+					interfaces = true;
 			}
 		}
 		
-		return sd&&sg&&interfaces;
+		return sd && sg && interfaces;
 	}
+	
 }

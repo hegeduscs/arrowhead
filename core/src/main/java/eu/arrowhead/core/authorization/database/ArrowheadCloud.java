@@ -74,6 +74,15 @@ public class ArrowheadCloud {
     public void setServiceList(Collection<ArrowheadService> serviceList) {
         this.serviceList = serviceList;
     }
+    
+    public boolean isEqual(ArrowheadCloud arrowheadCloud){
+    	boolean op = (this.operator.equals(arrowheadCloud.getOperator()));
+    	boolean cn = (this.cloudName.equals(arrowheadCloud.getCloudName()));
+    	boolean ai = (this.authenticationInfo.equals(arrowheadCloud.getAuthenticationInfo()));
+    	boolean sl = (this.serviceList.size() == arrowheadCloud.getServiceList().size());
+    	
+    	return op && cn && ai && sl;
+    }
    
    
 }

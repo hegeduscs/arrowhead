@@ -1,6 +1,7 @@
 package eu.arrowhead.core.authorization;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -15,7 +16,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.Status;
 
 import eu.arrowhead.core.authorization.database.ArrowheadCloud;
 import eu.arrowhead.core.authorization.database.ArrowheadService;
@@ -33,10 +33,29 @@ public class AuthorizationResource {
         return "This is the authorization service!";
     }
     
+    @GET
+    @Path("/operator/{operatorName}")
+    //returns a list of Clouds with the same Operator
+    public List<ArrowheadCloud> getClouds(@PathParam("operatorName") String operatorName){
+    	List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
+    	cloudList = databaseManager.getClouds(operatorName);
+    	
+    	return cloudList;
+    }
+    
+    @GET
+    @Path("/operator/{operatorName}/cloud/{cloudName}")
+    //returns a Cloud from the database
+    public Response getCloud(@PathParam("operatorName") String operatorName, 
+    		@PathParam("cloudName") String cloudName){
+    	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
+    	return Response.ok(arrowheadCloud).build();
+    }
+    
     @PUT
     @Path("/operator/{operatorName}/cloud/{cloudName}")
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
-    //can check whether a Cloud can use a Service (returns with boolean; or with JSON exception)
+    //checks whether a Cloud can use a Service (returns with boolean; or with JSON exception)
     public boolean isCloudAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthRequest request){
     	ArrowheadService requestedService = request.getArrowheadService();
@@ -55,8 +74,7 @@ public class AuthorizationResource {
     
     @POST
     @Path("/operator/{operatorName}/cloud/{cloudName}")
-    //can add new Cloud (and its consumable Services) to the database
-    //or override the whole auth entry
+    //adds a new Cloud (and its consumable Services) to the database
     public Response addCloudToAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry, 
     		@Context UriInfo uriInfo){
@@ -74,13 +92,68 @@ public class AuthorizationResource {
     
     @DELETE
     @Path("/operator/{operatorName}/cloud/{cloudName}")
-    //deletes a Cloud (and its Services!) from the database
+    //deletes a Cloud (and its consumable Services!) from the database
     public Response deleteCloudFromAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName){
     	databaseManager.deleteCloudFromAuthorized(operatorName, cloudName);
     	
-    	return Response.status(Status.OK)
-				.build();
+    	return Response.noContent().build();
+    }
+    
+    @GET
+    @Path("/operator/{operatorName}/cloud/{cloudName}/services")
+    //returns the list of consumable Services of a Cloud
+    public List<ArrowheadService> getCloudServices(@PathParam("operatorName") String operatorName, 
+    		@PathParam("cloudName") String cloudName){
+    	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
+    	List<ArrowheadService> serviceList = (List<ArrowheadService>) arrowheadCloud.getServiceList();
+    	
+    	return serviceList;
+    }
+    
+    @POST
+    @Path("/operator/{operatorName}/cloud/{cloudName}/services")
+    //adds a list of consumable Services to a Cloud
+    public List<ArrowheadService> addCloudServices(@PathParam("operatorName") String operatorName, 
+    		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry){
+    	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
+    	if(!entry.getAuthenticationInfo().isEmpty()){
+    		arrowheadCloud.setAuthenticationInfo(entry.getAuthenticationInfo());
+    	}
+    	List<ArrowheadService> serviceList = (List<ArrowheadService>) entry.getServiceList();
+    	arrowheadCloud.getServiceList().addAll(serviceList);
+    	databaseManager.updateAuthorizedCloud(arrowheadCloud);
+    	
+    	return serviceList;
+    }
+    
+    @PUT
+    @Path("/operator/{operatorName}/cloud/{cloudName}/services")
+    //list of consumable Services update, deletes the previous list
+    public List<ArrowheadService> updateCloudServices(@PathParam("operatorName") String operatorName, 
+    		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry){
+    	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
+    	if(!entry.getAuthenticationInfo().isEmpty()){
+    		arrowheadCloud.setAuthenticationInfo(entry.getAuthenticationInfo());
+    	}
+    	List<ArrowheadService> serviceList = (List<ArrowheadService>) entry.getServiceList();
+    	arrowheadCloud.getServiceList().clear();
+    	arrowheadCloud.getServiceList().addAll(serviceList);
+    	databaseManager.updateAuthorizedCloud(arrowheadCloud);
+				
+    	return serviceList;
+    }
+    
+    @DELETE
+    @Path("/operator/{operatorName}/cloud/{cloudName}/services")
+    public Response deleteCloudServices(@PathParam("operatorName") String operatorName, 
+    		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry){
+    	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
+    	List<ArrowheadService> serviceList = (List<ArrowheadService>) entry.getServiceList();
+    	arrowheadCloud.getServiceList().removeAll(serviceList);
+    	databaseManager.updateAuthorizedCloud(arrowheadCloud);
+    	
+    	return Response.noContent().build();
     }
     
     
