@@ -50,7 +50,13 @@ public class ArrowheadCloud {
         this.authenticationInfo = authenticationInfo;
         this.serviceList = serviceList;
     }
-    public String getOperator() {
+    
+    
+    public int getId() {
+		return id;
+	}
+
+	public String getOperator() {
         return operator;
     }
     public void setOperator(String operator) {

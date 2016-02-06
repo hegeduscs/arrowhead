@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.core.authorization.database.ArrowheadCloud;
+import eu.arrowhead.core.authorization.database.ArrowheadService;
  
 public class DatabaseManager {
 	
@@ -71,6 +74,9 @@ public class DatabaseManager {
              criteria.add(Restrictions.eq("cloudName", cloudName));
              criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
              arrowheadCloud = (ArrowheadCloud) criteria.uniqueResult();
+             if(arrowheadCloud == null){
+            	 throw new DataNotFoundException("The consumer Cloud is not in the authorized database.");
+             }
              transaction.commit();
          }
          catch (Exception e) {
@@ -143,6 +149,13 @@ public class DatabaseManager {
         finally {
             session.close();
         }
+    }
+    
+    public void deleteServices(String operator, String cloudName, List<ArrowheadService> serviceList){
+    	ArrowheadCloud arrowheadCloud = getCloudByName(operator, cloudName);
+    	arrowheadCloud.getServiceList().removeAll(serviceList);
+    	deleteCloudFromAuthorized(operator, cloudName);
+    	arrowheadCloud = addCloudToAuthorized(arrowheadCloud);
     }
     
 }

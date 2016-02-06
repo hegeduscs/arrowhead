@@ -39,6 +39,12 @@ public class ArrowheadService {
 		this.interfaces = interfaces;
 		this.metaData = metaData;
 	}
+	
+	
+
+	public int getId() {
+		return id;
+	}
 
 	public String getServiceGroup() {
 		return serviceGroup;

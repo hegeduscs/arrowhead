@@ -1,8 +1,0 @@
-/DataNotFoundException.class
-/DataNotFoundExceptionMapper.class
-/ErrorMessage.class
-/DuplicateEntryException.class
-/DuplicateEntryExceptionMapper.class
-/GenericExceptionMapper.class
-/MessageBodyMissingException.class
-/MessageBodyMissingExceptionMapper.class

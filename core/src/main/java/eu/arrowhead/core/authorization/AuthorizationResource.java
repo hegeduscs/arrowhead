@@ -127,6 +127,9 @@ public class AuthorizationResource {
     	return serviceList;
     }
     
+    /*
+     * Services still in the database after this, needs fixing.
+     */
     @PUT
     @Path("/operator/{operatorName}/cloud/{cloudName}/services")
     //list of consumable Services update, deletes the previous list
@@ -144,14 +147,18 @@ public class AuthorizationResource {
     	return serviceList;
     }
     
+    /*
+     * Services still in the database after this, needs fixing.
+     */
     @DELETE
     @Path("/operator/{operatorName}/cloud/{cloudName}/services")
     public Response deleteCloudServices(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry){
-    	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
+    	//ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
     	List<ArrowheadService> serviceList = (List<ArrowheadService>) entry.getServiceList();
-    	arrowheadCloud.getServiceList().removeAll(serviceList);
-    	databaseManager.updateAuthorizedCloud(arrowheadCloud);
+    	System.out.println(serviceList.size());
+    	//arrowheadCloud.getServiceList().removeAll(serviceList);
+    	databaseManager.deleteServices(operatorName, cloudName, serviceList);
     	
     	return Response.noContent().build();
     }
