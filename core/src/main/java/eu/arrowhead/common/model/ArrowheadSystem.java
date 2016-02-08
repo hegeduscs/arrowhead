@@ -1,5 +1,8 @@
 package eu.arrowhead.common.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class ArrowheadSystem {
 	
 	private String systemGroup;
