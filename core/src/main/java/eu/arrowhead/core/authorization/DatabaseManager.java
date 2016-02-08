@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
@@ -23,16 +21,16 @@ public class DatabaseManager {
     private static SessionFactory sessionFactory;
    
     public DatabaseManager(){
-        if (sessionFactory==null){
-            sessionFactory=new Configuration().configure().buildSessionFactory();
+        if (sessionFactory == null){
+            sessionFactory = new Configuration().configure().buildSessionFactory();
         }
     }
    
     public SessionFactory getSessionFactory() {
-    	if (sessionFactory!=null)
+    	if (sessionFactory != null)
     	return sessionFactory;
     	else {
-    		sessionFactory=new Configuration().configure().buildSessionFactory();
+    		sessionFactory = new Configuration().configure().buildSessionFactory();
     		return sessionFactory;
     	}
     }
@@ -42,9 +40,10 @@ public class DatabaseManager {
     	List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
     	
     	Session session = getSessionFactory().openSession();
-    	Transaction transaction = session.beginTransaction();
+    	Transaction transaction = null;
     	
     	try {
+    		transaction = session.beginTransaction();
             Criteria criteria = session.createCriteria(ArrowheadCloud.class);
             criteria.add(Restrictions.eq("operator", operator));
             criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
@@ -63,12 +62,13 @@ public class DatabaseManager {
     }
     
     public ArrowheadCloud getCloudByName(String operator, String cloudName){
-    	Session session = getSessionFactory().openSession();
-    	Transaction transaction = session.beginTransaction();
-    	
     	ArrowheadCloud arrowheadCloud;
     	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
     	try {
+    		 transaction = session.beginTransaction();
              Criteria criteria = session.createCriteria(ArrowheadCloud.class);
              criteria.add(Restrictions.eq("operator", operator));
              criteria.add(Restrictions.eq("cloudName", cloudName));
@@ -92,8 +92,10 @@ public class DatabaseManager {
     
     public ArrowheadCloud addCloudToAuthorized(ArrowheadCloud arrowheadCloud){
     	Session session = getSessionFactory().openSession();
-    	Transaction transaction = session.beginTransaction();
+    	Transaction transaction = null;
+    	
     	try {
+    		transaction = session.beginTransaction();
     		session.persist(arrowheadCloud);
 
             transaction.commit();
@@ -119,8 +121,10 @@ public class DatabaseManager {
     		throw new DataNotFoundException("Cloud not found in the database.");
     	
     	Session session = getSessionFactory().openSession();
-    	Transaction transaction = session.beginTransaction();
+    	Transaction transaction = null;
+    	
     	try {
+    		transaction = session.beginTransaction();
     		session.delete(arrowheadCloud);
 
             transaction.commit();
@@ -134,10 +138,15 @@ public class DatabaseManager {
         }
     }
     
+    /*
+     * Not used for anything at the moment.
+     */
     public void updateAuthorizedCloud(ArrowheadCloud arrowheadCloud){
     	Session session = getSessionFactory().openSession();
-    	Transaction transaction = session.beginTransaction();
+    	Transaction transaction = null;
+    	
     	try {
+    		transaction = session.beginTransaction();
     		session.update(arrowheadCloud);
 
             transaction.commit();

@@ -10,9 +10,11 @@
  <property name="hibernate.connection.username">root</property>
  <property name="hibernate.connection.password">root</property>
  <property name="show_sql">true</property>
- <property name="hibernate.hbm2ddl.auto">create</property>
+ <property name="hibernate.hbm2ddl.auto">update</property>
  <mapping class="eu.arrowhead.core.authorization.database.ArrowheadCloud"/>
  <mapping class="eu.arrowhead.core.authorization.database.ArrowheadSystem"/>
  <mapping class="eu.arrowhead.core.authorization.database.ArrowheadService"/>
+ <mapping class="eu.arrowhead.common.configuration.CoreSystem"/>
+ <mapping class="eu.arrowhead.common.configuration.NeighborCloud"/>
 </session-factory>
 </hibernate-configuration>
