@@ -14,7 +14,7 @@ public class OrchestrationResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getIt() {
-        return "This is the Orchestration Service!";
+        return "This is the Orchestration Service";
     }
     
     /*
