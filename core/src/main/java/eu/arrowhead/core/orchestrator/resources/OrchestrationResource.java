@@ -10,9 +10,9 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import eu.arrowhead.common.model.orchestrator.QueryResult;
-import eu.arrowhead.common.model.orchestrator.ServiceQueryForm;
-import eu.arrowhead.common.model.orchestrator.ServiceRequestForm;
+import eu.arrowhead.common.model.messages.QueryResult;
+import eu.arrowhead.common.model.messages.ServiceQueryForm;
+import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import eu.arrowhead.core.orchestrator.services.DummySRImitator;
 import eu.arrowhead.core.orchestrator.services.OrchestrationService;
 

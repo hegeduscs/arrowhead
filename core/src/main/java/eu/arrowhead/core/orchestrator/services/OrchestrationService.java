@@ -10,10 +10,10 @@ import javax.ws.rs.core.Response;
 
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.orchestrator.QueryResult;
-import eu.arrowhead.common.model.orchestrator.ServiceQueryForm;
-import eu.arrowhead.common.model.orchestrator.ServiceRegistryEntry;
-import eu.arrowhead.common.model.orchestrator.ServiceRequestForm;
+import eu.arrowhead.common.model.messages.QueryResult;
+import eu.arrowhead.common.model.messages.ServiceQueryForm;
+import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
+import eu.arrowhead.common.model.messages.ServiceRequestForm;
 
 public class OrchestrationService {
 	

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.orchestrator.ProvidedInterface;
-import eu.arrowhead.common.model.orchestrator.QueryResult;
-import eu.arrowhead.common.model.orchestrator.ServiceQueryForm;
+import eu.arrowhead.common.model.messages.ProvidedInterface;
+import eu.arrowhead.common.model.messages.QueryResult;
+import eu.arrowhead.common.model.messages.ServiceQueryForm;
 
 public class DummySRImitator {
 	

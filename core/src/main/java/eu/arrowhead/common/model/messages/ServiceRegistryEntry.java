@@ -1,4 +1,4 @@
-package eu.arrowhead.common.model.orchestrator;
+package eu.arrowhead.common.model.messages;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

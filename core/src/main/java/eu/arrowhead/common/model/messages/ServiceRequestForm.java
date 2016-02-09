@@ -1,4 +1,4 @@
-package eu.arrowhead.common.model.orchestrator;
+package eu.arrowhead.common.model.messages;
 
 import java.util.HashMap;
 import java.util.Map;

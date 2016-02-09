@@ -1,4 +1,4 @@
-package eu.arrowhead.common.model.orchestrator;
+package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
