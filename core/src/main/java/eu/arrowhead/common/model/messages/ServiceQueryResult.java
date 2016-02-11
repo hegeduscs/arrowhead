@@ -8,14 +8,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ServiceQueryResult {
 	
-	private List<ProvidedService> serviceQueryData = new ArrayList<ProvidedService>();
+	private List<ProvidedService> result = new ArrayList<ProvidedService>();
 
 	public List<ProvidedService> getServiceQueryData() {
-		return serviceQueryData;
+		return result;
 	}
 
-	public void setServiceQueryData(List<ProvidedService> serviceQueryData) {
-		this.serviceQueryData = serviceQueryData;
+	public void setServiceQueryData(List<ProvidedService> result) {
+		this.result = result;
 	}
 
 }
