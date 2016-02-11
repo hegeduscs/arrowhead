@@ -25,6 +25,13 @@ public class ServiceQueryForm {
 		this.pingProviders = pingProviders;
 		this.tsig_key = tSIG_key;
 	}
+	
+	public ServiceQueryForm(ServiceRequestForm srf){
+		this.serviceMetaData = srf.getRequestedService().getMetaData();
+		this.serviceInterfaces = srf.getRequestedService().getInterfaces();
+		this.pingProviders = srf.getOrchestrationFlags().get("PingProvider");
+		this.tsig_key ="DUMMY";
+	}
 
 	public String getServiceMetaData() {
 		return serviceMetaData;

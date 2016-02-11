@@ -1,5 +1,7 @@
 package eu.arrowhead.core.orchestrator;
 
+import java.net.URI;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -7,16 +9,24 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
+import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.QoSReserve;
 import eu.arrowhead.common.model.messages.QoSVerificationResponse;
 import eu.arrowhead.common.model.messages.QoSVerify;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
+import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import eu.arrowhead.core.orchestrator.services.OrchestrationService;
 
 /**
  * @author pardavib
@@ -27,38 +37,25 @@ import eu.arrowhead.common.model.messages.ServiceQueryResult;
 @Produces(MediaType.APPLICATION_JSON)
 public class OrchestrationResource {
 
+	private OrchestrationService orchestrationService = new OrchestrationService();
+
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String welcome() {
-		return "Hello, this is the Orchestration Service.";
+	public String welcome(@Context UriInfo uriInfo) {
+		//return "Hello, this is the Orchestration Service.";
+		return uriInfo.getBaseUriBuilder().path("serviceregistry").path("serviceregistry").build().toString();
 	}
-
-	/*
-	 * Testing communication between core systems
-	 */
-	/*
-	 * @GET
-	 * 
-	 * @Path("/test")
-	 * 
-	 * @Produces(MediaType.TEXT_PLAIN) public String testMethod() { Client
-	 * client = ClientBuilder.newClient();
-	 * 
-	 * Response response = client.target(
-	 * "http://localhost:8080/core/authorization/operator/A/cloud/b").request()
-	 * .get(); String message = response.readEntity(String.class);
-	 * 
-	 * return message; }
-	 */
 
 	/**
 	 * This function represents the main orchestration process initiated by the
 	 * consumer.
+	 * 
+	 * @return
 	 */
 	@POST
-	@Path("/orchestration/")
-	public void doOrchestration() {
-		ServiceQueryForm srvQueryForm = new ServiceQueryForm();
+	@Path("/orchestration")
+	public Response doOrchestration(@Context UriInfo uriInfo, ServiceRequestForm request) {
+		ServiceQueryForm srvQueryForm = new ServiceQueryForm(request);
 		ServiceQueryResult srvQueryResult;
 		AuthorizationRequest authRequest = new AuthorizationRequest();
 		AuthorizationResponse authResponse;
@@ -66,23 +63,41 @@ public class OrchestrationResource {
 		QoSVerificationResponse qosVerificationResponse;
 		QoSReserve qosReservation = new QoSReserve();
 		boolean qosReservationResponse;
+		URI uri;
 
-		srvQueryResult = getServiceQueryResult(srvQueryForm);
+		// Check for intercloud orchestration
+		if (request.getOrchestrationFlags().get("TriggerInterCloud")) {
+			doIntercloudOrchestration();
+			return Response.status(Status.OK).entity(null).build();
+		}
 
-		authResponse = getAuthorizationResponse(authRequest);
+		// Poll the Service Registry
+		uri = uriInfo.getBaseUriBuilder()
+				.path("serviceregistry")
+				.path(request.getRequestedService().getServiceGroup())
+				.path("servicename")
+				.path(request.getRequestedService().getInterfaces().get(0))
+				.build();
+		srvQueryResult = getServiceQueryResult(srvQueryForm, uri);
 
-		qosVerificationResponse = getQosVerificationResponse(qosVerification);
+		/*
+		 * authResponse = getAuthorizationResponse(authRequest);
+		 * 
+		 * qosVerificationResponse =
+		 * getQosVerificationResponse(qosVerification);
+		 * 
+		 * // TODO: Matchmaking
+		 * 
+		 * qosReservationResponse = doQosReservation(qosReservation);
+		 * 
+		 * // TODO: Compile orchestration response
+		 * 
+		 * // TODO: Send orchestration form
+		 * 
+		 * System.out.println("Orchestration process finished.");
+		 */
 
-		// TODO: Matchmaking
-
-		qosReservationResponse = doQosReservation(qosReservation);
-
-		// TODO: Compile orchestration response
-
-		// TODO: Send orchestration form
-
-		System.out.println("Orchestration process finished.");
-
+		return Response.status(Status.OK).entity(null).build();
 	}
 
 	/**
@@ -95,31 +110,38 @@ public class OrchestrationResource {
 	/**
 	 * Sends the Service Query Form to the Service Registry and asks for the
 	 * Service Query Result.
+	 * @param uriInfo 
 	 */
-	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf) {
-		return null;
-		// TODO Auto-generated method stub
+	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, URI uri) {
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(uri);
+		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
 
+		return response.readEntity(ServiceQueryResult.class);
 	}
 
 	/**
 	 * Sends the Authorization Request to the Authorization service and asks for
 	 * the Authorization Response.
 	 */
-	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest) {
-		return null;
-		// TODO Auto-generated method stub
+	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest, URI uri) {
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(uri);
+		Response response = target.request().header("Content-type", "application/json").put(Entity.json(authRequest));
 
+		return response.readEntity(AuthorizationResponse.class);
 	}
 
 	/**
 	 * Sends the QoS Verify message to the QoS service and asks for the QoS
 	 * Verification Response.
 	 */
-	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
-		return null;
-		// TODO Auto-generated method stub
+	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify, URI uri) {
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(uri);
+		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
 
+		return response.readEntity(QoSVerificationResponse.class);
 	}
 
 	/**
@@ -127,7 +149,12 @@ public class OrchestrationResource {
 	 * 
 	 * @return boolean Reservation response
 	 */
-	private boolean doQosReservation(QoSReserve qosReserve) {
+	private boolean doQosReservation(QoSReserve qosReserve, URI uri) {
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(uri);
+		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
+
+		// return response.readEntity(Boolean.class);
 
 		// Always true until QoS Service is added to the system.
 		return true;
