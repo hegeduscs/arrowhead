@@ -3,13 +3,16 @@ package eu.arrowhead.common.model.messages;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import eu.arrowhead.common.model.ArrowheadSystem;
 
+@XmlRootElement
 public class AuthorizationResponse {
 
-	Map<ArrowheadSystem, Boolean> AuthorizationState = new HashMap<>();
-	int ValidityPeriod;
-	Map<String, String> AuthorizationTickets = new HashMap<>();
+	private Map<ArrowheadSystem, Boolean> authorizationState = new HashMap<>();
+	private int validityPeriod;
+	private Map<String, String> authorizationTickets = new HashMap<>();
 
 	public AuthorizationResponse() {
 
@@ -17,33 +20,33 @@ public class AuthorizationResponse {
 
 	public AuthorizationResponse(Map<ArrowheadSystem, Boolean> authorizationState, int validityPeriod,
 			Map<String, String> authorizationTickets) {
-		AuthorizationState = authorizationState;
-		ValidityPeriod = validityPeriod;
-		AuthorizationTickets = authorizationTickets;
+		this.authorizationState = authorizationState;
+		this.validityPeriod = validityPeriod;
+		this.authorizationTickets = authorizationTickets;
 	}
 
 	public Map<ArrowheadSystem, Boolean> getAuthorizationState() {
-		return AuthorizationState;
+		return authorizationState;
 	}
 
 	public void setAuthorizationState(Map<ArrowheadSystem, Boolean> authorizationState) {
-		AuthorizationState = authorizationState;
+		this.authorizationState = authorizationState;
 	}
 
 	public int getValidityPeriod() {
-		return ValidityPeriod;
+		return validityPeriod;
 	}
 
 	public void setValidityPeriod(int validityPeriod) {
-		ValidityPeriod = validityPeriod;
+		this.validityPeriod = validityPeriod;
 	}
 
 	public Map<String, String> getAuthorizationTickets() {
-		return AuthorizationTickets;
+		return authorizationTickets;
 	}
 
 	public void setAuthorizationTickets(Map<String, String> authorizationTickets) {
-		AuthorizationTickets = authorizationTickets;
+		this.authorizationTickets = authorizationTickets;
 	}
 
 }

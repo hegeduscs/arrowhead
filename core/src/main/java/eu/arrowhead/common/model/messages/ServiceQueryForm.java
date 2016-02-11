@@ -8,10 +8,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ServiceQueryForm {
 
-	String ServiceMetaData;
-	List<String> ServiceInterfaces = new ArrayList<String>();
-	boolean PingProviders;
-	String TSIG_key;
+	private String serviceMetaData;
+	private List<String> serviceInterfaces = new ArrayList<String>();
+	private boolean pingProviders;
+	private boolean metadataSearch;
+	private String tsig_key;
 
 	public ServiceQueryForm() {
 
@@ -19,42 +20,50 @@ public class ServiceQueryForm {
 
 	public ServiceQueryForm(String serviceMetaData, List<String> serviceInterfaces, boolean pingProviders,
 			String tSIG_key) {
-		ServiceMetaData = serviceMetaData;
-		ServiceInterfaces = serviceInterfaces;
-		PingProviders = pingProviders;
-		TSIG_key = tSIG_key;
+		this.serviceMetaData = serviceMetaData;
+		this.serviceInterfaces = serviceInterfaces;
+		this.pingProviders = pingProviders;
+		this.tsig_key = tSIG_key;
 	}
 
 	public String getServiceMetaData() {
-		return ServiceMetaData;
+		return serviceMetaData;
 	}
 
 	public void setServiceMetaData(String serviceMetaData) {
-		ServiceMetaData = serviceMetaData;
+		this.serviceMetaData = serviceMetaData;
 	}
 
 	public boolean isPingProviders() {
-		return PingProviders;
+		return pingProviders;
 	}
 
 	public void setPingProviders(boolean pingProviders) {
-		PingProviders = pingProviders;
+		this.pingProviders = pingProviders;
 	}
 
 	public String getTSIG_key() {
-		return TSIG_key;
+		return tsig_key;
 	}
 
-	public void setTSIG_key(String tSIG_key) {
-		TSIG_key = tSIG_key;
+	public void setTSIG_key(String tsig_key) {
+		this.tsig_key = tsig_key;
 	}
 
 	public List<String> getServiceInterfaces() {
-		return ServiceInterfaces;
+		return serviceInterfaces;
 	}
 
 	public void setServiceInterfaces(List<String> serviceInterfaces) {
-		ServiceInterfaces = serviceInterfaces;
+		this.serviceInterfaces = serviceInterfaces;
+	}
+
+	public boolean isMetadataSearch() {
+		return metadataSearch;
+	}
+
+	public void setMetadataSearch(boolean metadataSearch) {
+		this.metadataSearch = metadataSearch;
 	}
 
 }
