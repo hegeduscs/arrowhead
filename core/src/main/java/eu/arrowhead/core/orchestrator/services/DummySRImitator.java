@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.ProvidedInterface;
+import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.QueryResult;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 
@@ -32,9 +32,9 @@ public class DummySRImitator {
 	public QueryResult getResult(ServiceQueryForm sqf){
 		serviceQueryForm = sqf;
 		QueryResult queryResult = new QueryResult();
-		ProvidedInterface pi1 = new ProvidedInterface(new ArrowheadSystem("Aitia", "A", "192.168.1.1", "8080", "authenticated"),
+		ProvidedService pi1 = new ProvidedService(new ArrowheadSystem("Aitia", "A", "192.168.1.1", "8080", "authenticated"),
 				"serviceURI", "interface");
-		ProvidedInterface pi2 = new ProvidedInterface(new ArrowheadSystem("Aitia", "B", "192.168.1.1", "8081", "authenticated"),
+		ProvidedService pi2 = new ProvidedService(new ArrowheadSystem("Aitia", "B", "192.168.1.1", "8081", "authenticated"),
 				"serviceURI", "interface");
 		queryResult.addProvider(pi1);
 		queryResult.addProvider(pi2);
