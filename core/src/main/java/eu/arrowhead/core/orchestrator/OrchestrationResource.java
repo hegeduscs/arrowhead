@@ -1,6 +1,8 @@
 package eu.arrowhead.core.orchestrator;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -17,9 +19,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
+import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
+import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.QoSReserve;
 import eu.arrowhead.common.model.messages.QoSVerificationResponse;
 import eu.arrowhead.common.model.messages.QoSVerify;
@@ -42,7 +46,7 @@ public class OrchestrationResource {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String welcome(@Context UriInfo uriInfo) {
-		//return "Hello, this is the Orchestration Service.";
+		// return "Hello, this is the Orchestration Service.";
 		return uriInfo.getBaseUriBuilder().path("serviceregistry").path("serviceregistry").build().toString();
 	}
 
@@ -54,11 +58,12 @@ public class OrchestrationResource {
 	 */
 	@POST
 	@Path("/orchestration")
-	public Response doOrchestration(@Context UriInfo uriInfo, ServiceRequestForm request) {
-		ServiceQueryForm srvQueryForm = new ServiceQueryForm(request);
+	public Response doOrchestration(@Context UriInfo uriInfo, ServiceRequestForm srForm) {
+		ServiceQueryForm srvQueryForm = new ServiceQueryForm(srForm);
 		ServiceQueryResult srvQueryResult;
-		AuthorizationRequest authRequest = new AuthorizationRequest();
+		AuthorizationRequest authRequest;
 		AuthorizationResponse authResponse;
+		List<ArrowheadSystem> providers = new ArrayList<ArrowheadSystem>();
 		QoSVerify qosVerification = new QoSVerify();
 		QoSVerificationResponse qosVerificationResponse;
 		QoSReserve qosReservation = new QoSReserve();
@@ -66,23 +71,36 @@ public class OrchestrationResource {
 		URI uri;
 
 		// Check for intercloud orchestration
-		if (request.getOrchestrationFlags().get("TriggerInterCloud")) {
+		if (srForm.getOrchestrationFlags().get("TriggerInterCloud")) {
 			doIntercloudOrchestration();
 			return Response.status(Status.OK).entity(null).build();
 		}
 
 		// Poll the Service Registry
 		uri = uriInfo.getBaseUriBuilder()
-				.path("serviceregistry")
-				.path(request.getRequestedService().getServiceGroup())
-				.path("servicename")
-				.path(request.getRequestedService().getInterfaces().get(0))
+				.path("ServiceRegistry")
+				.path(srForm.getRequestedService().getServiceGroup())
+				.path("servicename") // HONNAN?
+				.path(srForm.getRequestedService().getInterfaces().get(0))
 				.build();
 		srvQueryResult = getServiceQueryResult(srvQueryForm, uri);
 
+		// Poll the Authorization Service
+		uri = uriInfo.getBaseUriBuilder()
+				.path("SystemGroup")
+				.path(srForm.getRequestedService().getServiceGroup())
+				.path("System")
+				.path(srForm.getRequestedService().getInterfaces().get(0))
+				.build();
+
+		for (ProvidedService providedService : srvQueryResult.getServiceQueryData()) {
+			providers.add(providedService.getProvider());
+		}
+
+		authRequest = new AuthorizationRequest(srForm.getRequestedService(), providers, "AuthenticationInfo", true);
+		authResponse = getAuthorizationResponse(authRequest, uri);
+
 		/*
-		 * authResponse = getAuthorizationResponse(authRequest);
-		 * 
 		 * qosVerificationResponse =
 		 * getQosVerificationResponse(qosVerification);
 		 * 
@@ -110,7 +128,8 @@ public class OrchestrationResource {
 	/**
 	 * Sends the Service Query Form to the Service Registry and asks for the
 	 * Service Query Result.
-	 * @param uriInfo 
+	 * 
+	 * @param uriInfo
 	 */
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, URI uri) {
 		Client client = ClientBuilder.newClient();

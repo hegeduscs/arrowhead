@@ -7,7 +7,7 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 @XmlRootElement
 public class ProvidedService {
 
-	private ArrowheadSystem providedSystem;
+	private ArrowheadSystem provider;
 	private String serviceURI;
 	private String serviceInterface;
 
@@ -15,18 +15,18 @@ public class ProvidedService {
 
 	}
 
-	public ProvidedService(ArrowheadSystem providedSystem, String serviceURI, String serviceInterface) {
-		this.providedSystem = providedSystem;
+	public ProvidedService(ArrowheadSystem provider, String serviceURI, String serviceInterface) {
+		this.provider = provider;
 		this.serviceURI = serviceURI;
 		this.serviceInterface = serviceInterface;
 	}
 
-	public ArrowheadSystem getProvidedSystem() {
-		return providedSystem;
+	public ArrowheadSystem getProvider() {
+		return provider;
 	}
 
-	public void setProvidedSystem(ArrowheadSystem providedSystem) {
-		this.providedSystem = providedSystem;
+	public void setProvidedr(ArrowheadSystem provider) {
+		this.provider = provider;
 	}
 
 	public String getServiceURI() {
