@@ -4,11 +4,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
+@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"systemGroup", "systemName"})})
+@XmlRootElement
 public class ArrowheadSystem {
 	
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
+	@XmlTransient
 	private int id;
 	private String systemGroup;
 	private String systemName;
@@ -28,6 +35,14 @@ public class ArrowheadSystem {
 		this.IPAddress = iPAddress;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getSystemGroup() {

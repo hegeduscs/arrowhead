@@ -39,8 +39,10 @@ public class ArrowheadService {
 		this.interfaces = interfaces;
 		this.metaData = metaData;
 	}
-	
-	
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public int getId() {
 		return id;

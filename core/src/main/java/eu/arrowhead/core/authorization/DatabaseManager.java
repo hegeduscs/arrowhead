@@ -15,6 +15,8 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.core.authorization.database.ArrowheadCloud;
 import eu.arrowhead.core.authorization.database.ArrowheadService;
+import eu.arrowhead.core.authorization.database.ArrowheadSystem;
+import eu.arrowhead.core.authorization.database.Systems_Services;
  
 public class DatabaseManager {
 	
@@ -160,11 +162,142 @@ public class DatabaseManager {
         }
     }
     
+    /*
+     * Not working.
+     */
     public void deleteServices(String operator, String cloudName, List<ArrowheadService> serviceList){
     	ArrowheadCloud arrowheadCloud = getCloudByName(operator, cloudName);
     	arrowheadCloud.getServiceList().removeAll(serviceList);
     	deleteCloudFromAuthorized(operator, cloudName);
     	arrowheadCloud = addCloudToAuthorized(arrowheadCloud);
     }
+    
+    public ArrowheadSystem getSystemByName(String systemGroup, String systemName){
+    	ArrowheadSystem arrowheadSystem;
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		 transaction = session.beginTransaction();
+             Criteria criteria = session.createCriteria(ArrowheadSystem.class);
+             criteria.add(Restrictions.eq("systemGroup", systemGroup));
+             criteria.add(Restrictions.eq("systemName", systemName));
+             criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+             arrowheadSystem = (ArrowheadSystem) criteria.uniqueResult();
+             /*if(arrowheadSystem == null){
+            	 throw new DataNotFoundException("The consumer Cloud is not in the authorized database.");
+             }*/
+             transaction.commit();
+         }
+         catch (Exception e) {
+             if (transaction!=null) transaction.rollback();
+             throw e;
+         }
+         finally {
+             session.close();
+         }
+    	
+    	return arrowheadSystem;
+    }
+    
+    public ArrowheadService getServiceByName(String serviceGroup, String serviceDefinition){
+    	ArrowheadService arrowheadService;
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		 transaction = session.beginTransaction();
+             Criteria criteria = session.createCriteria(ArrowheadService.class);
+             criteria.add(Restrictions.eq("serviceGroup", serviceGroup));
+             criteria.add(Restrictions.eq("serviceDefinition", serviceDefinition));
+             criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+             //disregarding the fact that no uniqe constraint is used in the ArrowheadService class at the moment
+             arrowheadService = (ArrowheadService) criteria.uniqueResult();
+             if(arrowheadService == null){
+            	 throw new DataNotFoundException("The consumer Cloud is not in the authorized database.");
+             }
+             transaction.commit();
+         }
+         catch (Exception e) {
+             if (transaction!=null) transaction.rollback();
+             throw e;
+         }
+         finally {
+             session.close();
+         }
+    	
+    	return arrowheadService;
+    }
+    
+    public Systems_Services getSS(ArrowheadSystem consumer, ArrowheadSystem provider, ArrowheadService service){
+    	Systems_Services ss = new Systems_Services();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+   		 	transaction = session.beginTransaction();
+            Criteria criteria = session.createCriteria(Systems_Services.class);
+            criteria.add(Restrictions.eq("consumer", consumer));
+            criteria.add(Restrictions.eq("provider", provider));
+            criteria.add(Restrictions.eq("service", service));
+            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+            ss = (Systems_Services) criteria.uniqueResult();
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    	
+   	return ss;
+    }
+    
+    public <T> T save(T object){
+		Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		transaction = session.beginTransaction();
+    		session.saveOrUpdate(object);
+            transaction.commit();
+        }
+    	catch(ConstraintViolationException e){
+    		if (transaction!=null) transaction.rollback();
+    		throw new DuplicateEntryException("There is already an entry in the database with these parameters.");
+    	}
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    	
+    	return object;	
+	}
+	
+	public <T> void delete(T object){
+		Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		transaction = session.beginTransaction();
+    		session.delete(object);
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }	
+	}
     
 }

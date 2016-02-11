@@ -2,6 +2,7 @@ package eu.arrowhead.core.authorization;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -15,10 +16,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import eu.arrowhead.core.authorization.database.ArrowheadCloud;
 import eu.arrowhead.core.authorization.database.ArrowheadService;
+import eu.arrowhead.core.authorization.database.ArrowheadSystem;
+import eu.arrowhead.core.authorization.database.Systems_Services;
 
 @Path("authorization")
 @Produces(MediaType.APPLICATION_JSON)
@@ -163,5 +167,57 @@ public class AuthorizationResource {
     	return Response.noContent().build();
     }
     
+    @PUT
+    @Path("/systemgroup/{systemGroup}/system/{systemName}")
+    public IntraCloudAuthResp isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
+    		@PathParam("systemName") String systemName, IntraCloudAuthRequest request){
+    	ArrowheadSystem consumer = databaseManager.getSystemByName(systemGroup, systemName);
+    	//with this solution the extra payload information is useless, only the SG and SD matters
+    	ArrowheadService service = databaseManager.getServiceByName(request.getArrowheadService().getServiceGroup(), request.getArrowheadService().getServiceDefinition());
+    	ArrowheadSystem provider = databaseManager.getSystemByName(request.getProvider().getSystemGroup(), request.getProvider().getSystemName());
+    	Systems_Services ss = new Systems_Services();
+    	HashMap<ArrowheadSystem, Boolean> authorizationMap = new HashMap<ArrowheadSystem, Boolean>();
+    	ss = databaseManager.getSS(consumer, provider, service);
+    	if(ss == null){
+    		authorizationMap.put(request.getProvider(), false);
+    	}
+    	else{
+    		authorizationMap.put(provider, true);
+    	}
+    	
+    	IntraCloudAuthResp response = new IntraCloudAuthResp();
+    	response.setAuthorizationMap(authorizationMap);
+    	return response;
+    }
+    
+    @POST
+    @Path("/systemgroup/{systemGroup}/system/{systemName}")
+    public Response addSystemToAuthorized(@PathParam("systemGroup") String systemGroup,
+    		@PathParam("systemName") String systemName, IntraCloudAuthEntry entry){
+    	ArrowheadSystem consumerSystem = new ArrowheadSystem();
+    	consumerSystem.setSystemGroup(systemGroup);
+    	consumerSystem.setSystemName(systemName);
+    	consumerSystem.setIPAddress(entry.getIPAddress());
+    	consumerSystem.setPort(entry.getPort());
+    	consumerSystem.setAuthenticationInfo(entry.getAuthenticationInfo());
+    	consumerSystem = databaseManager.save(consumerSystem);
+    	
+    	ArrowheadSystem providerSystem = new ArrowheadSystem();
+    	ArrowheadService providedService = new ArrowheadService();
+    	
+    	for(int i = 0; i < entry.getProviderList().size(); i++){
+    		providerSystem = databaseManager.save(entry.getProviderList().get(i));
+    		for(int j = 0; j < entry.getServiceList().size(); j++){
+    			providedService = databaseManager.save(entry.getServiceList().get(j));
+    			Systems_Services ss = new Systems_Services();
+    			ss.setConsumer(consumerSystem);
+    			ss.setProvider(providerSystem);
+    			ss.setService(providedService);
+    			databaseManager.save(ss);
+    		}
+    	}
+    	
+    	return Response.status(Status.CREATED).entity(consumerSystem).build();
+    }
     
 }

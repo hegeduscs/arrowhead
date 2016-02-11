@@ -24,7 +24,6 @@ public class ConfigurationResource {
 	@GET
 	@Path("/coresystems")
 	public List<CoreSystem> getAllCoreSystem(){
-		
 		return databaseManager.getAll(CoreSystem.class);
 	}
 	
