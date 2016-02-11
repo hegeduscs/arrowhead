@@ -64,7 +64,7 @@ public class OrchestrationResource {
 		AuthorizationRequest authRequest;
 		AuthorizationResponse authResponse;
 		List<ArrowheadSystem> providers = new ArrayList<ArrowheadSystem>();
-		QoSVerify qosVerification = new QoSVerify();
+		QoSVerify qosVerification;
 		QoSVerificationResponse qosVerificationResponse;
 		QoSReserve qosReservation = new QoSReserve();
 		boolean qosReservationResponse;
@@ -100,10 +100,14 @@ public class OrchestrationResource {
 		authRequest = new AuthorizationRequest(srForm.getRequestedService(), providers, "AuthenticationInfo", true);
 		authResponse = getAuthorizationResponse(authRequest, uri);
 
-		/*
-		 * qosVerificationResponse =
-		 * getQosVerificationResponse(qosVerification);
-		 * 
+		// Poll the QoS Service
+		uri = uriInfo.getBaseUriBuilder()
+				.path("QoS") // NEED TO SPECIFY
+				.build();
+		qosVerification = new QoSVerify(srForm.getRequesterSystem(),srForm.getRequestedService(),providers,"RequestedQoS");
+		qosVerificationResponse = getQosVerificationResponse(qosVerification, uri);
+		
+		/* 
 		 * // TODO: Matchmaking
 		 * 
 		 * qosReservationResponse = doQosReservation(qosReservation);

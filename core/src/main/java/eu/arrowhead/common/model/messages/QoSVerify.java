@@ -20,6 +20,15 @@ public class QoSVerify {
 
 	}
 
+	public QoSVerify(ArrowheadSystem consumer, ArrowheadService requestedService, List<ArrowheadSystem> provider,
+			String requestedQoS) {
+		super();
+		this.consumer = consumer;
+		this.requestedService = requestedService;
+		this.provider = provider;
+		this.requestedQoS = requestedQoS;
+	}
+
 	public ArrowheadSystem getConsumer() {
 		return consumer;
 	}
