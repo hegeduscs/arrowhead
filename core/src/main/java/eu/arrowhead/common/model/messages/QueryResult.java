@@ -8,25 +8,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class QueryResult {
 	
-	List<ProvidedInterface> Providers = new ArrayList<ProvidedInterface>();
+	List<ProvidedService> Providers = new ArrayList<ProvidedService>();
 	
 	public QueryResult(){
 		
 	}
 
-	public QueryResult(List<ProvidedInterface> providers) {
+	public QueryResult(List<ProvidedService> providers) {
 		Providers = providers;
 	}
 
-	public List<ProvidedInterface> getProviders() {
+	public List<ProvidedService> getProviders() {
 		return Providers;
 	}
 
-	public void setProviders(List<ProvidedInterface> providers) {
+	public void setProviders(List<ProvidedService> providers) {
 		Providers = providers;
 	}
 	
-	public void addProvider(ProvidedInterface provider){
+	public void addProvider(ProvidedService provider){
 		Providers.add(provider);
 	}
 	

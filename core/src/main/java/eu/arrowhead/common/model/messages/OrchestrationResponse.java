@@ -3,11 +3,14 @@ package eu.arrowhead.common.model.messages;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class OrchestrationResponse {
 
-	List<OrchestrationForm> Response = new ArrayList<OrchestrationForm>();
-	List<String> OrchestrationURI = new ArrayList<String>();
-	int OrchestrationTimeOut;
+	private List<OrchestrationForm> response = new ArrayList<OrchestrationForm>();
+	private List<String> orchestrationURI = new ArrayList<String>();
+	private int orchestrationTimeout;
 
 	public OrchestrationResponse() {
 
@@ -15,33 +18,33 @@ public class OrchestrationResponse {
 
 	public OrchestrationResponse(List<OrchestrationForm> response, List<String> orchestrationURI,
 			int orchestrationTimeOut) {
-		Response = response;
-		OrchestrationURI = orchestrationURI;
-		OrchestrationTimeOut = orchestrationTimeOut;
+		this.response = response;
+		this.orchestrationURI = orchestrationURI;
+		this.orchestrationTimeout = orchestrationTimeOut;
 	}
 
 	public List<OrchestrationForm> getResponse() {
-		return Response;
+		return response;
 	}
 
 	public void setResponse(List<OrchestrationForm> response) {
-		Response = response;
+		this.response = response;
 	}
 
 	public List<String> getOrchestrationURI() {
-		return OrchestrationURI;
+		return orchestrationURI;
 	}
 
 	public void setOrchestrationURI(List<String> orchestrationURI) {
-		OrchestrationURI = orchestrationURI;
+		this.orchestrationURI = orchestrationURI;
 	}
 
 	public int getOrchestrationTimeOut() {
-		return OrchestrationTimeOut;
+		return orchestrationTimeout;
 	}
 
-	public void setOrchestrationTimeOut(int orchestrationTimeOut) {
-		OrchestrationTimeOut = orchestrationTimeOut;
+	public void setOrchestrationTimeOut(int orchestrationTimeout) {
+		this.orchestrationTimeout = orchestrationTimeout;
 	}
 
 }
