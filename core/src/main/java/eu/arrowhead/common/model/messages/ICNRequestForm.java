@@ -5,42 +5,43 @@ import eu.arrowhead.common.model.ArrowheadService;
 
 public class ICNRequestForm {
 
-	ArrowheadService RequestedService;
-	String AuthenticationInfo;
-	ArrowheadCloud TargetCloud;
+	private ArrowheadService requestedService;
+	private String authenticationInfo;
+	private ArrowheadCloud targetCloud;
 
 	public ICNRequestForm() {
-
+		super();
 	}
 
 	public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud targetCloud) {
-		RequestedService = requestedService;
-		AuthenticationInfo = authenticationInfo;
-		TargetCloud = targetCloud;
+		super();
+		this.requestedService = requestedService;
+		this.authenticationInfo = authenticationInfo;
+		this.targetCloud = targetCloud;
 	}
 
 	public ArrowheadService getRequestedService() {
-		return RequestedService;
+		return requestedService;
 	}
 
 	public void setRequestedService(ArrowheadService requestedService) {
-		RequestedService = requestedService;
+		this.requestedService = requestedService;
 	}
 
 	public String getAuthenticationInfo() {
-		return AuthenticationInfo;
+		return authenticationInfo;
 	}
 
 	public void setAuthenticationInfo(String authenticationInfo) {
-		AuthenticationInfo = authenticationInfo;
+		this.authenticationInfo = authenticationInfo;
 	}
 
 	public ArrowheadCloud getTargetCloud() {
-		return TargetCloud;
+		return targetCloud;
 	}
 
 	public void setTargetCloud(ArrowheadCloud targetCloud) {
-		TargetCloud = targetCloud;
+		this.targetCloud = targetCloud;
 	}
 
 }

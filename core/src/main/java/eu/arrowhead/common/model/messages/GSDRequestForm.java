@@ -4,23 +4,23 @@ import eu.arrowhead.common.model.ArrowheadService;
 
 public class GSDRequestForm {
 
-	ArrowheadService RequestedService;
-	
-	public GSDRequestForm(){
-		
+	private ArrowheadService requestedService;
+
+	public GSDRequestForm() {
+		super();
 	}
 
 	public GSDRequestForm(ArrowheadService requestedService) {
-		RequestedService = requestedService;
+		super();
+		this.requestedService = requestedService;
 	}
 
 	public ArrowheadService getRequestedService() {
-		return RequestedService;
+		return requestedService;
 	}
 
 	public void setRequestedService(ArrowheadService requestedService) {
-		RequestedService = requestedService;
+		this.requestedService = requestedService;
 	}
-	
-	
+
 }

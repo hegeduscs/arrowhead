@@ -7,28 +7,28 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class QueryResult {
-	
-	List<ProvidedService> Providers = new ArrayList<ProvidedService>();
-	
-	public QueryResult(){
-		
+
+	private List<ProvidedService> providers = new ArrayList<ProvidedService>();
+
+	public QueryResult() {
+		super();
 	}
 
 	public QueryResult(List<ProvidedService> providers) {
-		Providers = providers;
+		super();
+		this.providers = providers;
 	}
 
 	public List<ProvidedService> getProviders() {
-		return Providers;
+		return providers;
 	}
 
 	public void setProviders(List<ProvidedService> providers) {
-		Providers = providers;
+		this.providers = providers;
 	}
-	
-	public void addProvider(ProvidedService provider){
-		Providers.add(provider);
+
+	public void addProvider(ProvidedService provider) {
+		this.providers.add(provider);
 	}
-	
-	
+
 }

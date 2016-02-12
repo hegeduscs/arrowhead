@@ -17,11 +17,12 @@ public class AuthorizationRequest {
 	private boolean generateToken;
 
 	public AuthorizationRequest() {
-
+		super();
 	}
 
 	public AuthorizationRequest(ArrowheadService service, List<ArrowheadSystem> providers, String authenticationInfo,
 			boolean generateToken) {
+		super();
 		this.service = service;
 		this.providers = providers;
 		this.authenticationInfo = authenticationInfo;

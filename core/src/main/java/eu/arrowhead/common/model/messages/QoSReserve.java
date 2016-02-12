@@ -13,7 +13,7 @@ public class QoSReserve {
 	private ArrowheadService service;
 
 	public QoSReserve() {
-
+		super();
 	}
 
 	public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service) {

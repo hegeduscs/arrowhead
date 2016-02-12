@@ -15,11 +15,12 @@ public class AuthorizationResponse {
 	private Map<String, String> authorizationTickets = new HashMap<>();
 
 	public AuthorizationResponse() {
-
+		super();
 	}
 
 	public AuthorizationResponse(Map<ArrowheadSystem, Boolean> authorizationState, int validityPeriod,
 			Map<String, String> authorizationTickets) {
+		super();
 		this.authorizationState = authorizationState;
 		this.validityPeriod = validityPeriod;
 		this.authorizationTickets = authorizationTickets;

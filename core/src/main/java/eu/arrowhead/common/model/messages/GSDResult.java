@@ -7,32 +7,23 @@ import eu.arrowhead.common.model.ArrowheadService;
 
 public class GSDResult {
 
-	List<ArrowheadService> Response = new ArrayList<ArrowheadService>();
-	int OfferValidity;
+	private List<ArrowheadService> response = new ArrayList<ArrowheadService>();
 
 	public GSDResult() {
-
+		super();
 	}
 
-	public GSDResult(List<ArrowheadService> response, int offerValidity) {
-		Response = response;
-		OfferValidity = offerValidity;
+	public GSDResult(List<ArrowheadService> response) {
+		super();
+		this.response = response;
 	}
 
 	public List<ArrowheadService> getResponse() {
-		return Response;
+		return response;
 	}
 
 	public void setResponse(List<ArrowheadService> response) {
-		Response = response;
-	}
-
-	public int getOfferValidity() {
-		return OfferValidity;
-	}
-
-	public void setOfferValidity(int offerValidity) {
-		OfferValidity = offerValidity;
+		this.response = response;
 	}
 
 }

@@ -77,7 +77,6 @@ public class OrchestrationResource {
 		OrchestrationForm orchForm;
 		OrchestrationResponse orchResponse;
 		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
-		ArrayList<String> responseUriList = new ArrayList<String>();
 
 		// Check for intercloud orchestration
 		if (srForm.getOrchestrationFlags().get("TriggerInterCloud")) {
@@ -89,13 +88,12 @@ public class OrchestrationResource {
 		uri = uriInfo.getBaseUriBuilder()
 				.path("ServiceRegistry")
 				.path(srForm.getRequestedService().getServiceGroup())
-				.path("servicename") // HONNAN?
-				.path(srForm.getRequestedService().getInterfaces().get(0))
+				.path(srForm.getRequestedService().getServiceDefinition())
 				.build();
 		srvQueryResult = getServiceQueryResult(srvQueryForm, uri);
 
 		// Poll the Authorization Service
-		uri = uriInfo.getBaseUriBuilder()
+		uri = uriInfo.getBaseUriBuilder() //TODO: configurationból
 				.path("SystemGroup")
 				.path(srForm.getRequestedService().getServiceGroup())
 				.path("System")
@@ -140,8 +138,7 @@ public class OrchestrationResource {
 		
 		// Compile Orchestration Response
 		responseFormList.add(orchForm);
-		responseUriList.add("orchestrationURI");
-		orchResponse = new OrchestrationResponse(responseFormList, responseUriList, 5000);
+		orchResponse = new OrchestrationResponse(responseFormList);
 
 		// Send orchestration form
 		return Response.status(Status.OK).entity(orchResponse).build();

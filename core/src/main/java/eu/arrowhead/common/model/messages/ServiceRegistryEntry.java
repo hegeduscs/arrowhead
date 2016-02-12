@@ -7,52 +7,53 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 @XmlRootElement
 public class ServiceRegistryEntry {
 
-	ArrowheadSystem Provider;
-	String ServiceURI;
-	String ServiceMetadata;
-	String TSIG_key;
+	ArrowheadSystem provider;
+	String serviceURI;
+	String serviceMetadata;
+	String tSIG_key;
 
-	public ServiceRegistryEntry(){
-		
+	public ServiceRegistryEntry() {
+		super();
 	}
-	
+
 	public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI, String serviceMetadata, String tSIG_key) {
-		Provider = provider;
-		ServiceURI = serviceURI;
-		ServiceMetadata = serviceMetadata;
-		TSIG_key = tSIG_key;
+		super();
+		this.provider = provider;
+		this.serviceURI = serviceURI;
+		this.serviceMetadata = serviceMetadata;
+		this.tSIG_key = tSIG_key;
 	}
 
 	public ArrowheadSystem getProvider() {
-		return Provider;
+		return provider;
 	}
 
 	public void setProvider(ArrowheadSystem provider) {
-		Provider = provider;
+		this.provider = provider;
 	}
 
 	public String getServiceURI() {
-		return ServiceURI;
+		return serviceURI;
 	}
 
 	public void setServiceURI(String serviceURI) {
-		ServiceURI = serviceURI;
+		this.serviceURI = serviceURI;
 	}
 
 	public String getServiceMetadata() {
-		return ServiceMetadata;
+		return serviceMetadata;
 	}
 
 	public void setServiceMetadata(String serviceMetadata) {
-		ServiceMetadata = serviceMetadata;
+		this.serviceMetadata = serviceMetadata;
 	}
 
 	public String getTSIG_key() {
-		return TSIG_key;
+		return tSIG_key;
 	}
 
 	public void setTSIG_key(String tSIG_key) {
-		TSIG_key = tSIG_key;
+		this.tSIG_key = tSIG_key;
 	}
 
 }

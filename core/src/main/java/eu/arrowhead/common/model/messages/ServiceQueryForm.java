@@ -15,11 +15,12 @@ public class ServiceQueryForm {
 	private String tsig_key;
 
 	public ServiceQueryForm() {
-
+		super();
 	}
 
 	public ServiceQueryForm(String serviceMetaData, List<String> serviceInterfaces, boolean pingProviders,
 			String tSIG_key) {
+		super();
 		this.serviceMetaData = serviceMetaData;
 		this.serviceInterfaces = serviceInterfaces;
 		this.pingProviders = pingProviders;
@@ -30,7 +31,7 @@ public class ServiceQueryForm {
 		this.serviceMetaData = srf.getRequestedService().getMetaData();
 		this.serviceInterfaces = srf.getRequestedService().getInterfaces();
 		this.pingProviders = srf.getOrchestrationFlags().get("PingProvider");
-		this.tsig_key ="DUMMY";
+		this.tsig_key ="DUMMY"; // FROM CONFIGURATION
 	}
 
 	public String getServiceMetaData() {

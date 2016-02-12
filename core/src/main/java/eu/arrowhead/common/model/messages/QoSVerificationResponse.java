@@ -13,7 +13,12 @@ public class QoSVerificationResponse {
 	private Map<ArrowheadSystem, Boolean> response = new HashMap<>();
 
 	public QoSVerificationResponse() {
+		super();
+	}
 
+	public QoSVerificationResponse(Map<ArrowheadSystem, Boolean> response) {
+		super();
+		this.response = response;
 	}
 
 	public Map<ArrowheadSystem, Boolean> getResponse() {

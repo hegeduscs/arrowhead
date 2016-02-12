@@ -10,6 +10,15 @@ public class ServiceQueryResult {
 	
 	private List<ProvidedService> result = new ArrayList<ProvidedService>();
 
+	public ServiceQueryResult() {
+		super();
+	}
+
+	public ServiceQueryResult(List<ProvidedService> result) {
+		super();
+		this.result = result;
+	}
+
 	public List<ProvidedService> getServiceQueryData() {
 		return result;
 	}

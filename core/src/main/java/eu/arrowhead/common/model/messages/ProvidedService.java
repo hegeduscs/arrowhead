@@ -12,10 +12,11 @@ public class ProvidedService {
 	private String serviceInterface;
 
 	public ProvidedService() {
-
+		super();
 	}
 
 	public ProvidedService(ArrowheadSystem provider, String serviceURI, String serviceInterface) {
+		super();
 		this.provider = provider;
 		this.serviceURI = serviceURI;
 		this.serviceInterface = serviceInterface;

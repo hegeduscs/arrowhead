@@ -9,42 +9,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class OrchestrationResponse {
 
 	private List<OrchestrationForm> response = new ArrayList<OrchestrationForm>();
-	private List<String> orchestrationURI = new ArrayList<String>();
-	private int orchestrationTimeout;
 
 	public OrchestrationResponse() {
-
+		super();
 	}
 
-	public OrchestrationResponse(List<OrchestrationForm> response, List<String> orchestrationURI,
-			int orchestrationTimeOut) {
+	public OrchestrationResponse(List<OrchestrationForm> response) {
+		super();
 		this.response = response;
-		this.orchestrationURI = orchestrationURI;
-		this.orchestrationTimeout = orchestrationTimeOut;
 	}
 
 	public List<OrchestrationForm> getResponse() {
 		return response;
-	}
-
-	public void setResponse(List<OrchestrationForm> response) {
-		this.response = response;
-	}
-
-	public List<String> getOrchestrationURI() {
-		return orchestrationURI;
-	}
-
-	public void setOrchestrationURI(List<String> orchestrationURI) {
-		this.orchestrationURI = orchestrationURI;
-	}
-
-	public int getOrchestrationTimeOut() {
-		return orchestrationTimeout;
-	}
-
-	public void setOrchestrationTimeOut(int orchestrationTimeout) {
-		this.orchestrationTimeout = orchestrationTimeout;
 	}
 
 }

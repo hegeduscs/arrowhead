@@ -17,7 +17,7 @@ public class QoSVerify {
 	private String requestedQoS;
 
 	public QoSVerify() {
-
+		super();
 	}
 
 	public QoSVerify(ArrowheadSystem consumer, ArrowheadService requestedService, List<ArrowheadSystem> provider,
