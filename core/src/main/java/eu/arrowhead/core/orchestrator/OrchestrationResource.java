@@ -24,6 +24,8 @@ import javax.ws.rs.core.UriInfo;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
+import eu.arrowhead.common.model.messages.OrchestrationForm;
+import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.QoSReserve;
 import eu.arrowhead.common.model.messages.QoSVerificationResponse;
@@ -72,6 +74,10 @@ public class OrchestrationResource {
 		QoSReserve qosReservation;
 		boolean qosReservationResponse;
 		URI uri;
+		OrchestrationForm orchForm;
+		OrchestrationResponse orchResponse;
+		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
+		ArrayList<String> responseUriList = new ArrayList<String>();
 
 		// Check for intercloud orchestration
 		if (srForm.getOrchestrationFlags().get("TriggerInterCloud")) {
@@ -122,23 +128,31 @@ public class OrchestrationResource {
 		qosMap = qosVerificationResponse.getResponse();
 
 		for (Entry<ArrowheadSystem, Boolean> entry : qosMap.entrySet()) {
-			selectedSystem = entry.getKey();
+			selectedSystem = entry.getKey(); // TEMPORARLY selects a random system
 		}
 
 		qosReservation = new QoSReserve(selectedSystem, srForm.getRequesterSystem(), srForm.getRequestedService());
 		qosReservationResponse = doQosReservation(qosReservation, uri);
 
-		// TODO: Compile orchestration response
+		// Compile Orchestration Form
+		orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI", "authorizationInfo");
+		
+		// Compile Orchestration Response
+		responseFormList.add(orchForm);
+		responseUriList.add("orchestrationURI");
+		orchResponse = new OrchestrationResponse(responseFormList, responseUriList, 5000);
 
-		// TODO: Send orchestration form
-
-		return Response.status(Status.OK).entity(null).build();
+		// Send orchestration form
+		return Response.status(Status.OK).entity(orchResponse).build();
 	}
 
 	/**
 	 * This function represents the Intercloud orchestration process.
 	 */
 	private void doIntercloudOrchestration() {
+		
+		// TODO: Inter-cloud orchestration
+		
 		return;
 	}
 
