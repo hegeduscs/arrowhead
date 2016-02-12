@@ -127,6 +127,7 @@ public class OrchestrationResource {
 				.build();
 		qosMap = qosVerificationResponse.getResponse();
 
+		// Reserve QoS resources
 		for (Entry<ArrowheadSystem, Boolean> entry : qosMap.entrySet()) {
 			selectedSystem = entry.getKey(); // TEMPORARLY selects a random system
 		}
@@ -160,7 +161,9 @@ public class OrchestrationResource {
 	 * Sends the Service Query Form to the Service Registry and asks for the
 	 * Service Query Result.
 	 * 
+	 * @param sqf
 	 * @param uriInfo
+	 * @return ServiceQueryResult
 	 */
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, URI uri) {
 		Client client = ClientBuilder.newClient();
@@ -173,6 +176,10 @@ public class OrchestrationResource {
 	/**
 	 * Sends the Authorization Request to the Authorization service and asks for
 	 * the Authorization Response.
+	 * 
+	 * @param authRequest
+	 * @param uri
+	 * @return AuthorizationResponse
 	 */
 	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest, URI uri) {
 		Client client = ClientBuilder.newClient();
@@ -185,6 +192,10 @@ public class OrchestrationResource {
 	/**
 	 * Sends the QoS Verify message to the QoS service and asks for the QoS
 	 * Verification Response.
+	 * 
+	 * @param qosVerify
+	 * @param uri
+	 * @return QoSVerificationResponse
 	 */
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify, URI uri) {
 		Client client = ClientBuilder.newClient();
@@ -197,7 +208,9 @@ public class OrchestrationResource {
 	/**
 	 * Sends QoS reservation to the QoS service.
 	 * 
-	 * @return boolean Reservation response
+	 * @param qosReserve
+	 * @param uri
+	 * @return boolean indicating that the reservation completed successfully
 	 */
 	private boolean doQosReservation(QoSReserve qosReserve, URI uri) {
 		Client client = ClientBuilder.newClient();
