@@ -1,1 +1,2 @@
 /core/target
+/core/src/main/resources/hibernate.cfg.xml

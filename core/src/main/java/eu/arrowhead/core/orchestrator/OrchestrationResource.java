@@ -19,8 +19,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
@@ -45,12 +47,12 @@ import eu.arrowhead.core.orchestrator.services.OrchestrationService;
 public class OrchestrationResource {
 
 	private OrchestrationService orchestrationService = new OrchestrationService();
+	private SysConfig sysConfig = SysConfig.getInstance();
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String welcome(@Context UriInfo uriInfo) {
-		// return "Hello, this is the Orchestration Service.";
-		return uriInfo.getBaseUriBuilder().path("serviceregistry").path("serviceregistry").build().toString();
+		return "Hello, this is the Orchestration Service.";
 	}
 
 	/**
@@ -85,15 +87,14 @@ public class OrchestrationResource {
 		}
 
 		// Poll the Service Registry
-		uri = uriInfo.getBaseUriBuilder()
-				.path("ServiceRegistry")
+		uri = UriBuilder.fromUri(sysConfig.getServiceRegistryURI())
 				.path(srForm.getRequestedService().getServiceGroup())
 				.path(srForm.getRequestedService().getServiceDefinition())
 				.build();
 		srvQueryResult = getServiceQueryResult(srvQueryForm, uri);
 
 		// Poll the Authorization Service
-		uri = uriInfo.getBaseUriBuilder() //TODO: configurationból
+		uri = UriBuilder.fromUri(sysConfig.getAuthorizationURI())
 				.path("SystemGroup")
 				.path(srForm.getRequestedService().getServiceGroup())
 				.path("System")
