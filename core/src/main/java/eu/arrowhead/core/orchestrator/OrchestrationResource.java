@@ -3,6 +3,8 @@ package eu.arrowhead.core.orchestrator;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -16,13 +18,12 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
-import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.QoSReserve;
 import eu.arrowhead.common.model.messages.QoSVerificationResponse;
@@ -66,7 +67,9 @@ public class OrchestrationResource {
 		List<ArrowheadSystem> providers = new ArrayList<ArrowheadSystem>();
 		QoSVerify qosVerification;
 		QoSVerificationResponse qosVerificationResponse;
-		QoSReserve qosReservation = new QoSReserve();
+		Map<ArrowheadSystem, Boolean> qosMap;
+		ArrowheadSystem selectedSystem = null;
+		QoSReserve qosReservation;
 		boolean qosReservationResponse;
 		URI uri;
 
@@ -103,21 +106,31 @@ public class OrchestrationResource {
 		// Poll the QoS Service
 		uri = uriInfo.getBaseUriBuilder()
 				.path("QoS") // NEED TO SPECIFY
+				.path("verify")
 				.build();
-		qosVerification = new QoSVerify(srForm.getRequesterSystem(),srForm.getRequestedService(),providers,"RequestedQoS");
+		qosVerification = new QoSVerify(srForm.getRequesterSystem(), srForm.getRequestedService(), providers,
+				"RequestedQoS");
 		qosVerificationResponse = getQosVerificationResponse(qosVerification, uri);
-		
-		/* 
-		 * // TODO: Matchmaking
-		 * 
-		 * qosReservationResponse = doQosReservation(qosReservation);
-		 * 
-		 * // TODO: Compile orchestration response
-		 * 
-		 * // TODO: Send orchestration form
-		 * 
-		 * System.out.println("Orchestration process finished.");
-		 */
+
+		// TODO: Matchmaking
+
+		// Poll the QoS Service
+		uri = uriInfo.getBaseUriBuilder()
+				.path("QoS") // NEED TO SPECIFY
+				.path("reserve")
+				.build();
+		qosMap = qosVerificationResponse.getResponse();
+
+		for (Entry<ArrowheadSystem, Boolean> entry : qosMap.entrySet()) {
+			selectedSystem = entry.getKey();
+		}
+
+		qosReservation = new QoSReserve(selectedSystem, srForm.getRequesterSystem(), srForm.getRequestedService());
+		qosReservationResponse = doQosReservation(qosReservation, uri);
+
+		// TODO: Compile orchestration response
+
+		// TODO: Send orchestration form
 
 		return Response.status(Status.OK).entity(null).build();
 	}

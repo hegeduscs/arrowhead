@@ -16,6 +16,13 @@ public class QoSReserve {
 
 	}
 
+	public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service) {
+		super();
+		this.provider = provider;
+		this.consumer = consumer;
+		this.service = service;
+	}
+
 	public ArrowheadSystem getProvider() {
 		return provider;
 	}
