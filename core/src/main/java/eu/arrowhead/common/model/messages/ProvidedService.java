@@ -26,7 +26,7 @@ public class ProvidedService {
 		return provider;
 	}
 
-	public void setProvidedr(ArrowheadSystem provider) {
+	public void setProvider(ArrowheadSystem provider) {
 		this.provider = provider;
 	}
 

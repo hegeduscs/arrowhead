@@ -2,6 +2,7 @@ package eu.arrowhead.core.orchestrator;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,12 +24,14 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import eu.arrowhead.common.configuration.SysConfig;
+import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ProvidedService;
+import eu.arrowhead.common.model.messages.QoSReservationResponse;
 import eu.arrowhead.common.model.messages.QoSReserve;
 import eu.arrowhead.common.model.messages.QoSVerificationResponse;
 import eu.arrowhead.common.model.messages.QoSVerify;
@@ -74,45 +77,44 @@ public class OrchestrationResource {
 		Map<ArrowheadSystem, Boolean> qosMap;
 		ArrowheadSystem selectedSystem = null;
 		QoSReserve qosReservation;
-		boolean qosReservationResponse;
-		URI uri;
+		QoSReservationResponse qosReservationResponse;
+		URI uri = null;
 		OrchestrationForm orchForm;
 		OrchestrationResponse orchResponse;
 		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
+		System.out.println("orchestrator: SRF received");
 
 		// Check for intercloud orchestration
 		if (srForm.getOrchestrationFlags().get("TriggerInterCloud")) {
+			System.out.println("orchestrator: inside the intercloud IF statement");
 			doIntercloudOrchestration();
 			return Response.status(Status.OK).entity(null).build();
 		}
 
 		// Poll the Service Registry
-		uri = UriBuilder.fromUri(sysConfig.getServiceRegistryURI())
-				.path(srForm.getRequestedService().getServiceGroup())
-				.path(srForm.getRequestedService().getServiceDefinition())
-				.build();
+		/*uri = UriBuilder.fromUri(sysConfig.getServiceRegistryURI()).path(srForm.getRequestedService().getServiceGroup())
+				.path(srForm.getRequestedService().getServiceDefinition()).build();*/
 		srvQueryResult = getServiceQueryResult(srvQueryForm, uri);
+		System.out.println("orchestrator: returned to the main function after getting the SQR");
 
 		// Poll the Authorization Service
-		uri = UriBuilder.fromUri(sysConfig.getAuthorizationURI())
-				.path("SystemGroup")
-				.path(srForm.getRequestedService().getServiceGroup())
-				.path("System")
-				.path(srForm.getRequestedService().getInterfaces().get(0))
-				.build();
+		/*uri = UriBuilder.fromUri(sysConfig.getAuthorizationURI()).path("SystemGroup")
+				.path(srForm.getRequestedService().getServiceGroup()).path("System")
+				.path(srForm.getRequestedService().getInterfaces().get(0)).build();*/
 
 		for (ProvidedService providedService : srvQueryResult.getServiceQueryData()) {
 			providers.add(providedService.getProvider());
 		}
+		
+		System.out.println("A providers lista hossza: " + providers.size());
 
 		authRequest = new AuthorizationRequest(srForm.getRequestedService(), providers, "AuthenticationInfo", true);
+		System.out.println("orchestrator: AuthRequest created");
 		authResponse = getAuthorizationResponse(authRequest, uri);
 
 		// Poll the QoS Service
-		uri = uriInfo.getBaseUriBuilder()
-				.path("QoS") // NEED TO SPECIFY
-				.path("verify")
-				.build();
+		uri = uriInfo.getBaseUriBuilder().path("QoS") // NEED TO SPECIFY
+				.path("verify").build();
 		qosVerification = new QoSVerify(srForm.getRequesterSystem(), srForm.getRequestedService(), providers,
 				"RequestedQoS");
 		qosVerificationResponse = getQosVerificationResponse(qosVerification, uri);
@@ -120,28 +122,38 @@ public class OrchestrationResource {
 		// TODO: Matchmaking
 
 		// Poll the QoS Service
-		uri = uriInfo.getBaseUriBuilder()
-				.path("QoS") // NEED TO SPECIFY
-				.path("reserve")
-				.build();
+		/*uri = uriInfo.getBaseUriBuilder().path("QoS") // NEED TO SPECIFY
+				.path("reserve").build();*/
 		qosMap = qosVerificationResponse.getResponse();
 
 		// Reserve QoS resources
 		for (Entry<ArrowheadSystem, Boolean> entry : qosMap.entrySet()) {
-			selectedSystem = entry.getKey(); // TEMPORARLY selects a random system
+			selectedSystem = entry.getKey(); // TEMPORARLY selects a random
+												// system
 		}
 
 		qosReservation = new QoSReserve(selectedSystem, srForm.getRequesterSystem(), srForm.getRequestedService());
 		qosReservationResponse = doQosReservation(qosReservation, uri);
+		System.out.println("orchestrator: qosreservationresponse received, back to main method");
 
 		// Compile Orchestration Form
-		orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI", "authorizationInfo");
-		
+		/*orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI",
+				"vegigfutottam");*/
+		List<String> visszateresilista = new ArrayList<String>();
+		visszateresilista.add("cica");
+		visszateresilista.add("kutya");
+		orchForm = new OrchestrationForm(
+				new ArrowheadService("visszateresi", "serviceDefinition", visszateresilista, "metaData"),
+				new ArrowheadSystem("sysgroup", "eztkuldivissza", "azorchestrator", "remelhetoelgjo", "o"),
+				"serviceURI", "authorizationInfo");
+		System.out.println("orchestrator: orchform created");
+
 		// Compile Orchestration Response
 		responseFormList.add(orchForm);
 		orchResponse = new OrchestrationResponse(responseFormList);
 
 		// Send orchestration form
+		System.out.println("orchestrator: about to return");
 		return Response.status(Status.OK).entity(orchResponse).build();
 	}
 
@@ -149,9 +161,9 @@ public class OrchestrationResource {
 	 * This function represents the Intercloud orchestration process.
 	 */
 	private void doIntercloudOrchestration() {
-		
+
 		// TODO: Inter-cloud orchestration
-		
+
 		return;
 	}
 
@@ -164,11 +176,18 @@ public class OrchestrationResource {
 	 * @return ServiceQueryResult
 	 */
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, URI uri) {
+		System.out.println("orchestator: inside the getServiceQueryResult function");
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(uri);
+		// WebTarget target = client.target(uri);
+		WebTarget target = client.target("http://localhost:8080/ext/serviceregistry/query");
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
-
-		return response.readEntity(ServiceQueryResult.class);
+		System.out.println("orchestrator: gSQR received the response");
+		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
+		System.out.println("orchestrator received the following serviceURIs:");
+		for (ProvidedService providedService : sqr.getServiceQueryData()) {
+			System.out.println(providedService.getServiceURI() + providedService.getProvider().getIPAddress());
+		}
+		return sqr;
 	}
 
 	/**
@@ -180,11 +199,14 @@ public class OrchestrationResource {
 	 * @return AuthorizationResponse
 	 */
 	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest, URI uri) {
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(uri);
-		Response response = target.request().header("Content-type", "application/json").put(Entity.json(authRequest));
-
-		return response.readEntity(AuthorizationResponse.class);
+		System.out.println("orchestrator: inside the getAuthorizationResponse function");
+		//Client client = ClientBuilder.newClient();
+		//WebTarget target = client.target(uri);
+		//Response response = target.request().header("Content-type", "application/json").put(Entity.json(authRequest));
+		Map<String,String> stringmap = new HashMap<String,String>();
+		Map<ArrowheadSystem, Boolean> systemmap = new HashMap<ArrowheadSystem, Boolean>();
+		return new AuthorizationResponse(systemmap, 2, stringmap);
+		//return response.readEntity(AuthorizationResponse.class);
 	}
 
 	/**
@@ -196,10 +218,11 @@ public class OrchestrationResource {
 	 * @return QoSVerificationResponse
 	 */
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify, URI uri) {
+		System.out.println("orchestrator: inside the getQoSVerificationResponse method");
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(uri);
+		//WebTarget target = client.target(uri);
+		WebTarget target = client.target("http://localhost:8080/ext/qosservice/verification");
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
-
 		return response.readEntity(QoSVerificationResponse.class);
 	}
 
@@ -210,14 +233,12 @@ public class OrchestrationResource {
 	 * @param uri
 	 * @return boolean indicating that the reservation completed successfully
 	 */
-	private boolean doQosReservation(QoSReserve qosReserve, URI uri) {
+	private QoSReservationResponse doQosReservation(QoSReserve qosReserve, URI uri) {
+		System.out.println("orchestrator: inside the doQoSReservation method");
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(uri);
+		//WebTarget target = client.target(uri);
+		WebTarget target = client.target("http://localhost:8080/ext/qosservice/reservation");
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
-
-		// return response.readEntity(Boolean.class);
-
-		// Always true until QoS Service is added to the system.
-		return true;
+		return response.readEntity(QoSReservationResponse.class);
 	}
 }
