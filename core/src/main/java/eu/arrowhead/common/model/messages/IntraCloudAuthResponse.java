@@ -1,29 +1,25 @@
-package eu.arrowhead.core.authorization;
+package eu.arrowhead.common.model.messages;
 
 import java.util.HashMap;
 
 import eu.arrowhead.core.authorization.database.ArrowheadSystem;
 
-public class IntraCloudAuthResp {
+public class IntraCloudAuthResponse {
 	
 	private HashMap<ArrowheadSystem, Boolean> authorizationMap = new HashMap<ArrowheadSystem, Boolean>();
 
-	
-	public IntraCloudAuthResp() {
+	public IntraCloudAuthResponse() {
 		super();
 	}
 
-
-	public IntraCloudAuthResp(HashMap<ArrowheadSystem, Boolean> authorizationMap) {
+	public IntraCloudAuthResponse(HashMap<ArrowheadSystem, Boolean> authorizationMap) {
 		super();
 		this.authorizationMap = authorizationMap;
 	}
 
-
 	public HashMap<ArrowheadSystem, Boolean> getAuthorizationMap() {
 		return authorizationMap;
 	}
-
 
 	public void setAuthorizationMap(HashMap<ArrowheadSystem, Boolean> authorizationMap) {
 		this.authorizationMap = authorizationMap;
