@@ -19,7 +19,7 @@ import eu.arrowhead.core.orchestrator.services.OrchestrationService;
 @Path("orchestration")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class OrchestrationResource {
+public class OrchestrationResourceOld {
 
 	OrchestrationService orchestrationService = new OrchestrationService();
 	DummySRImitator imitator = new DummySRImitator();
