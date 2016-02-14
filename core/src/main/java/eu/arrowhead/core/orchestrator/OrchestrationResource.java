@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
@@ -17,6 +18,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -37,6 +39,7 @@ import eu.arrowhead.common.model.messages.QoSVerificationResponse;
 import eu.arrowhead.common.model.messages.QoSVerify;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
+import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import eu.arrowhead.core.orchestrator.services.OrchestrationService;
 
@@ -50,7 +53,7 @@ import eu.arrowhead.core.orchestrator.services.OrchestrationService;
 public class OrchestrationResource {
 
 	private OrchestrationService orchestrationService = new OrchestrationService();
-	private SysConfig sysConfig = SysConfig.getInstance();
+	//private SysConfig sysConfig = SysConfig.getInstance();
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
@@ -88,7 +91,7 @@ public class OrchestrationResource {
 		if (srForm.getOrchestrationFlags().get("TriggerInterCloud")) {
 			System.out.println("orchestrator: inside the intercloud IF statement");
 			doIntercloudOrchestration();
-			return Response.status(Status.OK).entity(null).build();
+			//return Response.status(Status.OK).entity(null).build();
 		}
 
 		// Poll the Service Registry
@@ -137,15 +140,8 @@ public class OrchestrationResource {
 		System.out.println("orchestrator: qosreservationresponse received, back to main method");
 
 		// Compile Orchestration Form
-		/*orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI",
-				"vegigfutottam");*/
-		List<String> visszateresilista = new ArrayList<String>();
-		visszateresilista.add("cica");
-		visszateresilista.add("kutya");
-		orchForm = new OrchestrationForm(
-				new ArrowheadService("visszateresi", "serviceDefinition", visszateresilista, "metaData"),
-				new ArrowheadSystem("sysgroup", "eztkuldivissza", "azorchestrator", "remelhetoelgjo", "o"),
-				"serviceURI", "authorizationInfo");
+		orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI",
+				"vegigfutottam");
 		System.out.println("orchestrator: orchform created");
 
 		// Compile Orchestration Response
@@ -154,6 +150,7 @@ public class OrchestrationResource {
 
 		// Send orchestration form
 		System.out.println("orchestrator: about to return");
+		//return orchResponse;
 		return Response.status(Status.OK).entity(orchResponse).build();
 	}
 

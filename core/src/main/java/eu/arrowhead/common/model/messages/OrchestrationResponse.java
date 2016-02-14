@@ -23,4 +23,8 @@ public class OrchestrationResponse {
 		return response;
 	}
 
+	public void setResponse(List<OrchestrationForm> response) {
+		this.response = response;
+	}
+
 }
