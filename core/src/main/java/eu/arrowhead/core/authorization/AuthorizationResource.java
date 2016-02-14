@@ -41,9 +41,14 @@ public class AuthorizationResource {
         return "This is the authorization service!";
     }
     
+    /**
+     * Returns a list of ArrowheadClouds with the same operator from the database.
+     * 
+     * @param {String} operatorName
+     * @return List<ArrowheadCloud>
+     */
     @GET
     @Path("/operator/{operatorName}")
-    //returns a list of Clouds with the same Operator
     public List<ArrowheadCloud> getClouds(@PathParam("operatorName") String operatorName){
     	List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
     	cloudList = databaseManager.getClouds(operatorName);
@@ -51,19 +56,34 @@ public class AuthorizationResource {
     	return cloudList;
     }
     
+    /**
+     * Returns an ArrowheadCloud from the database specified by the operatorName and cloudName.
+     * 
+     * @param {String} operatorName
+     * @param {String} cloudName
+     * @exception DataNotFoundException
+     * @return JAX-RS Response with status code 200 and ArrowheadCloud entity
+     */
     @GET
     @Path("/operator/{operatorName}/cloud/{cloudName}")
-    //returns a Cloud from the database
     public Response getCloud(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName){
     	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
     	return Response.ok(arrowheadCloud).build();
     }
     
+    /**
+     * Checks whether an external Cloud can use a local Service.
+     * 
+     * @param {String} operatorName
+     * @param {String} cloudName
+     * @param {InterCloudAuthRequest} request - POJO with the necessary informations
+     * @exception DataNotFoundException
+     * @return boolean
+     */
     @PUT
     @Path("/operator/{operatorName}/cloud/{cloudName}")
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
-    //checks whether a Cloud can use a Service (returns with boolean; or with JSON exception)
     public boolean isCloudAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthRequest request){
     	ArrowheadService requestedService = request.getArrowheadService();
@@ -80,9 +100,18 @@ public class AuthorizationResource {
     	return isAuthorized;
     }
     
+    /**
+     * Adds a new Cloud and its consumable Services to the database.
+     * 
+     * @param {String} operatorName
+     * @param {String} cloudName
+     * @param {InterCloudAuthEntry} entry - POJO with the necessary informations
+     * @param {UriInfo} uriInfo - JAX-RS object containing URI information
+     * @exception DuplicateEntryException
+     * @return JAX-RS Response with status code 201 and ArrowheadCloud entity
+     */
     @POST
     @Path("/operator/{operatorName}/cloud/{cloudName}")
-    //adds a new Cloud (and its consumable Services) to the database
     public Response addCloudToAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry, 
     		@Context UriInfo uriInfo){
@@ -98,9 +127,16 @@ public class AuthorizationResource {
     	return Response.created(uri).entity(authorizedCloud).build();
     }
     
+    /**
+     * Deletes a Cloud and its consumable Services from the database.
+     * 
+     * @param {String} operatorName
+     * @param {String} cloudName
+     * @exception DataNotFoundException
+     * @return JAX-RS Response with status code 204
+     */
     @DELETE
     @Path("/operator/{operatorName}/cloud/{cloudName}")
-    //deletes a Cloud (and its consumable Services!) from the database
     public Response deleteCloudFromAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName){
     	databaseManager.deleteCloudFromAuthorized(operatorName, cloudName);
@@ -108,9 +144,16 @@ public class AuthorizationResource {
     	return Response.noContent().build();
     }
     
+    /**
+     * Returns the list of consumable Services of a Cloud.
+     * 
+     * @param {String} operatorName
+     * @param {String} cloudName
+     * @exception DataNotFoundException
+     * @return List<ArrowheadService>
+     */
     @GET
     @Path("/operator/{operatorName}/cloud/{cloudName}/services")
-    //returns the list of consumable Services of a Cloud
     public List<ArrowheadService> getCloudServices(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName){
     	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
@@ -119,9 +162,16 @@ public class AuthorizationResource {
     	return serviceList;
     }
     
+    /**
+     * Adds a list of consumable Services to a Cloud.
+     * 
+     * @param {String} operatorName
+     * @param {String} cloudName
+     * @exception DataNotFoundException
+     * @return List<ArrowheadService>
+     */
     @POST
     @Path("/operator/{operatorName}/cloud/{cloudName}/services")
-    //adds a list of consumable Services to a Cloud
     public List<ArrowheadService> addCloudServices(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry){
     	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
@@ -135,6 +185,17 @@ public class AuthorizationResource {
     	return serviceList;
     }
     
+    /**
+     * Checks whether the consumer System can use a Service from a list of provider Systems.
+     * 
+     * @param {String} systemGroup
+     * @param {String} systemName
+     * @param {IntraCloudAuthRequest} request - POJO with the necessary informations
+     * @exception DataNotFoundException
+     * @return IntraCloudAuthResponse - POJO containing a HashMap<ArrowheadSystem, boolean>
+     * @problem The extra payload information such as the interfaces of the requested service are lost,
+     * 			since relations can only be made between persistent object instances.
+     */
     @PUT
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
     public IntraCloudAuthResponse isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
@@ -147,8 +208,6 @@ public class AuthorizationResource {
     		throw new DataNotFoundException("The Consumer System is not found in the database.");
     	}
     	
-    	//with this solution the extra payload information is useless, only the SG and SD matters
-    	//meaning the interfaces might not have a match!
     	List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
     	serviceList = databaseManager.getServiceByName(request.getArrowheadService()
     			.getServiceGroup(), request.getArrowheadService().getServiceDefinition());
@@ -177,8 +236,21 @@ public class AuthorizationResource {
     	return response;
     }
     
-    /*
-     * duplicate entry exception when the same providersystems are in the payload of 2 different request!!
+    /**
+     * Creates a relation between local Systems, defining the consumable services between Systems.
+     * (Not bidirectional.) OneToMany relation between consumer and providers, OneToMany relation
+     * between consumer and services.
+     * 
+     * @param {String} systemGroup
+     * @param {String} systemName
+     * @param {IntraCloudAuthEntry} entry - POJO with the necessary informations
+     * @exception DuplicateEntryException
+     * @return JAX-RS Response with status code 201 and ArrowheadSystem entity (consumer side)
+     * @problem Multiple POST requests will result in a DuplicateEntryException, if they have the 
+     * 			same provider Systems in their payload. This is because of the cascading in the relation
+     * 			table. Without cascading Hibernate won't save the relation (TransientObjectException).
+     * 			The workaround for now is to delete the uniqeConstraints in the ArrowheadSystem POJO, 
+     * 			allowing duplicate entries in that table.
      */
     @POST
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
@@ -222,6 +294,14 @@ public class AuthorizationResource {
     	return Response.status(Status.CREATED).entity(consumerSystem).build();
     }
     
+    /**
+     * Deletes all the relations where the given System is the consumer.
+     * 
+     * @param {String} systemGroup
+     * @param {String} systemName
+     * @exception DataNotFoundException
+     * @return JAX-RS Response with status code 204
+     */
     @DELETE
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
     public Response deleteRelationsFromAuthorized(@PathParam("systemGroup") String systemGroup,

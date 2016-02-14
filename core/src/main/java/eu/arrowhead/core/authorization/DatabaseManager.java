@@ -140,9 +140,6 @@ public class DatabaseManager {
         }
     }
     
-    /*
-     * Not used for anything at the moment.
-     */
     public void updateAuthorizedCloud(ArrowheadCloud arrowheadCloud){
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = null;
