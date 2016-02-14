@@ -1,4 +1,7 @@
-package eu.arrowhead.core.authorization;
+package eu.arrowhead.common.model.messages;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import eu.arrowhead.core.authorization.database.ArrowheadService;
 import eu.arrowhead.core.authorization.database.ArrowheadSystem;
@@ -8,27 +11,27 @@ public class IntraCloudAuthRequest {
 	private String authenticationInfo; //consumers
 	private ArrowheadService arrowheadService;
 	private boolean generateToken;
-	private ArrowheadSystem provider;
+	private Collection<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
 	
 	public IntraCloudAuthRequest() {
 		super();
 	}
-	
+
 	public IntraCloudAuthRequest(String authenticationInfo, ArrowheadService arrowheadService, boolean generateToken,
-			ArrowheadSystem provider) {
+			Collection<ArrowheadSystem> providerList) {
 		super();
 		this.authenticationInfo = authenticationInfo;
 		this.arrowheadService = arrowheadService;
 		this.generateToken = generateToken;
-		this.provider = provider;
+		this.providerList = providerList;
 	}
 
-	public ArrowheadSystem getProvider() {
-		return provider;
+	public Collection<ArrowheadSystem> getProviderList() {
+		return providerList;
 	}
 
-	public void setProvider(ArrowheadSystem provider) {
-		this.provider = provider;
+	public void setProviderList(Collection<ArrowheadSystem> providerList) {
+		this.providerList = providerList;
 	}
 
 	public String getAuthenticationInfo() {

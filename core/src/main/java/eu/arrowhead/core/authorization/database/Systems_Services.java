@@ -17,13 +17,13 @@ public class Systems_Services {
 	
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
 	private int id;
-	@ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
 	@JoinColumn(name="service_id")
 	private ArrowheadService service;
-	@ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
 	@JoinColumn(name="consumer_id")
 	private ArrowheadSystem consumer;
-	@ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
 	@JoinColumn(name="provider_id")
 	private ArrowheadSystem provider;
 	

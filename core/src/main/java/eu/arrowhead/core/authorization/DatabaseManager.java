@@ -185,9 +185,6 @@ public class DatabaseManager {
              criteria.add(Restrictions.eq("systemName", systemName));
              criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
              arrowheadSystem = (ArrowheadSystem) criteria.uniqueResult();
-             /*if(arrowheadSystem == null){
-            	 throw new DataNotFoundException("The consumer Cloud is not in the authorized database.");
-             }*/
              transaction.commit();
          }
          catch (Exception e) {
@@ -201,8 +198,8 @@ public class DatabaseManager {
     	return arrowheadSystem;
     }
     
-    public ArrowheadService getServiceByName(String serviceGroup, String serviceDefinition){
-    	ArrowheadService arrowheadService;
+    public List<ArrowheadService> getServiceByName(String serviceGroup, String serviceDefinition){
+    	List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
     	
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = null;
@@ -213,11 +210,7 @@ public class DatabaseManager {
              criteria.add(Restrictions.eq("serviceGroup", serviceGroup));
              criteria.add(Restrictions.eq("serviceDefinition", serviceDefinition));
              criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-             //disregarding the fact that no uniqe constraint is used in the ArrowheadService class at the moment
-             arrowheadService = (ArrowheadService) criteria.uniqueResult();
-             if(arrowheadService == null){
-            	 throw new DataNotFoundException("The consumer Cloud is not in the authorized database.");
-             }
+             serviceList = (List<ArrowheadService>) criteria.list();
              transaction.commit();
          }
          catch (Exception e) {
@@ -228,7 +221,7 @@ public class DatabaseManager {
              session.close();
          }
     	
-    	return arrowheadService;
+    	return serviceList;
     }
     
     public Systems_Services getSS(ArrowheadSystem consumer, ArrowheadSystem provider, ArrowheadService service){
@@ -256,6 +249,31 @@ public class DatabaseManager {
         }
     	
    	return ss;
+    }
+    
+    public List<Systems_Services> getRelations(ArrowheadSystem consumer){
+    	List<Systems_Services> ssList = new ArrayList<Systems_Services>();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+   		 	transaction = session.beginTransaction();
+            Criteria criteria = session.createCriteria(Systems_Services.class);
+            criteria.add(Restrictions.eq("consumer", consumer));
+            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+            ssList = (List<Systems_Services>) criteria.list();
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    	
+   	return ssList;
     }
     
     public <T> T save(T object){
@@ -298,6 +316,30 @@ public class DatabaseManager {
         finally {
             session.close();
         }	
+	}
+	
+	public Systems_Services saveRelation(Systems_Services ss){
+		Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		transaction = session.beginTransaction();
+    		session.merge(ss);
+            transaction.commit();
+        }
+    	catch(ConstraintViolationException e){
+    		if (transaction!=null) transaction.rollback();
+    		throw new DuplicateEntryException("There is already an entry in the database with these parameters.");
+    	}
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    	
+    	return ss;	
 	}
     
 }

@@ -19,6 +19,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
+import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
+import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.core.authorization.database.ArrowheadCloud;
 import eu.arrowhead.core.authorization.database.ArrowheadService;
 import eu.arrowhead.core.authorization.database.ArrowheadSystem;
@@ -131,93 +135,105 @@ public class AuthorizationResource {
     	return serviceList;
     }
     
-    /*
-     * Services still in the database after this, needs fixing.
-     */
-    @PUT
-    @Path("/operator/{operatorName}/cloud/{cloudName}/services")
-    //list of consumable Services update, deletes the previous list
-    public List<ArrowheadService> updateCloudServices(@PathParam("operatorName") String operatorName, 
-    		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry){
-    	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
-    	if(!entry.getAuthenticationInfo().isEmpty()){
-    		arrowheadCloud.setAuthenticationInfo(entry.getAuthenticationInfo());
-    	}
-    	List<ArrowheadService> serviceList = (List<ArrowheadService>) entry.getServiceList();
-    	arrowheadCloud.getServiceList().clear();
-    	arrowheadCloud.getServiceList().addAll(serviceList);
-    	databaseManager.updateAuthorizedCloud(arrowheadCloud);
-				
-    	return serviceList;
-    }
-    
-    /*
-     * Services still in the database after this, needs fixing.
-     */
-    @DELETE
-    @Path("/operator/{operatorName}/cloud/{cloudName}/services")
-    public Response deleteCloudServices(@PathParam("operatorName") String operatorName, 
-    		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry){
-    	//ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
-    	List<ArrowheadService> serviceList = (List<ArrowheadService>) entry.getServiceList();
-    	System.out.println(serviceList.size());
-    	//arrowheadCloud.getServiceList().removeAll(serviceList);
-    	databaseManager.deleteServices(operatorName, cloudName, serviceList);
-    	
-    	return Response.noContent().build();
-    }
-    
     @PUT
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
-    public IntraCloudAuthResp isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
+    public IntraCloudAuthResponse isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
     		@PathParam("systemName") String systemName, IntraCloudAuthRequest request){
-    	ArrowheadSystem consumer = databaseManager.getSystemByName(systemGroup, systemName);
-    	//with this solution the extra payload information is useless, only the SG and SD matters
-    	ArrowheadService service = databaseManager.getServiceByName(request.getArrowheadService().getServiceGroup(), request.getArrowheadService().getServiceDefinition());
-    	ArrowheadSystem provider = databaseManager.getSystemByName(request.getProvider().getSystemGroup(), request.getProvider().getSystemName());
     	Systems_Services ss = new Systems_Services();
     	HashMap<ArrowheadSystem, Boolean> authorizationMap = new HashMap<ArrowheadSystem, Boolean>();
-    	ss = databaseManager.getSS(consumer, provider, service);
-    	if(ss == null){
-    		authorizationMap.put(request.getProvider(), false);
-    	}
-    	else{
-    		authorizationMap.put(provider, true);
+    	IntraCloudAuthResponse response = new IntraCloudAuthResponse();
+    	ArrowheadSystem consumer = databaseManager.getSystemByName(systemGroup, systemName);
+    	if(consumer == null){
+    		throw new DataNotFoundException("The Consumer System is not found in the database.");
     	}
     	
-    	IntraCloudAuthResp response = new IntraCloudAuthResp();
+    	//with this solution the extra payload information is useless, only the SG and SD matters
+    	//meaning the interfaces might not have a match!
+    	List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
+    	serviceList = databaseManager.getServiceByName(request.getArrowheadService()
+    			.getServiceGroup(), request.getArrowheadService().getServiceDefinition());
+    	if(serviceList.isEmpty()){
+    		for(ArrowheadSystem provider : request.getProviderList()){
+    			authorizationMap.put(provider, false);
+    		}
+    		response.setAuthorizationMap(authorizationMap);
+    		return response;
+    	}
+    	
+    	for(ArrowheadSystem provider : request.getProviderList()){
+    		ArrowheadSystem retrievedSystem = databaseManager.getSystemByName(provider.getSystemGroup(), 
+    				provider.getSystemName());
+    		ss = databaseManager.getSS(consumer, retrievedSystem, serviceList.get(0));
+        	if(ss == null){
+        		authorizationMap.put(provider, false);
+        	}
+        	else{
+        		authorizationMap.put(retrievedSystem, true);
+        	}
+    	}
+    	
+    	
     	response.setAuthorizationMap(authorizationMap);
     	return response;
     }
     
+    /*
+     * duplicate entry exception when the same providersystems are in the payload of 2 different request!!
+     */
     @POST
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
     public Response addSystemToAuthorized(@PathParam("systemGroup") String systemGroup,
     		@PathParam("systemName") String systemName, IntraCloudAuthEntry entry){
-    	ArrowheadSystem consumerSystem = new ArrowheadSystem();
-    	consumerSystem.setSystemGroup(systemGroup);
-    	consumerSystem.setSystemName(systemName);
-    	consumerSystem.setIPAddress(entry.getIPAddress());
-    	consumerSystem.setPort(entry.getPort());
-    	consumerSystem.setAuthenticationInfo(entry.getAuthenticationInfo());
-    	consumerSystem = databaseManager.save(consumerSystem);
+    	ArrowheadSystem consumerSystem = databaseManager.getSystemByName(systemGroup, systemName);
+    	if(consumerSystem == null){
+    		ArrowheadSystem consumer = new ArrowheadSystem();
+    		consumer.setSystemGroup(systemGroup);
+    		consumer.setSystemName(systemName);
+    		consumer.setIPAddress(entry.getIPAddress());
+    		consumer.setPort(entry.getPort());
+    		consumer.setAuthenticationInfo(entry.getAuthenticationInfo());
+    		consumerSystem = databaseManager.save(consumer);
+    	}
     	
-    	ArrowheadSystem providerSystem = new ArrowheadSystem();
-    	ArrowheadService providedService = new ArrowheadService();
     	
-    	for(int i = 0; i < entry.getProviderList().size(); i++){
-    		providerSystem = databaseManager.save(entry.getProviderList().get(i));
-    		for(int j = 0; j < entry.getServiceList().size(); j++){
-    			providedService = databaseManager.save(entry.getServiceList().get(j));
-    			Systems_Services ss = new Systems_Services();
+    	ArrowheadSystem retrievedSystem = null;
+    	List<ArrowheadService> retrievedServiceList = new ArrayList<ArrowheadService>();
+    	Systems_Services ss = new Systems_Services();
+    	
+    	for (ArrowheadSystem providerSystem : entry.getProviderList()){
+    		retrievedSystem = databaseManager.getSystemByName(providerSystem.getSystemGroup(), 
+    				providerSystem.getSystemName());
+    		if(retrievedSystem == null){
+    			databaseManager.save(providerSystem);
+    		}
+    		for(ArrowheadService service : entry.getServiceList()){
+    			retrievedServiceList = databaseManager.getServiceByName(service.getServiceGroup(), 
+    					service.getServiceDefinition());
+    			if(retrievedServiceList.isEmpty()){
+    				databaseManager.save(service);
+    			}
     			ss.setConsumer(consumerSystem);
     			ss.setProvider(providerSystem);
-    			ss.setService(providedService);
-    			databaseManager.save(ss);
+    			ss.setService(service);
+    			databaseManager.saveRelation(ss);
     		}
     	}
     	
     	return Response.status(Status.CREATED).entity(consumerSystem).build();
+    }
+    
+    @DELETE
+    @Path("/systemgroup/{systemGroup}/system/{systemName}")
+    public Response deleteRelationsFromAuthorized(@PathParam("systemGroup") String systemGroup,
+    		@PathParam("systemName") String systemName){
+    	ArrowheadSystem consumer = databaseManager.getSystemByName(systemGroup, systemName);
+    	List<Systems_Services> ssList = new ArrayList<Systems_Services>();
+    	ssList = databaseManager.getRelations(consumer);
+    	for(Systems_Services ss : ssList){
+    		databaseManager.delete(ss);
+    	}
+    	
+    	return Response.noContent().build();
     }
     
 }
