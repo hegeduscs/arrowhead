@@ -54,7 +54,7 @@ public class tester {
         Transaction transaction=session.beginTransaction();
         List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
          try {
-             Criteria criteria = session.createCriteria(ArrowheadCloud.class);
+             /*Criteria criteria = session.createCriteria(ArrowheadCloud.class);
              criteria.add(Restrictions.eq("operator", "A"));
              criteria.add(Restrictions.eq("cloudName", "b"));
              criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
@@ -65,7 +65,7 @@ public class tester {
              	List<ArrowheadService> retrievedcloudServices=(List<ArrowheadService>)cloudList.get(i).getServiceList();
              	for (int j=0;j<retrievedcloudServices.size();j++)
              		System.out.println(retrievedcloudServices.get(j).getServiceDefinition());
-             }
+             }*/
          }
          catch (Exception e) {
              if (transaction!=null) transaction.rollback();
