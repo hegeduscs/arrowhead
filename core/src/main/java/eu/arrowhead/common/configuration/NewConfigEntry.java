@@ -12,7 +12,7 @@ public class NewConfigEntry {
 	
 	public NewConfigEntry(String iPAddress, String port, String authenticationInfo, String serviceURI) {
 		super();
-		IPAddress = iPAddress;
+		this.IPAddress = iPAddress;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
 		this.serviceURI = serviceURI;
@@ -23,7 +23,7 @@ public class NewConfigEntry {
 	}
 
 	public void setIPAddress(String iPAddress) {
-		IPAddress = iPAddress;
+		this.IPAddress = iPAddress;
 	}
 
 	public String getPort() {

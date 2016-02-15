@@ -182,4 +182,16 @@ public class SysConfig {
 		return gatekeeper.getIPAddress() + gatekeeper.getPort() + gatekeeper.getServiceURI();
 	}
 	
+	public List<String> getCloudURIs(){
+		List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();
+		cloudList.addAll(getAll(NeighborCloud.class));
+		
+		List<String> URIList = new ArrayList<String>();
+		for(NeighborCloud cloud : cloudList){
+			URIList.add(cloud.getIPAddress() + cloud.getPort() + cloud.getServiceURI());
+		}
+		
+		return URIList;
+	}
+	
 }
