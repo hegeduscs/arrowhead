@@ -99,9 +99,11 @@ public class OrchestrationResource {
 		qosMap = qosVerificationResponse.getResponse();
 		// Reserve QoS resources
 		for (Entry<ArrowheadSystem, Boolean> entry : qosMap.entrySet()) {
-			selectedSystem = entry.getKey(); // TEMPORARLY selects a random system
+			selectedSystem = entry.getKey(); // TEMPORARLY selects a random
+												// system
 		}
-		qosReservation = new QoSReserve(selectedSystem, srForm.getRequesterSystem(), srForm.getRequestedService());
+		qosReservation = new QoSReserve(selectedSystem, srForm.getRequesterSystem(), srForm.getRequestedService(),
+				"RequestedQoS");
 		qosReservationResponse = doQosReservation(qosReservation);
 		// Compile Orchestration Form
 		orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI", "vegigfutottam");
@@ -131,8 +133,12 @@ public class OrchestrationResource {
 	 * @return ServiceQueryResult
 	 */
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, ServiceRequestForm srForm) {
-	/*	uri =UriBuilder.fromUri(sysConfig.getServiceRegistryURI()).path(srForm.getRequestedService().getServiceGroup()).
-				path(srForm.getRequestedService().getServiceDefinition()).build();*/
+		/*
+		 * uri
+		 * =UriBuilder.fromUri(sysConfig.getServiceRegistryURI()).path(srForm.
+		 * getRequestedService().getServiceGroup()).
+		 * path(srForm.getRequestedService().getServiceDefinition()).build();
+		 */
 		System.out.println("orchestator: inside the getServiceQueryResult function");
 		// WebTarget target = client.target(uri);
 		WebTarget target = client.target("http://localhost:8080/ext/serviceregistry/query");
@@ -154,12 +160,16 @@ public class OrchestrationResource {
 	 * @param srForm
 	 * @return AuthorizationResponse
 	 */
-	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest, ServiceRequestForm srForm) {
+	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest,
+			ServiceRequestForm srForm) {
 		// Poll the Authorization Service
-		
-		/* uri = UriBuilder.fromUri(sysConfig.getAuthorizationURI()).path("SystemGroup")
-				 .path(srForm.getRequestedService().getServiceGroup()).path("System")
-				 .path(srForm.getRequestedService().getInterfaces().get(0)).build();*/
+
+		/*
+		 * uri = UriBuilder.fromUri(sysConfig.getAuthorizationURI()).path(
+		 * "SystemGroup")
+		 * .path(srForm.getRequestedService().getServiceGroup()).path("System")
+		 * .path(srForm.getRequestedService().getInterfaces().get(0)).build();
+		 */
 		// WebTarget target = client.target(uri);
 		// Response response = target.request().header("Content-type",
 		// "application/json").put(Entity.json(authRequest));
@@ -178,7 +188,8 @@ public class OrchestrationResource {
 	 * @return QoSVerificationResponse
 	 */
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
-		//uri = UriBuilder.fromUri(sysConfig.getQoSURI()).path("verify").build();
+		// uri =
+		// UriBuilder.fromUri(sysConfig.getQoSURI()).path("verify").build();
 		// WebTarget target = client.target(uri);
 		WebTarget target = client.target("http://localhost:8080/ext/qosservice/verification");
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
@@ -192,7 +203,8 @@ public class OrchestrationResource {
 	 * @return boolean indicating that the reservation completed successfully
 	 */
 	private QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
-		//uri = UriBuilder.fromUri(sysConfig.getQoSURI()).path("reserve").build();
+		// uri =
+		// UriBuilder.fromUri(sysConfig.getQoSURI()).path("reserve").build();
 		// WebTarget target = client.target(uri);
 		WebTarget target = client.target("http://localhost:8080/ext/qosservice/reservation");
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
