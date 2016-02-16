@@ -30,6 +30,10 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
+import eu.arrowhead.common.model.messages.GSDRequestForm;
+import eu.arrowhead.common.model.messages.GSDResult;
+import eu.arrowhead.common.model.messages.ICNRequestForm;
+import eu.arrowhead.common.model.messages.ICNResultForm;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ProvidedService;
@@ -82,8 +86,8 @@ public class OrchestrationResource {
 
 		// Check for intercloud orchestration
 		if (srForm.getOrchestrationFlags().get("TriggerInterCloud")) {
-			doIntercloudOrchestration();
-			return Response.status(Status.OK).entity(null).build();
+			orchResponse = doIntercloudOrchestration(srForm);
+			return Response.status(Status.OK).entity(orchResponse).build();
 		}
 		// Poll the Service Registry
 		srvQueryResult = getServiceQueryResult(srvQueryForm, srForm);
@@ -106,7 +110,7 @@ public class OrchestrationResource {
 				"RequestedQoS");
 		qosReservationResponse = doQosReservation(qosReservation);
 		// Compile Orchestration Form
-		orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI", "vegigfutottam");
+		orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI", "Orchestration Done");
 		// Compile Orchestration Response
 		responseFormList.add(orchForm);
 		orchResponse = new OrchestrationResponse(responseFormList);
@@ -117,11 +121,31 @@ public class OrchestrationResource {
 	/**
 	 * This function represents the Intercloud orchestration process.
 	 */
-	private void doIntercloudOrchestration() {
+	private OrchestrationResponse doIntercloudOrchestration(ServiceRequestForm srForm) {
+		GSDRequestForm gsdRequestForm;
+		GSDResult gsdResult;
+		ICNRequestForm icnRequestForm;
+		OrchestrationForm orchForm;
+		OrchestrationResponse orchResponse;
+		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
 
-		// TODO: Inter-cloud orchestration
+		// Init Global Service Discovery
+		gsdRequestForm = new GSDRequestForm(srForm.getRequestedService());
+		gsdResult = getGSDResult(gsdRequestForm);
 
-		return;
+		// TODO: Choose partnering cloud based on certain things...
+
+		// Init Inter-Cloud Negotiation
+		// TODO: null should be changed below...
+		icnRequestForm = new ICNRequestForm(srForm.getRequestedService(), "authInfo", null);
+
+		// Compile Orchestration Form
+		orchForm = new OrchestrationForm(srForm.getRequestedService(), null, "serviceURI", "ICN Done");
+		// Compile Orchestration Response
+		responseFormList.add(orchForm);
+		orchResponse = new OrchestrationResponse(responseFormList);
+		// Return orchestration form
+		return orchResponse;
 	}
 
 	/**
@@ -210,4 +234,39 @@ public class OrchestrationResource {
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
 		return response.readEntity(QoSReservationResponse.class);
 	}
+
+	/**
+	 * Initiates the Global Service Discovery process by sending a
+	 * GSDRequestForm to the Gatekeeper service and fetches the results.
+	 * 
+	 * @param gsdRequestForm
+	 * @return GSDResult
+	 */
+	private GSDResult getGSDResult(GSDRequestForm gsdRequestForm) {
+		// uri =
+		// UriBuilder.fromUri(sysConfig.getQoSURI()).path("verify").build();
+		// WebTarget target = client.target(uri);
+		WebTarget target = client.target("http://localhost:8080/core/gatekeeper/init_gsd");
+		Response response = target.request().header("Content-type", "application/json")
+				.put(Entity.json(gsdRequestForm));
+		return response.readEntity(GSDResult.class);
+	}
+
+	/**
+	 * Initiates the Inter-Cloud Negotiation process by sending an
+	 * ICNRequestForm to the Gatekeeper service and fetches the results.
+	 * 
+	 * @param icnRequestForm
+	 * @return ICNResultForm
+	 */
+	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
+		// uri =
+		// UriBuilder.fromUri(sysConfig.getQoSURI()).path("verify").build();
+		// WebTarget target = client.target(uri);
+		WebTarget target = client.target("http://localhost:8080/core/gatekeeper/init_icn");
+		Response response = target.request().header("Content-type", "application/json")
+				.put(Entity.json(icnRequestForm));
+		return response.readEntity(ICNResultForm.class);
+	}
+
 }
