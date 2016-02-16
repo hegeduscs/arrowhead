@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.arrowhead.common.model.ArrowheadCloud;
-import eu.arrowhead.common.model.ArrowheadService;
 
 public class GSDAnswer {
 
