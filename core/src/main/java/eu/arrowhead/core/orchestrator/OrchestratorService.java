@@ -7,26 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
-import eu.arrowhead.common.configuration.SysConfig;
-import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
@@ -43,33 +30,38 @@ import eu.arrowhead.common.model.messages.QoSVerificationResponse;
 import eu.arrowhead.common.model.messages.QoSVerify;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
-import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
-import eu.arrowhead.core.orchestrator.services.OrchestrationService;
 
 /**
- * @author pardavib
+ * @author pardavib, mereszd
  *
  */
-@Path("orchestrator")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
-public class OrchestrationResource {
+
+public class OrchestratorService {
+
+	private URI uri;
+	private Client client;
+	private ServiceRequestForm serviceRequestForm;
 	// private SysConfig sysConfig = SysConfig.getInstance();
-	URI uri = null;
-	Client client = ClientBuilder.newClient();
+
+	public OrchestratorService() {
+		super();
+		uri = null;
+		client = ClientBuilder.newClient();
+	}
+
+	public OrchestratorService(ServiceRequestForm serviceRequestForm) {
+		super();
+		uri = null;
+		client = ClientBuilder.newClient();
+		this.serviceRequestForm = serviceRequestForm;
+	}
 
 	/**
-	 * This function represents the main orchestration process initiated by the
-	 * consumer.
-	 * 
-	 * @return
+	 * This function represents the local orchestration process.
 	 */
-	@POST
-	@Path("/orchestration")
-	public Response doOrchestration(@Context UriInfo uriInfo, ServiceRequestForm srForm) {
-
-		ServiceQueryForm srvQueryForm = new ServiceQueryForm(srForm);
+	public OrchestrationResponse localOrchestration() {
+		ServiceQueryForm srvQueryForm = new ServiceQueryForm(this.serviceRequestForm);
 		ServiceQueryResult srvQueryResult;
 		AuthorizationRequest authRequest;
 		AuthorizationResponse authResponse;
@@ -84,21 +76,17 @@ public class OrchestrationResource {
 		OrchestrationResponse orchResponse;
 		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
 
-		// Check for intercloud orchestration
-		if (srForm.getOrchestrationFlags().get("TriggerInterCloud")) {
-			orchResponse = doIntercloudOrchestration(srForm);
-			return Response.status(Status.OK).entity(orchResponse).build();
-		}
 		// Poll the Service Registry
-		srvQueryResult = getServiceQueryResult(srvQueryForm, srForm);
+		srvQueryResult = getServiceQueryResult(srvQueryForm);
 		for (ProvidedService providedService : srvQueryResult.getServiceQueryData()) {
 			providers.add(providedService.getProvider());
 		}
-		authRequest = new AuthorizationRequest(srForm.getRequestedService(), providers, "AuthenticationInfo", true);
-		authResponse = getAuthorizationResponse(authRequest, srForm);
+		authRequest = new AuthorizationRequest(serviceRequestForm.getRequestedService(), providers,
+				"AuthenticationInfo", true);
+		authResponse = getAuthorizationResponse(authRequest);
 		// Poll the QoS Service
-		qosVerification = new QoSVerify(srForm.getRequesterSystem(), srForm.getRequestedService(), providers,
-				"RequestedQoS");
+		qosVerification = new QoSVerify(serviceRequestForm.getRequesterSystem(),
+				serviceRequestForm.getRequestedService(), providers, "RequestedQoS");
 		qosVerificationResponse = getQosVerificationResponse(qosVerification);
 		qosMap = qosVerificationResponse.getResponse();
 		// Reserve QoS resources
@@ -106,22 +94,21 @@ public class OrchestrationResource {
 			selectedSystem = entry.getKey(); // TEMPORARLY selects a random
 												// system
 		}
-		qosReservation = new QoSReserve(selectedSystem, srForm.getRequesterSystem(), srForm.getRequestedService(),
-				"RequestedQoS");
+		qosReservation = new QoSReserve(selectedSystem, serviceRequestForm.getRequesterSystem(),
+				serviceRequestForm.getRequestedService(), "RequestedQoS");
 		qosReservationResponse = doQosReservation(qosReservation);
 		// Compile Orchestration Form
-		orchForm = new OrchestrationForm(srForm.getRequestedService(), selectedSystem, "serviceURI", "Orchestration Done");
+		orchForm = new OrchestrationForm(serviceRequestForm.getRequestedService(), selectedSystem, "serviceURI",
+				"Orchestration Done");
 		// Compile Orchestration Response
 		responseFormList.add(orchForm);
-		orchResponse = new OrchestrationResponse(responseFormList);
-		// Send orchestration form
-		return Response.status(Status.OK).entity(orchResponse).build();
+		return new OrchestrationResponse(responseFormList);
 	}
 
 	/**
 	 * This function represents the Intercloud orchestration process.
 	 */
-	private OrchestrationResponse doIntercloudOrchestration(ServiceRequestForm srForm) {
+	public OrchestrationResponse intercloudOrchestration() {
 		GSDRequestForm gsdRequestForm;
 		GSDResult gsdResult;
 		ICNRequestForm icnRequestForm;
@@ -130,17 +117,17 @@ public class OrchestrationResource {
 		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
 
 		// Init Global Service Discovery
-		gsdRequestForm = new GSDRequestForm(srForm.getRequestedService());
+		gsdRequestForm = new GSDRequestForm(serviceRequestForm.getRequestedService());
 		gsdResult = getGSDResult(gsdRequestForm);
 
 		// TODO: Choose partnering cloud based on certain things...
 
 		// Init Inter-Cloud Negotiation
 		// TODO: null should be changed below...
-		icnRequestForm = new ICNRequestForm(srForm.getRequestedService(), "authInfo", null);
+		icnRequestForm = new ICNRequestForm(serviceRequestForm.getRequestedService(), "authInfo", null);
 
 		// Compile Orchestration Form
-		orchForm = new OrchestrationForm(srForm.getRequestedService(), null, "serviceURI", "ICN Done");
+		orchForm = new OrchestrationForm(serviceRequestForm.getRequestedService(), null, "serviceURI", "ICN Done");
 		// Compile Orchestration Response
 		responseFormList.add(orchForm);
 		orchResponse = new OrchestrationResponse(responseFormList);
@@ -156,12 +143,13 @@ public class OrchestrationResource {
 	 * @param srForm
 	 * @return ServiceQueryResult
 	 */
-	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, ServiceRequestForm srForm) {
+	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf) {
+
 		/*
-		 * uri
-		 * =UriBuilder.fromUri(sysConfig.getServiceRegistryURI()).path(srForm.
-		 * getRequestedService().getServiceGroup()).
-		 * path(srForm.getRequestedService().getServiceDefinition()).build();
+		 * uri =UriBuilder.fromUri(sysConfig.getServiceRegistryURI()).path(
+		 * serviceRequestForm. getRequestedService().getServiceGroup()).
+		 * path(serviceRequestForm.getRequestedService().getServiceDefinition())
+		 * .build();
 		 */
 		System.out.println("orchestator: inside the getServiceQueryResult function");
 		// WebTarget target = client.target(uri);
@@ -184,15 +172,16 @@ public class OrchestrationResource {
 	 * @param srForm
 	 * @return AuthorizationResponse
 	 */
-	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest,
-			ServiceRequestForm srForm) {
+	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest) {
 		// Poll the Authorization Service
 
 		/*
 		 * uri = UriBuilder.fromUri(sysConfig.getAuthorizationURI()).path(
 		 * "SystemGroup")
-		 * .path(srForm.getRequestedService().getServiceGroup()).path("System")
-		 * .path(srForm.getRequestedService().getInterfaces().get(0)).build();
+		 * .path(serviceRequestForm.getRequestedService().getServiceGroup()).
+		 * path("System")
+		 * .path(serviceRequestForm.getRequestedService().getInterfaces().get(0)
+		 * ).build();
 		 */
 		// WebTarget target = client.target(uri);
 		// Response response = target.request().header("Content-type",
@@ -267,6 +256,16 @@ public class OrchestrationResource {
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(icnRequestForm));
 		return response.readEntity(ICNResultForm.class);
+	}
+
+	/**
+	 * Returns if Inter-Cloud Orchestration is required or not based on the
+	 * Service Request Form.
+	 * 
+	 * @return Boolean
+	 */
+	public Boolean isInterCloud() {
+		return this.serviceRequestForm.getOrchestrationFlags().get("TriggerInterCloud");
 	}
 
 }
