@@ -2,6 +2,7 @@ package eu.arrowhead.core.gatekeeper;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -42,77 +43,99 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class GatekeeperResource {
-	private GSDRequestForm exampleRequest;
-//	private ArrowheadSystem requesterSystem;
-	private ArrowheadService requestedService;
-	private ArrowheadCloud requesterCloud;
-		
+	public ArrowheadService requestedService;
+	public ArrowheadCloud requesterCloud;
+	List<ProvidedService> testservices = new ArrayList<ProvidedService>();
+	ProvidedService providedService;
+
 	
-    @GET
+	@GET
 //    @Produces(MediaType.TEXT_PLAIN)
     public String getIt() {
-		List<String> interfaces = new ArrayList<String>();
-		interfaces.add("test1");
-		interfaces.add("test2");
-    	requestedService = new ArrowheadService("serviceGroup", "serviceDefinition", interfaces, "metaData");
-    	requesterCloud = new ArrowheadCloud("op", "clN", "gkIP", "gkPort", "gkURI", "authInfo");
-    	exampleRequest = new GSDRequestForm(requestedService);
         return "This is the Gatekeeper Resource stub.";
     }
     
     @PUT
-    @Path("/init_gsd/1")
-    //TODO: Testing
+//    @Path("/init_gsd/1")
+    @Path("/init_gsd/")
+    //XXX: Testing
     public GSDAnswer sendRequest(GSDPoll gsdPollRequest){
+//    	GSDPoll gsdPoll = gsdPollRequest;
+    	
+    	//Test GSDPoll
+    	List<String> interfaces = new ArrayList<String>();
+		interfaces.add("test1");
+		interfaces.add("test2");
+    	requestedService = new ArrowheadService("serviceGroup", "serviceDefinition", interfaces, "metaData");
+    	requesterCloud = new ArrowheadCloud("operator", "cloudName", "localhost", "8080", "gkURI", "authInfo");
     	GSDPoll gsdPoll = new GSDPoll(requestedService, requesterCloud);    	
+
     	Client client = ClientBuilder.newClient();
-    	String uri = "http://localhost:8080/core/gatekeeper/gsd_poll/2";
+    	String uri = "http://localhost:8080/core/gatekeeper/gsd_poll/";
+//    	String uri = "http://localhost:8080/core/gatekeeper/gsd_poll/2";
 		WebTarget target = client.target(uri);
 	    Response response = target
 	    		.request()
 	    		.header("Content-type", "application/json")
 				.put(Entity.json(gsdPoll));
 	    return response.readEntity(GSDAnswer.class);
+	    
     }
     
     @PUT
-    @Path("/gsd_poll/2")
-    public GSDAnswer getRequest(GSDPoll gsdPoll){
+//    @Path("/gsd_poll/2")
+    @Path("/gsd_poll/")
+    public GSDAnswer getRequest(GSDPoll gsdPollRequest){
     	System.out.println("getRequest method");
+    	GSDPoll gsdPoll = gsdPollRequest;    	
+
     	ArrowheadService requester = gsdPoll.getRequestedService();
     	String cloudOperator = gsdPoll.getRequesterCloud().getOperator();
-    	String cloudName = gsdPoll.getRequesterCloud().getName(); //FIXME: Provider Cloud kell ??
+    	String cloudName = gsdPoll.getRequesterCloud().getName(); 
     	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName;
-    	Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(uri);
-	    Response response = target
-	    		.request()
-	    		.header("Content-type", "application/json")
-				.put(Entity.json(gsdPoll)); //FIXME: argument
-	    if(response.readEntity(Boolean.class)){
-	    	ArrowheadSystem requesterSystem = new ArrowheadSystem(); //TODO
-	    	ArrowheadCloud providerCloud = new ArrowheadCloud(); //TODO
-	    	ServiceRequestForm srf = new ServiceRequestForm(requester, "requestedQoS", requesterSystem, 1000); //FIXME: arguments
-	    	ServiceQueryForm sqf = new ServiceQueryForm(srf);//FIXME: ServiceRequestForm
-	    	//TODO: SRF to Orch
-	    	ServiceQueryResult sqr = getServiceQueryResult(sqf);	    	
-	    	GSDAnswer answer = new GSDAnswer(sqr.getServiceQueryData(), providerCloud); //FIXME: providerCloud
-	    	return answer;
-	    }else return null; //Error handling
+    	System.out.println(uri);
+    	
+    	//No Author
+    	ArrowheadSystem requesterSystem = new ArrowheadSystem("systemGroup", "systemName", "iPAddress", "port", "authenticationInfo");
+    	ServiceRequestForm srf = new ServiceRequestForm(requester, "requestedQoS", requesterSystem, 1000); //TODO: servicingLength
+    	ServiceQueryForm sqf = new ServiceQueryForm(srf);
+    	System.out.println("eljutok idáig?");
+    	System.out.println(sqf.getServiceInterfaces());
+
+    	ServiceQueryResult sqr = getServiceQueryResult(sqf); //TODO: ServiceRequestForm
+    	GSDAnswer answer = new GSDAnswer(sqr.getServiceQueryData(), gsdPoll.getRequesterCloud()); //FIXME: ProviderCloud
+    	System.out.println(answer.getAnswer().toString());
+    	return answer;
+
+//    	Client client = ClientBuilder.newClient();
+//		WebTarget target = client.target(uri); //FIXME: bad URI?
+//	    Response response = target
+//	    		.request()
+//	    		.header("Content-type", "application/json")
+//				.put(Entity.json(gsdPoll)); 
+//    	System.out.println("mizu?");
+//
+//	    if(response.readEntity(Boolean.class)){
+//	    	ArrowheadSystem requesterSystem = new ArrowheadSystem("systemGroup", "systemName", "iPAddress", "port", "authenticationInfo");
+//	    	ServiceRequestForm srf = new ServiceRequestForm(requester, "requestedQoS", requesterSystem, 1000);
+//	    	ServiceQueryForm sqf = new ServiceQueryForm(srf);
+//	    	System.out.println("eljutok idáig?");
+//	    	System.out.println(sqf.getServiceInterfaces());
+//
+//	    	ServiceQueryResult sqr = getServiceQueryResult(sqf);
+//	    	GSDAnswer answer = new GSDAnswer(sqr.getServiceQueryData(), gsdPoll.getRequesterCloud());
+//	    	System.out.println(answer.getAnswer().toString());
+//	    	return answer;
+//	    }else return null; //XXX: Error handling
     }
-    
-    
-    
-    
     
     /**
      * WORK IN PROGRESS
      */
-    
     /*
     @GET
     @Path("/init_icn/1")
-    //TODO: Work in progress
+    //Work in progress
     public GSDAnswer sendProposal(ICNProposal icnProposal){
     	ICNProposal proposal = icnProposal;    	
     	
@@ -122,36 +145,40 @@ public class GatekeeperResource {
 	    		.request()
 	    		.accept(MediaType.APPLICATION_JSON)
 	    		.header("Content-type", "application/json")
-	    		.put(Entity.json(proposal)); //TODO
-	    return response.readEntity(GSDAnswer.class); //TODO 
+	    		.put(Entity.json(proposal)); 
+	    return response.readEntity(GSDAnswer.class);
     }
     
-    
-    
-    //TODO: Work in progress
+    //Work in progress
     @GET
     @Path("/icn_proposal/2")
     public OrchestrationForm ICNEnd (ICNProposal icnProposal){
     	OrchestrationForm icnEnd = new OrchestrationForm();
 		return icnEnd;
     }
-    
-    
     */
     
     
-    
-    
   //Copy from eu.arrowhead.core.orchestrator.OrchestrationResource
-  	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf/*, URI uri*/) {
-  		System.out.println("orchestator: inside the getServiceQueryResult function");
+  	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqfARG/*, URI uri*/) {
+  		ServiceQueryForm sqf = sqfARG;
+  		System.out.println("GK: inside the getServiceQueryResult function");
   		Client client = ClientBuilder.newClient();
   		// WebTarget target = client.target(uri);
   		WebTarget target = client.target("http://localhost:8080/ext/serviceregistry/query");
   		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
-  		System.out.println("orchestrator: gSQR received the response");
-  		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
-  		System.out.println("orchestrator received the following serviceURIs:");
+  		System.out.println("GK: gSQR received the response");
+
+// 		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class); //FIXME
+  		
+  		//fixme helyett:
+  		ArrowheadSystem provider = new ArrowheadSystem("a", "g", "f", "fd", "dd");
+		providedService = new ProvidedService(provider , "serviceURI", "serviceInterface");
+  		testservices.add(providedService);
+  		ServiceQueryResult sqr = new ServiceQueryResult(testservices);
+  		
+  		
+  		System.out.println("GK received the following serviceURIs:");
   		for (ProvidedService providedService : sqr.getServiceQueryData()) {
   			System.out.println(providedService.getServiceURI() + providedService.getProvider().getIPAddress());
   		}
