@@ -11,16 +11,26 @@ public class QoSReserve {
 	private ArrowheadSystem provider;
 	private ArrowheadSystem consumer;
 	private ArrowheadService service;
+	private String requestedQoS;
 
 	public QoSReserve() {
 		super();
 	}
 
-	public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service) {
+	public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service, String requestedQoS) {
 		super();
 		this.provider = provider;
 		this.consumer = consumer;
 		this.service = service;
+		this.requestedQoS = requestedQoS;
+	}
+
+	public String getRequestedQoS() {
+		return requestedQoS;
+	}
+
+	public void setRequestedQoS(String requestedQoS) {
+		this.requestedQoS = requestedQoS;
 	}
 
 	public ArrowheadSystem getProvider() {

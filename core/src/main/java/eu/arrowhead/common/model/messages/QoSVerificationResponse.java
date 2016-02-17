@@ -11,14 +11,24 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 public class QoSVerificationResponse {
 
 	private Map<ArrowheadSystem, Boolean> response = new HashMap<>();
+	private String rejectMotivation;
 
 	public QoSVerificationResponse() {
 		super();
 	}
 
-	public QoSVerificationResponse(Map<ArrowheadSystem, Boolean> response) {
+	public QoSVerificationResponse(Map<ArrowheadSystem, Boolean> response, String rejectMotivation) {
 		super();
 		this.response = response;
+		this.rejectMotivation = rejectMotivation;
+	}
+
+	public String getRejectMotivation() {
+		return rejectMotivation;
+	}
+
+	public void setRejectMotivation(String rejectMotivation) {
+		this.rejectMotivation = rejectMotivation;
 	}
 
 	public Map<ArrowheadSystem, Boolean> getResponse() {
