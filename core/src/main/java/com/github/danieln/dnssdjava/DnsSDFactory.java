@@ -5,6 +5,7 @@
  */
 package com.github.danieln.dnssdjava;
 
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -166,4 +167,8 @@ public abstract class DnsSDFactory {
 		}
 		return createRegistrator(registeringDomain);
 	}
+	
+	public abstract DnsSDRegistrator createRegistrator(String registeringDomain, InetSocketAddress resolverSocaddr) throws DnsSDException;
+		
+	
 }

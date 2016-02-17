@@ -19,7 +19,7 @@ public interface DnsSDRegistrator {
 	 * @param name the service name.
 	 * @param type the service type.
 	 * @return a service name.
-	 */
+	 */	
 	ServiceName makeServiceName(String name, ServiceType type);
 
 	/**

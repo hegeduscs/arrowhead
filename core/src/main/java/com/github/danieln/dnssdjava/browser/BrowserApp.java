@@ -46,10 +46,9 @@ import com.github.danieln.dnssdjava.ServiceType;
 public class BrowserApp extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-/*
+
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
-			@Override
 			public void run() {
 				BrowserApp app = new BrowserApp();
 				app.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -357,7 +356,6 @@ public class BrowserApp extends JFrame {
 
 	public class Listener implements ActionListener, ListSelectionListener {
 
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == computerDomainCombo) {
 				computerDomainChanged();
@@ -368,7 +366,6 @@ public class BrowserApp extends JFrame {
 			}
 		}
 
-		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			if (e.getValueIsAdjusting()) {
 				return;
@@ -381,5 +378,5 @@ public class BrowserApp extends JFrame {
 		}
 
 	}
-*/
+
 }

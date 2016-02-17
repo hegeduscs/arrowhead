@@ -5,6 +5,7 @@
  */
 package com.github.danieln.dnssdjava;
 
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +19,18 @@ import org.xbill.DNS.TextParseException;
  * @author Daniel Nilsson
  */
 public class UnicastDnsSDFactory extends DnsSDFactory {
+
+	@Override
+	public DnsSDRegistrator createRegistrator(String registeringDomain,
+			InetSocketAddress resolverSocaddr) throws DnsSDException {
+	try{
+		return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain), resolverSocaddr);
+	} catch (UnknownHostException ex) {
+		throw new DnsSDException("Failed to find DNS update server for domain: " + registeringDomain, ex);
+	} catch (TextParseException ex) {
+		throw new IllegalArgumentException("Invalid domain name: " + registeringDomain, ex);
+	}
+	}
 
 	UnicastDnsSDFactory() {
 	}

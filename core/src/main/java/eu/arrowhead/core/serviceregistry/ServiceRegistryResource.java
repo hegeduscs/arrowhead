@@ -15,30 +15,28 @@ import javax.ws.rs.core.MediaType;
 import eu.arrowhead.common.model.serviceregistry.Provider;
 import eu.arrowhead.common.model.serviceregistry.ServiceRegistryEntry;
 
-
 @Path("serviceregistry")
 public class ServiceRegistryResource {
-	
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getIt() {
-        return "This is the Service Registry.";
-    }
-    
-    @PUT
+
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getIt() {
+		return "This is the Service Registry.";
+	}
+
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/{serviceGroup}/{service}/{interf}/")
+	@Path("/{serviceGroup}/{service}")
 	public void publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-			@PathParam("interf") String interf, ServiceRegistryEntry entry) {
-		ServiceRegistry.getInstance().register(serviceGroup, service, interf, entry);
+			ServiceRegistryEntry entry) {
+		ServiceRegistry.getInstance().register(serviceGroup, service, entry);
 	}
 
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/{serviceGroup}/{service}/{interf}")
-	public void removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-			@PathParam("interf") String interf) {
-		ServiceRegistry.getInstance().unRegister(serviceGroup, service, interf);
+	@Path("/{serviceGroup}/{service}")
+	public void removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service) {
+		ServiceRegistry.getInstance().unRegister(serviceGroup, service);
 	}
 
 	/**
