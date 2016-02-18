@@ -84,9 +84,12 @@ public class AuthorizationResource {
     @PUT
     @Path("/operator/{operatorName}/cloud/{cloudName}")
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
-    public boolean isCloudAuthorized(@PathParam("operatorName") String operatorName, 
+    public Boolean isCloudAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthRequest request){
-    	ArrowheadService requestedService = request.getArrowheadService();
+    	eu.arrowhead.common.model.ArrowheadService requestedServiceModel = request.getArrowheadService();
+    	ArrowheadService requestedService = new ArrowheadService
+    			(requestedServiceModel.getServiceGroup(), requestedServiceModel.getServiceDefinition(), 
+    					requestedServiceModel.getInterfaces(), requestedServiceModel.getMetaData());
     	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
     	if(arrowheadCloud == null)
     		return false;
@@ -201,7 +204,8 @@ public class AuthorizationResource {
     public IntraCloudAuthResponse isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
     		@PathParam("systemName") String systemName, IntraCloudAuthRequest request){
     	Systems_Services ss = new Systems_Services();
-    	HashMap<ArrowheadSystem, Boolean> authorizationMap = new HashMap<ArrowheadSystem, Boolean>();
+    	HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean> authorizationMap = 
+    			new HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean>();
     	IntraCloudAuthResponse response = new IntraCloudAuthResponse();
     	ArrowheadSystem consumer = databaseManager.getSystemByName(systemGroup, systemName);
     	if(consumer == null){
@@ -212,14 +216,14 @@ public class AuthorizationResource {
     	serviceList = databaseManager.getServiceByName(request.getArrowheadService()
     			.getServiceGroup(), request.getArrowheadService().getServiceDefinition());
     	if(serviceList.isEmpty()){
-    		for(ArrowheadSystem provider : request.getProviderList()){
+    		for(eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviderList()){
     			authorizationMap.put(provider, false);
     		}
     		response.setAuthorizationMap(authorizationMap);
     		return response;
     	}
     	
-    	for(ArrowheadSystem provider : request.getProviderList()){
+    	for(eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviderList()){
     		ArrowheadSystem retrievedSystem = databaseManager.getSystemByName(provider.getSystemGroup(), 
     				provider.getSystemName());
     		ss = databaseManager.getSS(consumer, retrievedSystem, serviceList.get(0));
@@ -227,10 +231,9 @@ public class AuthorizationResource {
         		authorizationMap.put(provider, false);
         	}
         	else{
-        		authorizationMap.put(retrievedSystem, true);
+        		authorizationMap.put(provider, true);
         	}
     	}
-    	
     	
     	response.setAuthorizationMap(authorizationMap);
     	return response;

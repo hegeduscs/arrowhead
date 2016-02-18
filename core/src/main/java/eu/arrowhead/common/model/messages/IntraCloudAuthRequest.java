@@ -3,8 +3,8 @@ package eu.arrowhead.common.model.messages;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import eu.arrowhead.core.authorization.database.ArrowheadService;
-import eu.arrowhead.core.authorization.database.ArrowheadSystem;
+import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
 
 public class IntraCloudAuthRequest {
 	

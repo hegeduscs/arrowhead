@@ -1,6 +1,6 @@
 package eu.arrowhead.common.model.messages;
 
-import eu.arrowhead.core.authorization.database.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadService;
 
 public class InterCloudAuthRequest {
 	
