@@ -1,7 +1,10 @@
 package eu.arrowhead.common.model.messages;
 
-import eu.arrowhead.common.model.ArrowheadCloud;
-import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.core.authorization.database.ArrowheadCloud;
+import eu.arrowhead.core.authorization.database.ArrowheadService;
+
+//import eu.arrowhead.common.model.ArrowheadCloud;
+//import eu.arrowhead.common.model.ArrowheadService;
 
 public class GSDPoll {
 
