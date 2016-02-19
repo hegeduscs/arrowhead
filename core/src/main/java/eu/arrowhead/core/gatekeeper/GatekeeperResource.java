@@ -21,8 +21,9 @@ import javax.ws.rs.core.Response;
 
 
 
-//import eu.arrowhead.common.model.ArrowheadCloud;
-//import eu.arrowhead.common.model.ArrowheadService;
+
+import eu.arrowhead.common.model.ArrowheadCloud;
+import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.GSDAnswer;
 import eu.arrowhead.common.model.messages.GSDPoll;
@@ -32,13 +33,9 @@ import eu.arrowhead.common.model.messages.ICNProposal;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.ProvidedService;
-import eu.arrowhead.common.model.messages.QoSVerificationResponse;
-import eu.arrowhead.common.model.messages.QoSVerify;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
-import eu.arrowhead.core.authorization.database.ArrowheadCloud;
-import eu.arrowhead.core.authorization.database.ArrowheadService;
 
 /**
  * 
@@ -56,29 +53,28 @@ public class GatekeeperResource {
 
 	
 	@GET
-//    @Produces(MediaType.TEXT_PLAIN)
     public String getIt() {
         return "This is the Gatekeeper Resource stub.";
     }
     
+	/**
+	 * This function represents the Consumer-side GSD Poll, where the GateKeeper of the consumer service try to find 
+	 * a provider service from another Cloud
+	 * 
+	 * @param gsdPollRequest
+	 * @return GSDAnswer
+	 */
     @PUT
-//    @Path("/init_gsd/1")
     @Path("/init_gsd/")
-    //XXX: Testing
     public GSDAnswer sendRequest(GSDPoll gsdPollRequest){
 //    	GSDPoll gsdPoll = gsdPollRequest;
     	
     	//Test GSDPoll
-    	List<String> interfaces = new ArrayList<String>();
-		interfaces.add("test1");
-		interfaces.add("test2");
-    	requestedService = new ArrowheadService("serviceGroup", "serviceDefinition", interfaces, "metaData");
-    	requesterCloud = new ArrowheadCloud("operator", "cloudName","authInfo");
-    	GSDPoll gsdPoll = new GSDPoll(requestedService, requesterCloud);    	
-
+    	GSDPoll gsdPoll = testGSDPoll();    	
+    	
+    	// HTTP PUT to the provider GateKeeper
     	Client client = ClientBuilder.newClient();
     	String uri = "http://localhost:8080/core/gatekeeper/gsd_poll/";
-//    	String uri = "http://localhost:8080/core/gatekeeper/gsd_poll/2";
 		WebTarget target = client.target(uri);
 	    Response response = target
 	    		.request()
@@ -88,63 +84,71 @@ public class GatekeeperResource {
 	    
     }
     
+    /**
+     * This function represents the Provider-side GSDPoll, where the GateKeeper send back 
+     * a list of provider services, which match the demands of the consumer service     * 
+     * 
+     * @param gsdPollRequest
+     * @return GSDAnswer
+     */
     @PUT
-//    @Path("/gsd_poll/2")
     @Path("/gsd_poll/")
     public GSDAnswer getRequest(GSDPoll gsdPollRequest){
-    	System.out.println("getRequest method");
+
     	GSDPoll gsdPoll = gsdPollRequest;    	
-    	eu.arrowhead.common.model.ArrowheadCloud cheatCloud = new eu.arrowhead.common.model.ArrowheadCloud
-    			(gsdPoll.getRequesterCloud().getOperator(), gsdPoll.getRequesterCloud().getCloudName(), "gatekeeperIP", "gatekeeperPort", "gatekeeperURI", gsdPoll.getRequesterCloud().getAuthenticationInfo());
-    	ArrowheadService requester = gsdPoll.getRequestedService();
-    	String cloudOperator = gsdPoll.getRequesterCloud().getOperator();
-    	String cloudName = gsdPoll.getRequesterCloud().getCloudName(); 
-    	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName;
-    	System.out.println(uri);
+    	ArrowheadCloud requesterCloud = gsdPoll.getRequesterCloud();
+    	ArrowheadService requestedService = gsdPoll.getRequestedService();
+    	ArrowheadSystem requesterSystem = new ArrowheadSystem("systemGroup", "systemName", "iPAddress", "port", "authenticationInfo");
     	
-    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(cheatCloud.getAuthenticationInfo(), requester, true);
+    	// Auxiliary variable for InterCloudRequest
+    	eu.arrowhead.core.authorization.database.ArrowheadService requestedServiceDatabase = 
+    			new eu.arrowhead.core.authorization.database.ArrowheadService
+    			(requestedService.getServiceGroup(), requestedService.getServiceDefinition(),
+    					requestedService.getInterfaces(), requestedService.getMetaData());
+    	
+    	String cloudOperator = gsdPoll.getRequesterCloud().getOperator();
+    	String cloudName = gsdPoll.getRequesterCloud().getName(); 
+    	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName; //TODO: SysConfig URI
+    	
+    	// Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
+    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest
+    			(requesterCloud.getAuthenticationInfo(), requestedServiceDatabase, false);
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(uri); 
 	    Response response = target
 	    		.request()
 	    		.header("Content-type", "application/json")
 	    		.put(Entity.json(interAuthRequest)); 
-    	System.out.println("mizu?");
-    	
-//    	System.out.println(response.readEntity(Boolean.class));//FIXME: databaseManager.getCloudByName
 //	    if(response.readEntity(Boolean.class)){
     	
-	    	ArrowheadSystem requesterSystem = new ArrowheadSystem("systemGroup", "systemName", "iPAddress", "port", "authenticationInfo");
-	    	
-	    	eu.arrowhead.common.model.ArrowheadService cheatRequester = new eu.arrowhead.common.model.ArrowheadService(requester.getServiceGroup(), requester.getServiceDefinition(), requester.getInterfaces(), requester.getMetaData());
-	    	ServiceRequestForm srf = new ServiceRequestForm(cheatRequester, "requestedQoS", requesterSystem, 1000);
-	    	ServiceQueryForm sqf = new ServiceQueryForm(srf);
-	    	System.out.println("eljutok idáig?");
-	    	System.out.println(sqf.getServiceInterfaces());
-
+	    	// Generate a ServiceQueryForm from GSDPoll to send it to the Service Registry
+	    	ServiceRequestForm srf = new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, 1000);
+//	    	ServiceQueryForm sqf = new ServiceQueryForm(srf);
+	    	ServiceQueryForm sqf = new ServiceQueryForm(requestedService.getMetaData(), requestedService.getInterfaces(), false, "tSIG_key");
 	    	ServiceQueryResult sqr = getServiceQueryResult(sqf);
-	    	
-	    	GSDAnswer answer = new GSDAnswer(sqr.getServiceQueryData(), cheatCloud);
-	    	System.out.println(answer.getAnswer().toString());
+	    	GSDAnswer answer = new GSDAnswer(sqr.getServiceQueryData(), requesterCloud);
 	    	return answer;
-//	    }else return null; //XXX: Error handling
+	    	
+//	    }else return null; //TODO: Error handling
     }
-    
+
     /**
-     * WORK IN PROGRESS
+     * This function represents the consumer-side ICN Proposal, where the consumer service matches
+     * the provide service.
+     * 
+     * @param icnProposal
+     * @return OrchestrationForm
      */
-    
     @PUT
     @Path("/init_icn/")
     public OrchestrationForm sendProposal(ICNProposal icnProposal){
 //    	ICNProposal proposal = icnProposal;
-    	List<String> interfaces = new ArrayList<String>();
-		interfaces.add("test1");
-		interfaces.add("test2");
-    	eu.arrowhead.common.model.ArrowheadService requestedService = new eu.arrowhead.common.model.ArrowheadService("serviceGroup", "serviceDefinition", interfaces, "metaData");
-
-    	ICNProposal proposal = new ICNProposal(requestedService, "autttttInfo");
+//    	ArrowheadService requestedService = icnProposal.getRequestedService();
     	
+    	//Test ICNProposal
+    	ICNProposal proposal = testProposal();
+    	
+    	// HTTP PUT to the provider GateKeeper
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target("http://localhost:8080/core/gatekeeper/icn_proposal/");
 	    Response response = target
@@ -155,30 +159,87 @@ public class GatekeeperResource {
 	    return response.readEntity(OrchestrationForm.class);
     }
     
-    //Work in progress
+	/**
+     * This function represents the provider-side ICN Proposal, where the consumer service matches
+     * the provide service.
+     * 
+     * @param icnProposal
+     * @return OrchestrationForm
+     */
     @PUT
     @Path("/icn_proposal/")
-    public OrchestrationForm ICNEnd (ICNProposal icnProposal){
-    	ArrowheadSystem provider = new ArrowheadSystem("s", "fsfd", "fdsa", "Dd", "t");
-    	OrchestrationForm icnEnd = new OrchestrationForm(icnProposal.getRequestedService(), provider, "serviceURI", icnProposal.getAuthenticationInfo());
-		return icnEnd;
+    public OrchestrationForm ICNEnd (ICNProposal icnProposalRequest){
+    	
+    	ICNProposal icnProposal = icnProposalRequest;
+    	ArrowheadCloud consumerCloud = new ArrowheadCloud(
+    			"operator2", "cloudName2", "gatekeeperIP2", "gatekeeperPort2",
+    			"gatekeeperURI", "authenticationInfo");
+    	ArrowheadService requestedService = icnProposal.getRequestedService();
+    	ArrowheadSystem requesterSystem = new ArrowheadSystem(
+    			"systemGroup", "systemName", "iPAddress", "port", "authenticationInfo");
+    	
+    	// Auxiliary variable for InterCloudRequest
+    	eu.arrowhead.core.authorization.database.ArrowheadService requestedServiceDatabase = 
+    			new eu.arrowhead.core.authorization.database.ArrowheadService
+    			(requestedService.getServiceGroup(), requestedService.getServiceDefinition(),
+    					requestedService.getInterfaces(), requestedService.getMetaData());
+    	
+    	String cloudOperator = "operator";
+    	String cloudName = "cloudName";
+    	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName;
+    	
+    	// Sending an InterCloudAuthRequest to the Authorization System (generateToken=true)
+    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(
+    			consumerCloud.getAuthenticationInfo(), requestedServiceDatabase, true);
+    	Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(uri); 
+	    Response response = target
+	    		.request()
+	    		.header("Content-type", "application/json")
+	    		.put(Entity.json(interAuthRequest)); 
+//	    if(response.readEntity(Boolean.class)){
+	    	
+	    	// Send a HTTP POST to Orchestrator
+	    	ServiceRequestForm srf = new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, 1000);
+	    	Client client2 = ClientBuilder.newClient();
+	    	uri = "http://localhost:8080/core/orchestrator/orchestration";
+			WebTarget target2 = client2.target(uri); 
+		    Response response2 = target2
+		    		.request()
+		    		.header("Content-type", "application/json")
+		    		.post(Entity.json(srf));
+//		    return response2.readEntity(OrchestrationForm.class);
+		    
+		    //Test OrchestrationForm
+		    OrchestrationForm orchForm = testOrchestrationForm();
+		    return orchForm;
     }
     
-    
-    
-  //Copy from eu.arrowhead.core.orchestrator.OrchestrationResource
+
+
+	/**
+	 * Sends the Service Query Form to the Service Registry and asks for the
+	 * Service Query Result.
+	 * 
+	 * @param sqf
+	 * @return ServiceQueryResult
+	 */
+  //Copy from eu.arrowhead.core.orchestrator.OrchestrationService
   	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqfARG/*, URI uri*/) {
   		ServiceQueryForm sqf = sqfARG;
   		System.out.println("GK: inside the getServiceQueryResult function");
+
+  		// Send a HTTP PUT to ServiceRegistry for the provider service(s)
   		Client client = ClientBuilder.newClient();
-  		// WebTarget target = client.target(uri);
-  		WebTarget target = client.target("http://localhost:8080/ext/serviceregistry/query");
+  		String uri = "http://localhost:8080/core/serviceregistry/serviceGroup/service";
+  		WebTarget target = client.target(uri);
+//  		WebTarget target = client.target("http://localhost:8080/core/serviceregistry/query");
   		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
   		System.out.println("GK: gSQR received the response");
-
-// 		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class); //FIXME
   		
-  		//fixme helyett:
+//  	ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
+  		
+  		//Test ServiceQueryResult:
   		ArrowheadSystem provider = new ArrowheadSystem("a", "g", "f", "fd", "dd");
 		providedService = new ProvidedService(provider , "serviceURI", "serviceInterface");
   		testservices.add(providedService);
@@ -191,10 +252,51 @@ public class GatekeeperResource {
   		}
   		return sqr;
   	}
+
+  	
+  	/**
+  	 * Create a GSDPoll for testing
+  	 * 
+  	 * @return GSDPoll
+  	 */
+    private GSDPoll testGSDPoll(){
+    	List<String> interfaces = new ArrayList<String>();
+		interfaces.add("test1");
+		interfaces.add("test2");
+    	requestedService = new ArrowheadService("serviceGroup", "serviceDefinition", interfaces, "metaData");
+    	requesterCloud = new ArrowheadCloud("operator", "cloudName", "gatekeeperIP", "gatekeeperPort", "gatekeeperURI", "authenticationInfo");
+    	GSDPoll gsdPoll = new GSDPoll(requestedService, requesterCloud);
+    	return gsdPoll;    	
+    }
     
+    /**
+     * Create an ICNProposal for testing
+     * @return ICNProposal
+     */
+    private ICNProposal testProposal() {
+    	List<String> interfaces = new ArrayList<String>();
+		interfaces.add("test1");
+		interfaces.add("test2");
+    	ArrowheadService requestedService = new ArrowheadService("serviceGroup", "serviceDefinition", interfaces, "metaData");
+    	ICNProposal proposal = new ICNProposal(requestedService, "authInfo");
+    	return proposal;
+	}
     
-    
-    
-    
+    /**
+     * Create an OrchestrationForm for testing
+     * @return OrchestrationForm
+     */
+	private OrchestrationForm testOrchestrationForm() {
+		List<String> interfaces = new ArrayList<String>();
+    	interfaces.add("test111");
+    	interfaces.add("test222");
+	    ArrowheadService providerService = new ArrowheadService("serviceGroup", "serviceDefinition",
+	    		interfaces, "metaData");
+	    ArrowheadSystem providerSystem = new ArrowheadSystem("systemGroup", "systemName", 
+	    		"iPAddress", "port", "authenticationInfo");
+	    OrchestrationForm orchForm = new OrchestrationForm(
+	    		providerService, providerSystem, "serviceURI", "authorizationInfo");
+		return orchForm;
+	}
     
 }
