@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS `logs` (
   `user_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `date` datetime NOT NULL,
   `origin` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `level` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `message` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `level` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
+  `message` varchar(1000) COLLATE utf8_unicode_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
