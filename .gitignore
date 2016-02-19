@@ -1,3 +1,4 @@
 /core/target
 /core/src/main/resources/hibernate.cfg.xml
+/core/src/main/resources/log4j.properties
 core/.settings/org.hibernate.eclipse.console.prefs

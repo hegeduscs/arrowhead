@@ -10,9 +10,13 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
+
 import eu.arrowhead.common.model.messages.QueryResult;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import eu.arrowhead.core.orchestrator.OrchestratorService;
 import eu.arrowhead.core.orchestrator.services.DummySRImitator;
 import eu.arrowhead.core.orchestrator.services.OrchestrationService;
 
@@ -23,10 +27,15 @@ public class OrchestrationResourceOld {
 
 	OrchestrationService orchestrationService = new OrchestrationService();
 	DummySRImitator imitator = new DummySRImitator();
+	private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
 
 	@GET
 	@Path("/example")
 	public ServiceRequestForm getIt() {
+		log.debug("SalalaDebug");
+	    log.info("HahahahaInfo");
+	    log.fatal("sadadads");
+	    System.out.println("lefut");
 		return orchestrationService.getExample();
 	}
 
