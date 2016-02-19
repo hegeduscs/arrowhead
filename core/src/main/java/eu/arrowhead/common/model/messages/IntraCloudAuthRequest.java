@@ -58,4 +58,9 @@ public class IntraCloudAuthRequest {
 		this.generateToken = generateToken;
 	}
 	
+	public boolean isPayloadUsable(){
+		if(authenticationInfo == null|| arrowheadService == null || providerList.isEmpty())
+			return false;
+		return true;
+	}
 }

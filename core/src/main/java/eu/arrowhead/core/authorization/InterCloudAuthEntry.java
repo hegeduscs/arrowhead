@@ -36,5 +36,11 @@ public class InterCloudAuthEntry {
 		this.serviceList = serviceList;
 	}
    
+	public boolean isPayloadUsable(){
+		if(authenticationInfo.isEmpty() || serviceList.isEmpty())
+			return false;
+		return true;
+	}
+	
 	
 }

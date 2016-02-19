@@ -24,5 +24,11 @@ public class IntraCloudAuthResponse {
 	public void setAuthorizationMap(HashMap<ArrowheadSystem, Boolean> authorizationMap) {
 		this.authorizationMap = authorizationMap;
 	}
+	
+	public boolean isPayloadUsable(){
+		if(authorizationMap.isEmpty())
+			return false;
+		return true;
+	}
 
 }

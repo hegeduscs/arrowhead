@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
@@ -87,6 +88,10 @@ public class AuthorizationResource {
     public Boolean isCloudAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthRequest request){
     	eu.arrowhead.common.model.ArrowheadService requestedServiceModel = request.getArrowheadService();
+    	if(!request.isPayloadUsable()){
+    		throw new BadPayloadException("Bad payload: Missing arrowheadService or authenticationInfo from the "
+    				+ "request payload.");
+    	}
     	ArrowheadService requestedService = new ArrowheadService
     			(requestedServiceModel.getServiceGroup(), requestedServiceModel.getServiceDefinition(), 
     					requestedServiceModel.getInterfaces(), requestedServiceModel.getMetaData());
@@ -118,6 +123,10 @@ public class AuthorizationResource {
     public Response addCloudToAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry, 
     		@Context UriInfo uriInfo){
+    	if(!entry.isPayloadUsable()){
+    		throw new BadPayloadException("Bad payload: Missing serviceList or authenticationInfo "
+    				+ "from the entry payload.");
+    	}
     	ArrowheadCloud arrowheadCloud = new ArrowheadCloud();
     	arrowheadCloud.setOperator(operatorName);
     	arrowheadCloud.setCloudName(cloudName);
@@ -177,6 +186,9 @@ public class AuthorizationResource {
     @Path("/operator/{operatorName}/cloud/{cloudName}/services")
     public List<ArrowheadService> addCloudServices(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry){
+    	if(entry.getServiceList().isEmpty()){
+    		throw new BadPayloadException("Bad payload: Missing serviceList from the entry payload.");
+    	}
     	ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
     	if(!entry.getAuthenticationInfo().isEmpty()){
     		arrowheadCloud.setAuthenticationInfo(entry.getAuthenticationInfo());
@@ -203,6 +215,10 @@ public class AuthorizationResource {
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
     public IntraCloudAuthResponse isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
     		@PathParam("systemName") String systemName, IntraCloudAuthRequest request){
+    	if(!request.isPayloadUsable()){
+    		throw new BadPayloadException("Bad payload: Missing arrowheadService, authenticationInfo"
+    				+ " or providerList from the request payload.");
+    	}
     	Systems_Services ss = new Systems_Services();
     	HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean> authorizationMap = 
     			new HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean>();
@@ -259,6 +275,10 @@ public class AuthorizationResource {
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
     public Response addSystemToAuthorized(@PathParam("systemGroup") String systemGroup,
     		@PathParam("systemName") String systemName, IntraCloudAuthEntry entry){
+    	if(!entry.isPayloadUsable()){
+    		throw new BadPayloadException("Bad payload: Missing serviceList, providerList or "
+    				+ "authenticationInfo from the entry payload.");
+    	}
     	ArrowheadSystem consumerSystem = databaseManager.getSystemByName(systemGroup, systemName);
     	if(consumerSystem == null){
     		ArrowheadSystem consumer = new ArrowheadSystem();

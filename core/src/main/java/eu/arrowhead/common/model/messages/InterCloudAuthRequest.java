@@ -43,5 +43,10 @@ public class InterCloudAuthRequest {
 		this.generateToken = generateToken;
 	}
 	
+	public boolean isPayloadUsable(){
+		if(authenticationInfo.isEmpty() || arrowheadService == null)
+			return false;
+		return true;
+	}
 	
 }

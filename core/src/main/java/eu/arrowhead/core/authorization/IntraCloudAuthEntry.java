@@ -67,5 +67,11 @@ public class IntraCloudAuthEntry {
 		this.providerList = providerList;
 	}
     
+	public boolean isPayloadUsable(){
+		if(authenticationInfo == null || serviceList.isEmpty() || providerList.isEmpty()
+				|| IPAddress.isEmpty() || port.isEmpty())
+			return false;
+		return true;
+	}
 
 }
