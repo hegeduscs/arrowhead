@@ -15,7 +15,7 @@ public class LoggingRequestFilter implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
-		log.debug("IN." + requestContext.getMethod() + "." + requestContext.getUriInfo().getPath());
+		log.debug("IN." + requestContext.getMethod() + ": " + requestContext.getUriInfo().getPath());
 
 	}
 
