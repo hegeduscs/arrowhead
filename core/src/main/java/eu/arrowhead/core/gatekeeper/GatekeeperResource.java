@@ -111,8 +111,7 @@ public class GatekeeperResource {
     	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName; //TODO: SysConfig URI
     	
     	// Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
-    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest
-    			(requesterCloud.getAuthenticationInfo(), requestedServiceDatabase, false);
+    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest();// = new InterCloudAuthRequest (requesterCloud.getAuthenticationInfo(), requestedServiceDatabase, false);
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(uri); 
 	    Response response = target
@@ -189,8 +188,7 @@ public class GatekeeperResource {
     	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName;
     	
     	// Sending an InterCloudAuthRequest to the Authorization System (generateToken=true)
-    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(
-    			consumerCloud.getAuthenticationInfo(), requestedServiceDatabase, true);
+    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest();//= new InterCloudAuthRequest(consumerCloud.getAuthenticationInfo(), requestedServiceDatabase, true);
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(uri); 
 	    Response response = target
