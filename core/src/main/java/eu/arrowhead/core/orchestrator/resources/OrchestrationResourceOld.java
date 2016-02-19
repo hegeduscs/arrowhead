@@ -32,9 +32,7 @@ public class OrchestrationResourceOld {
 	@GET
 	@Path("/example")
 	public ServiceRequestForm getIt() {
-		log.debug("SalalaDebug");
 	    log.info("HahahahaInfo");
-	    log.fatal("sadadads");
 	    System.out.println("lefut");
 		return orchestrationService.getExample();
 	}
@@ -50,6 +48,8 @@ public class OrchestrationResourceOld {
 		return getQueryResult();
 	}
 	
+	@GET
+	@Path("/qr")
 	public QueryResult getQueryResult(){
 		return orchestrationService.sendSQF();		
 	}

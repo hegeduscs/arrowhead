@@ -1,5 +1,5 @@
 # Define the root logger with appender file
-log4j.rootLogger = DEBUG, DB
+log4j.rootLogger = DB
 
 # Define the DB appender
 log4j.appender.DB=org.apache.log4j.jdbc.JDBCAppender
@@ -19,3 +19,6 @@ log4j.appender.DB.sql=INSERT INTO LOGS VALUES(DEFAULT,'%x','%d{yyyy-MM-dd HH:mm:
 
 # Define the layout for file appender
 log4j.appender.DB.layout=org.apache.log4j.PatternLayout
+
+# Disable Hibernate verbose logging
+log4j.logger.org.hibernate=fatal
