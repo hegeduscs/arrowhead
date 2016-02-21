@@ -265,11 +265,6 @@ public class AuthorizationResource {
      * @param {IntraCloudAuthEntry} entry - POJO with the necessary informations
      * @exception DuplicateEntryException
      * @return JAX-RS Response with status code 201 and ArrowheadSystem entity (consumer side)
-     * @problem Multiple POST requests will result in a DuplicateEntryException, if they have the 
-     * 			same provider Systems in their payload. This is because of the cascading in the relation
-     * 			table. Without cascading Hibernate won't save the relation (TransientObjectException).
-     * 			The workaround for now is to delete the uniqeConstraints in the ArrowheadSystem POJO, 
-     * 			allowing duplicate entries in that table.
      */
     @POST
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
@@ -299,7 +294,7 @@ public class AuthorizationResource {
     		retrievedSystem = databaseManager.getSystemByName(providerSystem.getSystemGroup(), 
     				providerSystem.getSystemName());
     		if(retrievedSystem == null){
-    			databaseManager.save(providerSystem);
+    			retrievedSystem = databaseManager.save(providerSystem);
     		}
     		for(ArrowheadService service : entry.getServiceList()){
     			retrievedServiceList = databaseManager.getServiceByName(service.getServiceGroup(), 
@@ -308,7 +303,7 @@ public class AuthorizationResource {
     				databaseManager.save(service);
     			}
     			ss.setConsumer(consumerSystem);
-    			ss.setProvider(providerSystem);
+    			ss.setProvider(retrievedSystem);
     			ss.setService(service);
     			databaseManager.saveRelation(ss);
     		}
