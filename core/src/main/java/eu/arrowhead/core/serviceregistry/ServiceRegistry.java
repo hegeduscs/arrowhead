@@ -1,13 +1,14 @@
 package eu.arrowhead.core.serviceregistry;
 
-import java.io.IOException;
-import java.net.InetAddress;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import com.github.danieln.dnssdjava.DnsSDBrowser;
 import com.github.danieln.dnssdjava.DnsSDDomainEnumerator;
@@ -26,74 +27,226 @@ import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 
 public class ServiceRegistry {
 
+	// private static final Logger logger =
+	// Logger.getLogger(ServiceRegistry.class.getName());
+
 	private static ServiceRegistry instance;
 	private static Properties prop;
 
 	public static synchronized ServiceRegistry getInstance() {
-		if (instance == null) {
-			instance = new ServiceRegistry();
-			loadDNSProperties();
+		try {
+			if (instance == null) {
+				instance = new ServiceRegistry();
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 		return instance;
 	}
 
-	public void register(String serviceGroup, String serviceName, String interf, ServiceRegistryEntry entry) {
-
+	public synchronized Properties getProp() {
 		try {
-
-			// Get the DNS specific settings
-			/*
-			 * String dnsIpAddress = prop.getProperty("dns.ip",
-			 * "192.168.184.128"); String dnsDomain =
-			 * prop.getProperty("dns.domain", "srv.evoin.arrowhead.eu."); int
-			 * dnsPort = 53; try { dnsPort = new
-			 * Integer(prop.getProperty("dns.port", "53")); } catch
-			 * (NumberFormatException ex) { // TODO log }
-			 * 
-			 * InetSocketAddress dnsserverAddress = new
-			 * InetSocketAddress(dnsIpAddress, dnsPort); DnsSDRegistrator reg =
-			 * DnsSDFactory.getInstance().createRegistrator(dnsDomain,
-			 * dnsserverAddress);
-			 * 
-			 * // set TSIG from settings setTSIGKey(reg);
-			 */
-
-		} catch (Exception e) {
-			e.printStackTrace();
+			if (prop == null) {
+				prop = new Properties();
+				InputStream inputStream = getClass().getClassLoader().getResourceAsStream("dns.properties");
+				if (inputStream != null) {
+					prop.load(inputStream);
+					initSystemProperties();
+				} else {
+					throw new FileNotFoundException("property file 'dns.properties' not found in the classpath");
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
-
-		// TODO
-		/*
-		 * DnsSDDomainEnumerator dom =
-		 * DnsSDFactory.getInstance().createDomainEnumerator(); ServiceData
-		 * data; try { DnsSDRegistrator reg =
-		 * DnsSDFactory.getInstance().createRegistrator(dom); // TODO name get
-		 * from properties // reg.setTSIGKey(name,
-		 * DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5, // entry.getTSigKey());
-		 * 
-		 * // ServiceName name = //
-		 * reg.makeServiceName(serviceGroup+"."+serviceName ", //
-		 * ServiceType.valueOf(interf)); ServiceName name =
-		 * reg.makeServiceName("My\\Test.Service",
-		 * ServiceType.valueOf("_http._tcp,_printer")); // String nameString =
-		 * name.toString(); data = new ServiceData(name, reg.getLocalHostName(),
-		 * 8080);
-		 * 
-		 * setServiceDataProperties(entry, data);
-		 * 
-		 * if (reg.registerService(data)) {
-		 * System.out.println("Service registered: " + name); } else {
-		 * System.out.println("Service already exists: " + name); }
-		 * 
-		 * } catch (DnsSDException e) { e.printStackTrace(); } catch
-		 * (UnknownHostException e) { e.printStackTrace(); }
-		 */
+		return prop;
 	}
 
-	private void setTSIGKey(DnsSDRegistrator reg) {
-		String tsigKey = prop.getProperty("tsig.key", "RIuxP+vb5GjLXJo686NvKQ==");
-		String tsigKeyName = prop.getProperty("tsig.name", "key.evoin.arrowhead.eu.");
-		String tsigAlgorithm = prop.getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
+	// This is require for dnssdjava,dnsjava
+	private void initSystemProperties() {
+		System.setProperty("dns.server", getProp().getProperty("dns.ip"));
+		System.setProperty("dnssd.domain", getProp().getProperty("dns.domain"));
+		System.setProperty("dnssd.hostname", getProp().getProperty("dns.host"));
+	}
+
+	// Strings do not contain charachter : "_"
+	public void register(String serviceGroup, String serviceName, String interf, ServiceRegistryEntry entry) {
+		if (!parametersIsValid(serviceGroup, serviceName, interf)) {
+			return;
+		}
+
+		try {
+			if (entry != null && entry.getProvider() != null) {
+
+				DnsSDRegistrator reg = createRegistrator();
+
+				String serviceType = "_" + serviceGroup + "_" + serviceName + "_" + interf + "._tcp";
+				// Unique service name
+				String uniqueServiceName = entry.getProvider().getSystemName();
+				String localName = entry.getProvider().getIPAddress() + ".";
+				int port = new Integer(entry.getProvider().getPort());
+
+				ServiceName name = reg.makeServiceName(uniqueServiceName, ServiceType.valueOf(serviceType));
+				ServiceData data = new ServiceData(name, localName, port);
+
+				// set TSIG from settings
+				setTSIGKey(reg, entry.gettSIG_key());
+
+				setServiceDataProperties(entry, data);
+
+				if (reg.registerService(data)) {
+					System.out.println("Service registered: " + name);
+				} else {
+					System.out.println("Service already exists: " + name);
+				}
+
+			}
+		} catch (DnsSDException ex) {
+			ex.printStackTrace();
+		} catch (NumberFormatException ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	// Strings do not contain charachter : "_"
+	public void unRegister(String serviceGroup, String serviceName, String interf, ServiceRegistryEntry entry) {
+		if (!parametersIsValid(serviceGroup, serviceName, interf)) {
+			return;
+		}
+
+		try {
+			DnsSDRegistrator reg = createRegistrator();
+			String serviceType = "_" + serviceGroup + "_" + serviceName + "_" + interf + "._tcp";
+			String uniqueServiceName = entry.getProvider().getSystemName();
+			ServiceName name = reg.makeServiceName(uniqueServiceName, ServiceType.valueOf(serviceType));
+
+			setTSIGKey(reg, entry.gettSIG_key());
+
+			if (reg.unregisterService(name)) {
+				System.out.println("Service unregistered: " + name);
+			} else {
+				System.out.println("No service to remove: " + name);
+			}
+		} catch (DnsSDException ex) {
+			ex.printStackTrace();
+		} catch (NumberFormatException ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	public ServiceQueryResult provideServices(String serviceGroup, String serviceName, ServiceQueryForm queryForm) {
+
+		if (queryForm.getServiceInterfaces() != null && !queryForm.getServiceInterfaces().isEmpty()) {
+			try {
+
+				String computerDomain = getProp().getProperty("dns.domain", "evoin.arrowhead.eu");
+
+				DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator();
+
+				if (computerDomain != null) {
+					System.out.println("DNS-SD overriding computer domain: " + computerDomain);
+					de = DnsSDFactory.getInstance().createDomainEnumerator(computerDomain);
+				} else {
+					de = DnsSDFactory.getInstance().createDomainEnumerator();
+				}
+
+				DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
+
+				Collection<ServiceType> types = browser.getServiceTypes();
+				List<ProvidedService> list = new ArrayList<ProvidedService>();
+				for (ServiceType type : types) {
+					Collection<ServiceName> instances = browser.getServiceInstances(type);
+					System.out.println(instances);
+					for (ServiceName instance : instances) {
+						ServiceData service = browser.getServiceData(instance);
+						if (service != null) {
+							;
+							for (String serviceInterface : queryForm.getServiceInterfaces()) {
+								ProvidedService providerService = buildProviderService(service, serviceInterface);
+								if (providerService != null) {
+									list.add(providerService);
+								}
+							}
+
+						}
+						System.out.println(service);
+					}
+				}
+
+				ServiceQueryResult result = new ServiceQueryResult();
+				result.setServiceQueryData(list);
+				return result;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	private ProvidedService buildProviderService(ServiceData service, String serviceInterface) {
+		ProvidedService providerService = null;
+
+		if (serviceInterface != null && !serviceInterface.isEmpty()) {
+			String interfaceType = null;
+
+			String serviceType = service.getName().getType().toString();
+			int dotIndex = serviceType.indexOf(".");
+			if (dotIndex != -1) {
+				serviceType = serviceType.substring(0, dotIndex);
+				String[] array = serviceType.split("_");
+				if (array.length == 4) {
+					interfaceType = array[3];
+				}
+			}
+
+			if (interfaceType != null && interfaceType.equals(serviceInterface)) {
+				providerService = new ProvidedService();
+				ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
+
+				Map<String, String> properties = service.getProperties();
+				String systemGroup = properties.get("ahsysgrp");
+				String systemName = properties.get("ahsysname");
+				String authInfo = properties.get("ahsysauthinfo");
+				String serviceURI = properties.get("path");
+
+				String ipAddress = service.getHost();
+				if (ipAddress != null && ipAddress.length() > 0 && ipAddress.charAt(ipAddress.length() - 1) == '.') {
+					ipAddress = ipAddress.substring(0, ipAddress.length() - 1);
+				}
+
+				String port = new Integer(service.getPort()).toString();
+
+				arrowheadSystem.setAuthenticationInfo(authInfo);
+				arrowheadSystem.setIPAddress(ipAddress);
+				arrowheadSystem.setPort(port);
+				arrowheadSystem.setSystemGroup(systemGroup);
+				arrowheadSystem.setSystemName(systemName);
+
+				providerService.setProvider(arrowheadSystem);
+				providerService.setServiceURI(serviceURI);
+				providerService.setServiceInterface(interfaceType);
+			}
+		}
+		return providerService;
+	}
+
+	private DnsSDRegistrator createRegistrator() throws DnsSDException {
+		// Get the DNS specific settings
+		String dnsIpAddress = getProp().getProperty("dns.ip", "192.168.184.128");
+		String dnsDomain = getProp().getProperty("dns.registerDomain", "srv.evoin.arrowhead.eu") + ".";
+		int dnsPort = new Integer(getProp().getProperty("dns.port", "53"));
+
+		InetSocketAddress dnsserverAddress = new InetSocketAddress(dnsIpAddress, dnsPort);
+		DnsSDRegistrator reg = DnsSDFactory.getInstance().createRegistrator(dnsDomain, dnsserverAddress);
+		return reg;
+	}
+
+	private void setTSIGKey(DnsSDRegistrator reg, String tsigKey) {
+		System.out.println("TSIG Key: " + tsigKey);
+		String tsigKeyName = getProp().getProperty("tsig.name", "key.evoin.arrowhead.eu.");
+		String tsigAlgorithm = getProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
 		reg.setTSIGKey(tsigKeyName, tsigAlgorithm, tsigKey);
 	}
 
@@ -107,71 +260,13 @@ public class ServiceRegistry {
 		properties.put("txtvers", entry.getVersion());
 	}
 
-	public void unRegister(String serviceGroup, String serviceName, String interf, ServiceRegistryEntry entry) {
-		// TODO
-		/*
-		 * DnsSDDomainEnumerator dom =
-		 * DnsSDFactory.getInstance().createDomainEnumerator(); ServiceName name
-		 * = reg.makeServiceName("My\\Test.Service",
-		 * ServiceType.valueOf("_http._tcp,_printer")); try { DnsSDRegistrator
-		 * reg = DnsSDFactory.getInstance().createRegistrator(dom);
-		 * 
-		 * if (reg.unregisterService(name)) {
-		 * System.out.println("Service unregistered: " + name); } else {
-		 * System.out.println("No service to remove: " + name); } } catch
-		 * (DnsSDException e) { e.printStackTrace(); }
-		 */
-	}
-
-	public ServiceQueryResult provideServices(String serviceGroup, String serviceName, ServiceQueryForm queryForm) {
-
-		// TODO
-		/*
-		 * DnsSDDomainEnumerator dom =
-		 * DnsSDFactory.getInstance().createDomainEnumerator(); DnsSDBrowser
-		 * dnssd = DnsSDFactory.getInstance().createBrowser(dom);
-		 * Collection<ServiceType> types = dnssd.getServiceTypes();
-		 * System.out.println(types); for (ServiceType type : types) {
-		 * Collection<ServiceName> instances = dnssd.getServiceInstances(type);
-		 * System.out.println(instances); for (ServiceName instance : instances)
-		 * { ServiceData service = dnssd.getServiceData(instance);
-		 * System.out.println(service); } }
-		 */
-
-		ServiceQueryResult result = new ServiceQueryResult();
-
-		List<ProvidedService> list = new ArrayList<ProvidedService>();
-		ProvidedService provider = new ProvidedService();
-
-		ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
-		arrowheadSystem.setAuthenticationInfo("testAuth");
-		arrowheadSystem.setIPAddress("127.0.0.1");
-		arrowheadSystem.setPort("8443");
-		arrowheadSystem.setSystemGroup("testSystemGroup");
-		arrowheadSystem.setSystemName("testSystemName");
-
-		provider.setProvider(arrowheadSystem);
-
-		String serviceURI = "testServiceURI";
-		provider.setServiceURI(serviceURI);
-		String serviceInterface = "testInterface";
-		provider.setServiceInterface(serviceInterface);
-
-		list.add(provider);
-		list.add(provider);
-		result.setServiceQueryData(list);
+	private boolean parametersIsValid(String serviceGroup, String serviceName, String interf) {
+		boolean result = true;
+		if (serviceGroup == null || serviceName == null || interf == null || serviceGroup.contains("_")
+				|| serviceName.contains("_") || interf.contains("_")) {
+			result = false;
+		}
 		return result;
-	}
-
-	private static void loadDNSProperties() {
-		if (prop == null) {
-			prop = new Properties();
-		}
-		try {
-			prop.load(ServiceRegistry.class.getResourceAsStream("dns.properties"));
-		} catch (IOException e) {
-			// TODO log
-		}
 	}
 
 }

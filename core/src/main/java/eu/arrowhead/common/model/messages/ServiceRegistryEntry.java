@@ -51,11 +51,11 @@ public class ServiceRegistryEntry {
 		this.serviceMetadata = serviceMetadata;
 	}
 
-	public String getTSIG_key() {
+	public String gettSIG_key() {
 		return tSIG_key;
 	}
 
-	public void setTSIG_key(String tSIG_key) {
+	public void settSIG_key(String tSIG_key) {
 		this.tSIG_key = tSIG_key;
 	}
 
