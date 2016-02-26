@@ -8,7 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import com.github.danieln.dnssdjava.DnsSDBrowser;
 import com.github.danieln.dnssdjava.DnsSDDomainEnumerator;
@@ -19,6 +20,7 @@ import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import com.github.danieln.dnssdjava.ServiceType;
 
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
@@ -27,8 +29,7 @@ import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 
 public class ServiceRegistry {
 
-	// private static final Logger logger =
-	// Logger.getLogger(ServiceRegistry.class.getName());
+	private static Logger log = Logger.getLogger(ServiceRegistry.class.getName());
 
 	private static ServiceRegistry instance;
 	private static Properties prop;
@@ -69,10 +70,9 @@ public class ServiceRegistry {
 		System.setProperty("dnssd.hostname", getProp().getProperty("dns.host"));
 	}
 
-	// Strings do not contain charachter : "_"
 	public void register(String serviceGroup, String serviceName, String interf, ServiceRegistryEntry entry) {
 		if (!parametersIsValid(serviceGroup, serviceName, interf)) {
-			return;
+			throw new InvalidParameterException("Invalid parameters in URL!");
 		}
 
 		try {
@@ -95,8 +95,10 @@ public class ServiceRegistry {
 				setServiceDataProperties(entry, data);
 
 				if (reg.registerService(data)) {
+					log.info("Service registered: " + name);
 					System.out.println("Service registered: " + name);
 				} else {
+					log.info("Service already exists: " + name);
 					System.out.println("Service already exists: " + name);
 				}
 
@@ -109,10 +111,9 @@ public class ServiceRegistry {
 
 	}
 
-	// Strings do not contain charachter : "_"
 	public void unRegister(String serviceGroup, String serviceName, String interf, ServiceRegistryEntry entry) {
 		if (!parametersIsValid(serviceGroup, serviceName, interf)) {
-			return;
+			throw new InvalidParameterException("Invalid parameters in URL!");
 		}
 
 		try {
@@ -124,8 +125,10 @@ public class ServiceRegistry {
 			setTSIGKey(reg, entry.gettSIG_key());
 
 			if (reg.unregisterService(name)) {
+				log.info("Service unregistered: " + name);
 				System.out.println("Service unregistered: " + name);
 			} else {
+				log.info("No service to remove: " + name);
 				System.out.println("No service to remove: " + name);
 			}
 		} catch (DnsSDException ex) {
@@ -161,8 +164,7 @@ public class ServiceRegistry {
 					System.out.println(instances);
 					for (ServiceName instance : instances) {
 						ServiceData service = browser.getServiceData(instance);
-						if (service != null) {
-							;
+						if (service != null) {							
 							for (String serviceInterface : queryForm.getServiceInterfaces()) {
 								ProvidedService providerService = buildProviderService(service, serviceInterface);
 								if (providerService != null) {
