@@ -40,6 +40,12 @@
     log4j.appender.DB.password=password
   ```
 
+## Additional repositories
+
+* Extensions for Arrowhead Core System: [repository](https://github.com/pardavib/arrowhead-ext)
+* Java-based client implementation examples: [repository](https://github.com/pardavib/arrowhead-client)
+* Web based management tool: [repository](https://github.com/pardavib/arrowhead-web)
+
 ## Requirements
 
 * Eclipse IDE for Java EE Developers: [download](https://www.eclipse.org/downloads/)
