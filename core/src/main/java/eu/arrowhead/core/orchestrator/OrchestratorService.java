@@ -13,6 +13,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
@@ -41,7 +42,7 @@ public class OrchestratorService {
 	private URI uri;
 	private Client client;
 	private ServiceRequestForm serviceRequestForm;
-	// private SysConfig sysConfig = SysConfig.getInstance();
+	private SysConfig sysConfig = SysConfig.getInstance();
 
 	public OrchestratorService() {
 		super();
@@ -80,22 +81,27 @@ public class OrchestratorService {
 		for (ProvidedService providedService : srvQueryResult.getServiceQueryData()) {
 			providers.add(providedService.getProvider());
 		}
-		authRequest = new AuthorizationRequest(serviceRequestForm.getRequestedService(), providers,
-				"AuthenticationInfo", true);
-		authResponse = getAuthorizationResponse(authRequest);
-		// Poll the QoS Service
-		qosVerification = new QoSVerify(serviceRequestForm.getRequesterSystem(),
-				serviceRequestForm.getRequestedService(), providers, "RequestedQoS");
-		qosVerificationResponse = getQosVerificationResponse(qosVerification);
-		qosMap = qosVerificationResponse.getResponse();
-		// Reserve QoS resources
-		for (Entry<ArrowheadSystem, Boolean> entry : qosMap.entrySet()) {
-			selectedSystem = entry.getKey(); // TEMPORARLY selects a random
-												// system
+		selectedSystem = providers.get(0); //temporarily selects the first fit System
+		if (isExternal() == false){
+			//Poll the Authorization
+			authRequest = new AuthorizationRequest(serviceRequestForm.getRequestedService(), providers,
+					"AuthenticationInfo", true);
+			authResponse = getAuthorizationResponse(authRequest);
+			
+			// Poll the QoS Service
+			qosVerification = new QoSVerify(serviceRequestForm.getRequesterSystem(),
+					serviceRequestForm.getRequestedService(), providers, "RequestedQoS");
+			qosVerificationResponse = getQosVerificationResponse(qosVerification);
+			qosMap = qosVerificationResponse.getResponse();
+			
+			// Reserve QoS resources
+			for (Entry<ArrowheadSystem, Boolean> entry : qosMap.entrySet()) {
+				selectedSystem = entry.getKey(); // TEMPORARLY selects a random system
+			}
+			qosReservation = new QoSReserve(selectedSystem, serviceRequestForm.getRequesterSystem(),
+					serviceRequestForm.getRequestedService(), "RequestedQoS");
+			qosReservationResponse = doQosReservation(qosReservation);
 		}
-		qosReservation = new QoSReserve(selectedSystem, serviceRequestForm.getRequesterSystem(),
-				serviceRequestForm.getRequestedService(), "RequestedQoS");
-		qosReservationResponse = doQosReservation(qosReservation);
 		// Compile Orchestration Form
 		orchForm = new OrchestrationForm(serviceRequestForm.getRequestedService(), selectedSystem, "serviceURI",
 				"Orchestration Done");
@@ -111,6 +117,7 @@ public class OrchestratorService {
 		GSDRequestForm gsdRequestForm;
 		GSDResult gsdResult;
 		ICNRequestForm icnRequestForm;
+		ICNResultForm icnResultForm;
 		OrchestrationForm orchForm;
 		OrchestrationResponse orchResponse;
 		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
@@ -122,8 +129,8 @@ public class OrchestratorService {
 		// TODO: Choose partnering cloud based on certain things...
 
 		// Init Inter-Cloud Negotiation
-		// TODO: null should be changed below...
 		icnRequestForm = new ICNRequestForm(serviceRequestForm.getRequestedService(), "authInfo", null);
+		icnResultForm = getICNResultForm(icnRequestForm);
 
 		// Compile Orchestration Form
 		orchForm = new OrchestrationForm(serviceRequestForm.getRequestedService(), null, "serviceURI", "ICN Done");
@@ -265,6 +272,10 @@ public class OrchestratorService {
 	 */
 	public Boolean isInterCloud() {
 		return this.serviceRequestForm.getOrchestrationFlags().get("TriggerInterCloud");
+	}
+	
+	public Boolean isExternal (){
+		return this.serviceRequestForm.getOrchestrationFlags().get("ExternalServiceRequest");
 	}
 
 }
