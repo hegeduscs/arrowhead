@@ -6,10 +6,10 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class AuthorizationExceptionMapper implements ExceptionMapper<AuthorizationException>{
+public class AuthenticationExceptionMapper implements ExceptionMapper<AuthenticationException>{
 
 	@Override
-	public Response toResponse(AuthorizationException ex) {
+	public Response toResponse(AuthenticationException ex) {
 		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 401, "No documentation yet.");
 		return Response.status(Status.UNAUTHORIZED)
 				.entity(errorMessage)
