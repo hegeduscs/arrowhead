@@ -201,6 +201,22 @@ public class AuthorizationResource {
     }
     
     /**
+     * Returns an ArrowheadCloud from the database specified by the operatorName and cloudName.
+     * 
+     * @param {String} operatorName
+     * @param {String} cloudName
+     * @exception DataNotFoundException
+     * @return JAX-RS Response with status code 200 and ArrowheadCloud entity
+     */
+    @GET
+    @Path("/systemgroup/{systemGroup}/system/{systemName}")
+    public Response getSystem(@PathParam("systemGroup") String systemGroup, 
+    		@PathParam("systemName") String systemName){
+    	ArrowheadSystem arrowheadSystem = databaseManager.getSystemByName(systemGroup, systemName);
+    	return Response.ok(arrowheadSystem).build();
+    }
+    
+    /**
      * Checks whether the consumer System can use a Service from a list of provider Systems.
      * 
      * @param {String} systemGroup
