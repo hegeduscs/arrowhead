@@ -159,16 +159,6 @@ public class DatabaseManager {
         }
     }
     
-    /*
-     * Not working.
-     */
-    public void deleteServices(String operator, String cloudName, List<ArrowheadService> serviceList){
-    	ArrowheadCloud arrowheadCloud = getCloudByName(operator, cloudName);
-    	arrowheadCloud.getServiceList().removeAll(serviceList);
-    	deleteCloudFromAuthorized(operator, cloudName);
-    	arrowheadCloud = addCloudToAuthorized(arrowheadCloud);
-    }
-    
     public ArrowheadSystem getSystemByName(String systemGroup, String systemName){
     	ArrowheadSystem arrowheadSystem;
     	
@@ -195,6 +185,7 @@ public class DatabaseManager {
     	return arrowheadSystem;
     }
     
+    @SuppressWarnings("unchecked")
     public List<ArrowheadService> getServiceByName(String serviceGroup, String serviceDefinition){
     	List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
     	

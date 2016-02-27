@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -24,6 +25,7 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
+import eu.arrowhead.common.ssl.SSLAuthentication;
 import eu.arrowhead.core.authorization.database.ArrowheadCloud;
 import eu.arrowhead.core.authorization.database.ArrowheadService;
 import eu.arrowhead.core.authorization.database.ArrowheadSystem;
@@ -86,7 +88,8 @@ public class AuthorizationResource {
     @Path("/operator/{operatorName}/cloud/{cloudName}")
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
     public Boolean isCloudAuthorized(@PathParam("operatorName") String operatorName, 
-    		@PathParam("cloudName") String cloudName, InterCloudAuthRequest request){
+    		@PathParam("cloudName") String cloudName, InterCloudAuthRequest request, 
+    		@Context HttpServletRequest httpRequest){
     	eu.arrowhead.common.model.ArrowheadService requestedServiceModel = request.getArrowheadService();
     	if(!request.isPayloadUsable()){
     		throw new BadPayloadException("Bad payload: Missing arrowheadService or authenticationInfo from the "
@@ -198,6 +201,22 @@ public class AuthorizationResource {
     	databaseManager.updateAuthorizedCloud(arrowheadCloud);
     	
     	return serviceList;
+    }
+    
+    /**
+     * Returns an ArrowheadCloud from the database specified by the operatorName and cloudName.
+     * 
+     * @param {String} operatorName
+     * @param {String} cloudName
+     * @exception DataNotFoundException
+     * @return JAX-RS Response with status code 200 and ArrowheadCloud entity
+     */
+    @GET
+    @Path("/systemgroup/{systemGroup}/system/{systemName}")
+    public Response getSystem(@PathParam("systemGroup") String systemGroup, 
+    		@PathParam("systemName") String systemName){
+    	ArrowheadSystem arrowheadSystem = databaseManager.getSystemByName(systemGroup, systemName);
+    	return Response.ok(arrowheadSystem).build();
     }
     
     /**
