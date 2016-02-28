@@ -19,6 +19,11 @@ public class GSDAnswer {
 		this.answer = answer;
 		this.providerCloud = providerCloud;
 	}
+	
+	public GSDAnswer(List<ProvidedService> answer) {
+		super();
+		this.answer = answer;
+	}
 
 	public List<ProvidedService> getAnswer() {
 		return answer;
