@@ -58,7 +58,18 @@ public class GatekeeperResource {
 	
 	@GET
     public String getIt() {
-        return "This is the Gatekeeper Resource stub.";
+//		List<String> test = sysConfig.getCloudURIs();
+//		String testURI = test.get(0);
+		System.out.println("testURI");
+        Client client = ClientBuilder.newClient();
+    	String uri = "http://152.66.245.167:8080/core/gatekeeper/";
+		WebTarget target = client.target(uri);
+	    Response response = target
+	    		.request()
+	    		.header("Content-type", "application/json")
+				.get();
+	    System.out.println(response.readEntity(String.class));
+	    return "This is the Gatekeeper Resource stub.";
     }
 	
 	
@@ -123,11 +134,12 @@ public class GatekeeperResource {
     	
     	
     	// HTTP PUT to the provider GateKeeper
-   		log.info("Starting to find provider service for: "+ gsdPoll.getRequestedService().getServiceDefinition());
-
+//   		log.info("Starting to find provider service for: "+ gsdPoll.getRequestedService().getServiceDefinition());
+   		System.out.println("Starting to find provider service for: "+ gsdPoll.getRequestedService().getServiceDefinition());
    		Client client = ClientBuilder.newClient();
     	//TODO: URI to neighbour cloud (GSD)
-    	String uri = "http://localhost:8080/core/gatekeeper/gsd_poll/";
+//    	String uri = "http://localhost:8080/core/gatekeeper/gsd_poll/";
+    	String uri = "http://152.66.245.167:8080/core/gatekeeper/gsd_poll/";
 		WebTarget target = client.target(uri);
 	    Response response = target
 	    		.request()
@@ -200,8 +212,8 @@ public class GatekeeperResource {
 			//TEST ServiceRequest
 //	    	ArrowheadSystem requesterSystem = new ArrowheadSystem("systemGroup", "systemName", "iPAddress", "port", "authenticationInfo");
 	    	ServiceRequestForm srf = new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, 1000);
-//	    	ServiceQueryForm sqf = new ServiceQueryForm(srf);
-	    	ServiceQueryForm sqf = new ServiceQueryForm(requestedService.getMetaData(), requestedService.getInterfaces(), false, "tSIG_key");
+	    	ServiceQueryForm sqf = new ServiceQueryForm(srf);
+//	    	ServiceQueryForm sqf = new ServiceQueryForm(requestedService.getMetaData(), requestedService.getInterfaces(), false, "tSIG_key");
 	    	ServiceQueryResult sqr = getServiceQueryResultGateKeeper(sqf);
 	    	GSDAnswer answer = new GSDAnswer(sqr.getServiceQueryData(), requesterCloud);
 	    	return answer;
