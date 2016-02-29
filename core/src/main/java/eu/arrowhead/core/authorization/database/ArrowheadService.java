@@ -21,11 +21,11 @@ public class ArrowheadService {
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
 	private int id;
+	@Column(name="service_group")
 	private String serviceGroup;
 	private String serviceDefinition;
 	@ElementCollection(fetch = FetchType.LAZY)
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@Column(name="interface")
 	private List<String> interfaces = new ArrayList<String>();
 	private String metaData;
 	

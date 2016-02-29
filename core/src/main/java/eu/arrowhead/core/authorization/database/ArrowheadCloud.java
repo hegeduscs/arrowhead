@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
@@ -25,11 +27,15 @@ public class ArrowheadCloud {
     @Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
     private int id;
+    @Column(name="operator")
     private String operator;
+    @Column(name="cloud_name")
     private String cloudName;
+    @Column(name="authentication_info")
     private String authenticationInfo;
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
-    @JoinTable (name="Clouds_Services")
+    @JoinTable (name="Clouds_Services", joinColumns = @JoinColumn(name = "consumer_cloud_id"), 
+    	       inverseJoinColumns = @JoinColumn(name = "arrowhead_service_id"))
     private Collection<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
    
     public ArrowheadCloud(){
