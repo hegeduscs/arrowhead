@@ -1,6 +1,5 @@
 package eu.arrowhead.core.authorization.database;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,22 +10,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"system_group", "system_name"})})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"systemGroup", "systemName"})})
 @XmlRootElement
 public class ArrowheadSystem {
 	
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
 	@XmlTransient
 	private int id;
-	@Column(name="system_group")
 	private String systemGroup;
-	@Column(name="system_name")
 	private String systemName;
-	@Column(name="ip_address")
 	private String IPAddress;
-	@Column(name="port")
 	private String port;
-	@Column(name="authentication_info")
 	private String authenticationInfo;
 	
 	public ArrowheadSystem(){

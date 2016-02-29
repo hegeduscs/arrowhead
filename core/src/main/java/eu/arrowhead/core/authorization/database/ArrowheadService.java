@@ -3,7 +3,6 @@ package eu.arrowhead.core.authorization.database;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -21,15 +20,11 @@ public class ArrowheadService {
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
 	private int id;
-	@Column(name="service_group")
 	private String serviceGroup;
-	@Column(name="service_definition")
 	private String serviceDefinition;
 	@ElementCollection(fetch = FetchType.LAZY)
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@Column(name="interface")
 	private List<String> interfaces = new ArrayList<String>();
-	@Column(name="metadata")
 	private String metaData;
 	
 	public ArrowheadService(){
