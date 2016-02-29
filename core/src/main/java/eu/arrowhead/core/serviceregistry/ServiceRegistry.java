@@ -310,7 +310,7 @@ public class ServiceRegistry {
 		properties.put("ahsysauthinfo", entry.getProvider().getAuthenticationInfo());
 		properties.put("path", entry.getServiceURI());
 		properties.put("ahsrvmetad", entry.getServiceMetadata());
-		properties.put("txtvers", entry.getVersion());
+		//properties.put("txtvers", entry.getVersion());
 	}
 
 	private boolean parametersIsValid(String serviceGroup, String serviceName, String interf) {
