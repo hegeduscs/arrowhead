@@ -3,6 +3,7 @@ package eu.arrowhead.core.authorization.database;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -24,6 +25,7 @@ public class ArrowheadService {
 	private String serviceDefinition;
 	@ElementCollection(fetch = FetchType.LAZY)
 	@LazyCollection(LazyCollectionOption.FALSE)
+	@Column(name="interface")
 	private List<String> interfaces = new ArrayList<String>();
 	private String metaData;
 	

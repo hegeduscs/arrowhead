@@ -18,6 +18,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.apache.log4j.Logger;
+
 import javax.ws.rs.core.UriInfo;
 
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -37,6 +40,7 @@ import eu.arrowhead.core.authorization.database.Systems_Services;
 public class AuthorizationResource {
 	
 	DatabaseManager databaseManager = new DatabaseManager();
+	private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());
 	
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -108,6 +112,7 @@ public class AuthorizationResource {
          		isAuthorized = true; 
          }
 
+        log.info("Authorization rights requested for Cloud: " + cloudName);
     	return isAuthorized;
     }
     
@@ -138,6 +143,7 @@ public class AuthorizationResource {
     	
     	ArrowheadCloud authorizedCloud = databaseManager.addCloudToAuthorized(arrowheadCloud);
     	
+    	log.info("Cloud added to authorization database: " + cloudName);
     	URI uri = uriInfo.getAbsolutePathBuilder().build();
     	return Response.created(uri).entity(authorizedCloud).build();
     }
@@ -156,6 +162,7 @@ public class AuthorizationResource {
     		@PathParam("cloudName") String cloudName){
     	databaseManager.deleteCloudFromAuthorized(operatorName, cloudName);
     	
+    	log.info("Cloud deleted from authorization database: " + cloudName);
     	return Response.noContent().build();
     }
     
@@ -270,6 +277,7 @@ public class AuthorizationResource {
         	}
     	}
     	
+    	log.info("Authorization rights requested for System: " + systemName);
     	response.setAuthorizationMap(authorizationMap);
     	return response;
     }
@@ -328,6 +336,7 @@ public class AuthorizationResource {
     		}
     	}
     	
+    	log.info("System added to authorization database: " + systemName);
     	return Response.status(Status.CREATED).entity(consumerSystem).build();
     }
     
@@ -350,6 +359,7 @@ public class AuthorizationResource {
     		databaseManager.delete(ss);
     	}
     	
+    	log.info("Consumer System relations deleted from authorization database. System name: " + systemName);
     	return Response.noContent().build();
     }
     
