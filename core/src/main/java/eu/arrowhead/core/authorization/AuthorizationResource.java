@@ -94,6 +94,11 @@ public class AuthorizationResource {
     public Boolean isCloudAuthorized(@PathParam("operatorName") String operatorName, 
     		@PathParam("cloudName") String cloudName, InterCloudAuthRequest request, 
     		@Context HttpServletRequest httpRequest){
+    	/*SSLAuthentication ssl = new SSLAuthentication();
+    	String msg = ssl.getIt(httpRequest);
+    	if(msg == null){
+    		throw new AuthorizationException("SSL authentication error.");
+    	}*/
     	eu.arrowhead.common.model.ArrowheadService requestedServiceModel = request.getArrowheadService();
     	if(!request.isPayloadUsable()){
     		throw new BadPayloadException("Bad payload: Missing arrowheadService or authenticationInfo from the "
