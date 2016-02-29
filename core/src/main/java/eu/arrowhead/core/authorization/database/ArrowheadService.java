@@ -23,10 +23,13 @@ public class ArrowheadService {
 	private int id;
 	@Column(name="service_group")
 	private String serviceGroup;
+	@Column(name="service_definition")
 	private String serviceDefinition;
 	@ElementCollection(fetch = FetchType.LAZY)
 	@LazyCollection(LazyCollectionOption.FALSE)
+	@Column(name="interface")
 	private List<String> interfaces = new ArrayList<String>();
+	@Column(name="metadata")
 	private String metaData;
 	
 	public ArrowheadService(){
