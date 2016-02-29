@@ -42,7 +42,7 @@ public class OrchestratorService {
 	private URI uri;
 	private Client client;
 	private ServiceRequestForm serviceRequestForm;
-	private SysConfig sysConfig = SysConfig.getInstance();
+	public SysConfig sysConfig = SysConfig.getInstance();
 
 	public OrchestratorService() {
 		super();

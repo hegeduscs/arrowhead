@@ -34,6 +34,17 @@ public class OrchestratorResource {
 	public Response getOrchestration() {
 		return Response.status(Status.BAD_REQUEST).build();
 	}
+	
+	@GET
+	@Path("stringtest")
+	public String stringTest(){
+		String ret;
+		ret = "OrchestratorUri: " + orchestratorService.sysConfig.getOrchestratorURI() + "\n AuthorizationUri: "
+				+ orchestratorService.sysConfig.getAuthorizationURI() + "\n ServiceRegistryUri: " +
+				orchestratorService.sysConfig.getServiceRegistryURI() + "\n GateKeeperUri: " + 
+				orchestratorService.sysConfig.getGatekeeperURI();
+		return ret;
+	}
 
 	/**
 	 * This function represents the main orchestration process initiated by the
