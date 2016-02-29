@@ -1,6 +1,5 @@
 package eu.arrowhead.common.configuration;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,15 +15,10 @@ public class CoreSystem {
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
     private int id;
-	@Column(name="system_name")
 	private String systemName;
-	@Column(name="ip_address")
 	private String IPAddress;
-	@Column(name="port")
 	private String port;
-	@Column(name="authentication_info")
 	private String authenticationInfo;
-	@Column(name="service_uri")
 	private String serviceURI;
 	
 	public CoreSystem(){
