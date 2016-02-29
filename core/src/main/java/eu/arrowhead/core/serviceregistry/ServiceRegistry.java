@@ -1,8 +1,10 @@
 package eu.arrowhead.core.serviceregistry;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -104,8 +106,10 @@ public class ServiceRegistry {
 
 			}
 		} catch (DnsSDException ex) {
+			log.error(ex);
 			ex.printStackTrace();
 		} catch (NumberFormatException ex) {
+			log.error(ex);
 			ex.printStackTrace();
 		}
 
@@ -132,8 +136,10 @@ public class ServiceRegistry {
 				System.out.println("No service to remove: " + name);
 			}
 		} catch (DnsSDException ex) {
+			log.error(ex);
 			ex.printStackTrace();
 		} catch (NumberFormatException ex) {
+			log.error(ex);
 			ex.printStackTrace();
 		}
 
@@ -164,11 +170,44 @@ public class ServiceRegistry {
 					System.out.println(instances);
 					for (ServiceName instance : instances) {
 						ServiceData service = browser.getServiceData(instance);
-						if (service != null) {							
+						if (service != null) {
 							for (String serviceInterface : queryForm.getServiceInterfaces()) {
 								ProvidedService providerService = buildProviderService(service, serviceInterface);
 								if (providerService != null) {
-									list.add(providerService);
+									Map<String, String> properties = service.getProperties();
+
+									if (queryForm.isMetadataSearch()) {
+
+										boolean replied = true;
+										if (queryForm.isPingProviders()) {
+											String path = properties.get("path");
+											String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
+											int timeout = new Integer(prop.getProperty("ping.timeout", "10000")).intValue();
+											int port = new Integer(service.getPort()).intValue();
+											if (!pingHost(service.getHost(), port, timeout)) {
+												log.info("Can't access the service in the following URL" + targetUrl + ", in "
+														+ timeout + "millisec");
+												removeService(instance);
+												replied = false;
+											}
+										}
+
+										String metaData = properties.get("ahsrvmetad");
+										if (replied && metaData != null && metaData.equals(queryForm.getServiceMetaData())) {
+											log.info("Service is found by interface and metadata and added to ServiceQueryResult, it's interface and name and metadata are : "
+													+ providerService.getServiceInterface()
+													+ ", "
+													+ providerService.getProvider().getSystemName() + ", " + metaData);
+											list.add(providerService);
+										}
+
+									} else {
+										log.info("Service is found by interface and added to ServiceQueryResult, it's interface and name are : "
+												+ providerService.getServiceInterface()
+												+ ", "
+												+ providerService.getProvider().getSystemName());
+										list.add(providerService);
+									}
 								}
 							}
 
@@ -181,10 +220,22 @@ public class ServiceRegistry {
 				result.setServiceQueryData(list);
 				return result;
 			} catch (Exception ex) {
+				log.error(ex);
 				ex.printStackTrace();
 			}
 		}
 		return null;
+	}
+
+	private void removeService(ServiceName instance) throws DnsSDException {
+		DnsSDRegistrator reg = createRegistrator();
+		if (reg.unregisterService(instance)) {
+			log.info("Service unregistered: " + instance);
+			System.out.println("Service unregistered: " + instance);
+		} else {
+			log.info("No service to remove: " + instance);
+			System.out.println("No service to remove: " + instance);
+		}
 	}
 
 	private ProvidedService buildProviderService(ServiceData service, String serviceInterface) {
@@ -271,4 +322,12 @@ public class ServiceRegistry {
 		return result;
 	}
 
+	public static boolean pingHost(String host, int port, int timeout) {
+		try (Socket socket = new Socket()) {
+			socket.connect(new InetSocketAddress(host, port), timeout);
+			return true;
+		} catch (IOException e) {
+			return false; // Either timeout or unreachable or failed DNS lookup.
+		}
+	}
 }
