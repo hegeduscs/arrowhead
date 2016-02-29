@@ -17,7 +17,7 @@ public class QoSReserve {
 		super();
 	}
 
-	public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service, String requestedQoS) {
+	public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, String requestedQoS, ArrowheadService service) {
 		super();
 		this.provider = provider;
 		this.consumer = consumer;

@@ -41,11 +41,8 @@ public class OrchestratorResource {
 	public String stringTest(){
 		orchestratorService = new OrchestratorService();
 		String ret;
-		ret = "OrchestratorUri: " + orchestratorService.sysConfig.getOrchestratorURI();
-		/*+ "\n AuthorizationUri: "
-				+ orchestratorService.sysConfig.getAuthorizationURI() + "\n ServiceRegistryUri: " +
-				orchestratorService.sysConfig.getServiceRegistryURI() + "\n GateKeeperUri: " + 
-				orchestratorService.sysConfig.getGatekeeperURI();*/
+		ret = orchestratorService.sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager");
+		//ret = "OrchestratorUri: " + orchestratorService.sysConfig.getOrchestratorURI();
 		return ret;
 	}
 

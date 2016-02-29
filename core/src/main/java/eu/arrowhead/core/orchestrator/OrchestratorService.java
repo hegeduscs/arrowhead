@@ -70,6 +70,7 @@ public class OrchestratorService {
 		IntraCloudAuthRequest authReq;
 		IntraCloudAuthResponse authResp;
 		List<ArrowheadSystem> providers = new ArrayList<ArrowheadSystem>();
+		List<ProvidedService> provservices = new ArrayList<ProvidedService>();
 		QoSVerify qosVerification;
 		QoSVerificationResponse qosVerificationResponse;
 		Map<ArrowheadSystem, Boolean> qosMap;
@@ -82,38 +83,49 @@ public class OrchestratorService {
 
 		// Poll the Service Registry
 		srvQueryResult = getServiceQueryResult(srvQueryForm, this.serviceRequestForm);
-		for (ProvidedService providedService : srvQueryResult.getServiceQueryData()) {
+		provservices = srvQueryResult.getServiceQueryData();
+		for (ProvidedService providedService : provservices) {
 			providers.add(providedService.getProvider());
 		}
-		selectedSystem = providers.get(0); //temporarily selects the first fit System
 		if (isExternal() == false){
+			
 			//Poll the Authorization
 			authReq = new IntraCloudAuthRequest("authInfo", this.serviceRequestForm.getRequestedService(), false, providers);
 			authResp = getAuthorizationResponse(authReq, this.serviceRequestForm);
+			
 			//Removing the non-authenticated systems from the providers list
 			for (ArrowheadSystem ahsys : authResp.getAuthorizationMap().keySet()){
 				if(authResp.getAuthorizationMap().get(ahsys) == false)
 					providers.remove(ahsys);
 			}
+			
 			// Poll the QoS Service
 			qosVerification = new QoSVerify(serviceRequestForm.getRequesterSystem(),
 					serviceRequestForm.getRequestedService(), providers, "RequestedQoS");
 			qosVerificationResponse = getQosVerificationResponse(qosVerification);
 			qosMap = qosVerificationResponse.getResponse();
 			
-			// Reserve QoS resources
-			for (Entry<ArrowheadSystem, Boolean> entry : qosMap.entrySet()) {
-				selectedSystem = entry.getKey(); // TEMPORARLY selects a random system
+			//Removing the bad QoS ones from consideration - temporarly everything is true
+			for (ArrowheadSystem ahsys : qosVerificationResponse.getResponse().keySet()){
+				if (qosVerificationResponse.getResponse().get(ahsys) == false)
+					providers.remove(ahsys);
 			}
-			qosReservation = new QoSReserve(selectedSystem, serviceRequestForm.getRequesterSystem(),
-					serviceRequestForm.getRequestedService(), "RequestedQoS");
+			
+			// Reserve QoS resources
+			selectedSystem = providers.get(0); //temporarily selects the first fit System
+			qosReservation = new QoSReserve(selectedSystem, this.serviceRequestForm.getRequesterSystem(), "requestedQoS", this.serviceRequestForm.getRequestedService());
 			qosReservationResponse = doQosReservation(qosReservation);
+			
+			//Actualizing the provservices list
+			for (ProvidedService provservice : provservices){
+				if(providers.contains(provservice.getProvider()) == false)
+					provservices.remove(provservice);
+			}
 		}
-		// Compile Orchestration Form
-		orchForm = new OrchestrationForm(serviceRequestForm.getRequestedService(), selectedSystem, "serviceURI",
-				"Orchestration Done");
-		// Compile Orchestration Response
-		responseFormList.add(orchForm);
+		// Create Orchestration Forms - returning every matching System as Required for the Demo
+		for (ProvidedService provservice : provservices){
+			responseFormList.add(new OrchestrationForm(this.serviceRequestForm.getRequestedService(), provservice.getProvider(), provservice.getServiceURI(), "authorizationInfo"));
+		}
 		return new OrchestrationResponse(responseFormList);
 	}
 
@@ -202,10 +214,11 @@ public class OrchestratorService {
 	 * @return QoSVerificationResponse
 	 */
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
-		// uri =
-		// UriBuilder.fromUri(sysConfig.getQoSURI()).path("verify").build();
-		// WebTarget target = client.target(uri);
-		WebTarget target = client.target("http://localhost:8080/ext/qosservice/verification");
+		System.out.println("orchestrator: inside the getQoSVerificationResponse function");
+		//TODO: get address from database
+		//String strtarget = "http://localhost:8080/core/QoSManager/QoSVerify";
+		String strtarget = sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSVerify";
+		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
 		return response.readEntity(QoSVerificationResponse.class);
 	}
@@ -217,10 +230,11 @@ public class OrchestratorService {
 	 * @return boolean indicating that the reservation completed successfully
 	 */
 	private QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
-		// uri =
-		// UriBuilder.fromUri(sysConfig.getQoSURI()).path("reserve").build();
-		// WebTarget target = client.target(uri);
-		WebTarget target = client.target("http://localhost:8080/ext/qosservice/reservation");
+		System.out.println("orchestrator: inside the doQoSReservation function");
+		//TODO: get address from database
+		String strtarget = sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSReserve";
+		//String strtarget = "http://localhost:8080/core/QoSManager/QoSReserve";
+		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
 		return response.readEntity(QoSReservationResponse.class);
 	}
