@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"systemGroup", "systemName"})})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"system_group", "system_name"})})
 @XmlRootElement
 public class ArrowheadSystem {
 	

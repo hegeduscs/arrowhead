@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
  
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloudName"})})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
 @XmlRootElement
 public class ArrowheadCloud {
    
