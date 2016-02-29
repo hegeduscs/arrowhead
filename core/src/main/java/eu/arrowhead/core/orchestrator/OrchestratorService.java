@@ -73,12 +73,9 @@ public class OrchestratorService {
 		List<ProvidedService> provservices = new ArrayList<ProvidedService>();
 		QoSVerify qosVerification;
 		QoSVerificationResponse qosVerificationResponse;
-		Map<ArrowheadSystem, Boolean> qosMap;
 		ArrowheadSystem selectedSystem = null;
 		QoSReserve qosReservation;
 		QoSReservationResponse qosReservationResponse;
-		OrchestrationForm orchForm;
-		OrchestrationResponse orchResponse;
 		List<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
 
 		// Poll the Service Registry
@@ -87,6 +84,7 @@ public class OrchestratorService {
 		for (ProvidedService providedService : provservices) {
 			providers.add(providedService.getProvider());
 		}
+		//If the SRF is external, no need for Auth and QoS
 		if (isExternal() == false){
 			
 			//Poll the Authorization
@@ -103,7 +101,6 @@ public class OrchestratorService {
 			qosVerification = new QoSVerify(serviceRequestForm.getRequesterSystem(),
 					serviceRequestForm.getRequestedService(), providers, "RequestedQoS");
 			qosVerificationResponse = getQosVerificationResponse(qosVerification);
-			qosMap = qosVerificationResponse.getResponse();
 			
 			//Removing the bad QoS ones from consideration - temporarly everything is true
 			for (ArrowheadSystem ahsys : qosVerificationResponse.getResponse().keySet()){
@@ -145,7 +142,7 @@ public class OrchestratorService {
 		gsdRequestForm = new GSDRequestForm(serviceRequestForm.getRequestedService());
 		gsdResult = getGSDResult(gsdRequestForm);
 
-		// TODO: Choose partnering cloud based on certain things...
+		// Putting an ICN Request Form to every single matching cloud
 
 		// Init Inter-Cloud Negotiation
 		icnRequestForm = new ICNRequestForm(serviceRequestForm.getRequestedService(), "authInfo", null);
@@ -247,10 +244,8 @@ public class OrchestratorService {
 	 * @return GSDResult
 	 */
 	private GSDResult getGSDResult(GSDRequestForm gsdRequestForm) {
-		// uri =
-		// UriBuilder.fromUri(sysConfig.getQoSURI()).path("verify").build();
-		// WebTarget target = client.target(uri);
-		WebTarget target = client.target("http://localhost:8080/core/gatekeeper/init_gsd");
+		String strtarget = sysConfig.getGatekeeperURI()+"/init_gsd";
+		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(gsdRequestForm));
 		return response.readEntity(GSDResult.class);
