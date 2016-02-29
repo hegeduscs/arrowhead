@@ -17,20 +17,21 @@ public class ServiceQueryForm {
 	public ServiceQueryForm() {
 		super();
 	}
-
+	
 	public ServiceQueryForm(String serviceMetaData, List<String> serviceInterfaces, boolean pingProviders,
-			String tSIG_key) {
-		super();
+			boolean metadataSearch, String tsig_key) {
 		this.serviceMetaData = serviceMetaData;
 		this.serviceInterfaces = serviceInterfaces;
 		this.pingProviders = pingProviders;
-		this.tsig_key = tSIG_key;
+		this.metadataSearch = metadataSearch;
+		this.tsig_key = tsig_key;
 	}
-	
+
 	public ServiceQueryForm(ServiceRequestForm srf){
 		this.serviceMetaData = srf.getRequestedService().getMetaData();
 		this.serviceInterfaces = srf.getRequestedService().getInterfaces();
 		this.pingProviders = srf.getOrchestrationFlags().get("PingProvider");
+		this.metadataSearch = srf.getOrchestrationFlags().get("MetadataSearch");
 		this.tsig_key ="DUMMY"; // FROM CONFIGURATION
 	}
 
@@ -50,14 +51,6 @@ public class ServiceQueryForm {
 		this.pingProviders = pingProviders;
 	}
 
-	public String getTSIG_key() {
-		return tsig_key;
-	}
-
-	public void setTSIG_key(String tsig_key) {
-		this.tsig_key = tsig_key;
-	}
-
 	public List<String> getServiceInterfaces() {
 		return serviceInterfaces;
 	}
@@ -72,6 +65,14 @@ public class ServiceQueryForm {
 
 	public void setMetadataSearch(boolean metadataSearch) {
 		this.metadataSearch = metadataSearch;
+	}
+
+	public String getTsig_key() {
+		return tsig_key;
+	}
+
+	public void setTsig_key(String tsig_key) {
+		this.tsig_key = tsig_key;
 	}
 
 }

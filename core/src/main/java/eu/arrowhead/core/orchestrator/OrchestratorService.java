@@ -14,6 +14,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import eu.arrowhead.common.configuration.SysConfig;
+import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
@@ -21,6 +22,8 @@ import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
 import eu.arrowhead.common.model.messages.ICNRequestForm;
 import eu.arrowhead.common.model.messages.ICNResultForm;
+import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
+import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ProvidedService;
@@ -62,9 +65,10 @@ public class OrchestratorService {
 	 */
 	public OrchestrationResponse localOrchestration() {
 		ServiceQueryForm srvQueryForm = new ServiceQueryForm(this.serviceRequestForm);
+		srvQueryForm.setTsig_key("RIuxP+vb5GjLXJo686NvKQ==");
 		ServiceQueryResult srvQueryResult;
-		AuthorizationRequest authRequest;
-		AuthorizationResponse authResponse;
+		IntraCloudAuthRequest authReq;
+		IntraCloudAuthResponse authResp;
 		List<ArrowheadSystem> providers = new ArrayList<ArrowheadSystem>();
 		QoSVerify qosVerification;
 		QoSVerificationResponse qosVerificationResponse;
@@ -74,20 +78,23 @@ public class OrchestratorService {
 		QoSReservationResponse qosReservationResponse;
 		OrchestrationForm orchForm;
 		OrchestrationResponse orchResponse;
-		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
+		List<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
 
 		// Poll the Service Registry
-		srvQueryResult = getServiceQueryResult(srvQueryForm);
+		srvQueryResult = getServiceQueryResult(srvQueryForm, this.serviceRequestForm);
 		for (ProvidedService providedService : srvQueryResult.getServiceQueryData()) {
 			providers.add(providedService.getProvider());
 		}
 		selectedSystem = providers.get(0); //temporarily selects the first fit System
 		if (isExternal() == false){
 			//Poll the Authorization
-			authRequest = new AuthorizationRequest(serviceRequestForm.getRequestedService(), providers,
-					"AuthenticationInfo", true);
-			authResponse = getAuthorizationResponse(authRequest);
-			
+			authReq = new IntraCloudAuthRequest("authInfo", this.serviceRequestForm.getRequestedService(), false, providers);
+			authResp = getAuthorizationResponse(authReq, this.serviceRequestForm);
+			//Removing the non-authenticated systems from the providers list
+			for (ArrowheadSystem ahsys : authResp.getAuthorizationMap().keySet()){
+				if(authResp.getAuthorizationMap().get(ahsys) == false)
+					providers.remove(ahsys);
+			}
 			// Poll the QoS Service
 			qosVerification = new QoSVerify(serviceRequestForm.getRequesterSystem(),
 					serviceRequestForm.getRequestedService(), providers, "RequestedQoS");
@@ -149,23 +156,17 @@ public class OrchestratorService {
 	 * @param srForm
 	 * @return ServiceQueryResult
 	 */
-	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf) {
-
-		/*
-		 * uri =UriBuilder.fromUri(sysConfig.getServiceRegistryURI()).path(
-		 * serviceRequestForm. getRequestedService().getServiceGroup()).
-		 * path(serviceRequestForm.getRequestedService().getServiceDefinition())
-		 * .build();
-		 */
+	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, ServiceRequestForm srf) {
 		System.out.println("orchestator: inside the getServiceQueryResult function");
-		// WebTarget target = client.target(uri);
-		WebTarget target = client.target("http://localhost:8080/ext/serviceregistry/query");
+		ArrowheadService as = srf.getRequestedService();
+		String strtarget = sysConfig.getServiceRegistryURI()+ "/" + as.getServiceGroup() + "/" + as.getServiceDefinition();
+		System.out.println("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
+		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
-		System.out.println("orchestrator: gSQR received the response");
 		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
-		System.out.println("orchestrator received the following serviceURIs:");
+		System.out.println("orchestrator received the following services from the SR:");
 		for (ProvidedService providedService : sqr.getServiceQueryData()) {
-			System.out.println(providedService.getServiceURI() + providedService.getProvider().getIPAddress());
+			System.out.println(providedService.getProvider().getSystemGroup() + providedService.getProvider().getSystemName());
 		}
 		return sqr;
 	}
@@ -175,28 +176,22 @@ public class OrchestratorService {
 	 * the Authorization Response.
 	 * 
 	 * @param authRequest
-	 * @param srForm
 	 * @return AuthorizationResponse
 	 */
-	private AuthorizationResponse getAuthorizationResponse(AuthorizationRequest authRequest) {
-		// Poll the Authorization Service
-
-		/*
-		 * uri = UriBuilder.fromUri(sysConfig.getAuthorizationURI()).path(
-		 * "SystemGroup")
-		 * .path(serviceRequestForm.getRequestedService().getServiceGroup()).
-		 * path("System")
-		 * .path(serviceRequestForm.getRequestedService().getInterfaces().get(0)
-		 * ).build();
-		 */
-		// WebTarget target = client.target(uri);
-		// Response response = target.request().header("Content-type",
-		// "application/json").put(Entity.json(authRequest));
+	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq, ServiceRequestForm srf) {	
 		System.out.println("orchestrator: inside the getAuthorizationResponse function");
-		Map<String, String> stringmap = new HashMap<String, String>();
-		Map<ArrowheadSystem, Boolean> systemmap = new HashMap<ArrowheadSystem, Boolean>();
-		return new AuthorizationResponse(systemmap, 2, stringmap);
-		// return response.readEntity(AuthorizationResponse.class);
+		String strtarget = sysConfig.getAuthorizationURI() + "/SystemGroup/" + srf.getRequesterSystem().getSystemGroup() +
+				"/System/" + srf.getRequesterSystem().getSystemName();
+		System.out.println("orchestrator: sending AuthReq to this address: " + strtarget);
+		WebTarget target = client.target(strtarget);
+		Response response = target.request().header("Content-type","application/json").put(Entity.json(authReq));
+		IntraCloudAuthResponse authResp = response.readEntity(IntraCloudAuthResponse.class);
+		System.out.println("orchestrator received the following services from the AR:");
+		for (ArrowheadSystem ahsys : authResp.getAuthorizationMap().keySet()){
+			System.out.println("System: " + ahsys.getSystemGroup() + ahsys.getSystemName());
+			System.out.println("Value: " + authResp.getAuthorizationMap().get(ahsys));
+		}
+		return authResp;
 	}
 
 	/**

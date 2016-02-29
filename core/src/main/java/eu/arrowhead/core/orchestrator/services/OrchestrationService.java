@@ -57,7 +57,7 @@ public class OrchestrationService {
 		ServiceQueryForm example = new ServiceQueryForm();
 		example.setPingProviders(false);
 		example.setServiceMetaData("MetadataProba");
-		example.setTSIG_key("Key");
+		example.setTsig_key("Key");
 		List<String> interfaces = new ArrayList<String>();
 		interfaces.add("Cica");
 		interfaces.add("Kutya");
