@@ -37,12 +37,15 @@ public class OrchestratorResource {
 	
 	@GET
 	@Path("stringtest")
+	@Produces(MediaType.TEXT_PLAIN)
 	public String stringTest(){
+		orchestratorService = new OrchestratorService();
 		String ret;
-		ret = "OrchestratorUri: " + orchestratorService.sysConfig.getOrchestratorURI() + "\n AuthorizationUri: "
+		ret = "OrchestratorUri: " + orchestratorService.sysConfig.getOrchestratorURI();
+		/*+ "\n AuthorizationUri: "
 				+ orchestratorService.sysConfig.getAuthorizationURI() + "\n ServiceRegistryUri: " +
 				orchestratorService.sysConfig.getServiceRegistryURI() + "\n GateKeeperUri: " + 
-				orchestratorService.sysConfig.getGatekeeperURI();
+				orchestratorService.sysConfig.getGatekeeperURI();*/
 		return ret;
 	}
 
