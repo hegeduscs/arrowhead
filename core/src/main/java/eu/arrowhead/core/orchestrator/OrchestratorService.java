@@ -18,6 +18,7 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.AuthorizationRequest;
 import eu.arrowhead.common.model.messages.AuthorizationResponse;
+import eu.arrowhead.common.model.messages.GSDEntry;
 import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
 import eu.arrowhead.common.model.messages.ICNRequestForm;
@@ -143,10 +144,9 @@ public class OrchestratorService {
 		gsdResult = getGSDResult(gsdRequestForm);
 
 		// Putting an ICN Request Form to every single matching cloud
-
-		// Init Inter-Cloud Negotiation
-		icnRequestForm = new ICNRequestForm(serviceRequestForm.getRequestedService(), "authInfo", null);
-		icnResultForm = getICNResultForm(icnRequestForm);
+		for (GSDEntry entry : gsdResult.getResponse()){
+			
+		}
 
 		// Compile Orchestration Form
 		orchForm = new OrchestrationForm(serviceRequestForm.getRequestedService(), null, "serviceURI", "ICN Done");
@@ -259,10 +259,8 @@ public class OrchestratorService {
 	 * @return ICNResultForm
 	 */
 	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
-		// uri =
-		// UriBuilder.fromUri(sysConfig.getQoSURI()).path("verify").build();
-		// WebTarget target = client.target(uri);
-		WebTarget target = client.target("http://localhost:8080/core/gatekeeper/init_icn");
+		String strtarget = sysConfig.getGatekeeperURI()+"/init_icn";
+		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(icnRequestForm));
 		return response.readEntity(ICNResultForm.class);
