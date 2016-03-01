@@ -14,9 +14,12 @@ import org.apache.log4j.jdbc.JDBCAppender;
 import org.hibernate.cfg.Configuration;
 
 public class ServletContextClass implements ServletContextListener {
+	
+	private static Logger log = Logger.getLogger(ServletContextClass.class.getName());
 
 	public void contextInitialized(ServletContextEvent arg0) {
 		System.out.println("[Arrowhead Core] Servlet deployed.");
+		log.info("[Arrowhead Core] Servlet redeployed.");
 
 		// Access Hibernate config data
 		Configuration configuration = new Configuration().configure("hibernate.cfg.xml");

@@ -189,15 +189,15 @@ public class OrchestratorService {
 	 * @return ServiceQueryResult
 	 */
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, ServiceRequestForm srf) {
-		System.out.println("orchestator: inside the getServiceQueryResult function");
+		log.info("orchestator: inside the getServiceQueryResult function");
 		ArrowheadService as = srf.getRequestedService();
 		String strtarget = sysConfig.getServiceRegistryURI() + "/" + as.getServiceGroup() + "/"
 				+ as.getServiceDefinition();
-		System.out.println("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
+		log.info("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
 		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
-		System.out.println("orchestrator received the following services from the SR:");
+		log.info("orchestrator received the following services from the SR:");
 		for (ProvidedService providedService : sqr.getServiceQueryData()) {
 			System.out.println(
 					providedService.getProvider().getSystemGroup() + providedService.getProvider().getSystemName());
@@ -213,14 +213,14 @@ public class OrchestratorService {
 	 * @return AuthorizationResponse
 	 */
 	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq, ServiceRequestForm srf) {
-		System.out.println("orchestrator: inside the getAuthorizationResponse function");
+		log.info("orchestrator: inside the getAuthorizationResponse function");
 		String strtarget = sysConfig.getAuthorizationURI() + "/SystemGroup/" + srf.getRequesterSystem().getSystemGroup()
 				+ "/System/" + srf.getRequesterSystem().getSystemName();
-		System.out.println("orchestrator: sending AuthReq to this address: " + strtarget);
+		log.info("orchestrator: sending AuthReq to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(authReq));
 		IntraCloudAuthResponse authResp = response.readEntity(IntraCloudAuthResponse.class);
-		System.out.println("orchestrator received the following services from the AR:");
+		log.info("orchestrator received the following services from the AR:");
 		for (ArrowheadSystem ahsys : authResp.getAuthorizationMap().keySet()) {
 			System.out.println("System: " + ahsys.getSystemGroup() + ahsys.getSystemName());
 			System.out.println("Value: " + authResp.getAuthorizationMap().get(ahsys));
@@ -236,7 +236,7 @@ public class OrchestratorService {
 	 * @return QoSVerificationResponse
 	 */
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
-		System.out.println("orchestrator: inside the getQoSVerificationResponse function");
+		log.info("orchestrator: inside the getQoSVerificationResponse function");
 		// TODO: get address from database
 		// String strtarget = "http://localhost:8080/core/QoSManager/QoSVerify";
 		String strtarget = sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSVerify";
@@ -252,7 +252,7 @@ public class OrchestratorService {
 	 * @return boolean indicating that the reservation completed successfully
 	 */
 	private QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
-		System.out.println("orchestrator: inside the doQoSReservation function");
+		log.info("orchestrator: inside the doQoSReservation function");
 		// TODO: get address from database
 		String strtarget = sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSReserve";
 		// String strtarget =

@@ -59,7 +59,9 @@ public class OrchestratorResource {
 			log.info("ServiceRequestForm not found in request payload.");
 			return Response.status(Status.BAD_REQUEST).build();
 		} else {
+			log.info("Creating SRF from payload: "+serviceRequestForm.toString());
 			orchestratorService = new OrchestratorService(serviceRequestForm);
+			log.info("SRF created.");
 			isInterCloud = orchestratorService.isInterCloud();
 		}
 
