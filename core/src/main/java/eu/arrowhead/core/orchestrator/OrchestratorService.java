@@ -161,20 +161,30 @@ public class OrchestratorService {
 		log.info("Initiating global service discovery.");
 		gsdRequestForm = new GSDRequestForm(serviceRequestForm.getRequestedService());
 		gsdResult = getGSDResult(gsdRequestForm);
+		if (gsdResult.getResponse().isEmpty()){
+			log.info("orchestrator: Didn't receive any GSDEntry, returnin null");
+			return null;
+		}
+		log.info("orchestrator: Got the results from the Gatekeeper");
 
 		// Putting an ICN Request Form to every single matching cloud
 		log.info("Processing global service discovery data.");
 		for (GSDEntry entry : gsdResult.getResponse()) {
 			// ICN Request for each cloud contained in an Entry
+			log.info("Sendin ICN to the following cloud: " + entry.getCloud().getName());
 			icnResultForm = getICNResultForm(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
 					"authenticationInfo", entry.getCloud(),this.serviceRequestForm.getRequesterSystem()));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
 			for (OrchestrationForm of : icnResultForm.getInstructions().getResponse()) {
+				log.info("Adding the following ServiceURI: " + of.getServiceURI());
 				responseFormList.add(of);
 			}
 		}
-		
+		if (responseFormList.isEmpty()){
+			log.info("orchestrator: Didn't receive any OrchestrationForms, returning null");
+			return null;
+		}
 		// Creating the response
 		log.info("Creating orchestration response.");
 		orchResponse = new OrchestrationResponse(responseFormList);
@@ -277,10 +287,12 @@ public class OrchestratorService {
 	 * @return GSDResult
 	 */
 	private GSDResult getGSDResult(GSDRequestForm gsdRequestForm) {
+		log.info("orchestrator: inside the getGSDResult function");
 		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_gsd";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(gsdRequestForm));
+		log.info("orchestrator: received response from the GateKeeper, returning");
 		return response.readEntity(GSDResult.class);
 	}
 
@@ -292,6 +304,7 @@ public class OrchestratorService {
 	 * @return ICNResultForm
 	 */
 	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
+		log.info("orchestrator: inside the getICNResultForm function");
 		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_icn";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
