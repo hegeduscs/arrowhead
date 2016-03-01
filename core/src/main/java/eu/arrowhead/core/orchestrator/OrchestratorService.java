@@ -82,6 +82,10 @@ public class OrchestratorService {
 		log.info("Polling the Service Registry.");
 		srvQueryResult = getServiceQueryResult(srvQueryForm, this.serviceRequestForm);
 		provservices = srvQueryResult.getServiceQueryData();
+		if (provservices.isEmpty()){
+			log.info("Could not find any matching providers");
+			return null;
+		}
 		for (ProvidedService providedService : provservices) {
 			providers.add(providedService.getProvider());
 		}
@@ -116,7 +120,6 @@ public class OrchestratorService {
 			// Reserve QoS resources
 			log.info("Reserving QoS resources.");
 			selectedSystem = providers.get(0); // temporarily selects the first
-												// fit System
 			qosReservation = new QoSReserve(selectedSystem, this.serviceRequestForm.getRequesterSystem(),
 					"requestedQoS", this.serviceRequestForm.getRequestedService());
 			qosReservationResponse = doQosReservation(qosReservation);
@@ -196,6 +199,13 @@ public class OrchestratorService {
 		log.info("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
+		log.info("The data of the ServiceQueryForm: ");
+		log.info("Metadata: " + sqf.getServiceMetaData());
+		log.info("The TSIG_key: " + sqf.getTsig_key());
+		log.info("The service interfaces: ");
+		for (String str : sqf.getServiceInterfaces()){
+			log.info("Service interface: " + str);
+		}
 		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
 		log.info("orchestrator received the following services from the SR:");
 		for (ProvidedService providedService : sqr.getServiceQueryData()) {
@@ -237,9 +247,8 @@ public class OrchestratorService {
 	 */
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
 		log.info("orchestrator: inside the getQoSVerificationResponse function");
-		// TODO: get address from database
-		// String strtarget = "http://localhost:8080/core/QoSManager/QoSVerify";
-		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSVerify";
+		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSVerify";
+		log.info("orchestrator: sending QoSVerify to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
 		return response.readEntity(QoSVerificationResponse.class);
@@ -253,10 +262,8 @@ public class OrchestratorService {
 	 */
 	private QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
 		log.info("orchestrator: inside the doQoSReservation function");
-		// TODO: get address from database
-		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSReserve";
-		// String strtarget =
-		// "http://localhost:8080/core/QoSManager/QoSReserve";
+		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSReserve";
+		log.info("orchestrator: sending QoSReserve to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
 		return response.readEntity(QoSReservationResponse.class);
@@ -302,8 +309,7 @@ public class OrchestratorService {
 		for (String str : serviceRequestForm.getOrchestrationFlags().keySet()){
 			log.info("Key name: " + str + ", key value " + serviceRequestForm.getOrchestrationFlags().get(str));
 		}
-		return false;
-		//return this.serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud");
+		return this.serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud");
 	}
 
 	public Boolean isExternal() {

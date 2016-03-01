@@ -106,7 +106,6 @@ public class OrchestratorResource {
 			log.info("Orchestration process finished successfully.");
 			return Response.status(Status.OK).entity(orchResponse).build();
 		}
-
 		// Returning error in case of a problem.
 		log.info("Error occured during orchestration process.");
 		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
