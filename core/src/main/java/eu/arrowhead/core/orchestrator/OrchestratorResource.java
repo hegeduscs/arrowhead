@@ -1,5 +1,8 @@
 package eu.arrowhead.core.orchestrator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,6 +16,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 
+import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 
@@ -37,6 +42,24 @@ public class OrchestratorResource {
 	public Response getOrchestration() {
 		log.info("Orchestrator cannot be reached through GET methods.");
 		return Response.status(Status.BAD_REQUEST).build();
+	}
+	
+	@GET
+	@Path("/example")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response example() {
+		ArrowheadService requestedService = new ArrowheadService();
+		ArrowheadSystem requesterSystem = new ArrowheadSystem();
+		Map<String, Boolean> orchestrationFlags = new HashMap<>();
+		orchestrationFlags.put("matchmaking", false);
+		orchestrationFlags.put("externalServiceRequest", false);
+		orchestrationFlags.put("triggerInterCloud", false);
+		orchestrationFlags.put("metadataSearch", false);
+		orchestrationFlags.put("pingProvider", false);
+		Response resp = Response.status(Status.OK).entity(new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, orchestrationFlags)).build();
+		
+		//return resp.readEntity(ServiceRequestForm.class).toString();
+		return resp;
 	}
 
 	/**

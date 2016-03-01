@@ -270,7 +270,7 @@ public class OrchestratorService {
 	 * @return GSDResult
 	 */
 	private GSDResult getGSDResult(GSDRequestForm gsdRequestForm) {
-		String strtarget = sysConfig.getGatekeeperURI() + "/init_gsd";
+		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_gsd";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(gsdRequestForm));
@@ -285,7 +285,7 @@ public class OrchestratorService {
 	 * @return ICNResultForm
 	 */
 	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
-		String strtarget = sysConfig.getGatekeeperURI() + "/init_icn";
+		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_icn";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(icnRequestForm));

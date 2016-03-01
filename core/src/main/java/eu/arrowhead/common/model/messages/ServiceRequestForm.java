@@ -16,8 +16,6 @@ public class ServiceRequestForm {
 	private ArrowheadSystem requesterSystem;
 	private Map<String, Boolean> orchestrationFlags = new HashMap<>();
 	
-	// TODO
-	
 	public ServiceRequestForm (){
 		super();
 	}
