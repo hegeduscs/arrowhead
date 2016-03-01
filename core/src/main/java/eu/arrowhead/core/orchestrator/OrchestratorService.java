@@ -82,6 +82,10 @@ public class OrchestratorService {
 		log.info("Polling the Service Registry.");
 		srvQueryResult = getServiceQueryResult(srvQueryForm, this.serviceRequestForm);
 		provservices = srvQueryResult.getServiceQueryData();
+		if (provservices.isEmpty()){
+			log.info("Could not find any matching providers");
+			return null;
+		}
 		for (ProvidedService providedService : provservices) {
 			providers.add(providedService.getProvider());
 		}
@@ -116,7 +120,6 @@ public class OrchestratorService {
 			// Reserve QoS resources
 			log.info("Reserving QoS resources.");
 			selectedSystem = providers.get(0); // temporarily selects the first
-												// fit System
 			qosReservation = new QoSReserve(selectedSystem, this.serviceRequestForm.getRequesterSystem(),
 					"requestedQoS", this.serviceRequestForm.getRequestedService());
 			qosReservationResponse = doQosReservation(qosReservation);
@@ -158,20 +161,30 @@ public class OrchestratorService {
 		log.info("Initiating global service discovery.");
 		gsdRequestForm = new GSDRequestForm(serviceRequestForm.getRequestedService());
 		gsdResult = getGSDResult(gsdRequestForm);
+		if (gsdResult.getResponse().isEmpty()){
+			log.info("orchestrator: Didn't receive any GSDEntry, returnin null");
+			return null;
+		}
+		log.info("orchestrator: Got the results from the Gatekeeper");
 
 		// Putting an ICN Request Form to every single matching cloud
 		log.info("Processing global service discovery data.");
 		for (GSDEntry entry : gsdResult.getResponse()) {
 			// ICN Request for each cloud contained in an Entry
+			log.info("Sendin ICN to the following cloud: " + entry.getCloud().getName());
 			icnResultForm = getICNResultForm(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
 					"authenticationInfo", entry.getCloud(),this.serviceRequestForm.getRequesterSystem()));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
 			for (OrchestrationForm of : icnResultForm.getInstructions().getResponse()) {
+				log.info("Adding the following ServiceURI: " + of.getServiceURI());
 				responseFormList.add(of);
 			}
 		}
-		
+		if (responseFormList.isEmpty()){
+			log.info("orchestrator: Didn't receive any OrchestrationForms, returning null");
+			return null;
+		}
 		// Creating the response
 		log.info("Creating orchestration response.");
 		orchResponse = new OrchestrationResponse(responseFormList);
@@ -196,6 +209,13 @@ public class OrchestratorService {
 		log.info("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
+		log.info("The data of the ServiceQueryForm: ");
+		log.info("Metadata: " + sqf.getServiceMetaData());
+		log.info("The TSIG_key: " + sqf.getTsig_key());
+		log.info("The service interfaces: ");
+		for (String str : sqf.getServiceInterfaces()){
+			log.info("Service interface: " + str);
+		}
 		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
 		log.info("orchestrator received the following services from the SR:");
 		for (ProvidedService providedService : sqr.getServiceQueryData()) {
@@ -237,9 +257,8 @@ public class OrchestratorService {
 	 */
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
 		log.info("orchestrator: inside the getQoSVerificationResponse function");
-		// TODO: get address from database
-		// String strtarget = "http://localhost:8080/core/QoSManager/QoSVerify";
-		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSVerify";
+		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSVerify";
+		log.info("orchestrator: sending QoSVerify to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
 		return response.readEntity(QoSVerificationResponse.class);
@@ -253,10 +272,8 @@ public class OrchestratorService {
 	 */
 	private QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
 		log.info("orchestrator: inside the doQoSReservation function");
-		// TODO: get address from database
-		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSReserve";
-		// String strtarget =
-		// "http://localhost:8080/core/QoSManager/QoSReserve";
+		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSReserve";
+		log.info("orchestrator: sending QoSReserve to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
 		return response.readEntity(QoSReservationResponse.class);
@@ -270,10 +287,12 @@ public class OrchestratorService {
 	 * @return GSDResult
 	 */
 	private GSDResult getGSDResult(GSDRequestForm gsdRequestForm) {
+		log.info("orchestrator: inside the getGSDResult function");
 		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_gsd";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(gsdRequestForm));
+		log.info("orchestrator: received response from the GateKeeper, returning");
 		return response.readEntity(GSDResult.class);
 	}
 
@@ -285,6 +304,7 @@ public class OrchestratorService {
 	 * @return ICNResultForm
 	 */
 	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
+		log.info("orchestrator: inside the getICNResultForm function");
 		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_icn";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
@@ -302,8 +322,7 @@ public class OrchestratorService {
 		for (String str : serviceRequestForm.getOrchestrationFlags().keySet()){
 			log.info("Key name: " + str + ", key value " + serviceRequestForm.getOrchestrationFlags().get(str));
 		}
-		return false;
-		//return this.serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud");
+		return this.serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud");
 	}
 
 	public Boolean isExternal() {
