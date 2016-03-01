@@ -299,11 +299,11 @@ public class OrchestratorService {
 	 * @return Boolean
 	 */
 	public Boolean isInterCloud() {
-		return this.serviceRequestForm.getOrchestrationFlags().get("TriggerInterCloud");
+		return this.serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud");
 	}
 
 	public Boolean isExternal() {
-		return this.serviceRequestForm.getOrchestrationFlags().get("ExternalServiceRequest");
+		return this.serviceRequestForm.getOrchestrationFlags().get("externalServiceRequest");
 	}
 
 }

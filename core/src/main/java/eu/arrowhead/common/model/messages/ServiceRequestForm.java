@@ -29,11 +29,11 @@ public class ServiceRequestForm {
 		RequestedQoS = requestedQoS;
 		RequesterSystem = requesterSystem;
 		ServicingLength = servicingLength;
-		OrchestrationFlags.put("Matchmaking", false);
-		OrchestrationFlags.put("ExternalServiceRequest", false);
-		OrchestrationFlags.put("TriggerInterCloud", false);
-		OrchestrationFlags.put("MetadataSearch", false);
-		OrchestrationFlags.put("PingProvider", false);
+		OrchestrationFlags.put("matchmaking", false);
+		OrchestrationFlags.put("externalServiceRequest", false);
+		OrchestrationFlags.put("triggerInterCloud", false);
+		OrchestrationFlags.put("metadataSearch", false);
+		OrchestrationFlags.put("pingProvider", false);
 	}
 	
 	
