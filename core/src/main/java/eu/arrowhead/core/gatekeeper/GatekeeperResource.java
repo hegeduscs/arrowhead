@@ -172,7 +172,7 @@ public class GatekeeperResource {
     	System.out.println(uri);
 
     	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
-    	log.info("Sending an interAuthRequest to Authorization");
+    	log.info("Sending an interAuthRequest to Authorization: " + uri);
     	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(requesterCloud.getAuthenticationInfo(), requestedService, false);
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(uri); 
@@ -181,9 +181,10 @@ public class GatekeeperResource {
 	    		.header("Content-type", "application/json")
 	    		.put(Entity.json(interAuthRequest)); 
 
-	    boolean respAuth;
-	    respAuth = response.readEntity(Boolean.class);
-	    log.info("Response from the Authorization in GSD: " + Boolean.toString(respAuth));
+	    String respAuth;
+	    log.info("Response from the Auth");
+	    respAuth = response.readEntity(String.class);
+	    log.info("Response from the Authorization in GSD: " + respAuth);
 	    
     	
 	    	// Generate a ServiceQueryForm from GSDPoll to send it to the Service Registry
@@ -296,9 +297,11 @@ public class GatekeeperResource {
 	    		.request()
 	    		.header("Content-type", "application/json")
 	    		.put(Entity.json(interAuthRequest));
-	    boolean respAuth;
-	    respAuth = response.readEntity(Boolean.class);
-	    log.info("Response from the Authorization in ICN: " + Boolean.toString(respAuth));
+
+	    String respAuth;
+	    log.info("Response from the Auth");
+	    respAuth = response.readEntity(String.class);
+	    log.info("Response from the Authorization in ICN: " + respAuth);
 	    
 	    	
 	    	// Send a HTTP POST to Orchestrator

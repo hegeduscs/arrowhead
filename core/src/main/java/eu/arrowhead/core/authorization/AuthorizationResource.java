@@ -98,7 +98,7 @@ public class AuthorizationResource {
 	@PUT
 	@Path("/operator/{operatorName}/cloud/{cloudName}")
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON })
-	public Boolean isCloudAuthorized(@PathParam("operatorName") String operatorName,
+	public String isCloudAuthorized(@PathParam("operatorName") String operatorName,
 			@PathParam("cloudName") String cloudName, InterCloudAuthRequest request,
 			@Context HttpServletRequest httpRequest) {
 		/*
@@ -116,7 +116,8 @@ public class AuthorizationResource {
 				requestedServiceModel.getMetaData());
 		ArrowheadCloud arrowheadCloud = databaseManager.getCloudByName(operatorName, cloudName);
 		if (arrowheadCloud == null)
-			return false;
+			
+			return "false";
 		boolean isAuthorized = false;
 		List<ArrowheadService> retrievedCloudServices = (List<ArrowheadService>) arrowheadCloud.getServiceList();
 		for (int j = 0; j < retrievedCloudServices.size(); j++) {
@@ -125,7 +126,8 @@ public class AuthorizationResource {
 		}
 
 		log.info("Authorization rights requested for Cloud: " + cloudName);
-		return isAuthorized;
+		if (isAuthorized == true) return "true";
+		else return "false";
 	}
 
 	/**
