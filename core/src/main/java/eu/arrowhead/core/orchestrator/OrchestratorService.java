@@ -65,6 +65,7 @@ public class OrchestratorService {
 	public OrchestrationResponse localOrchestration() {
 		ServiceQueryForm srvQueryForm = new ServiceQueryForm(this.serviceRequestForm);
 		srvQueryForm.setTsig_key("RIuxP+vb5GjLXJo686NvKQ==");
+		ArrowheadService srv = null;
 		ServiceQueryResult srvQueryResult;
 		IntraCloudAuthRequest authReq;
 		IntraCloudAuthResponse authResp;
@@ -134,8 +135,11 @@ public class OrchestratorService {
 		// Required for the Demo
 		log.info("Creating orchestration forms.");
 		for (ProvidedService provservice : provservices) {
-			responseFormList.add(new OrchestrationForm(this.serviceRequestForm.getRequestedService(),
-					provservice.getProvider(), provservice.getServiceURI(), "authorizationInfo"));
+			//Setting the correct interface list for the Form
+			srv = this.serviceRequestForm.getRequestedService();
+			srv.getInterfaces().clear();
+			srv.getInterfaces().add(provservice.getServiceInterface());
+			responseFormList.add(new OrchestrationForm(srv, provservice.getProvider(), provservice.getServiceURI(), "authorizationInfo"));
 		}
 		return new OrchestrationResponse(responseFormList);
 	}
