@@ -244,7 +244,7 @@ public class AuthorizationResource {
      */
     @PUT
     @Path("/systemgroup/{systemGroup}/system/{systemName}")
-    public IntraCloudAuthResponse isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
+    public Response isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
     		@PathParam("systemName") String systemName, IntraCloudAuthRequest request){
     	if(!request.isPayloadUsable()){
     		throw new BadPayloadException("Bad payload: Missing arrowheadService, authenticationInfo"
@@ -267,7 +267,7 @@ public class AuthorizationResource {
     			authorizationMap.put(provider, false);
     		}
     		response.setAuthorizationMap(authorizationMap);
-    		return response;
+    		return Response.status(Status.OK).entity(response).build();
     	}
     	
     	for(eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviderList()){
@@ -284,7 +284,7 @@ public class AuthorizationResource {
     	
     	log.info("Authorization rights requested for System: " + systemName);
     	response.setAuthorizationMap(authorizationMap);
-    	return response;
+    	return Response.status(Status.OK).entity(response).build();
     }
     
     /**

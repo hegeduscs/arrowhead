@@ -3,9 +3,12 @@ package eu.arrowhead.common.model.messages;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 
+@XmlRootElement
 public class IntraCloudAuthRequest {
 	
 	private String authenticationInfo; //consumers

@@ -1,24 +1,46 @@
 package eu.arrowhead.common.model.messages;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
 
+@XmlRootElement
 public class ICNRequestForm {
 
 	private ArrowheadService requestedService;
 	private String authenticationInfo;
 	private ArrowheadCloud targetCloud;
+	private ArrowheadSystem requesterSystem;
+	
+	
 
 	public ICNRequestForm() {
 		super();
+		// TODO Auto-generated constructor stub
 	}
 
-	public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud targetCloud) {
+	
+	public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud targetCloud,
+			ArrowheadSystem requesterSystem) {
 		super();
 		this.requestedService = requestedService;
 		this.authenticationInfo = authenticationInfo;
 		this.targetCloud = targetCloud;
+		this.requesterSystem = requesterSystem;
 	}
+	
+	
+	public ArrowheadSystem getRequesterSystem() {
+		return requesterSystem;
+	}
+
+
+	public void setRequesterSystem(ArrowheadSystem requesterSystem) {
+		this.requesterSystem = requesterSystem;
+	}
+
 
 	public ArrowheadService getRequestedService() {
 		return requestedService;
