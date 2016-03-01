@@ -164,7 +164,7 @@ public class OrchestratorService {
 		for (GSDEntry entry : gsdResult.getResponse()) {
 			// ICN Request for each cloud contained in an Entry
 			icnResultForm = getICNResultForm(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
-					"authenticationInfo", entry.getCloud()));
+					"authenticationInfo", entry.getCloud(),this.serviceRequestForm.getRequesterSystem()));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
 			for (OrchestrationForm of : icnResultForm.getInstructions().getResponse()) {
