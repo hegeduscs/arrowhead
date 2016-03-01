@@ -273,7 +273,7 @@ public class GatekeeperResource {
 //	    if(response.readEntity(Boolean.class)){
 	    	
 	    	// Send a HTTP POST to Orchestrator
-    		ServiceRequestForm serviceRequestForm = new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, 5);
+    		ServiceRequestForm serviceRequestForm = new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem);
 			
 			Client client2 = ClientBuilder.newClient();
 

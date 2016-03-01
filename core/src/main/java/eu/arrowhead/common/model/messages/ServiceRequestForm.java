@@ -11,80 +11,68 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 @XmlRootElement
 public class ServiceRequestForm {
 
-	ArrowheadService RequestedService;
-	String RequestedQoS;
-	ArrowheadSystem RequesterSystem;
-	int ServicingLength;
-	Map<String, Boolean> OrchestrationFlags = new HashMap<>();
+	private ArrowheadService requestedService;
+	private String requestedQoS;
+	private ArrowheadSystem requesterSystem;
+	private Map<String, Boolean> orchestrationFlags = new HashMap<>();
 	
 	// TODO
 	
 	public ServiceRequestForm (){
-		
+		super();
 	}
 
-	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, ArrowheadSystem requesterSystem,
-			int servicingLength) {
-		RequestedService = requestedService;
-		RequestedQoS = requestedQoS;
-		RequesterSystem = requesterSystem;
-		ServicingLength = servicingLength;
-		OrchestrationFlags.put("matchmaking", false);
-		OrchestrationFlags.put("externalServiceRequest", false);
-		OrchestrationFlags.put("triggerInterCloud", false);
-		OrchestrationFlags.put("metadataSearch", false);
-		OrchestrationFlags.put("pingProvider", false);
+	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, ArrowheadSystem requesterSystem) {
+		this.requestedService = requestedService;
+		this.requestedQoS = requestedQoS;
+		this.requesterSystem = requesterSystem;
+		this.orchestrationFlags.put("matchmaking", false);
+		this.orchestrationFlags.put("externalServiceRequest", false);
+		this.orchestrationFlags.put("triggerInterCloud", false);
+		this.orchestrationFlags.put("metadataSearch", false);
+		this.orchestrationFlags.put("pingProvider", false);
 	}
 	
 	
 
 	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, ArrowheadSystem requesterSystem,
-		int servicingLength, Map<String, Boolean> orchestrationFlags) {
-		RequestedService = requestedService;
-		RequestedQoS = requestedQoS;
-		RequesterSystem = requesterSystem;
-		ServicingLength = servicingLength;
-		OrchestrationFlags = orchestrationFlags;
+		Map<String, Boolean> orchestrationFlags) {
+		this.requestedService = requestedService;
+		this.requestedQoS = requestedQoS;
+		this.requesterSystem = requesterSystem;
+		this.orchestrationFlags = orchestrationFlags;
 	}
 
 	public ArrowheadService getRequestedService() {
-		return RequestedService;
+		return requestedService;
 	}
 
 	public void setRequestedService(ArrowheadService requestedService) {
-		RequestedService = requestedService;
+		this.requestedService = requestedService;
 	}
 
 	public String getRequestedQoS() {
-		return RequestedQoS;
+		return requestedQoS;
 	}
 
 	public void setRequestedQoS(String requestedQoS) {
-		RequestedQoS = requestedQoS;
+		this.requestedQoS = requestedQoS;
 	}
 
 	public ArrowheadSystem getRequesterSystem() {
-		return RequesterSystem;
+		return requesterSystem;
 	}
 
 	public void setRequesterSystem(ArrowheadSystem requesterSystem) {
-		RequesterSystem = requesterSystem;
-	}
-
-	public int getServicingLength() {
-		return ServicingLength;
-	}
-
-	public void setServicingLength(int servicingLength) {
-		ServicingLength = servicingLength;
+		this.requesterSystem = requesterSystem;
 	}
 
 	public Map<String, Boolean> getOrchestrationFlags() {
-		return OrchestrationFlags;
+		return orchestrationFlags;
 	}
 
 	public void setOrchestrationFlags(Map<String, Boolean> orchestrationFlags) {
-		OrchestrationFlags = orchestrationFlags;
+		this.orchestrationFlags = orchestrationFlags;
 	}
 	
 	
