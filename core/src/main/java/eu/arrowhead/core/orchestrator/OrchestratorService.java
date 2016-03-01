@@ -162,7 +162,7 @@ public class OrchestratorService {
 		gsdRequestForm = new GSDRequestForm(serviceRequestForm.getRequestedService());
 		gsdResult = getGSDResult(gsdRequestForm);
 		if (gsdResult.getResponse().isEmpty()){
-			log.info("orchestrator: Didn't receive any GSDEntry, returning null");
+			log.info("bad");
 			return null;
 		}
 		log.info("orchestrator: Got the results from the Gatekeeper");
@@ -182,7 +182,7 @@ public class OrchestratorService {
 			}
 		}
 		if (responseFormList.isEmpty()){
-			log.info("orchestrator: Didn't receive any OrchestrationForms, returning null");
+			log.info("badbad");
 			return null;
 		}
 		// Creating the response
