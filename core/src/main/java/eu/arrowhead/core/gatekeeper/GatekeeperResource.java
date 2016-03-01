@@ -76,9 +76,15 @@ public class GatekeeperResource {
     @PUT
     @Path("/init_gsd/")
     public GSDResult sendRequest(GSDRequestForm gsdRequest){
+    	log.info("Inside the GateKeeper");
+    	String random = sysConfig.getAuthorizationURI();
+    	log.info("Sysconfig");
     	
     	ArrowheadCloud cloud = sysConfig.getInternalCloud();
+    	
+    	log.info("Got the cloud info");
     	GSDPoll gsdPoll = new GSDPoll();
+    	log.info("Created gsdPoll");
     	
     	//Test GSDPoll
     	if(gsdRequest==null) {
@@ -88,7 +94,7 @@ public class GatekeeperResource {
     	}
     	
     	else {
-    		System.out.println("Existing GSDPoll, starting to find provider service");
+    		log.info("Existing GSDPoll, starting to find provider service");
     		gsdPoll = new GSDPoll(gsdRequest.getRequestedService(),cloud);}
     	
     	

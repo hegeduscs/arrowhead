@@ -198,8 +198,10 @@ public class SysConfig {
 	}
 	
 	public ArrowheadCloud getInternalCloud(){
-		List<InternalCloud> cloudList = getAll(InternalCloud.class);
+		List<InternalCloud> cloudList = new ArrayList<InternalCloud>();
+		cloudList = getAll(InternalCloud.class);
 		InternalCloud retrievedCloud = cloudList.get(0);
+		
 		ArrowheadCloud internalCloud = new ArrowheadCloud();
 		internalCloud.setOperator(retrievedCloud.getOperator());
 		internalCloud.setName(retrievedCloud.getCloudName());

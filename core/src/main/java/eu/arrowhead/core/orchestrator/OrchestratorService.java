@@ -288,7 +288,8 @@ public class OrchestratorService {
 	 */
 	private GSDResult getGSDResult(GSDRequestForm gsdRequestForm) {
 		log.info("orchestrator: inside the getGSDResult function");
-		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_gsd";
+		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_gsd/";
+		log.info("orchestrator: sent GSDRequestForm to the following: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(gsdRequestForm));
@@ -305,7 +306,7 @@ public class OrchestratorService {
 	 */
 	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
 		log.info("orchestrator: inside the getICNResultForm function");
-		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_icn";
+		String strtarget = "http://"+sysConfig.getGatekeeperURI() + "/init_icn/";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(icnRequestForm));
