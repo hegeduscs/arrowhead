@@ -12,11 +12,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log4j.Logger;
+
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.QoSReservationResponse;
 import eu.arrowhead.common.model.messages.QoSReserve;
 import eu.arrowhead.common.model.messages.QoSVerificationResponse;
 import eu.arrowhead.common.model.messages.QoSVerify;
+import eu.arrowhead.core.authorization.AuthorizationResource;
 
 /**
  * @author pardavib, mereszd
@@ -29,6 +32,8 @@ public class QoSResource {
 
 	private Map<ArrowheadSystem, Boolean> qosMap = new HashMap<ArrowheadSystem, Boolean>();
 	private Map<ArrowheadSystem, String> reject = new HashMap<ArrowheadSystem, String>();
+	
+	private static Logger log = Logger.getLogger(QoSResource.class.getName());
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
@@ -39,18 +44,20 @@ public class QoSResource {
 	@PUT
 	@Path("/QoSVerify")
 	public Response qosVerification(QoSVerify qosVerify) {
-		System.out.println("qosservice: inside the qosVerification method");
+		log.info("QoS: Verifying QoS paramteres.");
 		//Every system is okay, the reject map is empty
 		for (ArrowheadSystem system : qosVerify.getProvider()) {
 			qosMap.put(system, true);
 		}
 		QoSVerificationResponse qvr = new QoSVerificationResponse(qosMap, reject);
+		log.info("QoS: QoS paramteres verified.");
 		return Response.status(Status.OK).entity(qvr).build();
 	}
 
 	@PUT
 	@Path("/QoSReserve")
 	public Response qosReservation(QoSReserve qosReservation) {
+		log.info("QoS: Reserving resouces.");
 		QoSReservationResponse qosrr = new QoSReservationResponse(true);
 		return Response.status(Status.OK).entity(qosrr).build();
 	}
