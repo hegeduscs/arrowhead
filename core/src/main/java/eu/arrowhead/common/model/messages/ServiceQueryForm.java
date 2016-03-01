@@ -30,8 +30,8 @@ public class ServiceQueryForm {
 	public ServiceQueryForm(ServiceRequestForm srf){
 		this.serviceMetaData = srf.getRequestedService().getMetaData();
 		this.serviceInterfaces = srf.getRequestedService().getInterfaces();
-		this.pingProviders = srf.getOrchestrationFlags().get("PingProvider");
-		this.metadataSearch = srf.getOrchestrationFlags().get("MetadataSearch");
+		this.pingProviders = srf.getOrchestrationFlags().get("pingProvider");
+		this.metadataSearch = srf.getOrchestrationFlags().get("metadataSearch");
 		this.tsig_key ="DUMMY"; // FROM CONFIGURATION
 	}
 
