@@ -13,6 +13,7 @@ import org.hibernate.exception.ConstraintViolationException;
 
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
+import eu.arrowhead.common.model.ArrowheadCloud;
 
 public class SysConfig {
 	 
@@ -162,6 +163,8 @@ public class SysConfig {
         }	
 	}
 	
+	//TODO make available these methods via rest calls too
+	
 	public String getOrchestratorURI(){
 		CoreSystem orchestration = getSystem("orchestration");
 		return orchestration.getIPAddress() + orchestration.getPort() + orchestration.getServiceURI();
@@ -192,6 +195,20 @@ public class SysConfig {
 		}
 		
 		return URIList;
+	}
+	
+	public ArrowheadCloud getInternalCloud(){
+		List<InternalCloud> cloudList = getAll(InternalCloud.class);
+		InternalCloud retrievedCloud = cloudList.get(0);
+		ArrowheadCloud internalCloud = new ArrowheadCloud();
+		internalCloud.setOperator(retrievedCloud.getOperator());
+		internalCloud.setName(retrievedCloud.getCloudName());
+		internalCloud.setGatekeeperIP(retrievedCloud.getIPAddress());
+		internalCloud.setGatekeeperPort(retrievedCloud.getPort());
+		internalCloud.setGatekeeperURI(retrievedCloud.getServiceURI());
+		internalCloud.setAuthenticationInfo(retrievedCloud.getAuthenticationInfo());
+		
+		return internalCloud;
 	}
 	
 }

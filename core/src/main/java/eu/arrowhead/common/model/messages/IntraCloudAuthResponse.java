@@ -2,8 +2,11 @@ package eu.arrowhead.common.model.messages;
 
 import java.util.HashMap;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import eu.arrowhead.common.model.ArrowheadSystem;
 
+@XmlRootElement
 public class IntraCloudAuthResponse {
 	
 	private HashMap<ArrowheadSystem, Boolean> authorizationMap = new HashMap<ArrowheadSystem, Boolean>();
@@ -16,7 +19,7 @@ public class IntraCloudAuthResponse {
 		super();
 		this.authorizationMap = authorizationMap;
 	}
-
+	
 	public HashMap<ArrowheadSystem, Boolean> getAuthorizationMap() {
 		return authorizationMap;
 	}
@@ -24,7 +27,7 @@ public class IntraCloudAuthResponse {
 	public void setAuthorizationMap(HashMap<ArrowheadSystem, Boolean> authorizationMap) {
 		this.authorizationMap = authorizationMap;
 	}
-	
+
 	public boolean isPayloadUsable(){
 		if(authorizationMap.isEmpty())
 			return false;

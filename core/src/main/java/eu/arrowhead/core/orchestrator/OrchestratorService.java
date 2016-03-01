@@ -164,7 +164,7 @@ public class OrchestratorService {
 		for (GSDEntry entry : gsdResult.getResponse()) {
 			// ICN Request for each cloud contained in an Entry
 			icnResultForm = getICNResultForm(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
-					"authenticationInfo", entry.getCloud()));
+					"authenticationInfo", entry.getCloud(),this.serviceRequestForm.getRequesterSystem()));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
 			for (OrchestrationForm of : icnResultForm.getInstructions().getResponse()) {
@@ -191,7 +191,7 @@ public class OrchestratorService {
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, ServiceRequestForm srf) {
 		log.info("orchestator: inside the getServiceQueryResult function");
 		ArrowheadService as = srf.getRequestedService();
-		String strtarget = sysConfig.getServiceRegistryURI() + "/" + as.getServiceGroup() + "/"
+		String strtarget = "http://"+sysConfig.getServiceRegistryURI() + "/" + as.getServiceGroup() + "/"
 				+ as.getServiceDefinition();
 		log.info("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
 		WebTarget target = client.target(strtarget);
@@ -214,7 +214,7 @@ public class OrchestratorService {
 	 */
 	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq, ServiceRequestForm srf) {
 		log.info("orchestrator: inside the getAuthorizationResponse function");
-		String strtarget = sysConfig.getAuthorizationURI() + "/SystemGroup/" + srf.getRequesterSystem().getSystemGroup()
+		String strtarget = "http://"+sysConfig.getAuthorizationURI() + "/SystemGroup/" + srf.getRequesterSystem().getSystemGroup()
 				+ "/System/" + srf.getRequesterSystem().getSystemName();
 		log.info("orchestrator: sending AuthReq to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
@@ -239,7 +239,7 @@ public class OrchestratorService {
 		log.info("orchestrator: inside the getQoSVerificationResponse function");
 		// TODO: get address from database
 		// String strtarget = "http://localhost:8080/core/QoSManager/QoSVerify";
-		String strtarget = sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSVerify";
+		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSVerify";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
 		return response.readEntity(QoSVerificationResponse.class);
@@ -254,7 +254,7 @@ public class OrchestratorService {
 	private QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
 		log.info("orchestrator: inside the doQoSReservation function");
 		// TODO: get address from database
-		String strtarget = sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSReserve";
+		String strtarget = "http://"+sysConfig.getOrchestratorURI().replace("orchestration", "QoSManager") + "/QoSReserve";
 		// String strtarget =
 		// "http://localhost:8080/core/QoSManager/QoSReserve";
 		WebTarget target = client.target(strtarget);
@@ -299,7 +299,11 @@ public class OrchestratorService {
 	 * @return Boolean
 	 */
 	public Boolean isInterCloud() {
-		return this.serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud");
+		for (String str : serviceRequestForm.getOrchestrationFlags().keySet()){
+			log.info("Key name: " + str + ", key value " + serviceRequestForm.getOrchestrationFlags().get(str));
+		}
+		return false;
+		//return this.serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud");
 	}
 
 	public Boolean isExternal() {

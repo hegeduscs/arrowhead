@@ -43,7 +43,7 @@ public class OrchestratorResource {
 		log.info("Orchestrator cannot be reached through GET methods.");
 		return Response.status(Status.BAD_REQUEST).build();
 	}
-	
+
 	@GET
 	@Path("/example")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -56,9 +56,11 @@ public class OrchestratorResource {
 		orchestrationFlags.put("triggerInterCloud", false);
 		orchestrationFlags.put("metadataSearch", false);
 		orchestrationFlags.put("pingProvider", false);
-		Response resp = Response.status(Status.OK).entity(new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, orchestrationFlags)).build();
-		
-		//return resp.readEntity(ServiceRequestForm.class).toString();
+		Response resp = Response.status(Status.OK)
+				.entity(new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, orchestrationFlags))
+				.build();
+
+		// return resp.readEntity(ServiceRequestForm.class).toString();
 		return resp;
 	}
 
@@ -76,25 +78,27 @@ public class OrchestratorResource {
 		OrchestrationResponse orchResponse;
 
 		log.info("Entering orchestration process.");
-		
+
 		// Checking the existence of expected request payload
 		if (serviceRequestForm == null) {
 			log.info("ServiceRequestForm not found in request payload.");
 			return Response.status(Status.BAD_REQUEST).build();
 		} else {
-			log.info("Creating SRF from payload: "+serviceRequestForm.toString());
+			log.info("Creating SRF from payload: " + serviceRequestForm.toString());
 			orchestratorService = new OrchestratorService(serviceRequestForm);
 			log.info("SRF created.");
 			isInterCloud = orchestratorService.isInterCloud();
+			log.info("isIntercloud value is: " + isInterCloud.toString());
 		}
 
 		// Deciding on local or inter-cloud orchestration
 		if (isInterCloud) {
-			log.info("Local orchestration process initiated.");
-			orchResponse = orchestratorService.localOrchestration();
-		} else {
 			log.info("Intercloud orchestration process initiated.");
 			orchResponse = orchestratorService.intercloudOrchestration();
+
+		} else {
+			log.info("Local orchestration process initiated.");
+			orchResponse = orchestratorService.localOrchestration();
 		}
 
 		// Returning response if everything is OK.
