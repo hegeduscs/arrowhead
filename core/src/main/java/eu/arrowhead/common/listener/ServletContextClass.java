@@ -19,7 +19,6 @@ public class ServletContextClass implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent arg0) {
 		System.out.println("[Arrowhead Core] Servlet deployed.");
-		log.info("[Arrowhead Core] Servlet redeployed.");
 
 		// Access Hibernate config data
 		Configuration configuration = new Configuration().configure("hibernate.cfg.xml");
@@ -36,6 +35,8 @@ public class ServletContextClass implements ServletContextListener {
 		// Set appender and the appropriate log level
 		Logger.getRootLogger().addAppender(appender);
 		Logger.getRootLogger().setLevel(Level.DEBUG);
+		
+		log.info("[Arrowhead Core] Servlet redeployed.");
 
 	}
 
