@@ -3,8 +3,11 @@ package eu.arrowhead.common.model.messages;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import eu.arrowhead.common.model.ArrowheadCloud;
 
+@XmlRootElement
 public class GSDAnswer {
 
 	private List<ProvidedService> answer = new ArrayList<ProvidedService>();
