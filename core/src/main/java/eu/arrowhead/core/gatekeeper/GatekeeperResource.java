@@ -172,7 +172,7 @@ public class GatekeeperResource {
     	System.out.println(uri);
 
     	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
-    	log.info("Sending an interAuthRequest to Authorization");
+    	log.info("Sending an interAuthRequest to Authorization: " + uri);
     	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(requesterCloud.getAuthenticationInfo(), requestedService, false);
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(uri); 
@@ -180,7 +180,11 @@ public class GatekeeperResource {
 	    		.request()
 	    		.header("Content-type", "application/json")
 	    		.put(Entity.json(interAuthRequest)); 
-	    if(response.readEntity(Boolean.class)){
+
+	    String respAuth;
+	    log.info("Response from the Auth");
+	    respAuth = response.readEntity(String.class);
+	    log.info("Response from the Authorization in GSD: " + respAuth);
 	    
     	
 	    	// Generate a ServiceQueryForm from GSDPoll to send it to the Service Registry
@@ -199,12 +203,14 @@ public class GatekeeperResource {
 	    	}
 	    	else{
 	    		log.info("No ServiceQueryResult");
-	    		return null;}
-	    }else {
-	    	log.info("Not authorized cloud in GSD");
-	    	return null; 
-	    }
+	    		return null;
+	    		}
     }
+//	    }else {
+//	    	log.info("Not authorized cloud in GSD");
+//	    	return null; 
+//	    }
+//    }
 
     /**
      * This function represents the consumer-side ICN Proposal, where the consumer service matches
@@ -291,8 +297,11 @@ public class GatekeeperResource {
 	    		.request()
 	    		.header("Content-type", "application/json")
 	    		.put(Entity.json(interAuthRequest));
-	    
-	    if(response.readEntity(Boolean.class)){
+
+	    String respAuth;
+	    log.info("Response from the Auth");
+	    respAuth = response.readEntity(String.class);
+	    log.info("Response from the Authorization in ICN: " + respAuth);
 	    
 	    	
 	    	// Send a HTTP POST to Orchestrator
@@ -320,12 +329,12 @@ public class GatekeeperResource {
     		log.info("Sending ICNEnd back");
 
 		    return icnEND;
-		    }
-	    else {
-	    log.info("Not authorized cloud in ICN.");
-	    return null;  }  
-	    
     }
+//	    else {
+//	    log.info("Not authorized cloud in ICN.");
+//	    return null;  }  
+	    
+//    }
 
     
 
