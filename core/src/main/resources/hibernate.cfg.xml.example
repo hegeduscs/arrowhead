@@ -17,5 +17,6 @@
  <mapping class="eu.arrowhead.core.authorization.database.Systems_Services"/>
  <mapping class="eu.arrowhead.common.configuration.CoreSystem"/>
  <mapping class="eu.arrowhead.common.configuration.NeighborCloud"/>
+ <mapping class="eu.arrowhead.common.configuration.InternalCloud"/>
 </session-factory>
 </hibernate-configuration>
