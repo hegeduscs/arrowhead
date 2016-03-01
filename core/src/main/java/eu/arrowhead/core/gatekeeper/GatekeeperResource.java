@@ -116,7 +116,8 @@ public class GatekeeperResource {
 	    if (answer == null) 
 	    	{
 	    	System.out.println("answer == null");
-	    	return null;	    	
+	    	GSDResult result = new GSDResult();
+	    	return result;  	
 	    	}
 	    
 	    else{
