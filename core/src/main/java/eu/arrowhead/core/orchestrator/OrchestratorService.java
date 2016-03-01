@@ -234,8 +234,8 @@ public class OrchestratorService {
 	 */
 	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq, ServiceRequestForm srf) {
 		log.info("orchestrator: inside the getAuthorizationResponse function");
-		String strtarget = "http://"+sysConfig.getAuthorizationURI() + "/SystemGroup/" + srf.getRequesterSystem().getSystemGroup()
-				+ "/System/" + srf.getRequesterSystem().getSystemName();
+		String strtarget = "http://"+sysConfig.getAuthorizationURI() + "/systemGroup/" + srf.getRequesterSystem().getSystemGroup()
+				+ "/system/" + srf.getRequesterSystem().getSystemName();
 		log.info("orchestrator: sending AuthReq to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(authReq));

@@ -268,7 +268,7 @@ public class AuthorizationResource {
 	 *          between persistent object instances.
 	 */
 	@PUT
-	@Path("/SystemGroup/{systemGroup}/System/{systemName}")
+	@Path("/systemGroup/{systemGroup}/system/{systemName}")
 	public Response isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName, IntraCloudAuthRequest request) {
 		log.info("Entered the isSystemAuthorized function");
