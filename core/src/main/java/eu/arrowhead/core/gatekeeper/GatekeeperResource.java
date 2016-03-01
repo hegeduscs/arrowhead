@@ -3,6 +3,7 @@ package eu.arrowhead.core.gatekeeper;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -170,16 +171,16 @@ public class GatekeeperResource {
 //    	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName;
     	System.out.println(uri);
 
-//    	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
-//    	log.info("Sending an interAuthRequest to Authorization");
-//    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(requesterCloud.getAuthenticationInfo(), requestedService, false);
-//    	Client client = ClientBuilder.newClient();
-//		WebTarget target = client.target(uri); 
-//	    Response response = target
-//	    		.request()
-//	    		.header("Content-type", "application/json")
-//	    		.put(Entity.json(interAuthRequest)); 
-//	    if(response.readEntity(Boolean.class)){
+    	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
+    	log.info("Sending an interAuthRequest to Authorization");
+    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(requesterCloud.getAuthenticationInfo(), requestedService, false);
+    	Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(uri); 
+	    Response response = target
+	    		.request()
+	    		.header("Content-type", "application/json")
+	    		.put(Entity.json(interAuthRequest)); 
+	    if(response.readEntity(Boolean.class)){
 	    
     	
 	    	// Generate a ServiceQueryForm from GSDPoll to send it to the Service Registry
@@ -196,10 +197,13 @@ public class GatekeeperResource {
 	    		log.info("Service found, provider cloud: " + answer.getProviderCloud().getName());
 	    		return answer;
 	    	}
-	    	
-	    	else return null;
-
-//	    }else return null; //Error handling: return Response.status(Status.UNAUTHORIZED).build();
+	    	else{
+	    		log.info("No ServiceQueryResult");
+	    		return null;}
+	    }else {
+	    	log.info("Not authorized cloud in GSD");
+	    	return null; 
+	    }
     }
 
     /**
@@ -279,19 +283,27 @@ public class GatekeeperResource {
     	System.out.println(uri);
 
     	// Sending an InterCloudAuthRequest to the Authorization System (generateToken=true)
-//    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(icnProposal.getRequestedCloud().getAuthenticationInfo(), requestedService, true);
-//    	Client client = ClientBuilder.newClient();
-//		WebTarget target = client.target(uri); 
-//	    Response response = target
-//	    		.request()
-//	    		.header("Content-type", "application/json")
-//	    		.put(Entity.json(interAuthRequest)); 
-//	    if(response.readEntity(Boolean.class)){
+    	log.info("Sending an InterCloudAuthRequest to the Authorization System");
+    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(icnProposal.getRequestedCloud().getAuthenticationInfo(), requestedService, true);
+    	Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(uri); 
+	    Response response = target
+	    		.request()
+	    		.header("Content-type", "application/json")
+	    		.put(Entity.json(interAuthRequest));
+	    
+	    if(response.readEntity(Boolean.class)){
 	    
 	    	
 	    	// Send a HTTP POST to Orchestrator
     		log.info("Sending SRF to Orchestrator");
-    		ServiceRequestForm serviceRequestForm = new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem);
+    		Map<String, Boolean> orchestrationFlags = new HashMap<>();
+    		orchestrationFlags.put("matchmaking", false);
+    		orchestrationFlags.put("externalServiceRequest", true);
+    		orchestrationFlags.put("triggerInterCloud", false);
+    		orchestrationFlags.put("metadataSearch", false);
+    		orchestrationFlags.put("pingProvider", false);
+    		ServiceRequestForm serviceRequestForm = new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, orchestrationFlags);
 			
 			Client client2 = ClientBuilder.newClient();
 
@@ -305,9 +317,13 @@ public class GatekeeperResource {
 		    		.header("Content-type", "application/json")
 		    		.post(Entity.json(serviceRequestForm));
 		    ICNEnd  icnEND = new ICNEnd(response2.readEntity(OrchestrationResponse.class));
+    		log.info("Sending ICNEnd back");
+
 		    return icnEND;
-//    }
-//	    else return null;    
+		    }
+	    else {
+	    log.info("Not authorized cloud in ICN.");
+	    return null;  }  
 	    
     }
 
