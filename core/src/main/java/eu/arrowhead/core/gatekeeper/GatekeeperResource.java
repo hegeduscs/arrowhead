@@ -134,8 +134,9 @@ public class GatekeeperResource {
 	    List<GSDEntry> gsdEntryList = new ArrayList<GSDEntry>();
 	    GSDEntry gsdEntry = new GSDEntry(answer.getProviderCloud(), answer.getRequestedService());
 	    gsdEntryList.add(gsdEntry);
-
+	    
 	    GSDResult result = new GSDResult(gsdEntryList);
+	    log.info("result: " + result.getResponse().get(0));
 	    	
 	    return result;
 	    }
@@ -192,6 +193,7 @@ public class GatekeeperResource {
 	    		log.info("Service found.");
 	    		GSDAnswer answer = new GSDAnswer(gsdPollRequest.getRequestedService(),
 	    				providerCloud);
+	    		log.info("Service found, provider cloud: " + answer.getProviderCloud().getName());
 	    		return answer;
 	    	}
 	    	
@@ -220,7 +222,7 @@ public class GatekeeperResource {
     	}
     	else {
     		proposal = new ICNProposal(icnRequestForm.getRequestedService(), 
-        			icnRequestForm.getAuthenticationInfo(), sysConfig.getInternalCloud());
+        			icnRequestForm.getAuthenticationInfo(), sysConfig.getInternalCloud(), icnRequestForm.getRequesterSystem());
     	}
     	
     	
@@ -229,6 +231,8 @@ public class GatekeeperResource {
     	
     	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+
     			"gatekeeper/icn_proposal/";
+    	
+    	log.info("ICN Proposal to: " + uri);
     	
 //    	String uri = "http://"+sysConfig.getGatekeeperURI()+"/icn_proposal/";
 
@@ -242,6 +246,9 @@ public class GatekeeperResource {
 	    		.header("Content-type", "application/json")
 	    		.put(Entity.json(proposal)); 
 	    ICNResultForm icnResult = new ICNResultForm(response.readEntity(ICNEnd.class));
+	    
+	    log.info("GK gets an ICNResultForm");
+	    
 	    return icnResult;
     }
     
@@ -264,7 +271,7 @@ public class GatekeeperResource {
     	String cloudName = icnProposal.getRequestedCloud().getName();
     	
     	ArrowheadService requestedService = icnProposal.getRequestedService();
-    	ArrowheadSystem requesterSystem = new ArrowheadSystem();
+    	ArrowheadSystem requesterSystem = icnProposal.getRequesterSystem();
     	
     	
 //    	String uri = "http://" + sysConfig.getAuthorizationURI() + "/operator/" + cloudOperator+"/cloud/"+cloudName;
@@ -288,7 +295,7 @@ public class GatekeeperResource {
 			
 			Client client2 = ClientBuilder.newClient();
 
-			String uri2 = "http://" + sysConfig.getOrchestratorURI() + "/orchestration/";
+			String uri2 = "http://" + sysConfig.getOrchestratorURI();
 //	    	String uri2 = "http://localhost:8080/core/orchestrator/orchestration";
 			System.out.println(uri2);
 			
@@ -333,9 +340,9 @@ public class GatekeeperResource {
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
 		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
 		System.out.println("GK received the following services from the SR:");
-		log.info("GK received the following services from the SR:");
+		log.info("GK received something");
 		for (ProvidedService providedService : sqr.getServiceQueryData()) {
-			System.out.println(providedService.getProvider().getSystemGroup() + providedService.getProvider().getSystemName());
+			log.info("GK received the following services from the SR: " + providedService.getProvider().getSystemGroup() + providedService.getProvider().getSystemName());
 		}
 		return sqr;
   	}
@@ -365,7 +372,7 @@ public class GatekeeperResource {
 		interfaces.add("inf2");
 		interfaces.add("inf4");
 		ArrowheadService requestedService = new ArrowheadService("sg4", "sd4", interfaces, "md4");
-    	ICNProposal proposal = new ICNProposal(requestedService, "test", null);
+    	ICNProposal proposal = new ICNProposal(requestedService, "test", null, null);
     	return proposal;
 	}
     
