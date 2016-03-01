@@ -1,36 +1,34 @@
 package eu.arrowhead.common.model.messages;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.arrowhead.common.model.ArrowheadCloud;
+import eu.arrowhead.common.model.ArrowheadService;
 
+@XmlRootElement
 public class GSDAnswer {
 
-	private List<ProvidedService> answer = new ArrayList<ProvidedService>();
+	
+	private ArrowheadService requestedService;
 	private ArrowheadCloud providerCloud;
 	
 	public GSDAnswer() {
 		super();
 	}
-	
-	public GSDAnswer(List<ProvidedService> answer, ArrowheadCloud providerCloud) {
+
+	public GSDAnswer(ArrowheadService requestedService,
+			ArrowheadCloud providerCloud) {
 		super();
-		this.answer = answer;
+		this.requestedService = requestedService;
 		this.providerCloud = providerCloud;
 	}
-	
-	public GSDAnswer(List<ProvidedService> answer) {
-		super();
-		this.answer = answer;
+
+	public ArrowheadService getRequestedService() {
+		return requestedService;
 	}
 
-	public List<ProvidedService> getAnswer() {
-		return answer;
-	}
-
-	public void setAnswer(List<ProvidedService> answer) {
-		this.answer = answer;
+	public void setRequestedService(ArrowheadService requestedService) {
+		this.requestedService = requestedService;
 	}
 
 	public ArrowheadCloud getProviderCloud() {
@@ -40,5 +38,7 @@ public class GSDAnswer {
 	public void setProviderCloud(ArrowheadCloud providerCloud) {
 		this.providerCloud = providerCloud;
 	}
+
+	
 	
 }
