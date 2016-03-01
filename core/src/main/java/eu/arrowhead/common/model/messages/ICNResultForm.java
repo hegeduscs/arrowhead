@@ -15,6 +15,10 @@ public class ICNResultForm {
 	public ICNResultForm(OrchestrationResponse instructions) {
 		this.instructions = instructions;
 	}
+	
+	public ICNResultForm(ICNEnd icnEnd) {
+		this.instructions = icnEnd.getInstructions();
+	}
 
 	public OrchestrationResponse getInstructions() {
 		return instructions;

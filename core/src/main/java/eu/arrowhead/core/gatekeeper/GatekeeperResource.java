@@ -28,10 +28,14 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.GSDAnswer;
+import eu.arrowhead.common.model.messages.GSDEntry;
 import eu.arrowhead.common.model.messages.GSDPoll;
 import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
+import eu.arrowhead.common.model.messages.ICNEnd;
 import eu.arrowhead.common.model.messages.ICNProposal;
+import eu.arrowhead.common.model.messages.ICNRequestForm;
+import eu.arrowhead.common.model.messages.ICNResultForm;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
@@ -56,53 +60,8 @@ public class GatekeeperResource {
 	
 	@GET
     public String getIt() {
-//		List<String> test = sysConfig.getCloudURIs();
-//		String testURI = test.get(0);
-//		String conc = testURI.substring(0, 25) + "gatekeeper";
-//		System.out.println(testURI);
-//		System.out.println(conc);
-//    	String uri = sysConfig.getCloudURIs().get(0).substring(0, 25)+
-//    			"gatekeeper/init_gsd/";
-//		System.out.println(uri);
-
 	    return "This is the Gatekeeper Resource stub.";
     }
-	
-	
-	@GET
-    @Path("/test_gsd/")
-    public GSDAnswer testGSD() {
-		GSDPoll gsdPoll = new GSDPoll();
-		gsdPoll = testGSDPoll();
-		
-    	Client client = ClientBuilder.newClient();
-    	String uri = "http://localhost:8080/core/gatekeeper/init_gsd/";
-		WebTarget target = client.target(uri);
-	    Response response = target
-	    		.request()
-	    		.header("Content-type", "application/json")
-				.put(Entity.json(gsdPoll));
-	    return response.readEntity(GSDAnswer.class);
-	}
-	
-	
-	@GET
-    @Path("/test_icn/")
-    public OrchestrationResponse testICN() {
-    	ICNProposal proposal = new ICNProposal();
-    	proposal = testProposal();
-    	
-    	Client client = ClientBuilder.newClient();
-    	String uri = "http://localhost:8080/core/gatekeeper/init_icn/";
-		WebTarget target = client.target(uri);
-	    Response response = target
-	    		.request()
-	    		.header("Content-type", "application/json")
-				.put(Entity.json(proposal));
-	    return response.readEntity(OrchestrationResponse.class);
-
-	}
-	
 	
     
 	/**
@@ -114,26 +73,28 @@ public class GatekeeperResource {
 	 */
     @PUT
     @Path("/init_gsd/")
-    public GSDAnswer sendRequest(GSDPoll gsdPollRequest){
+    public GSDResult sendRequest(GSDRequestForm gsdRequest){
+    	//FIXME: Cloud???
+    	ArrowheadCloud cloud = new ArrowheadCloud(
+    			"operator", "cloudName", "gatekeeperIP", "gatekeeperPort", "gatekeeperURI", "authenticationInfo");
     	GSDPoll gsdPoll = new GSDPoll();
     	
     	//Test GSDPoll
-    	if(gsdPollRequest==null) {
-    		log.info("No GSDPoll, creating a test request.");
+    	if(gsdRequest==null) {
+    		log.info("No GSDRequest, creating a test request.");
     		System.out.println("No GSDPoll, creating a test request.");
         	gsdPoll = testGSDPoll();    	
     	}
     	
     	else {
     		System.out.println("Existing GSDPoll, starting to find provider service");
-    		gsdPoll = gsdPollRequest;}
+    		gsdPoll = new GSDPoll(gsdRequest.getRequestedService(),cloud);}
     	
     	
     	// HTTP PUT to the provider GateKeeper
 //   		log.info("Starting to find provider service for: "+ gsdPoll.getRequestedService().getServiceDefinition());
    		System.out.println("Starting to find provider service for: "+ gsdPoll.getRequestedService().getServiceDefinition());
    		Client client = ClientBuilder.newClient();
-    	//TODO: URI to neighbour cloud (GSD)
    		
    		//Majd jó lesz:
 //    	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+
@@ -149,7 +110,28 @@ public class GatekeeperResource {
 	    		.request()
 	    		.header("Content-type", "application/json")
 				.put(Entity.json(gsdPoll));
-	    return response.readEntity(GSDAnswer.class);
+	    GSDAnswer answer = response.readEntity(GSDAnswer.class);
+	    
+	    List<GSDEntry> gsdEntryList = new ArrayList<GSDEntry>();
+	    List<ProvidedService> provservices = answer.getAnswer();
+	    List<String> interfaces = new ArrayList<String>();
+	    interfaces.add("inf2");
+	    interfaces.add("inf4");
+
+	    //FIXME: ProviderService -> ArrowheadService
+	    for(ProvidedService providedService : provservices){
+	    	ArrowheadService service = new ArrowheadService(
+	    			providedService.getProvider().getSystemGroup(), 
+	    			providedService.getProvider().getSystemName(),
+	    			interfaces, "metaData");
+	    	
+	    	GSDEntry gsdEntry = new GSDEntry(answer.getProviderCloud(), service);
+	    	gsdEntryList.add(gsdEntry);
+	    }
+	    
+	    
+	    GSDResult gsdResult = new GSDResult(gsdEntryList); 
+	    return gsdResult;
     }
     
     /**
@@ -215,17 +197,18 @@ public class GatekeeperResource {
      */
     @PUT
     @Path("/init_icn/")
-    public OrchestrationResponse sendProposal(ICNProposal icnProposal){
+    public ICNResultForm sendProposal(ICNRequestForm icnRequestForm){
     	
     	ICNProposal proposal = new ICNProposal();
     	
     	//Test ICNProposal
-    	if (icnProposal == null){
-    		log.info("No ICNProposal, creating a test request.");
+    	if (icnRequestForm == null){
+    		log.info("No icnRequestForm, creating a test request.");
     		proposal = testProposal();    	
     	}
     	else {
-    		proposal = icnProposal;
+    		proposal = new ICNProposal(icnRequestForm.getRequestedService(), 
+        			icnRequestForm.getAuthenticationInfo());
     	}
     	
     	
@@ -247,8 +230,8 @@ public class GatekeeperResource {
 	    		.accept(MediaType.APPLICATION_JSON)
 	    		.header("Content-type", "application/json")
 	    		.put(Entity.json(proposal)); 
-	    
-	    return response.readEntity(OrchestrationResponse.class);
+	    ICNResultForm icnResult = new ICNResultForm(response.readEntity(ICNEnd.class));
+	    return icnResult;
     }
     
 	/**
@@ -260,7 +243,7 @@ public class GatekeeperResource {
      */
     @PUT
     @Path("/icn_proposal/")
-    public OrchestrationResponse ICNEnd (ICNProposal icnProposalRequest){
+    public ICNEnd getICNEnd (ICNProposal icnProposalRequest){
     	
     	ICNProposal icnProposal = icnProposalRequest;
     	String cloudOperator = "BME";
@@ -301,7 +284,8 @@ public class GatekeeperResource {
 		    		.request()
 		    		.header("Content-type", "application/json")
 		    		.post(Entity.json(serviceRequestForm));
-		    return response2.readEntity(OrchestrationResponse.class);
+		    ICNEnd  icnEND = new ICNEnd(response2.readEntity(OrchestrationResponse.class));
+		    return icnEND;
 //    }
 //	    else return null;    
 	    
