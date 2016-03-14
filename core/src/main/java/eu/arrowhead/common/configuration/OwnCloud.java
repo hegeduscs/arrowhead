@@ -1,5 +1,6 @@
 package eu.arrowhead.common.configuration;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -9,29 +10,35 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
-@Table(name="internal_cloud", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloudName"})})
-public class InternalCloud {
+@Table(name="own_cloud", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
+public class OwnCloud {
 	
+	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
     private int id;
+	@Column(name="operator")
 	private String operator;
+	@Column(name="cloud_name")
 	private String cloudName;
+	@Column(name="ip_address")
 	private String IPAddress;
+	@Column(name="port")
 	private String port;
+	@Column(name="authentication_info")
 	private String authenticationInfo;
+	@Column(name="service_uri")
 	private String serviceURI;
 	
-	public InternalCloud(){
-		
+	public OwnCloud(){
 	}
 	
-	public InternalCloud(String operator, String cloudName, String iPAddress, String port, 
+	public OwnCloud(String operator, String cloudName, String IPAddress, String port, 
 			String authenticationInfo, String serviceURI) {
 		super();
 		this.operator = operator;
 		this.cloudName = cloudName;
-		this.IPAddress = iPAddress;
+		this.IPAddress = IPAddress;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
 		this.serviceURI = serviceURI;
@@ -66,8 +73,8 @@ public class InternalCloud {
 		return IPAddress;
 	}
 
-	public void setIPAddress(String iPAddress) {
-		IPAddress = iPAddress;
+	public void setIPAddress(String IPAddress) {
+		this.IPAddress = IPAddress;
 	}
 
 	public String getPort() {

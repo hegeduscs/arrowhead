@@ -1,47 +1,47 @@
 package eu.arrowhead.core.authorization.database;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.ElementCollection;
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-
+/**
+ * @author umlaufz
+ * Entity class for storing Arrowhead Services in the database.
+ * The "service_group" and service_definition" columns must be unique together.
+ */
 @Entity
+@Table(name="arrowhead_service", uniqueConstraints={@UniqueConstraint(columnNames = {"service_group", "service_definition"})})
+@XmlRootElement
 public class ArrowheadService {
 
+	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
 	private int id;
+	
+	@Column(name="service_group")
 	private String serviceGroup;
+	
+	@Column(name="service_definition")
 	private String serviceDefinition;
-	@ElementCollection(fetch = FetchType.LAZY)
-	@LazyCollection(LazyCollectionOption.FALSE)
-	private List<String> interfaces = new ArrayList<String>();
+	
+	@Column(name="meta_data")
 	private String metaData;
 	
 	public ArrowheadService(){
-		
 	}
 	
-	public ArrowheadService(String serviceGroup, String serviceDefinition,
-			List<String> interfaces, String metaData) {
-		super();
+	public ArrowheadService(String serviceGroup, String serviceDefinition, 
+			String metaData) {
 		this.serviceGroup = serviceGroup;
 		this.serviceDefinition = serviceDefinition;
-		this.interfaces = interfaces;
 		this.metaData = metaData;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public int getId() {
@@ -64,14 +64,6 @@ public class ArrowheadService {
 		this.serviceDefinition = serviceDefinition;
 	}
 
-	public List<String> getInterfaces() {
-		return interfaces;
-	}
-
-	public void setInterfaces(List<String> interfaces) {
-		this.interfaces = interfaces;
-	}
-
 	public String getMetaData() {
 		return metaData;
 	}
@@ -80,20 +72,5 @@ public class ArrowheadService {
 		this.metaData = metaData;
 	}
 	
-	public boolean isEqual(ArrowheadService requestedService){
-		boolean sg = (this.serviceGroup.equals(requestedService.getServiceGroup()));
-		boolean sd = (this.serviceDefinition.equals(requestedService.getServiceDefinition()));
-		
-		boolean interfaces = false;
-		
-		for (int i =0 ; i < this.interfaces.size(); i++) {
-			for (int j = 0; j < requestedService.getInterfaces().size(); j++ ) {
-				if (this.interfaces.get(i).equals(requestedService.getInterfaces().get(j))) 
-					interfaces = true;
-			}
-		}
-		
-		return sd && sg && interfaces;
-	}
 	
 }

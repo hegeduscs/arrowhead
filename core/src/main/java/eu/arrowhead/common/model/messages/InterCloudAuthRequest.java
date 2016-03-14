@@ -47,7 +47,7 @@ public class InterCloudAuthRequest {
 	}
 	
 	public boolean isPayloadUsable(){
-		if(authenticationInfo.isEmpty() || arrowheadService == null)
+		if(authenticationInfo == null || arrowheadService == null)
 			return false;
 		return true;
 	}

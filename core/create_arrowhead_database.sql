@@ -18,109 +18,83 @@ USE `core`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `arrowheadcloud`
+-- Table structure for table `arrowhead_cloud`
 --
 
-DROP TABLE IF EXISTS `arrowheadcloud`;
+DROP TABLE IF EXISTS `arrowhead_cloud`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `arrowheadcloud` (
+CREATE TABLE `arrowhead_cloud` (
   `id` int(11) NOT NULL,
-  `authenticationInfo` varchar(255) DEFAULT NULL,
-  `cloudName` varchar(255) DEFAULT NULL,
+  `authentication_info` varchar(255) DEFAULT NULL,
+  `cloud_name` varchar(255) DEFAULT NULL,
   `operator` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UK3u1wgfsf3ayneoxt5264me60p` (`operator`,`cloudName`)
+  UNIQUE KEY `UK9cjou6d7x3w0pvnnb27bc4c4d` (`operator`,`cloud_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `arrowheadcloud`
+-- Dumping data for table `arrowhead_cloud`
 --
 
-LOCK TABLES `arrowheadcloud` WRITE;
-/*!40000 ALTER TABLE `arrowheadcloud` DISABLE KEYS */;
-/*!40000 ALTER TABLE `arrowheadcloud` ENABLE KEYS */;
+LOCK TABLES `arrowhead_cloud` WRITE;
+/*!40000 ALTER TABLE `arrowhead_cloud` DISABLE KEYS */;
+/*!40000 ALTER TABLE `arrowhead_cloud` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `arrowheadservice`
+-- Table structure for table `arrowhead_service`
 --
 
-DROP TABLE IF EXISTS `arrowheadservice`;
+DROP TABLE IF EXISTS `arrowhead_service`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `arrowheadservice` (
+CREATE TABLE `arrowhead_service` (
   `id` int(11) NOT NULL,
-  `metaData` varchar(255) DEFAULT NULL,
-  `serviceDefinition` varchar(255) DEFAULT NULL,
-  `serviceGroup` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `arrowheadservice`
---
-
-LOCK TABLES `arrowheadservice` WRITE;
-/*!40000 ALTER TABLE `arrowheadservice` DISABLE KEYS */;
-INSERT INTO `arrowheadservice` VALUES (3,'md4','sd4','sg4'),(5,'md5','sd5','sg5'),(15,'md4','sd4','sg4'),(17,'md5','sd5','sg5'),(20,'md4','sd4','sg4'),(22,'md5','sd5','sg5'),(25,'md4','sd4','sg4'),(27,'md5','sd5','sg5'),(30,'md4','sd4','sg4'),(32,'md5','sd5','sg5');
-/*!40000 ALTER TABLE `arrowheadservice` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `arrowheadservice_interfaces`
---
-
-DROP TABLE IF EXISTS `arrowheadservice_interfaces`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `arrowheadservice_interfaces` (
-  `ArrowheadService_id` int(11) NOT NULL,
-  `interfaces` varchar(255) DEFAULT NULL,
-  KEY `FKq6tn1xhrykgicexd7yryvjt1q` (`ArrowheadService_id`),
-  CONSTRAINT `FKq6tn1xhrykgicexd7yryvjt1q` FOREIGN KEY (`ArrowheadService_id`) REFERENCES `arrowheadservice` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `arrowheadservice_interfaces`
---
-
-LOCK TABLES `arrowheadservice_interfaces` WRITE;
-/*!40000 ALTER TABLE `arrowheadservice_interfaces` DISABLE KEYS */;
-INSERT INTO `arrowheadservice_interfaces` VALUES (3,'inf1'),(3,'inf2'),(5,'inf3'),(5,'inf4'),(15,'inf1'),(15,'inf2'),(17,'inf3'),(17,'inf4'),(20,'inf1'),(20,'inf2'),(22,'inf3'),(22,'inf4'),(25,'inf1'),(25,'inf2'),(27,'inf3'),(27,'inf4'),(30,'inf1'),(30,'inf2'),(32,'inf3'),(32,'inf4');
-/*!40000 ALTER TABLE `arrowheadservice_interfaces` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `arrowheadsystem`
---
-
-DROP TABLE IF EXISTS `arrowheadsystem`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `arrowheadsystem` (
-  `id` int(11) NOT NULL,
-  `IPAddress` varchar(255) DEFAULT NULL,
-  `authenticationInfo` varchar(255) DEFAULT NULL,
-  `port` varchar(255) DEFAULT NULL,
-  `systemGroup` varchar(255) DEFAULT NULL,
-  `systemName` varchar(255) DEFAULT NULL,
+  `meta_data` varchar(255) DEFAULT NULL,
+  `service_definition` varchar(255) DEFAULT NULL,
+  `service_group` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UKajlnl3tnovmqpu1syq8esif0e` (`systemGroup`,`systemName`)
+  UNIQUE KEY `UKow5u4aa2pf2txupvsipl8o8db` (`service_group`,`service_definition`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `arrowheadsystem`
+-- Dumping data for table `arrowhead_service`
 --
 
-LOCK TABLES `arrowheadsystem` WRITE;
-/*!40000 ALTER TABLE `arrowheadsystem` DISABLE KEYS */;
-INSERT INTO `arrowheadsystem` VALUES (1,'105.105.10.987','februar2','8080','A','c'),(2,'105.105.10.987','februar2','8080','sg1','sn1'),(7,'105.105.10.987','februar2','8080','sg2','sn2'),(10,'105.105.10.987','februar2','8080','A','b'),(14,'105.105.10.987','februar2','8080','sg121321321','sn1321321'),(19,'105.105.10.987','februar2','8080','sg23212321321','sn2'),(24,'105.105.10.987','februar2','8080','sg1213213321','sn1321321'),(29,'105.105.10.987','februar2','8080','sg232123231321','sn2');
-/*!40000 ALTER TABLE `arrowheadsystem` ENABLE KEYS */;
+LOCK TABLES `arrowhead_service` WRITE;
+/*!40000 ALTER TABLE `arrowhead_service` DISABLE KEYS */;
+/*!40000 ALTER TABLE `arrowhead_service` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `arrowhead_system`
+--
+
+DROP TABLE IF EXISTS `arrowhead_system`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `arrowhead_system` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `authentication_info` varchar(255) DEFAULT NULL,
+  `port` varchar(255) DEFAULT NULL,
+  `system_group` varchar(255) DEFAULT NULL,
+  `system_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKfcoywnmdu0wm2km94onm855l8` (`system_group`,`system_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `arrowhead_system`
+--
+
+LOCK TABLES `arrowhead_system` WRITE;
+/*!40000 ALTER TABLE `arrowhead_system` DISABLE KEYS */;
+/*!40000 ALTER TABLE `arrowhead_system` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -131,12 +105,14 @@ DROP TABLE IF EXISTS `clouds_services`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `clouds_services` (
-  `ArrowheadCloud_id` int(11) NOT NULL,
-  `serviceList_id` int(11) NOT NULL,
-  KEY `FK7wcmwdn086ghlsrgde1ftq8kb` (`serviceList_id`),
-  KEY `FKok587e699898ym434x0vsjqby` (`ArrowheadCloud_id`),
-  CONSTRAINT `FK7wcmwdn086ghlsrgde1ftq8kb` FOREIGN KEY (`serviceList_id`) REFERENCES `arrowheadservice` (`id`),
-  CONSTRAINT `FKok587e699898ym434x0vsjqby` FOREIGN KEY (`ArrowheadCloud_id`) REFERENCES `arrowheadcloud` (`id`)
+  `id` int(11) NOT NULL,
+  `cloud_id` int(11) DEFAULT NULL,
+  `service_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKq7oa4r9xbm30wx6dfqw62t2i5` (`cloud_id`,`service_id`),
+  KEY `FKkyfqutpyeb3hlc526bh8kkla` (`service_id`),
+  CONSTRAINT `FKb851ly3g76roxuvo3atnfqc7o` FOREIGN KEY (`cloud_id`) REFERENCES `arrowhead_cloud` (`id`),
+  CONSTRAINT `FKkyfqutpyeb3hlc526bh8kkla` FOREIGN KEY (`service_id`) REFERENCES `arrowhead_service` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -174,7 +150,6 @@ CREATE TABLE `coresystem` (
 
 LOCK TABLES `coresystem` WRITE;
 /*!40000 ALTER TABLE `coresystem` DISABLE KEYS */;
-INSERT INTO `coresystem` VALUES (34,'http://localhost:','Public key of Orchestration System','8080','/core/orchestration','orchestration'),(35,'http://localhost:','Public key of Service Registry System','8080','/core/serviceregistry','serviceregistry'),(36,'http://localhost:','Public key of Authorization System','8080','/core/authorization','authorization'),(37,'http://localhost:','Public key of Gatekeeper System','8080','/core/gatekeeper','gatekeeper');
 /*!40000 ALTER TABLE `coresystem` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -196,8 +171,38 @@ CREATE TABLE `hibernate_sequence` (
 
 LOCK TABLES `hibernate_sequence` WRITE;
 /*!40000 ALTER TABLE `hibernate_sequence` DISABLE KEYS */;
-INSERT INTO `hibernate_sequence` VALUES (44),(44),(44),(44),(44),(44);
+INSERT INTO `hibernate_sequence` VALUES (1),(1),(1),(1),(1),(1),(1),(1);
 /*!40000 ALTER TABLE `hibernate_sequence` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `logs`
+--
+
+DROP TABLE IF EXISTS `logs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `logs` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `date` datetime NOT NULL,
+  `origin` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `level` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
+  `message` varchar(1000) COLLATE utf8_unicode_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=515 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `logs`
+--
+
+LOCK TABLES `logs` WRITE;
+/*!40000 ALTER TABLE `logs` DISABLE KEYS */;
+INSERT INTO `logs` VALUES (511,'','2016-03-14 16:22:49','eu.arrowhead.common.listener.ServletContextClass','INFO','[Arrowhead Core] Servlet redeployed.','2016-03-14 15:22:50','0000-00-00 00:00:00'),(512,'','2016-03-14 16:24:53','eu.arrowhead.common.listener.ServletContextClass','INFO','[Arrowhead Core] Servlet redeployed.','2016-03-14 15:24:53','0000-00-00 00:00:00'),(513,'','2016-03-14 16:25:00','eu.arrowhead.common.filter.LoggingRequestFilter','DEBUG','IN.GET: authorization/operator/A/cloud/c65/services','2016-03-14 15:25:00','0000-00-00 00:00:00'),(514,'','2016-03-14 16:25:00','eu.arrowhead.common.filter.LoggingResponseFilter','DEBUG','OUT.404: Not Found','2016-03-14 15:25:00','0000-00-00 00:00:00');
+/*!40000 ALTER TABLE `logs` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -226,8 +231,36 @@ CREATE TABLE `neighborhood` (
 
 LOCK TABLES `neighborhood` WRITE;
 /*!40000 ALTER TABLE `neighborhood` DISABLE KEYS */;
-INSERT INTO `neighborhood` VALUES (40,'http://localhost:','Public key of the Cloud','cloud1','admin1','8080','/core/operator/admin1/cloud/cloud1'),(41,'http://localhost:','Public key of the Cloud','cloud2','admin1','8080','/core/operator/admin1/cloud/cloud2'),(42,'http://localhost:','Public key of the Cloud','cloud3','admin1','8080','/core/operator/admin1/cloud/cloud3'),(43,'http://localhost:','Public key of the Cloud','cloud1','admin2','8080','/core/operator/admin2/cloud/cloud1');
 /*!40000 ALTER TABLE `neighborhood` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `own_cloud`
+--
+
+DROP TABLE IF EXISTS `own_cloud`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `own_cloud` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `authentication_info` varchar(255) DEFAULT NULL,
+  `cloud_name` varchar(255) DEFAULT NULL,
+  `operator` varchar(255) DEFAULT NULL,
+  `port` varchar(255) DEFAULT NULL,
+  `service_uri` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKk8xvsabjdcypcsij7qm72bsqv` (`operator`,`cloud_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `own_cloud`
+--
+
+LOCK TABLES `own_cloud` WRITE;
+/*!40000 ALTER TABLE `own_cloud` DISABLE KEYS */;
+/*!40000 ALTER TABLE `own_cloud` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -243,12 +276,12 @@ CREATE TABLE `systems_services` (
   `provider_id` int(11) DEFAULT NULL,
   `service_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UKae6h4w11cydjbqrpvasl75f2e` (`service_id`,`consumer_id`,`provider_id`),
-  KEY `FKmdixg0nof2acme7a1hiqnt4o8` (`consumer_id`),
-  KEY `FKo3c8f38dgwsu8ts0x2jxbu80x` (`provider_id`),
-  CONSTRAINT `FKeuebrpda9oftpa9235062ufyu` FOREIGN KEY (`service_id`) REFERENCES `arrowheadservice` (`id`),
-  CONSTRAINT `FKmdixg0nof2acme7a1hiqnt4o8` FOREIGN KEY (`consumer_id`) REFERENCES `arrowheadsystem` (`id`),
-  CONSTRAINT `FKo3c8f38dgwsu8ts0x2jxbu80x` FOREIGN KEY (`provider_id`) REFERENCES `arrowheadsystem` (`id`)
+  UNIQUE KEY `UKnl06duvgwnau3mkekw90hctba` (`consumer_id`,`provider_id`,`service_id`),
+  KEY `FKgkx12ee8t9bfm28jfstp0l9c4` (`provider_id`),
+  KEY `FK6cpe7vapdht1wc1afq4tgbw3w` (`service_id`),
+  CONSTRAINT `FK6cpe7vapdht1wc1afq4tgbw3w` FOREIGN KEY (`service_id`) REFERENCES `arrowhead_service` (`id`),
+  CONSTRAINT `FK7i8f6y01rnirewctixqqm7pvp` FOREIGN KEY (`consumer_id`) REFERENCES `arrowhead_system` (`id`),
+  CONSTRAINT `FKgkx12ee8t9bfm28jfstp0l9c4` FOREIGN KEY (`provider_id`) REFERENCES `arrowhead_system` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -258,7 +291,6 @@ CREATE TABLE `systems_services` (
 
 LOCK TABLES `systems_services` WRITE;
 /*!40000 ALTER TABLE `systems_services` DISABLE KEYS */;
-INSERT INTO `systems_services` VALUES (4,1,2,3),(8,1,7,3),(6,1,2,5),(9,1,7,5),(16,10,14,15),(18,10,14,17),(21,10,19,20),(23,10,19,22),(26,10,24,25),(28,10,24,27),(31,10,29,30),(33,10,29,32);
 /*!40000 ALTER TABLE `systems_services` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -271,4 +303,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-02-15 13:40:44
+-- Dump completed on 2016-03-14 16:25:28

@@ -14,57 +14,46 @@ import javax.persistence.UniqueConstraint;
 
 /**
  * @author umlaufz
- * This class maps the intra cloud authorization rights between Arrowhead Systems.
+ * This class maps the inter cloud authorization rights.
  * The table entry itself is the authorization right.
- * The "service_id", "consumer_id" and "provider_id" columns must be unique together.
+ * The "cloud_id" and "service_id" columns must be unique together.
  */
 @Entity
-@Table(name="systems_services", uniqueConstraints={@UniqueConstraint(columnNames = 
-		{"consumer_id", "provider_id", "service_id"})})
-public class Systems_Services {
+@Table(name="clouds_services", uniqueConstraints={@UniqueConstraint(columnNames = {"cloud_id", "service_id"})})
+public class Clouds_Services {
 	
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
 	private int id;
 	
-	@JoinColumn(name="consumer_id")
+	@JoinColumn(name="cloud_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
-	private ArrowheadSystem consumer;
-	
-	@JoinColumn(name="provider_id")
-	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
-	private ArrowheadSystem provider;
+	private ArrowheadCloud cloud;
 	
 	@JoinColumn(name="service_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
 	private ArrowheadService service;
 	
-	public Systems_Services() {
+	public Clouds_Services() {
 	}
 
-	public Systems_Services(ArrowheadSystem consumer, ArrowheadSystem provider, 
-			ArrowheadService service) {
-		this.consumer = consumer;
-		this.provider = provider;
+	public Clouds_Services(ArrowheadCloud cloud, ArrowheadService service) {
+		this.cloud = cloud;
 		this.service = service;
 	}
-
-	public ArrowheadSystem getConsumer() {
-		return consumer;
-	}
-
-	public void setConsumer(ArrowheadSystem consumer) {
-		this.consumer = consumer;
-	}
-
-	public ArrowheadSystem getProvider() {
-		return provider;
-	}
 	
-	public void setProvider(ArrowheadSystem providers) {
-		this.provider = providers;
+	public int getId() {
+		return id;
 	}
-	
+
+	public ArrowheadCloud getCloud() {
+		return cloud;
+	}
+
+	public void setCloud(ArrowheadCloud cloud) {
+		this.cloud = cloud;
+	}
+
 	public ArrowheadService getService() {
 		return service;
 	}
@@ -72,6 +61,6 @@ public class Systems_Services {
 	public void setService(ArrowheadService service) {
 		this.service = service;
 	}
-	
 
+	
 }
