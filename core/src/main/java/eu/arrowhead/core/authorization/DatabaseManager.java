@@ -255,8 +255,8 @@ public class DatabaseManager {
         }
     	catch(ConstraintViolationException e){
     		if (transaction!=null) transaction.rollback();
-    		throw new DuplicateEntryException("There is already an entry in the database "
-    				+ "with these parameters.");
+    		throw new DuplicateEntryException("There is already an entry in the "
+    				+ "authorization database with these parameters.");
     	}
         catch (Exception e) {
             if (transaction!=null) transaction.rollback();
@@ -280,8 +280,8 @@ public class DatabaseManager {
         }
     	catch(ConstraintViolationException e){
     		if (transaction!=null) transaction.rollback();
-    		throw new DuplicateEntryException("There is already an entry in the database "
-    				+ "with these parameters.");
+    		throw new DuplicateEntryException("There is already an entry in the "
+    				+ "authorization database with these parameters.");
     	}
         catch (Exception e) {
             if (transaction!=null) transaction.rollback();

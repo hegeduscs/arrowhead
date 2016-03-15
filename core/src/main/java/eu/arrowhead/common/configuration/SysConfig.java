@@ -3,6 +3,8 @@ package eu.arrowhead.common.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.UriBuilder;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -15,10 +17,15 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 
+/**
+ * @author umlaufz
+ *
+ */
 public class SysConfig {
 	 
 	private static SysConfig instance = null;
 	private static SessionFactory sessionFactory;
+	private static final String baseURI = "http://";
 	   
 	private SysConfig() {
 		if (sessionFactory == null){
@@ -40,6 +47,7 @@ public class SysConfig {
     	return sessionFactory;
     }
 	
+	@SuppressWarnings("unchecked")
 	public <T> List<T> getAll(Class<T> type){
 		List<T> retrievedList = new ArrayList<T>();
 		
@@ -49,7 +57,6 @@ public class SysConfig {
     	try {
     		transaction = session.beginTransaction();
             Criteria criteria = session.createCriteria(type);
-            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
             retrievedList = (List<T>) criteria.list();
             transaction.commit();
         }
@@ -75,10 +82,10 @@ public class SysConfig {
             Criteria criteria = session.createCriteria(NeighborCloud.class);
             criteria.add(Restrictions.eq("operator", operator));
             criteria.add(Restrictions.eq("cloudName", cloudName));
-            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
             retrievedCloud = (NeighborCloud) criteria.uniqueResult();
             if(retrievedCloud == null){
-            	throw new DataNotFoundException("This Cloud is not in the database.");
+            	throw new DataNotFoundException("The requested Neighbor Cloud is not "
+            		+ "in the configuration database. (OP: " + operator +", CN: " + cloudName + ")");
             }
             transaction.commit();
         }
@@ -103,11 +110,11 @@ public class SysConfig {
     		transaction = session.beginTransaction();
             Criteria criteria = session.createCriteria(CoreSystem.class);
             criteria.add(Restrictions.eq("systemName", systemName));
-            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
             retrievedSystem = (CoreSystem) criteria.uniqueResult();
             if(retrievedSystem == null){
-              	 throw new DataNotFoundException("This System is not in the database.");
-               }
+            	throw new DataNotFoundException("The requested Core System is not "
+                	+ "in the configuration database. (SN: " + systemName + ")");
+            }
             transaction.commit();
         }
         catch (Exception e) {
@@ -132,7 +139,8 @@ public class SysConfig {
         }
     	catch(ConstraintViolationException e){
     		if (transaction!=null) transaction.rollback();
-    		throw new DuplicateEntryException("There is already an entry in the database with these parameters.");
+    		throw new DuplicateEntryException("There is already an entry"
+    				+ " in the configuration database with these parameters.");
     	}
         catch (Exception e) {
             if (transaction!=null) transaction.rollback();
@@ -163,54 +171,104 @@ public class SysConfig {
         }	
 	}
 	
-	//TODO make available these methods via rest calls too
+	/*
+	 * Some level of flexibility in the URI creation, in order to avoid implementation mistakes.
+	 */
+	public String getURI(CoreSystem coreSystem){
+		UriBuilder ub = null;
+		if(coreSystem.getIPAddress().startsWith("http://")){
+			ub = UriBuilder.fromUri(coreSystem.getIPAddress());
+		}
+		else{
+			ub = UriBuilder.fromUri(baseURI);
+		}
+		if(coreSystem.getPort() != null){
+			ub.path(":").path(coreSystem.getPort());
+		}
+		if(!coreSystem.getServiceURI().startsWith("/")){
+			ub.path("/");
+		}
+		ub.path(coreSystem.getServiceURI());
+		
+		return ub.toString();
+	}
+	
+	public String getURI(NeighborCloud neighborCloud){
+		UriBuilder ub = null;
+		if(neighborCloud.getIPAddress().startsWith("http://")){
+			ub = UriBuilder.fromUri(neighborCloud.getIPAddress());
+		}
+		else{
+			ub = UriBuilder.fromUri(baseURI);
+		}
+		if(neighborCloud.getPort() != null){
+			ub.path(":").path(neighborCloud.getPort());
+		}
+		if(!neighborCloud.getServiceURI().startsWith("/")){
+			ub.path("/");
+		}
+		ub.path(neighborCloud.getServiceURI());
+		
+		return ub.toString();
+	}
 	
 	public String getOrchestratorURI(){
 		CoreSystem orchestration = getSystem("orchestration");
-		return orchestration.getIPAddress() + orchestration.getPort() + orchestration.getServiceURI();
+		return getURI(orchestration);
 	}
 	
 	public String getServiceRegistryURI(){
 		CoreSystem serviceRegistry = getSystem("serviceregistry");
-		return serviceRegistry.getIPAddress() + serviceRegistry.getPort() + serviceRegistry.getServiceURI();
+		return getURI(serviceRegistry);
 	}
 	
 	public String getAuthorizationURI(){
 		CoreSystem authorization = getSystem("authorization");
-		return authorization.getIPAddress() + authorization.getPort() + authorization.getServiceURI();
+		return getURI(authorization);
 	}
 	
 	public String getGatekeeperURI(){
 		CoreSystem gatekeeper = getSystem("gatekeeper");
-		return gatekeeper.getIPAddress() + gatekeeper.getPort() + gatekeeper.getServiceURI();
+		return getURI(gatekeeper);
 	}
 	
+	public String getQoSURI(){
+		CoreSystem QoS = getSystem("qos");
+		return getURI(QoS);
+	}
+
 	public List<String> getCloudURIs(){
 		List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();
 		cloudList.addAll(getAll(NeighborCloud.class));
 		
 		List<String> URIList = new ArrayList<String>();
 		for(NeighborCloud cloud : cloudList){
-			URIList.add(cloud.getIPAddress() + cloud.getPort() + cloud.getServiceURI());
+			URIList.add(getURI(cloud));
 		}
 		
 		return URIList;
 	}
 	
-	public ArrowheadCloud getInternalCloud(){
+	public ArrowheadCloud getOwnCloud(){
 		List<OwnCloud> cloudList = new ArrayList<OwnCloud>();
 		cloudList = getAll(OwnCloud.class);
+		if(cloudList.isEmpty()){
+			throw new DataNotFoundException("No 'Own Cloud' entry in the configuration database." 
+					+ "Please make sure to enter one in the 'own_cloud' table."
+					+ "This information is needed for the Gatekeeper System.");
+		}
 		OwnCloud retrievedCloud = cloudList.get(0);
 		
-		ArrowheadCloud internalCloud = new ArrowheadCloud();
-		internalCloud.setOperator(retrievedCloud.getOperator());
-		internalCloud.setName(retrievedCloud.getCloudName());
-		internalCloud.setGatekeeperIP(retrievedCloud.getIPAddress());
-		internalCloud.setGatekeeperPort(retrievedCloud.getPort());
-		internalCloud.setGatekeeperURI(retrievedCloud.getServiceURI());
-		internalCloud.setAuthenticationInfo(retrievedCloud.getAuthenticationInfo());
+		ArrowheadCloud ownCloud = new ArrowheadCloud();
+		ownCloud.setOperator(retrievedCloud.getOperator());
+		ownCloud.setName(retrievedCloud.getCloudName());
+		ownCloud.setGatekeeperIP(retrievedCloud.getIPAddress());
+		ownCloud.setGatekeeperPort(retrievedCloud.getPort());
+		ownCloud.setGatekeeperURI(retrievedCloud.getServiceURI());
+		ownCloud.setAuthenticationInfo(retrievedCloud.getAuthenticationInfo());
 		
-		return internalCloud;
+		return ownCloud;
 	}
+	
 	
 }

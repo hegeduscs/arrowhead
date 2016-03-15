@@ -81,7 +81,7 @@ public class GatekeeperResource {
     	String random = sysConfig.getAuthorizationURI();
     	log.info("Sysconfig");
     	
-    	ArrowheadCloud cloud = sysConfig.getInternalCloud();
+    	ArrowheadCloud cloud = sysConfig.getOwnCloud();
     	
     	log.info("Got the cloud info");
     	GSDPoll gsdPoll = new GSDPoll();
@@ -162,7 +162,7 @@ public class GatekeeperResource {
     	
     	ArrowheadCloud requesterCloud = gsdPoll.getRequesterCloud();
     	ArrowheadService requestedService = gsdPoll.getRequestedService();
-    	ArrowheadCloud providerCloud = sysConfig.getInternalCloud();
+    	ArrowheadCloud providerCloud = sysConfig.getOwnCloud();
 
     	String cloudOperator = requesterCloud.getOperator();
     	String cloudName = requesterCloud.getName();
@@ -232,7 +232,7 @@ public class GatekeeperResource {
     	}
     	else {
     		proposal = new ICNProposal(icnRequestForm.getRequestedService(), 
-        			icnRequestForm.getAuthenticationInfo(), sysConfig.getInternalCloud(), icnRequestForm.getRequesterSystem());
+        			icnRequestForm.getAuthenticationInfo(), sysConfig.getOwnCloud(), icnRequestForm.getRequesterSystem());
     	}
     	
     	
