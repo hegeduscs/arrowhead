@@ -126,32 +126,33 @@ LOCK TABLES `clouds_services` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `coresystem`
+-- Table structure for table `core_system`
 --
 
-DROP TABLE IF EXISTS `coresystem`;
+DROP TABLE IF EXISTS `core_system`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `coresystem` (
+CREATE TABLE `core_system` (
   `id` int(11) NOT NULL,
-  `IPAddress` varchar(255) DEFAULT NULL,
-  `authenticationInfo` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `authentication_info` varchar(255) DEFAULT NULL,
   `port` varchar(255) DEFAULT NULL,
-  `serviceURI` varchar(255) DEFAULT NULL,
-  `systemName` varchar(255) DEFAULT NULL,
+  `service_uri` varchar(255) DEFAULT NULL,
+  `system_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UKqn7hgomoef12tl4um40rvw4fv` (`systemName`)
+  UNIQUE KEY `UKow0cderx2j9knaajiwdyrad96` (`system_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `coresystem`
+-- Dumping data for table `core_system`
 --
 
-LOCK TABLES `coresystem` WRITE;
-/*!40000 ALTER TABLE `coresystem` DISABLE KEYS */;
-/*!40000 ALTER TABLE `coresystem` ENABLE KEYS */;
+LOCK TABLES `core_system` WRITE;
+/*!40000 ALTER TABLE `core_system` DISABLE KEYS */;
+/*!40000 ALTER TABLE `core_system` ENABLE KEYS */;
 UNLOCK TABLES;
+
 
 --
 -- Table structure for table `hibernate_sequence`
@@ -175,35 +176,6 @@ INSERT INTO `hibernate_sequence` VALUES (1),(1),(1),(1),(1),(1),(1),(1);
 /*!40000 ALTER TABLE `hibernate_sequence` ENABLE KEYS */;
 UNLOCK TABLES;
 
---
--- Table structure for table `logs`
---
-
-DROP TABLE IF EXISTS `logs`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `logs` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `date` datetime NOT NULL,
-  `origin` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `level` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
-  `message` varchar(1000) COLLATE utf8_unicode_ci NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=515 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `logs`
---
-
-LOCK TABLES `logs` WRITE;
-/*!40000 ALTER TABLE `logs` DISABLE KEYS */;
-INSERT INTO `logs` VALUES (511,'','2016-03-14 16:22:49','eu.arrowhead.common.listener.ServletContextClass','INFO','[Arrowhead Core] Servlet redeployed.','2016-03-14 15:22:50','0000-00-00 00:00:00'),(512,'','2016-03-14 16:24:53','eu.arrowhead.common.listener.ServletContextClass','INFO','[Arrowhead Core] Servlet redeployed.','2016-03-14 15:24:53','0000-00-00 00:00:00'),(513,'','2016-03-14 16:25:00','eu.arrowhead.common.filter.LoggingRequestFilter','DEBUG','IN.GET: authorization/operator/A/cloud/c65/services','2016-03-14 15:25:00','0000-00-00 00:00:00'),(514,'','2016-03-14 16:25:00','eu.arrowhead.common.filter.LoggingResponseFilter','DEBUG','OUT.404: Not Found','2016-03-14 15:25:00','0000-00-00 00:00:00');
-/*!40000 ALTER TABLE `logs` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `neighborhood`
@@ -214,14 +186,14 @@ DROP TABLE IF EXISTS `neighborhood`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `neighborhood` (
   `id` int(11) NOT NULL,
-  `IPAddress` varchar(255) DEFAULT NULL,
-  `authenticationInfo` varchar(255) DEFAULT NULL,
-  `cloudName` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `authentication_info` varchar(255) DEFAULT NULL,
+  `cloud_name` varchar(255) DEFAULT NULL,
   `operator` varchar(255) DEFAULT NULL,
   `port` varchar(255) DEFAULT NULL,
-  `serviceURI` varchar(255) DEFAULT NULL,
+  `service_uri` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UK7s8g58nkllsi9uw2ijka6kyk0` (`operator`,`cloudName`)
+  UNIQUE KEY `UKsqoqh6vfetcf8jo4928a22jaj` (`operator`,`cloud_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -303,4 +275,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-03-14 16:25:28
+-- Dump completed on 2016-03-15 15:36:04

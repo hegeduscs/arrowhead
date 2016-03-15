@@ -1,5 +1,6 @@
 package eu.arrowhead.common.configuration;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -8,42 +9,49 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
+/**
+ * @author umlaufz
+ * 
+ * Entity class for storing nearby Cloud informations in the database.
+ * The "operator" and "cloud_name" columns must be unique together.
+ */
 @Entity
-@Table(name="neighborhood", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloudName"})})
+@Table(name="neighborhood", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
 public class NeighborCloud {
 	
+	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
     private int id;
+	@Column(name="operator")
 	private String operator;
+	@Column(name="cloud_name")
 	private String cloudName;
+	@Column(name="ip_address")
 	private String IPAddress;
+	@Column(name="port")
 	private String port;
-	private String authenticationInfo;
+	@Column(name="service_uri")
 	private String serviceURI;
+	@Column(name="authentication_info")
+	private String authenticationInfo;
 	
 	public NeighborCloud(){
-		
 	}
 	
-	public NeighborCloud(String operator, String cloudName, String iPAddress, String port, 
-			String authenticationInfo, String serviceURI) {
-		super();
+	public NeighborCloud(String operator, String cloudName, String IPAddress, String port, 
+			 String serviceURI, String authenticationInfo) {
 		this.operator = operator;
 		this.cloudName = cloudName;
-		this.IPAddress = iPAddress;
+		this.IPAddress = IPAddress;
 		this.port = port;
-		this.authenticationInfo = authenticationInfo;
 		this.serviceURI = serviceURI;
+		this.authenticationInfo = authenticationInfo;
 	}
 	
 
 	public int getId() {
 		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public String getOperator() {
@@ -66,8 +74,8 @@ public class NeighborCloud {
 		return IPAddress;
 	}
 
-	public void setIPAddress(String iPAddress) {
-		IPAddress = iPAddress;
+	public void setIPAddress(String IPAddress) {
+		this.IPAddress = IPAddress;
 	}
 
 	public String getPort() {
@@ -76,6 +84,14 @@ public class NeighborCloud {
 
 	public void setPort(String port) {
 		this.port = port;
+	}
+	
+	public String getServiceURI() {
+		return serviceURI;
+	}
+
+	public void setServiceURI(String serviceURI) {
+		this.serviceURI = serviceURI;
 	}
 
 	public String getAuthenticationInfo() {
@@ -86,12 +102,5 @@ public class NeighborCloud {
 		this.authenticationInfo = authenticationInfo;
 	}
 
-	public String getServiceURI() {
-		return serviceURI;
-	}
-
-	public void setServiceURI(String serviceURI) {
-		this.serviceURI = serviceURI;
-	}
 	
 }

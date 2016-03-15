@@ -9,6 +9,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
+/**
+ * @author umlaufz
+ * 
+ * Entity class for storing information about the local Cloud in the database.
+ * (Gatekeeper needs this information for negotiations.)
+ * The "operator" and "cloud_name" columns must be unique together.
+ */
 @Entity
 @Table(name="own_cloud", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
 public class OwnCloud {
@@ -34,23 +41,17 @@ public class OwnCloud {
 	}
 	
 	public OwnCloud(String operator, String cloudName, String IPAddress, String port, 
-			String authenticationInfo, String serviceURI) {
-		super();
+			String serviceURI, String authenticationInfo) {
 		this.operator = operator;
 		this.cloudName = cloudName;
 		this.IPAddress = IPAddress;
 		this.port = port;
-		this.authenticationInfo = authenticationInfo;
 		this.serviceURI = serviceURI;
+		this.authenticationInfo = authenticationInfo;
 	}
 	
-
 	public int getId() {
 		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public String getOperator() {
@@ -84,6 +85,14 @@ public class OwnCloud {
 	public void setPort(String port) {
 		this.port = port;
 	}
+	
+	public String getServiceURI() {
+		return serviceURI;
+	}
+
+	public void setServiceURI(String serviceURI) {
+		this.serviceURI = serviceURI;
+	}
 
 	public String getAuthenticationInfo() {
 		return authenticationInfo;
@@ -92,13 +101,6 @@ public class OwnCloud {
 	public void setAuthenticationInfo(String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
 	}
-
-	public String getServiceURI() {
-		return serviceURI;
-	}
-
-	public void setServiceURI(String serviceURI) {
-		this.serviceURI = serviceURI;
-	}
+	
 	
 }
