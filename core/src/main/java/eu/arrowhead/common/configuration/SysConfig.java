@@ -19,7 +19,8 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 
 /**
  * @author umlaufz
- *
+ * This class serves as a Database Acces Object for the configuration tables in the database,
+ * and provides URI information for the core systems.
  */
 public class SysConfig {
 	 
