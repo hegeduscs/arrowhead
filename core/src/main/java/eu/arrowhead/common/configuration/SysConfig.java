@@ -181,7 +181,7 @@ public class SysConfig {
 			ub = UriBuilder.fromUri(coreSystem.getIPAddress());
 		}
 		else{
-			ub = UriBuilder.fromUri(baseURI);
+			ub = UriBuilder.fromUri(baseURI).path(coreSystem.getIPAddress());
 		}
 		if(coreSystem.getPort() != null){
 			ub.path(":").path(coreSystem.getPort());
@@ -200,7 +200,7 @@ public class SysConfig {
 			ub = UriBuilder.fromUri(neighborCloud.getIPAddress());
 		}
 		else{
-			ub = UriBuilder.fromUri(baseURI);
+			ub = UriBuilder.fromUri(baseURI).path(neighborCloud.getIPAddress());
 		}
 		if(neighborCloud.getPort() != null){
 			ub.path(":").path(neighborCloud.getPort());
