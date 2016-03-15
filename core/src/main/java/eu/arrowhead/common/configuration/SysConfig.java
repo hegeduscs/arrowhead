@@ -178,16 +178,21 @@ public class SysConfig {
 	public String getURI(CoreSystem coreSystem){
 		UriBuilder ub = null;
 		if(coreSystem.getIPAddress().startsWith("http://")){
-			ub = UriBuilder.fromUri(coreSystem.getIPAddress());
+			if(coreSystem.getPort() != null){
+				ub = UriBuilder.fromPath(coreSystem.getIPAddress() + ":" + coreSystem.getPort());
+			}
+			else{
+				ub = UriBuilder.fromPath(coreSystem.getIPAddress());
+			}
 		}
 		else{
-			ub = UriBuilder.fromUri(baseURI).path(coreSystem.getIPAddress());
-		}
-		if(coreSystem.getPort() != null){
-			ub.path(":").path(coreSystem.getPort());
-		}
-		if(!coreSystem.getServiceURI().startsWith("/")){
-			ub.path("/");
+			if(coreSystem.getPort() != null){
+				ub = UriBuilder.fromPath(baseURI).path(coreSystem.getIPAddress() 
+						+ ":" + coreSystem.getPort());
+			}
+			else{
+				ub = UriBuilder.fromPath(baseURI).path(coreSystem.getIPAddress());
+			}
 		}
 		ub.path(coreSystem.getServiceURI());
 		
@@ -197,16 +202,21 @@ public class SysConfig {
 	public String getURI(NeighborCloud neighborCloud){
 		UriBuilder ub = null;
 		if(neighborCloud.getIPAddress().startsWith("http://")){
-			ub = UriBuilder.fromUri(neighborCloud.getIPAddress());
+			if(neighborCloud.getPort() != null){
+				ub = UriBuilder.fromPath(neighborCloud.getIPAddress() + ":" + neighborCloud.getPort());
+			}
+			else{
+				ub = UriBuilder.fromPath(neighborCloud.getIPAddress());
+			}
 		}
 		else{
-			ub = UriBuilder.fromUri(baseURI).path(neighborCloud.getIPAddress());
-		}
-		if(neighborCloud.getPort() != null){
-			ub.path(":").path(neighborCloud.getPort());
-		}
-		if(!neighborCloud.getServiceURI().startsWith("/")){
-			ub.path("/");
+			if(neighborCloud.getPort() != null){
+				ub = UriBuilder.fromPath(baseURI).path(neighborCloud.getIPAddress() 
+						+ ":" + neighborCloud.getPort());
+			}
+			else{
+				ub = UriBuilder.fromPath(baseURI).path(neighborCloud.getIPAddress());
+			}
 		}
 		ub.path(neighborCloud.getServiceURI());
 		
