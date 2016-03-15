@@ -371,7 +371,7 @@ public class AuthorizationResource {
 	 */
 	@DELETE
 	@Path("/operator/{operatorName}/cloud/{cloudName}")
-	public Response deleteCloudFromAuthorized(@PathParam("operatorName") String operatorName,
+	public Response deleteCloudRelations(@PathParam("operatorName") String operatorName,
 			@PathParam("cloudName") String cloudName) {
 		ArrowheadCloud cloud = databaseManager.getCloudByName(operatorName, cloudName);
 		if(cloud == null){
