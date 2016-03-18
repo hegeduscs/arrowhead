@@ -48,6 +48,21 @@ public class AuthorizationResource {
 
 	DatabaseManager databaseManager = new DatabaseManager();
 	private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());
+	
+	/**
+	 * Returns a list of ArrowheadSystems with the same systemGroup from the database.
+	 * 
+	 * @param {String} systemGroup
+	 * @return List<ArrowheadSystem>
+	 */
+	@GET
+	@Path("/systemgroup/{systemGroup}")
+	public List<ArrowheadSystem> getSystems(@PathParam("systemGroup") String systemGroup) {
+		List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
+		systemList = databaseManager.getSystems(systemGroup);
+
+		return systemList;
+	}
 
 	/**
 	 * Returns an ArrowheadSystem from the database specified by the systemGroup
@@ -159,7 +174,8 @@ public class AuthorizationResource {
 	@POST
 	@Path("/systemgroup/{systemGroup}/system/{systemName}")
 	public Response addSystemToAuthorized(@PathParam("systemGroup") String systemGroup,
-			@PathParam("systemName") String systemName, IntraCloudAuthEntry entry) {
+			@PathParam("systemName") String systemName, IntraCloudAuthEntry entry,
+			@Context UriInfo uriInfo) {
 		if (!entry.isPayloadUsable()) {
 			throw new BadPayloadException("Bad payload: Missing serviceList, providerList, "
 					+ "IP address, port or authenticationInfo from the entry payload.");
@@ -200,7 +216,8 @@ public class AuthorizationResource {
 		}
 
 		log.info("System added to authorization database: " + systemName);
-		return Response.status(Status.CREATED).entity(consumer).build();
+		URI uri = uriInfo.getAbsolutePathBuilder().build();
+		return Response.created(uri).entity(consumer).build();
 	}
 
 	/**
@@ -228,6 +245,35 @@ public class AuthorizationResource {
 		log.info("Consumer System relations deleted from authorization database. "
 				+ "System name: " + systemName);
 		return Response.noContent().build();
+	}
+	
+	/**
+	 * Returns the list of consumable Services of a System.
+	 * 
+	 * @param {String} systemGroup
+	 * @param {String} systemName
+	 * @exception DataNotFoundException
+	 * @return List<ArrowheadService>
+	 */
+	@GET
+	@Path("/operator/{operatorName}/cloud/{cloudName}/services")
+	public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup,
+			@PathParam("systemName") String systemName) {
+		ArrowheadSystem system = databaseManager.getSystemByName(systemGroup, systemName);
+		if(system == null){
+       	 	throw new DataNotFoundException(
+       	 		"This System is not in the authorization database. (SG: " + systemGroup + 
+				", SN: " + systemName + ")");
+        }
+		
+		List<Systems_Services> ssList = new ArrayList<Systems_Services>();
+		ssList = databaseManager.getSystemRelations(system);
+		Set<ArrowheadService> serviceList = new HashSet<ArrowheadService>();
+		for(Systems_Services ss : ssList){
+			serviceList.add(ss.getService());
+		}
+
+		return serviceList;
 	}
 
 	/**

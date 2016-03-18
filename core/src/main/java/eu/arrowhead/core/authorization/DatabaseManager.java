@@ -42,6 +42,31 @@ public class DatabaseManager {
     	}
     }
     
+    @SuppressWarnings("unchecked")
+	public List<ArrowheadSystem> getSystems(String systemGroup){
+    	List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		transaction = session.beginTransaction();
+            Criteria criteria = session.createCriteria(ArrowheadSystem.class);
+            criteria.add(Restrictions.eq("systemGroup", systemGroup));
+            systemList = (List<ArrowheadSystem>) criteria.list();
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    	
+    	return systemList;
+    }
+    
     public ArrowheadSystem getSystemByName(String systemGroup, String systemName){
     	ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
     	

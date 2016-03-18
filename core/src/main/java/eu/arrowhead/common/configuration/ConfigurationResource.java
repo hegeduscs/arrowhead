@@ -30,15 +30,37 @@ public class ConfigurationResource {
 	
 	@GET
 	@Path("/coresystems")
-	public List<CoreSystem> getAllCoreSystem(){
+	public List<CoreSystem> getAllCoreSystems(){
 		return databaseManager.getAll(CoreSystem.class);
 	}
 	
 	@GET
 	@Path("/neighborhood")
 	public List<NeighborCloud> getAllNeighborClouds(){
-		
 		return databaseManager.getAll(NeighborCloud.class);
+	}
+	
+	@GET
+	@Path("/owncloud")
+	public List<OwnCloud> getAllOwnClouds(){
+		return databaseManager.getAll(OwnCloud.class);
+	}
+	
+	@GET
+	@Path("/coresystems/{systemName}")
+	public Response getSystem(@PathParam("systemName") String systemName){
+		CoreSystem coreSystem = databaseManager.getSystem(systemName);
+	
+		return Response.status(Status.OK).entity(coreSystem).build();
+	}
+	
+	@GET
+	@Path("/neighborhood/operator/{operatorName}/cloud/{cloudName}")
+	public Response getCloud(@PathParam("operatorName") String operatorName, 
+			@PathParam("cloudName") String cloudName){
+		NeighborCloud neighborCloud = databaseManager.getCloud(operatorName, cloudName);
+	
+		return Response.status(Status.OK).entity(neighborCloud).build();
 	}
 	
 	@POST
