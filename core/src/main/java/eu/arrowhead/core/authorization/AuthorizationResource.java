@@ -256,7 +256,7 @@ public class AuthorizationResource {
 	 * @return List<ArrowheadService>
 	 */
 	@GET
-	@Path("/operator/{operatorName}/cloud/{cloudName}/services")
+	@Path("/systemgroup/{systemGroup}/systemname/{systemName}/services")
 	public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
 		ArrowheadSystem system = databaseManager.getSystemByName(systemGroup, systemName);
