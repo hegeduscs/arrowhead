@@ -37,7 +37,7 @@ import eu.arrowhead.core.authorization.database.Clouds_Services;
 import eu.arrowhead.core.authorization.database.Systems_Services;
 
 /**
- * @author umlaufz 
+ * @author umlaufz, hegeduscs 
  * This class handles the requests targeted at core/authorization/*.
  * Note: PathParam values are NOT case sensitive.
  */

@@ -1,5 +1,12 @@
 package eu.arrowhead.common.configuration;
 
+/**
+ * @author umlaufz
+ * 
+ * Plain Old Java Object for using the Configuration Resource in this package.
+ * New Core Systems, Neighbor Clouds and Own Cloud objects can be added 
+ * to the configuration database with this class via a REST interface.
+ */
 public class NewConfigEntry {
 	private String IPAddress;
 	private String port;
@@ -7,12 +14,11 @@ public class NewConfigEntry {
 	private String serviceURI;
 	
 	public NewConfigEntry(){
-		
 	}
 	
-	public NewConfigEntry(String iPAddress, String port, String authenticationInfo, String serviceURI) {
-		super();
-		this.IPAddress = iPAddress;
+	public NewConfigEntry(String IPAddress, String port, String authenticationInfo, 
+			String serviceURI) {
+		this.IPAddress = IPAddress;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
 		this.serviceURI = serviceURI;
@@ -22,8 +28,8 @@ public class NewConfigEntry {
 		return IPAddress;
 	}
 
-	public void setIPAddress(String iPAddress) {
-		this.IPAddress = iPAddress;
+	public void setIPAddress(String IPAddress) {
+		this.IPAddress = IPAddress;
 	}
 
 	public String getPort() {
@@ -49,5 +55,6 @@ public class NewConfigEntry {
 	public void setServiceURI(String serviceURI) {
 		this.serviceURI = serviceURI;
 	}
+	
 	
 }

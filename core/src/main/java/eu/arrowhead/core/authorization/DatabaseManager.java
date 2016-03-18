@@ -19,7 +19,7 @@ import eu.arrowhead.core.authorization.database.Clouds_Services;
 import eu.arrowhead.core.authorization.database.Systems_Services;
  
 /**
- * @author umlaufz
+ * @author umlaufz, hegeduscs
  * Database Acces Object with CRUD methods on the authorization tables of the database.
  * (These tables are found in the *.autorization.database package.)
  */

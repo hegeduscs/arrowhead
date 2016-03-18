@@ -14,6 +14,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+/**
+ * @author umlaufz
+ * 
+ * This class handles the requests targeted at core/configuration/*.
+ * This resource can be used to perform CRUD operations (via REST) on Core Systems 
+ * and Neighbor Clouds objects in the configuration database.
+ */
 @Path("configuration")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -110,4 +117,5 @@ public class ConfigurationResource {
 		return Response.noContent().build();
 	}
 
+	
 }
