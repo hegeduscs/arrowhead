@@ -7,19 +7,26 @@ import eu.arrowhead.common.model.ArrowheadService;
 @XmlRootElement
 public class InterCloudAuthRequest {
 	
+	private ArrowheadService service;
 	private String authenticationInfo;
-	private ArrowheadService arrowheadService;
 	private boolean generateToken;
 	
 	public InterCloudAuthRequest(){
-		
 	}
 	
-	public InterCloudAuthRequest(String authenticationInfo, ArrowheadService arrowheadService, boolean generateToken) {
-		super();
+	public InterCloudAuthRequest(ArrowheadService service, String authenticationInfo, 
+			boolean generateToken) {
+		this.service = service;
 		this.authenticationInfo = authenticationInfo;
-		this.arrowheadService = arrowheadService;
 		this.generateToken = generateToken;
+	}
+
+	public ArrowheadService getService() {
+		return service;
+	}
+
+	public void setService(ArrowheadService service) {
+		this.service = service;
 	}
 
 	public String getAuthenticationInfo() {
@@ -30,14 +37,6 @@ public class InterCloudAuthRequest {
 		this.authenticationInfo = authenticationInfo;
 	}
 
-	public ArrowheadService getArrowheadService() {
-		return arrowheadService;
-	}
-
-	public void setArrowheadService(ArrowheadService arrowheadService) {
-		this.arrowheadService = arrowheadService;
-	}
-
 	public boolean isGenerateToken() {
 		return generateToken;
 	}
@@ -45,9 +44,9 @@ public class InterCloudAuthRequest {
 	public void setGenerateToken(boolean generateToken) {
 		this.generateToken = generateToken;
 	}
-	
+
 	public boolean isPayloadUsable(){
-		if(authenticationInfo == null || arrowheadService == null)
+		if(authenticationInfo == null || service == null)
 			return false;
 		return true;
 	}

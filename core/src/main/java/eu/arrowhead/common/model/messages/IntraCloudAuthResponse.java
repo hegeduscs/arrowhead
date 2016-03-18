@@ -9,27 +9,25 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 @XmlRootElement
 public class IntraCloudAuthResponse {
 	
-	private HashMap<ArrowheadSystem, Boolean> authorizationMap = new HashMap<ArrowheadSystem, Boolean>();
+	private HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<ArrowheadSystem, Boolean>();
 
 	public IntraCloudAuthResponse() {
-		super();
 	}
 
-	public IntraCloudAuthResponse(HashMap<ArrowheadSystem, Boolean> authorizationMap) {
-		super();
-		this.authorizationMap = authorizationMap;
+	public IntraCloudAuthResponse(HashMap<ArrowheadSystem, Boolean> authorizationState) {
+		this.authorizationState = authorizationState;
 	}
 	
 	public HashMap<ArrowheadSystem, Boolean> getAuthorizationMap() {
-		return authorizationMap;
+		return authorizationState;
 	}
 
-	public void setAuthorizationMap(HashMap<ArrowheadSystem, Boolean> authorizationMap) {
-		this.authorizationMap = authorizationMap;
+	public void setAuthorizationMap(HashMap<ArrowheadSystem, Boolean> authorizationState) {
+		this.authorizationState = authorizationState;
 	}
 
 	public boolean isPayloadUsable(){
-		if(authorizationMap.isEmpty())
+		if(authorizationState.isEmpty())
 			return false;
 		return true;
 	}

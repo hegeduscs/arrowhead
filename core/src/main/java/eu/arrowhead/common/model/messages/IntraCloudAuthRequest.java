@@ -11,30 +11,36 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 @XmlRootElement
 public class IntraCloudAuthRequest {
 	
+	private ArrowheadService service;
+	private Collection<ArrowheadSystem> providers = new ArrayList<ArrowheadSystem>();
 	private String authenticationInfo; //consumers
-	private ArrowheadService arrowheadService;
-	private boolean generateToken;
-	private Collection<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
+	private boolean generateToken;	
 	
 	public IntraCloudAuthRequest() {
-		super();
 	}
 
-	public IntraCloudAuthRequest(String authenticationInfo, ArrowheadService arrowheadService, boolean generateToken,
-			Collection<ArrowheadSystem> providerList) {
-		super();
+	public IntraCloudAuthRequest(ArrowheadService service, Collection<ArrowheadSystem> providers,
+			String authenticationInfo, boolean generateToken) {
+		this.service = service;
+		this.providers = providers;
 		this.authenticationInfo = authenticationInfo;
-		this.arrowheadService = arrowheadService;
 		this.generateToken = generateToken;
-		this.providerList = providerList;
+	}
+	
+	public ArrowheadService getService() {
+		return service;
 	}
 
-	public Collection<ArrowheadSystem> getProviderList() {
-		return providerList;
+	public void setService(ArrowheadService service) {
+		this.service = service;
 	}
 
-	public void setProviderList(Collection<ArrowheadSystem> providerList) {
-		this.providerList = providerList;
+	public Collection<ArrowheadSystem> getProviders() {
+		return providers;
+	}
+
+	public void setProviders(Collection<ArrowheadSystem> providers) {
+		this.providers = providers;
 	}
 
 	public String getAuthenticationInfo() {
@@ -45,14 +51,6 @@ public class IntraCloudAuthRequest {
 		this.authenticationInfo = authenticationInfo;
 	}
 
-	public ArrowheadService getArrowheadService() {
-		return arrowheadService;
-	}
-
-	public void setArrowheadService(ArrowheadService arrowheadService) {
-		this.arrowheadService = arrowheadService;
-	}
-
 	public boolean isGenerateToken() {
 		return generateToken;
 	}
@@ -60,10 +58,12 @@ public class IntraCloudAuthRequest {
 	public void setGenerateToken(boolean generateToken) {
 		this.generateToken = generateToken;
 	}
-	
+
 	public boolean isPayloadUsable(){
-		if(authenticationInfo == null|| arrowheadService == null || providerList.isEmpty())
+		if(authenticationInfo == null|| service == null || providers.isEmpty())
 			return false;
 		return true;
 	}
+	
+	
 }

@@ -157,8 +157,7 @@ public class GatekeeperResource {
     	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
     	log.info("Creating an InterCloudAuthRequest to the Authorization System");
     	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(
-    			gsdPoll.getRequesterCloud().getAuthenticationInfo(), 
-    			requestedService, false);
+    			requestedService, gsdPoll.getRequesterCloud().getAuthenticationInfo(), false);
     	
     	String AuthorizationResponse = getAuthorizationResponse(interAuthRequest,
     			gsdPoll.getRequesterCloud());
@@ -267,7 +266,8 @@ public class GatekeeperResource {
     	
     	// Sending an InterCloudAuthRequest to the Authorization System (generateToken=true)
     	log.info("Creating an InterCloudAuthRequest to the Authorization System");
-    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(icnProposal.getRequestedCloud().getAuthenticationInfo(), requestedService, true);
+    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(requestedService, 
+    			icnProposal.getRequestedCloud().getAuthenticationInfo(), true);
     	
     	String AuthorizationResponse = getAuthorizationResponse(interAuthRequest,
     			icnProposal.getRequestedCloud());

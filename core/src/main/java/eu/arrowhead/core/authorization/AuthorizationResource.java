@@ -38,7 +38,7 @@ import eu.arrowhead.core.authorization.database.Systems_Services;
 
 /**
  * @author umlaufz 
- * This class handles the requests targedet at core/authorization/*.
+ * This class handles the requests targeted at core/authorization/*.
  * Note: PathParam values are NOT case sensitive.
  */
 @Path("authorization")
@@ -104,40 +104,40 @@ public class AuthorizationResource {
 		log.info("Consumer group: " + consumer.getSystemGroup() + 
 				", consumer name: " + consumer.getSystemName());
 		
-		HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean> authorizationMap = 
+		HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean> authorizationState = 
 				new HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean>();
 		log.info("Hashmap created");
 		
 		ArrowheadService service = null;
-		service = databaseManager.getServiceByName(request.getArrowheadService().getServiceGroup(),
-				request.getArrowheadService().getServiceDefinition());
+		service = databaseManager.getServiceByName(request.getService().getServiceGroup(),
+				request.getService().getServiceDefinition());
 		if (service == null) {
 			log.info("Service is not in the database.");
-			for (eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviderList()) {
-				authorizationMap.put(provider, false);
+			for (eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviders()) {
+				authorizationState.put(provider, false);
 			}
-			response.setAuthorizationMap(authorizationMap);
+			response.setAuthorizationMap(authorizationState);
 			return Response.status(Status.OK).entity(response).build();
 		}
 
 		Systems_Services ss = new Systems_Services();
-		for (eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviderList()) {
+		for (eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviders()) {
 			ArrowheadSystem retrievedSystem = databaseManager.getSystemByName(provider.getSystemGroup(),
 					provider.getSystemName());
 			ss = databaseManager.getSS(consumer, retrievedSystem, service);
 			if (ss == null) {
-				authorizationMap.put(provider, false);
+				authorizationState.put(provider, false);
 			} else {
-				authorizationMap.put(provider, true);
+				authorizationState.put(provider, true);
 			}
 		}
 		log.info("Authorization rights requested for System: " + systemName);
 		
 		log.info("Finalizing Map");
-		response.setAuthorizationMap(authorizationMap);
-		for (eu.arrowhead.common.model.ArrowheadSystem ahsys : authorizationMap.keySet()) {
+		response.setAuthorizationMap(authorizationState);
+		for (eu.arrowhead.common.model.ArrowheadSystem ahsys : authorizationState.keySet()) {
 			log.info("System group: " + ahsys.getSystemGroup() + ", system name: " + 
-					ahsys.getSystemName() + ", value" + authorizationMap.get(ahsys).toString());
+					ahsys.getSystemName() + ", value" + authorizationState.get(ahsys).toString());
 		}
 		
 		log.info("Sending response");
@@ -292,13 +292,12 @@ public class AuthorizationResource {
        	 			"Consumer Cloud is not in the authorization database. (OP: " + operatorName + 
 				", CN: " + cloudName + ")");
         }
-        log.info("Cloud operator: " + cloud.getOperator() + 
-				", cloud name: " + cloud.getCloudName());
+        log.info("Cloud operator: " + cloud.getOperator() + ", cloud name: " + cloud.getCloudName());
         
 		ArrowheadService service = null;
 		boolean isAuthorized = false;
-		service = databaseManager.getServiceByName(request.getArrowheadService().getServiceGroup(),
-				request.getArrowheadService().getServiceDefinition());
+		service = databaseManager.getServiceByName(request.getService().getServiceGroup(),
+				request.getService().getServiceDefinition());
 		if(service == null){
 			return Response.status(Status.OK).entity(isAuthorized).build();
 		}

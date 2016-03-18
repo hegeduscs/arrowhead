@@ -94,8 +94,8 @@ public class OrchestratorService {
 
 			// Poll the Authorization
 			log.info("Polling the Authorization service.");
-			authReq = new IntraCloudAuthRequest("authInfo", this.serviceRequestForm.getRequestedService(), false,
-					providers);
+			authReq = new IntraCloudAuthRequest(this.serviceRequestForm.getRequestedService(), 
+					providers, "authInfo", false);
 			authResp = getAuthorizationResponse(authReq, this.serviceRequestForm);
 
 			// Removing the non-authenticated systems from the providers list
