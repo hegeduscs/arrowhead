@@ -32,6 +32,7 @@ arrowhead-serviceregistry/webservice/.settings/org.eclipse.wst.common.project.fa
 arrowhead-serviceregistry/webservice/.settings/org.eclipse.wst.jsdt.ui.superType.container
 arrowhead-serviceregistry/webservice/.settings/org.eclipse.wst.jsdt.ui.superType.name
 arrowhead/.project
+arrowhead/orchestrator/target/orchestrator-1.0.0/WEB-INF/lib/javax.annotation-api-1.2.jar
 arrowhead/gatekeeper/.settings/org.eclipse.wst.common.component
 arrowhead/gatekeeper/.settings/org.eclipse.wst.common.project.facet.core.prefs.xml
 arrowhead/gatekeeper/.settings/org.eclipse.m2e.core.prefs
@@ -121,3 +122,4 @@ arrowhead/authorization/.settings/org.eclipse.jdt.core.prefs
 arrowhead/authorization/.settings/org.eclipse.m2e.core.prefs
 arrowhead/serviceregistry/src/main/resources/log4j.properties_tmit
 arrowhead/qos/.settings/org.eclipse.wst.jsdt.ui.superType.container
+arrowhead/serviceregistry/src/main/resources/log4j.properties_local
