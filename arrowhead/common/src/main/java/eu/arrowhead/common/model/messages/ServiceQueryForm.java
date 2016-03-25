@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ServiceQueryForm {
 
+	//TODO String -> HashMap (Lásd.: TODO.txt :))
 	private String serviceMetaData;
 	private List<String> serviceInterfaces = new ArrayList<String>();
 	private boolean pingProviders;

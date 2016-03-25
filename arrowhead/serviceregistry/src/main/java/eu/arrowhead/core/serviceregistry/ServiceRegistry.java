@@ -22,6 +22,7 @@ import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import com.github.danieln.dnssdjava.ServiceType;
 
+import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.ProvidedService;
@@ -108,9 +109,7 @@ public class ServiceRegistry {
 		} catch (DnsSDException ex) {
 			log.error(ex);
 			ex.printStackTrace();
-		} catch (NumberFormatException ex) {
-			log.error(ex);
-			ex.printStackTrace();
+			throw new DnsException(ex.getMessage());
 		}
 
 	}
@@ -138,9 +137,7 @@ public class ServiceRegistry {
 		} catch (DnsSDException ex) {
 			log.error(ex);
 			ex.printStackTrace();
-		} catch (NumberFormatException ex) {
-			log.error(ex);
-			ex.printStackTrace();
+			throw new DnsException(ex.getMessage());
 		}
 
 	}
@@ -184,30 +181,18 @@ public class ServiceRegistry {
 
 										boolean replied = true;
 										if (queryForm.isPingProviders()) {
-											String path = properties.get("path");
-											String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
-											int timeout = new Integer(prop.getProperty("ping.timeout", "10000")).intValue();
-											int port = new Integer(service.getPort()).intValue();
-											String host = removeLastChar(service.getHost(), '.');
-											if (!pingHost(host, port, timeout)) {
-												System.out.println("Can't access the service in the following URL " + targetUrl
-														+ ", in " + timeout + "millisec");
-												log.info("Can't access the service in the following URL" + targetUrl + ", in "
-														+ timeout + "millisec");
-												needToRemoveInstances.add(instance);
-												replied = false;
-											}
+											replied = pingService(needToRemoveInstances, instance, service, properties, replied);
 										}
 
 										if (replied && queryForm.isMetadataSearch()) {
 											String metaData = properties.get("ahsrvmetad");
 											if (metaData != null && metaData.equals(queryForm.getServiceMetaData())) {
 												System.out
-														.println("Service is found by interface and metadata and added to ServiceQueryResult, it's interface and name and metadata are : "
+														.println("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
 																+ providerService.getServiceInterface()
 																+ ", "
 																+ providerService.getProvider().getSystemName() + ", " + metaData);
-												log.info("Service is found by interface and metadata and added to ServiceQueryResult, it's interface and name and metadata are : "
+												log.info("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
 														+ providerService.getServiceInterface()
 														+ ", "
 														+ providerService.getProvider().getSystemName() + ", " + metaData);
@@ -215,11 +200,11 @@ public class ServiceRegistry {
 											}
 										} else if (replied && !queryForm.isMetadataSearch()) {
 											System.out
-													.println("Service is found by interface and pinged and added to ServiceQueryResult, it's interface and name are : "
+													.println("Service is found by interface and pinged and added to ServiceQueryResult, interface and name are : "
 															+ providerService.getServiceInterface()
 															+ ", "
 															+ providerService.getProvider().getSystemName());
-											log.info("Service is found by interface and metadata and added to ServiceQueryResult, it's interface and name are : "
+											log.info("Service is found by interface and metadata and added to ServiceQueryResult, interface and name are : "
 													+ providerService.getServiceInterface()
 													+ ", "
 													+ providerService.getProvider().getSystemName());
@@ -228,11 +213,11 @@ public class ServiceRegistry {
 
 									} else {
 										System.out
-												.println("Service is found by interface and added to ServiceQueryResult, it's interface and name are : "
+												.println("Service is found by interface and added to ServiceQueryResult, interface and name are : "
 														+ providerService.getServiceInterface()
 														+ ", "
 														+ providerService.getProvider().getSystemName());
-										log.info("Service is found by interface and added to ServiceQueryResult, it's interface and name are : "
+										log.info("Service is found by interface and added to ServiceQueryResult, interface and name are : "
 												+ providerService.getServiceInterface()
 												+ ", "
 												+ providerService.getProvider().getSystemName());
@@ -253,12 +238,127 @@ public class ServiceRegistry {
 				ServiceQueryResult result = new ServiceQueryResult();
 				result.setServiceQueryData(list);
 				return result;
-			} catch (Exception ex) {
+			} catch (DnsSDException ex) {
 				log.error(ex);
 				ex.printStackTrace();
+				throw new DnsException(ex.getMessage());
 			}
 		}
 		return null;
+	}
+
+	public ServiceQueryResult provideAllServices() {
+
+		try {
+
+			String computerDomain = getProp().getProperty("dns.domain", "evoin.arrowhead.eu");
+
+			DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator();
+
+			if (computerDomain != null) {
+				System.out.println("DNS-SD overriding computer domain: " + computerDomain);
+				de = DnsSDFactory.getInstance().createDomainEnumerator(computerDomain);
+			} else {
+				de = DnsSDFactory.getInstance().createDomainEnumerator();
+			}
+
+			DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
+
+			Collection<ServiceType> types = browser.getServiceTypes();
+			List<ProvidedService> list = new ArrayList<ProvidedService>();
+			Collection<ServiceName> needToRemoveInstances = new ArrayList<ServiceName>();
+
+			if (types != null) {
+
+				for (ServiceType type : types) {
+					Collection<ServiceName> instances = browser.getServiceInstances(type);
+					System.out.println(instances);
+					for (ServiceName instance : instances) {
+						ServiceData service = browser.getServiceData(instance);
+						ProvidedService providerService = null;
+						if (service != null) {
+
+							String interfaceType = null;
+
+							String serviceType = service.getName().getType().toString();
+							int dotIndex = serviceType.indexOf(".");
+							if (dotIndex != -1) {
+								serviceType = serviceType.substring(0, dotIndex);
+								String[] array = serviceType.split("_");
+								if (array.length == 4) {
+									interfaceType = array[3];
+								}
+							}
+
+							providerService = createProvidedService(service, interfaceType);
+
+							if (providerService != null) {
+								list.add(providerService);
+							}
+
+						}
+						System.out.println(service);
+					}
+				}
+
+				if (!needToRemoveInstances.isEmpty()) {
+					removeService(needToRemoveInstances);
+				}
+
+				ServiceQueryResult result = new ServiceQueryResult();
+				result.setServiceQueryData(list);
+				return result;
+			}
+		} catch (DnsSDException ex) {
+			log.error(ex);
+			ex.printStackTrace();
+			throw new DnsException(ex.getMessage());
+		}
+		return null;
+	}
+
+	private ProvidedService createProvidedService(ServiceData service, String interfaceType) {
+		ProvidedService providerService;
+		providerService = new ProvidedService();
+		ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
+
+		Map<String, String> properties = service.getProperties();
+		String systemGroup = properties.get("ahsysgrp");
+		String systemName = properties.get("ahsysname");
+		String authInfo = properties.get("ahsysauthinfo");
+		String serviceURI = properties.get("path");
+
+		String ipAddress = service.getHost();
+		ipAddress = removeLastChar(ipAddress, '.');
+
+		String port = new Integer(service.getPort()).toString();
+
+		arrowheadSystem.setAuthenticationInfo(authInfo);
+		arrowheadSystem.setIPAddress(ipAddress);
+		arrowheadSystem.setPort(port);
+		arrowheadSystem.setSystemGroup(systemGroup);
+		arrowheadSystem.setSystemName(systemName);
+
+		providerService.setProvider(arrowheadSystem);
+		providerService.setServiceURI(serviceURI);
+		providerService.setServiceInterface(interfaceType);
+		return providerService;
+	}
+
+	private boolean pingService(Collection<ServiceName> needToRemoveInstances, ServiceName instance, ServiceData service,
+			Map<String, String> properties, boolean replied) {
+		String path = properties.get("path");
+		String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
+		int timeout = new Integer(prop.getProperty("ping.timeout", "10000")).intValue();
+		int port = new Integer(service.getPort()).intValue();
+		String host = removeLastChar(service.getHost(), '.');
+		if (!pingHost(host, port, timeout)) {
+			System.out.println("Can't access the service in the following URL " + targetUrl + ", in " + timeout + "millisec");
+			log.info("Can't access the service in the following URL" + targetUrl + ", in " + timeout + "millisec");
+			needToRemoveInstances.add(instance);
+			replied = false;
+		}
+		return replied;
 	}
 
 	private void removeService(Collection<ServiceName> needToRemoveInstances) throws DnsSDException {
@@ -299,29 +399,7 @@ public class ServiceRegistry {
 
 			if (interfaceType != null && interfaceType.equals(serviceInterface) && serviceGroupDns != null
 					&& serviceGroupDns.equals(serviceGroup) && serviceNameDns != null && serviceNameDns.equals(serviceName)) {
-				providerService = new ProvidedService();
-				ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
-
-				Map<String, String> properties = service.getProperties();
-				String systemGroup = properties.get("ahsysgrp");
-				String systemName = properties.get("ahsysname");
-				String authInfo = properties.get("ahsysauthinfo");
-				String serviceURI = properties.get("path");
-
-				String ipAddress = service.getHost();
-				ipAddress = removeLastChar(ipAddress, '.');
-
-				String port = new Integer(service.getPort()).toString();
-
-				arrowheadSystem.setAuthenticationInfo(authInfo);
-				arrowheadSystem.setIPAddress(ipAddress);
-				arrowheadSystem.setPort(port);
-				arrowheadSystem.setSystemGroup(systemGroup);
-				arrowheadSystem.setSystemName(systemName);
-
-				providerService.setProvider(arrowheadSystem);
-				providerService.setServiceURI(serviceURI);
-				providerService.setServiceInterface(interfaceType);
+				providerService = createProvidedService(service, interfaceType);
 			}
 		}
 		return providerService;

@@ -17,7 +17,7 @@
 		<servlet-name>Jersey Web Application</servlet-name>
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
-	<listener>
-		<listener-class>eu.arrowhead.common.listener.ServletContextClass</listener-class>
+	<listener>		
+		<listener-class>eu.arrowhead.core.serviceregistry.AppContextListener</listener-class>
 	</listener>
 </web-app>

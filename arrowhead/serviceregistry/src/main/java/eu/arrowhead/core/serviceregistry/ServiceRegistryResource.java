@@ -58,4 +58,15 @@ public class ServiceRegistryResource {
 			@PathParam("service") String service, ServiceQueryForm queryForm) {
 		return ServiceRegistry.getInstance().provideServices(serviceGroup, service, queryForm);
 	}
+	
+	/**
+	 * 
+	 * @return All registered service
+	 */
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path(value = "/all")
+	public ServiceQueryResult getAllServices() {
+		return ServiceRegistry.getInstance().provideAllServices();
+	}
 }
