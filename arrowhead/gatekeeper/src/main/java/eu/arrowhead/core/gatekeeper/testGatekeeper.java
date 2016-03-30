@@ -1,8 +1,8 @@
 package eu.arrowhead.core.gatekeeper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
@@ -29,7 +29,9 @@ protected GSDPoll testGSDPoll(){
 	List<String> interfaces = new ArrayList<String>();
 	interfaces.add("inf2");
 	interfaces.add("inf4");
-	ArrowheadService requestedService = new ArrowheadService("sg4", "sd4", interfaces, "md4");
+	HashMap<String, String> map =  new HashMap<String,String>();
+	map.put("md4", "md4");
+	ArrowheadService requestedService = new ArrowheadService("sg4", "sd4", interfaces, map);
 	ArrowheadCloud requesterCloud = new ArrowheadCloud("BME", "B", "gatekeeperIP", "gatekeeperPort", "gatekeeperURI", "test");
 	GSDPoll gsdPoll = new GSDPoll(requestedService, requesterCloud);
 	return gsdPoll;    	
@@ -43,7 +45,9 @@ protected ICNProposal testProposal() {
 	List<String> interfaces = new ArrayList<String>();
 	interfaces.add("inf2");
 	interfaces.add("inf4");
-	ArrowheadService requestedService = new ArrowheadService("sg4", "sd4", interfaces, "md4");
+	HashMap<String, String> map =  new HashMap<String,String>();
+	map.put("md4", "md4");
+	ArrowheadService requestedService = new ArrowheadService("sg4", "sd4", interfaces, map);
 	ICNProposal proposal = new ICNProposal(requestedService, "test", null, null);
 	return proposal;
 }
@@ -56,12 +60,11 @@ protected OrchestrationForm testOrchestrationForm() {
 	List<String> interfaces = new ArrayList<String>();
 	interfaces.add("test111");
 	interfaces.add("test222");
-   ArrowheadService providerService = new ArrowheadService("serviceGroup", "serviceDefinition",
-   		interfaces, "metaData");
-   ArrowheadSystem providerSystem = new ArrowheadSystem("systemGroup", "systemName", 
-   		"iPAddress", "port", "authenticationInfo");
-   OrchestrationForm orchForm = new OrchestrationForm(
-   		providerService, providerSystem, "serviceURI", "authorizationInfo");
+	HashMap<String, String> map =  new HashMap<String,String>();
+	map.put("md4", "md4");
+   ArrowheadService providerService = new ArrowheadService("serviceGroup", "serviceDefinition", interfaces, map);
+   ArrowheadSystem providerSystem = new ArrowheadSystem("systemGroup", "systemName", "iPAddress", "port", "authenticationInfo");
+   OrchestrationForm orchForm = new OrchestrationForm(providerService, providerSystem, "serviceURI", "authorizationInfo");
 	return orchForm;
 }
 

@@ -185,18 +185,23 @@ public class ServiceRegistry {
 										}
 
 										if (replied && queryForm.isMetadataSearch()) {
-											String metaData = properties.get("ahsrvmetad");
-											if (metaData != null && metaData.equals(queryForm.getServiceMetaData())) {
-												System.out
-														.println("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
-																+ providerService.getServiceInterface()
-																+ ", "
-																+ providerService.getProvider().getSystemName() + ", " + metaData);
-												log.info("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
-														+ providerService.getServiceInterface()
-														+ ", "
-														+ providerService.getProvider().getSystemName() + ", " + metaData);
-												list.add(providerService);
+
+											for (Map.Entry<String, String> entry : queryForm.getServiceMetaData().entrySet()) {
+												String metaData = properties.get("ahsrvmetad_" + entry.getKey());
+												if (metaData != null && metaData.equals(entry.getValue())) {
+													System.out
+															.println("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
+																	+ providerService.getServiceInterface()
+																	+ ", "
+																	+ providerService.getProvider().getSystemName()
+																	+ ", "
+																	+ metaData);
+													log.info("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
+															+ providerService.getServiceInterface()
+															+ ", "
+															+ providerService.getProvider().getSystemName() + ", " + metaData);
+													list.add(providerService);
+												}
 											}
 										} else if (replied && !queryForm.isMetadataSearch()) {
 											System.out
@@ -423,14 +428,15 @@ public class ServiceRegistry {
 		reg.setTSIGKey(tsigKeyName, tsigAlgorithm, tsigKey);
 	}
 
-	private void setServiceDataProperties(ServiceRegistryEntry entry, ServiceData data) {
+	private void setServiceDataProperties(ServiceRegistryEntry registryEntry, ServiceData data) {
 		Map<String, String> properties = data.getProperties();
-		properties.put("ahsysgrp", entry.getProvider().getSystemGroup());
-		properties.put("ahsysname", entry.getProvider().getSystemName());
-		properties.put("ahsysauthinfo", entry.getProvider().getAuthenticationInfo());
-		properties.put("path", entry.getServiceURI());
-		properties.put("ahsrvmetad", entry.getServiceMetadata());
-		// properties.put("txtvers", entry.getVersion());
+		properties.put("ahsysgrp", registryEntry.getProvider().getSystemGroup());
+		properties.put("ahsysname", registryEntry.getProvider().getSystemName());
+		properties.put("ahsysauthinfo", registryEntry.getProvider().getAuthenticationInfo());
+		properties.put("path", registryEntry.getServiceURI());
+		for (Map.Entry<String, String> entry : registryEntry.getServiceMetadata().entrySet()) {
+			properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());
+		}
 	}
 
 	private boolean parametersIsValid(String serviceGroup, String serviceName, String interf) {

@@ -2,14 +2,14 @@ package eu.arrowhead.common.model.messages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class ServiceQueryForm {
 
-	//TODO String -> HashMap (Lásd.: TODO.txt :))
-	private String serviceMetaData;
+	private Map<String, String> serviceMetaData;
 	private List<String> serviceInterfaces = new ArrayList<String>();
 	private boolean pingProviders;
 	private boolean metadataSearch;
@@ -18,8 +18,8 @@ public class ServiceQueryForm {
 	public ServiceQueryForm() {
 		super();
 	}
-	
-	public ServiceQueryForm(String serviceMetaData, List<String> serviceInterfaces, boolean pingProviders,
+
+	public ServiceQueryForm(Map<String, String> serviceMetaData, List<String> serviceInterfaces, boolean pingProviders,
 			boolean metadataSearch, String tsig_key) {
 		this.serviceMetaData = serviceMetaData;
 		this.serviceInterfaces = serviceInterfaces;
@@ -28,19 +28,19 @@ public class ServiceQueryForm {
 		this.tsig_key = tsig_key;
 	}
 
-	public ServiceQueryForm(ServiceRequestForm srf){
+	public ServiceQueryForm(ServiceRequestForm srf) {
 		this.serviceMetaData = srf.getRequestedService().getMetaData();
 		this.serviceInterfaces = srf.getRequestedService().getInterfaces();
 		this.pingProviders = srf.getOrchestrationFlags().get("pingProvider");
 		this.metadataSearch = srf.getOrchestrationFlags().get("metadataSearch");
-		this.tsig_key ="DUMMY"; // FROM CONFIGURATION
+		this.tsig_key = "DUMMY"; // FROM CONFIGURATION
 	}
 
-	public String getServiceMetaData() {
+	public Map<String, String> getServiceMetaData() {
 		return serviceMetaData;
 	}
 
-	public void setServiceMetaData(String serviceMetaData) {
+	public void setServiceMetaData(Map<String, String> serviceMetaData) {
 		this.serviceMetaData = serviceMetaData;
 	}
 
