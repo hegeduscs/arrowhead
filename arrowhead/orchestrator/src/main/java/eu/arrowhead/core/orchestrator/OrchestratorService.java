@@ -210,7 +210,7 @@ public class OrchestratorService {
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
 		log.info("The data of the ServiceQueryForm: ");
-		log.info("Metadata: " + sqf.getServiceMetaData());
+		log.info("Metadata: " + sqf.getServiceMetadata());
 		log.info("The TSIG_key: " + sqf.getTsig_key());
 		log.info("The service interfaces: ");
 		for (String str : sqf.getServiceInterfaces()){

@@ -26,6 +26,7 @@ import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.ProvidedService;
+import eu.arrowhead.common.model.messages.ServiceMetadata;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
@@ -77,7 +78,7 @@ public class ServiceRegistry {
 		if (!parametersIsValid(serviceGroup, serviceName, interf)) {
 			throw new InvalidParameterException("Invalid parameters in URL!");
 		}
-
+		System.out.println("entry.getServiceMetadata() :" + entry.getServiceMetadata());
 		try {
 			if (entry != null && entry.getProvider() != null) {
 
@@ -107,6 +108,7 @@ public class ServiceRegistry {
 
 			}
 		} catch (DnsSDException ex) {
+			System.out.println(ex.getMessage());
 			log.error(ex);
 			ex.printStackTrace();
 			throw new DnsException(ex.getMessage());
@@ -176,6 +178,7 @@ public class ServiceRegistry {
 									Map<String, String> properties = service.getProperties();
 									System.out.println("queryForm.isMetadataSearch(): " + queryForm.isMetadataSearch());
 									System.out.println("queryForm.isPingProviders(): " + queryForm.isPingProviders());
+									System.out.println("queryForm.getServiceMetadata(): " + queryForm.getServiceMetadata());
 
 									if (queryForm.isMetadataSearch() || queryForm.isPingProviders()) {
 
@@ -184,11 +187,15 @@ public class ServiceRegistry {
 											replied = pingService(needToRemoveInstances, instance, service, properties, replied);
 										}
 
-										if (replied && queryForm.isMetadataSearch()) {
+										if (replied && queryForm.getServiceMetadata() != null && queryForm.isMetadataSearch()) {
+											boolean found = false;
+											for (ServiceMetadata entry : queryForm.getServiceMetadata()) {
+												System.out.println("entry: " + entry);
+												String metaData = (entry != null) ? properties
+														.get("ahsrvmetad_" + entry.getKey()) : null;
+												System.out.println("metaData: " + metaData);
 
-											for (Map.Entry<String, String> entry : queryForm.getServiceMetaData().entrySet()) {
-												String metaData = properties.get("ahsrvmetad_" + entry.getKey());
-												if (metaData != null && metaData.equals(entry.getValue())) {
+												if (!found && metaData != null && metaData.equals(entry.getValue())) {
 													System.out
 															.println("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
 																	+ providerService.getServiceInterface()
@@ -201,9 +208,11 @@ public class ServiceRegistry {
 															+ ", "
 															+ providerService.getProvider().getSystemName() + ", " + metaData);
 													list.add(providerService);
+													found = true;
 												}
 											}
-										} else if (replied && !queryForm.isMetadataSearch()) {
+										} else if (replied && queryForm.getServiceMetadata() != null
+												&& !queryForm.isMetadataSearch()) {
 											System.out
 													.println("Service is found by interface and pinged and added to ServiceQueryResult, interface and name are : "
 															+ providerService.getServiceInterface()
@@ -254,72 +263,129 @@ public class ServiceRegistry {
 
 	public ServiceQueryResult provideAllServices() {
 
-		try {
+		String computerDomain = getProp().getProperty("dns.domain", "evoin.arrowhead.eu");
 
-			String computerDomain = getProp().getProperty("dns.domain", "evoin.arrowhead.eu");
+		DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator();
 
-			DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator();
+		if (computerDomain != null) {
+			System.out.println("DNS-SD overriding computer domain: " + computerDomain);
+			de = DnsSDFactory.getInstance().createDomainEnumerator(computerDomain);
+		} else {
+			de = DnsSDFactory.getInstance().createDomainEnumerator();
+		}
 
-			if (computerDomain != null) {
-				System.out.println("DNS-SD overriding computer domain: " + computerDomain);
-				de = DnsSDFactory.getInstance().createDomainEnumerator(computerDomain);
-			} else {
-				de = DnsSDFactory.getInstance().createDomainEnumerator();
-			}
+		DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
 
-			DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
+		Collection<ServiceType> types = browser.getServiceTypes();
+		List<ProvidedService> list = new ArrayList<ProvidedService>();
 
-			Collection<ServiceType> types = browser.getServiceTypes();
-			List<ProvidedService> list = new ArrayList<ProvidedService>();
-			Collection<ServiceName> needToRemoveInstances = new ArrayList<ServiceName>();
+		if (types != null) {
 
-			if (types != null) {
+			for (ServiceType type : types) {
+				Collection<ServiceName> instances = browser.getServiceInstances(type);
+				System.out.println(instances);
+				for (ServiceName instance : instances) {
+					ServiceData service = browser.getServiceData(instance);
+					ProvidedService providerService = null;
+					if (service != null) {
 
-				for (ServiceType type : types) {
-					Collection<ServiceName> instances = browser.getServiceInstances(type);
-					System.out.println(instances);
-					for (ServiceName instance : instances) {
-						ServiceData service = browser.getServiceData(instance);
-						ProvidedService providerService = null;
-						if (service != null) {
+						String interfaceType = null;
 
-							String interfaceType = null;
-
-							String serviceType = service.getName().getType().toString();
-							int dotIndex = serviceType.indexOf(".");
-							if (dotIndex != -1) {
-								serviceType = serviceType.substring(0, dotIndex);
-								String[] array = serviceType.split("_");
-								if (array.length == 4) {
-									interfaceType = array[3];
-								}
+						String serviceType = service.getName().getType().toString();
+						int dotIndex = serviceType.indexOf(".");
+						if (dotIndex != -1) {
+							serviceType = serviceType.substring(0, dotIndex);
+							String[] array = serviceType.split("_");
+							if (array.length == 4) {
+								interfaceType = array[3];
 							}
-
-							providerService = createProvidedService(service, interfaceType);
-
-							if (providerService != null) {
-								list.add(providerService);
-							}
-
 						}
-						System.out.println(service);
+
+						providerService = createProvidedService(service, interfaceType);
+
+						if (providerService != null) {
+							list.add(providerService);
+						}
+
 					}
+					System.out.println(service);
 				}
-
-				if (!needToRemoveInstances.isEmpty()) {
-					removeService(needToRemoveInstances);
-				}
-
-				ServiceQueryResult result = new ServiceQueryResult();
-				result.setServiceQueryData(list);
-				return result;
 			}
-		} catch (DnsSDException ex) {
-			log.error(ex);
-			ex.printStackTrace();
-			throw new DnsException(ex.getMessage());
+
+			ServiceQueryResult result = new ServiceQueryResult();
+			result.setServiceQueryData(list);
+			return result;
 		}
 		return null;
+	}
+
+	public void pingAndRemoveServices() {
+
+		String scheduledPing = getProp().getProperty("ping.scheduled", "false");
+
+		if (scheduledPing.equals("true")) {
+			try {
+
+				String computerDomain = getProp().getProperty("dns.domain", "evoin.arrowhead.eu");
+
+				DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator();
+
+				if (computerDomain != null) {
+					System.out.println("DNS-SD overriding computer domain: " + computerDomain);
+					de = DnsSDFactory.getInstance().createDomainEnumerator(computerDomain);
+				} else {
+					de = DnsSDFactory.getInstance().createDomainEnumerator();
+				}
+
+				DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
+
+				Collection<ServiceType> types = browser.getServiceTypes();
+				Collection<ServiceName> needToRemoveInstances = new ArrayList<ServiceName>();
+
+				if (types != null) {
+
+					for (ServiceType type : types) {
+						Collection<ServiceName> instances = browser.getServiceInstances(type);
+						System.out.println(instances);
+						for (ServiceName instance : instances) {
+							ServiceData service = browser.getServiceData(instance);
+							ProvidedService providerService = null;
+							if (service != null) {
+
+								String interfaceType = null;
+
+								String serviceType = service.getName().getType().toString();
+								int dotIndex = serviceType.indexOf(".");
+								if (dotIndex != -1) {
+									serviceType = serviceType.substring(0, dotIndex);
+									String[] array = serviceType.split("_");
+									if (array.length == 4) {
+										interfaceType = array[3];
+									}
+								}
+
+								providerService = createProvidedService(service, interfaceType);
+
+								if (providerService != null) {
+									Map<String, String> properties = service.getProperties();
+									pingService(needToRemoveInstances, instance, service, properties, true);
+								}
+
+							}
+							System.out.println(service);
+						}
+					}
+
+					if (!needToRemoveInstances.isEmpty()) {
+						removeService(needToRemoveInstances);
+					}
+				}
+			} catch (DnsSDException ex) {
+				log.error(ex);
+				ex.printStackTrace();
+				throw new DnsException(ex.getMessage());
+			}
+		}
 	}
 
 	private ProvidedService createProvidedService(ServiceData service, String interfaceType) {
@@ -434,7 +500,7 @@ public class ServiceRegistry {
 		properties.put("ahsysname", registryEntry.getProvider().getSystemName());
 		properties.put("ahsysauthinfo", registryEntry.getProvider().getAuthenticationInfo());
 		properties.put("path", registryEntry.getServiceURI());
-		for (Map.Entry<String, String> entry : registryEntry.getServiceMetadata().entrySet()) {
+		for (ServiceMetadata entry : registryEntry.getServiceMetadata()) {
 			properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());
 		}
 	}

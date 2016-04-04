@@ -1,6 +1,6 @@
 package eu.arrowhead.common.model.messages;
 
-import java.util.Map;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -11,7 +11,7 @@ public class ServiceRegistryEntry {
 
 	ArrowheadSystem provider;
 	String serviceURI;	
-	Map<String,String> serviceMetadata;
+	List<ServiceMetadata> serviceMetadata;
 	String tSIG_key;
 	String version;
 
@@ -19,7 +19,7 @@ public class ServiceRegistryEntry {
 		super();
 	}
 
-	public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI, Map<String,String> serviceMetadata, String tsig_key,
+	public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI, List<ServiceMetadata> serviceMetadata, String tsig_key,
 			String version) {
 		super();
 		this.provider = provider;
@@ -45,11 +45,11 @@ public class ServiceRegistryEntry {
 		this.serviceURI = serviceURI;
 	}
 
-	public Map<String,String> getServiceMetadata() {
+	public List<ServiceMetadata> getServiceMetadata() {
 		return serviceMetadata;
 	}
 
-	public void setServiceMetadata(Map<String,String> serviceMetadata) {
+	public void setServiceMetadata(List<ServiceMetadata> serviceMetadata) {
 		this.serviceMetadata = serviceMetadata;
 	}
 

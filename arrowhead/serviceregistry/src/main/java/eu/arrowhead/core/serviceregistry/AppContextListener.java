@@ -20,7 +20,7 @@ public class AppContextListener implements ServletContextListener {
 
 		TimerTask pingTask = new PingTask();
 		Timer timer = new Timer();
-		timer.schedule(pingTask, 60000l, (30l * 60l * 1000l));
+		timer.schedule(pingTask, 60000l, (2l * 60l * 1000l));
 
 	}
 
@@ -28,8 +28,8 @@ public class AppContextListener implements ServletContextListener {
 
 		@Override
 		public void run() {
-			// TODO delete the "inactive" services
 			System.out.println("TimerTask " + new Date().toString());
+			ServiceRegistry.getInstance().pingAndRemoveServices();			
 		}
 	}
 }
