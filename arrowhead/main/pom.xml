@@ -34,6 +34,36 @@
 		<artifactId>authorization</artifactId>
 		<version>${project.version}</version>
 	</dependency>	
+	<dependency>
+		<groupId>eu.arrowhead</groupId>
+		<artifactId>gatekeeper</artifactId>
+		<version>${project.version}</version>
+	</dependency>	
+	<dependency>
+		<groupId>eu.arrowhead</groupId>
+		<artifactId>dnssd</artifactId>
+		<version>${project.version}</version>
+	</dependency>	
+	<dependency>
+		<groupId>eu.arrowhead</groupId>
+		<artifactId>orchestrator</artifactId>
+		<version>${project.version}</version>
+	</dependency>	
+	<dependency>
+		<groupId>eu.arrowhead</groupId>
+		<artifactId>qos</artifactId>
+		<version>${project.version}</version>
+	</dependency>		
+	<dependency>
+		<groupId>eu.arrowhead</groupId>
+		<artifactId>serviceregistry</artifactId>
+		<version>${project.version}</version>
+	</dependency>		
+	<dependency>
+		<groupId>eu.arrowhead</groupId>
+		<artifactId>api</artifactId>
+		<version>${project.version}</version>
+	</dependency>			
         <!-- uncomment this to get JSON support:
          <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
