@@ -123,3 +123,4 @@ arrowhead/authorization/.settings/org.eclipse.m2e.core.prefs
 arrowhead/serviceregistry/src/main/resources/log4j.properties_tmit
 arrowhead/qos/.settings/org.eclipse.wst.jsdt.ui.superType.container
 arrowhead/serviceregistry/src/main/resources/log4j.properties_local
+arrowhead/common/src/main/resources/hibernate.cfg.xml
