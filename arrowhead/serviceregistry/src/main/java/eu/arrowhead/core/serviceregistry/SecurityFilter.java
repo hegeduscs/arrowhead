@@ -18,9 +18,6 @@ public class SecurityFilter implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext context) throws IOException {
-		System.out.println("Filter called, request context " + context);
-		System.out.println("Filter called, request context javax.servlet.request.X509Certificate " + context.getProperty("javax.servlet.request.X509Certificate"));
-		System.out.println("Filter called, request context javax.servlet.request.X509Certificate " + context.getProperty("javax.servlet.request.X509Certificate").getClass());
 		
 		X509Certificate[] chain =
 			      (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
