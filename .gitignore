@@ -123,3 +123,13 @@ arrowhead/authorization/.settings/org.eclipse.m2e.core.prefs
 arrowhead/serviceregistry/src/main/resources/log4j.properties_tmit
 arrowhead/qos/.settings/org.eclipse.wst.jsdt.ui.superType.container
 arrowhead/serviceregistry/src/main/resources/log4j.properties_local
+arrowhead/common/src/main/resources/hibernate.cfg.xml
+arrowhead-serviceregistry/webservice/.settings/org.eclipse.wst.validation.prefs
+arrowhead-serviceregistry/webservice/.settings/org.eclipse.wst.common.project.facet.core.prefs.xml
+arrowhead-serviceregistry/service/.settings/org.eclipse.wst.validation.prefs
+arrowhead-serviceregistry/dnsdjava/.settings/org.eclipse.wst.validation.prefs
+arrowhead/main/.settings/org.hibernate.eclipse.console.prefs
+arrowhead-serviceregistry/model/.settings/org.eclipse.wst.validation.prefs
+arrowhead/api/.settings/org.hibernate.eclipse.console.prefs
+arrowhead/api/.settings/org.eclipse.m2e.core.prefs
+arrowhead/api/.settings/org.eclipse.core.resources.prefs

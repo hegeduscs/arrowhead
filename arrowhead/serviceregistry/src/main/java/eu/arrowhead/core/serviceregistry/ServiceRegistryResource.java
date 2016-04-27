@@ -8,7 +8,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
@@ -19,23 +21,23 @@ public class ServiceRegistryResource {
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt() {
+	public String getIt(@Context SecurityContext sc) {
 		return "This is the Service Registry.";
 	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/{serviceGroup}/{service}/{interf}")
-	public void publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-			@PathParam("interf") String interf, ServiceRegistryEntry entry) {
+	public void publishingToRegistry(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup,
+			@PathParam("service") String service, @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 		ServiceRegistry.getInstance().register(serviceGroup, service, interf, entry);
 	}
 
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/{serviceGroup}/{service}/{interf}")
-	public void removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-			@PathParam("interf") String interf, ServiceRegistryEntry entry) {
+	public void removingFromRegistry(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup,
+			@PathParam("service") String service, @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 		ServiceRegistry.getInstance().unRegister(serviceGroup, service, interf, entry);
 	}
 
@@ -54,11 +56,11 @@ public class ServiceRegistryResource {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path(value = "/{serviceGroup}/{service}")
-	public ServiceQueryResult getServiceQueryForm(@PathParam("serviceGroup") String serviceGroup,
+	public ServiceQueryResult getServiceQueryForm(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup,
 			@PathParam("service") String service, ServiceQueryForm queryForm) {
 		return ServiceRegistry.getInstance().provideServices(serviceGroup, service, queryForm);
 	}
-	
+
 	/**
 	 * 
 	 * @return All registered service
@@ -66,7 +68,7 @@ public class ServiceRegistryResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path(value = "/all")
-	public ServiceQueryResult getAllServices() {
+	public ServiceQueryResult getAllServices(@Context SecurityContext sc) {
 		return ServiceRegistry.getInstance().provideAllServices();
 	}
 }

@@ -1,8 +1,8 @@
 package eu.arrowhead.core.serviceregistry;
 
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -53,12 +53,16 @@ public class ServiceRegistry {
 		try {
 			if (prop == null) {
 				prop = new Properties();
-				InputStream inputStream = getClass().getClassLoader().getResourceAsStream("dns.properties");
+
+				File file = new File("config" + File.separator + "dns.properties");
+				FileInputStream inputStream = new FileInputStream(file);
+
+				// InputStream inputStream =
+				// getClass().getClassLoader().getResourceAsStream("dns.properties");
+
 				if (inputStream != null) {
 					prop.load(inputStream);
 					initSystemProperties();
-				} else {
-					throw new FileNotFoundException("property file 'dns.properties' not found in the classpath");
 				}
 			}
 		} catch (Exception ex) {
