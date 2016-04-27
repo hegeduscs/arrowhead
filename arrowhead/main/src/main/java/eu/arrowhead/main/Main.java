@@ -29,7 +29,6 @@ public class Main {
     	serverList.add(new ServerInfo(
         		"serviceregistry",8444,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.serviceregistry.ServiceRegistryResource.class)
         		).setSSLContext(certHandler.getSSLContext("cloud1.serviceregistry")));
                 
@@ -37,7 +36,6 @@ public class Main {
     	serverList.add(new ServerInfo(
         		"authorization",8445,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.authorization.AuthorizationResource.class)
         		).setSSLContext(certHandler.getSSLContext("cloud1.authorization")));
               
@@ -45,38 +43,34 @@ public class Main {
     	serverList.add(new ServerInfo(
         		"gatekeeper",8446,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.gatekeeper.GatekeeperResource.class)
         		).setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));
         
     	serverList.add(new ServerInfo(
         		"orchestrator",8447,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.orchestrator.OrchestratorResource.class)
         		).setSSLContext(certHandler.getSSLContext("cloud1.orchestrator"))); 
         
     	serverList.add(new ServerInfo(
         		"qos",8448,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.qos.QoSResource.class)
         		).setSSLContext(certHandler.getSSLContext("cloud1.qos")));         
     	
     	serverList.add(new ServerInfo(
         		"api",8449,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.api.ApiResource.class)
-        		).setSSLContext(certHandler.getSSLContext("cloud1.qos")));            	
+        		).setSSLContext(certHandler.getSSLContext("cloud1.qos")));           	
                 
         
-        /*ServerInfo testServer = new ServerInfo(
-        		"myapp",8443,
+    	/*serverList.add(new ServerInfo(
+        		"myapp",8081,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
+        				//SecurityFilter.class,
         				MyResource.class))
-        		.setSSLContext(certHandler.getSSLContext("cloud1.client1")); */       
+        		.setSSLContext(certHandler.getSSLContext("cloud1.client1")));    */    
         
         for(ServerInfo server : serverList) {
         	server.start();
