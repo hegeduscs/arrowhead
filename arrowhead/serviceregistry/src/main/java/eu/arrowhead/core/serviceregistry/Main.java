@@ -1,11 +1,14 @@
 package eu.arrowhead.core.serviceregistry;
 
+import org.apache.log4j.PropertyConfigurator;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +23,7 @@ import javax.ws.rs.core.UriBuilder;
  */
 public class Main {
 	// Base URI the Grizzly HTTP server will listen on
-	
+
 	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8080/core/");
 	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/core/");
 
@@ -73,6 +76,8 @@ public class Main {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
+		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+
 		final HttpServer server = startServer();
 		System.out.println(String.format("Jersey app started with WADL available at "
 				+ "%sapplication.wadl\nHit enter to stop it...", BASE_URI_SECURED));
@@ -84,12 +89,17 @@ public class Main {
 		try {
 			if (prop == null) {
 				prop = new Properties();
-				InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("app.properties");
+				File file = new File("config" + File.separator + "app.properties");
+				FileInputStream inputStream = new FileInputStream(file);
+				// InputStream inputStream =
+				// Main.class.getClassLoader().getResourceAsStream("app.properties");
 				if (inputStream != null) {
 					prop.load(inputStream);
-				} else {
-					throw new FileNotFoundException("property file 'ssl.properties' not found in the classpath");
-				}
+				} /*
+				 * else { throw new FileNotFoundException(
+				 * "property file 'app.properties' not found in the classpath");
+				 * }
+				 */
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
