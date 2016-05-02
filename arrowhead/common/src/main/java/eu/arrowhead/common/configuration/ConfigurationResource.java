@@ -49,7 +49,7 @@ public class ConfigurationResource {
 	@GET
 	@Path("/coresystems/{systemName}")
 	public Response getSystem(@PathParam("systemName") String systemName){
-		CoreSystem coreSystem = databaseManager.getSystem(systemName);
+		CoreSystem coreSystem = databaseManager.getCoreSystem(systemName);
 	
 		return Response.status(Status.OK).entity(coreSystem).build();
 	}
@@ -58,7 +58,7 @@ public class ConfigurationResource {
 	@Path("/neighborhood/operator/{operatorName}/cloud/{cloudName}")
 	public Response getCloud(@PathParam("operatorName") String operatorName, 
 			@PathParam("cloudName") String cloudName){
-		NeighborCloud neighborCloud = databaseManager.getCloud(operatorName, cloudName);
+		NeighborCloud neighborCloud = databaseManager.getNeighborCloud(operatorName, cloudName);
 	
 		return Response.status(Status.OK).entity(neighborCloud).build();
 	}
@@ -96,7 +96,7 @@ public class ConfigurationResource {
 	@PUT
 	@Path("/coresystems/{systemName}")
 	public Response updateSystem(@PathParam("systemName") String systemName, NewConfigEntry entry){
-		CoreSystem coreSystem = databaseManager.getSystem(systemName);
+		CoreSystem coreSystem = databaseManager.getCoreSystem(systemName);
 		databaseManager.delete(coreSystem);
 		coreSystem.setIPAddress(entry.getIPAddress());
 		coreSystem.setPort(entry.getPort());
@@ -111,7 +111,7 @@ public class ConfigurationResource {
 	@Path("/neighborhood/operator/{operatorName}/cloud/{cloudName}")
 	public Response updateCloud(@PathParam("operatorName") String operatorName, 
 			@PathParam("cloudName") String cloudName, NewConfigEntry entry){
-		NeighborCloud neighborCloud = databaseManager.getCloud(operatorName, cloudName);
+		NeighborCloud neighborCloud = databaseManager.getNeighborCloud(operatorName, cloudName);
 		databaseManager.delete(neighborCloud);
 		neighborCloud.setIPAddress(entry.getIPAddress());
 		neighborCloud.setPort(entry.getPort());
@@ -125,7 +125,7 @@ public class ConfigurationResource {
 	@DELETE
 	@Path("/coresystems/{systemName}")
 	public Response deleteSystem(@PathParam("systemName") String systemName){
-		CoreSystem retrievedSystem = databaseManager.getSystem(systemName);
+		CoreSystem retrievedSystem = databaseManager.getCoreSystem(systemName);
 		databaseManager.delete(retrievedSystem);
 		return Response.noContent().build();
 	}
@@ -134,7 +134,7 @@ public class ConfigurationResource {
 	@Path("/neighborhood/operator/{operatorName}/cloud/{cloudName}")
 	public Response deleteCloud(@PathParam("operatorName") String operatorName, 
 			@PathParam("cloudName") String cloudName){
-		NeighborCloud retrievedCloud = databaseManager.getCloud(operatorName, cloudName);
+		NeighborCloud retrievedCloud = databaseManager.getNeighborCloud(operatorName, cloudName);
 		databaseManager.delete(retrievedCloud);
 		return Response.noContent().build();
 	}

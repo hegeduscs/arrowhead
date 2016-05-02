@@ -20,10 +20,10 @@ public class Main {
      */
     public static void main(String[] args) throws Exception {
     	
-    	CertificateHandler certHandler = new CertificateHandler("/home/sanyi/Development/certs")
+    	CertificateHandler certHandler = new CertificateHandler("C:/Users/Public/arrowheadgit/arrowhead/certificates")
     			.setTrustStore("mastercacerts")
     			.setDefaultPassword("123456");
-    	
+    
     	List<ServerInfo> serverList = new ArrayList<ServerInfo>();
     	
     	serverList.add(new ServerInfo(
@@ -37,7 +37,8 @@ public class Main {
         		"authorization",8445,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.authorization.AuthorizationResource.class)
-        		).setSSLContext(certHandler.getSSLContext("cloud1.authorization")));
+        		));
+        		//.setSSLContext(certHandler.getSSLContext("cloud1.authorization")));
               
         
     	serverList.add(new ServerInfo(
@@ -62,7 +63,8 @@ public class Main {
         		"api",8449,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.api.ApiResource.class)
-        		).setSSLContext(certHandler.getSSLContext("cloud1.qos")));           	
+        		));
+    			//.setSSLContext(certHandler.getSSLContext("cloud1.qos")));           	
                 
         
     	/*serverList.add(new ServerInfo(

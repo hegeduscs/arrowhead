@@ -5,6 +5,12 @@
   <projects>
     <project>authorization</project>
     <project>common</project>
+    <project>gatekeeper</project>
+    <project>dnssd</project>
+    <project>orchestrator</project>
+    <project>qos</project>
+    <project>serviceregistry</project>
+    <project>api</project>
   </projects>
   <buildSpec>
     <buildCommand>

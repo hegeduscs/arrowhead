@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import eu.arrowhead.core.authorization.database.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadService;
 
 /**
  * @author umlaufz

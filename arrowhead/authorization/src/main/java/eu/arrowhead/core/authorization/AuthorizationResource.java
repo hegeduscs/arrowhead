@@ -24,17 +24,18 @@ import org.apache.log4j.Logger;
 
 import javax.ws.rs.core.UriInfo;
 
+import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.model.ArrowheadCloud;
+import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 
-import eu.arrowhead.core.authorization.database.ArrowheadCloud;
-import eu.arrowhead.core.authorization.database.ArrowheadService;
-import eu.arrowhead.core.authorization.database.ArrowheadSystem;
-import eu.arrowhead.core.authorization.database.Clouds_Services;
-import eu.arrowhead.core.authorization.database.Systems_Services;
+import eu.arrowhead.core.authorization.database.InterCloudAuthorization;
+import eu.arrowhead.core.authorization.database.IntraCloudAuthorization;
 
 /**
  * @author umlaufz, hegeduscs 
@@ -46,6 +47,7 @@ import eu.arrowhead.core.authorization.database.Systems_Services;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthorizationResource {
 
+	SysConfig dm = SysConfig.getInstance();
 	DatabaseManager databaseManager = new DatabaseManager();
 	private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());
 	
@@ -59,7 +61,7 @@ public class AuthorizationResource {
 	@Path("/systemgroup/{systemGroup}")
 	public List<ArrowheadSystem> getSystems(@PathParam("systemGroup") String systemGroup) {
 		List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
-		systemList = databaseManager.getSystems(systemGroup);
+		systemList = dm.getSystemGroup(systemGroup);
 
 		return systemList;
 	}
@@ -77,7 +79,7 @@ public class AuthorizationResource {
 	@Path("/systemgroup/{systemGroup}/system/{systemName}")
 	public Response getSystem(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
-		ArrowheadSystem arrowheadSystem = databaseManager.getSystemByName(systemGroup, systemName);
+		ArrowheadSystem arrowheadSystem = dm.getArrowheadSystem(systemGroup, systemName);
 		if(arrowheadSystem == null)
 			throw new DataNotFoundException("System not found in the database.");
 		
@@ -109,7 +111,7 @@ public class AuthorizationResource {
 		log.info("Payload is usable");
 		
 		IntraCloudAuthResponse response = new IntraCloudAuthResponse();
-		ArrowheadSystem consumer = databaseManager.getSystemByName(systemGroup, systemName);
+		ArrowheadSystem consumer = dm.getArrowheadSystem(systemGroup, systemName);
 		if(consumer == null){
 			log.info("Consumer was not found");
 			throw new DataNotFoundException(
@@ -124,7 +126,7 @@ public class AuthorizationResource {
 		log.info("Hashmap created");
 		
 		ArrowheadService service = null;
-		service = databaseManager.getServiceByName(request.getService().getServiceGroup(),
+		service = dm.getArrowheadService(request.getService().getServiceGroup(),
 				request.getService().getServiceDefinition());
 		if (service == null) {
 			log.info("Service is not in the database.");
@@ -135,12 +137,12 @@ public class AuthorizationResource {
 			return Response.status(Status.OK).entity(response).build();
 		}
 
-		Systems_Services ss = new Systems_Services();
+		IntraCloudAuthorization authRight = new IntraCloudAuthorization();
 		for (eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviders()) {
-			ArrowheadSystem retrievedSystem = databaseManager.getSystemByName(provider.getSystemGroup(),
+			ArrowheadSystem retrievedSystem = dm.getArrowheadSystem(provider.getSystemGroup(),
 					provider.getSystemName());
-			ss = databaseManager.getSS(consumer, retrievedSystem, service);
-			if (ss == null) {
+			authRight = databaseManager.getIntraAuthRight(consumer, retrievedSystem, service);
+			if (authRight == null) {
 				authorizationState.put(provider, false);
 			} else {
 				authorizationState.put(provider, true);
@@ -181,37 +183,37 @@ public class AuthorizationResource {
 					+ "IP address, port or authenticationInfo from the entry payload.");
 		}
 		
-		ArrowheadSystem consumer = databaseManager.getSystemByName(systemGroup, systemName);
+		ArrowheadSystem consumer = dm.getArrowheadSystem(systemGroup, systemName);
 		if (consumer == null) {
 			consumer = new ArrowheadSystem();
 			consumer.setSystemGroup(systemGroup);
 			consumer.setSystemName(systemName);
-			consumer.setIPAddress(entry.getIPAddress());
+			consumer.setAddress(entry.getAddress());
 			consumer.setPort(entry.getPort());
 			consumer.setAuthenticationInfo(entry.getAuthenticationInfo());
-			consumer = databaseManager.save(consumer);
+			consumer = dm.save(consumer);
 		}
 
 		ArrowheadSystem retrievedSystem = null;
 		ArrowheadService retrievedService = null;
-		Systems_Services ss = new Systems_Services();
+		IntraCloudAuthorization authRight = new IntraCloudAuthorization();
 
 		for (ArrowheadSystem providerSystem : entry.getProviderList()) {
-			retrievedSystem = databaseManager.getSystemByName(providerSystem.getSystemGroup(),
+			retrievedSystem = dm.getArrowheadSystem(providerSystem.getSystemGroup(),
 					providerSystem.getSystemName());
 			if (retrievedSystem == null) {
-				retrievedSystem = databaseManager.save(providerSystem);
+				retrievedSystem = dm.save(providerSystem);
 			}
 			for (ArrowheadService service : entry.getServiceList()) {
-				retrievedService = databaseManager.getServiceByName(service.getServiceGroup(),
+				retrievedService = dm.getArrowheadService(service.getServiceGroup(),
 						service.getServiceDefinition());
 				if (retrievedService == null) {
-					retrievedService = databaseManager.save(service);
+					retrievedService = dm.save(service);
 				}
-				ss.setConsumer(consumer);
-				ss.setProvider(retrievedSystem);
-				ss.setService(retrievedService);
-				databaseManager.saveRelation(ss);
+				authRight.setConsumer(consumer);
+				authRight.setProvider(retrievedSystem);
+				authRight.setArrowheadService(retrievedService);
+				databaseManager.saveRelation(authRight);
 			}
 		}
 
@@ -231,15 +233,15 @@ public class AuthorizationResource {
 	@Path("/systemgroup/{systemGroup}/system/{systemName}")
 	public Response deleteSystemRelations(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
-		ArrowheadSystem consumer = databaseManager.getSystemByName(systemGroup, systemName);
+		ArrowheadSystem consumer = dm.getArrowheadSystem(systemGroup, systemName);
 		if(consumer == null){
 			return Response.noContent().build();
 		}
 		
-		List<Systems_Services> ssList = new ArrayList<Systems_Services>();
-		ssList = databaseManager.getSystemRelations(consumer);
-		for (Systems_Services ss : ssList) {
-			databaseManager.delete(ss);
+		List<IntraCloudAuthorization> authRightsList = new ArrayList<IntraCloudAuthorization>();
+		authRightsList = databaseManager.getSystemRelations(consumer);
+		for (IntraCloudAuthorization authRight : authRightsList) {
+			dm.delete(authRight);
 		}
 
 		log.info("Consumer System relations deleted from authorization database. "
@@ -259,18 +261,18 @@ public class AuthorizationResource {
 	@Path("/systemgroup/{systemGroup}/systemname/{systemName}/services")
 	public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
-		ArrowheadSystem system = databaseManager.getSystemByName(systemGroup, systemName);
+		ArrowheadSystem system = dm.getArrowheadSystem(systemGroup, systemName);
 		if(system == null){
        	 	throw new DataNotFoundException(
        	 		"This System is not in the authorization database. (SG: " + systemGroup + 
 				", SN: " + systemName + ")");
         }
 		
-		List<Systems_Services> ssList = new ArrayList<Systems_Services>();
-		ssList = databaseManager.getSystemRelations(system);
+		List<IntraCloudAuthorization> authRightsList = new ArrayList<IntraCloudAuthorization>();
+		authRightsList = databaseManager.getSystemRelations(system);
 		Set<ArrowheadService> serviceList = new HashSet<ArrowheadService>();
-		for(Systems_Services ss : ssList){
-			serviceList.add(ss.getService());
+		for(IntraCloudAuthorization authRight : authRightsList){
+			serviceList.add(authRight.getArrowheadService());
 		}
 
 		return serviceList;
@@ -286,7 +288,7 @@ public class AuthorizationResource {
 	@Path("/operator/{operatorName}")
 	public List<ArrowheadCloud> getClouds(@PathParam("operatorName") String operatorName) {
 		List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
-		cloudList = databaseManager.getClouds(operatorName);
+		cloudList = dm.getCloudsFromOperator(operatorName);
 
 		return cloudList;
 	}
@@ -304,7 +306,7 @@ public class AuthorizationResource {
 	@Path("/operator/{operatorName}/cloud/{cloudName}")
 	public Response getCloud(@PathParam("operatorName") String operatorName, 
 			@PathParam("cloudName") String cloudName) {
-		ArrowheadCloud cloud = databaseManager.getCloudByName(operatorName, cloudName);
+		ArrowheadCloud cloud = dm.getArrowheadCloud(operatorName, cloudName);
 		return Response.ok(cloud).build();
 	}
 
@@ -331,7 +333,7 @@ public class AuthorizationResource {
 		}
 		log.info("Payload is usable");
 		
-		ArrowheadCloud cloud = databaseManager.getCloudByName(operatorName, cloudName);
+		ArrowheadCloud cloud = dm.getArrowheadCloud(operatorName, cloudName);
         if(cloud == null){
         	log.info("Consumer was not found");
        	 	throw new DataNotFoundException(
@@ -342,17 +344,17 @@ public class AuthorizationResource {
         
 		ArrowheadService service = null;
 		boolean isAuthorized = false;
-		service = databaseManager.getServiceByName(request.getService().getServiceGroup(),
+		service = dm.getArrowheadService(request.getService().getServiceGroup(),
 				request.getService().getServiceDefinition());
 		if(service == null){
 			return Response.status(Status.OK).entity(isAuthorized).build();
 		}
 		
-		Clouds_Services cs = new Clouds_Services();
-		cs = databaseManager.getCS(cloud, service);
+		InterCloudAuthorization authRight = new InterCloudAuthorization();
+		authRight = databaseManager.getInterAuthRight(cloud, service);
 		log.info("Authorization rights requested for Cloud: " + cloudName);
 		
-		if (cs != null){
+		if (authRight != null){
 			isAuthorized = true;
 		}
 
@@ -379,27 +381,27 @@ public class AuthorizationResource {
 				"Bad payload: Missing serviceList or authenticationInfo from the entry payload.");
 		}
 		
-		ArrowheadCloud cloud = databaseManager.getCloudByName(operatorName, cloudName);
+		ArrowheadCloud cloud = dm.getArrowheadCloud(operatorName, cloudName);
 		if(cloud == null){
 			cloud = new ArrowheadCloud();
 			cloud.setOperator(operatorName);
 			cloud.setCloudName(cloudName);
 			cloud.setAuthenticationInfo(entry.getAuthenticationInfo());
-			cloud = databaseManager.save(cloud);
+			cloud = dm.save(cloud);
 		}
 		
 		ArrowheadService retrievedService = null;
-		Clouds_Services cs = new Clouds_Services();
+		InterCloudAuthorization authRight = new InterCloudAuthorization();
 
 		for (ArrowheadService service : entry.getServiceList()) {
-			retrievedService = databaseManager.getServiceByName(service.getServiceGroup(),
+			retrievedService = dm.getArrowheadService(service.getServiceGroup(),
 					service.getServiceDefinition());
 			if (retrievedService == null) {
-				retrievedService = databaseManager.save(service);
+				retrievedService = dm.save(service);
 			}
-			cs.setCloud(cloud);
-			cs.setService(retrievedService);
-			databaseManager.saveRelation(cs);
+			authRight.setCloud(cloud);
+			authRight.setArrowheadService(retrievedService);
+			databaseManager.saveRelation(authRight);
 		}
 
 		log.info("Cloud added to authorization database: " + cloudName);
@@ -418,15 +420,15 @@ public class AuthorizationResource {
 	@Path("/operator/{operatorName}/cloud/{cloudName}")
 	public Response deleteCloudRelations(@PathParam("operatorName") String operatorName,
 			@PathParam("cloudName") String cloudName) {
-		ArrowheadCloud cloud = databaseManager.getCloudByName(operatorName, cloudName);
+		ArrowheadCloud cloud = dm.getArrowheadCloud(operatorName, cloudName);
 		if(cloud == null){
 			return Response.noContent().build();
 		}
 		
-		List<Clouds_Services> csList = new ArrayList<Clouds_Services>();
-		csList = databaseManager.getCloudRelations(cloud);
-		for (Clouds_Services ss : csList) {
-			databaseManager.delete(ss);
+		List<InterCloudAuthorization> authRightsList = new ArrayList<InterCloudAuthorization>();
+		authRightsList = databaseManager.getCloudRelations(cloud);
+		for (InterCloudAuthorization authRight : authRightsList) {
+			dm.delete(authRight);
 		}
 
 		log.info("Cloud relations deleted from authorization database. "
@@ -446,18 +448,18 @@ public class AuthorizationResource {
 	@Path("/operator/{operatorName}/cloud/{cloudName}/services")
 	public Set<ArrowheadService> getCloudServices(@PathParam("operatorName") String operatorName,
 			@PathParam("cloudName") String cloudName) {
-		ArrowheadCloud cloud = databaseManager.getCloudByName(operatorName, cloudName);
+		ArrowheadCloud cloud = dm.getArrowheadCloud(operatorName, cloudName);
 		if(cloud == null){
        	 	throw new DataNotFoundException(
        	 		"Consumer Cloud is not in the authorization database. (OP: " + operatorName + 
 				", CN: " + cloudName + ")");
         }
 		
-		List<Clouds_Services> csList = new ArrayList<Clouds_Services>();
-		csList = databaseManager.getCloudRelations(cloud);
+		List<InterCloudAuthorization> authRightsList = new ArrayList<InterCloudAuthorization>();
+		authRightsList = databaseManager.getCloudRelations(cloud);
 		Set<ArrowheadService> serviceList = new HashSet<ArrowheadService>();
-		for(Clouds_Services cs : csList){
-			serviceList.add(cs.getService());
+		for(InterCloudAuthorization authRight : authRightsList){
+			serviceList.add(authRight.getArrowheadService());
 		}
 
 		return serviceList;

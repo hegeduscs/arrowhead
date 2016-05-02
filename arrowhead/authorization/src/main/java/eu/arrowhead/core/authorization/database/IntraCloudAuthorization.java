@@ -12,41 +12,52 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
+
 /**
  * @author umlaufz
  * This class maps the intra cloud authorization rights between Arrowhead Systems.
  * The table entry itself is the authorization right.
- * The "service_id", "consumer_id" and "provider_id" columns must be unique together.
+ * The "arrowhead_service_id", "consumer_system_id" and "provider_system_id" columns must be unique together.
  */
 @Entity
-@Table(name="systems_services", uniqueConstraints={@UniqueConstraint(columnNames = 
-		{"consumer_id", "provider_id", "service_id"})})
-public class Systems_Services {
+@Table(name="intra_cloud_authorization", uniqueConstraints={@UniqueConstraint(columnNames = 
+		{"consumer_system_id", "provider_system_id", "arrowhead_service_id"})})
+public class IntraCloudAuthorization {
 	
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
 	private int id;
 	
-	@JoinColumn(name="consumer_id")
+	@JoinColumn(name="consumer_system_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
 	private ArrowheadSystem consumer;
 	
-	@JoinColumn(name="provider_id")
+	@JoinColumn(name="provider_system_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
 	private ArrowheadSystem provider;
 	
-	@JoinColumn(name="service_id")
+	@JoinColumn(name="arrowhead_service_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
-	private ArrowheadService service;
+	private ArrowheadService arrowheadService;
 	
-	public Systems_Services() {
+	public IntraCloudAuthorization() {
 	}
 
-	public Systems_Services(ArrowheadSystem consumer, ArrowheadSystem provider, 
-			ArrowheadService service) {
+	public IntraCloudAuthorization(ArrowheadSystem consumer, ArrowheadSystem provider, 
+			ArrowheadService arrowheadService) {
 		this.consumer = consumer;
 		this.provider = provider;
-		this.service = service;
+		this.arrowheadService = arrowheadService;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public ArrowheadSystem getConsumer() {
@@ -64,14 +75,14 @@ public class Systems_Services {
 	public void setProvider(ArrowheadSystem providers) {
 		this.provider = providers;
 	}
-	
-	public ArrowheadService getService() {
-		return service;
+
+	public ArrowheadService getArrowheadService() {
+		return arrowheadService;
 	}
 
-	public void setService(ArrowheadService service) {
-		this.service = service;
+	public void setArrowheadService(ArrowheadService arrowheadService) {
+		this.arrowheadService = arrowheadService;
 	}
-	
 
+	
 }

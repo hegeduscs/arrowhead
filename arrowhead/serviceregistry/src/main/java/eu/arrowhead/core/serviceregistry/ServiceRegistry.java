@@ -91,7 +91,7 @@ public class ServiceRegistry {
 				String serviceType = "_" + serviceGroup + "_" + serviceName + "_" + interf + "._tcp";
 				// Unique service name
 				String uniqueServiceName = entry.getProvider().getSystemName();
-				String localName = entry.getProvider().getIPAddress() + ".";
+				String localName = entry.getProvider().getAddress() + ".";
 				int port = new Integer(entry.getProvider().getPort());
 
 				ServiceName name = reg.makeServiceName(uniqueServiceName, ServiceType.valueOf(serviceType));
@@ -409,7 +409,7 @@ public class ServiceRegistry {
 		String port = new Integer(service.getPort()).toString();
 
 		arrowheadSystem.setAuthenticationInfo(authInfo);
-		arrowheadSystem.setIPAddress(ipAddress);
+		arrowheadSystem.setAddress(ipAddress);
 		arrowheadSystem.setPort(port);
 		arrowheadSystem.setSystemGroup(systemGroup);
 		arrowheadSystem.setSystemName(systemName);

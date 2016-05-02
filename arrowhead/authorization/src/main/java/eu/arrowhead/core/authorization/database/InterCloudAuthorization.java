@@ -12,38 +12,46 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import eu.arrowhead.common.model.ArrowheadCloud;
+import eu.arrowhead.common.model.ArrowheadService;
+
 /**
  * @author umlaufz
  * This class maps the inter cloud authorization rights.
  * The table entry itself is the authorization right.
- * The "cloud_id" and "service_id" columns must be unique together.
+ * The "consumer_cloud_id" and "arrowhead_service_id" columns must be unique together.
  */
 @Entity
-@Table(name="clouds_services", uniqueConstraints={@UniqueConstraint(columnNames = {"cloud_id", "service_id"})})
-public class Clouds_Services {
+@Table(name="inter_cloud_authorization", uniqueConstraints={@UniqueConstraint(columnNames = {"consumer_cloud_id", 
+		"arrowhead_service_id"})})
+public class InterCloudAuthorization {
 	
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
 	private int id;
 	
-	@JoinColumn(name="cloud_id")
+	@JoinColumn(name="consumer_cloud_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
 	private ArrowheadCloud cloud;
 	
-	@JoinColumn(name="service_id")
+	@JoinColumn(name="arrowhead_service_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
-	private ArrowheadService service;
+	private ArrowheadService arrowheadService;
 	
-	public Clouds_Services() {
+	public InterCloudAuthorization() {
 	}
 
-	public Clouds_Services(ArrowheadCloud cloud, ArrowheadService service) {
+	public InterCloudAuthorization(ArrowheadCloud cloud, ArrowheadService arrowheadService) {
 		this.cloud = cloud;
-		this.service = service;
+		this.arrowheadService = arrowheadService;
 	}
-	
+
 	public int getId() {
 		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public ArrowheadCloud getCloud() {
@@ -54,12 +62,12 @@ public class Clouds_Services {
 		this.cloud = cloud;
 	}
 
-	public ArrowheadService getService() {
-		return service;
+	public ArrowheadService getArrowheadService() {
+		return arrowheadService;
 	}
 
-	public void setService(ArrowheadService service) {
-		this.service = service;
+	public void setArrowheadService(ArrowheadService arrowheadService) {
+		this.arrowheadService = arrowheadService;
 	}
 
 	

@@ -12,16 +12,15 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
 import eu.arrowhead.common.exception.DuplicateEntryException;
-import eu.arrowhead.core.authorization.database.ArrowheadCloud;
-import eu.arrowhead.core.authorization.database.ArrowheadService;
-import eu.arrowhead.core.authorization.database.ArrowheadSystem;
-import eu.arrowhead.core.authorization.database.Clouds_Services;
-import eu.arrowhead.core.authorization.database.Systems_Services;
+import eu.arrowhead.common.model.ArrowheadCloud;
+import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
+import eu.arrowhead.core.authorization.database.InterCloudAuthorization;
+import eu.arrowhead.core.authorization.database.IntraCloudAuthorization;
  
 /**
  * @author umlaufz, hegeduscs
- * Database Acces Object with CRUD methods on the authorization tables of the database.
- * (These tables are found in the *.autorization.database package.)
+ * Database Acces Object for managing the authorization tables.
  */
 public class DatabaseManager {
 	
@@ -42,95 +41,20 @@ public class DatabaseManager {
     	}
     }
     
-    @SuppressWarnings("unchecked")
-	public List<ArrowheadSystem> getSystems(String systemGroup){
-    	List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
-    	
-    	Session session = getSessionFactory().openSession();
-    	Transaction transaction = null;
-    	
-    	try {
-    		transaction = session.beginTransaction();
-            Criteria criteria = session.createCriteria(ArrowheadSystem.class);
-            criteria.add(Restrictions.eq("systemGroup", systemGroup));
-            systemList = (List<ArrowheadSystem>) criteria.list();
-            transaction.commit();
-        }
-        catch (Exception e) {
-            if (transaction!=null) transaction.rollback();
-            throw e;
-        }
-        finally {
-            session.close();
-        }
-    	
-    	return systemList;
-    }
-    
-    public ArrowheadSystem getSystemByName(String systemGroup, String systemName){
-    	ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
-    	
-    	Session session = getSessionFactory().openSession();
-    	Transaction transaction = null;
-    	
-    	try {
-    		 transaction = session.beginTransaction();
-             Criteria criteria = session.createCriteria(ArrowheadSystem.class);
-             criteria.add(Restrictions.eq("systemGroup", systemGroup));
-             criteria.add(Restrictions.eq("systemName", systemName));
-             arrowheadSystem = (ArrowheadSystem) criteria.uniqueResult();
-             transaction.commit();
-         }
-         catch (Exception e) {
-             if (transaction!=null) transaction.rollback();
-             throw e;
-         }
-         finally {
-             session.close();
-         }
-    	
-    	return arrowheadSystem;
-    }
-    
-    public ArrowheadService getServiceByName(String serviceGroup, String serviceDefinition){
-    	ArrowheadService service = new ArrowheadService();
-    	
-    	Session session = getSessionFactory().openSession();
-    	Transaction transaction = null;
-    	
-    	try {
-    		 transaction = session.beginTransaction();
-             Criteria criteria = session.createCriteria(ArrowheadService.class);
-             criteria.add(Restrictions.eq("serviceGroup", serviceGroup));
-             criteria.add(Restrictions.eq("serviceDefinition", serviceDefinition));
-             service = (ArrowheadService) criteria.uniqueResult();
-             transaction.commit();
-         }
-         catch (Exception e) {
-             if (transaction!=null) transaction.rollback();
-             throw e;
-         }
-         finally {
-             session.close();
-         }
-    	
-    	return service;
-    }
-    
-    public Systems_Services getSS(ArrowheadSystem consumer, ArrowheadSystem provider, 
+    public IntraCloudAuthorization getIntraAuthRight(ArrowheadSystem consumer, ArrowheadSystem provider, 
     		ArrowheadService service){
-    	Systems_Services ss = new Systems_Services();
+    	IntraCloudAuthorization authRight = new IntraCloudAuthorization();
     	
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = null;
     	
     	try {
    		 	transaction = session.beginTransaction();
-            Criteria criteria = session.createCriteria(Systems_Services.class);
+            Criteria criteria = session.createCriteria(IntraCloudAuthorization.class);
             criteria.add(Restrictions.eq("consumer", consumer));
             criteria.add(Restrictions.eq("provider", provider));
-            criteria.add(Restrictions.eq("service", service));
-            ss = (Systems_Services) criteria.uniqueResult();
+            criteria.add(Restrictions.eq("arrowheadService", service));
+            authRight = (IntraCloudAuthorization) criteria.uniqueResult();
             transaction.commit();
         }
         catch (Exception e) {
@@ -141,21 +65,21 @@ public class DatabaseManager {
             session.close();
         }
     	
-    	return ss;
+    	return authRight;
     }
     
     @SuppressWarnings("unchecked")
-    public List<Systems_Services> getSystemRelations(ArrowheadSystem consumer){
-    	List<Systems_Services> ssList = new ArrayList<Systems_Services>();
+    public List<IntraCloudAuthorization> getSystemRelations(ArrowheadSystem consumer){
+    	List<IntraCloudAuthorization> authRightsList = new ArrayList<IntraCloudAuthorization>();
     	
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = null;
     	
     	try {
    		 	transaction = session.beginTransaction();
-            Criteria criteria = session.createCriteria(Systems_Services.class);
+            Criteria criteria = session.createCriteria(IntraCloudAuthorization.class);
             criteria.add(Restrictions.eq("consumer", consumer));
-            ssList = (List<Systems_Services>) criteria.list();
+            authRightsList = (List<IntraCloudAuthorization>) criteria.list();
             transaction.commit();
         }
         catch (Exception e) {
@@ -166,71 +90,21 @@ public class DatabaseManager {
             session.close();
         }
     	
-    	return ssList;
+    	return authRightsList;
     }
     
-    @SuppressWarnings("unchecked")
-	public List<ArrowheadCloud> getClouds(String operator){
-    	List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
-    	
-    	Session session = getSessionFactory().openSession();
-    	Transaction transaction = null;
-    	
-    	try {
-    		transaction = session.beginTransaction();
-            Criteria criteria = session.createCriteria(ArrowheadCloud.class);
-            criteria.add(Restrictions.eq("operator", operator));
-            cloudList = (List<ArrowheadCloud>) criteria.list();
-            transaction.commit();
-        }
-        catch (Exception e) {
-            if (transaction!=null) transaction.rollback();
-            throw e;
-        }
-        finally {
-            session.close();
-        }
-    	
-    	return cloudList;
-    }
-    
-    public ArrowheadCloud getCloudByName(String operator, String cloudName){
-    	ArrowheadCloud arrowheadCloud = new ArrowheadCloud();
-    	
-    	Session session = getSessionFactory().openSession();
-    	Transaction transaction = null;
-    	
-    	try {
-    		 transaction = session.beginTransaction();
-             Criteria criteria = session.createCriteria(ArrowheadCloud.class);
-             criteria.add(Restrictions.eq("operator", operator));
-             criteria.add(Restrictions.eq("cloudName", cloudName));
-             arrowheadCloud = (ArrowheadCloud) criteria.uniqueResult();
-             transaction.commit();
-         }
-         catch (Exception e) {
-             if (transaction!=null) transaction.rollback();
-             throw e;
-         }
-         finally {
-             session.close();
-         }
-    	
-    	return arrowheadCloud;
-    }
-    
-    public Clouds_Services getCS(ArrowheadCloud cloud, ArrowheadService service){
-    	Clouds_Services cs = new Clouds_Services();
+    public InterCloudAuthorization getInterAuthRight(ArrowheadCloud cloud, ArrowheadService service){
+    	InterCloudAuthorization authRight = new InterCloudAuthorization();
     	
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = null;
     	
     	try {
    		 	transaction = session.beginTransaction();
-            Criteria criteria = session.createCriteria(Clouds_Services.class);
+            Criteria criteria = session.createCriteria(InterCloudAuthorization.class);
             criteria.add(Restrictions.eq("cloud", cloud));
-            criteria.add(Restrictions.eq("service", service));
-            cs = (Clouds_Services) criteria.uniqueResult();
+            criteria.add(Restrictions.eq("arrowheadService", service));
+            authRight = (InterCloudAuthorization) criteria.uniqueResult();
             transaction.commit();
         }
         catch (Exception e) {
@@ -241,21 +115,21 @@ public class DatabaseManager {
             session.close();
         }
     	
-    	return cs;
+    	return authRight;
     }
     
     @SuppressWarnings("unchecked")
-    public List<Clouds_Services> getCloudRelations(ArrowheadCloud cloud){
-    	List<Clouds_Services> csList = new ArrayList<Clouds_Services>();
+    public List<InterCloudAuthorization> getCloudRelations(ArrowheadCloud cloud){
+    	List<InterCloudAuthorization> authRightsList = new ArrayList<InterCloudAuthorization>();
     	
     	Session session = getSessionFactory().openSession();
     	Transaction transaction = null;
     	
     	try {
    		 	transaction = session.beginTransaction();
-            Criteria criteria = session.createCriteria(Clouds_Services.class);
+            Criteria criteria = session.createCriteria(InterCloudAuthorization.class);
             criteria.add(Restrictions.eq("cloud", cloud));
-            csList = (List<Clouds_Services>) criteria.list();
+            authRightsList = (List<InterCloudAuthorization>) criteria.list();
             transaction.commit();
         }
         catch (Exception e) {
@@ -266,33 +140,8 @@ public class DatabaseManager {
             session.close();
         }
     	
-    	return csList;
+    	return authRightsList;
     }
-    
-    public <T> T save(T object){
-		Session session = getSessionFactory().openSession();
-    	Transaction transaction = null;
-    	
-    	try {
-    		transaction = session.beginTransaction();
-    		session.saveOrUpdate(object);
-            transaction.commit();
-        }
-    	catch(ConstraintViolationException e){
-    		if (transaction!=null) transaction.rollback();
-    		throw new DuplicateEntryException("There is already an entry in the "
-    				+ "authorization database with these parameters.");
-    	}
-        catch (Exception e) {
-            if (transaction!=null) transaction.rollback();
-            throw e;
-        }
-        finally {
-            session.close();
-        }
-    	
-    	return object;	
-	}
     
     public <T> T saveRelation(T object){
 		Session session = getSessionFactory().openSession();
@@ -317,24 +166,6 @@ public class DatabaseManager {
         }
     	
     	return object;	
-	}
-    
-	public <T> void delete(T object){
-		Session session = getSessionFactory().openSession();
-    	Transaction transaction = null;
-    	
-    	try {
-    		transaction = session.beginTransaction();
-    		session.delete(object);
-            transaction.commit();
-        }
-        catch (Exception e) {
-            if (transaction!=null) transaction.rollback();
-            throw e;
-        }
-        finally {
-            session.close();
-        }	
 	}
     
 	

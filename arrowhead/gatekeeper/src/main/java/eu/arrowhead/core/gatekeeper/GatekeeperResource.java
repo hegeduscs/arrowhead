@@ -178,7 +178,7 @@ public class GatekeeperResource {
 	    	{	
 	    		log.info("Service found.");
 	    		GSDAnswer answer = new GSDAnswer(gsdPollRequest.getRequestedService(),providerCloud);
-	    		log.info("Service found, provider cloud: " + answer.getProviderCloud().getName());
+	    		log.info("Service found, provider cloud: " + answer.getProviderCloud().getCloudName());
 	    		return answer;
 	    	}
 	    	else{
@@ -304,7 +304,7 @@ public class GatekeeperResource {
     	//TODO: "http://"
     	String uri = "http://" + sysConfig.getAuthorizationURI() + 
     			"/operator/" + requesterCloud.getOperator()+
-    			"/cloud/"+requesterCloud.getName();
+    			"/cloud/"+requesterCloud.getCloudName();
 //    	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName;
     	System.out.println(uri);
     	

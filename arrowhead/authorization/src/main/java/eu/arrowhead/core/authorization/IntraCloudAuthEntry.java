@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import eu.arrowhead.core.authorization.database.ArrowheadService;
-import eu.arrowhead.core.authorization.database.ArrowheadSystem;
+import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
 
 /**
  * @author umlaufz
@@ -13,7 +13,7 @@ import eu.arrowhead.core.authorization.database.ArrowheadSystem;
 @XmlRootElement
 public class IntraCloudAuthEntry {
 	
-	private String IPAddress;
+	private String address;
 	private String port;
     private ArrayList<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
     private ArrayList<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
@@ -22,21 +22,21 @@ public class IntraCloudAuthEntry {
     public IntraCloudAuthEntry(){
     }
 
-	public IntraCloudAuthEntry(String IPAddress, String port, ArrayList<ArrowheadService> serviceList, 
+	public IntraCloudAuthEntry(String address, String port, ArrayList<ArrowheadService> serviceList, 
 			ArrayList<ArrowheadSystem> providerList, String authenticationInfo) {
-		this.IPAddress = IPAddress;
+		this.address = address;
 		this.port = port;
 		this.serviceList = serviceList;
 		this.providerList = providerList;
 		this.authenticationInfo = authenticationInfo;
 	}
 
-	public String getIPAddress() {
-		return IPAddress;
+	public String getAddress() {
+		return address;
 	}
 
-	public void setIPAddress(String IPAddress) {
-		this.IPAddress = IPAddress;
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	public String getPort() {
@@ -72,7 +72,7 @@ public class IntraCloudAuthEntry {
 	}
     
 	public boolean isPayloadUsable(){
-		if(IPAddress == null || port == null || authenticationInfo == null || 
+		if(address == null || port == null || authenticationInfo == null || 
 				serviceList.isEmpty() || providerList.isEmpty())
 			return false;
 		return true;

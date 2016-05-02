@@ -16,10 +16,12 @@ import org.hibernate.exception.ConstraintViolationException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.model.ArrowheadCloud;
+import eu.arrowhead.common.model.ArrowheadSystem;
+import eu.arrowhead.common.model.ArrowheadService;
 
 /**
  * @author umlaufz
- * This class serves as a Database Acces Object for the configuration tables in the database,
+ * This class serves as a Database Acces Object for the database,
  * and provides URI information for the core systems.
  */
 public class SysConfig {
@@ -48,6 +50,28 @@ public class SysConfig {
     	return sessionFactory;
     }
 	
+	public <T> T get(Class<T> table, int id){
+    	T object = null;
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		 transaction = session.beginTransaction();
+    		 object = session.get(table, id);
+             transaction.commit();
+         }
+         catch (Exception e) {
+             if (transaction!=null) transaction.rollback();
+             throw e;
+         }
+         finally {
+             session.close();
+         }
+    	
+    	return object;
+    }
+	
 	@SuppressWarnings("unchecked")
 	public <T> List<T> getAll(Class<T> type){
 		List<T> retrievedList = new ArrayList<T>();
@@ -72,7 +96,132 @@ public class SysConfig {
     	return retrievedList;	
 	}
 	
-	public NeighborCloud getCloud(String operator, String cloudName){
+	@SuppressWarnings("unchecked")
+	public List<ArrowheadSystem> getSystemGroup(String systemGroup){
+    	List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		transaction = session.beginTransaction();
+            Criteria criteria = session.createCriteria(ArrowheadSystem.class);
+            criteria.add(Restrictions.eq("systemGroup", systemGroup));
+            systemList = (List<ArrowheadSystem>) criteria.list();
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    	
+    	return systemList;
+    }
+	
+	public ArrowheadSystem getArrowheadSystem(String systemGroup, String systemName){
+    	ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		 transaction = session.beginTransaction();
+             Criteria criteria = session.createCriteria(ArrowheadSystem.class);
+             criteria.add(Restrictions.eq("systemGroup", systemGroup));
+             criteria.add(Restrictions.eq("systemName", systemName));
+             arrowheadSystem = (ArrowheadSystem) criteria.uniqueResult();
+             transaction.commit();
+         }
+         catch (Exception e) {
+             if (transaction!=null) transaction.rollback();
+             throw e;
+         }
+         finally {
+             session.close();
+         }
+    	
+    	return arrowheadSystem;
+    }
+	
+	public ArrowheadService getArrowheadService(String serviceGroup, String serviceDefinition){
+    	ArrowheadService service = new ArrowheadService();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		 transaction = session.beginTransaction();
+             Criteria criteria = session.createCriteria(ArrowheadService.class);
+             criteria.add(Restrictions.eq("serviceGroup", serviceGroup));
+             criteria.add(Restrictions.eq("serviceDefinition", serviceDefinition));
+             service = (ArrowheadService) criteria.uniqueResult();
+             transaction.commit();
+         }
+         catch (Exception e) {
+             if (transaction!=null) transaction.rollback();
+             throw e;
+         }
+         finally {
+             session.close();
+         }
+    	
+    	return service;
+    }
+	
+    @SuppressWarnings("unchecked")
+	public List<ArrowheadCloud> getCloudsFromOperator(String operator){
+    	List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		transaction = session.beginTransaction();
+            Criteria criteria = session.createCriteria(ArrowheadCloud.class);
+            criteria.add(Restrictions.eq("operator", operator));
+            cloudList = (List<ArrowheadCloud>) criteria.list();
+            transaction.commit();
+        }
+        catch (Exception e) {
+            if (transaction!=null) transaction.rollback();
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    	
+    	return cloudList;
+    }
+    
+    public ArrowheadCloud getArrowheadCloud(String operator, String cloudName){
+    	ArrowheadCloud arrowheadCloud = new ArrowheadCloud();
+    	
+    	Session session = getSessionFactory().openSession();
+    	Transaction transaction = null;
+    	
+    	try {
+    		 transaction = session.beginTransaction();
+             Criteria criteria = session.createCriteria(ArrowheadCloud.class);
+             criteria.add(Restrictions.eq("operator", operator));
+             criteria.add(Restrictions.eq("cloudName", cloudName));
+             arrowheadCloud = (ArrowheadCloud) criteria.uniqueResult();
+             transaction.commit();
+         }
+         catch (Exception e) {
+             if (transaction!=null) transaction.rollback();
+             throw e;
+         }
+         finally {
+             session.close();
+         }
+    	
+    	return arrowheadCloud;
+    }
+	
+	public NeighborCloud getNeighborCloud(String operator, String cloudName){
 		NeighborCloud retrievedCloud;
 		
 		Session session = getSessionFactory().openSession();
@@ -101,7 +250,7 @@ public class SysConfig {
     	return retrievedCloud;	
 	}
 	
-	public CoreSystem getSystem(String systemName){
+	public CoreSystem getCoreSystem(String systemName){
 		CoreSystem retrievedSystem;
 		
 		Session session = getSessionFactory().openSession();
@@ -224,27 +373,27 @@ public class SysConfig {
 	}
 	
 	public String getOrchestratorURI(){
-		CoreSystem orchestration = getSystem("orchestration");
+		CoreSystem orchestration = getCoreSystem("orchestration");
 		return getURI(orchestration);
 	}
 	
 	public String getServiceRegistryURI(){
-		CoreSystem serviceRegistry = getSystem("serviceregistry");
+		CoreSystem serviceRegistry = getCoreSystem("serviceregistry");
 		return getURI(serviceRegistry);
 	}
 	
 	public String getAuthorizationURI(){
-		CoreSystem authorization = getSystem("authorization");
+		CoreSystem authorization = getCoreSystem("authorization");
 		return getURI(authorization);
 	}
 	
 	public String getGatekeeperURI(){
-		CoreSystem gatekeeper = getSystem("gatekeeper");
+		CoreSystem gatekeeper = getCoreSystem("gatekeeper");
 		return getURI(gatekeeper);
 	}
 	
 	public String getQoSURI(){
-		CoreSystem QoS = getSystem("qos");
+		CoreSystem QoS = getCoreSystem("qos");
 		return getURI(QoS);
 	}
 
@@ -272,10 +421,10 @@ public class SysConfig {
 		
 		ArrowheadCloud ownCloud = new ArrowheadCloud();
 		ownCloud.setOperator(retrievedCloud.getOperator());
-		ownCloud.setName(retrievedCloud.getCloudName());
-		ownCloud.setGatekeeperIP(retrievedCloud.getIPAddress());
-		ownCloud.setGatekeeperPort(retrievedCloud.getPort());
-		ownCloud.setGatekeeperURI(retrievedCloud.getServiceURI());
+		ownCloud.setCloudName(retrievedCloud.getCloudName());
+		ownCloud.setAddress(retrievedCloud.getIPAddress());
+		ownCloud.setPort(retrievedCloud.getPort());
+		ownCloud.setGatekeeperServiceURI(retrievedCloud.getServiceURI());
 		ownCloud.setAuthenticationInfo(retrievedCloud.getAuthenticationInfo());
 		
 		return ownCloud;
