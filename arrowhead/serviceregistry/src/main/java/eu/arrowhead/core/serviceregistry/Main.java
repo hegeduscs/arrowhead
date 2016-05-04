@@ -9,9 +9,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.Properties;
 
@@ -36,14 +34,14 @@ public class Main {
 	 * @return Grizzly HTTP server.
 	 * @throws IOException
 	 */
-	public static HttpServer startServer() throws IOException {
+	public static HttpServer startSecureServer() throws IOException {
 		// create a resource config that scans for JAX-RS resources and
 		// providers
-		// in com.example package
-		final ResourceConfig rc = new ResourceConfig().registerClasses(ServiceRegistryResource.class, SecurityFilter.class);
 
-		URI uri = UriBuilder.fromUri(BASE_URI).build();
-		URI uri_sec = UriBuilder.fromUri(BASE_URI_SECURED).build();
+		final ResourceConfig config = new ResourceConfig().registerClasses(SecureServiceRegistryResource.class,
+				SecurityFilter.class);
+
+		URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
 
 		SSLContextConfigurator sslCon = new SSLContextConfigurator();
 
@@ -57,15 +55,30 @@ public class Main {
 		sslCon.setTrustStoreFile(truststorePath);
 		sslCon.setTrustStorePass(truststorePass);
 
-		// create and start a new instance of grizzly http server
-		// exposing the Jersey application at BASE_URI
-		// HttpServer server =
-		// GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
-		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri_sec, rc, true, new SSLEngineConfigurator(sslCon)
+		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
 				.setClientMode(false).setNeedClientAuth(true));
 
 		server.start();
+		return server;
+	}
 
+	/**
+	 * Starts Grizzly HTTP server exposing JAX-RS resources defined in this
+	 * application.
+	 * 
+	 * @return Grizzly HTTP server.
+	 * @throws IOException
+	 */
+	public static HttpServer startServer() throws IOException {
+		// create a resource config that scans for JAX-RS resources and
+		// providers
+
+		final ResourceConfig config = new ResourceConfig().registerClasses(ServiceRegistryResource.class);
+
+		URI uri = UriBuilder.fromUri(BASE_URI).build();
+		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+
+		server.start();
 		return server;
 	}
 
@@ -75,12 +88,27 @@ public class Main {
 	 * @param args
 	 * @throws IOException
 	 */
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws IOException {
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
-		final HttpServer server = startServer();
-		System.out.println(String.format("Jersey app started with WADL available at "
-				+ "%sapplication.wadl\nHit enter to stop it...", BASE_URI_SECURED));
+		HttpServer server = null;
+		if (args != null && args.length > 0) {
+			switch (args[0]) {
+			case "insec":
+				server = startServer();
+				System.out.println(String.format("Jersey app started with WADL available at "
+						+ "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
+				break;
+			default:
+				break;
+			}
+		} else {
+			server = startSecureServer();
+			System.out.println(String.format("Jersey app started with WADL available at "
+					+ "%sapplication.wadl\nHit enter to stop it...", BASE_URI_SECURED));
+		}
+
 		System.in.read();
 		server.stop();
 	}
@@ -91,15 +119,9 @@ public class Main {
 				prop = new Properties();
 				File file = new File("config" + File.separator + "app.properties");
 				FileInputStream inputStream = new FileInputStream(file);
-				// InputStream inputStream =
-				// Main.class.getClassLoader().getResourceAsStream("app.properties");
 				if (inputStream != null) {
 					prop.load(inputStream);
-				} /*
-				 * else { throw new FileNotFoundException(
-				 * "property file 'app.properties' not found in the classpath");
-				 * }
-				 */
+				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

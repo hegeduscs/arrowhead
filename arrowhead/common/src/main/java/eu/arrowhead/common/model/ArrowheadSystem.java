@@ -17,7 +17,6 @@ public class ArrowheadSystem {
 	
 	public ArrowheadSystem(String systemGroup, String systemName, 
 			String iPAddress, String port, String authenticationInfo) {
-		super();
 		this.systemGroup = systemGroup;
 		this.systemName = systemName;
 		this.IPAddress = iPAddress;

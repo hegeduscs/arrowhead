@@ -2,6 +2,7 @@ package eu.arrowhead.common.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.arrowhead.common.model.messages.ServiceMetadata;
@@ -12,7 +13,7 @@ public class ArrowheadService {
 	private String serviceGroup;
 	private String serviceDefinition;
 	private List<String> interfaces = new ArrayList<String>();
-	private List<ServiceMetadata> metaData;
+	private List<ServiceMetadata> metaData = new ArrayList<ServiceMetadata>();
 	
 	public ArrowheadService(){
 		
@@ -20,7 +21,7 @@ public class ArrowheadService {
 	
 	public ArrowheadService(String serviceGroup, String serviceDefinition,
 			List<String> interfaces, List<ServiceMetadata> metaData) {
-		super();
+		
 		this.serviceGroup = serviceGroup;
 		this.serviceDefinition = serviceDefinition;
 		this.interfaces = interfaces;

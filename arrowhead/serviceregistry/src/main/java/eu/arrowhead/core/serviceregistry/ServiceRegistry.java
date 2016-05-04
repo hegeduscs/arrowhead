@@ -24,6 +24,7 @@ import com.github.danieln.dnssdjava.ServiceType;
 
 import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.ServiceMetadata;
@@ -293,20 +294,24 @@ public class ServiceRegistry {
 					ProvidedService providerService = null;
 					if (service != null) {
 
+						String serviceGroup = null;
+						String serviceName = null;
 						String interfaceType = null;
 
 						String serviceType = service.getName().getType().toString();
+						System.out.println("serviceType :" + serviceType);
 						int dotIndex = serviceType.indexOf(".");
 						if (dotIndex != -1) {
 							serviceType = serviceType.substring(0, dotIndex);
 							String[] array = serviceType.split("_");
 							if (array.length == 4) {
+								serviceGroup = array[1];
+								serviceName = array[2];
 								interfaceType = array[3];
 							}
 						}
-
-						providerService = createProvidedService(service, interfaceType);
-
+						providerService = createProvidedService(service, interfaceType, serviceGroup, serviceName);
+						System.out.println("providerService : " + providerService);
 						if (providerService != null) {
 							list.add(providerService);
 						}
@@ -418,6 +423,65 @@ public class ServiceRegistry {
 		providerService.setServiceURI(serviceURI);
 		providerService.setServiceInterface(interfaceType);
 		return providerService;
+	}
+
+	private ProvidedService createProvidedService(ServiceData service, String interfaceType, String serviceGroup,
+			String serviceName) {
+		try {
+
+			ProvidedService providerService = new ProvidedService();
+			ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
+			ArrowheadService offered = new ArrowheadService();
+
+			Map<String, String> properties = service.getProperties();
+			String systemGroup = properties.get("ahsysgrp");
+			String systemName = properties.get("ahsysname");
+			String authInfo = properties.get("ahsysauthinfo");
+			String serviceURI = properties.get("path");
+
+			String ipAddress = service.getHost();
+			ipAddress = removeLastChar(ipAddress, '.');
+
+			String port = new Integer(service.getPort()).toString();
+
+			arrowheadSystem.setAuthenticationInfo(authInfo);
+			arrowheadSystem.setIPAddress(ipAddress);
+			arrowheadSystem.setPort(port);
+			arrowheadSystem.setSystemGroup(systemGroup);
+			arrowheadSystem.setSystemName(systemName);
+
+			offered.setServiceDefinition(serviceName);
+			offered.setServiceGroup(serviceGroup);
+			List<String> interfaces = new ArrayList<String>();
+			interfaces.add(interfaceType);
+			offered.setInterfaces(interfaces);
+
+			List<ServiceMetadata> metaData = null;
+			for (Map.Entry<String, String> entry : properties.entrySet()) {
+				System.out.println("key : " + entry.getKey());
+				System.out.println("value : " + entry.getValue());
+				if (entry.getKey() != null && entry.getValue() != null && entry.getKey().contains("ahsrvmetad_")) {
+					if (metaData == null) {
+						metaData = new ArrayList<ServiceMetadata>();
+					}
+					String key = entry.getKey().substring("ahsrvmetad_".length());
+					metaData.add(new ServiceMetadata(key, entry.getValue()));
+				}
+			}
+
+			if (metaData != null && !metaData.isEmpty()) {
+				offered.setMetaData(metaData);
+			} 
+			providerService.setProvider(arrowheadSystem);
+			providerService.setServiceURI(serviceURI);			
+			providerService.setOffered(offered);
+			return providerService;
+		} catch (Throwable e) {
+			System.out.println(e);
+			e.printStackTrace();
+		} 
+		return null;
+
 	}
 
 	private boolean pingService(Collection<ServiceName> needToRemoveInstances, ServiceName instance, ServiceData service,

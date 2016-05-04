@@ -9,11 +9,10 @@ public class ServiceMetadata {
 	private String value;
 
 	public ServiceMetadata() {
-		super();
+		
 	}
 
 	public ServiceMetadata(String key, String value) {
-		super();
 		this.key = key;
 		this.value = value;
 	}
