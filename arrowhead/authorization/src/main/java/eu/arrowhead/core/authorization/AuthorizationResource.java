@@ -97,6 +97,8 @@ public class AuthorizationResource {
 	 * @exception DataNotFoundException, BadPayloadException
 	 * @return IntraCloudAuthResponse - POJO containing a HashMap<ArrowheadSystem, boolean>
 	 */
+	//TODO token generation if flag set true
+	//TODO token generator function 
 	@PUT
 	@Path("/systemgroup/{systemGroup}/system/{systemName}")
 	public Response isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
