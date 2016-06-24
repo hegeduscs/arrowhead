@@ -16,7 +16,7 @@ public class SSLClient
     public static void main( String[] args )
     { 	
 		try {
-			//TODO modify file paths pointing to the keystore files
+			//TODO not yet used- modify file paths pointing to the keystore files
 			SslConfigurator sslConfig = SslConfigurator.newInstance()
 			        .trustStoreFile("C:\\tomcat8_2\\conf\\mastercacerts.jks")
 			        .trustStorePassword("123456")

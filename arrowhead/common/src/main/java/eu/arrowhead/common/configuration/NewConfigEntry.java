@@ -3,7 +3,7 @@ package eu.arrowhead.common.configuration;
 /**
  * @author umlaufz
  * 
- * Plain Old Java Object for using the Configuration Resource in this package.
+ * Java Object for using the Configuration Resource in this package.
  * New Core Systems, Neighbor Clouds and Own Cloud objects can be added 
  * to the configuration database with this class via a REST interface.
  */

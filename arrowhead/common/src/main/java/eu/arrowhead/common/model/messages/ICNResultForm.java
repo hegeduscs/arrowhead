@@ -9,7 +9,6 @@ public class ICNResultForm {
 
 	public ICNResultForm() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public ICNResultForm(OrchestrationResponse instructions) {

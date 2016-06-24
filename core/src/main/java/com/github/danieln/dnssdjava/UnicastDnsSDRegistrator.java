@@ -123,7 +123,6 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			simpleResolver.setAddress(socaddr);
 			return simpleResolver;
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -195,7 +194,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 				// Must not be empty
 				strings.add("");
 			}
-			Update update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to add
+			Update update = new Update(registrationDomain);		
 			update.absent(dnsName);
 			update.add(new PTRRecord(servicesName, DClass.IN, timeToLive, typeName));
 			update.add(new PTRRecord(typeName, DClass.IN, timeToLive, dnsName));
@@ -232,7 +231,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			for (String subtype : serviceName.getType().toDnsStringsWithSubtype()) {
 				subtypes.add(new Name(subtype, registrationDomain));
 			}
-			Update update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to remove
+			Update update = new Update(registrationDomain);		
 			update.present(dnsName);
 			update.delete(new PTRRecord(typeName, DClass.IN, timeToLive, dnsName));
 			for (Name subtype : subtypes) {
@@ -250,7 +249,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 					throw new DnsSDException("Server returned error code: " + Rcode.string(response.getRcode()));
 			}
 			// Remove the service type if there are no instances left
-			update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to remove
+			update = new Update(registrationDomain);		
 			update.absent(typeName);
 			update.delete(new PTRRecord(servicesName, DClass.IN, timeToLive, typeName));
 			response = resolver.send(update);

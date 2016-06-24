@@ -64,6 +64,7 @@ public class OrchestratorService {
 	 */
 	public OrchestrationResponse localOrchestration() {
 		ServiceQueryForm srvQueryForm = new ServiceQueryForm(this.serviceRequestForm);
+		//TODO hardwired tsig not cool
 		srvQueryForm.setTsig_key("RIuxP+vb5GjLXJo686NvKQ==");
 		ArrowheadService srv = null;
 		ServiceQueryResult srvQueryResult;
@@ -182,6 +183,7 @@ public class OrchestratorService {
 			}
 		}
 		if (responseFormList.isEmpty()){
+			//TODO logging fix
 			log.info("badbad");
 			return null;
 		}
@@ -204,11 +206,13 @@ public class OrchestratorService {
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, ServiceRequestForm srf) {
 		log.info("orchestator: inside the getServiceQueryResult function");
 		ArrowheadService as = srf.getRequestedService();
+		//TODO uri-building
 		String strtarget = sysConfig.getServiceRegistryURI() + "/" + as.getServiceGroup() + "/"
 				+ as.getServiceDefinition();
 		log.info("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
+		//TODO logging fix, less info
 		log.info("The data of the ServiceQueryForm: ");
 		log.info("Metadata: " + sqf.getServiceMetadata());
 		log.info("The TSIG_key: " + sqf.getTsig_key());
@@ -255,6 +259,7 @@ public class OrchestratorService {
 	 * @param qosVerify
 	 * @return QoSVerificationResponse
 	 */
+	//TODO remove QoS from orch
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
 		log.info("orchestrator: inside the getQoSVerificationResponse function");
 		String strtarget = sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSVerify";

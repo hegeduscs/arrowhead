@@ -21,8 +21,8 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 /**
  * @author uzoltan
  *
- *         REST resource for arrowhead management tools. TODO: adding more
- *         functions
+ *         REST resource for arrowhead management tools. 
+ *         TODO adding more functions
  */
 @Path("api")
 @Produces(MediaType.APPLICATION_JSON)
@@ -76,6 +76,8 @@ public class ApiResource {
 		return savedServices;
 	}
 
+	//TODO megvizsgálni, hogy szükséges-e id-ket bevezetni az android app-hoz
+	
 	/**
 	 * Deletes the ArrowheadService with the id specified by the path parameter.
 	 * Returns 200 if the delete is succesful, 204 (no content) if the service

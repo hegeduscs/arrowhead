@@ -20,7 +20,7 @@ import eu.arrowhead.core.authorization.database.IntraCloudAuthorization;
  
 /**
  * @author umlaufz, hegeduscs
- * Database Acces Object for managing the authorization tables.
+ * Database Access Object for managing the authorization tables.
  */
 public class DatabaseManager {
 	
@@ -154,6 +154,7 @@ public class DatabaseManager {
         }
     	catch(ConstraintViolationException e){
     		if (transaction!=null) transaction.rollback();
+    		//TODO rossz exception msg
     		throw new DuplicateEntryException("There is already an entry in the "
     				+ "authorization database with these parameters.");
     	}

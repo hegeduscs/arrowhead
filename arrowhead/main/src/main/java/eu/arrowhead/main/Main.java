@@ -20,12 +20,12 @@ public class Main {
      */
     public static void main(String[] args) throws Exception {
     	
-    	CertificateHandler certHandler = new CertificateHandler("C:/Users/Public/arrowheadgit/arrowhead/certificates")
+    	CertificateHandler certHandler = new CertificateHandler("C:/Arrowhead/arrowhead/certificates")
     			.setTrustStore("mastercacerts")
     			.setDefaultPassword("123456");
     
     	List<ServerInfo> serverList = new ArrayList<ServerInfo>();
-    	
+    	/*
     	serverList.add(new ServerInfo(
         		"serviceregistry",8444,
         		new ResourceConfig().registerClasses(
@@ -58,7 +58,7 @@ public class Main {
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.qos.QoSResource.class)
         		).setSSLContext(certHandler.getSSLContext("cloud1.qos")));         
-    	
+    	*/
     	serverList.add(new ServerInfo(
         		"api",8449,
         		new ResourceConfig().registerClasses(

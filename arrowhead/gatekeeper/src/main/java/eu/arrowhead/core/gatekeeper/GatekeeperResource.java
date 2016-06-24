@@ -72,7 +72,6 @@ public class GatekeeperResource {
     	
     	log.info("Inside the GateKeeper");
     	ArrowheadCloud requesterCloud = sysConfig.getOwnCloud();
-    	//XXX: INTERNAL / OWN
     	
     	log.info("Got the cloud info");
     	GSDPoll gsdPoll = new GSDPoll();
@@ -92,7 +91,7 @@ public class GatekeeperResource {
    		log.info("Starting to find provider service for: "+ gsdPoll.getRequestedService().getServiceDefinition());
    		Client client = ClientBuilder.newClient();
    		
-		//TODO: "http://"
+		//TODO: URI builder
     	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/gsd_poll/";    	
     	System.out.println(uri);
     	
@@ -152,7 +151,6 @@ public class GatekeeperResource {
     	
     	ArrowheadService requestedService = gsdPoll.getRequestedService();
     	ArrowheadCloud providerCloud = sysConfig.getOwnCloud();
-    	//XXX: INTERNAL / OWN
     	
     	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
     	log.info("Creating an InterCloudAuthRequest to the Authorization System");
@@ -208,21 +206,18 @@ public class GatekeeperResource {
     	else {
     		proposal = new ICNProposal(icnRequestForm.getRequestedService(), 
         			icnRequestForm.getAuthenticationInfo(), sysConfig.getOwnCloud(), icnRequestForm.getRequesterSystem());
-    		//XXX: INTERNAL / OWN
     	}
     	
     	// HTTP PUT to the provider GateKeeper
     	log.info("ICN Proposal for: " + proposal.getRequestedService().getServiceDefinition());
     	
-		//TODO: "http://"
+		//TODO: URI builder
     	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/icn_proposal/";
     	
     	log.info("ICN Proposal to the chosen GateKeeper.");
     	System.out.println("ICN Proposal to: " + uri);
     	
-//    	String uri = "http://"+sysConfig.getGatekeeperURI()+"/icn_proposal/";
-//    	String uri = "http://localhost:8080/core/gatekeeper/icn_proposal/";
-    	
+		//TODO exception handling
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(uri);
 	    Response response = target
@@ -275,7 +270,7 @@ public class GatekeeperResource {
     	if(AuthorizationResponse=="false")
     	{
     		log.info("Cloud is not authorized. Sending back an empty GSDAnswer.");
-    		System.out.println("Cloud is not authorized. Sending back an empty GSDAnswer.");
+    		//System.out.println("Cloud is not authorized. Sending back an empty GSDAnswer.");
     		return emptyAnswer;
     	}
     	else{
@@ -301,11 +296,10 @@ public class GatekeeperResource {
     private String getAuthorizationResponse(
 			InterCloudAuthRequest interAuthRequest, ArrowheadCloud requesterCloud) {
 
-    	//TODO: "http://"
+    	//TODO: uri building
     	String uri = "http://" + sysConfig.getAuthorizationURI() + 
     			"/operator/" + requesterCloud.getOperator()+
     			"/cloud/"+requesterCloud.getCloudName();
-//    	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName;
     	System.out.println(uri);
     	
     	Client client = ClientBuilder.newClient();
@@ -334,7 +328,7 @@ public class GatekeeperResource {
 	private OrchestrationResponse getOrchestrationResponse(
 			ArrowheadService requestedService, String string,
 			ArrowheadSystem requesterSystem) {
-		
+		//TODO new SRF
 		Map<String, Boolean> orchestrationFlags = new HashMap<>();
 		orchestrationFlags.put("matchmaking", false);
 		orchestrationFlags.put("externalServiceRequest", true);
@@ -347,7 +341,7 @@ public class GatekeeperResource {
 		
 		Client client2 = ClientBuilder.newClient();
 
-		//TODO: "http://"
+		//TODO: URI building
 		String uri2 = "http://" + sysConfig.getOrchestratorURI();
 //    	String uri2 = "http://localhost:8080/core/orchestrator/orchestration";
 		System.out.println(uri2);
@@ -372,6 +366,7 @@ public class GatekeeperResource {
 	 * @return ServiceQueryResult
 	 */
   //Copy from eu.arrowhead.core.orchestrator.OrchestrationService
+  //TODO renamne function
   	private ServiceQueryResult getServiceQueryResultGateKeeper(ArrowheadService arrService) {
   		log.info("GK: inside the getServiceQueryResult function");
 		ArrowheadService as = arrService;
@@ -382,12 +377,14 @@ public class GatekeeperResource {
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(strtarget);
 		
+		//TODO hardwired tsig, not cool!
 		ServiceQueryForm sqf = new ServiceQueryForm
 				(as.getMetaData(), as.getInterfaces(), false, false,"RIuxP+vb5GjLXJo686NvKQ==");
 		
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
 		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
 		log.info("GK received something");
+		//TODO redo this
 		for (ProvidedService providedService : sqr.getServiceQueryData()) {
 			log.info("GK received the following services from the SR: " + providedService.getProvider().getSystemGroup() + providedService.getProvider().getSystemName());
 		}

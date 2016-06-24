@@ -21,6 +21,9 @@ import javax.ws.rs.core.Response.Status;
  * This resource can be used to perform CRUD operations (via REST) on Core Systems 
  * and Neighbor Clouds objects in the configuration database.
  */
+
+//TODO place this in the API module (?)
+
 @Path("configuration")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
