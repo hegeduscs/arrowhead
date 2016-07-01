@@ -13,38 +13,34 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 @XmlRootElement
 public class IntraCloudAuthEntry {
 	
-	private String address;
-	private String port;
+    private ArrowheadSystem consumer;
+	private ArrayList<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
     private ArrayList<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
-    private ArrayList<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
-    private String authenticationInfo;
 	
     public IntraCloudAuthEntry(){
     }
 
-	public IntraCloudAuthEntry(String address, String port, ArrayList<ArrowheadService> serviceList, 
-			ArrayList<ArrowheadSystem> providerList, String authenticationInfo) {
-		this.address = address;
-		this.port = port;
-		this.serviceList = serviceList;
+	public IntraCloudAuthEntry(ArrowheadSystem consumer, ArrayList<ArrowheadSystem> providerList,
+			ArrayList<ArrowheadService> serviceList) {
+		this.consumer = consumer;
 		this.providerList = providerList;
-		this.authenticationInfo = authenticationInfo;
+		this.serviceList = serviceList;
+	}
+    
+	public ArrowheadSystem getConsumer() {
+		return consumer;
 	}
 
-	public String getAddress() {
-		return address;
+	public void setConsumer(ArrowheadSystem consumer) {
+		this.consumer = consumer;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
+	public ArrayList<ArrowheadSystem> getProviderList() {
+		return providerList;
 	}
 
-	public String getPort() {
-		return port;
-	}
-
-	public void setPort(String port) {
-		this.port = port;
+	public void setProviderList(ArrayList<ArrowheadSystem> providerList) {
+		this.providerList = providerList;
 	}
 
 	public ArrayList<ArrowheadService> getServiceList() {
@@ -55,26 +51,15 @@ public class IntraCloudAuthEntry {
 		this.serviceList = serviceList;
 	}
 
-	public ArrayList<ArrowheadSystem> getProviderList() {
-		return providerList;
-	}
-
-	public void setProviderList(ArrayList<ArrowheadSystem> providerList) {
-		this.providerList = providerList;
-	}
-	
-	public String getAuthenticationInfo() {
-		return authenticationInfo;
-	}
-
-	public void setAuthenticationInfo(String authenticationInfo) {
-		this.authenticationInfo = authenticationInfo;
-	}
-    
 	public boolean isPayloadUsable(){
-		if(address == null || port == null || authenticationInfo == null || 
-				serviceList.isEmpty() || providerList.isEmpty())
+		if(consumer == null || serviceList.isEmpty() || providerList.isEmpty() || !consumer.isValid())
 			return false;
+		for(ArrowheadSystem provider : providerList)
+			if(!provider.isValid())
+				return false;
+		for(ArrowheadService service : serviceList)
+			if(!service.isValid())
+				return false;
 		return true;
 	}
 

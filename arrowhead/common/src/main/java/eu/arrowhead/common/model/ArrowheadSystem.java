@@ -99,5 +99,11 @@ public class ArrowheadSystem {
 		this.authenticationInfo = authenticationInfo;
 	}
 	
+	public boolean isValid(){
+		if(systemGroup == null || systemName == null)
+			return false;
+		return true;
+	}
+	
 	
 }

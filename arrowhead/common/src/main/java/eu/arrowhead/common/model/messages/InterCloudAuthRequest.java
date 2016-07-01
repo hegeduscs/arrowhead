@@ -2,23 +2,31 @@ package eu.arrowhead.common.model.messages;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 
 @XmlRootElement
 public class InterCloudAuthRequest {
 	
+	private ArrowheadCloud cloud;
 	private ArrowheadService service;
-	private String authenticationInfo;
 	private boolean generateToken;
 	
 	public InterCloudAuthRequest(){
 	}
-	
-	public InterCloudAuthRequest(ArrowheadService service, String authenticationInfo, 
-			boolean generateToken) {
+
+	public InterCloudAuthRequest(ArrowheadCloud cloud, ArrowheadService service, boolean generateToken) {
+		this.cloud = cloud;
 		this.service = service;
-		this.authenticationInfo = authenticationInfo;
 		this.generateToken = generateToken;
+	}
+
+	public ArrowheadCloud getCloud() {
+		return cloud;
+	}
+
+	public void setCloud(ArrowheadCloud cloud) {
+		this.cloud = cloud;
 	}
 
 	public ArrowheadService getService() {
@@ -27,14 +35,6 @@ public class InterCloudAuthRequest {
 
 	public void setService(ArrowheadService service) {
 		this.service = service;
-	}
-
-	public String getAuthenticationInfo() {
-		return authenticationInfo;
-	}
-
-	public void setAuthenticationInfo(String authenticationInfo) {
-		this.authenticationInfo = authenticationInfo;
 	}
 
 	public boolean isGenerateToken() {
@@ -46,7 +46,7 @@ public class InterCloudAuthRequest {
 	}
 
 	public boolean isPayloadUsable(){
-		if(authenticationInfo == null || service == null)
+		if(cloud == null || service == null || !cloud.isValid() || !service.isValid())
 			return false;
 		return true;
 	}

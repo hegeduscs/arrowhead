@@ -101,6 +101,12 @@ public class NeighborCloud {
 	public void setAuthenticationInfo(String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
 	}
+	
+	public boolean isPayloadUsable(){
+		if(operator == null || cloudName == null)
+			return false;
+		return true;
+	}
 
 	
 }

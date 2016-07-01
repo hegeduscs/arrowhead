@@ -156,7 +156,7 @@ public class GatekeeperResource {
     	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
     	log.info("Creating an InterCloudAuthRequest to the Authorization System");
     	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(
-    			requestedService, gsdPoll.getRequesterCloud().getAuthenticationInfo(), false);
+    			gsdPoll.getRequesterCloud(), requestedService, false);
     	
     	String AuthorizationResponse = getAuthorizationResponse(interAuthRequest,
     			gsdPoll.getRequesterCloud());
@@ -298,9 +298,7 @@ public class GatekeeperResource {
 			InterCloudAuthRequest interAuthRequest, ArrowheadCloud requesterCloud) {
 
     	//TODO: uri building
-    	String uri = "http://" + sysConfig.getAuthorizationURI() + 
-    			"/operator/" + requesterCloud.getOperator()+
-    			"/cloud/"+requesterCloud.getCloudName();
+    	String uri = "http://" + sysConfig.getAuthorizationURI() + "/intercloud";
     	System.out.println(uri);
     	
     	Client client = ClientBuilder.newClient();

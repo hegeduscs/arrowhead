@@ -15,7 +15,8 @@ import javax.xml.bind.annotation.XmlTransient;
  * The "operator" and "cloud_name" columns must be unique together.
  */
 @Entity
-@Table(name="arrowhead_cloud", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
+@Table(name="arrowhead_cloud", uniqueConstraints={@UniqueConstraint(
+		columnNames = {"operator", "cloud_name"})})
 @XmlRootElement
 public class ArrowheadCloud {
 	
@@ -109,6 +110,12 @@ public class ArrowheadCloud {
 
 	public void setAuthenticationInfo(String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
+	}
+	
+	public boolean isValid(){
+		if(operator == null || cloudName == null)
+			return false;
+		return true;
 	}
 	
 

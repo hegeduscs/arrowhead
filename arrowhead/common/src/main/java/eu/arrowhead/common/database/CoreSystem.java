@@ -90,5 +90,11 @@ public class CoreSystem {
 		this.authenticationInfo = authenticationInfo;
 	}
 
+	public boolean isPayloadUsable(){
+		if(systemName == null)
+			return false;
+		return true;
+	}
+	
 	
 }

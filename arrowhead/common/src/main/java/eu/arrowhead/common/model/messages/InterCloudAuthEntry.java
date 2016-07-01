@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 
 /**
@@ -13,15 +14,23 @@ import eu.arrowhead.common.model.ArrowheadService;
 @XmlRootElement
 public class InterCloudAuthEntry {
 	
+	private ArrowheadCloud cloud;
     private Collection<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
-    private String authenticationInfo;
 	
     public InterCloudAuthEntry(){
     }
     
-    public InterCloudAuthEntry(Collection<ArrowheadService> serviceList, String authenticationInfo) {
+	public InterCloudAuthEntry(ArrowheadCloud cloud, Collection<ArrowheadService> serviceList) {
+		this.cloud = cloud;
 		this.serviceList = serviceList;
-		this.authenticationInfo = authenticationInfo;
+	}
+
+	public ArrowheadCloud getCloud() {
+		return cloud;
+	}
+
+	public void setCloud(ArrowheadCloud cloud) {
+		this.cloud = cloud;
 	}
 
 	public Collection<ArrowheadService> getServiceList() {
@@ -31,18 +40,13 @@ public class InterCloudAuthEntry {
 	public void setServiceList(Collection<ArrowheadService> serviceList) {
 		this.serviceList = serviceList;
 	}
-	
-	public String getAuthenticationInfo() {
-		return authenticationInfo;
-	}
 
-	public void setAuthenticationInfo(String authenticationInfo) {
-		this.authenticationInfo = authenticationInfo;
-	}
-   
 	public boolean isPayloadUsable(){
-		if(serviceList.isEmpty() || authenticationInfo == null)
+		if(cloud == null || serviceList.isEmpty() || !cloud.isValid())
 			return false;
+		for(ArrowheadService service : serviceList)
+			if(!service.isValid())
+				return false;
 		return true;
 	}
 	

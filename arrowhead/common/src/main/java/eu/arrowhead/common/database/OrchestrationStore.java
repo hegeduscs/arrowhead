@@ -182,5 +182,11 @@ public class OrchestrationStore {
 		this.orchestrationRule = orchestrationRule;
 	}
 
+	public boolean isPayloadUsable(){
+		if(consumer == null || service == null || serialNumber == 0)
+			return false;
+		return true;
+	}
+	
 
 }

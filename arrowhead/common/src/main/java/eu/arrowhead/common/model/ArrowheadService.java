@@ -99,5 +99,11 @@ public class ArrowheadService {
 		this.metaData = metaData;
 	}
 	
+	public boolean isValid(){
+		if(serviceGroup == null || serviceDefinition == null)
+			return false;
+		return true;
+	}
+	
 	
 }

@@ -75,7 +75,7 @@ public class Main {
     	serverList.add(new ServerInfo(
         		"api",8450,
         		new ResourceConfig().registerClasses(
-        				eu.arrowhead.core.api.AuthenticationApi.class,
+        				eu.arrowhead.core.api.AuthorizationApi.class,
         				eu.arrowhead.core.api.CommonApi.class,
         				eu.arrowhead.core.api.ConfigurationApi.class,
         				eu.arrowhead.core.api.OrchestrationApi.class,

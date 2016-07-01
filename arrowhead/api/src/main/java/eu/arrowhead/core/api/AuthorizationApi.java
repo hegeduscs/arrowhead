@@ -1,6 +1,5 @@
 package eu.arrowhead.core.api;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,10 +14,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import eu.arrowhead.common.configuration.DatabaseManager;
@@ -35,10 +32,10 @@ import eu.arrowhead.common.model.messages.IntraCloudAuthEntry;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 
-@Path("authorization")
+@Path("auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AuthenticationApi {
+public class AuthorizationApi {
 
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
@@ -49,10 +46,20 @@ public class AuthenticationApi {
 		return "Got it";
 	}
 	
+	/**
+	 * Returns all the IntraCloud authorization rights from the database.
+	 * 
+	 * @exception DataNotFoundException
+	 * @return List<IntraCloudAuthorization>
+	 */
 	@GET
 	@Path("/intracloud")
 	public List<IntraCloudAuthorization> getIntraCloudAuthRights(){
-		List<IntraCloudAuthorization> authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
+		List<IntraCloudAuthorization> authRights = new ArrayList<IntraCloudAuthorization>();
+		authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
+		if(authRights.isEmpty()){
+			throw new DataNotFoundException("IntraCloud authorization rights not found in the database.");
+		}
 		
 		return authRights;
 	}
@@ -61,8 +68,6 @@ public class AuthenticationApi {
 	 * Checks whether the consumer System can use a Service from a list of
 	 * provider Systems.
 	 * 
-	 * @param {String} systemGroup
-	 * @param {String} systemName
 	 * @param {IntraCloudAuthRequest} request - POJO with the necessary informations
 	 * @exception DataNotFoundException, BadPayloadException
 	 * @return IntraCloudAuthResponse - POJO containing a HashMap<ArrowheadSystem, boolean>
@@ -70,23 +75,23 @@ public class AuthenticationApi {
 	//TODO token generation if flag set true
 	//TODO token generator function 
 	@PUT
-	@Path("/systemgroup/{systemGroup}/system/{systemName}")
-	public Response isSystemAuthorized(@PathParam("systemGroup") String systemGroup,
-			@PathParam("systemName") String systemName, IntraCloudAuthRequest request) {
+	@Path("/intracloud")
+	public Response isSystemAuthorized(IntraCloudAuthRequest request) {
 		
 		if (!request.isPayloadUsable()) {
-			throw new BadPayloadException("Bad payload: Missing arrowheadService, authenticationInfo"
-					+ " or providerList from the request payload.");
+			throw new BadPayloadException("Bad payload: Missing/incomplete consumer, service"
+					+ " or providerList in the request payload.");
 		}
 		
 		IntraCloudAuthResponse response = new IntraCloudAuthResponse();
-		restrictionMap.put("systemGroup", systemGroup);
-		restrictionMap.put("systemName", systemName);
+		restrictionMap.put("systemGroup", request.getConsumer().getSystemGroup());
+		restrictionMap.put("systemName", request.getConsumer().getSystemName());
 		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 		if(consumer == null){
 			throw new DataNotFoundException(
-				"Consumer System is not in the authorization database. (SG: " + systemGroup + 
-				", SN: " + systemName + ")");
+				"Consumer System is not in the database. (SG: " + 
+				request.getConsumer().getSystemGroup() + ", SN: " + 
+				request.getConsumer().getSystemName() + ")");
         }
 		
 		HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<ArrowheadSystem, Boolean>();
@@ -132,34 +137,24 @@ public class AuthenticationApi {
 	 * services between Systems. (Not bidirectional.) OneToMany relation between
 	 * consumer and providers, OneToMany relation between consumer and services.
 	 * 
-	 * @param {String} systemGroup
-	 * @param {String} systemName
 	 * @param {IntraCloudAuthEntry} entry - POJO with the necessary informations
 	 * @exception DuplicateEntryException, BadPayloadException
 	 * @return JAX-RS Response with status code 201 and ArrowheadSystem entity
 	 *         (the consumer system)
 	 */
 	@POST
-	@Path("/systemgroup/{systemGroup}/system/{systemName}")
-	public Response addSystemToAuthorized(@PathParam("systemGroup") String systemGroup,
-			@PathParam("systemName") String systemName, IntraCloudAuthEntry entry,
-			@Context UriInfo uriInfo) {
+	@Path("/intracloud")
+	public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
 		if (!entry.isPayloadUsable()) {
-			throw new BadPayloadException("Bad payload: Missing serviceList, providerList, "
-					+ "IP address, port or authenticationInfo from the entry payload.");
+			throw new BadPayloadException("Bad payload: Missing/incomplete consumer, "
+					+ "serviceList or providerList in the entry payload.");
 		}
 		
-		restrictionMap.put("systemGroup", systemGroup);
-		restrictionMap.put("systemName", systemName);
+		restrictionMap.put("systemGroup", entry.getConsumer().getSystemGroup());
+		restrictionMap.put("systemName", entry.getConsumer().getSystemName());
 		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 		if (consumer == null) {
-			consumer = new ArrowheadSystem();
-			consumer.setSystemGroup(systemGroup);
-			consumer.setSystemName(systemName);
-			consumer.setAddress(entry.getAddress());
-			consumer.setPort(entry.getPort());
-			consumer.setAuthenticationInfo(entry.getAuthenticationInfo());
-			consumer = dm.save(consumer);
+			consumer = dm.save(entry.getConsumer());
 		}
 
 		ArrowheadSystem retrievedSystem = null;
@@ -185,12 +180,11 @@ public class AuthenticationApi {
 				authRight.setConsumer(consumer);
 				authRight.setProvider(retrievedSystem);
 				authRight.setService(retrievedService);
-				dm.merge(authRight); //TODO needs testing if this works with the new dm
+				dm.merge(authRight);
 			}
 		}
 
-		URI uri = uriInfo.getAbsolutePathBuilder().build();
-		return Response.created(uri).entity(consumer).build();
+		return Response.status(Status.CREATED).entity(consumer).build();
 	}
 
 	/**
@@ -198,10 +192,11 @@ public class AuthenticationApi {
 	 * 
 	 * @param {String} systemGroup
 	 * @param {String} systemName
-	 * @return JAX-RS Response with status code 204
+	 * @return JAX-RS Response with status code 200 (if delete is succesfull)
+	 * or 204 (if nothing happens).
 	 */
 	@DELETE
-	@Path("/systemgroup/{systemGroup}/system/{systemName}")
+	@Path("/intracloud/systemgroup/{systemGroup}/system/{systemName}")
 	public Response deleteSystemRelations(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
 		
@@ -220,7 +215,7 @@ public class AuthenticationApi {
 			dm.delete(authRight);
 		}
 
-		return Response.noContent().build();
+		return Response.ok().build();
 	}
 	
 	/**
@@ -232,9 +227,9 @@ public class AuthenticationApi {
 	 * @return List<ArrowheadService>
 	 */
 	@GET
-	@Path("/systemgroup/{systemGroup}/systemname/{systemName}/services")
+	@Path("/intracloud/systemgroup/{systemGroup}/systemname/{systemName}/services")
 	public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup,
-			@PathParam("systemName") String systemName) throws DataNotFoundException {
+			@PathParam("systemName") String systemName) {
 		restrictionMap.put("systemGroup", systemGroup);
 		restrictionMap.put("systemName", systemName);
 		ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
@@ -255,34 +250,50 @@ public class AuthenticationApi {
 
 		return serviceList;
 	}
+	
+	/**
+	 * Returns all the InterCloud authorization rights from the database.
+	 * 
+	 * @exception DataNotFoundException
+	 * @return List<InterCloudAuthorization>
+	 */
+	@GET
+	@Path("/intercloud")
+	public List<InterCloudAuthorization> getInterCloudAuthRights(){
+		List<InterCloudAuthorization> authRights = new ArrayList<InterCloudAuthorization>();
+		authRights = dm.getAll(InterCloudAuthorization.class, restrictionMap);
+		if(authRights.isEmpty()){
+			throw new DataNotFoundException("InterCloud authorization rights not found in the database.");
+		}
+		
+		return authRights;
+	}
 
 	/**
 	 * Checks whether an external Cloud can use a local Service.
 	 * 
-	 * @param {String} operatorName
-	 * @param {String} cloudName
 	 * @param {InterCloudAuthRequest} request - POJO with the necessary informations
 	 * @exception DataNotFoundException, BadPayloadException
 	 * @return boolean
 	 */
 	@PUT
-	@Path("/operator/{operator}/cloud/{cloudName}")
+	@Path("/intercloud")
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON })
-	public Response isCloudAuthorized(@PathParam("operator") String operator,
-			@PathParam("cloudName") String cloudName, InterCloudAuthRequest request) throws DataNotFoundException {
+	public Response isCloudAuthorized(InterCloudAuthRequest request) {
 		
 		if (!request.isPayloadUsable()) {
 			throw new BadPayloadException(
-				"Bad payload: Missing arrowheadService or authenticationInfo from the request payload.");
+				"Bad payload: Missing/incomplete cloud or service in the request payload.");
 		}
 		
-		restrictionMap.put("operator", operator);
-		restrictionMap.put("cloudName", cloudName);
+		restrictionMap.put("operator", request.getCloud().getOperator());
+		restrictionMap.put("cloudName", request.getCloud().getCloudName());
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
         if(cloud == null){
        	 	throw new DataNotFoundException(
-       	 			"Consumer Cloud is not in the authorization database. (OP: " + operator + 
-				", CN: " + cloudName + ")");
+       	 			"Consumer Cloud is not in the authorization database. (OP: " 
+       	 			+ request.getCloud().getOperator() + ", CN: " 
+       	 			+ request.getCloud().getCloudName() + ")");
         }
         
 		boolean isAuthorized = false;
@@ -311,32 +322,23 @@ public class AuthenticationApi {
 	/**
 	 * Adds a new Cloud and its consumable Services to the database.
 	 * 
-	 * @param {String} operatorName
-	 * @param {String} cloudName
 	 * @param {InterCloudAuthEntry} entry - POJO with the necessary informations
-	 * @param {UriInfo} uriInfo - JAX-RS object containing URI information
 	 * @exception DuplicateEntryException, BadPayloadException
 	 * @return JAX-RS Response with status code 201 and ArrowheadCloud entity
 	 */
 	@POST
-	@Path("/operator/{operator}/cloud/{cloudName}")
-	public Response addCloudToAuthorized(@PathParam("operator") String operator,
-			@PathParam("cloudName") String cloudName, InterCloudAuthEntry entry, 
-			@Context UriInfo uriInfo) {
+	@Path("/intercloud")
+	public Response addCloudToAuthorized(InterCloudAuthEntry entry) {
 		if (!entry.isPayloadUsable()) {
 			throw new BadPayloadException(
-				"Bad payload: Missing serviceList or authenticationInfo from the entry payload.");
+				"Bad payload: Missing/incomplete cloud or serviceList in the entry payload.");
 		}
 		
-		restrictionMap.put("operator", operator);
-		restrictionMap.put("cloudName", cloudName);
+		restrictionMap.put("operator", entry.getCloud().getOperator());
+		restrictionMap.put("cloudName", entry.getCloud().getCloudName());
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);;
 		if(cloud == null){
-			cloud = new ArrowheadCloud();
-			cloud.setOperator(operator);
-			cloud.setCloudName(cloudName);
-			cloud.setAuthenticationInfo(entry.getAuthenticationInfo());
-			cloud = dm.save(cloud);
+			cloud = dm.save(entry.getCloud());
 		}
 		
 		ArrowheadService retrievedService = null;
@@ -352,11 +354,10 @@ public class AuthenticationApi {
 			}
 			authRight.setCloud(cloud);
 			authRight.setService(retrievedService);
-			dm.merge(authRight); //TODO needs testing if this works with the new dm
+			dm.merge(authRight);
 		}
 
-		URI uri = uriInfo.getAbsolutePathBuilder().build();
-		return Response.created(uri).entity(cloud).build();
+		return Response.status(Status.CREATED).entity(cloud).build();
 	}
 
 	/**
@@ -364,7 +365,8 @@ public class AuthenticationApi {
 	 * 
 	 * @param {String} operatorName
 	 * @param {String} cloudName
-	 * @return JAX-RS Response with status code 204
+	 * @return JAX-RS Response with status code 200 (if delete is succesfull)
+	 * or 204 (if nothing happens).
 	 */
 	@DELETE
 	@Path("/operator/{operator}/cloud/{cloudName}")
@@ -386,7 +388,7 @@ public class AuthenticationApi {
 			dm.delete(authRight);
 		}
 
-		return Response.noContent().build();
+		return Response.ok().build();
 	}
 
 	/**
@@ -400,7 +402,7 @@ public class AuthenticationApi {
 	@GET
 	@Path("/operator/{operator}/cloud/{cloudName}/services")
 	public Set<ArrowheadService> getCloudServices(@PathParam("operator") String operator,
-			@PathParam("cloudName") String cloudName) throws DataNotFoundException {
+			@PathParam("cloudName") String cloudName) {
 		
 		restrictionMap.put("operator", operator);
 		restrictionMap.put("cloudName", cloudName);

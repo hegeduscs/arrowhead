@@ -22,7 +22,7 @@ public class DatabaseManager {
 
 	private DatabaseManager() {
 		if (sessionFactory == null) {
-			sessionFactory = new Configuration().configure().buildSessionFactory();
+			sessionFactory = new Configuration().configure().buildSessionFactory();	
 		}
 	}
 
