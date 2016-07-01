@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import eu.arrowhead.common.configuration.DatabaseManager;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
@@ -110,10 +111,19 @@ public class CommonApi {
 	 * @param {List<ArrowheadService>}
 	 *            serviceList
 	 * @return List<ArrowheadService>
+	 * @throws BadPayloadException
 	 */
 	@POST
 	@Path("/services")
 	public List<ArrowheadService> addServices(List<ArrowheadService> serviceList) {
+		
+		for(ArrowheadService service : serviceList){
+			if(!service.isValid()){
+				throw new BadPayloadException("Bad payload: Missing/incomplete "
+					+ "serviceList in the entry payload.");
+			}
+		}
+		
 		List<ArrowheadService> savedServices = new ArrayList<ArrowheadService>();
 		for (ArrowheadService service : serviceList) {
 			restrictionMap.clear();
@@ -143,10 +153,9 @@ public class CommonApi {
 		restrictionMap.put("serviceDefinition", service.getServiceDefinition());
 		ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
 		if (retrievedService != null) {
-			dm.delete(retrievedService);
 			retrievedService.setInterfaces(service.getInterfaces());
 			retrievedService.setMetaData(service.getMetaData()); // transient!
-			retrievedService = dm.save(retrievedService);
+			retrievedService = dm.merge(retrievedService);
 			return Response.status(Status.ACCEPTED).entity(retrievedService).build();
 		} else {
 			return Response.noContent().build();

@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
@@ -262,8 +261,8 @@ public class GatekeeperResource {
     	
     	// Sending an InterCloudAuthRequest to the Authorization System (generateToken=true)
     	log.info("Creating an InterCloudAuthRequest to the Authorization System");
-    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest(requestedService, 
-    			icnProposal.getRequestedCloud().getAuthenticationInfo(), true);
+    	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest( 
+    			icnProposal.getRequestedCloud(),requestedService, true);
     	
     	String AuthorizationResponse = getAuthorizationResponse(interAuthRequest,
     			icnProposal.getRequestedCloud());

@@ -96,9 +96,9 @@ public class OrchestratorService {
 
 			// Poll the Authorization
 			log.info("Polling the Authorization service.");
-			authReq = new IntraCloudAuthRequest(this.serviceRequestForm.getRequestedService(), 
-					providers, "authInfo", false);
-			authResp = getAuthorizationResponse(authReq, this.serviceRequestForm);
+			authReq = new IntraCloudAuthRequest(this.serviceRequestForm.getRequesterSystem(),
+					providers, this.serviceRequestForm.getRequestedService(), false);
+			authResp = getAuthorizationResponse(authReq);
 
 			// Removing the non-authenticated systems from the providers list
 			for (ArrowheadSystem ahsys : authResp.getAuthorizationMap().keySet()) {
@@ -239,10 +239,9 @@ public class OrchestratorService {
 	 * @param authRequest
 	 * @return AuthorizationResponse
 	 */
-	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq, ServiceRequestForm srf) {
+	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq) {
 		log.info("orchestrator: inside the getAuthorizationResponse function");
-		String strtarget = sysConfig.getAuthorizationURI() + "/systemgroup/" + srf.getRequesterSystem().getSystemGroup()
-				+ "/system/" + srf.getRequesterSystem().getSystemName();
+		String strtarget = sysConfig.getAuthorizationURI() + "/intracloud";
 		log.info("orchestrator: sending AuthReq to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(authReq));

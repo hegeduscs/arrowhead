@@ -49,8 +49,8 @@ public class AuthorizationApi {
 	/**
 	 * Returns all the IntraCloud authorization rights from the database.
 	 * 
-	 * @exception DataNotFoundException
 	 * @return List<IntraCloudAuthorization>
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/intracloud")
@@ -69,8 +69,8 @@ public class AuthorizationApi {
 	 * provider Systems.
 	 * 
 	 * @param {IntraCloudAuthRequest} request - POJO with the necessary informations
-	 * @exception DataNotFoundException, BadPayloadException
 	 * @return IntraCloudAuthResponse - POJO containing a HashMap<ArrowheadSystem, boolean>
+	 * @throws DataNotFoundException, BadPayloadException
 	 */
 	//TODO token generation if flag set true
 	//TODO token generator function 
@@ -138,9 +138,9 @@ public class AuthorizationApi {
 	 * consumer and providers, OneToMany relation between consumer and services.
 	 * 
 	 * @param {IntraCloudAuthEntry} entry - POJO with the necessary informations
-	 * @exception DuplicateEntryException, BadPayloadException
 	 * @return JAX-RS Response with status code 201 and ArrowheadSystem entity
 	 *         (the consumer system)
+	 * @throws DuplicateEntryException, BadPayloadException
 	 */
 	@POST
 	@Path("/intracloud")
@@ -223,8 +223,8 @@ public class AuthorizationApi {
 	 * 
 	 * @param {String} systemGroup
 	 * @param {String} systemName
-	 * @exception DataNotFoundException
 	 * @return List<ArrowheadService>
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/intracloud/systemgroup/{systemGroup}/systemname/{systemName}/services")
@@ -254,8 +254,8 @@ public class AuthorizationApi {
 	/**
 	 * Returns all the InterCloud authorization rights from the database.
 	 * 
-	 * @exception DataNotFoundException
 	 * @return List<InterCloudAuthorization>
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/intercloud")
@@ -273,8 +273,8 @@ public class AuthorizationApi {
 	 * Checks whether an external Cloud can use a local Service.
 	 * 
 	 * @param {InterCloudAuthRequest} request - POJO with the necessary informations
-	 * @exception DataNotFoundException, BadPayloadException
 	 * @return boolean
+	 * @throws DataNotFoundException, BadPayloadException
 	 */
 	@PUT
 	@Path("/intercloud")
@@ -323,8 +323,8 @@ public class AuthorizationApi {
 	 * Adds a new Cloud and its consumable Services to the database.
 	 * 
 	 * @param {InterCloudAuthEntry} entry - POJO with the necessary informations
-	 * @exception DuplicateEntryException, BadPayloadException
 	 * @return JAX-RS Response with status code 201 and ArrowheadCloud entity
+	 * @throws DuplicateEntryException, BadPayloadException
 	 */
 	@POST
 	@Path("/intercloud")
@@ -396,8 +396,8 @@ public class AuthorizationApi {
 	 * 
 	 * @param {String} operatorName
 	 * @param {String} cloudName
-	 * @exception DataNotFoundException
 	 * @return List<ArrowheadService>
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/operator/{operator}/cloud/{cloudName}/services")
