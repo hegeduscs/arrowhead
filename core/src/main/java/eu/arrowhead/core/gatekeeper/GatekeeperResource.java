@@ -16,6 +16,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
 
@@ -212,9 +213,12 @@ public class GatekeeperResource {
     	// HTTP PUT to the provider GateKeeper
     	log.info("ICN Proposal for: " + proposal.getRequestedService().getServiceDefinition());
     	
-		//TODO: URI builder
-    	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/icn_proposal/";
-    	
+		//TODO: URI builder --- done, needs testing (old solution commented out)
+    	//String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/icn_proposal/";
+    	UriBuilder ub = null;
+		ub = UriBuilder.fromPath(sysConfig.getCloudURIs().get(0)).path("gatekeeper").path("icn_proposal");
+		String uri = ub.toString();
+		
     	log.info("ICN Proposal to the chosen GateKeeper.");
     	System.out.println("ICN Proposal to: " + uri);
     	    	

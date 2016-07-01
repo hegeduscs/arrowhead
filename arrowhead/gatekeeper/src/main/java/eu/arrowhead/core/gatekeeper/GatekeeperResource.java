@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
@@ -49,7 +50,7 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class GatekeeperResource {
-	private SysConfig sysConfig = SysConfig.getInstance();
+	private SysConfig sysConfig = new SysConfig();
 	private static Logger log = Logger.getLogger(GatekeeperResource.class.getName());
 
 	
@@ -68,7 +69,7 @@ public class GatekeeperResource {
 	 */
     @PUT
     @Path("/init_gsd/")
-    public GSDResult sendRequest(GSDRequestForm gsdRequest){
+    public GSDResult sendRequest(GSDRequestForm gsdRequest) {
     	
     	log.info("Inside the GateKeeper");
     	ArrowheadCloud requesterCloud = sysConfig.getOwnCloud();
@@ -134,7 +135,7 @@ public class GatekeeperResource {
      */
     @PUT
     @Path("/gsd_poll/")
-    public GSDAnswer getRequest(GSDPoll gsdPollRequest){
+    public GSDAnswer getRequest(GSDPoll gsdPollRequest) {
     	
     	log.info("GK gets a GSDPoll");
     	GSDAnswer emptyAnswer = new GSDAnswer();
@@ -195,7 +196,7 @@ public class GatekeeperResource {
      */
     @PUT
     @Path("/init_icn/")
-    public ICNResultForm sendProposal(ICNRequestForm icnRequestForm){
+    public ICNResultForm sendProposal(ICNRequestForm icnRequestForm) {
     	
     	ICNProposal proposal = new ICNProposal();
     	

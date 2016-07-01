@@ -1,4 +1,4 @@
-package eu.arrowhead.common.configuration;
+package eu.arrowhead.common.database;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,38 +12,34 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * @author umlaufz
  * 
- * Entity class for storing information about the local Cloud in the database.
- * (Gatekeeper needs this information for negotiations.)
- * The "operator" and "cloud_name" columns must be unique together.
+ * Entity class for storing Core System informations in the database.
+ * The "system_name" column must be unique.
  */
 @Entity
-@Table(name="own_cloud", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
-public class OwnCloud {
+@Table(name="core_system", uniqueConstraints={@UniqueConstraint(columnNames = {"system_name"})})
+public class CoreSystem {
 	
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
     private int id;
-	@Column(name="operator")
-	private String operator;
-	@Column(name="cloud_name")
-	private String cloudName;
+	@Column(name="system_name")
+	private String systemName;
 	@Column(name="ip_address")
 	private String IPAddress;
 	@Column(name="port")
 	private String port;
-	@Column(name="authentication_info")
-	private String authenticationInfo;
 	@Column(name="service_uri")
 	private String serviceURI;
+	@Column(name="authentication_info")
+	private String authenticationInfo;
 	
-	public OwnCloud(){
+	public CoreSystem(){
 	}
 	
-	public OwnCloud(String operator, String cloudName, String IPAddress, String port, 
-			String serviceURI, String authenticationInfo) {
-		this.operator = operator;
-		this.cloudName = cloudName;
+	public CoreSystem(String systemName, String IPAddress, String port, 
+				String serviceURI, String authenticationInfo) {
+		this.systemName = systemName;
 		this.IPAddress = IPAddress;
 		this.port = port;
 		this.serviceURI = serviceURI;
@@ -54,20 +50,12 @@ public class OwnCloud {
 		return id;
 	}
 
-	public String getOperator() {
-		return operator;
+	public String getSystemName() {
+		return systemName;
 	}
 
-	public void setOperator(String operator) {
-		this.operator = operator;
-	}
-
-	public String getCloudName() {
-		return cloudName;
-	}
-
-	public void setCloudName(String cloudName) {
-		this.cloudName = cloudName;
+	public void setSystemName(String systemName) {
+		this.systemName = systemName;
 	}
 
 	public String getIPAddress() {
@@ -101,6 +89,6 @@ public class OwnCloud {
 	public void setAuthenticationInfo(String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
 	}
-	
+
 	
 }

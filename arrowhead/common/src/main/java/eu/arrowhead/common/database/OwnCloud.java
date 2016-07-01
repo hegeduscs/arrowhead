@@ -1,4 +1,4 @@
-package eu.arrowhead.common.configuration;
+package eu.arrowhead.common.database;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,12 +12,13 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * @author umlaufz
  * 
- * Entity class for storing nearby Cloud informations in the database.
+ * Entity class for storing information about the local Cloud in the database.
+ * (Gatekeeper needs this information for negotiations.)
  * The "operator" and "cloud_name" columns must be unique together.
  */
 @Entity
-@Table(name="neighborhood", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
-public class NeighborCloud {
+@Table(name="own_cloud", uniqueConstraints={@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
+public class OwnCloud {
 	
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
@@ -31,16 +32,16 @@ public class NeighborCloud {
 	private String IPAddress;
 	@Column(name="port")
 	private String port;
-	@Column(name="service_uri")
-	private String serviceURI;
 	@Column(name="authentication_info")
 	private String authenticationInfo;
+	@Column(name="service_uri")
+	private String serviceURI;
 	
-	public NeighborCloud(){
+	public OwnCloud(){
 	}
 	
-	public NeighborCloud(String operator, String cloudName, String IPAddress, String port, 
-			 String serviceURI, String authenticationInfo) {
+	public OwnCloud(String operator, String cloudName, String IPAddress, String port, 
+			String serviceURI, String authenticationInfo) {
 		this.operator = operator;
 		this.cloudName = cloudName;
 		this.IPAddress = IPAddress;
@@ -49,7 +50,6 @@ public class NeighborCloud {
 		this.authenticationInfo = authenticationInfo;
 	}
 	
-
 	public int getId() {
 		return id;
 	}
@@ -101,6 +101,6 @@ public class NeighborCloud {
 	public void setAuthenticationInfo(String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
 	}
-
+	
 	
 }

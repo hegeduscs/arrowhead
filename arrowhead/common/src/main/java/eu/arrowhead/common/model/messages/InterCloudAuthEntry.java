@@ -1,4 +1,4 @@
-package eu.arrowhead.core.authorization;
+package eu.arrowhead.common.model.messages;
 
 import java.util.ArrayList;
 import java.util.Collection;

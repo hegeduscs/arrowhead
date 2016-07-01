@@ -9,6 +9,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
 
@@ -43,7 +44,7 @@ public class OrchestratorService {
 	private URI uri;
 	private Client client;
 	private ServiceRequestForm serviceRequestForm;
-	public SysConfig sysConfig = SysConfig.getInstance();
+	public SysConfig sysConfig = new SysConfig();
 	private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
 
 	public OrchestratorService() {
@@ -206,9 +207,11 @@ public class OrchestratorService {
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, ServiceRequestForm srf) {
 		log.info("orchestator: inside the getServiceQueryResult function");
 		ArrowheadService as = srf.getRequestedService();
-		//TODO uri-building
-		String strtarget = sysConfig.getServiceRegistryURI() + "/" + as.getServiceGroup() + "/"
-				+ as.getServiceDefinition();
+		//TODO uri-building --- done, needs testing
+		UriBuilder ub = null;
+		ub = UriBuilder.fromPath(sysConfig.getServiceRegistryURI()).path(as.getServiceGroup())
+				.path(as.getServiceDefinition());
+		String strtarget = ub.toString();
 		log.info("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));

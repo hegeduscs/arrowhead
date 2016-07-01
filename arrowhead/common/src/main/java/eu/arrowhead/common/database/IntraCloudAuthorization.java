@@ -1,4 +1,4 @@
-package eu.arrowhead.core.authorization.database;
+package eu.arrowhead.common.database;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -40,16 +40,16 @@ public class IntraCloudAuthorization {
 	
 	@JoinColumn(name="arrowhead_service_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade={CascadeType.MERGE})
-	private ArrowheadService arrowheadService;
+	private ArrowheadService service;
 	
 	public IntraCloudAuthorization() {
 	}
 
 	public IntraCloudAuthorization(ArrowheadSystem consumer, ArrowheadSystem provider, 
-			ArrowheadService arrowheadService) {
+			ArrowheadService service) {
 		this.consumer = consumer;
 		this.provider = provider;
-		this.arrowheadService = arrowheadService;
+		this.service = service;
 	}
 
 	public int getId() {
@@ -76,12 +76,12 @@ public class IntraCloudAuthorization {
 		this.provider = providers;
 	}
 
-	public ArrowheadService getArrowheadService() {
-		return arrowheadService;
+	public ArrowheadService getService() {
+		return service;
 	}
 
-	public void setArrowheadService(ArrowheadService arrowheadService) {
-		this.arrowheadService = arrowheadService;
+	public void setService(ArrowheadService service) {
+		this.service = service;
 	}
 
 	
