@@ -10,7 +10,7 @@ public class BadMethodExceptionMapper implements ExceptionMapper<NotAllowedExcep
 
 	public Response toResponse(NotAllowedException exception) {
 
-		return Response.status(Response.Status.NOT_FOUND)
+		return Response.status(Response.Status.METHOD_NOT_ALLOWED)
 				.entity(new ErrorMessage("Bad request: requested method is not allowed.", 405, 
 						"No documentation yet."))
 				.build();

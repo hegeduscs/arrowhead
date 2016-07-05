@@ -185,7 +185,7 @@ public class AuthorizationApi {
 			}
 		}
 
-		return Response.status(Status.CREATED).entity(consumer).build();
+		return Response.status(Status.CREATED).entity(authRight).build();
 	}
 
 	/**
@@ -212,11 +212,15 @@ public class AuthorizationApi {
 		restrictionMap.clear();
 		restrictionMap.put("consumer", consumer);
 		authRightsList = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
-		for (IntraCloudAuthorization authRight : authRightsList) {
-			dm.delete(authRight);
+		if(!authRightsList.isEmpty()){
+			for (IntraCloudAuthorization authRight : authRightsList) {
+				dm.delete(authRight);
+			}
+			
+			return Response.ok().build();
 		}
-
-		return Response.ok().build();
+		
+		return Response.noContent().build();
 	}
 	
 	/**
@@ -359,7 +363,7 @@ public class AuthorizationApi {
 			dm.merge(authRight);
 		}
 
-		return Response.status(Status.CREATED).entity(cloud).build();
+		return Response.status(Status.CREATED).entity(authRight).build();
 	}
 
 	/**
@@ -371,7 +375,7 @@ public class AuthorizationApi {
 	 * or 204 (if nothing happens).
 	 */
 	@DELETE
-	@Path("/operator/{operator}/cloudname/{cloudName}")
+	@Path("/intercloud/operator/{operator}/cloudname/{cloudName}")
 	public Response deleteCloudRelations(@PathParam("operator") String operator,
 			@PathParam("cloudName") String cloudName) {
 		
@@ -386,11 +390,15 @@ public class AuthorizationApi {
 		restrictionMap.clear();
 		restrictionMap.put("cloud", cloud);
 		authRightsList = dm.getAll(InterCloudAuthorization.class, restrictionMap);
-		for (InterCloudAuthorization authRight : authRightsList) {
-			dm.delete(authRight);
+		if(!authRightsList.isEmpty()){
+			for (InterCloudAuthorization authRight : authRightsList) {
+				dm.delete(authRight);
+			}
+			
+			return Response.ok().build();
 		}
-
-		return Response.ok().build();
+		
+		return Response.noContent().build();
 	}
 
 	/**
@@ -402,7 +410,7 @@ public class AuthorizationApi {
 	 * @throws DataNotFoundException
 	 */
 	@GET
-	@Path("/operator/{operator}/cloudname/{cloudName}/services")
+	@Path("/intercloud/operator/{operator}/cloudname/{cloudName}/services")
 	public Set<ArrowheadService> getCloudServices(@PathParam("operator") String operator,
 			@PathParam("cloudName") String cloudName) {
 		
@@ -427,4 +435,5 @@ public class AuthorizationApi {
 		return serviceList;
 	}
 
+	
 }
