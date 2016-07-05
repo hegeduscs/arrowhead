@@ -48,20 +48,22 @@ public class SysConfig {
 
 	public String getURI(NeighborCloud neighborCloud) {
 		UriBuilder ub = null;
-		if (neighborCloud.getIPAddress().startsWith("http://")) {
-			if (neighborCloud.getPort() != null) {
-				ub = UriBuilder.fromPath(neighborCloud.getIPAddress() + ":" + neighborCloud.getPort());
+		if (neighborCloud.getCloud().getAddress().startsWith("http://")) {
+			if (neighborCloud.getCloud().getPort() != null) {
+				ub = UriBuilder.fromPath(neighborCloud.getCloud().getAddress() 
+						+ ":" + neighborCloud.getCloud().getPort());
 			} else {
-				ub = UriBuilder.fromPath(neighborCloud.getIPAddress());
+				ub = UriBuilder.fromPath(neighborCloud.getCloud().getAddress());
 			}
 		} else {
-			if (neighborCloud.getPort() != null) {
-				ub = UriBuilder.fromPath(baseURI).path(neighborCloud.getIPAddress() + ":" + neighborCloud.getPort());
+			if (neighborCloud.getCloud().getPort() != null) {
+				ub = UriBuilder.fromPath(baseURI).path(neighborCloud.getCloud().getAddress() 
+						+ ":" + neighborCloud.getCloud().getPort());
 			} else {
-				ub = UriBuilder.fromPath(baseURI).path(neighborCloud.getIPAddress());
+				ub = UriBuilder.fromPath(baseURI).path(neighborCloud.getCloud().getAddress());
 			}
 		}
-		ub.path(neighborCloud.getServiceURI());
+		ub.path(neighborCloud.getCloud().getGatekeeperServiceURI());
 
 		return ub.toString();
 	}
@@ -126,9 +128,9 @@ public class SysConfig {
 		ArrowheadCloud ownCloud = new ArrowheadCloud();
 		ownCloud.setOperator(retrievedCloud.getOperator());
 		ownCloud.setCloudName(retrievedCloud.getCloudName());
-		ownCloud.setAddress(retrievedCloud.getIPAddress());
+		ownCloud.setAddress(retrievedCloud.getAddress());
 		ownCloud.setPort(retrievedCloud.getPort());
-		ownCloud.setGatekeeperServiceURI(retrievedCloud.getServiceURI());
+		ownCloud.setGatekeeperServiceURI(retrievedCloud.getGatekeeperServiceURI());
 		ownCloud.setAuthenticationInfo(retrievedCloud.getAuthenticationInfo());
 
 		return ownCloud;

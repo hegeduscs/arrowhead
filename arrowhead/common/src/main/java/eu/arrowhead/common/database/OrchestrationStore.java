@@ -185,6 +185,10 @@ public class OrchestrationStore {
 	public boolean isPayloadUsable(){
 		if(consumer == null || service == null || serialNumber == 0)
 			return false;
+		if(consumer.getSystemGroup() == null || consumer.getSystemName() == null)
+			return false;
+		if(service.getServiceGroup() == null || service.getServiceDefinition() == null)
+			return false;
 		return true;
 	}
 	

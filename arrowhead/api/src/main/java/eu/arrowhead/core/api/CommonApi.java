@@ -105,34 +105,29 @@ public class CommonApi {
 
 	/**
 	 * Adds a list of ArrowheadServices to the database. Elements which would
-	 * cause DuplicateEntryException are being skipped. The returned list only
-	 * contains the elements which was saved in the process.
+	 * cause DuplicateEntryException or BadPayloadException 
+	 * (caused by missing serviceGroup or serviceDefinition) are being skipped. 
+	 * The returned list only contains the elements which was saved in the process.
 	 *
 	 * @param {List<ArrowheadService>}
 	 *            serviceList
 	 * @return List<ArrowheadService>
-	 * @throws BadPayloadException
 	 */
 	@POST
 	@Path("/services")
 	public List<ArrowheadService> addServices(List<ArrowheadService> serviceList) {
-		
-		for(ArrowheadService service : serviceList){
-			if(!service.isValid()){
-				throw new BadPayloadException("Bad payload: Missing/incomplete "
-					+ "serviceList in the entry payload.");
-			}
-		}
-		
+			
 		List<ArrowheadService> savedServices = new ArrayList<ArrowheadService>();
 		for (ArrowheadService service : serviceList) {
-			restrictionMap.clear();
-			restrictionMap.put("serviceGroup", service.getServiceGroup());
-			restrictionMap.put("serviceDefinition", service.getServiceDefinition());
-			ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
-			if (retrievedService == null) {
-				dm.save(service);
-				savedServices.add(service);
+			if(service.isValid()){
+				restrictionMap.clear();
+				restrictionMap.put("serviceGroup", service.getServiceGroup());
+				restrictionMap.put("serviceDefinition", service.getServiceDefinition());
+				ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
+				if (retrievedService == null) {
+					dm.save(service);
+					savedServices.add(service);
+				}
 			}
 		}
 
@@ -145,10 +140,17 @@ public class CommonApi {
 	 * 
 	 * @param {ArrowheadService}
 	 *            service
+	 * @throws BadPayloadException
 	 */
 	@PUT
 	@Path("/services")
 	public Response updateService(ArrowheadService service) {
+		
+		if(!service.isValid()){
+			throw new BadPayloadException("Bad payload: missing service group "
+					+ "or service definition in the entry payload.");
+		}
+		
 		restrictionMap.put("serviceGroup", service.getServiceGroup());
 		restrictionMap.put("serviceDefinition", service.getServiceDefinition());
 		ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
@@ -191,12 +193,16 @@ public class CommonApi {
 	 * Returns the list of ArrowheadSystems from the database.
 	 *
 	 * @return List<ArrowheadSystem>
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/systems")
 	public List<ArrowheadSystem> getAllSystems() {
 		List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
 		systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
+		if (systemList.isEmpty()) {
+			throw new DataNotFoundException("ArrowheadSystems not found in the database.");
+		}
 
 		return systemList;
 	}
@@ -208,6 +214,7 @@ public class CommonApi {
 	 * @param {String}
 	 *            systemGroup
 	 * @return List<ArrowheadSystem>
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/systems/systemgroup/{systemGroup}")
@@ -215,6 +222,10 @@ public class CommonApi {
 		List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
 		restrictionMap.put("systemGroup", systemGroup);
 		systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
+		if (systemList.isEmpty()) {
+			throw new DataNotFoundException("ArrowheadSystems not found in the "
+					+ "database from this system group.");
+		}
 
 		return systemList;
 	}
@@ -228,6 +239,7 @@ public class CommonApi {
 	 * @param {String}
 	 *            systemName
 	 * @return ArrowheadSystem
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/systems/systemgroup/{systemGroup}/systemname/{systemName}")
@@ -237,14 +249,18 @@ public class CommonApi {
 		restrictionMap.put("systemGroup", systemGroup);
 		restrictionMap.put("systemName", systemName);
 		system = dm.get(ArrowheadSystem.class, restrictionMap);
+		if(system == null){
+			throw new DataNotFoundException("Requested ArrowheadSystem not found in the database.");
+		}
 
 		return system;
 	}
 
 	/**
 	 * Adds a list of ArrowheadSystems to the database. Elements which would
-	 * cause DuplicateEntryException are being skipped. The returned list only
-	 * contains the elements which was saved in the process.
+	 * cause DuplicateEntryException or BadPayloadException 
+	 * (caused by missing systemGroup or systemName) are being skipped. 
+	 * The returned list only contains the elements which was saved in the process.
 	 *
 	 * @param {List<ArrowheadSystem>}
 	 *            systemList
@@ -255,14 +271,16 @@ public class CommonApi {
 	public List<ArrowheadSystem> addSystems(List<ArrowheadSystem> systemList) {
 		List<ArrowheadSystem> savedSystems = new ArrayList<ArrowheadSystem>();
 		for (ArrowheadSystem system : systemList) {
-			restrictionMap.clear();
-			restrictionMap.put("systemGroup", system.getSystemGroup());
-			restrictionMap.put("systemName", system.getSystemName());
-			ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
-			restrictionMap.clear();
-			if (retrievedSystem == null) {
-				dm.save(system);
-				savedSystems.add(system);
+			if(system.isValid()){
+				restrictionMap.clear();
+				restrictionMap.put("systemGroup", system.getSystemGroup());
+				restrictionMap.put("systemName", system.getSystemName());
+				ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
+				restrictionMap.clear();
+				if (retrievedSystem == null) {
+					dm.save(system);
+					savedSystems.add(system);
+				}
 			}
 		}
 
@@ -275,20 +293,26 @@ public class CommonApi {
 	 * 
 	 * @param {ArrowheadSystem}
 	 *            system
+	 * @throws BadPayloadException
 	 */
 	@PUT
 	@Path("/systems")
 	public Response updateSystem(ArrowheadSystem system) {
+		
+		if(!system.isValid()){
+			throw new BadPayloadException("Bad payload: missing system group or"
+					+ "system name in the entry payload.");
+		}
+		
 		restrictionMap.put("systemGroup", system.getSystemGroup());
 		restrictionMap.put("systemName", system.getSystemName());
 		ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
 		if (retrievedSystem != null) {
-			dm.delete(retrievedSystem);
 			retrievedSystem.setAddress(system.getAddress());
 			retrievedSystem.setPort(system.getPort());
 			retrievedSystem.setAuthenticationInfo(system.getAuthenticationInfo());
 
-			retrievedSystem = dm.save(retrievedSystem);
+			retrievedSystem = dm.merge(retrievedSystem);
 			return Response.status(Status.ACCEPTED).entity(retrievedSystem).build();
 		} else {
 			return Response.noContent().build();
@@ -324,12 +348,16 @@ public class CommonApi {
 	 * Returns the list of ArrowheadClouds from the database.
 	 *
 	 * @return List<ArrowheadCloud>
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/clouds")
 	public List<ArrowheadCloud> getAllClouds() {
 		List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
 		cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
+		if (cloudList.isEmpty()) {
+			throw new DataNotFoundException("ArrowheadClouds not found in the database.");
+		}
 
 		return cloudList;
 	}
@@ -341,6 +369,7 @@ public class CommonApi {
 	 * @param {String}
 	 *            operator
 	 * @return List<ArrowheadCloud>
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/clouds/operator/{operator}")
@@ -348,6 +377,10 @@ public class CommonApi {
 		List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
 		restrictionMap.put("operator", operator);
 		cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
+		if (cloudList.isEmpty()) {
+			throw new DataNotFoundException("ArrowheadClouds not found in the database "
+					+ "from this operator.");
+		}
 
 		return cloudList;
 	}
@@ -361,6 +394,7 @@ public class CommonApi {
 	 * @param {String}
 	 *            cloudName
 	 * @return ArrowheadCloud
+	 * @throws DataNotFoundException
 	 */
 	@GET
 	@Path("/clouds/operator/{operator}/cloudname/{cloudName}")
@@ -369,14 +403,18 @@ public class CommonApi {
 		restrictionMap.put("operator", operator);
 		restrictionMap.put("cloudname", cloudname);
 		cloud = dm.get(ArrowheadCloud.class, restrictionMap);
+		if(cloud == null){
+			throw new DataNotFoundException("Requested ArrowheadCloud not found in the database.");
+		}
 
 		return cloud;
 	}
 
 	/**
 	 * Adds a list of ArrowheadClouds to the database. Elements which would
-	 * cause DuplicateEntryException are being skipped. The returned list only
-	 * contains the elements which was saved in the process.
+	 * cause DuplicateEntryException or BadPayloadException 
+	 * (caused by missing operator or cloudName) are being skipped. 
+	 * The returned list only contains the elements which was saved in the process.
 	 *
 	 * @param {List<ArrowheadCloud>}
 	 *            cloudList
@@ -387,14 +425,16 @@ public class CommonApi {
 	public List<ArrowheadCloud> addClouds(List<ArrowheadCloud> cloudList) {
 		List<ArrowheadCloud> savedClouds = new ArrayList<ArrowheadCloud>();
 		for (ArrowheadCloud cloud : cloudList) {
-			restrictionMap.clear();
-			restrictionMap.put("operator", cloud.getOperator());
-			restrictionMap.put("cloudName", cloud.getCloudName());
-			ArrowheadCloud retrievedCloud = dm.get(ArrowheadCloud.class, restrictionMap);
-			restrictionMap.clear();
-			if (retrievedCloud == null) {
-				dm.save(cloud);
-				savedClouds.add(cloud);
+			if(cloud.isValid()){
+				restrictionMap.clear();
+				restrictionMap.put("operator", cloud.getOperator());
+				restrictionMap.put("cloudName", cloud.getCloudName());
+				ArrowheadCloud retrievedCloud = dm.get(ArrowheadCloud.class, restrictionMap);
+				restrictionMap.clear();
+				if (retrievedCloud == null) {
+					dm.save(cloud);
+					savedClouds.add(cloud);
+				}
 			}
 		}
 
@@ -407,22 +447,27 @@ public class CommonApi {
 	 * 
 	 * @param {ArrowheadCloud}
 	 *            cloud
+	 * @throws BadPayloadException
 	 */
 	@PUT
 	@Path("/clouds")
 	public Response updateCloud(ArrowheadCloud cloud) {
+		
+		if(!cloud.isValid()){
+			throw new BadPayloadException("Bad payload: missing operator or"
+					+ " cloud name in the entry payload.");
+		}
+		
 		restrictionMap.put("operator", cloud.getOperator());
 		restrictionMap.put("cloudName", cloud.getCloudName());
 		ArrowheadCloud retrievedCloud = dm.get(ArrowheadCloud.class, restrictionMap);
 		if (retrievedCloud != null) {
-			dm.delete(retrievedCloud);
 			retrievedCloud.setAddress(cloud.getAddress());
 			retrievedCloud.setPort(cloud.getPort());
 			retrievedCloud.setGatekeeperServiceURI(cloud.getGatekeeperServiceURI());
-			;
 			retrievedCloud.setAuthenticationInfo(cloud.getAuthenticationInfo());
 
-			retrievedCloud = dm.save(retrievedCloud);
+			retrievedCloud = dm.merge(retrievedCloud);
 			return Response.status(Status.ACCEPTED).entity(retrievedCloud).build();
 		} else {
 			return Response.noContent().build();

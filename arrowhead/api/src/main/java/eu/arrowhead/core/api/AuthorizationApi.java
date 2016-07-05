@@ -58,7 +58,8 @@ public class AuthorizationApi {
 		List<IntraCloudAuthorization> authRights = new ArrayList<IntraCloudAuthorization>();
 		authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
 		if(authRights.isEmpty()){
-			throw new DataNotFoundException("IntraCloud authorization rights not found in the database.");
+			throw new DataNotFoundException("IntraCloud authorization rights "
+					+ "were not found in the database.");
 		}
 		
 		return authRights;
@@ -196,7 +197,7 @@ public class AuthorizationApi {
 	 * or 204 (if nothing happens).
 	 */
 	@DELETE
-	@Path("/intracloud/systemgroup/{systemGroup}/system/{systemName}")
+	@Path("/intracloud/systemgroup/{systemGroup}/systemname/{systemName}")
 	public Response deleteSystemRelations(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
 		
@@ -263,7 +264,8 @@ public class AuthorizationApi {
 		List<InterCloudAuthorization> authRights = new ArrayList<InterCloudAuthorization>();
 		authRights = dm.getAll(InterCloudAuthorization.class, restrictionMap);
 		if(authRights.isEmpty()){
-			throw new DataNotFoundException("InterCloud authorization rights not found in the database.");
+			throw new DataNotFoundException("InterCloud authorization rights "
+					+ "were not found in the database.");
 		}
 		
 		return authRights;
@@ -369,7 +371,7 @@ public class AuthorizationApi {
 	 * or 204 (if nothing happens).
 	 */
 	@DELETE
-	@Path("/operator/{operator}/cloud/{cloudName}")
+	@Path("/operator/{operator}/cloudname/{cloudName}")
 	public Response deleteCloudRelations(@PathParam("operator") String operator,
 			@PathParam("cloudName") String cloudName) {
 		
@@ -400,7 +402,7 @@ public class AuthorizationApi {
 	 * @throws DataNotFoundException
 	 */
 	@GET
-	@Path("/operator/{operator}/cloud/{cloudName}/services")
+	@Path("/operator/{operator}/cloudname/{cloudName}/services")
 	public Set<ArrowheadService> getCloudServices(@PathParam("operator") String operator,
 			@PathParam("cloudName") String cloudName) {
 		

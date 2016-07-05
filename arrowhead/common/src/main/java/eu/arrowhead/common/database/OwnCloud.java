@@ -28,25 +28,25 @@ public class OwnCloud {
 	private String operator;
 	@Column(name="cloud_name")
 	private String cloudName;
-	@Column(name="ip_address")
-	private String IPAddress;
+	@Column(name="address")
+	private String address;
 	@Column(name="port")
 	private String port;
 	@Column(name="authentication_info")
 	private String authenticationInfo;
 	@Column(name="service_uri")
-	private String serviceURI;
+	private String gatekeeperServiceURI;
 	
 	public OwnCloud(){
 	}
 	
-	public OwnCloud(String operator, String cloudName, String IPAddress, String port, 
-			String serviceURI, String authenticationInfo) {
+	public OwnCloud(String operator, String cloudName, String address, String port, 
+			String gatekeeperServiceURI, String authenticationInfo) {
 		this.operator = operator;
 		this.cloudName = cloudName;
-		this.IPAddress = IPAddress;
+		this.address = address;
 		this.port = port;
-		this.serviceURI = serviceURI;
+		this.gatekeeperServiceURI = gatekeeperServiceURI;
 		this.authenticationInfo = authenticationInfo;
 	}
 	
@@ -70,12 +70,12 @@ public class OwnCloud {
 		this.cloudName = cloudName;
 	}
 
-	public String getIPAddress() {
-		return IPAddress;
+	public String getAddress() {
+		return address;
 	}
 
-	public void setIPAddress(String IPAddress) {
-		this.IPAddress = IPAddress;
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	public String getPort() {
@@ -85,13 +85,13 @@ public class OwnCloud {
 	public void setPort(String port) {
 		this.port = port;
 	}
-	
-	public String getServiceURI() {
-		return serviceURI;
+
+	public String getGatekeeperServiceURI() {
+		return gatekeeperServiceURI;
 	}
 
-	public void setServiceURI(String serviceURI) {
-		this.serviceURI = serviceURI;
+	public void setGatekeeperServiceURI(String gatekeeperServiceURI) {
+		this.gatekeeperServiceURI = gatekeeperServiceURI;
 	}
 
 	public String getAuthenticationInfo() {
