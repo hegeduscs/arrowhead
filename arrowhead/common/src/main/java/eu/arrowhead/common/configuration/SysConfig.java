@@ -102,6 +102,13 @@ public class SysConfig {
 		CoreSystem QoS = dm.get(CoreSystem.class, restrictionMap);
 		return getURI(QoS);
 	}
+	
+	public String getApiURI(){
+		restrictionMap.clear();
+		restrictionMap.put("systemName", "api");
+		CoreSystem api = dm.get(CoreSystem.class, restrictionMap);
+		return getURI(api);
+	}
 
 	public List<String> getCloudURIs() {
 		List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();

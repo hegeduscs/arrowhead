@@ -32,6 +32,12 @@ public class StorePayload {
 	public void setService(ArrowheadService service) {
 		this.service = service;
 	}
+	
+	public boolean isPayloadUsable(){
+		if(consumer == null || service == null || !consumer.isValid() || !service.isValid())
+			return false;
+		return true;
+	}
 
 
 }

@@ -13,6 +13,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -41,6 +42,27 @@ public class OrchestrationApi {
 	}
 	
 	/**
+	 * Returns an Orchestration Store entry from the database specified by the
+	 * name of the entry.
+	 * 
+	 * @param {String} - name
+	 * @return OrchestrationStore
+	 * @throws DataNotFoundException
+	 */
+	@GET
+	@Path("store/{name}")
+	public Response getStoreEntry(@PathParam("name") String name){
+		restrictionMap.put("name", name);
+		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
+		if(entry == null){
+			throw new DataNotFoundException("Requested store entry was not found in the database.");
+		}
+		else{
+			return Response.ok(entry).build();
+		}
+	}
+	
+	/**
 	 * Returns the Orchestration Store entries from the database specified by
 	 * the consumer and/or the service. If the payload is empty ({}), all entries
 	 * will be returned.
@@ -52,7 +74,7 @@ public class OrchestrationApi {
 	 */
 	@PUT
 	@Path("/store")
-	public List<OrchestrationStore> getStoreEntries(StorePayload payload) {
+	public Response getStoreEntries(StorePayload payload) {
 		
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		HashMap<String, Object> rm = new HashMap<String, Object>();
@@ -84,13 +106,60 @@ public class OrchestrationApi {
 					+ "were not found in the database.");
 		}
 
-		return store;
+		GenericEntity<List<OrchestrationStore>> entity = 
+				new GenericEntity<List<OrchestrationStore>>(store) {};
+		return Response.ok(entity).build();
+	}
+	
+	/**
+	 * 
+	 * @param {StorePayload} - payload
+	 * @return 
+	 * @throws BadPayloadException, DataNotFoundException
+	 */
+	@PUT
+	@Path("store/active")
+	public Response setActiveEntry(StorePayload payload){
+		
+		if(!payload.isPayloadUsable()){
+			throw new BadPayloadException("Bad payload: missing/incomplete consumer or service.");
+		}
+		
+		HashMap<String, Object> rm = new HashMap<String, Object>();
+		rm.put("systemGroup", payload.getConsumer().getSystemGroup());
+		rm.put("systemName", payload.getConsumer().getSystemName());
+		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, rm);
+		restrictionMap.put("consumer", consumer);
+		
+		rm.clear();
+		rm.put("serviceGroup", payload.getService().getServiceGroup());
+		rm.put("serviceDefinition", payload.getService().getServiceDefinition());
+		ArrowheadService service = dm.get(ArrowheadService.class, rm);
+		restrictionMap.put("service", service);
+		
+		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
+		if(entry == null){
+			throw new DataNotFoundException("Requested entry was not found in the database.");
+		}
+		
+		restrictionMap.clear();
+		restrictionMap.put("isActive", true);
+		OrchestrationStore activeEntry = dm.get(OrchestrationStore.class, restrictionMap);
+		if(activeEntry != null){
+			activeEntry.setIsActive(false);
+			dm.merge(activeEntry);
+		}
+		
+		entry.setIsActive(true);
+		dm.merge(entry);
+		
+		return Response.ok(entry).build();
 	}
 
 	/**
-	 * Adds a list of Orchestration Store entries to the database. Elements which would
-	 * cause DuplicateEntryException or BadPayloadException 
-	 * (caused by missing/incomplete consumer, service or serialNumber) are being skipped. 
+	 * Adds a list of Orchestration Store entries to the database. Elements which would throw
+	 * BadPayloadException (caused by missing/incomplete consumer, service, serialNumber or 
+	 * provider) are being skipped. 
 	 * The returned list only contains the elements which was saved in the process.
 	 *
 	 * @param {List<OrchestrationStore>}
@@ -110,7 +179,7 @@ public class OrchestrationApi {
 				ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
 				if (service == null) {
 					throw new DataNotFoundException("Invalid Orchestration Store entry: "
-							+ "missing ArrowheadService.");
+							+ "missing ArrowheadService in the database.");
 				}
 				restrictionMap.clear();
 				restrictionMap.put("systemGroup", entry.getConsumer().getSystemGroup());
@@ -118,7 +187,7 @@ public class OrchestrationApi {
 				ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 				if (consumer == null) {
 					throw new DataNotFoundException("Invalid Orchestration Store entry: "
-							+ "missing consumer ArrowheadSystem.");
+							+ "missing consumer ArrowheadSystem in the database.");
 				}
 				
 				ArrowheadSystem providerSystem = null;
@@ -150,24 +219,19 @@ public class OrchestrationApi {
 					}
 				}
 				
-				restrictionMap.clear();
-				restrictionMap.put("consumer", consumer);
-				restrictionMap.put("service", service);
-				OrchestrationStore retrievedEntry = dm.get(OrchestrationStore.class, restrictionMap);
-				if (retrievedEntry == null) {
-					entry.setConsumer(consumer);
-					entry.setService(service);
-					if(providerSystem != null){
-						entry.setProviderSystem(providerSystem);
-					}
-					if(providerCloud != null){
-						entry.setProviderCloud(providerCloud);
-					}
-					
-					entry.setLastUpdated(new Date());
-					dm.merge(entry);
-					store.add(entry);
+				entry.setConsumer(consumer);
+				entry.setService(service);
+				if(providerSystem != null){
+					entry.setProviderSystem(providerSystem);
 				}
+				if(providerCloud != null){
+					entry.setProviderCloud(providerCloud);
+				}
+				
+				entry.setSerialNumber(0);
+				entry.setLastUpdated(new Date());
+				dm.merge(entry);
+				store.add(entry);
 			}
 		}
 
@@ -186,6 +250,7 @@ public class OrchestrationApi {
 	@Path("/store/update")
 	public Response updateEntry(OrchestrationStore payload){
 		
+		//TODO itt elszál, ha payloadban nincs benne a name, de igazából nem szükséges ennél a függvénynél
 		if(!payload.isPayloadUsable()){
 			throw new BadPayloadException("Bad payload: one of the mandatory fields is "
 					+ "missing from the payload.");
@@ -210,12 +275,11 @@ public class OrchestrationApi {
 					+ "not found in the database.");
 		}
 		else{
-			storeEntry.setIsActive(payload.getIsActive());
 			storeEntry.setIsInterCloud(payload.getIsInterCloud());
-			storeEntry.setName(payload.getName());
 			storeEntry.setOrchestrationRule(payload.getOrchestrationRule());
 			storeEntry.setProviderCloud(payload.getProviderCloud());
 			storeEntry.setProviderSystem(payload.getProviderSystem());
+			storeEntry.setSerialNumber(storeEntry.getSerialNumber() + 1);
 			storeEntry.setLastUpdated(new Date());
 			storeEntry = dm.merge(storeEntry);
 			
@@ -224,17 +288,17 @@ public class OrchestrationApi {
 	}
 
 	/**
-	 * Deletes the Orchestration Store entry with the serial number specified by
+	 * Deletes the Orchestration Store entry with the name specified by
 	 * the path parameter. Returns 200 if the delete is succesful, 204 (no
 	 * content) if the entry was not in the database to begin with.
 	 * 
-	 * @param {int}
-	 *            serial
+	 * @param {String}
+	 *            name
 	 */
 	@DELETE
-	@Path("/store/{serial}")
-	public Response deleteEntry(@PathParam("serial") int serial) {
-		restrictionMap.put("serialNumber", serial);
+	@Path("/store/{name}")
+	public Response deleteEntry(@PathParam("name") String name) {
+		restrictionMap.put("name", name);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if (entry == null) {
 			return Response.noContent().build();

@@ -129,7 +129,8 @@ public class DatabaseManager {
 			if (transaction != null)
 				transaction.rollback();
 			throw new DuplicateEntryException(
-					"There is already an entry in the database with these parameters.");
+					"DuplicateEntryException: there is already an entry in the database with these parameters. "
+					+ "Please check the unique fields of the " + object.getClass());
 		} catch (Exception e) {
 			if (transaction != null)
 				transaction.rollback();
@@ -153,7 +154,8 @@ public class DatabaseManager {
 			if (transaction != null)
 				transaction.rollback();
 			throw new DuplicateEntryException(
-					"There is already an entry in the database with these parameters.");
+					"DuplicateEntryException: there is already an entry in the database with these parameters. "
+							+ "Please check the unique fields of the " + object.getClass());
 		} catch (Exception e) {
 			if (transaction != null)
 				transaction.rollback();

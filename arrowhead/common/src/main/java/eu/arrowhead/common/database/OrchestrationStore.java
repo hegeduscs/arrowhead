@@ -31,7 +31,7 @@ import eu.arrowhead.common.model.ArrowheadSystem;
  * 
  * Entity class for storing Orchestration Store entries in the database.
  * The "consumer_system_id" and "arrowhead_service_id" columns must be unique together.
- * The serial_number column must be unique by itself.
+ * The name column must be unique by itself.
  */
 @Entity
 @Table(name="orchestration_store", uniqueConstraints={@UniqueConstraint(columnNames = 
@@ -66,10 +66,13 @@ public class OrchestrationStore {
 	@Column(name="is_active")
 	private boolean isActive;
 	
-	@Column(name="name")
+	@Column(name="name", unique = true)
 	private String name;
 	
-	@Column(name="serial_number", unique = true)
+	/*
+	 * Each update on an entry will increase its value by 1.
+	 */
+	@Column(name="serial_number")
 	private int serialNumber;
 	
 	@Column(name="last_updated")
@@ -183,11 +186,12 @@ public class OrchestrationStore {
 	}
 
 	public boolean isPayloadUsable(){
-		if(consumer == null || service == null || serialNumber == 0)
+		if(consumer == null || service == null || name == null || 
+				!consumer.isValid() || !service.isValid())
 			return false;
-		if(consumer.getSystemGroup() == null || consumer.getSystemName() == null)
+		if(!isInterCloud && (providerSystem == null || !providerSystem.isValid()))
 			return false;
-		if(service.getServiceGroup() == null || service.getServiceDefinition() == null)
+		if(isInterCloud && (providerCloud == null || !providerCloud.isValid()))
 			return false;
 		return true;
 	}
