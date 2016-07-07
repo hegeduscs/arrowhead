@@ -44,7 +44,6 @@ public class OrchestratorService {
 	private URI uri;
 	private Client client;
 	private ServiceRequestForm serviceRequestForm;
-	public SysConfig sysConfig = new SysConfig();
 	private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
 
 	public OrchestratorService() {
@@ -209,7 +208,7 @@ public class OrchestratorService {
 		ArrowheadService as = srf.getRequestedService();
 		//TODO uri-building --- done, needs testing
 		UriBuilder ub = null;
-		ub = UriBuilder.fromPath(sysConfig.getServiceRegistryURI()).path(as.getServiceGroup())
+		ub = UriBuilder.fromPath(SysConfig.getServiceRegistryURI()).path(as.getServiceGroup())
 				.path(as.getServiceDefinition());
 		String strtarget = ub.toString();
 		log.info("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
@@ -241,7 +240,7 @@ public class OrchestratorService {
 	 */
 	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq) {
 		log.info("orchestrator: inside the getAuthorizationResponse function");
-		String strtarget = sysConfig.getAuthorizationURI() + "/intracloud";
+		String strtarget = SysConfig.getAuthorizationURI() + "/intracloud";
 		log.info("orchestrator: sending AuthReq to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(authReq));
@@ -264,7 +263,7 @@ public class OrchestratorService {
 	//TODO remove QoS from orch
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
 		log.info("orchestrator: inside the getQoSVerificationResponse function");
-		String strtarget = sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSVerify";
+		String strtarget = SysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSVerify";
 		log.info("orchestrator: sending QoSVerify to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
@@ -279,7 +278,7 @@ public class OrchestratorService {
 	 */
 	private QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
 		log.info("orchestrator: inside the doQoSReservation function");
-		String strtarget = sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSReserve";
+		String strtarget = SysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSReserve";
 		log.info("orchestrator: sending QoSReserve to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
@@ -295,7 +294,7 @@ public class OrchestratorService {
 	 */
 	private GSDResult getGSDResult(GSDRequestForm gsdRequestForm) {
 		log.info("orchestrator: inside the getGSDResult function");
-		String strtarget = sysConfig.getGatekeeperURI() + "/init_gsd/";
+		String strtarget = SysConfig.getGatekeeperURI() + "/init_gsd/";
 		log.info("orchestrator: sent GSDRequestForm to the following: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
@@ -313,7 +312,7 @@ public class OrchestratorService {
 	 */
 	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
 		log.info("orchestrator: inside the getICNResultForm function");
-		String strtarget = sysConfig.getGatekeeperURI() + "/init_icn/";
+		String strtarget = SysConfig.getGatekeeperURI() + "/init_icn/";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(icnRequestForm));

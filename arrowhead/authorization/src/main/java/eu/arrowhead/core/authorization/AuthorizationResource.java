@@ -27,7 +27,6 @@ import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 
 /**
  * @author umlaufz, hegeduscs 
- * This class handles the requests targeted at core/authorization/*.
  * Note: PathParam values are NOT case sensitive.
  */
 @Path("authorization")

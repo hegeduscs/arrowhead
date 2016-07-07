@@ -13,20 +13,25 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 
 /**
- * @author umlaufz This class serves as a Database Acces Object for the
- *         database, and provides URI information for the core systems.
+ * @author umlaufz 
+ * 
+ * This utility class provides configuration informations to the core systems.
  */
-public class SysConfig {
+public final class SysConfig {
 
+	//TODO maybe this has to have the option to be https once we have authentication
 	private static final String baseURI = "http://";
-	public DatabaseManager dm = DatabaseManager.getInstance();
-	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+	private static DatabaseManager dm = DatabaseManager.getInstance();
+	private static HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+	
+	private SysConfig(){
+	}
 	
 	/*
 	 * Some level of flexibility in the URI creation, in order to avoid
 	 * implementation mistakes.
 	 */
-	public String getURI(CoreSystem coreSystem) {
+	public static String getURI(CoreSystem coreSystem) {
 		UriBuilder ub = null;
 		if (coreSystem.getIPAddress().startsWith("http://")) {
 			if (coreSystem.getPort() != null) {
@@ -46,7 +51,7 @@ public class SysConfig {
 		return ub.toString();
 	}
 
-	public String getURI(NeighborCloud neighborCloud) {
+	public static String getURI(NeighborCloud neighborCloud) {
 		UriBuilder ub = null;
 		if (neighborCloud.getCloud().getAddress().startsWith("http://")) {
 			if (neighborCloud.getCloud().getPort() != null) {
@@ -68,49 +73,49 @@ public class SysConfig {
 		return ub.toString();
 	}
 
-	public String getOrchestratorURI() {
+	public static String getOrchestratorURI() {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "orchestration");
 		CoreSystem orchestration = dm.get(CoreSystem.class, restrictionMap);
 		return getURI(orchestration);
 	}
 
-	public String getServiceRegistryURI() {
+	public static String getServiceRegistryURI() {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "serviceregistry");
 		CoreSystem serviceRegistry = dm.get(CoreSystem.class, restrictionMap);
 		return getURI(serviceRegistry);
 	}
 
-	public String getAuthorizationURI() {
+	public static String getAuthorizationURI() {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "authorization");
 		CoreSystem authorization = dm.get(CoreSystem.class, restrictionMap);
 		return getURI(authorization);
 	}
 
-	public String getGatekeeperURI() {
+	public static String getGatekeeperURI() {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "gatekeeper");
 		CoreSystem gatekeeper = dm.get(CoreSystem.class, restrictionMap);
 		return getURI(gatekeeper);
 	}
 
-	public String getQoSURI() {
+	public static String getQoSURI() {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "qos");
 		CoreSystem QoS = dm.get(CoreSystem.class, restrictionMap);
 		return getURI(QoS);
 	}
 	
-	public String getApiURI(){
+	public static String getApiURI(){
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "api");
 		CoreSystem api = dm.get(CoreSystem.class, restrictionMap);
 		return getURI(api);
 	}
 
-	public List<String> getCloudURIs() {
+	public static List<String> getCloudURIs() {
 		List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();
 		cloudList.addAll(dm.getAll(NeighborCloud.class, restrictionMap));
 
@@ -122,7 +127,7 @@ public class SysConfig {
 		return URIList;
 	}
 
-	public ArrowheadCloud getOwnCloud() {
+	public static ArrowheadCloud getOwnCloud() {
 		List<OwnCloud> cloudList = new ArrayList<OwnCloud>();
 		cloudList = dm.getAll(OwnCloud.class, restrictionMap);
 		if (cloudList.isEmpty()) {
@@ -142,5 +147,6 @@ public class SysConfig {
 
 		return ownCloud;
 	}
+	
 
 }

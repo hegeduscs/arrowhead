@@ -25,7 +25,6 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.GSDAnswer;
-import eu.arrowhead.common.model.messages.GSDEntry;
 import eu.arrowhead.common.model.messages.GSDPoll;
 import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
@@ -45,12 +44,11 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
  * @author blevente92
  *
  */
-@Path("gatekeeper")
+//@Path("gatekeeper")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class GatekeeperResource {
 	
-	private SysConfig sysConfig = new SysConfig();
 	private static Logger log = Logger.getLogger(GatekeeperResource.class.getName());
 
 	
@@ -73,7 +71,7 @@ public class GatekeeperResource {
     	
     	log.info("Inside the GateKeeper");
     	
-    	ArrowheadCloud requesterCloud = sysConfig.getOwnCloud();
+    	ArrowheadCloud requesterCloud = SysConfig.getOwnCloud();
     	log.info("Got the cloud info");
     	
     	GSDPoll gsdPoll = new GSDPoll();
@@ -93,7 +91,7 @@ public class GatekeeperResource {
    		Client client = ClientBuilder.newClient();
    		
 		//TODO: URI builder
-    	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/gsd_poll/";    	
+    	String uri = "http://"+SysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/gsd_poll/";    	
     	System.out.println(uri);
     	
 		WebTarget target = client.target(uri);
@@ -115,8 +113,8 @@ public class GatekeeperResource {
 	    	
 	    //Creating GSDResult for the Orchestrator
 	    log.info("Creating GSDResult from GSDAnswer");
-	    List<GSDEntry> gsdEntryList = new ArrayList<GSDEntry>();
-	    GSDEntry gsdEntry = new GSDEntry(answer.getProviderCloud(), answer.getRequestedService());
+	    List<GSDAnswer> gsdEntryList = new ArrayList<GSDAnswer>();
+	    GSDAnswer gsdEntry = new GSDAnswer(answer.getRequestedService(), answer.getProviderCloud());
 	    gsdEntryList.add(gsdEntry);
 	    
 	    GSDResult result = new GSDResult(gsdEntryList);
@@ -151,7 +149,7 @@ public class GatekeeperResource {
     	
     	
     	ArrowheadService requestedService = gsdPoll.getRequestedService();
-    	ArrowheadCloud providerCloud = sysConfig.getOwnCloud();
+    	ArrowheadCloud providerCloud = SysConfig.getOwnCloud();
     	
     	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
     	log.info("Creating an InterCloudAuthRequest to the Authorization System");
@@ -206,14 +204,14 @@ public class GatekeeperResource {
     		}
     	else {
     		proposal = new ICNProposal(icnRequestForm.getRequestedService(), 
-        			icnRequestForm.getAuthenticationInfo(), sysConfig.getOwnCloud(), icnRequestForm.getRequesterSystem());
+        			icnRequestForm.getAuthenticationInfo(), SysConfig.getOwnCloud(), icnRequestForm.getRequesterSystem());
     	}
     	
     	// HTTP PUT to the provider GateKeeper
     	log.info("ICN Proposal for: " + proposal.getRequestedService().getServiceDefinition());
     	
 		//TODO: URI builder
-    	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/icn_proposal/";
+    	String uri = "http://"+SysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/icn_proposal/";
     	
     	log.info("ICN Proposal to the chosen GateKeeper.");
     	System.out.println("ICN Proposal to: " + uri);
@@ -298,7 +296,7 @@ public class GatekeeperResource {
 			InterCloudAuthRequest interAuthRequest, ArrowheadCloud requesterCloud) {
 
     	//TODO: uri building
-    	String uri = "http://" + sysConfig.getAuthorizationURI() + "/intercloud";
+    	String uri = "http://" + SysConfig.getAuthorizationURI() + "/intercloud";
     	System.out.println(uri);
     	
     	Client client = ClientBuilder.newClient();
@@ -341,7 +339,7 @@ public class GatekeeperResource {
 		Client client2 = ClientBuilder.newClient();
 
 		//TODO: URI building
-		String uri2 = "http://" + sysConfig.getOrchestratorURI();
+		String uri2 = "http://" + SysConfig.getOrchestratorURI();
 //    	String uri2 = "http://localhost:8080/core/orchestrator/orchestration";
 		System.out.println(uri2);
 		
@@ -369,7 +367,7 @@ public class GatekeeperResource {
   	private ServiceQueryResult getServiceQueryResultGateKeeper(ArrowheadService arrService) {
   		log.info("GK: inside the getServiceQueryResult function");
 		ArrowheadService as = arrService;
-		String strtarget = "http://" + sysConfig.getServiceRegistryURI()+ "/" + as.getServiceGroup() + "/" + as.getServiceDefinition();
+		String strtarget = "http://" + SysConfig.getServiceRegistryURI()+ "/" + as.getServiceGroup() + "/" + as.getServiceDefinition();
 		System.out.println("GK: sending the ServiceQueryForm to this address:" + strtarget);
 		log.info("GK: sending the ServiceQueryForm to this address:" + strtarget);
 		
