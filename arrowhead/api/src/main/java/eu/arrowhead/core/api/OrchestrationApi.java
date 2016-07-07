@@ -142,7 +142,7 @@ public class OrchestrationApi {
 			throw new DataNotFoundException("Requested entry was not found in the database.");
 		}
 		
-		restrictionMap.clear();
+		restrictionMap.remove("service");
 		restrictionMap.put("isActive", true);
 		OrchestrationStore activeEntry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(activeEntry != null){

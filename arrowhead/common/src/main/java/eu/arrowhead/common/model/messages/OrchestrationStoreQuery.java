@@ -1,7 +1,5 @@
 package eu.arrowhead.common.model.messages;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
@@ -11,16 +9,16 @@ public class OrchestrationStoreQuery {
 	private ArrowheadService requestedService;
 	private ArrowheadSystem requesterSystem;
 	//private Map<String, Boolean> queryFlags = new HashMap<String, Boolean>();
-	private boolean legacyMode;
+	private Boolean onlyActive = false;
 	
 	public OrchestrationStoreQuery() {
 	}
-	
+
 	public OrchestrationStoreQuery(ArrowheadService requestedService, ArrowheadSystem requesterSystem,
-			boolean legacyMode) {
+			Boolean onlyActive) {
 		this.requestedService = requestedService;
 		this.requesterSystem = requesterSystem;
-		this.legacyMode = legacyMode;
+		this.onlyActive = onlyActive;
 	}
 
 	public ArrowheadService getRequestedService() {
@@ -39,17 +37,23 @@ public class OrchestrationStoreQuery {
 		this.requesterSystem = requesterSystem;
 	}
 
-	public boolean isLegacyMode() {
-		return legacyMode;
+	public Boolean isOnlyActive() {
+		return onlyActive;
 	}
 
-	public void setLegacyMode(boolean legacyMode) {
-		this.legacyMode = legacyMode;
+	public void setOnlyActive(Boolean onlyActive) {
+		this.onlyActive = onlyActive;
 	}
 
+	public boolean isPayloadEmpty(){
+		if(requestedService == null && requesterSystem == null)
+			return true;
+		return false;
+	}
+	
 	public boolean isPayloadUsable(){
 		if(requestedService == null || requesterSystem == null ||
-				requestedService.isValid() || requesterSystem.isValid())
+				!requestedService.isValid() || !requesterSystem.isValid())
 			return false;
 		return true;
 	}

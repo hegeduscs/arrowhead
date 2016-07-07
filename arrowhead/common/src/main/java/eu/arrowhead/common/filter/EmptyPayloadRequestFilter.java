@@ -1,4 +1,4 @@
-package eu.arrowhead.core.api.filters;
+package eu.arrowhead.common.filter;
 
 import java.io.IOException;
 
@@ -19,7 +19,7 @@ public class EmptyPayloadRequestFilter implements ContainerRequestFilter  {
 			int contentLength = requestContext.getLength();
 			if(contentLength == 0){
 				ErrorMessage em = new ErrorMessage("Payload is null! If you want to send an empty payload, "
-                		+ "try sending empty brackets ({})", 400, "");
+                		+ "try sending empty brackets ({})", 400, "No documentation yet.");
 				requestContext.abortWith(Response.status(Response.Status.BAD_REQUEST)
 		                .entity(em)
 		                .build());

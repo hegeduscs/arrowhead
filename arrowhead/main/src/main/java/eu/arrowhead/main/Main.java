@@ -59,7 +59,7 @@ public class Main {
         		).setSSLContext(certHandler.getSSLContext("cloud1.orchestrator"))); */
     	
     	serverList.add(new ServerInfo(
-        		"orchestrator/store",8448,
+        		"orchestrator",8448,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.orchestrator.store.StoreResource.class)
         				.packages("eu.arrowhead.common")
@@ -80,7 +80,7 @@ public class Main {
         				eu.arrowhead.core.api.ConfigurationApi.class,
         				eu.arrowhead.core.api.OrchestrationApi.class,
         				eu.arrowhead.core.api.ServiceRegistryApi.class)
-        				.packages("eu.arrowhead.common", "eu.arrowhead.core.api.filters")
+        				.packages("eu.arrowhead.common")
         		));
     			//.setSSLContext(certHandler.getSSLContext("cloud1.qos")));           	
                 
