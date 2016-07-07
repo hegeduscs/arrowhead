@@ -27,10 +27,10 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.StorePayload;
 
-@Path("orchestration")
+@Path("orchestrator")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class OrchestrationApi {
+public class OrchestratorApi {
 
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
@@ -63,14 +63,31 @@ public class OrchestrationApi {
 	}
 	
 	/**
+	 * Returns all the entries of the Orchestration Store.
+	 * 
+	 * @return List<OrchestrationStore>
+	 * @throws DataNotFoundException
+	 */
+	@GET
+	@Path("store/all")
+	public List<OrchestrationStore> getAllStoreEntries(){
+		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+		store = dm.getAll(OrchestrationStore.class, restrictionMap);
+		if(store.isEmpty()){
+			throw new DataNotFoundException("The Orchestration Store is empty.");
+		}
+			
+		return store;
+	}
+	
+	/**
 	 * Returns the Orchestration Store entries from the database specified by
-	 * the consumer and/or the service. If the payload is empty ({}), all entries
-	 * will be returned.
+	 * the consumer and/or the service.
 	 * 
 	 * @param {StorePayload}
 	 *            payload
 	 * @return List<OrchestrationStore>
-	 * @throws DataNotFoundException
+	 * @throws BadPayloadException, DataNotFoundException
 	 */
 	@PUT
 	@Path("/store")
@@ -100,6 +117,9 @@ public class OrchestrationApi {
 			}
 		}
 		
+		if(restrictionMap.size() == 0){
+			throw new BadPayloadException("Bad payload: missing both the consumer and the service.");
+		}
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
 			throw new DataNotFoundException("Store entries specified by the payload "
@@ -112,6 +132,8 @@ public class OrchestrationApi {
 	}
 	
 	/**
+	 * Sets the entry specified by the payload to be active. Any other entries with the same
+	 * consumer will be set to be inactive.
 	 * 
 	 * @param {StorePayload} - payload
 	 * @return 

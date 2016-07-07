@@ -11,7 +11,7 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 public class StoreService {
 	
 	DatabaseManager dm = DatabaseManager.getInstance();
-	HashMap<String, Object> rm = new HashMap<String, Object>();
+	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	
 	/**
 	 * This method returns an Orchestration Store entry specified by the consumer system
@@ -25,9 +25,9 @@ public class StoreService {
 		if(savedConsumer == null || savedService == null)
 			return null;
 		
-		rm.put("consumer", savedConsumer);
-		rm.put("service", savedService);
-		return dm.get(OrchestrationStore.class, rm);
+		restrictionMap.put("consumer", savedConsumer);
+		restrictionMap.put("service", savedService);
+		return dm.get(OrchestrationStore.class, restrictionMap);
 	}
 
 	/**
@@ -39,9 +39,9 @@ public class StoreService {
 		if(savedConsumer == null)
 			return null;
 			
-		rm.put("consumer", savedConsumer);
-		rm.put("isActive", true);
-		return dm.get(OrchestrationStore.class, rm);
+		restrictionMap.put("consumer", savedConsumer);
+		restrictionMap.put("isActive", true);
+		return dm.get(OrchestrationStore.class, restrictionMap);
 	}
 	
 	/**
@@ -53,15 +53,15 @@ public class StoreService {
 		if(savedConsumer == null)
 			return null;
 		
-		rm.put("consumer", savedConsumer);
-		return dm.getAll(OrchestrationStore.class, rm);
+		restrictionMap.put("consumer", savedConsumer);
+		return dm.getAll(OrchestrationStore.class, restrictionMap);
 	}
 	
 	/**
 	 * This method returns all the entries of the Orchestration Store.
 	 */
 	public List<OrchestrationStore> getAllStoreEntries(){
-		return dm.getAll(OrchestrationStore.class, rm);
+		return dm.getAll(OrchestrationStore.class, restrictionMap);
 	}
 	
 	/**

@@ -35,9 +35,26 @@ public class StoreResource {
 	}
 	
 	/**
-	 * This method queries the Orchestration Store. Based on the payload it can return all 
-	 * of the store entries, get a specific entry (consumer/onlyActive or consumer/service 
-	 * pairs specify an entry) or all of the entries belonging to a consumer.
+	 * Returns all the entries of the Orchestration Store.
+	 * 
+	 * @return OrchestrationStoreQueryResponse
+	 * @throws DataNotFoundException
+	 */
+	@GET
+	@Path("/all")
+	public OrchestrationStoreQueryResponse getAllConfigurations(){
+		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+		store = storeService.getAllStoreEntries();
+		if(store.isEmpty()){
+			throw new DataNotFoundException("The Orchestration Store is empty.");
+		}
+		
+		return new OrchestrationStoreQueryResponse(store);
+	}
+	
+	/**
+	 * Returns the Orchestration Store entries from the database specified by
+	 * the consumer and/or the service.
 	 * 
 	 * @param {OrchestrationStoreQuery} - query
 	 * @return OrchestrationStoreQueryResponse
@@ -46,15 +63,21 @@ public class StoreResource {
 	@PUT
 	public OrchestrationStoreQueryResponse getConfigurations(OrchestrationStoreQuery query){
 		List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
-		if(query.isPayloadEmpty()){
-			List<OrchestrationStore> store = storeService.getAllStoreEntries();
-			if(store != null)
-				entryList.addAll(store);
-			else{
-				throw new DataNotFoundException("Orchestration Store is empty.");
-			}
+		
+		/*
+		 * If the payload does not have a identifiable requesterSystem
+		 * we throw a BadPayloadException.
+		 */
+		if(query.getRequesterSystem() == null || !query.getRequesterSystem().isValid()){
+			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
+					+ "is/are missing. (systemGroup, systemName)");
 		}
-		else if(query.isPayloadUsable()){
+		
+		/*
+		 * If the payload has both the requesterSystem and the requestedService,
+		 * we return the matching Orchestration Store entry.
+		 */
+		else if(query.isPayloadComplete()){
 			OrchestrationStore entry = storeService.getStoreEntry(query.getRequesterSystem(), 
 					query.getRequestedService());
 			if(entry != null)
@@ -63,8 +86,12 @@ public class StoreResource {
 				throw new DataNotFoundException("Requested Store entry was not found in the database."); 
 			}
 		}
-		else if(query.isOnlyActive() && query.getRequesterSystem() != null && 
-				query.getRequesterSystem().isValid()){
+		
+		/*
+		 * If the payload does not have a requestedService, but the onlyActive boolean is true,
+		 * we return the active store entry belonging to the requesterSystem.
+		 */
+		else if(query.isOnlyActive()){
 			OrchestrationStore entry = storeService.getActiveStoreEntry(query.getRequesterSystem());
 			if(entry != null)
 				entryList.add(entry);
@@ -73,7 +100,12 @@ public class StoreResource {
 						+ "was not found in the database.");
 			}
 		}
-		else if(query.getRequesterSystem() != null && query.getRequesterSystem().isValid()){
+		
+		/*
+		 * If the onlyActive boolean is false, we return all the store entries 
+		 * belonging to the requesterSystem.
+		 */
+		else{
 			List<OrchestrationStore> retrievedList = 
 					storeService.getStoreEntries(query.getRequesterSystem());
 			if(retrievedList != null)
@@ -82,10 +114,6 @@ public class StoreResource {
 				throw new DataNotFoundException("Store entries for this consumer were not found"
 						+ "in the database.");
 			}
-		}
-		else{
-			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
-					+ "is/are missing. (systemGroup, systemName)");
 		}
 		
 		return new OrchestrationStoreQueryResponse(entryList);

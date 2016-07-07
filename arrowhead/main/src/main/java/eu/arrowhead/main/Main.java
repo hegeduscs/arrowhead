@@ -78,7 +78,7 @@ public class Main {
         				eu.arrowhead.core.api.AuthorizationApi.class,
         				eu.arrowhead.core.api.CommonApi.class,
         				eu.arrowhead.core.api.ConfigurationApi.class,
-        				eu.arrowhead.core.api.OrchestrationApi.class,
+        				eu.arrowhead.core.api.OrchestratorApi.class,
         				eu.arrowhead.core.api.ServiceRegistryApi.class)
         				.packages("eu.arrowhead.common")
         		));

@@ -51,7 +51,7 @@ public class OrchestrationStoreQuery {
 		return false;
 	}
 	
-	public boolean isPayloadUsable(){
+	public boolean isPayloadComplete(){
 		if(requestedService == null || requesterSystem == null ||
 				!requestedService.isValid() || !requesterSystem.isValid())
 			return false;

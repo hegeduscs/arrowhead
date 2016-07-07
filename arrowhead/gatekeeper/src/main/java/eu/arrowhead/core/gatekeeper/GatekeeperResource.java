@@ -49,6 +49,7 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class GatekeeperResource {
+	
 	private SysConfig sysConfig = new SysConfig();
 	private static Logger log = Logger.getLogger(GatekeeperResource.class.getName());
 
@@ -60,8 +61,8 @@ public class GatekeeperResource {
 	
     
 	/**
-	 * This function represents the Consumer-side GSD Poll, where the GateKeeper of the consumer service try to find 
-	 * a provider service from another Cloud
+	 * This function represents the Consumer-side GSD Poll, where the GateKeeper of the 
+	 * consumer service try to find a provider service from another Cloud.
 	 * 
 	 * @param GSDRequestForm
 	 * @return GSDResult
@@ -71,23 +72,23 @@ public class GatekeeperResource {
     public GSDResult sendRequest(GSDRequestForm gsdRequest) {
     	
     	log.info("Inside the GateKeeper");
-    	ArrowheadCloud requesterCloud = sysConfig.getOwnCloud();
     	
+    	ArrowheadCloud requesterCloud = sysConfig.getOwnCloud();
     	log.info("Got the cloud info");
+    	
     	GSDPoll gsdPoll = new GSDPoll();
     	
     	if (gsdRequest==null) {
 			throw new BadPayloadException(
-					"GateKeeper: Bad payload from Orchestrator: Missing/wrong parameters in GSDRequestForm.");
+				"GateKeeper: Bad payload from Orchestrator: Missing/wrong parameters in GSDRequestForm.");
 		}
     	
     	else {
     		log.info("Creating GSDPoll for requester service");
     		gsdPoll = new GSDPoll(gsdRequest.getRequestedService(),requesterCloud);
-    		}
+    	}
     	
-    	
-    	// HTTP PUT to the provider GateKeeper
+    	//Sending HTTP PUT request to the possible provider GateKeeper(s) 
    		log.info("Starting to find provider service for: "+ gsdPoll.getRequestedService().getServiceDefinition());
    		Client client = ClientBuilder.newClient();
    		
