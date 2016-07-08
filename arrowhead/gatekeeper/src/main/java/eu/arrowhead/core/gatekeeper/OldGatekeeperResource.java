@@ -261,10 +261,10 @@ public class OldGatekeeperResource {
     	// Sending an InterCloudAuthRequest to the Authorization System (generateToken=true)
     	log.info("Creating an InterCloudAuthRequest to the Authorization System");
     	InterCloudAuthRequest interAuthRequest = new InterCloudAuthRequest( 
-    			icnProposal.getRequestedCloud(),requestedService, true);
+    			icnProposal.getRequesterCloud(),requestedService, true);
     	
     	String AuthorizationResponse = getAuthorizationResponse(interAuthRequest,
-    			icnProposal.getRequestedCloud());
+    			icnProposal.getRequesterCloud());
 	    
     	if(AuthorizationResponse=="false")
     	{

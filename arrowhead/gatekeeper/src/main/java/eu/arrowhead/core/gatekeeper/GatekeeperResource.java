@@ -1,7 +1,9 @@
 package eu.arrowhead.core.gatekeeper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -17,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.SysConfig;
+import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
@@ -30,8 +33,10 @@ import eu.arrowhead.common.model.messages.ICNRequestForm;
 import eu.arrowhead.common.model.messages.ICNResult;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.InterCloudAuthResponse;
+import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
+import eu.arrowhead.common.model.messages.ServiceRequestForm;
 
 /**
  * @author umlaufz
@@ -49,7 +54,7 @@ public class GatekeeperResource {
     }
 	
 	/**
-	 * This function represents the Consumer-side of GlobalServiceDiscovery, 
+	 * This function represents the consumer-side of GlobalServiceDiscovery, 
 	 * where the GateKeeper of the consumer System tries to find a provider Cloud
 	 * for the requested Service.
 	 * 
@@ -82,12 +87,11 @@ public class GatekeeperResource {
 		}
 		
 		GSDResult gsdResult = new GSDResult(gsdAnswerList);
-		
 		return Response.ok().entity(gsdResult).build();
 	}
 	
     /**
-     * This function represents the Provider-side of GlobalServiceDiscovery, 
+     * This function represents the provider-side of GlobalServiceDiscovery, 
      * where the GateKeeper of the provider Cloud sends back its information
      * if the Authorization and Service Registry polling yields positive results.
      * 
@@ -135,19 +139,42 @@ public class GatekeeperResource {
     }
 	
 	/**
+	 * This function represents the consumer-side of InterCloudNegotiations, 
+	 * where the Gatekeeper sends information about the requester System.
+	 * (SSL secured)
 	 * 
 	 * @param ICNRequestForm
 	 * @return ICNResult
+	 * @throws BadPayloadException
 	 */
     @PUT
     @Path("init_icn")
     public Response ICNRequest(ICNRequestForm requestForm) {
     	
-    	return null;
+    	if(!requestForm.isPayloadUsable()){
+    		throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.");
+    	}
+    	
+    	ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), 
+    			requestForm.getAuthenticationInfo(), SysConfig.getOwnCloud(), 
+    			requestForm.getRequesterSystem());
+    	
+    	NeighborCloud cloud = new NeighborCloud(requestForm.getTargetCloud());
+    	String icnURI = SysConfig.getURI(cloud);
+    	icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
+    	
+    	Response response = Utility.sendRequest(icnURI, "PUT", icnProposal);
+    	ICNResult result = new ICNResult(response.readEntity(ICNEnd.class));
+
+    	return Response.status(response.getStatus()).entity(result).build();
     }
     
     /**
-     * 
+     * This function represents the provider-side of InterCloudNegotiations, 
+	 * where the Gatekeeper (after an Orchestration process) sends information 
+	 * about the provider System.
+	 * (SSL secured)
+	 * 
      * @param ICNProposal
      * @return ICNEnd
      */
@@ -155,7 +182,40 @@ public class GatekeeperResource {
     @Path("icn_proposal")
     public Response ICNProposal (ICNProposal icnProposal) {
     	
-    	return null;
+    	//Polling the Authorization System about the consumer Cloud
+		ArrowheadCloud cloud = icnProposal.getRequesterCloud();
+		ArrowheadService service = icnProposal.getRequestedService();
+		InterCloudAuthRequest authRequest = new InterCloudAuthRequest(cloud, service, false);
+		
+		String authURI = SysConfig.getAuthorizationURI();
+		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
+		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
+		
+		//If the consumer Cloud is not authorized null is returned
+		if(!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()){
+			return Response.status(Status.UNAUTHORIZED).entity(null).build();
+		}
+		
+		/*
+		 * If it is authorized, send a ServiceRequestForm to the Orchestrator 
+		 * and return the OrchestrationResponse
+		 */
+		else{
+			Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+			orchestrationFlags.put("matchmaking", false);
+			orchestrationFlags.put("externalServiceRequest", true);
+			orchestrationFlags.put("triggerInterCloud", false);
+			orchestrationFlags.put("metadataSearch", false);
+			orchestrationFlags.put("pingProvider", false);
+			
+			ServiceRequestForm serviceRequestForm = new ServiceRequestForm(service, null, 
+					icnProposal.getRequesterSystem(), orchestrationFlags);
+			String orchestratorURI = SysConfig.getOrchestratorURI();
+			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm);
+			OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
+			
+			return Response.status(response.getStatus()).entity(new ICNEnd(orchResponse)).build();	
+		}
     }
 
     

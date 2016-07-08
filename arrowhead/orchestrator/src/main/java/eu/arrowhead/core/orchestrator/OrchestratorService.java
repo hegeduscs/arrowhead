@@ -173,7 +173,7 @@ public class OrchestratorService {
 		for (GSDAnswer entry : gsdResult.getResponse()) {
 			// ICN Request for each cloud contained in an Entry
 			log.info("Sendin ICN to the following cloud: " + entry.getProviderCloud().getCloudName());
-			icnResultForm = getICNResultForm(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
+			icnResultForm = getICNResult(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
 					"authenticationInfo", entry.getProviderCloud(),this.serviceRequestForm.getRequesterSystem()));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
@@ -310,7 +310,7 @@ public class OrchestratorService {
 	 * @param icnRequestForm
 	 * @return ICNResultForm
 	 */
-	private ICNResult getICNResultForm(ICNRequestForm icnRequestForm) {
+	private ICNResult getICNResult(ICNRequestForm icnRequestForm) {
 		log.info("orchestrator: inside the getICNResultForm function");
 		String strtarget = SysConfig.getGatekeeperURI() + "/init_icn/";
 		WebTarget target = client.target(strtarget);

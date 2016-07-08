@@ -176,7 +176,6 @@ public class AuthorizationResource {
 		}
 		
 		InterCloudAuthResponse response = new InterCloudAuthResponse(isAuthorized);
-
 		return Response.status(Status.OK).entity(response).build();
 	}
 
