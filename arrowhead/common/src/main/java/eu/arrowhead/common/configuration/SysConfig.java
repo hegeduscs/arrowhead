@@ -148,5 +148,11 @@ public final class SysConfig {
 		return ownCloud;
 	}
 	
+	public static CoreSystem getCoreSystem(String systemName){
+		restrictionMap.put("systemName", systemName);
+		CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
+		return coreSystem;
+	}
+	
 
 }

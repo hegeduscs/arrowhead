@@ -26,5 +26,12 @@ public class ServiceQueryResult {
 	public void setServiceQueryData(List<ProvidedService> result) {
 		this.result = result;
 	}
+	
+	public boolean isPayloadEmpty(){
+		if(result == null || result.isEmpty())
+			return true;
+		return false;
+	}
+	
 
 }

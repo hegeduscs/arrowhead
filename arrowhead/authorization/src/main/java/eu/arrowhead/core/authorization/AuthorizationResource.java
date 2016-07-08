@@ -22,6 +22,7 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
+import eu.arrowhead.common.model.messages.InterCloudAuthResponse;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 
@@ -173,8 +174,10 @@ public class AuthorizationResource {
 		if (authRight != null){
 			isAuthorized = true;
 		}
+		
+		InterCloudAuthResponse response = new InterCloudAuthResponse(isAuthorized);
 
-		return Response.status(Status.OK).entity(isAuthorized).build();
+		return Response.status(Status.OK).entity(response).build();
 	}
 
 	

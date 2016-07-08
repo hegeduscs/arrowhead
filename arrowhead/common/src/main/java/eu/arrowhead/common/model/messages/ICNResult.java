@@ -3,19 +3,19 @@ package eu.arrowhead.common.model.messages;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ICNResultForm {
+public class ICNResult {
 	
 	OrchestrationResponse instructions;
 
-	public ICNResultForm() {
+	public ICNResult() {
 		super();
 	}
 
-	public ICNResultForm(OrchestrationResponse instructions) {
+	public ICNResult(OrchestrationResponse instructions) {
 		this.instructions = instructions;
 	}
 	
-	public ICNResultForm(ICNEnd icnEnd) {
+	public ICNResult(ICNEnd icnEnd) {
 		this.instructions = icnEnd.getInstructions();
 	}
 

@@ -16,11 +16,11 @@ import org.apache.log4j.Logger;
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.GSDEntry;
+import eu.arrowhead.common.model.messages.GSDAnswer;
 import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
 import eu.arrowhead.common.model.messages.ICNRequestForm;
-import eu.arrowhead.common.model.messages.ICNResultForm;
+import eu.arrowhead.common.model.messages.ICNResult;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
@@ -154,7 +154,7 @@ public class OrchestratorService {
 	public OrchestrationResponse intercloudOrchestration() {
 		GSDRequestForm gsdRequestForm;
 		GSDResult gsdResult;
-		ICNResultForm icnResultForm;
+		ICNResult icnResultForm;
 		OrchestrationResponse orchResponse;
 		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
 
@@ -170,11 +170,11 @@ public class OrchestratorService {
 
 		// Putting an ICN Request Form to every single matching cloud
 		log.info("Processing global service discovery data.");
-		for (GSDEntry entry : gsdResult.getResponse()) {
+		for (GSDAnswer entry : gsdResult.getResponse()) {
 			// ICN Request for each cloud contained in an Entry
-			log.info("Sendin ICN to the following cloud: " + entry.getCloud().getCloudName());
+			log.info("Sendin ICN to the following cloud: " + entry.getProviderCloud().getCloudName());
 			icnResultForm = getICNResultForm(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
-					"authenticationInfo", entry.getCloud(),this.serviceRequestForm.getRequesterSystem()));
+					"authenticationInfo", entry.getProviderCloud(),this.serviceRequestForm.getRequesterSystem()));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
 			for (OrchestrationForm of : icnResultForm.getInstructions().getResponse()) {
@@ -310,13 +310,13 @@ public class OrchestratorService {
 	 * @param icnRequestForm
 	 * @return ICNResultForm
 	 */
-	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
+	private ICNResult getICNResultForm(ICNRequestForm icnRequestForm) {
 		log.info("orchestrator: inside the getICNResultForm function");
 		String strtarget = SysConfig.getGatekeeperURI() + "/init_icn/";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(icnRequestForm));
-		return response.readEntity(ICNResultForm.class);
+		return response.readEntity(ICNResult.class);
 	}
 
 	/**
