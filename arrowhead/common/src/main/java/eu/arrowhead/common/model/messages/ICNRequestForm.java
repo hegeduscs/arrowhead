@@ -14,13 +14,10 @@ public class ICNRequestForm {
 	private ArrowheadCloud targetCloud;
 	private ArrowheadSystem requesterSystem;
 	
-	
-
 	public ICNRequestForm() {
 		super();
 	}
 
-	
 	public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud targetCloud,
 			ArrowheadSystem requesterSystem) {
 		super();
@@ -30,16 +27,13 @@ public class ICNRequestForm {
 		this.requesterSystem = requesterSystem;
 	}
 	
-	
 	public ArrowheadSystem getRequesterSystem() {
 		return requesterSystem;
 	}
 
-
 	public void setRequesterSystem(ArrowheadSystem requesterSystem) {
 		this.requesterSystem = requesterSystem;
 	}
-
 
 	public ArrowheadService getRequestedService() {
 		return requestedService;

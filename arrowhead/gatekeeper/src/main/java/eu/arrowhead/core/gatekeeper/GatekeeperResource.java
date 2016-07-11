@@ -235,7 +235,7 @@ public class GatekeeperResource {
 			orchestrationFlags.put("pingProvider", false);
 			
 			ServiceRequestForm serviceRequestForm = new ServiceRequestForm(service, null, 
-					icnProposal.getRequesterSystem(), orchestrationFlags);
+					icnProposal.getRequesterSystem(), orchestrationFlags, null);
 			String orchestratorURI = SysConfig.getOrchestratorURI();
 			log.info("Sending ServiceRequestForm to the Orchestrator.");
 			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm);
