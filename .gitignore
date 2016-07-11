@@ -136,3 +136,5 @@ arrowhead/serviceregistry/src/main/resources/log4j.properties_bme2
 arrowhead/serviceregistry/src/main/resources/log4j.properties_local
 arrowhead/serviceregistry/src/main/resources/log4j.properties_tmit
 core/.settings/org.hibernate.eclipse.console.prefs
+arrowhead/api/.project
+arrowhead/main/.project

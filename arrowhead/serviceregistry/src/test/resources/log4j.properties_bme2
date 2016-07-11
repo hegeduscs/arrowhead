@@ -1,12 +1,6 @@
 # Define the root logger with appender file
 log4j.rootLogger = INFO, DB
 
-# Direct log messages to stdout - for test
-# log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-# log4j.appender.stdout.target=System.out 
-# log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-# log4j.appender.stdout.layout.conversionPattern=%d{ABSOLUTE} %5p %t %c{1}:%M:%L - %m%n
-
 # Define the DB appender
 log4j.appender.DB=org.apache.log4j.jdbc.JDBCAppender
 
@@ -21,7 +15,7 @@ log4j.appender.DB.user=arrowhead
 log4j.appender.DB.password=root
 
 # Set the SQL statement to be executed.
-log4j.appender.DB.sql=INSERT INTO LOGS VALUES (DEFAULT,'%m','%C','%d{yyyy-MM-dd HH:mm:ss}','%p')
+log4j.appender.DB.sql=INSERT INTO LOGS VALUES(DEFAULT,'%x','%d{yyyy-MM-dd HH:mm:ss}','%C','%p','%m',DEFAULT,DEFAULT)
 
 # Define the layout for file appender
 log4j.appender.DB.layout=org.apache.log4j.PatternLayout

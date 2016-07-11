@@ -76,6 +76,9 @@
 				<configuration>
 					<!-- MainClass in mainfest make a executable jar -->
 					<archive>
+						<manifestEntries>
+			                <Class-Path>config/</Class-Path>
+			            </manifestEntries>
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<mainClass>eu.arrowhead.core.serviceregistry.Main</mainClass>

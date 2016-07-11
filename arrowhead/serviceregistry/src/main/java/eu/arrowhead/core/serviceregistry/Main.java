@@ -24,7 +24,7 @@ import javax.ws.rs.core.UriBuilder;
  */
 public class Main {
 	// Base URI the Grizzly HTTP server will listen on
-
+	
 	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8080/core/");
 	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/core/");
 
