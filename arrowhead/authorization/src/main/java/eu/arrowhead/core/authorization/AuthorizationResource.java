@@ -5,7 +5,6 @@ import java.util.HashMap;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,7 +51,7 @@ public class AuthorizationResource {
 	@PUT
 	@Path("/intracloud")
 	public Response isSystemAuthorized(IntraCloudAuthRequest request) {
-		log.info("Entered the  isSystemAuthorized function");
+		log.info("Entered the AuthorizationResource:isSystemAuthorized function");
 		
 		if (!request.isPayloadUsable()) {
 			log.info("Payload is not usable");
@@ -61,23 +60,21 @@ public class AuthorizationResource {
 		}
 		log.info("Payload is usable");
 		
+		
 		IntraCloudAuthResponse response = new IntraCloudAuthResponse();
 		restrictionMap.put("systemGroup", request.getConsumer().getSystemGroup());
 		restrictionMap.put("systemName", request.getConsumer().getSystemName());
 		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 		if(consumer == null){
-			log.info("Consumer was not found");
+			log.info("Consumer is not in the database.");
 			throw new DataNotFoundException(
 				"Consumer System is not in the authorization database. (SG: " + 
 				request.getConsumer().getSystemGroup() + 
 				", SN: " + request.getConsumer().getSystemName() + ")");
         }
-		log.info("Consumer group: " + consumer.getSystemGroup() + 
-				", consumer name: " + consumer.getSystemName());
 		
-		HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean> authorizationState = 
-				new HashMap<eu.arrowhead.common.model.ArrowheadSystem, Boolean>();
-		log.info("Hashmap created");
+		HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<ArrowheadSystem, Boolean>();
+		log.info("authorizationState hashmap created");
 		
 		restrictionMap.clear();
 		restrictionMap.put("serviceGroup", request.getService().getServiceGroup());
@@ -93,7 +90,7 @@ public class AuthorizationResource {
 		}
 
 		IntraCloudAuthorization authRight = new IntraCloudAuthorization();
-		for (eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviders()) {
+		for (ArrowheadSystem provider : request.getProviders()) {
 			restrictionMap.clear();
 			restrictionMap.put("systemGroup", provider.getSystemGroup());
 			restrictionMap.put("systemName", provider.getSystemName());
@@ -103,22 +100,17 @@ public class AuthorizationResource {
 			restrictionMap.put("provider", retrievedSystem);
 			restrictionMap.put("service", service);
 			authRight = dm.get(IntraCloudAuthorization.class, restrictionMap);
+			log.info("Authorization rights requested for System: " + request.getConsumer().getSystemName());
+			
 			if (authRight == null) {
 				authorizationState.put(provider, false);
 			} else {
 				authorizationState.put(provider, true);
 			}
 		}
-		log.info("Authorization rights requested for System: " + request.getConsumer().getSystemName());
 		
-		log.info("Finalizing Map");
+		log.info("Sending authorization response");
 		response.setAuthorizationMap(authorizationState);
-		for (eu.arrowhead.common.model.ArrowheadSystem ahsys : authorizationState.keySet()) {
-			log.info("System group: " + ahsys.getSystemGroup() + ", system name: " + 
-					ahsys.getSystemName() + ", value" + authorizationState.get(ahsys).toString());
-		}
-		
-		log.info("Sending response");
 		return Response.status(Status.OK).entity(response).build();
 	}
 
@@ -133,7 +125,7 @@ public class AuthorizationResource {
 	@Path("/intercloud")
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON })
 	public Response isCloudAuthorized(InterCloudAuthRequest request) {
-		log.info("Entered the isCloudAuthorized function");
+		log.info("Entered the AuthorizationResource:isCloudAuthorized function");
 		
 		if (!request.isPayloadUsable()) {
 			log.info("Payload is not usable");
@@ -146,13 +138,12 @@ public class AuthorizationResource {
 		restrictionMap.put("cloudName", request.getCloud().getCloudName());
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
         if(cloud == null){
-        	log.info("Consumer was not found");
+        	log.info("Consumer is not in the database.");
        	 	throw new DataNotFoundException(
        	 			"Consumer Cloud is not in the authorization database. (OP: " 
        	 			+ request.getCloud().getOperator() + 
        	 			", CN: " + request.getCloud().getCloudName() + ")");
         }
-        log.info("Cloud operator: " + cloud.getOperator() + ", cloud name: " + cloud.getCloudName());
         
 		boolean isAuthorized = false;
 		
@@ -161,6 +152,7 @@ public class AuthorizationResource {
 		restrictionMap.put("serviceDefinition", request.getService().getServiceDefinition());
 		ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
 		if(service == null){
+			log.info("Service is not in the database.");
 			return Response.status(Status.OK).entity(isAuthorized).build();
 		}
 		

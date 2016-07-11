@@ -14,9 +14,9 @@
  <mapping class="eu.arrowhead.common.model.ArrowheadCloud"/>
  <mapping class="eu.arrowhead.common.model.ArrowheadSystem"/>
  <mapping class="eu.arrowhead.common.model.ArrowheadService"/>
+ <mapping class="eu.arrowhead.common.database.CoreSystem"/>
  <mapping class="eu.arrowhead.common.database.InterCloudAuthorization"/>
  <mapping class="eu.arrowhead.common.database.IntraCloudAuthorization"/>
- <mapping class="eu.arrowhead.common.database.CoreSystem"/>
  <mapping class="eu.arrowhead.common.database.NeighborCloud"/>
  <mapping class="eu.arrowhead.common.database.OwnCloud"/>
  <mapping class="eu.arrowhead.common.database.OrchestrationStore"/>

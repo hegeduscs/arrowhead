@@ -1,6 +1,8 @@
 package eu.arrowhead.common.model.messages;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -15,12 +17,14 @@ public class ServiceRequestForm {
 	private String requestedQoS;
 	private ArrowheadSystem requesterSystem;
 	private Map<String, Boolean> orchestrationFlags = new HashMap<>();
+	private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
 	
 	public ServiceRequestForm (){
 		super();
 	}
 
-	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, ArrowheadSystem requesterSystem) {
+	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, 
+			ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredProviders) {
 		this.requestedService = requestedService;
 		this.requestedQoS = requestedQoS;
 		this.requesterSystem = requesterSystem;
@@ -29,16 +33,19 @@ public class ServiceRequestForm {
 		this.orchestrationFlags.put("triggerInterCloud", false);
 		this.orchestrationFlags.put("metadataSearch", false);
 		this.orchestrationFlags.put("pingProvider", false);
+		this.preferredProviders = preferredProviders;
 	}
 	
 	
 
-	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, ArrowheadSystem requesterSystem,
-		Map<String, Boolean> orchestrationFlags) {
+	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, 
+			ArrowheadSystem requesterSystem, Map<String, Boolean> orchestrationFlags,
+			List<ArrowheadSystem> preferredProviders) {
 		this.requestedService = requestedService;
 		this.requestedQoS = requestedQoS;
 		this.requesterSystem = requesterSystem;
 		this.orchestrationFlags = orchestrationFlags;
+		this.preferredProviders = preferredProviders;
 	}
 
 	public ArrowheadService getRequestedService() {
@@ -72,7 +79,14 @@ public class ServiceRequestForm {
 	public void setOrchestrationFlags(Map<String, Boolean> orchestrationFlags) {
 		this.orchestrationFlags = orchestrationFlags;
 	}
-	
-	
 
+	public List<ArrowheadSystem> getPreferredProviders() {
+		return preferredProviders;
+	}
+
+	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
+		this.preferredProviders = preferredProviders;
+	}
+	
+	
 }
