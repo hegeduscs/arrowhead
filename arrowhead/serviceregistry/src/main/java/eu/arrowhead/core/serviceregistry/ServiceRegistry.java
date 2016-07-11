@@ -445,7 +445,7 @@ public class ServiceRegistry {
 			String port = new Integer(service.getPort()).toString();
 
 			arrowheadSystem.setAuthenticationInfo(authInfo);
-			arrowheadSystem.setIPAddress(ipAddress);
+			arrowheadSystem.setAddress(ipAddress);
 			arrowheadSystem.setPort(port);
 			arrowheadSystem.setSystemGroup(systemGroup);
 			arrowheadSystem.setSystemName(systemName);

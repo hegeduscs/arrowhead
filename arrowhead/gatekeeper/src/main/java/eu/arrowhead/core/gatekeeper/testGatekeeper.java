@@ -75,7 +75,7 @@ public class testGatekeeper {
 	*/
 	protected ServiceQueryResult testServiceQueryResult(){
 		ArrowheadSystem provider = new ArrowheadSystem("a", "g", "f", "fd", "dd");
-		ProvidedService providedService = new ProvidedService(provider , "serviceURI", "serviceInterface");
+		ProvidedService providedService = new ProvidedService(provider , null, "serviceURI", "serviceInterface");
 		List<ProvidedService> testservices = new ArrayList<ProvidedService>();
 		testservices.add(providedService);
 		ServiceQueryResult sqr = new ServiceQueryResult(testservices);
