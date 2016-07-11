@@ -1,10 +1,12 @@
 package eu.arrowhead.main;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.log4j.PropertyConfigurator;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
@@ -46,6 +48,7 @@ class ServerInfo {
 	  public void start() throws IOException{
 	    uri = getUri();
 	    if(server==null) {
+	    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 	      if(sslContext == null) {
 	    	  server = GrizzlyHttpServerFactory.createHttpServer(uri, rc);
 	      }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -12,9 +13,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.apache.log4j.Logger;
 
 import eu.arrowhead.common.configuration.DatabaseManager;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -30,11 +34,14 @@ public class CommonApi {
 	
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+	private static Logger log = Logger.getLogger(CommonApi.class.getName());
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getIt() {
-		return "Got it";
+		
+		log.info("logging works!!!!");
+		return "Got it!";
 	}
 	
 	/**
