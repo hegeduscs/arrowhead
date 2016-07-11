@@ -28,11 +28,13 @@ public class ServiceRequestForm {
 		this.requestedService = requestedService;
 		this.requestedQoS = requestedQoS;
 		this.requesterSystem = requesterSystem;
-		this.orchestrationFlags.put("matchmaking", false);
 		this.orchestrationFlags.put("externalServiceRequest", false);
 		this.orchestrationFlags.put("triggerInterCloud", false);
 		this.orchestrationFlags.put("metadataSearch", false);
 		this.orchestrationFlags.put("pingProvider", false);
+		this.orchestrationFlags.put("overrideStore", false);
+		this.orchestrationFlags.put("matchmaking", false);
+		this.orchestrationFlags.put("hasPreferences", false);
 		this.preferredProviders = preferredProviders;
 	}
 	
@@ -88,5 +90,16 @@ public class ServiceRequestForm {
 		this.preferredProviders = preferredProviders;
 	}
 	
+	public boolean areFlagsSet(){
+		if(!orchestrationFlags.containsKey("externalServiceRequest") ||
+			!orchestrationFlags.containsKey("triggerInterCloud") ||
+			!orchestrationFlags.containsKey("metadataSearch") ||
+			!orchestrationFlags.containsKey("pingProvider") ||
+			!orchestrationFlags.containsKey("overrideStore") ||
+			!orchestrationFlags.containsKey("matchmaking") ||
+			!orchestrationFlags.containsKey("hasPreferences"))
+			return false;
+		return true;
+	}
 	
 }
