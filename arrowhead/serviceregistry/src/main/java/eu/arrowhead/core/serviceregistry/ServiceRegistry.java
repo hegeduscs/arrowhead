@@ -92,7 +92,7 @@ public class ServiceRegistry {
 				String serviceType = "_" + serviceGroup + "_" + serviceName + "_" + interf + "._tcp";
 				// Unique service name
 				String uniqueServiceName = entry.getProvider().getSystemName();
-				String localName = entry.getProvider().getIPAddress() + ".";
+				String localName = entry.getProvider().getAddress() + ".";
 				int port = new Integer(entry.getProvider().getPort());
 
 				ServiceName name = reg.makeServiceName(uniqueServiceName, ServiceType.valueOf(serviceType));
@@ -414,7 +414,7 @@ public class ServiceRegistry {
 		String port = new Integer(service.getPort()).toString();
 
 		arrowheadSystem.setAuthenticationInfo(authInfo);
-		arrowheadSystem.setIPAddress(ipAddress);
+		arrowheadSystem.setAddress(ipAddress);
 		arrowheadSystem.setPort(port);
 		arrowheadSystem.setSystemGroup(systemGroup);
 		arrowheadSystem.setSystemName(systemName);
@@ -546,6 +546,7 @@ public class ServiceRegistry {
 
 	private DnsSDRegistrator createRegistrator() throws DnsSDException {
 		// Get the DNS specific settings
+		//TODO: hardwired IP?
 		String dnsIpAddress = getProp().getProperty("dns.ip", "192.168.184.128");
 		String dnsDomain = getProp().getProperty("dns.registerDomain", "srv.evoin.arrowhead.eu") + ".";
 		int dnsPort = new Integer(getProp().getProperty("dns.port", "53"));

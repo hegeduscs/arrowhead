@@ -11,19 +11,19 @@ public class ICNProposal {
 
 	private ArrowheadService requestedService;
 	private String authenticationInfo;
-	private ArrowheadCloud requestedCloud;
+	private ArrowheadCloud requesterCloud;
 	private ArrowheadSystem requesterSystem;
 	
 	public ICNProposal() {
 		super();
 	}
 
-	public ICNProposal(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud requestedCloud,
+	public ICNProposal(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud requesterCloud,
 			ArrowheadSystem requesterSystem) {
 		super();
 		this.requestedService = requestedService;
 		this.authenticationInfo = authenticationInfo;
-		this.requestedCloud = requestedCloud;
+		this.requesterCloud = requesterCloud;
 		this.requesterSystem = requesterSystem;
 	}
 
@@ -43,12 +43,12 @@ public class ICNProposal {
 		this.authenticationInfo = authenticationInfo;
 	}
 
-	public ArrowheadCloud getRequestedCloud() {
-		return requestedCloud;
+	public ArrowheadCloud getRequesterCloud() {
+		return requesterCloud;
 	}
 
-	public void setRequestedCloud(ArrowheadCloud requestedCloud) {
-		this.requestedCloud = requestedCloud;
+	public void setRequesterCloud(ArrowheadCloud requesterCloud) {
+		this.requesterCloud = requesterCloud;
 	}
 
 	public ArrowheadSystem getRequesterSystem() {

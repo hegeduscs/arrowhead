@@ -60,6 +60,11 @@ public class ArrowheadCloud {
 	public void setAuthenticationInfo(String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
 	}
+
+	public String getCloudName() {
+		// fix for gatekeeper
+		return cloudName;
+	}
 	
 
 }

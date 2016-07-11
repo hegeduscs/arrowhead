@@ -17,7 +17,8 @@ public class ServiceRequestForm {
 	int ServicingLength;
 	Map<String, Boolean> OrchestrationFlags = new HashMap<>();
 	
-	// TODO
+	// TODO add new orch flags
+	//TODO should be able to parse into multiple versions of the orch form ? 
 	
 	public ServiceRequestForm (){
 		

@@ -9,17 +9,18 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
 
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.GSDEntry;
+import eu.arrowhead.common.model.messages.GSDAnswer;
 import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
 import eu.arrowhead.common.model.messages.ICNRequestForm;
-import eu.arrowhead.common.model.messages.ICNResultForm;
+import eu.arrowhead.common.model.messages.ICNResult;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
@@ -43,7 +44,6 @@ public class OrchestratorService {
 	private URI uri;
 	private Client client;
 	private ServiceRequestForm serviceRequestForm;
-	public SysConfig sysConfig = SysConfig.getInstance();
 	private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
 
 	public OrchestratorService() {
@@ -64,6 +64,7 @@ public class OrchestratorService {
 	 */
 	public OrchestrationResponse localOrchestration() {
 		ServiceQueryForm srvQueryForm = new ServiceQueryForm(this.serviceRequestForm);
+		//TODO hardwired tsig not cool
 		srvQueryForm.setTsig_key("RIuxP+vb5GjLXJo686NvKQ==");
 		ArrowheadService srv = null;
 		ServiceQueryResult srvQueryResult;
@@ -94,9 +95,9 @@ public class OrchestratorService {
 
 			// Poll the Authorization
 			log.info("Polling the Authorization service.");
-			authReq = new IntraCloudAuthRequest(this.serviceRequestForm.getRequestedService(), 
-					providers, "authInfo", false);
-			authResp = getAuthorizationResponse(authReq, this.serviceRequestForm);
+			authReq = new IntraCloudAuthRequest(this.serviceRequestForm.getRequesterSystem(),
+					providers, this.serviceRequestForm.getRequestedService(), false);
+			authResp = getAuthorizationResponse(authReq);
 
 			// Removing the non-authenticated systems from the providers list
 			for (ArrowheadSystem ahsys : authResp.getAuthorizationMap().keySet()) {
@@ -153,7 +154,7 @@ public class OrchestratorService {
 	public OrchestrationResponse intercloudOrchestration() {
 		GSDRequestForm gsdRequestForm;
 		GSDResult gsdResult;
-		ICNResultForm icnResultForm;
+		ICNResult icnResultForm;
 		OrchestrationResponse orchResponse;
 		ArrayList<OrchestrationForm> responseFormList = new ArrayList<OrchestrationForm>();
 
@@ -169,11 +170,11 @@ public class OrchestratorService {
 
 		// Putting an ICN Request Form to every single matching cloud
 		log.info("Processing global service discovery data.");
-		for (GSDEntry entry : gsdResult.getResponse()) {
+		for (GSDAnswer entry : gsdResult.getResponse()) {
 			// ICN Request for each cloud contained in an Entry
-			log.info("Sendin ICN to the following cloud: " + entry.getCloud().getName());
-			icnResultForm = getICNResultForm(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
-					"authenticationInfo", entry.getCloud(),this.serviceRequestForm.getRequesterSystem()));
+			log.info("Sendin ICN to the following cloud: " + entry.getProviderCloud().getCloudName());
+			icnResultForm = getICNResult(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
+					"authenticationInfo", entry.getProviderCloud(),this.serviceRequestForm.getRequesterSystem()));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
 			for (OrchestrationForm of : icnResultForm.getInstructions().getResponse()) {
@@ -182,6 +183,7 @@ public class OrchestratorService {
 			}
 		}
 		if (responseFormList.isEmpty()){
+			//TODO logging fix
 			log.info("badbad");
 			return null;
 		}
@@ -204,11 +206,15 @@ public class OrchestratorService {
 	private ServiceQueryResult getServiceQueryResult(ServiceQueryForm sqf, ServiceRequestForm srf) {
 		log.info("orchestator: inside the getServiceQueryResult function");
 		ArrowheadService as = srf.getRequestedService();
-		String strtarget = sysConfig.getServiceRegistryURI() + "/" + as.getServiceGroup() + "/"
-				+ as.getServiceDefinition();
+		//TODO uri-building --- done, needs testing
+		UriBuilder ub = null;
+		ub = UriBuilder.fromPath(SysConfig.getServiceRegistryURI()).path(as.getServiceGroup())
+				.path(as.getServiceDefinition());
+		String strtarget = ub.toString();
 		log.info("orchestrator: sending the ServiceQueryForm to this address:" + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(sqf));
+		//TODO logging fix, less info
 		log.info("The data of the ServiceQueryForm: ");
 		log.info("Metadata: " + sqf.getServiceMetadata());
 		log.info("The TSIG_key: " + sqf.getTsig_key());
@@ -232,10 +238,9 @@ public class OrchestratorService {
 	 * @param authRequest
 	 * @return AuthorizationResponse
 	 */
-	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq, ServiceRequestForm srf) {
+	private IntraCloudAuthResponse getAuthorizationResponse(IntraCloudAuthRequest authReq) {
 		log.info("orchestrator: inside the getAuthorizationResponse function");
-		String strtarget = sysConfig.getAuthorizationURI() + "/systemgroup/" + srf.getRequesterSystem().getSystemGroup()
-				+ "/system/" + srf.getRequesterSystem().getSystemName();
+		String strtarget = SysConfig.getAuthorizationURI() + "/intracloud";
 		log.info("orchestrator: sending AuthReq to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(authReq));
@@ -255,9 +260,10 @@ public class OrchestratorService {
 	 * @param qosVerify
 	 * @return QoSVerificationResponse
 	 */
+	//TODO remove QoS from orch
 	private QoSVerificationResponse getQosVerificationResponse(QoSVerify qosVerify) {
 		log.info("orchestrator: inside the getQoSVerificationResponse function");
-		String strtarget = sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSVerify";
+		String strtarget = SysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSVerify";
 		log.info("orchestrator: sending QoSVerify to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosVerify));
@@ -272,7 +278,7 @@ public class OrchestratorService {
 	 */
 	private QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
 		log.info("orchestrator: inside the doQoSReservation function");
-		String strtarget = sysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSReserve";
+		String strtarget = SysConfig.getOrchestratorURI().replace("orchestrator/orchestration", "QoSManager") + "/QoSReserve";
 		log.info("orchestrator: sending QoSReserve to this address: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json").put(Entity.json(qosReserve));
@@ -288,7 +294,7 @@ public class OrchestratorService {
 	 */
 	private GSDResult getGSDResult(GSDRequestForm gsdRequestForm) {
 		log.info("orchestrator: inside the getGSDResult function");
-		String strtarget = sysConfig.getGatekeeperURI() + "/init_gsd/";
+		String strtarget = SysConfig.getGatekeeperURI() + "/init_gsd/";
 		log.info("orchestrator: sent GSDRequestForm to the following: " + strtarget);
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
@@ -304,13 +310,13 @@ public class OrchestratorService {
 	 * @param icnRequestForm
 	 * @return ICNResultForm
 	 */
-	private ICNResultForm getICNResultForm(ICNRequestForm icnRequestForm) {
+	private ICNResult getICNResult(ICNRequestForm icnRequestForm) {
 		log.info("orchestrator: inside the getICNResultForm function");
-		String strtarget = sysConfig.getGatekeeperURI() + "/init_icn/";
+		String strtarget = SysConfig.getGatekeeperURI() + "/init_icn/";
 		WebTarget target = client.target(strtarget);
 		Response response = target.request().header("Content-type", "application/json")
 				.put(Entity.json(icnRequestForm));
-		return response.readEntity(ICNResultForm.class);
+		return response.readEntity(ICNResult.class);
 	}
 
 	/**

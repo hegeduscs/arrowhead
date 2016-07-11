@@ -25,6 +25,9 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
  * @author pardavib, mereszd
  *
  */
+
+//TODO should make 
+
 @Path("orchestrator")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,6 +51,8 @@ public class OrchestratorResource {
 	@Path("/example")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response example() {
+		//TODO new SRF
+		//TODO remove QoS interaction
 		ArrowheadService requestedService = new ArrowheadService();
 		ArrowheadSystem requesterSystem = new ArrowheadSystem();
 		Map<String, Boolean> orchestrationFlags = new HashMap<>();
@@ -74,6 +79,7 @@ public class OrchestratorResource {
 	@Path("/orchestration")
 	public Response postOrchestration(@Context UriInfo uriInfo, ServiceRequestForm serviceRequestForm) {
 
+		//TODO new orch process
 		Boolean isInterCloud;
 		OrchestrationResponse orchResponse;
 

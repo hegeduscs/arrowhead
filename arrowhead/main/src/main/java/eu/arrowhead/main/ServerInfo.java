@@ -50,6 +50,9 @@ class ServerInfo {
 	    	  server = GrizzlyHttpServerFactory.createHttpServer(uri, rc);
 	      }
 	      else {
+	    	  if(rc.isRegistered(SecurityFilter.class)==false)
+	    		  rc.register(SecurityFilter.class);
+	    	  
 	    	  server = GrizzlyHttpServerFactory.createHttpServer(uri, rc, true,
 	    			  new SSLEngineConfigurator(sslContext).setClientMode(false).setNeedClientAuth(true)
 	    	  );    

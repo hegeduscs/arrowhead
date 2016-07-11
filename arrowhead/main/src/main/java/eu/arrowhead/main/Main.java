@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 
 
 /**
@@ -20,63 +21,77 @@ public class Main {
      */
     public static void main(String[] args) throws Exception {
     	
-    	CertificateHandler certHandler = new CertificateHandler("/home/sanyi/Development/certs")
+    	CertificateHandler certHandler = new CertificateHandler("C:/Arrowhead/arrowhead/certificates")
     			.setTrustStore("mastercacerts")
     			.setDefaultPassword("123456");
-    	
+    
     	List<ServerInfo> serverList = new ArrayList<ServerInfo>();
-    	
+    	/*
     	serverList.add(new ServerInfo(
         		"serviceregistry",8444,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.serviceregistry.ServiceRegistryResource.class)
+        				.packages("eu.arrowhead.common")
         		).setSSLContext(certHandler.getSSLContext("cloud1.serviceregistry")));
                 
         
     	serverList.add(new ServerInfo(
         		"authorization",8445,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.authorization.AuthorizationResource.class)
-        		).setSSLContext(certHandler.getSSLContext("cloud1.authorization")));
+        				.packages("eu.arrowhead.common")
+        		));
+        		//.setSSLContext(certHandler.getSSLContext("cloud1.authorization")));
               
         
     	serverList.add(new ServerInfo(
         		"gatekeeper",8446,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.gatekeeper.GatekeeperResource.class)
+        				.packages("eu.arrowhead.common")
         		).setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));
         
     	serverList.add(new ServerInfo(
         		"orchestrator",8447,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
         				eu.arrowhead.core.orchestrator.OrchestratorResource.class)
-        		).setSSLContext(certHandler.getSSLContext("cloud1.orchestrator"))); 
-        
-    	serverList.add(new ServerInfo(
-        		"qos",8448,
-        		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
-        				eu.arrowhead.core.qos.QoSResource.class)
-        		).setSSLContext(certHandler.getSSLContext("cloud1.qos")));         
+        				.packages("eu.arrowhead.common")
+        		).setSSLContext(certHandler.getSSLContext("cloud1.orchestrator"))); */
     	
     	serverList.add(new ServerInfo(
-        		"api",8449,
+        		"orchestrator",8448,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
-        				eu.arrowhead.core.api.ApiResource.class)
-        		).setSSLContext(certHandler.getSSLContext("cloud1.qos")));            	
-                
+        				eu.arrowhead.core.orchestrator.store.StoreResource.class)
+        				.packages("eu.arrowhead.common")
+        		));
         
-        /*ServerInfo testServer = new ServerInfo(
-        		"myapp",8443,
+    	/*serverList.add(new ServerInfo(
+        		"qos",8449,
         		new ResourceConfig().registerClasses(
-        				SecurityFilter.class,
-        				MyResource.class))
-        		.setSSLContext(certHandler.getSSLContext("cloud1.client1")); */       
+        				eu.arrowhead.core.qos.QoSResource.class)
+        				.packages("eu.arrowhead.common")
+        		).setSSLContext(certHandler.getSSLContext("cloud1.qos")));         
+    	*/
+    	serverList.add(new ServerInfo(
+        		"api",8450,
+        		new ResourceConfig().registerClasses(
+        				eu.arrowhead.core.api.AuthorizationApi.class,
+        				eu.arrowhead.core.api.CommonApi.class,
+        				eu.arrowhead.core.api.ConfigurationApi.class,
+        				eu.arrowhead.core.api.OrchestratorApi.class,
+        				eu.arrowhead.core.api.ServiceRegistryApi.class)
+        				.packages("eu.arrowhead.common")
+        		));
+    			//.setSSLContext(certHandler.getSSLContext("cloud1.qos")));           	
+                
+    	
+        
+    	/*serverList.add(new ServerInfo(
+        		"myapp",8081,
+        		new ResourceConfig().registerClasses(
+        				//SecurityFilter.class,
+        				MyResource.class)).packages("eu.arrowhead.common")
+        		.setSSLContext(certHandler.getSSLContext("cloud1.client1")));    */    
         
         for(ServerInfo server : serverList) {
         	server.start();

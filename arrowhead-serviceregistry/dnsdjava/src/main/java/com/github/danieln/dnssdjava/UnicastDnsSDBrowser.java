@@ -73,7 +73,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 		data.setName(service);
 		for (Record record : records) {
 			if (record instanceof SRVRecord) {
-				// TODO Handle priority and weight correctly in case of multiple SRV record.
+				//  Handle priority and weight correctly in case of multiple SRV record.
 				SRVRecord srv = (SRVRecord) record;
 				data.setHost(srv.getTarget().toString());
 				data.setPort(srv.getPort());
@@ -87,7 +87,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 		}
 		for (Record record : records) {
 			if (record instanceof TXTRecord) {
-				// TODO Handle multiple TXT records as different variants of same service
+				//  Handle multiple TXT records as different variants of same service
 				TXTRecord txt = (TXTRecord) record;
 				for (Object o : txt.getStrings()) {
 					String string = (String) o;     // Safe cast

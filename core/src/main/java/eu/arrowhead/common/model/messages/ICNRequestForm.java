@@ -18,7 +18,6 @@ public class ICNRequestForm {
 
 	public ICNRequestForm() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	

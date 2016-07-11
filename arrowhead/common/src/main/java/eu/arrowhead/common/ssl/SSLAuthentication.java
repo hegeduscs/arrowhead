@@ -28,6 +28,7 @@ public class SSLAuthentication {
     		throw new AuthenticationException("Error: no certificate received in request!");
     	}
 
+    	//TODO rethink cert CN structure
     	// We use the certificate subject field for identifying the sender;
     	// Certificate subject field looks like this:
     	//  CN=arrowhead.cloud1.client, O=Arrowhead, L=Budapest, C=HU
@@ -70,7 +71,7 @@ public class SSLAuthentication {
     		throw new AuthenticationException("Client is not in our cloud...");    		
     	}
     	
-    	// TODO: authorize based on cnfields[3];
+    	// TODO:sanyi- authorize based on cnfields[3];
     	
     	String msg = "We received " + certs.length + " certificates from subject: " + subjectname + ", CN: " + cn + ", array: " + Arrays.toString(cnfields);
     	return msg;     	

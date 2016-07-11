@@ -8,7 +8,6 @@ public class QoSReservationResponse {
 
 	public QoSReservationResponse() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public QoSReservationResponse(boolean response) {

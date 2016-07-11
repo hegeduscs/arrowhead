@@ -1,5 +1,3 @@
-/arrowhead/api/target
-/arrowhead/main/target
 /core/src/main/resources/hibernate.cfg.xml
 /core/target
 arrowhead-serviceregistry/.project
@@ -41,9 +39,7 @@ arrowhead/.project
 arrowhead/.settings/org.eclipse.core.resources.prefs
 arrowhead/.settings/org.eclipse.m2e.core.prefs
 arrowhead/api/.classpath
-arrowhead/api/.project
 arrowhead/api/.settings/org.eclipse.core.resources.prefs
-arrowhead/api/.settings/org.eclipse.jdt.core.prefs
 arrowhead/api/.settings/org.eclipse.m2e.core.prefs
 arrowhead/api/.settings/org.hibernate.eclipse.console.prefs
 arrowhead/authorization/.classpath
@@ -90,6 +86,8 @@ arrowhead/gatekeeper/.settings/org.eclipse.wst.jsdt.ui.superType.container
 arrowhead/gatekeeper/.settings/org.eclipse.wst.jsdt.ui.superType.name
 arrowhead/gatekeeper/.settings/org.eclipse.wst.validation.prefs
 arrowhead/gatekeeper/.settings/org.hibernate.eclipse.console.prefs
+arrowhead/main/.classpath
+arrowhead/main/.settings/org.eclipse.m2e.core.prefs
 arrowhead/main/.settings/org.hibernate.eclipse.console.prefs
 arrowhead/orchestrator/.classpath
 arrowhead/orchestrator/.project

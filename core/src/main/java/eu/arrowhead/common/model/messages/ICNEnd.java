@@ -9,7 +9,6 @@ public class ICNEnd {
 
 	public ICNEnd() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public ICNEnd(OrchestrationResponse instructions) {

@@ -11,28 +11,28 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 @XmlRootElement
 public class IntraCloudAuthRequest {
 	
-	private ArrowheadService service;
+	private ArrowheadSystem consumer;
 	private Collection<ArrowheadSystem> providers = new ArrayList<ArrowheadSystem>();
-	private String authenticationInfo; //consumers
+	private ArrowheadService service;
 	private boolean generateToken;	
 	
 	public IntraCloudAuthRequest() {
 	}
 
-	public IntraCloudAuthRequest(ArrowheadService service, Collection<ArrowheadSystem> providers,
-			String authenticationInfo, boolean generateToken) {
-		this.service = service;
+	public IntraCloudAuthRequest(ArrowheadSystem consumer, Collection<ArrowheadSystem> providers,
+			ArrowheadService service, boolean generateToken) {
+		this.consumer = consumer;
 		this.providers = providers;
-		this.authenticationInfo = authenticationInfo;
+		this.service = service;
 		this.generateToken = generateToken;
 	}
 	
-	public ArrowheadService getService() {
-		return service;
+	public ArrowheadSystem getConsumer() {
+		return consumer;
 	}
 
-	public void setService(ArrowheadService service) {
-		this.service = service;
+	public void setConsumer(ArrowheadSystem consumer) {
+		this.consumer = consumer;
 	}
 
 	public Collection<ArrowheadSystem> getProviders() {
@@ -43,12 +43,12 @@ public class IntraCloudAuthRequest {
 		this.providers = providers;
 	}
 
-	public String getAuthenticationInfo() {
-		return authenticationInfo;
+	public ArrowheadService getService() {
+		return service;
 	}
 
-	public void setAuthenticationInfo(String authenticationInfo) {
-		this.authenticationInfo = authenticationInfo;
+	public void setService(ArrowheadService service) {
+		this.service = service;
 	}
 
 	public boolean isGenerateToken() {
@@ -60,8 +60,12 @@ public class IntraCloudAuthRequest {
 	}
 
 	public boolean isPayloadUsable(){
-		if(authenticationInfo == null|| service == null || providers.isEmpty())
+		if(consumer == null|| service == null || providers.isEmpty() || 
+				!consumer.isValid() || !service.isValid())
 			return false;
+		for(ArrowheadSystem provider : providers)
+			if(!provider.isValid())
+				return false;
 		return true;
 	}
 	

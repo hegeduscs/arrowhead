@@ -25,5 +25,14 @@ public class GSDRequestForm {
 	public void setRequestedService(ArrowheadService requestedService) {
 		this.requestedService = requestedService;
 	}
-
+	
+	public boolean isPayloadUsable(){
+		if(requestedService == null)
+			return false;
+		if(requestedService.getServiceGroup() == null || requestedService.getServiceDefinition() == null)
+			return false;
+		if(requestedService.getInterfaces() == null || requestedService.getInterfaces().isEmpty())
+			return false;
+		return true;
+	}
 }

@@ -8,14 +8,14 @@
 
 	<modules>
 		<module>common</module>
-		<module>dnssd</module>		
+		<module>dnssd</module>
 		<module>serviceregistry</module>
 		<module>qos</module>
 		<module>gatekeeper</module>
 		<module>authorization</module>
 		<module>orchestrator</module>
 		<module>api</module>
-		<module>main</module>		
+		<module>main</module>
 	</modules>
 	<properties>
 		<jersey.version>2.22.1</jersey.version>
@@ -102,13 +102,13 @@
 					<version>${mvn.glassfish.version}</version>
 				</plugin>
 				<plugin>
-				    <groupId>org.codehaus.mojo</groupId>
-				    <artifactId>exec-maven-plugin</artifactId>
-				    <version>1.2.1</version>
-				    <configuration>
-				    	<mainClass>eu.arrowhead.main.Main</mainClass>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.2.1</version>
+					<configuration>
+						<mainClass>eu.arrowhead.main.Main</mainClass>
 						<executable>java</executable>
-				    </configuration>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

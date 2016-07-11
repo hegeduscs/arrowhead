@@ -16,6 +16,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
 
@@ -72,7 +73,6 @@ public class GatekeeperResource {
     	
     	log.info("Inside the GateKeeper");
     	ArrowheadCloud requesterCloud = sysConfig.getOwnCloud();
-    	//XXX: INTERNAL / OWN
     	
     	log.info("Got the cloud info");
     	GSDPoll gsdPoll = new GSDPoll();
@@ -92,7 +92,7 @@ public class GatekeeperResource {
    		log.info("Starting to find provider service for: "+ gsdPoll.getRequestedService().getServiceDefinition());
    		Client client = ClientBuilder.newClient();
    		
-		//TODO: "http://"
+		//TODO: use URI builder instead
     	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/gsd_poll/";    	
     	System.out.println(uri);
     	
@@ -143,7 +143,7 @@ public class GatekeeperResource {
     	
     	if (gsdPollRequest==null) {
 			throw new BadPayloadException(
-					"GateKeeper: Bad payload from GateKeeper: Missing/wrong parameters in GSDPoll.");
+					"GateKeeper: Bad payload from external: Missing/wrong parameters in GSDPoll.");
 		}    	
     	else {
     		gsdPoll = gsdPollRequest;
@@ -152,7 +152,6 @@ public class GatekeeperResource {
     	
     	ArrowheadService requestedService = gsdPoll.getRequestedService();
     	ArrowheadCloud providerCloud = sysConfig.getOwnCloud();
-    	//XXX: INTERNAL / OWN
     	
     	 //Sending an InterCloudAuthRequest to the Authorization System (generateToken=false)
     	log.info("Creating an InterCloudAuthRequest to the Authorization System");
@@ -208,21 +207,22 @@ public class GatekeeperResource {
     	else {
     		proposal = new ICNProposal(icnRequestForm.getRequestedService(), 
         			icnRequestForm.getAuthenticationInfo(), sysConfig.getOwnCloud(), icnRequestForm.getRequesterSystem());
-    		//XXX: INTERNAL / OWN
+    		//TODO: why xxx
     	}
     	
     	// HTTP PUT to the provider GateKeeper
     	log.info("ICN Proposal for: " + proposal.getRequestedService().getServiceDefinition());
     	
-		//TODO: "http://"
-    	String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/icn_proposal/";
-    	
+		//TODO: URI builder --- done, needs testing (old solution commented out)
+    	//String uri = "http://"+sysConfig.getCloudURIs().get(0).substring(0, 25)+"gatekeeper/icn_proposal/";
+    	UriBuilder ub = null;
+		ub = UriBuilder.fromPath(sysConfig.getCloudURIs().get(0)).path("gatekeeper").path("icn_proposal");
+		String uri = ub.toString();
+		
     	log.info("ICN Proposal to the chosen GateKeeper.");
     	System.out.println("ICN Proposal to: " + uri);
-    	
-//    	String uri = "http://"+sysConfig.getGatekeeperURI()+"/icn_proposal/";
-//    	String uri = "http://localhost:8080/core/gatekeeper/icn_proposal/";
-    	
+    	    	
+    	//TODO: error handling 
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(uri);
 	    Response response = target
@@ -246,6 +246,7 @@ public class GatekeeperResource {
      */
     @PUT
     @Path("/icn_proposal/")
+    //TODO rename function
     public ICNEnd getICNEnd (ICNProposal icnProposalRequest){
 
     	log.info("GK gets an ICNProposal");
@@ -301,12 +302,10 @@ public class GatekeeperResource {
     private String getAuthorizationResponse(
 			InterCloudAuthRequest interAuthRequest, ArrowheadCloud requesterCloud) {
 
-    	//TODO: "http://"
+    	//TODO: URI builder once again
     	String uri = "http://" + sysConfig.getAuthorizationURI() + 
     			"/operator/" + requesterCloud.getOperator()+
     			"/cloud/"+requesterCloud.getName();
-//    	String uri = "http://localhost:8080/core/authorization/operator/"+cloudOperator+"/cloud/"+cloudName;
-    	System.out.println(uri);
     	
     	Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(uri); 
@@ -334,7 +333,7 @@ public class GatekeeperResource {
 	private OrchestrationResponse getOrchestrationResponse(
 			ArrowheadService requestedService, String string,
 			ArrowheadSystem requesterSystem) {
-		
+		//TODO update for new orch form
 		Map<String, Boolean> orchestrationFlags = new HashMap<>();
 		orchestrationFlags.put("matchmaking", false);
 		orchestrationFlags.put("externalServiceRequest", true);
@@ -347,9 +346,8 @@ public class GatekeeperResource {
 		
 		Client client2 = ClientBuilder.newClient();
 
-		//TODO: "http://"
+		//TODO: variable names & uri building if needed
 		String uri2 = "http://" + sysConfig.getOrchestratorURI();
-//    	String uri2 = "http://localhost:8080/core/orchestrator/orchestration";
 		System.out.println(uri2);
 		
 		log.info("Sending the ServiceRequestForm to the Orchestrator");
@@ -372,6 +370,7 @@ public class GatekeeperResource {
 	 * @return ServiceQueryResult
 	 */
   //Copy from eu.arrowhead.core.orchestrator.OrchestrationService
+	//TODO fix function name, internals: error handling, logging messages, ...
   	private ServiceQueryResult getServiceQueryResultGateKeeper(ArrowheadService arrService) {
   		log.info("GK: inside the getServiceQueryResult function");
 		ArrowheadService as = arrService;
@@ -382,6 +381,7 @@ public class GatekeeperResource {
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(strtarget);
 		
+		//TODO tsig key not hardwired!!
 		ServiceQueryForm sqf = new ServiceQueryForm
 				(as.getMetaData(), as.getInterfaces(), false, false,"RIuxP+vb5GjLXJo686NvKQ==");
 		

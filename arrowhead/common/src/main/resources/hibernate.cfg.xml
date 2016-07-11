@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+ <session-factory>
+ <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+ <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+ <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/arrowhead</property>
+ <property name="hibernate.connection.username">root</property>
+ <property name="hibernate.connection.password">root</property>
+ <property name="show_sql">true</property>
+ <property name="hibernate.hbm2ddl.auto">update</property>
+ <mapping class="eu.arrowhead.common.model.ArrowheadCloud"/>
+ <mapping class="eu.arrowhead.common.model.ArrowheadSystem"/>
+ <mapping class="eu.arrowhead.common.model.ArrowheadService"/>
+ <mapping class="eu.arrowhead.common.database.InterCloudAuthorization"/>
+ <mapping class="eu.arrowhead.common.database.IntraCloudAuthorization"/>
+ <mapping class="eu.arrowhead.common.database.CoreSystem"/>
+ <mapping class="eu.arrowhead.common.database.NeighborCloud"/>
+ <mapping class="eu.arrowhead.common.database.OwnCloud"/>
+ <mapping class="eu.arrowhead.common.database.OrchestrationStore"/>
+</session-factory>
+</hibernate-configuration>

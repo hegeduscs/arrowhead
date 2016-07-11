@@ -322,6 +322,7 @@ public class ServiceRegistry {
 
 	private DnsSDRegistrator createRegistrator() throws DnsSDException {
 		// Get the DNS specific settings
+		//TODO hardwired IP?
 		String dnsIpAddress = getProp().getProperty("dns.ip", "192.168.184.128");
 		String dnsDomain = getProp().getProperty("dns.registerDomain", "srv.evoin.arrowhead.eu") + ".";
 		int dnsPort = new Integer(getProp().getProperty("dns.port", "53"));
