@@ -11,7 +11,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Date;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -108,6 +111,10 @@ public class Main {
 			System.out.println(String.format("Jersey app started with WADL available at "
 					+ "%sapplication.wadl\nHit enter to stop it...", BASE_URI_SECURED));
 		}
+		
+		TimerTask pingTask = new PingTask();
+		Timer timer = new Timer();
+		timer.schedule(pingTask, 60000l, (2l * 60l * 1000l));
 
 		System.in.read();
 		server.stop();
@@ -127,5 +134,14 @@ public class Main {
 			ex.printStackTrace();
 		}
 		return prop;
+	}
+	
+	static class PingTask extends TimerTask {
+
+		@Override
+		public void run() {
+			System.out.println("TimerTask " + new Date().toString());
+			ServiceRegistry.getInstance().pingAndRemoveServices();			
+		}
 	}
 }
