@@ -1,11 +1,5 @@
 # Define the root logger with appender file
-log4j.rootLogger = INFO, DB
-
-# Direct log messages to stdout - for test
-# log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-# log4j.appender.stdout.target=System.out 
-# log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-# log4j.appender.stdout.layout.conversionPattern=%d{ABSOLUTE} %5p %t %c{1}:%M:%L - %m%n
+log4j.rootLogger = DEBUG, DB
 
 # Define the DB appender
 log4j.appender.DB=org.apache.log4j.jdbc.JDBCAppender
@@ -13,8 +7,8 @@ log4j.appender.DB=org.apache.log4j.jdbc.JDBCAppender
 # Set Database Driver
 log4j.appender.DB.driver=com.mysql.jdbc.Driver
 
-# Set Database URL -- CLOUD B
-log4j.appender.DB.URL=jdbc:mysql://152.66.245.169:3306/core
+# Set Database URL
+log4j.appender.DB.URL=jdbc:mysql://152.66.245.167:3306/core
 
 # Set database user name and password
 log4j.appender.DB.user=arrowhead
