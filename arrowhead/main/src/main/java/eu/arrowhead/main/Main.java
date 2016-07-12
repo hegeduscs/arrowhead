@@ -32,7 +32,7 @@ public class Main {
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.serviceregistry.ServiceRegistryResource.class)
         				.packages("eu.arrowhead.common")
-        		).setSSLContext(certHandler.getSSLContext("cloud1.serviceregistry")));
+        		).setSSLContext(certHandler.getSSLContext("cloud1.serviceregistry")));*/
                 
         
     	serverList.add(new ServerInfo(
@@ -43,20 +43,20 @@ public class Main {
         		));
         		//.setSSLContext(certHandler.getSSLContext("cloud1.authorization")));
               
-        
+        /*
     	serverList.add(new ServerInfo(
         		"gatekeeper",8446,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.gatekeeper.GatekeeperResource.class)
         				.packages("eu.arrowhead.common")
-        		).setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));
+        		).setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));*/
         
     	serverList.add(new ServerInfo(
         		"orchestrator",8447,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.orchestrator.OrchestratorResource.class)
         				.packages("eu.arrowhead.common")
-        		).setSSLContext(certHandler.getSSLContext("cloud1.orchestrator"))); */
+        		));//.setSSLContext(certHandler.getSSLContext("cloud1.orchestrator"))); 
     	
     	serverList.add(new ServerInfo(
         		"orchestrator",8448,

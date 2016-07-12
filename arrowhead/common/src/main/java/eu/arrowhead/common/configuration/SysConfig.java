@@ -77,6 +77,9 @@ public final class SysConfig {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "orchestration");
 		CoreSystem orchestration = dm.get(CoreSystem.class, restrictionMap);
+		if(orchestration == null){
+			throw new DataNotFoundException("Orchestration Core System not found in the database!");
+		}
 		return getURI(orchestration);
 	}
 
@@ -84,6 +87,9 @@ public final class SysConfig {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "serviceregistry");
 		CoreSystem serviceRegistry = dm.get(CoreSystem.class, restrictionMap);
+		if(serviceRegistry == null){
+			throw new DataNotFoundException("Service Registry Core System not found in the database!");
+		}
 		return getURI(serviceRegistry);
 	}
 
@@ -91,6 +97,9 @@ public final class SysConfig {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "authorization");
 		CoreSystem authorization = dm.get(CoreSystem.class, restrictionMap);
+		if(authorization == null){
+			throw new DataNotFoundException("Authoriaztion Core System not found in the database!");
+		}
 		return getURI(authorization);
 	}
 
@@ -98,6 +107,9 @@ public final class SysConfig {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "gatekeeper");
 		CoreSystem gatekeeper = dm.get(CoreSystem.class, restrictionMap);
+		if(gatekeeper == null){
+			throw new DataNotFoundException("Gatekeeper Core System not found in the database!");
+		}
 		return getURI(gatekeeper);
 	}
 
@@ -105,6 +117,9 @@ public final class SysConfig {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "qos");
 		CoreSystem QoS = dm.get(CoreSystem.class, restrictionMap);
+		if(QoS == null){
+			throw new DataNotFoundException("QoS Core System not found in the database!");
+		}
 		return getURI(QoS);
 	}
 	
@@ -112,6 +127,9 @@ public final class SysConfig {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "api");
 		CoreSystem api = dm.get(CoreSystem.class, restrictionMap);
+		if(api == null){
+			throw new DataNotFoundException("API Core System not found in the database!");
+		}
 		return getURI(api);
 	}
 
@@ -151,6 +169,11 @@ public final class SysConfig {
 	public static CoreSystem getCoreSystem(String systemName){
 		restrictionMap.put("systemName", systemName);
 		CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
+		if(coreSystem == null){
+			throw new DataNotFoundException("Requested Core System "
+					+ "(" + systemName + ") not found in the database!");
+		}
+		
 		return coreSystem;
 	}
 	
