@@ -38,8 +38,6 @@ public class ServiceRequestForm {
 		this.preferredProviders = preferredProviders;
 	}
 	
-	
-
 	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, 
 			ArrowheadSystem requesterSystem, Map<String, Boolean> orchestrationFlags,
 			List<ArrowheadSystem> preferredProviders) {
