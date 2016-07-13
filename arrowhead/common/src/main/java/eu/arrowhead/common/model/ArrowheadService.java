@@ -32,8 +32,7 @@ public class ArrowheadService {
 
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
-    @XmlTransient
-	private int id;
+    private int id;
 	
 	@Column(name="service_group")
 	private String serviceGroup;
@@ -59,6 +58,7 @@ public class ArrowheadService {
 		this.metaData = metaData;
 	}
 
+	@XmlTransient
 	public int getId() {
 		return id;
 	}
