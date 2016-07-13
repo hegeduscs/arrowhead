@@ -117,6 +117,7 @@ public final class SysConfig {
 	}
 
 	public static List<String> getNeighborCloudURIs() {
+		restrictionMap.clear();
 		List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();
 		cloudList.addAll(dm.getAll(NeighborCloud.class, restrictionMap));
 
@@ -130,6 +131,7 @@ public final class SysConfig {
 	}
 
 	public static ArrowheadCloud getOwnCloud() {
+		restrictionMap.clear();
 		List<OwnCloud> cloudList = new ArrayList<OwnCloud>();
 		cloudList = dm.getAll(OwnCloud.class, restrictionMap);
 		if (cloudList.isEmpty()) {
@@ -137,12 +139,13 @@ public final class SysConfig {
 					+ "Please make sure to enter one in the 'own_cloud' table."
 					+ "This information is needed for the Gatekeeper System.");
 		}
-
+		
 		ArrowheadCloud ownCloud = new ArrowheadCloud(cloudList.get(0));
 		return ownCloud;
 	}
 	
 	public static CoreSystem getCoreSystem(String systemName){
+		restrictionMap.clear();
 		restrictionMap.put("systemName", systemName);
 		CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
 		if(coreSystem == null){
