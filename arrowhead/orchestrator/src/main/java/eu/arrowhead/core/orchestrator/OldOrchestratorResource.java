@@ -62,7 +62,7 @@ public class OldOrchestratorResource {
 		orchestrationFlags.put("metadataSearch", false);
 		orchestrationFlags.put("pingProvider", false);
 		Response resp = Response.status(Status.OK)
-				.entity(new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, orchestrationFlags, null))
+				.entity(new ServiceRequestForm(requestedService, "requestedQoS", requesterSystem, orchestrationFlags, null, null))
 				.build();
 
 		// return resp.readEntity(ServiceRequestForm.class).toString();

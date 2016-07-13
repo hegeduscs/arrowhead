@@ -36,9 +36,10 @@ public class ServiceRequestForm {
 		this.orchestrationFlags.put("triggerInterCloud", false);
 		this.orchestrationFlags.put("enableInterCloud", false);
 		this.orchestrationFlags.put("metadataSearch", false);
-		this.orchestrationFlags.put("pingProvider", false);
+		this.orchestrationFlags.put("pingProviders", false);
 		this.orchestrationFlags.put("overrideStore", false);
 		this.orchestrationFlags.put("storeOnlyActive", false);
+		this.orchestrationFlags.put("onlyPreferred", false);
 		this.orchestrationFlags.put("matchmaking", false);
 		this.orchestrationFlags.put("generateToken", false);
 	}

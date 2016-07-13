@@ -7,6 +7,9 @@ import java.util.List;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
+import eu.arrowhead.common.configuration.SysConfig;
+import eu.arrowhead.common.model.ArrowheadCloud;
+
 
 /**
  * Main class.
