@@ -54,9 +54,7 @@ public class NeighborCloud {
 	}
 
 	public boolean isPayloadUsable(){
-		if(cloud == null)
-			return false;
-		if(cloud.getOperator() == null || cloud.getCloudName() == null)
+		if(cloud == null || !cloud.isValid())
 			return false;
 		return true;
 	}

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 
@@ -16,36 +17,42 @@ public class ServiceRequestForm {
 	private ArrowheadService requestedService;
 	private String requestedQoS;
 	private ArrowheadSystem requesterSystem;
-	private Map<String, Boolean> orchestrationFlags = new HashMap<>();
-	private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
+	private Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+	private List<ArrowheadSystem> preferredSystems = new ArrayList<ArrowheadSystem>();
+	private List<ArrowheadCloud> preferredClouds = new ArrayList<ArrowheadCloud>();
 	
 	public ServiceRequestForm (){
-		super();
 	}
 
 	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, 
-			ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredProviders) {
+			ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredSystems,
+			List<ArrowheadCloud> preferredClouds) {
 		this.requestedService = requestedService;
 		this.requestedQoS = requestedQoS;
 		this.requesterSystem = requesterSystem;
+		this.preferredSystems = preferredSystems;
+		this.preferredClouds = preferredClouds;
 		this.orchestrationFlags.put("externalServiceRequest", false);
 		this.orchestrationFlags.put("triggerInterCloud", false);
+		this.orchestrationFlags.put("enableInterCloud", false);
 		this.orchestrationFlags.put("metadataSearch", false);
-		this.orchestrationFlags.put("pingProvider", false);
+		this.orchestrationFlags.put("pingProviders", false);
 		this.orchestrationFlags.put("overrideStore", false);
+		this.orchestrationFlags.put("storeOnlyActive", false);
+		this.orchestrationFlags.put("onlyPreferred", false);
 		this.orchestrationFlags.put("matchmaking", false);
-		this.orchestrationFlags.put("hasPreferences", false);
-		this.preferredProviders = preferredProviders;
+		this.orchestrationFlags.put("generateToken", false);
 	}
 	
 	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, 
-			ArrowheadSystem requesterSystem, Map<String, Boolean> orchestrationFlags,
-			List<ArrowheadSystem> preferredProviders) {
+			ArrowheadSystem requesterSystem, Map<String, Boolean> orchestrationFlags, 
+			List<ArrowheadSystem> preferredSystems, List<ArrowheadCloud> preferredClouds) {
 		this.requestedService = requestedService;
 		this.requestedQoS = requestedQoS;
 		this.requesterSystem = requesterSystem;
 		this.orchestrationFlags = orchestrationFlags;
-		this.preferredProviders = preferredProviders;
+		this.preferredSystems = preferredSystems;
+		this.preferredClouds = preferredClouds;
 	}
 
 	public ArrowheadService getRequestedService() {
@@ -80,24 +87,27 @@ public class ServiceRequestForm {
 		this.orchestrationFlags = orchestrationFlags;
 	}
 
-	public List<ArrowheadSystem> getPreferredProviders() {
-		return preferredProviders;
+	public List<ArrowheadSystem> getPreferredSystems() {
+		return preferredSystems;
 	}
 
-	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
-		this.preferredProviders = preferredProviders;
+	public void setPreferredSystems(List<ArrowheadSystem> preferredSystems) {
+		this.preferredSystems = preferredSystems;
+	}
+
+	public List<ArrowheadCloud> getPreferredClouds() {
+		return preferredClouds;
+	}
+
+	public void setPreferredClouds(List<ArrowheadCloud> preferredClouds) {
+		this.preferredClouds = preferredClouds;
 	}
 	
-	public boolean areFlagsSet(){
-		if(!orchestrationFlags.containsKey("externalServiceRequest") ||
-			!orchestrationFlags.containsKey("triggerInterCloud") ||
-			!orchestrationFlags.containsKey("metadataSearch") ||
-			!orchestrationFlags.containsKey("pingProvider") ||
-			!orchestrationFlags.containsKey("overrideStore") ||
-			!orchestrationFlags.containsKey("matchmaking") ||
-			!orchestrationFlags.containsKey("hasPreferences"))
+	public boolean isPayloadUsable(){
+		if(requesterSystem == null || !requesterSystem.isValid())
 			return false;
 		return true;
 	}
+
 	
 }

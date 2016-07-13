@@ -30,12 +30,10 @@ import eu.arrowhead.common.model.ArrowheadSystem;
  * @author umlaufz
  * 
  * Entity class for storing Orchestration Store entries in the database.
- * The "consumer_system_id" and "arrowhead_service_id" columns must be unique together.
- * The name column must be unique by itself.
+ * The name column must be unique.
  */
 @Entity
-@Table(name="orchestration_store", uniqueConstraints={@UniqueConstraint(columnNames = 
-		{"consumer_system_id", "arrowhead_service_id"})})
+@Table(name="orchestration_store")
 public class OrchestrationStore {
 	
 	@Column(name="id")

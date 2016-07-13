@@ -1,21 +1,25 @@
 package eu.arrowhead.common.model.messages;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
+import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 
 @XmlRootElement
 public class GSDRequestForm {
 
 	private ArrowheadService requestedService;
+	private List<ArrowheadCloud> preferredClouds = new ArrayList<ArrowheadCloud>();
 
 	public GSDRequestForm() {
-		super();
 	}
 
-	public GSDRequestForm(ArrowheadService requestedService) {
-		super();
+	public GSDRequestForm(ArrowheadService requestedService, List<ArrowheadCloud> preferredClouds) {
 		this.requestedService = requestedService;
+		this.preferredClouds = preferredClouds;
 	}
 
 	public ArrowheadService getRequestedService() {
@@ -26,10 +30,18 @@ public class GSDRequestForm {
 		this.requestedService = requestedService;
 	}
 	
+	public List<ArrowheadCloud> getPreferredClouds() {
+		return preferredClouds;
+	}
+
+	public void setPreferredClouds(List<ArrowheadCloud> preferredClouds) {
+		this.preferredClouds = preferredClouds;
+	}
+
 	public boolean isPayloadUsable(){
 		if(requestedService == null)
 			return false;
-		if(requestedService.getServiceGroup() == null || requestedService.getServiceDefinition() == null)
+		if(!requestedService.isValid())
 			return false;
 		if(requestedService.getInterfaces() == null || requestedService.getInterfaces().isEmpty())
 			return false;

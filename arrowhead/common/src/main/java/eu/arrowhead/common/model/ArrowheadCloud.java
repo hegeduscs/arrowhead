@@ -10,6 +10,8 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import eu.arrowhead.common.database.OwnCloud;
+
 /**
  * Entity class for storing Arrowhead Clouds in the database.
  * The "operator" and "cloud_name" columns must be unique together.
@@ -54,6 +56,15 @@ public class ArrowheadCloud {
 		this.port = port;
 		this.gatekeeperServiceURI = gatekeeperServiceURI;
 		this.authenticationInfo = authenticationInfo;
+	}
+	
+	public ArrowheadCloud(OwnCloud cloud){
+		this.operator = cloud.getOperator();
+		this.cloudName = cloud.getCloudName();
+		this.address = cloud.getAddress();
+		this.port = cloud.getPort();
+		this.gatekeeperServiceURI = cloud.getGatekeeperServiceURI();
+		this.authenticationInfo = cloud.getAuthenticationInfo();
 	}
 
 	public int getId() {
