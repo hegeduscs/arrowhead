@@ -81,6 +81,25 @@ public class OrchestratorApi {
 	}
 	
 	/**
+	 * Returns all the active entries of the Orchestration Store.
+	 * 
+	 * @return List<OrchestrationStore>
+	 * @throws DataNotFoundException
+	 */
+	@GET
+	@Path("store/allactive")
+	public List<OrchestrationStore> getActiveStoreEntries(){
+		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+		restrictionMap.put("isActive", true);
+		store = dm.getAll(OrchestrationStore.class, restrictionMap);
+		if(store.isEmpty()){
+			throw new DataNotFoundException("Active Orchestration Store entries were not found.");
+		}
+			
+		return store;
+	}
+	
+	/**
 	 * Returns the Orchestration Store entries from the database specified by
 	 * the consumer and/or the service.
 	 * 

@@ -153,16 +153,8 @@ public final class SysConfig {
 					+ "Please make sure to enter one in the 'own_cloud' table."
 					+ "This information is needed for the Gatekeeper System.");
 		}
-		OwnCloud retrievedCloud = cloudList.get(0);
 
-		ArrowheadCloud ownCloud = new ArrowheadCloud();
-		ownCloud.setOperator(retrievedCloud.getOperator());
-		ownCloud.setCloudName(retrievedCloud.getCloudName());
-		ownCloud.setAddress(retrievedCloud.getAddress());
-		ownCloud.setPort(retrievedCloud.getPort());
-		ownCloud.setGatekeeperServiceURI(retrievedCloud.getGatekeeperServiceURI());
-		ownCloud.setAuthenticationInfo(retrievedCloud.getAuthenticationInfo());
-
+		ArrowheadCloud ownCloud = new ArrowheadCloud(cloudList.get(0));
 		return ownCloud;
 	}
 	
