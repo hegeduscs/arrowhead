@@ -44,12 +44,6 @@ public class OrchestrationStoreQuery {
 	public void setOnlyActive(Boolean onlyActive) {
 		this.onlyActive = onlyActive;
 	}
-
-	public boolean isPayloadEmpty(){
-		if(requestedService == null && requesterSystem == null)
-			return true;
-		return false;
-	}
 	
 	public boolean isPayloadComplete(){
 		if(requestedService == null || requesterSystem == null ||

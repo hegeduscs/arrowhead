@@ -29,7 +29,7 @@ public class GSDRequestForm {
 	public boolean isPayloadUsable(){
 		if(requestedService == null)
 			return false;
-		if(requestedService.getServiceGroup() == null || requestedService.getServiceDefinition() == null)
+		if(requestedService.isValid())
 			return false;
 		if(requestedService.getInterfaces() == null || requestedService.getInterfaces().isEmpty())
 			return false;
