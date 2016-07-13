@@ -21,7 +21,7 @@ public class Main {
      */
     public static void main(String[] args) throws Exception {
     	
-    	CertificateHandler certHandler = new CertificateHandler("C:/Arrowhead/arrowhead/certificates")
+    	CertificateHandler certHandler = new CertificateHandler("D:/Eclipse_workspace/Arrowhead/certificates")
     			.setTrustStore("mastercacerts")
     			.setDefaultPassword("123456");
     
