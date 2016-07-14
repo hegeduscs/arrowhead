@@ -8,27 +8,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ServiceQueryResult {
 	
-	private List<ProvidedService> serviceQueryData = new ArrayList<ProvidedService>();
+	private List<ProvidedService> result = new ArrayList<ProvidedService>();
 
 	public ServiceQueryResult() {
 		super();
 	}
 
-	public ServiceQueryResult(List<ProvidedService> serviceQueryData) {
+	public ServiceQueryResult(List<ProvidedService> result) {
 		super();
-		this.serviceQueryData = serviceQueryData;
+		this.result = result;
 	}
 
 	public List<ProvidedService> getServiceQueryData() {
-		return serviceQueryData;
+		return result;
 	}
 
-	public void setServiceQueryData(List<ProvidedService> serviceQueryData) {
-		this.serviceQueryData = serviceQueryData;
+	public void setServiceQueryData(List<ProvidedService> result) {
+		this.result = result;
 	}
 	
 	public boolean isPayloadEmpty(){
-		if(serviceQueryData == null || serviceQueryData.isEmpty())
+		if(result == null || result.isEmpty())
 			return true;
 		return false;
 	}

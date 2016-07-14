@@ -27,7 +27,7 @@ public class ServiceQueryForm {
 	}
 
 	public ServiceQueryForm(ServiceRequestForm srf) {
-		this.serviceMetadata = srf.getRequestedService().getMetaData();
+		this.serviceMetadata = srf.getRequestedService().getServiceMetadata();
 		this.serviceInterfaces = srf.getRequestedService().getInterfaces();
 		this.pingProviders = srf.getOrchestrationFlags().get("pingProvider");
 		this.metadataSearch = srf.getOrchestrationFlags().get("metadataSearch");

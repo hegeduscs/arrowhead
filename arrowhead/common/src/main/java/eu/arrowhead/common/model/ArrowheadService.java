@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -43,17 +44,18 @@ public class ArrowheadService {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<String> interfaces = new ArrayList<String>();
 	
-	private List<ServiceMetadata> metaData;
+	@Transient
+	private List<ServiceMetadata> serviceMetadata;
 	
 	public ArrowheadService(){
 	}
 	
 	public ArrowheadService(String serviceGroup, String serviceDefinition,
-			List<String> interfaces, List<ServiceMetadata> metaData) {
+			List<String> interfaces, List<ServiceMetadata> serviceMetadata) {
 		this.serviceGroup = serviceGroup;
 		this.serviceDefinition = serviceDefinition;
 		this.interfaces = interfaces;
-		this.metaData = metaData;
+		this.serviceMetadata = serviceMetadata;
 	}
 
 	@XmlTransient
@@ -89,12 +91,12 @@ public class ArrowheadService {
 		this.interfaces = interfaces;
 	}
 
-	public List<ServiceMetadata> getMetaData() {
-		return metaData;
+	public List<ServiceMetadata> getServiceMetadata() {
+		return serviceMetadata;
 	}
 
-	public void setMetaData(List<ServiceMetadata> metaData) {
-		this.metaData = metaData;
+	public void setServiceMetadata(List<ServiceMetadata> metaData) {
+		this.serviceMetadata = metaData;
 	}
 	
 	public boolean isValid(){

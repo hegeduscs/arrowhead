@@ -38,6 +38,7 @@ public class ServiceRegistry {
 
 	private static ServiceRegistry instance;
 	private static Properties prop;
+	private static Properties appProp;
 
 	public static synchronized ServiceRegistry getInstance() {
 		try {
@@ -67,6 +68,25 @@ public class ServiceRegistry {
 			ex.printStackTrace();
 		}
 		return prop;
+	}
+	
+	public synchronized Properties getAppProp() {
+		try {
+			if (appProp == null) {
+				appProp = new Properties();
+
+				File file = new File("config" + File.separator + "app.properties");
+				FileInputStream inputStream = new FileInputStream(file);
+
+				if (inputStream != null) {
+					appProp.load(inputStream);
+					initSystemProperties();
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return appProp;
 	}
 
 	// This is require for dnssdjava,dnsjava
@@ -298,7 +318,7 @@ public class ServiceRegistry {
 
 	public void pingAndRemoveServices() {
 
-		String scheduledPing = getProp().getProperty("ping.scheduled", "false");
+		String scheduledPing = getAppProp().getProperty("ping.scheduled", "false");
 
 		if (scheduledPing.equals("true")) {
 			try {
@@ -433,7 +453,7 @@ public class ServiceRegistry {
 			}
 
 			if (metaData != null && !metaData.isEmpty()) {
-				offered.setMetaData(metaData);
+				offered.setServiceMetadata(metaData);
 			} 
 			providerService.setProvider(arrowheadSystem);
 			providerService.setServiceURI(serviceURI);			
@@ -451,7 +471,7 @@ public class ServiceRegistry {
 			Map<String, String> properties, boolean replied) {
 		String path = properties.get("path");
 		String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
-		int timeout = new Integer(prop.getProperty("ping.timeout", "10000")).intValue();
+		int timeout = new Integer(getAppProp().getProperty("ping.timeout", "10000")).intValue();
 		int port = new Integer(service.getPort()).intValue();
 		String host = removeLastChar(service.getHost(), '.');
 		if (!pingHost(host, port, timeout)) {

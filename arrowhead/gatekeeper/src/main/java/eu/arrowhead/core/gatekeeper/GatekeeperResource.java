@@ -154,21 +154,19 @@ public class GatekeeperResource {
 			String srURI = SysConfig.getServiceRegistryURI();
 			srURI = UriBuilder.fromPath(srURI).path(service.getServiceGroup())
 					.path(service.getServiceDefinition()).toString();
-			log.info("ServiceRegistry URI acquired: " + srURI);
 			String tsig_key = SysConfig.getCoreSystem("serviceregistry").getAuthenticationInfo();
-			ServiceQueryForm queryForm = new ServiceQueryForm(service.getMetaData(), service.getInterfaces(),
+			ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(),
 					false, false, tsig_key);
 			
 			//Sending back provider Cloud information if the SR poll has results
 			Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
 			log.info("ServiceRegistry queried for requested Service: " + service.getServiceDefinition());
 			ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
-			
 			if(result.isPayloadEmpty()){
 				log.info("ServiceRegistry query came back empty.");
 				return Response.noContent().entity(null).build();
 			}
-
+			
 			log.info("Sending back GSD answer to requester Cloud.");
 			GSDAnswer answer = new GSDAnswer(service, SysConfig.getOwnCloud());
 			return Response.ok().entity(answer).build();
@@ -234,7 +232,7 @@ public class GatekeeperResource {
 		String authURI = SysConfig.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
 		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
-		log.info("Authorization System query finished");
+		log.info("Authorization System queried for requester Cloud: " + cloud.getCloudName());
 		
 		//If the consumer Cloud is not authorized null is returned
 		if(!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()){

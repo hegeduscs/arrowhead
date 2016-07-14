@@ -163,7 +163,7 @@ public class CommonApi {
 		ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
 		if (retrievedService != null) {
 			retrievedService.setInterfaces(service.getInterfaces());
-			retrievedService.setMetaData(service.getMetaData()); // transient!
+			retrievedService.setMetaData(service.getServiceMetadata()); // transient!
 			retrievedService = dm.merge(retrievedService);
 			return Response.status(Status.ACCEPTED).entity(retrievedService).build();
 		} else {

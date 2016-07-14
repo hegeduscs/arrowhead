@@ -138,5 +138,3 @@ arrowhead/serviceregistry/src/main/resources/log4j.properties_tmit
 core/.settings/org.hibernate.eclipse.console.prefs
 arrowhead/api/.project
 arrowhead/main/.project
-arrowhead/main/src/main/java/eu/arrowhead/main/Main.java
-arrowhead/common/bin/src/main/resources/hibernate.cfg
