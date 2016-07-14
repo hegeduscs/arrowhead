@@ -197,7 +197,7 @@ public class GatekeeperResource {
     	log.info("Compiling ICN proposal");
     	ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), 
     			requestForm.getAuthenticationInfo(), SysConfig.getOwnCloud(), 
-    			requestForm.getRequesterSystem(), requestForm.getPreferredSystems());
+    			requestForm.getRequesterSystem(), requestForm.getPreferredProviders());
     	
     	String icnURI = SysConfig.getURI(requestForm.getTargetCloud().getAddress(),
     			requestForm.getTargetCloud().getPort(), 
@@ -251,21 +251,23 @@ public class GatekeeperResource {
 			
 			//TODO review the flag values here
 			Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
-			orchestrationFlags.put("externalServiceRequest", false);
 			orchestrationFlags.put("triggerInterCloud", false);
+			orchestrationFlags.put("externalServiceRequest", false);
 			orchestrationFlags.put("enableInterCloud", false);
 			orchestrationFlags.put("metadataSearch", false);
 			orchestrationFlags.put("pingProviders", false);
 			orchestrationFlags.put("overrideStore", false);
 			orchestrationFlags.put("storeOnlyActive", false);
-			orchestrationFlags.put("onlyPreferred", false);
 			orchestrationFlags.put("matchmaking", false);
+			orchestrationFlags.put("hasPreferences", false);
+			orchestrationFlags.put("onlyPreferred", false);
 			orchestrationFlags.put("generateToken", false);
 			
-			ServiceRequestForm serviceRequestForm = new ServiceRequestForm(service, null, 
-					icnProposal.getRequesterSystem(), orchestrationFlags, 
-					icnProposal.getPreferredSystems(), null);
+			ServiceRequestForm serviceRequestForm = 
+					new ServiceRequestForm(icnProposal.getRequesterSystem(), service, null,
+							orchestrationFlags, null, icnProposal.getPreferredProviders());
 			String orchestratorURI = SysConfig.getOrchestratorURI();
+			
 			log.info("Sending ServiceRequestForm to the Orchestrator.");
 			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm);
 			OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);

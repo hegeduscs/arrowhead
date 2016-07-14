@@ -19,7 +19,6 @@ import eu.arrowhead.common.model.ArrowheadCloud;
  */
 public final class SysConfig {
 
-	//TODO maybe this has to have the option to be https once we have authentication
 	private static final String baseURI = "http://";
 	private static DatabaseManager dm = DatabaseManager.getInstance();
 	private static HashMap<String, Object> restrictionMap = new HashMap<String, Object>();

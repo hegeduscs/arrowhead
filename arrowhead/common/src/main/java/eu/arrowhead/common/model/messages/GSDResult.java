@@ -11,11 +11,9 @@ public class GSDResult {
 	private List<GSDAnswer> response = new ArrayList<GSDAnswer>();
 
 	public GSDResult() {
-		super();
 	}
 
 	public GSDResult(List<GSDAnswer> response) {
-		super();
 		this.response = response;
 	}
 
@@ -26,5 +24,6 @@ public class GSDResult {
 	public void setResponse(List<GSDAnswer> response) {
 		this.response = response;
 	}
+	
 
 }

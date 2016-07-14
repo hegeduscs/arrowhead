@@ -13,12 +13,10 @@ public class GSDPoll {
 	private ArrowheadCloud requesterCloud;
 	
 	public GSDPoll() {
-		super();
 	}
 
 	public GSDPoll(ArrowheadService requestedService,
 			ArrowheadCloud requesterCloud) {
-		super();
 		this.requestedService = requestedService;
 		this.requesterCloud = requesterCloud;
 	}
@@ -38,5 +36,6 @@ public class GSDPoll {
 	public void setRequesterCloud(ArrowheadCloud requesterCloud) {
 		this.requesterCloud = requesterCloud;
 	}
+	
 
 }

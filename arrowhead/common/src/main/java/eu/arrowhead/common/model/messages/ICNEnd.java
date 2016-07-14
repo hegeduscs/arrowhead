@@ -8,7 +8,6 @@ public class ICNEnd {
 	OrchestrationResponse instructions;
 
 	public ICNEnd() {
-		super();
 	}
 
 	public ICNEnd(OrchestrationResponse instructions) {
@@ -22,4 +21,6 @@ public class ICNEnd {
 	public void setInstructions(OrchestrationResponse instructions) {
 		this.instructions = instructions;
 	}
+	
+	
 }

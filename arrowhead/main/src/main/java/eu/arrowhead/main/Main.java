@@ -7,9 +7,6 @@ import java.util.List;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
-import eu.arrowhead.common.configuration.SysConfig;
-import eu.arrowhead.common.model.ArrowheadCloud;
-
 
 /**
  * Main class.
@@ -23,12 +20,8 @@ public class Main {
      * @throws Exception 
      */
     public static void main(String[] args) throws Exception {
-    	
-<<<<<<< HEAD
-    	CertificateHandler certHandler = new CertificateHandler("D:/Eclipse Workspace/Arrowhead/certificates")
-=======
+
     	CertificateHandler certHandler = new CertificateHandler("C:/Arrowhead/arrowhead/certificates")
->>>>>>> de4e0340012c285e6d68515e01255b51c3843830
     			.setTrustStore("mastercacerts")
     			.setDefaultPassword("123456");
     
