@@ -57,7 +57,7 @@ public final class SysConfig {
 
 	public static String getOrchestratorURI() {
 		restrictionMap.clear();
-		restrictionMap.put("systemName", "orchestration");
+		restrictionMap.put("systemName", "orchestrator");
 		CoreSystem orchestration = dm.get(CoreSystem.class, restrictionMap);
 		if(orchestration == null){
 			throw new DataNotFoundException("Orchestration Core System not found in the database!");
@@ -116,6 +116,7 @@ public final class SysConfig {
 	}
 
 	public static List<String> getNeighborCloudURIs() {
+		restrictionMap.clear();
 		List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();
 		cloudList.addAll(dm.getAll(NeighborCloud.class, restrictionMap));
 
@@ -129,6 +130,7 @@ public final class SysConfig {
 	}
 
 	public static ArrowheadCloud getOwnCloud() {
+		restrictionMap.clear();
 		List<OwnCloud> cloudList = new ArrayList<OwnCloud>();
 		cloudList = dm.getAll(OwnCloud.class, restrictionMap);
 		if (cloudList.isEmpty()) {
@@ -142,6 +144,7 @@ public final class SysConfig {
 	}
 	
 	public static CoreSystem getCoreSystem(String systemName){
+		restrictionMap.clear();
 		restrictionMap.put("systemName", systemName);
 		CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
 		if(coreSystem == null){

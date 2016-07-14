@@ -36,20 +36,20 @@ public class Main {
                 
         
     	serverList.add(new ServerInfo(
-        		"authorization",8445,
+        		"",8445,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.authorization.AuthorizationResource.class)
         				.packages("eu.arrowhead.common")
         		));
         		//.setSSLContext(certHandler.getSSLContext("cloud1.authorization")));
               
-        /*
+        
     	serverList.add(new ServerInfo(
-        		"gatekeeper",8446,
+        		"",8446,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.gatekeeper.GatekeeperResource.class)
         				.packages("eu.arrowhead.common")
-        		).setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));*/
+        		));//.setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));
         
     	serverList.add(new ServerInfo(
         		"orchestrator",8447,

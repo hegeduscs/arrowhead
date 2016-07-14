@@ -63,7 +63,6 @@ public class GatekeeperResource {
 	 * @return GSDResult
 	 * @throws BadPayloadException
 	 */
-	//TODO linkedhashset amit csabival beszéltem.
 	@PUT
 	@Path("init_gsd")
 	public Response GSDRequest(GSDRequestForm requestForm) {
