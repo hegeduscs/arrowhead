@@ -68,7 +68,7 @@ public class Main {
 
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
 				.setClientMode(false).setNeedClientAuth(true));
-
+		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
 		server.start();
 		return server;
 	}
@@ -90,8 +90,10 @@ public class Main {
 
 		URI uri = UriBuilder.fromUri(BASE_URI).build();
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
-
-		server.start();
+		log.debug("isAllowPayloadForUndefinedHttpMethods : " + server.getServerConfiguration().isAllowPayloadForUndefinedHttpMethods());
+		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);		
+		log.debug("isAllowPayloadForUndefinedHttpMethods : " + server.getServerConfiguration().isAllowPayloadForUndefinedHttpMethods());
+		server.start();		
 		return server;
 	}
 
@@ -101,16 +103,15 @@ public class Main {
 	 * @param args
 	 * @throws IOException
 	 */
-	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws IOException {
 		log.info("Starting Server!");
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
-		HttpServer server = null;
+		
 		if (args != null && args.length > 0) {
 			switch (args[0]) {
 			case "insec":
-				server = startServer();
+				startServer();
 				log.debug(String.format("Jersey app started with WADL available at "
 						+ "%sapplication.wadl", BASE_URI));
 				break;
@@ -118,17 +119,22 @@ public class Main {
 				break;
 			}
 		} else {
-			server = startSecureServer();
+			startSecureServer();
 			log.debug(String.format("Jersey app started with WADL available at " + "%sapplication.wadl",
 					BASE_URI_SECURED));
 		}
 
 		TimerTask pingTask = new PingTask();
 		Timer timer = new Timer();
-		timer.schedule(pingTask, 60000l, (2l * 60l * 1000l));
+		int interval = 10;
+		try {
+			interval = Integer.parseInt(getProp().getProperty("ping.interval", "10"));	
+		} catch (Exception e) {
+			log.error("Invalid 'ping.interval' value in app.properties!");
+		}
+		
+		timer.schedule(pingTask, 60000l, (interval * 60l * 1000l));
 
-		System.in.read();
-		server.stop();
 	}
 
 	public synchronized static Properties getProp() {
@@ -148,7 +154,6 @@ public class Main {
 	}
 
 	static class PingTask extends TimerTask {
-
 		@Override
 		public void run() {
 			log.debug("TimerTask " + new Date().toString());
