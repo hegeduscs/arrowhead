@@ -155,7 +155,7 @@ public class GatekeeperResource {
 			srURI = UriBuilder.fromPath(srURI).path(service.getServiceGroup())
 					.path(service.getServiceDefinition()).toString();
 			String tsig_key = SysConfig.getCoreSystem("serviceregistry").getAuthenticationInfo();
-			ServiceQueryForm queryForm = new ServiceQueryForm(service.getMetaData(), service.getInterfaces(),
+			ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(),
 					false, false, tsig_key);
 			
 			//Sending back provider Cloud information if the SR poll has results

@@ -453,7 +453,7 @@ public class ServiceRegistry {
 			}
 
 			if (metaData != null && !metaData.isEmpty()) {
-				offered.setMetaData(metaData);
+				offered.setServiceMetadata(metaData);
 			} 
 			providerService.setProvider(arrowheadSystem);
 			providerService.setServiceURI(serviceURI);			
