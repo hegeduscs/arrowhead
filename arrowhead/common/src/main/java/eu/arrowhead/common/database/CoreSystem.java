@@ -25,8 +25,8 @@ public class CoreSystem {
     private int id;
 	@Column(name="system_name")
 	private String systemName;
-	@Column(name="ip_address")
-	private String IPAddress;
+	@Column(name="address")
+	private String address;
 	@Column(name="port")
 	private String port;
 	@Column(name="service_uri")
@@ -37,10 +37,10 @@ public class CoreSystem {
 	public CoreSystem(){
 	}
 	
-	public CoreSystem(String systemName, String IPAddress, String port, 
+	public CoreSystem(String systemName, String address, String port, 
 				String serviceURI, String authenticationInfo) {
 		this.systemName = systemName;
-		this.IPAddress = IPAddress;
+		this.address = address;
 		this.port = port;
 		this.serviceURI = serviceURI;
 		this.authenticationInfo = authenticationInfo;
@@ -58,12 +58,12 @@ public class CoreSystem {
 		this.systemName = systemName;
 	}
 
-	public String getIPAddress() {
-		return IPAddress;
+	public String getAddress() {
+		return address;
 	}
 
-	public void setIPAddress(String IPAddress) {
-		this.IPAddress = IPAddress;
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	public String getPort() {

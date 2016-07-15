@@ -32,8 +32,7 @@ public class ArrowheadService {
 
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
-    @XmlTransient
-	private int id;
+    private int id;
 	
 	@Column(name="service_group")
 	private String serviceGroup;
@@ -46,19 +45,20 @@ public class ArrowheadService {
 	private List<String> interfaces = new ArrayList<String>();
 	
 	@Transient
-	private List<ServiceMetadata> metaData; //TODO should i keep it?
+	private List<ServiceMetadata> serviceMetadata;
 	
 	public ArrowheadService(){
 	}
 	
 	public ArrowheadService(String serviceGroup, String serviceDefinition,
-			List<String> interfaces, List<ServiceMetadata> metaData) {
+			List<String> interfaces, List<ServiceMetadata> serviceMetadata) {
 		this.serviceGroup = serviceGroup;
 		this.serviceDefinition = serviceDefinition;
 		this.interfaces = interfaces;
-		this.metaData = metaData;
+		this.serviceMetadata = serviceMetadata;
 	}
 
+	@XmlTransient
 	public int getId() {
 		return id;
 	}
@@ -91,12 +91,12 @@ public class ArrowheadService {
 		this.interfaces = interfaces;
 	}
 
-	public List<ServiceMetadata> getMetaData() {
-		return metaData;
+	public List<ServiceMetadata> getServiceMetadata() {
+		return serviceMetadata;
 	}
 
-	public void setMetaData(List<ServiceMetadata> metaData) {
-		this.metaData = metaData;
+	public void setServiceMetadata(List<ServiceMetadata> metaData) {
+		this.serviceMetadata = metaData;
 	}
 	
 	public boolean isValid(){

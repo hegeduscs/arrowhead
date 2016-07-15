@@ -160,7 +160,7 @@ public class OldOrchestratorService {
 
 		// Init Global Service Discovery
 		log.info("Initiating global service discovery.");
-		gsdRequestForm = new GSDRequestForm(serviceRequestForm.getRequestedService());
+		gsdRequestForm = new GSDRequestForm(serviceRequestForm.getRequestedService(), null);
 		gsdResult = getGSDResult(gsdRequestForm);
 		if (gsdResult.getResponse().isEmpty()){
 			log.info("bad");
@@ -174,7 +174,7 @@ public class OldOrchestratorService {
 			// ICN Request for each cloud contained in an Entry
 			log.info("Sendin ICN to the following cloud: " + entry.getProviderCloud().getCloudName());
 			icnResultForm = getICNResult(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
-					"authenticationInfo", entry.getProviderCloud(),this.serviceRequestForm.getRequesterSystem()));
+					"authenticationInfo", entry.getProviderCloud(),this.serviceRequestForm.getRequesterSystem(), null));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
 			for (OrchestrationForm of : icnResultForm.getInstructions().getResponse()) {

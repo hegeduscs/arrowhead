@@ -31,7 +31,7 @@ public class ServiceRegistryResource {
 		ServiceRegistry.getInstance().register(serviceGroup, service, interf, entry);
 	}
 
-	@DELETE
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/{serviceGroup}/{service}/{interf}")
 	public void removingFromRegistry(@PathParam("serviceGroup") String serviceGroup,

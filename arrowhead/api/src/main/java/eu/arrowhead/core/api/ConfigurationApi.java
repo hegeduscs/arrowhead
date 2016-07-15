@@ -230,7 +230,7 @@ public class ConfigurationApi {
 		restrictionMap.put("systemName", cs.getSystemName());
 		CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
 		if (coreSystem != null) {
-			coreSystem.setIPAddress(cs.getIPAddress());
+			coreSystem.setAddress(cs.getAddress());
 			coreSystem.setPort(cs.getPort());
 			coreSystem.setAuthenticationInfo(cs.getAuthenticationInfo());
 			coreSystem.setServiceURI(cs.getServiceURI());

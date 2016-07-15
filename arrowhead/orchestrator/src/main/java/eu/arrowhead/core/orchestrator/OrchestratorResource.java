@@ -15,7 +15,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 
-@Path("")
+@Path("orchestration")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class OrchestratorResource {

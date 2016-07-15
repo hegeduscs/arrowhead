@@ -38,6 +38,7 @@ public class ServiceRegistry {
 
 	private static ServiceRegistry instance;
 	private static Properties prop;
+	private static Properties appProp;
 
 	public static synchronized ServiceRegistry getInstance() {
 		try {
@@ -58,9 +59,6 @@ public class ServiceRegistry {
 				File file = new File("config" + File.separator + "dns.properties");
 				FileInputStream inputStream = new FileInputStream(file);
 
-				// InputStream inputStream =
-				// getClass().getClassLoader().getResourceAsStream("dns.properties");
-
 				if (inputStream != null) {
 					prop.load(inputStream);
 					initSystemProperties();
@@ -70,6 +68,25 @@ public class ServiceRegistry {
 			ex.printStackTrace();
 		}
 		return prop;
+	}
+	
+	public synchronized Properties getAppProp() {
+		try {
+			if (appProp == null) {
+				appProp = new Properties();
+
+				File file = new File("config" + File.separator + "app.properties");
+				FileInputStream inputStream = new FileInputStream(file);
+
+				if (inputStream != null) {
+					appProp.load(inputStream);
+					initSystemProperties();
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return appProp;
 	}
 
 	// This is require for dnssdjava,dnsjava
@@ -83,7 +100,7 @@ public class ServiceRegistry {
 		if (!parametersIsValid(serviceGroup, serviceName, interf)) {
 			throw new InvalidParameterException("Invalid parameters in URL!");
 		}
-		System.out.println("entry.getServiceMetadata() :" + entry.getServiceMetadata());
+		
 		try {
 			if (entry != null && entry.getProvider() != null) {
 
@@ -104,16 +121,13 @@ public class ServiceRegistry {
 				setServiceDataProperties(entry, data);
 
 				if (reg.registerService(data)) {
-					log.info("Service registered: " + name);
-					System.out.println("Service registered: " + name);
+					log.info("Service registered: " + name);					
 				} else {
-					log.info("Service already exists: " + name);
-					System.out.println("Service already exists: " + name);
+					log.info("Service already exists: " + name);					
 				}
 
 			}
 		} catch (DnsSDException ex) {
-			System.out.println(ex.getMessage());
 			log.error(ex);
 			ex.printStackTrace();
 			throw new DnsException(ex.getMessage());
@@ -135,11 +149,9 @@ public class ServiceRegistry {
 			setTSIGKey(reg, entry.gettSIG_key());
 
 			if (reg.unregisterService(name)) {
-				log.info("Service unregistered: " + name);
-				System.out.println("Service unregistered: " + name);
+				log.info("Service unregistered: " + name);				
 			} else {
-				log.info("No service to remove: " + name);
-				System.out.println("No service to remove: " + name);
+				log.info("No service to remove: " + name);				
 			}
 		} catch (DnsSDException ex) {
 			log.error(ex);
@@ -159,7 +171,6 @@ public class ServiceRegistry {
 				DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator();
 
 				if (computerDomain != null) {
-					System.out.println("DNS-SD overriding computer domain: " + computerDomain);
 					de = DnsSDFactory.getInstance().createDomainEnumerator(computerDomain);
 				} else {
 					de = DnsSDFactory.getInstance().createDomainEnumerator();
@@ -171,8 +182,7 @@ public class ServiceRegistry {
 				List<ProvidedService> list = new ArrayList<ProvidedService>();
 				Collection<ServiceName> needToRemoveInstances = new ArrayList<ServiceName>();
 				for (ServiceType type : types) {
-					Collection<ServiceName> instances = browser.getServiceInstances(type);
-					System.out.println(instances);
+					Collection<ServiceName> instances = browser.getServiceInstances(type);					
 					for (ServiceName instance : instances) {
 						ServiceData service = browser.getServiceData(instance);
 						if (service != null) {
@@ -181,10 +191,7 @@ public class ServiceRegistry {
 										serviceInterface);
 								if (providerService != null) {
 									Map<String, String> properties = service.getProperties();
-									System.out.println("queryForm.isMetadataSearch(): " + queryForm.isMetadataSearch());
-									System.out.println("queryForm.isPingProviders(): " + queryForm.isPingProviders());
-									System.out.println("queryForm.getServiceMetadata(): " + queryForm.getServiceMetadata());
-
+									
 									if (queryForm.isMetadataSearch() || queryForm.isPingProviders()) {
 
 										boolean replied = true;
@@ -195,19 +202,10 @@ public class ServiceRegistry {
 										if (replied && queryForm.getServiceMetadata() != null && queryForm.isMetadataSearch()) {
 											boolean found = false;
 											for (ServiceMetadata entry : queryForm.getServiceMetadata()) {
-												System.out.println("entry: " + entry);
 												String metaData = (entry != null) ? properties
 														.get("ahsrvmetad_" + entry.getKey()) : null;
-												System.out.println("metaData: " + metaData);
-
+												
 												if (!found && metaData != null && metaData.equals(entry.getValue())) {
-													System.out
-															.println("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
-																	+ providerService.getServiceInterface()
-																	+ ", "
-																	+ providerService.getProvider().getSystemName()
-																	+ ", "
-																	+ metaData);
 													log.info("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
 															+ providerService.getServiceInterface()
 															+ ", "
@@ -218,11 +216,6 @@ public class ServiceRegistry {
 											}
 										} else if (replied && queryForm.getServiceMetadata() != null
 												&& !queryForm.isMetadataSearch()) {
-											System.out
-													.println("Service is found by interface and pinged and added to ServiceQueryResult, interface and name are : "
-															+ providerService.getServiceInterface()
-															+ ", "
-															+ providerService.getProvider().getSystemName());
 											log.info("Service is found by interface and metadata and added to ServiceQueryResult, interface and name are : "
 													+ providerService.getServiceInterface()
 													+ ", "
@@ -231,11 +224,6 @@ public class ServiceRegistry {
 										}
 
 									} else {
-										System.out
-												.println("Service is found by interface and added to ServiceQueryResult, interface and name are : "
-														+ providerService.getServiceInterface()
-														+ ", "
-														+ providerService.getProvider().getSystemName());
 										log.info("Service is found by interface and added to ServiceQueryResult, interface and name are : "
 												+ providerService.getServiceInterface()
 												+ ", "
@@ -246,7 +234,7 @@ public class ServiceRegistry {
 							}
 
 						}
-						System.out.println(service);
+						
 					}
 				}
 
@@ -272,8 +260,7 @@ public class ServiceRegistry {
 
 		DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator();
 
-		if (computerDomain != null) {
-			System.out.println("DNS-SD overriding computer domain: " + computerDomain);
+		if (computerDomain != null) {			
 			de = DnsSDFactory.getInstance().createDomainEnumerator(computerDomain);
 		} else {
 			de = DnsSDFactory.getInstance().createDomainEnumerator();
@@ -288,7 +275,7 @@ public class ServiceRegistry {
 
 			for (ServiceType type : types) {
 				Collection<ServiceName> instances = browser.getServiceInstances(type);
-				System.out.println(instances);
+				
 				for (ServiceName instance : instances) {
 					ServiceData service = browser.getServiceData(instance);
 					ProvidedService providerService = null;
@@ -299,7 +286,7 @@ public class ServiceRegistry {
 						String interfaceType = null;
 
 						String serviceType = service.getName().getType().toString();
-						System.out.println("serviceType :" + serviceType);
+						
 						int dotIndex = serviceType.indexOf(".");
 						if (dotIndex != -1) {
 							serviceType = serviceType.substring(0, dotIndex);
@@ -311,18 +298,19 @@ public class ServiceRegistry {
 							}
 						}
 						providerService = createProvidedService(service, interfaceType, serviceGroup, serviceName);
-						System.out.println("providerService : " + providerService);
+						
 						if (providerService != null) {
 							list.add(providerService);
 						}
 
 					}
-					System.out.println(service);
+					
 				}
 			}
 
 			ServiceQueryResult result = new ServiceQueryResult();
 			result.setServiceQueryData(list);
+			log.info("All Services are provided!");
 			return result;
 		}
 		return null;
@@ -330,7 +318,7 @@ public class ServiceRegistry {
 
 	public void pingAndRemoveServices() {
 
-		String scheduledPing = getProp().getProperty("ping.scheduled", "false");
+		String scheduledPing = getAppProp().getProperty("ping.scheduled", "false");
 
 		if (scheduledPing.equals("true")) {
 			try {
@@ -340,7 +328,6 @@ public class ServiceRegistry {
 				DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator();
 
 				if (computerDomain != null) {
-					System.out.println("DNS-SD overriding computer domain: " + computerDomain);
 					de = DnsSDFactory.getInstance().createDomainEnumerator(computerDomain);
 				} else {
 					de = DnsSDFactory.getInstance().createDomainEnumerator();
@@ -354,8 +341,7 @@ public class ServiceRegistry {
 				if (types != null) {
 
 					for (ServiceType type : types) {
-						Collection<ServiceName> instances = browser.getServiceInstances(type);
-						System.out.println(instances);
+						Collection<ServiceName> instances = browser.getServiceInstances(type);						
 						for (ServiceName instance : instances) {
 							ServiceData service = browser.getServiceData(instance);
 							ProvidedService providerService = null;
@@ -380,8 +366,7 @@ public class ServiceRegistry {
 									pingService(needToRemoveInstances, instance, service, properties, true);
 								}
 
-							}
-							System.out.println(service);
+							}							
 						}
 					}
 
@@ -458,8 +443,6 @@ public class ServiceRegistry {
 
 			List<ServiceMetadata> metaData = null;
 			for (Map.Entry<String, String> entry : properties.entrySet()) {
-				System.out.println("key : " + entry.getKey());
-				System.out.println("value : " + entry.getValue());
 				if (entry.getKey() != null && entry.getValue() != null && entry.getKey().contains("ahsrvmetad_")) {
 					if (metaData == null) {
 						metaData = new ArrayList<ServiceMetadata>();
@@ -470,14 +453,14 @@ public class ServiceRegistry {
 			}
 
 			if (metaData != null && !metaData.isEmpty()) {
-				offered.setMetaData(metaData);
+				offered.setServiceMetadata(metaData);
 			} 
 			providerService.setProvider(arrowheadSystem);
 			providerService.setServiceURI(serviceURI);			
 			providerService.setOffered(offered);
 			return providerService;
 		} catch (Throwable e) {
-			System.out.println(e);
+			log.error(e);
 			e.printStackTrace();
 		} 
 		return null;
@@ -488,11 +471,10 @@ public class ServiceRegistry {
 			Map<String, String> properties, boolean replied) {
 		String path = properties.get("path");
 		String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
-		int timeout = new Integer(prop.getProperty("ping.timeout", "10000")).intValue();
+		int timeout = new Integer(getAppProp().getProperty("ping.timeout", "10000")).intValue();
 		int port = new Integer(service.getPort()).intValue();
 		String host = removeLastChar(service.getHost(), '.');
 		if (!pingHost(host, port, timeout)) {
-			System.out.println("Can't access the service in the following URL " + targetUrl + ", in " + timeout + "millisec");
 			log.info("Can't access the service in the following URL" + targetUrl + ", in " + timeout + "millisec");
 			needToRemoveInstances.add(instance);
 			replied = false;
@@ -506,11 +488,9 @@ public class ServiceRegistry {
 		setTSIGKey(reg, tsigKey);
 		for (ServiceName sn : needToRemoveInstances) {
 			if (reg.unregisterService(sn)) {
-				log.info("Service unregistered: " + instance);
-				System.out.println("Service unregistered: " + instance);
-			} else {
-				log.info("No service to remove: " + instance);
-				System.out.println("No service to remove: " + instance);
+				log.info("Service unregistered: " + instance);				
+			} else {				
+				log.info("No service to remove: " + instance);				
 			}
 		}
 	}
@@ -557,7 +537,6 @@ public class ServiceRegistry {
 	}
 
 	private void setTSIGKey(DnsSDRegistrator reg, String tsigKey) {
-		System.out.println("TSIG Key: " + tsigKey);
 		String tsigKeyName = getProp().getProperty("tsig.name", "key.evoin.arrowhead.eu.");
 		String tsigAlgorithm = getProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
 		reg.setTSIGKey(tsigKeyName, tsigAlgorithm, tsigKey);
@@ -588,7 +567,7 @@ public class ServiceRegistry {
 			socket.connect(new InetSocketAddress(host, port), timeout);
 			return true;
 		} catch (IOException e) {
-			System.out.println("Exception Message : " + e.getMessage());
+			log.error(e);
 			e.printStackTrace();
 			return false; // Either timeout or unreachable or failed DNS lookup.
 		}

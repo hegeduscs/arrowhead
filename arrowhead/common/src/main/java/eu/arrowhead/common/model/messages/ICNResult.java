@@ -8,7 +8,6 @@ public class ICNResult {
 	OrchestrationResponse instructions;
 
 	public ICNResult() {
-		super();
 	}
 
 	public ICNResult(OrchestrationResponse instructions) {
@@ -26,4 +25,6 @@ public class ICNResult {
 	public void setInstructions(OrchestrationResponse instructions) {
 		this.instructions = instructions;
 	}
+	
+	
 }

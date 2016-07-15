@@ -10,7 +10,8 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
 
 	@Override
 	public Response toResponse(Exception ex) {
-		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 500, "No documentation yet.");
+		ErrorMessage errorMessage = new ErrorMessage("Class: " + ex.getClass().toString() + 
+				" Message: " + ex.getMessage(), 500, "No documentation yet.");
 		return Response.status(Status.INTERNAL_SERVER_ERROR)
 				.entity(errorMessage)
 				.build();

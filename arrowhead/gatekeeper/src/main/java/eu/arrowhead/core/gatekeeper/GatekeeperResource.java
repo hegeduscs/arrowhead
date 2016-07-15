@@ -2,8 +2,10 @@ package eu.arrowhead.core.gatekeeper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -19,7 +21,6 @@ import org.apache.log4j.Logger;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.SysConfig;
-import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
@@ -78,8 +79,25 @@ public class GatekeeperResource {
 		GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
 		
 		List<String> cloudURIs = new ArrayList<String>();
-		cloudURIs = SysConfig.getCloudURIs();
-		log.info(cloudURIs.size() + "NeighborCloud URIs acquired.");
+		if(requestForm.getSearchPerimeter() == null || requestForm.getSearchPerimeter().isEmpty()){
+			cloudURIs = SysConfig.getNeighborCloudURIs();
+			log.info(cloudURIs.size() + "NeighborCloud URIs acquired.");
+		}
+		else{
+			/*
+			 * Using a Set removes duplicate entries (which are needed for the Orchestrator) 
+			 * from the Cloud list.
+			 */
+			Set<ArrowheadCloud> preferredClouds = new LinkedHashSet<>(requestForm.getSearchPerimeter());
+			String URI = null;
+			for(ArrowheadCloud cloud : preferredClouds){
+				URI = SysConfig.getURI(cloud.getAddress(), cloud.getPort(), 
+						cloud.getGatekeeperServiceURI());
+				cloudURIs.add(URI);
+				log.info(cloudURIs.size() + "preferred cloud URIs acquired.");
+			}
+		}
+		
 		List<GSDAnswer> gsdAnswerList = new ArrayList<GSDAnswer>();
 		for(String URI : cloudURIs){
 			URI = UriBuilder.fromPath(URI).path("gsd_poll").toString();
@@ -136,7 +154,7 @@ public class GatekeeperResource {
 			srURI = UriBuilder.fromPath(srURI).path(service.getServiceGroup())
 					.path(service.getServiceDefinition()).toString();
 			String tsig_key = SysConfig.getCoreSystem("serviceregistry").getAuthenticationInfo();
-			ServiceQueryForm queryForm = new ServiceQueryForm(service.getMetaData(), service.getInterfaces(),
+			ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(),
 					false, false, tsig_key);
 			
 			//Sending back provider Cloud information if the SR poll has results
@@ -176,10 +194,11 @@ public class GatekeeperResource {
     	log.info("Compiling ICN proposal");
     	ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), 
     			requestForm.getAuthenticationInfo(), SysConfig.getOwnCloud(), 
-    			requestForm.getRequesterSystem());
+    			requestForm.getRequesterSystem(), requestForm.getPreferredProviders());
     	
-    	NeighborCloud cloud = new NeighborCloud(requestForm.getTargetCloud());
-    	String icnURI = SysConfig.getURI(cloud);
+    	String icnURI = SysConfig.getURI(requestForm.getTargetCloud().getAddress(),
+    			requestForm.getTargetCloud().getPort(), 
+    			requestForm.getTargetCloud().getGatekeeperServiceURI());
     	icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
     	
     	log.info("Sending ICN proposal to provider Cloud: " + icnURI);
@@ -227,16 +246,25 @@ public class GatekeeperResource {
 		else{
 			log.info("Requester Cloud is AUTHORIZED");
 			
+			//TODO review the flag values here
 			Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
-			orchestrationFlags.put("matchmaking", false);
-			orchestrationFlags.put("externalServiceRequest", true);
 			orchestrationFlags.put("triggerInterCloud", false);
+			orchestrationFlags.put("externalServiceRequest", true);
+			orchestrationFlags.put("enableInterCloud", false);
 			orchestrationFlags.put("metadataSearch", false);
-			orchestrationFlags.put("pingProvider", false);
+			orchestrationFlags.put("pingProviders", false);
+			orchestrationFlags.put("overrideStore", false);
+			orchestrationFlags.put("storeOnlyActive", false);
+			orchestrationFlags.put("matchmaking", false);
+			orchestrationFlags.put("hasPreferences", false);
+			orchestrationFlags.put("onlyPreferred", false);
+			orchestrationFlags.put("generateToken", false);
 			
-			ServiceRequestForm serviceRequestForm = new ServiceRequestForm(service, null, 
-					icnProposal.getRequesterSystem(), orchestrationFlags, null);
+			ServiceRequestForm serviceRequestForm = 
+					new ServiceRequestForm(icnProposal.getRequesterSystem(), service, null,
+							orchestrationFlags, null, icnProposal.getPreferredProviders());
 			String orchestratorURI = SysConfig.getOrchestratorURI();
+			
 			log.info("Sending ServiceRequestForm to the Orchestrator.");
 			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm);
 			OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);

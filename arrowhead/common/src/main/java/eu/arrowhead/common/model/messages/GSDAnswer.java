@@ -9,18 +9,15 @@ import eu.arrowhead.common.model.ArrowheadService;
 
 @XmlRootElement
 public class GSDAnswer {
-
 	
 	private ArrowheadService requestedService;
 	private ArrowheadCloud providerCloud;
 	
 	public GSDAnswer() {
-		super();
 	}
 
 	public GSDAnswer(ArrowheadService requestedService,
 			ArrowheadCloud providerCloud) {
-		super();
 		this.requestedService = requestedService;
 		this.providerCloud = providerCloud;
 	}
@@ -41,6 +38,5 @@ public class GSDAnswer {
 		this.providerCloud = providerCloud;
 	}
 
-	
 	
 }

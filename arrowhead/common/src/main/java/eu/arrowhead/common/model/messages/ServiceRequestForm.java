@@ -7,45 +7,61 @@ import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 
 @XmlRootElement
 public class ServiceRequestForm {
 
+	private ArrowheadSystem requesterSystem;
 	private ArrowheadService requestedService;
 	private String requestedQoS;
-	private ArrowheadSystem requesterSystem;
-	private Map<String, Boolean> orchestrationFlags = new HashMap<>();
+	private Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+	private List<ArrowheadCloud> preferredClouds = new ArrayList<ArrowheadCloud>();
 	private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
 	
 	public ServiceRequestForm (){
-		super();
 	}
 
-	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, 
-			ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredProviders) {
+	public ServiceRequestForm(ArrowheadSystem requesterSystem, ArrowheadService requestedService, 
+			String requestedQoS, List<ArrowheadCloud> preferredClouds, 
+			List<ArrowheadSystem> preferredProviders) {
+		this.requesterSystem = requesterSystem;
 		this.requestedService = requestedService;
 		this.requestedQoS = requestedQoS;
-		this.requesterSystem = requesterSystem;
-		this.orchestrationFlags.put("externalServiceRequest", false);
+		this.preferredClouds = preferredClouds;
+		this.preferredProviders = preferredProviders;
 		this.orchestrationFlags.put("triggerInterCloud", false);
+		this.orchestrationFlags.put("externalServiceRequest", false);
+		this.orchestrationFlags.put("enableInterCloud", false);
 		this.orchestrationFlags.put("metadataSearch", false);
-		this.orchestrationFlags.put("pingProvider", false);
+		this.orchestrationFlags.put("pingProviders", false);
 		this.orchestrationFlags.put("overrideStore", false);
+		this.orchestrationFlags.put("storeOnlyActive", false);
 		this.orchestrationFlags.put("matchmaking", false);
 		this.orchestrationFlags.put("hasPreferences", false);
-		this.preferredProviders = preferredProviders;
+		this.orchestrationFlags.put("onlyPreferred", false);
+		this.orchestrationFlags.put("generateToken", false);
 	}
 	
-	public ServiceRequestForm(ArrowheadService requestedService, String requestedQoS, 
-			ArrowheadSystem requesterSystem, Map<String, Boolean> orchestrationFlags,
-			List<ArrowheadSystem> preferredProviders) {
+	public ServiceRequestForm(ArrowheadSystem requesterSystem, ArrowheadService requestedService, 
+			String requestedQoS, Map<String, Boolean> orchestrationFlags, 
+			List<ArrowheadCloud> preferredClouds, List<ArrowheadSystem> preferredProviders) {
+		this.requesterSystem = requesterSystem;
 		this.requestedService = requestedService;
 		this.requestedQoS = requestedQoS;
-		this.requesterSystem = requesterSystem;
 		this.orchestrationFlags = orchestrationFlags;
+		this.preferredClouds = preferredClouds;
 		this.preferredProviders = preferredProviders;
+	}
+
+	public ArrowheadSystem getRequesterSystem() {
+		return requesterSystem;
+	}
+
+	public void setRequesterSystem(ArrowheadSystem requesterSystem) {
+		this.requesterSystem = requesterSystem;
 	}
 
 	public ArrowheadService getRequestedService() {
@@ -64,20 +80,20 @@ public class ServiceRequestForm {
 		this.requestedQoS = requestedQoS;
 	}
 
-	public ArrowheadSystem getRequesterSystem() {
-		return requesterSystem;
-	}
-
-	public void setRequesterSystem(ArrowheadSystem requesterSystem) {
-		this.requesterSystem = requesterSystem;
-	}
-
 	public Map<String, Boolean> getOrchestrationFlags() {
 		return orchestrationFlags;
 	}
 
 	public void setOrchestrationFlags(Map<String, Boolean> orchestrationFlags) {
 		this.orchestrationFlags = orchestrationFlags;
+	}
+
+	public List<ArrowheadCloud> getPreferredClouds() {
+		return preferredClouds;
+	}
+
+	public void setPreferredClouds(List<ArrowheadCloud> preferredClouds) {
+		this.preferredClouds = preferredClouds;
 	}
 
 	public List<ArrowheadSystem> getPreferredProviders() {
@@ -87,17 +103,12 @@ public class ServiceRequestForm {
 	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
 		this.preferredProviders = preferredProviders;
 	}
-	
-	public boolean areFlagsSet(){
-		if(!orchestrationFlags.containsKey("externalServiceRequest") ||
-			!orchestrationFlags.containsKey("triggerInterCloud") ||
-			!orchestrationFlags.containsKey("metadataSearch") ||
-			!orchestrationFlags.containsKey("pingProvider") ||
-			!orchestrationFlags.containsKey("overrideStore") ||
-			!orchestrationFlags.containsKey("matchmaking") ||
-			!orchestrationFlags.containsKey("hasPreferences"))
+
+	public boolean isPayloadUsable(){
+		if(requesterSystem == null || !requesterSystem.isValid())
 			return false;
 		return true;
 	}
+
 	
 }

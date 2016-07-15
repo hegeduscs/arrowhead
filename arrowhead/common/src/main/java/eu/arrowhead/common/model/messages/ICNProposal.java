@@ -1,5 +1,8 @@
 package eu.arrowhead.common.model.messages;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.arrowhead.common.model.ArrowheadCloud;
@@ -13,18 +16,19 @@ public class ICNProposal {
 	private String authenticationInfo;
 	private ArrowheadCloud requesterCloud;
 	private ArrowheadSystem requesterSystem;
+	private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
 	
 	public ICNProposal() {
-		super();
 	}
 
-	public ICNProposal(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud requesterCloud,
-			ArrowheadSystem requesterSystem) {
-		super();
+	public ICNProposal(ArrowheadService requestedService, String authenticationInfo, 
+			ArrowheadCloud requesterCloud, ArrowheadSystem requesterSystem,
+			List<ArrowheadSystem> preferredProviders) {
 		this.requestedService = requestedService;
 		this.authenticationInfo = authenticationInfo;
 		this.requesterCloud = requesterCloud;
 		this.requesterSystem = requesterSystem;
+		this.preferredProviders = preferredProviders;
 	}
 
 	public ArrowheadService getRequestedService() {
@@ -59,10 +63,13 @@ public class ICNProposal {
 		this.requesterSystem = requesterSystem;
 	}
 
+	public List<ArrowheadSystem> getPreferredProviders() {
+		return preferredProviders;
+	}
 
-	
-	
-
+	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
+		this.preferredProviders = preferredProviders;
+	}
 	
 	
 }

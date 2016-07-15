@@ -21,7 +21,6 @@ public class ArrowheadSystem {
 	
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
-	@XmlTransient
 	private int id;
 	
 	@Column(name="system_group")
@@ -51,6 +50,7 @@ public class ArrowheadSystem {
 		this.authenticationInfo = authenticationInfo;
 	}
 
+	@XmlTransient
 	public int getId() {
 		return id;
 	}

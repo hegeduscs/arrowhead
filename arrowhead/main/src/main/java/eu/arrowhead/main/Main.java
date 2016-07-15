@@ -20,8 +20,8 @@ public class Main {
      * @throws Exception 
      */
     public static void main(String[] args) throws Exception {
-    	
-    	CertificateHandler certHandler = new CertificateHandler("D:/Eclipse_workspace/Arrowhead/certificates")
+
+    	CertificateHandler certHandler = new CertificateHandler("C:/Arrowhead/arrowhead/certificates")
     			.setTrustStore("mastercacerts")
     			.setDefaultPassword("123456");
     
@@ -36,30 +36,30 @@ public class Main {
                 
         
     	serverList.add(new ServerInfo(
-        		"authorization",8445,
+        		"",8448,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.authorization.AuthorizationResource.class)
         				.packages("eu.arrowhead.common")
         		));
         		//.setSSLContext(certHandler.getSSLContext("cloud1.authorization")));
               
-        /*
+        
     	serverList.add(new ServerInfo(
-        		"gatekeeper",8446,
+        		"",8446,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.gatekeeper.GatekeeperResource.class)
         				.packages("eu.arrowhead.common")
-        		).setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));*/
+        		));//.setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));
         
     	serverList.add(new ServerInfo(
-        		"orchestrator",8447,
+        		"orchestrator",8444,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.orchestrator.OrchestratorResource.class)
         				.packages("eu.arrowhead.common")
         		));//.setSSLContext(certHandler.getSSLContext("cloud1.orchestrator"))); 
     	
     	serverList.add(new ServerInfo(
-        		"orchestrator",8448,
+        		"orchestrator",8449,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.orchestrator.store.StoreResource.class)
         				.packages("eu.arrowhead.common")
@@ -78,8 +78,7 @@ public class Main {
         				eu.arrowhead.core.api.AuthorizationApi.class,
         				eu.arrowhead.core.api.CommonApi.class,
         				eu.arrowhead.core.api.ConfigurationApi.class,
-        				eu.arrowhead.core.api.OrchestratorApi.class,
-        				eu.arrowhead.core.api.ServiceRegistryApi.class)
+        				eu.arrowhead.core.api.OrchestratorApi.class)
         				.packages("eu.arrowhead.common")
         		));
     			//.setSSLContext(certHandler.getSSLContext("cloud1.qos")));           	
