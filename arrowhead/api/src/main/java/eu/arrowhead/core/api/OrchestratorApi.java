@@ -1,6 +1,7 @@
 package eu.arrowhead.core.api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +78,7 @@ public class OrchestratorApi {
 			throw new DataNotFoundException("The Orchestration Store is empty.");
 		}
 			
+		Collections.sort(store);
 		return store;
 	}
 	
@@ -95,7 +97,8 @@ public class OrchestratorApi {
 		if(store.isEmpty()){
 			throw new DataNotFoundException("Active Orchestration Store entries were not found.");
 		}
-			
+		
+		Collections.sort(store);
 		return store;
 	}
 	
@@ -141,7 +144,8 @@ public class OrchestratorApi {
 			throw new DataNotFoundException("Store entries specified by the payload "
 					+ "were not found in the database.");
 		}
-
+		
+		Collections.sort(store);
 		GenericEntity<List<OrchestrationStore>> entity = 
 				new GenericEntity<List<OrchestrationStore>>(store) {};
 		return Response.ok(entity).build();
@@ -249,7 +253,6 @@ public class OrchestratorApi {
 					entry.setProviderCloud(providerCloud);
 				}
 				
-				entry.setSerialNumber(0);
 				entry.setLastUpdated(new Date());
 				dm.merge(entry);
 				store.add(entry);
@@ -288,7 +291,7 @@ public class OrchestratorApi {
 			storeEntry.setOrchestrationRule(payload.getOrchestrationRule());
 			storeEntry.setProviderCloud(payload.getProviderCloud());
 			storeEntry.setProviderSystem(payload.getProviderSystem());
-			storeEntry.setSerialNumber(storeEntry.getSerialNumber() + 1);
+			storeEntry.setSerialNumber(payload.getSerialNumber());
 			storeEntry.setLastUpdated(new Date());
 			storeEntry = dm.merge(storeEntry);
 			

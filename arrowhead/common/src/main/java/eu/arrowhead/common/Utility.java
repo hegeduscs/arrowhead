@@ -11,7 +11,7 @@ import eu.arrowhead.common.exception.ErrorMessage;
 
 public final class Utility {
 	
-	private static Client client = ClientBuilder.newClient();
+    private static Client client = ClientBuilder.newClient();
 	
 	private Utility(){
 	}

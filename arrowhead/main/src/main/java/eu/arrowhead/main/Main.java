@@ -36,7 +36,7 @@ public class Main {
                 
         
     	serverList.add(new ServerInfo(
-        		"",8445,
+        		"",8448,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.authorization.AuthorizationResource.class)
         				.packages("eu.arrowhead.common")
@@ -52,14 +52,14 @@ public class Main {
         		));//.setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));
         
     	serverList.add(new ServerInfo(
-        		"orchestrator",8447,
+        		"orchestrator",8444,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.orchestrator.OrchestratorResource.class)
         				.packages("eu.arrowhead.common")
         		));//.setSSLContext(certHandler.getSSLContext("cloud1.orchestrator"))); 
     	
     	serverList.add(new ServerInfo(
-        		"orchestrator",8448,
+        		"orchestrator",8449,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.orchestrator.store.StoreResource.class)
         				.packages("eu.arrowhead.common")

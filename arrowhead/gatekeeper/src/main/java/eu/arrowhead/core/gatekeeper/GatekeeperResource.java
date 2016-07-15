@@ -79,7 +79,7 @@ public class GatekeeperResource {
 		GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
 		
 		List<String> cloudURIs = new ArrayList<String>();
-		if(requestForm.getPreferredClouds() == null || requestForm.getPreferredClouds().isEmpty()){
+		if(requestForm.getSearchPerimeter() == null || requestForm.getSearchPerimeter().isEmpty()){
 			cloudURIs = SysConfig.getNeighborCloudURIs();
 			log.info(cloudURIs.size() + "NeighborCloud URIs acquired.");
 		}
@@ -88,7 +88,7 @@ public class GatekeeperResource {
 			 * Using a Set removes duplicate entries (which are needed for the Orchestrator) 
 			 * from the Cloud list.
 			 */
-			Set<ArrowheadCloud> preferredClouds = new LinkedHashSet<>(requestForm.getPreferredClouds());
+			Set<ArrowheadCloud> preferredClouds = new LinkedHashSet<>(requestForm.getSearchPerimeter());
 			String URI = null;
 			for(ArrowheadCloud cloud : preferredClouds){
 				URI = SysConfig.getURI(cloud.getAddress(), cloud.getPort(), 
@@ -249,7 +249,7 @@ public class GatekeeperResource {
 			//TODO review the flag values here
 			Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
 			orchestrationFlags.put("triggerInterCloud", false);
-			orchestrationFlags.put("externalServiceRequest", false);
+			orchestrationFlags.put("externalServiceRequest", true);
 			orchestrationFlags.put("enableInterCloud", false);
 			orchestrationFlags.put("metadataSearch", false);
 			orchestrationFlags.put("pingProviders", false);

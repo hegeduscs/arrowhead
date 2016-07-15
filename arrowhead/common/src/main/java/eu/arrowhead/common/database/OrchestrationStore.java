@@ -1,5 +1,7 @@
 package eu.arrowhead.common.database;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -14,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -34,7 +35,7 @@ import eu.arrowhead.common.model.ArrowheadSystem;
  */
 @Entity
 @Table(name="orchestration_store")
-public class OrchestrationStore {
+public class OrchestrationStore implements Comparable<OrchestrationStore>{
 	
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
@@ -68,10 +69,10 @@ public class OrchestrationStore {
 	private String name;
 	
 	/*
-	 * Each update on an entry will increase its value by 1.
+	 * Used for prioritizing between entries.
 	 */
 	@Column(name="serial_number")
-	private int serialNumber;
+	private Integer serialNumber;
 	
 	@Column(name="last_updated")
 	@Type(type="timestamp")
@@ -84,9 +85,10 @@ public class OrchestrationStore {
 	public OrchestrationStore(){
 	}
 
-	public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, ArrowheadSystem providerSystem,
-			ArrowheadCloud providerCloud, boolean isInterCloud, boolean isActive, String name, int serialNumber,
-			Date lastUpdated, List<String> orchestrationRule) {
+	public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, 
+			ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, boolean isInterCloud, 
+			boolean isActive, String name, Integer serialNumber, Date lastUpdated, 
+			List<String> orchestrationRule) {
 		this.consumer = consumer;
 		this.service = service;
 		this.providerSystem = providerSystem;
@@ -159,11 +161,11 @@ public class OrchestrationStore {
 		this.name = name;
 	}
 
-	public int getSerialNumber() {
+	public Integer getSerialNumber() {
 		return serialNumber;
 	}
 
-	public void setSerialNumber(int serialNumber) {
+	public void setSerialNumber(Integer serialNumber) {
 		this.serialNumber = serialNumber;
 	}
 
@@ -191,8 +193,14 @@ public class OrchestrationStore {
 			return false;
 		if(isInterCloud && (providerCloud == null || !providerCloud.isValid()))
 			return false;
+		if(serialNumber < 0)
+			return false;
 		return true;
 	}
-	
 
+	@Override
+	public int compareTo(OrchestrationStore other) {
+		return this.serialNumber - other.serialNumber;
+	}
+	
 }

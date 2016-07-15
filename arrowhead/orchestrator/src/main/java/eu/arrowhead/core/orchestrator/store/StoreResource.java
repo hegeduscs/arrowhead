@@ -2,6 +2,7 @@ package eu.arrowhead.core.orchestrator.store;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -49,6 +50,7 @@ public class StoreResource {
 			throw new DataNotFoundException("The Orchestration Store is empty.");
 		}
 		
+		Collections.sort(store);
 		return new OrchestrationStoreQueryResponse(store);
 	}
 	
@@ -116,6 +118,7 @@ public class StoreResource {
 			}
 		}
 		
+		Collections.sort(entryList);
 		return new OrchestrationStoreQueryResponse(entryList);
 	}
 	

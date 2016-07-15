@@ -12,14 +12,14 @@ import eu.arrowhead.common.model.ArrowheadService;
 public class GSDRequestForm {
 
 	private ArrowheadService requestedService;
-	private List<ArrowheadCloud> preferredClouds = new ArrayList<ArrowheadCloud>();
+	private List<ArrowheadCloud> searchPerimeter = new ArrayList<ArrowheadCloud>();
 
 	public GSDRequestForm() {
 	}
 
-	public GSDRequestForm(ArrowheadService requestedService, List<ArrowheadCloud> preferredClouds) {
+	public GSDRequestForm(ArrowheadService requestedService, List<ArrowheadCloud> searchPerimeter) {
 		this.requestedService = requestedService;
-		this.preferredClouds = preferredClouds;
+		this.searchPerimeter = searchPerimeter;
 	}
 
 	public ArrowheadService getRequestedService() {
@@ -29,13 +29,13 @@ public class GSDRequestForm {
 	public void setRequestedService(ArrowheadService requestedService) {
 		this.requestedService = requestedService;
 	}
-	
-	public List<ArrowheadCloud> getPreferredClouds() {
-		return preferredClouds;
+
+	public List<ArrowheadCloud> getSearchPerimeter() {
+		return searchPerimeter;
 	}
 
-	public void setPreferredClouds(List<ArrowheadCloud> preferredClouds) {
-		this.preferredClouds = preferredClouds;
+	public void setSearchPerimeter(List<ArrowheadCloud> searchPerimeter) {
+		this.searchPerimeter = searchPerimeter;
 	}
 
 	public boolean isPayloadUsable(){
