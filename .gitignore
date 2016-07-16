@@ -64,6 +64,7 @@ arrowhead/common/.settings/org.eclipse.wst.common.component
 arrowhead/common/.settings/org.eclipse.wst.common.project.facet.core.xml
 arrowhead/common/.settings/org.eclipse.wst.validation.prefs
 arrowhead/common/.settings/org.hibernate.eclipse.console.prefs
+arrowhead/common/bin/src/main/resources/hibernate.cfg.xml
 arrowhead/common/src/main/resources/hibernate.cfg.xml
 arrowhead/dnssd/.classpath
 arrowhead/dnssd/.project
@@ -89,6 +90,7 @@ arrowhead/gatekeeper/.settings/org.hibernate.eclipse.console.prefs
 arrowhead/main/.classpath
 arrowhead/main/.settings/org.eclipse.m2e.core.prefs
 arrowhead/main/.settings/org.hibernate.eclipse.console.prefs
+arrowhead/main/src/main/java/eu/arrowhead/main/Main.java
 arrowhead/orchestrator/.classpath
 arrowhead/orchestrator/.project
 arrowhead/orchestrator/.settings/.jsdtscope
