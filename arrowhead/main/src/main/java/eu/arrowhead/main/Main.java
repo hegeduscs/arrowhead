@@ -21,18 +21,17 @@ public class Main {
      */
     public static void main(String[] args) throws Exception {
 
-    	CertificateHandler certHandler = new CertificateHandler("C:/Arrowhead/arrowhead/certificates")
+    	CertificateHandler certHandler = new CertificateHandler("D:/Eclipse_workspace/Arrowhead/certificates")
     			.setTrustStore("mastercacerts")
     			.setDefaultPassword("123456");
     
     	List<ServerInfo> serverList = new ArrayList<ServerInfo>();
-    	/*
     	serverList.add(new ServerInfo(
         		"serviceregistry",8444,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.serviceregistry.ServiceRegistryResource.class)
         				.packages("eu.arrowhead.common")
-        		).setSSLContext(certHandler.getSSLContext("cloud1.serviceregistry")));*/
+        		).setSSLContext(certHandler.getSSLContext("cloud1.serviceregistry")));
                 
         
     	serverList.add(new ServerInfo(
@@ -52,7 +51,7 @@ public class Main {
         		));//.setSSLContext(certHandler.getSSLContext("cloud1.gatekeeper")));
         
     	serverList.add(new ServerInfo(
-        		"orchestrator",8444,
+        		"orchestrator",8447,
         		new ResourceConfig().registerClasses(
         				eu.arrowhead.core.orchestrator.OrchestratorResource.class)
         				.packages("eu.arrowhead.common")
