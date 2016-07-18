@@ -71,7 +71,7 @@ public class DatabaseManager {
 		try {
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(queryClass);
-			if (null != restrictionMap && !restrictionMap.isEmpty()) {
+			if (restrictionMap != null && !restrictionMap.isEmpty()) {
 				for (Entry<String, Object> entry : restrictionMap.entrySet()) {
 					criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
 				}
@@ -99,7 +99,7 @@ public class DatabaseManager {
 		try {
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(queryClass);
-			if (null != restrictionMap && !restrictionMap.isEmpty()) {
+			if (restrictionMap != null && !restrictionMap.isEmpty()) {
 				for (Entry<String, Object> entry : restrictionMap.entrySet()) {
 					criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
 				}

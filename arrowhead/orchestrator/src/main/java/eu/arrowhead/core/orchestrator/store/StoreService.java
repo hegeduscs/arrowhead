@@ -14,37 +14,6 @@ public class StoreService {
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	
 	/**
-	 * This method returns an Orchestration Store entry specified by the consumer system
-	 * and the requested service.
-	 */
-	public OrchestrationStore getStoreEntry(ArrowheadSystem consumer, ArrowheadService service){
-		ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), 
-				consumer.getSystemName());
-		ArrowheadService savedService = getRequestedService(service.getServiceGroup(),
-				service.getServiceDefinition());
-		if(savedConsumer == null || savedService == null)
-			return null;
-		
-		restrictionMap.put("consumer", savedConsumer);
-		restrictionMap.put("service", savedService);
-		return dm.get(OrchestrationStore.class, restrictionMap);
-	}
-
-	/**
-	 * This method returns the active Orchestration Store entry for a consumer.
-	 */
-	public OrchestrationStore getActiveStoreEntry(ArrowheadSystem consumer){
-		ArrowheadSystem savedConsumer = new ArrowheadSystem();
-		savedConsumer =	getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
-		if(savedConsumer == null)
-			return null;
-			
-		restrictionMap.put("consumer", savedConsumer);
-		restrictionMap.put("isActive", true);
-		return dm.get(OrchestrationStore.class, restrictionMap);
-	}
-	
-	/**
 	 * This method returns all the Orchestration Store entries belonging to a consumer.
 	 */
 	public List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer){
@@ -54,6 +23,37 @@ public class StoreService {
 			return null;
 		
 		restrictionMap.put("consumer", savedConsumer);
+		return dm.getAll(OrchestrationStore.class, restrictionMap);
+	}
+	
+	/**
+	 * This method returns a list of Orchestration Store entries specified by the consumer system
+	 * and the requested service.
+	 */
+	public List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service){
+		ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), 
+				consumer.getSystemName());
+		ArrowheadService savedService = getRequestedService(service.getServiceGroup(),
+				service.getServiceDefinition());
+		if(savedConsumer == null || savedService == null)
+			return null;
+		
+		restrictionMap.put("consumer", savedConsumer);
+		restrictionMap.put("service", savedService);
+		return dm.getAll(OrchestrationStore.class, restrictionMap);
+	}
+
+	/**
+	 * This method returns the active Orchestration Store entries for a consumer.
+	 */
+	public List<OrchestrationStore> getActiveStoreEntries(ArrowheadSystem consumer){
+		ArrowheadSystem savedConsumer =	getConsumerSystem(consumer.getSystemGroup(), 
+				consumer.getSystemName());
+		if(savedConsumer == null)
+			return null;
+			
+		restrictionMap.put("consumer", savedConsumer);
+		restrictionMap.put("isActive", true);
 		return dm.getAll(OrchestrationStore.class, restrictionMap);
 	}
 	

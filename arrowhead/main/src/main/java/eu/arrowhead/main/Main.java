@@ -20,7 +20,7 @@ public class Main {
      * @throws Exception 
      */
     public static void main(String[] args) throws Exception {
-
+    	
     	CertificateHandler certHandler = new CertificateHandler("D:/Eclipse_workspace/Arrowhead/certificates")
     			.setTrustStore("mastercacerts")
     			.setDefaultPassword("123456");

@@ -8,7 +8,6 @@ public class OrchestrationStoreQuery {
 	
 	private ArrowheadService requestedService;
 	private ArrowheadSystem requesterSystem;
-	//private Map<String, Boolean> queryFlags = new HashMap<String, Boolean>();
 	private Boolean onlyActive = false;
 	
 	public OrchestrationStoreQuery() {
@@ -45,9 +44,8 @@ public class OrchestrationStoreQuery {
 		this.onlyActive = onlyActive;
 	}
 	
-	public boolean isPayloadComplete(){
-		if(requestedService == null || requesterSystem == null ||
-				!requestedService.isValid() || !requesterSystem.isValid())
+	public boolean isPayloadUsable(){
+		if(requesterSystem == null || !requesterSystem.isValid())
 			return false;
 		return true;
 	}

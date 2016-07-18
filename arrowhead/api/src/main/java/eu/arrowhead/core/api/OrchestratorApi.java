@@ -44,16 +44,16 @@ public class OrchestratorApi {
 	
 	/**
 	 * Returns an Orchestration Store entry from the database specified by the
-	 * name of the entry.
+	 * database generated id.
 	 * 
-	 * @param {String} - name
+	 * @param {int} - id
 	 * @return OrchestrationStore
 	 * @throws DataNotFoundException
 	 */
 	@GET
-	@Path("store/{name}")
-	public Response getStoreEntry(@PathParam("name") String name){
-		restrictionMap.put("name", name);
+	@Path("store/{id}")
+	public Response getStoreEntry(@PathParam("id") int id){
+		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(entry == null){
 			throw new DataNotFoundException("Requested store entry was not found in the database.");
@@ -131,7 +131,7 @@ public class OrchestratorApi {
 		if(query.isOnlyActive()){
 			restrictionMap.put("isActive", true);
 		}
-		else if(query.isPayloadComplete()){
+		else if(query.isPayloadUsable()){ //FUNCTION CHANGED, dont forget to refactor this whole method
 			rm.clear();
 			rm.put("serviceGroup", query.getRequestedService().getServiceGroup());
 			rm.put("serviceDefinition", query.getRequestedService().getServiceDefinition());
@@ -174,11 +174,11 @@ public class OrchestratorApi {
 		restrictionMap.put("isActive", true);
 		OrchestrationStore activeEntry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(activeEntry != null){
-			activeEntry.setIsActive(false);
+			activeEntry.setActive(false);
 			dm.merge(activeEntry);
 		}
 		
-		entry.setIsActive(true);
+		entry.setActive(true);
 		dm.merge(entry);
 		
 		return Response.ok(entry).build();
@@ -199,7 +199,7 @@ public class OrchestratorApi {
 	public List<OrchestrationStore> addStoreEntries(List<OrchestrationStore> storeEntries) {
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		for (OrchestrationStore entry : storeEntries) {
-			if(entry.isPayloadUsable()){
+			if(entry.isPayloadUsable()){ //TODO kell ide check arra, hogy a priority > 0 legyen?
 				restrictionMap.clear();
 				restrictionMap.put("serviceGroup", entry.getService().getServiceGroup());
 				restrictionMap.put("serviceDefinition", entry.getService().getServiceDefinition());
@@ -287,11 +287,10 @@ public class OrchestratorApi {
 		else{
 			storeEntry.setConsumer(payload.getConsumer());
 			storeEntry.setService(payload.getService());
-			storeEntry.setIsInterCloud(payload.getIsInterCloud());
 			storeEntry.setOrchestrationRule(payload.getOrchestrationRule());
 			storeEntry.setProviderCloud(payload.getProviderCloud());
 			storeEntry.setProviderSystem(payload.getProviderSystem());
-			storeEntry.setSerialNumber(payload.getSerialNumber());
+			storeEntry.setPriority(payload.getPriority());
 			storeEntry.setLastUpdated(new Date());
 			storeEntry = dm.merge(storeEntry);
 			

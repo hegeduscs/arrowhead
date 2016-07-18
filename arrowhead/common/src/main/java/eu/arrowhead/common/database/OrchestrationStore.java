@@ -1,7 +1,5 @@
 package eu.arrowhead.common.database;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -59,20 +57,14 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 	@NotFound(action = NotFoundAction.IGNORE)
 	private ArrowheadCloud providerCloud;
 	
-	@Column(name="is_inter_cloud")
-	private boolean isInterCloud;
+	@Column(name="priority")
+	private Integer priority;
 	
 	@Column(name="is_active")
 	private boolean isActive;
 	
-	@Column(name="name", unique = true)
+	@Column(name="name")
 	private String name;
-	
-	/*
-	 * Used for prioritizing between entries.
-	 */
-	@Column(name="serial_number")
-	private Integer serialNumber;
 	
 	@Column(name="last_updated")
 	@Type(type="timestamp")
@@ -84,23 +76,30 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 
 	public OrchestrationStore(){
 	}
-
-	public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, 
-			ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, boolean isInterCloud, 
-			boolean isActive, String name, Integer serialNumber, Date lastUpdated, 
-			List<String> orchestrationRule) {
+	
+	public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service,
+			ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, Integer priority) {
 		this.consumer = consumer;
 		this.service = service;
 		this.providerSystem = providerSystem;
 		this.providerCloud = providerCloud;
-		this.isInterCloud = isInterCloud;
+		this.priority = priority;
+	}
+
+	public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, 
+			ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, Integer priority, 
+			boolean isActive, String name, Date lastUpdated, List<String> orchestrationRule) {
+		this.consumer = consumer;
+		this.service = service;
+		this.providerSystem = providerSystem;
+		this.providerCloud = providerCloud;
+		this.priority = priority;
 		this.isActive = isActive;
 		this.name = name;
-		this.serialNumber = serialNumber;
 		this.lastUpdated = lastUpdated;
 		this.orchestrationRule = orchestrationRule;
 	}
-	
+
 	public int getId() {
 		return id;
 	}
@@ -137,19 +136,19 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 		this.providerCloud = providerCloud;
 	}
 
-	public boolean getIsInterCloud() {
-		return isInterCloud;
+	public Integer getPriority() {
+		return priority;
 	}
 
-	public void setIsInterCloud(boolean isInterCloud) {
-		this.isInterCloud = isInterCloud;
+	public void setPriority(Integer priority) {
+		this.priority = priority;
 	}
 
-	public boolean getIsActive() {
+	public boolean isActive() {
 		return isActive;
 	}
 
-	public void setIsActive(boolean isActive) {
+	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
 
@@ -159,14 +158,6 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Integer getSerialNumber() {
-		return serialNumber;
-	}
-
-	public void setSerialNumber(Integer serialNumber) {
-		this.serialNumber = serialNumber;
 	}
 
 	public Date getLastUpdated() {
@@ -186,21 +177,16 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 	}
 
 	public boolean isPayloadUsable(){
-		if(consumer == null || service == null || name == null || 
-				!consumer.isValid() || !service.isValid())
+		if(consumer == null || service == null || !consumer.isValid() || !service.isValid())
 			return false;
-		if(!isInterCloud && (providerSystem == null || !providerSystem.isValid()))
-			return false;
-		if(isInterCloud && (providerCloud == null || !providerCloud.isValid()))
-			return false;
-		if(serialNumber < 0)
+		if(priority < 0)
 			return false;
 		return true;
 	}
 
 	@Override
 	public int compareTo(OrchestrationStore other) {
-		return this.serialNumber - other.serialNumber;
+		return this.priority - other.priority;
 	}
 	
 }
