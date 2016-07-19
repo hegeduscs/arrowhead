@@ -194,7 +194,8 @@ public class GatekeeperResource {
     	log.info("Compiling ICN proposal");
     	ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), 
     			requestForm.getAuthenticationInfo(), SysConfig.getOwnCloud(), 
-    			requestForm.getRequesterSystem(), requestForm.getPreferredProviders());
+    			requestForm.getRequesterSystem(), requestForm.getPreferredProviders(),
+    			requestForm.isOnlyPreferred());
     	
     	String icnURI = SysConfig.getURI(requestForm.getTargetCloud().getAddress(),
     			requestForm.getTargetCloud().getPort(), 
@@ -257,7 +258,7 @@ public class GatekeeperResource {
 			orchestrationFlags.put("storeOnlyActive", false);
 			orchestrationFlags.put("matchmaking", false);
 			orchestrationFlags.put("hasPreferences", false);
-			orchestrationFlags.put("onlyPreferred", false);
+			orchestrationFlags.put("onlyPreferred", icnProposal.isOnlyPreferred());
 			orchestrationFlags.put("generateToken", false);
 			
 			ServiceRequestForm serviceRequestForm = 

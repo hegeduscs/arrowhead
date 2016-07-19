@@ -1,11 +1,9 @@
 package eu.arrowhead.common.database;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -14,9 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Type;
@@ -32,7 +29,9 @@ import eu.arrowhead.common.model.ArrowheadSystem;
  * The name column must be unique.
  */
 @Entity
-@Table(name="orchestration_store")
+@Table(name="orchestration_store", uniqueConstraints={@UniqueConstraint(
+		columnNames = {"consumer_system_id", "arrowhead_service_id", "provider_system_id",
+				"provider_cloud_id", "priority", "is_active"})})
 public class OrchestrationStore implements Comparable<OrchestrationStore>{
 	
 	@Column(name="id")
@@ -70,9 +69,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 	@Type(type="timestamp")
 	private Date lastUpdated;
 	
-	@ElementCollection(fetch = FetchType.LAZY)
-	@LazyCollection(LazyCollectionOption.FALSE)
-	private List<String> orchestrationRule;
+	@Column(name="orchestration_rule")
+	private String orchestrationRule;
 
 	public OrchestrationStore(){
 	}
@@ -88,7 +86,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 
 	public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, 
 			ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, Integer priority, 
-			boolean isActive, String name, Date lastUpdated, List<String> orchestrationRule) {
+			boolean isActive, String name, Date lastUpdated, String orchestrationRule) {
 		this.consumer = consumer;
 		this.service = service;
 		this.providerSystem = providerSystem;
@@ -168,18 +166,18 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 		this.lastUpdated = lastUpdated;
 	}
 
-	public List<String> getOrchestrationRule() {
+	public String getOrchestrationRule() {
 		return orchestrationRule;
 	}
 
-	public void setOrchestrationRule(List<String> orchestrationRule) {
+	public void setOrchestrationRule(String orchestrationRule) {
 		this.orchestrationRule = orchestrationRule;
 	}
 
 	public boolean isPayloadUsable(){
 		if(consumer == null || service == null || !consumer.isValid() || !service.isValid())
 			return false;
-		if(priority < 0)
+		if(priority == null || priority < 0)
 			return false;
 		return true;
 	}

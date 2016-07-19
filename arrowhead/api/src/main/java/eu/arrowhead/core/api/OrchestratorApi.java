@@ -19,6 +19,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log4j.Logger;
+
 import eu.arrowhead.common.configuration.DatabaseManager;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -33,6 +35,7 @@ import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrchestratorApi {
 
+	private static Logger log = Logger.getLogger(OrchestratorApi.class.getName());
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	
@@ -56,9 +59,11 @@ public class OrchestratorApi {
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(entry == null){
+			log.info("getStoreEntry throws DataNotFoundException.");
 			throw new DataNotFoundException("Requested store entry was not found in the database.");
 		}
 		else{
+			log.info("getStoreEntry returns a store entry.");
 			return Response.ok(entry).build();
 		}
 	}
@@ -75,10 +80,12 @@ public class OrchestratorApi {
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
+			log.info("getAllStoreEntries throws DataNotFoundException.");
 			throw new DataNotFoundException("The Orchestration Store is empty.");
 		}
 			
 		Collections.sort(store);
+		log.info("getAllStoreEntries succesfully returns.");
 		return store;
 	}
 	
@@ -95,10 +102,12 @@ public class OrchestratorApi {
 		restrictionMap.put("isActive", true);
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
+			log.info("getActiveStoreEntries throws DataNotFoundException.");
 			throw new DataNotFoundException("Active Orchestration Store entries were not found.");
 		}
 		
 		Collections.sort(store);
+		log.info("getActiveStoreEntries succesfully returns.");
 		return store;
 	}
 	
@@ -113,6 +122,7 @@ public class OrchestratorApi {
 	@PUT
 	public Response getStoreEntries(OrchestrationStoreQuery query) {
 		if(!query.isPayloadUsable()){
+			log.info("getStoreEntries throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
 					+ "is/are missing. (systemGroup, systemName)");
 		}
@@ -138,6 +148,7 @@ public class OrchestratorApi {
 		
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
+			log.info("getStoreEntries throws DataNotFoundException.");
 			throw new DataNotFoundException("Store entries specified by the payload "
 					+ "were not found in the database.");
 		}
@@ -145,6 +156,7 @@ public class OrchestratorApi {
 		Collections.sort(store);
 		GenericEntity<List<OrchestrationStore>> entity = 
 				new GenericEntity<List<OrchestrationStore>>(store) {};
+		log.info("getStoreEntries succesfully returns.");
 		return Response.ok(entity).build();
 	}
 
@@ -168,7 +180,7 @@ public class OrchestratorApi {
 				if (consumer == null) {
 					consumer = dm.save(entry.getConsumer());
 				}
-				
+
 				restrictionMap.clear();
 				restrictionMap.put("serviceGroup", entry.getService().getServiceGroup());
 				restrictionMap.put("serviceDefinition", entry.getService().getServiceDefinition());
@@ -176,7 +188,7 @@ public class OrchestratorApi {
 				if (service == null) {
 					service = dm.save(entry.getService());
 				}
-				
+
 				ArrowheadSystem providerSystem = null;
 				if(entry.getProviderSystem() != null && entry.getProviderSystem().isValid()){
 					restrictionMap.clear();
@@ -201,14 +213,15 @@ public class OrchestratorApi {
 				
 				entry.setConsumer(consumer);
 				entry.setService(service);
-				entry.setProviderSystem(providerSystem);	
+				entry.setProviderSystem(providerSystem);
 				entry.setProviderCloud(providerCloud);
 				entry.setLastUpdated(new Date());
 				dm.merge(entry);
 				store.add(entry);
 			}
 		}
-
+		
+		log.info("addStoreEntries succesfully returns. Arraylist size: " + store.size());
 		return store;
 	}
 	
@@ -225,12 +238,14 @@ public class OrchestratorApi {
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(entry == null){
+			log.info("toggleIsActive throws DataNotFoundException.");
 			throw new DataNotFoundException("Orchestration Store entry with this id "
 					+ "was not found in the database.");
 		}
 		else{
 			entry.setActive(!entry.isActive());
 			dm.merge(entry);
+			log.info("toggleIsActive succesfully returns.");
 			return Response.ok(entry).build();
 		}
 	}
@@ -247,6 +262,7 @@ public class OrchestratorApi {
 	public Response updateEntry(OrchestrationStore payload){
 		
 		if(!payload.isPayloadUsable()){
+			log.info("updateEntry throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: mandatory field(s) is/are "
 					+ "missing from the payload.");
 		}
@@ -254,8 +270,9 @@ public class OrchestratorApi {
 		restrictionMap.put("id", payload.getId());
 		OrchestrationStore storeEntry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(storeEntry == null){
-			throw new DataNotFoundException("Store entry specified by the id was "
-					+ "not found in the database.");
+			log.info("updateEntry throws DataNotFoundException.");
+			throw new DataNotFoundException("Store entry specified by the id(" 
+					+ payload.getId() +") was not found in the database.");
 		}
 		else{
 			storeEntry.setConsumer(payload.getConsumer());
@@ -269,6 +286,7 @@ public class OrchestratorApi {
 			storeEntry.setOrchestrationRule(payload.getOrchestrationRule());
 			storeEntry = dm.merge(storeEntry);
 			
+			log.info("updateEntry succesfully returns.");
 			return Response.status(Status.ACCEPTED).entity(storeEntry).build();
 		}
 	}
@@ -286,9 +304,11 @@ public class OrchestratorApi {
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if (entry == null) {
+			log.info("deleteEntry had no effect.");
 			return Response.noContent().build();
 		} else {
 			dm.delete(entry);
+			log.info("deleteEntry succesfully returns.");
 			return Response.ok().build();
 		}
 	}
@@ -303,6 +323,7 @@ public class OrchestratorApi {
 	@DELETE
 	public Response deleteEntries(OrchestrationStoreQuery query){
 		if(!query.isPayloadUsable()){
+			log.info("deleteEntries throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
 					+ "is/are missing. (systemGroup, systemName)");
 		}
@@ -325,12 +346,15 @@ public class OrchestratorApi {
 		
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
+			log.info("deleteEntries had no effect.");
 			return Response.noContent().build();
 		}
 		else{
 			for(OrchestrationStore entry: store){
 				dm.delete(entry);
 			}
+			
+			log.info("deleteEntries succesfully returns.");
 			return Response.ok().build();
 		}
 	}

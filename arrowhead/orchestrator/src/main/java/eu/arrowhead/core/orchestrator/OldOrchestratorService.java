@@ -174,7 +174,7 @@ public class OldOrchestratorService {
 			// ICN Request for each cloud contained in an Entry
 			log.info("Sendin ICN to the following cloud: " + entry.getProviderCloud().getCloudName());
 			icnResultForm = getICNResult(new ICNRequestForm(this.serviceRequestForm.getRequestedService(),
-					"authenticationInfo", entry.getProviderCloud(),this.serviceRequestForm.getRequesterSystem(), null));
+					"authenticationInfo", entry.getProviderCloud(),this.serviceRequestForm.getRequesterSystem(), null, false));
 			// Adding every OrchestrationForm from the returned Response to the
 			// final Response
 			for (OrchestrationForm of : icnResultForm.getInstructions().getResponse()) {

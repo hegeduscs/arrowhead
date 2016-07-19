@@ -17,18 +17,20 @@ public class ICNProposal {
 	private ArrowheadCloud requesterCloud;
 	private ArrowheadSystem requesterSystem;
 	private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
+	private boolean onlyPreferred;
 	
 	public ICNProposal() {
 	}
 
 	public ICNProposal(ArrowheadService requestedService, String authenticationInfo, 
-			ArrowheadCloud requesterCloud, ArrowheadSystem requesterSystem,
-			List<ArrowheadSystem> preferredProviders) {
+			ArrowheadCloud requesterCloud, ArrowheadSystem requesterSystem, 
+			List<ArrowheadSystem> preferredProviders, boolean onlyPreferred) {
 		this.requestedService = requestedService;
 		this.authenticationInfo = authenticationInfo;
 		this.requesterCloud = requesterCloud;
 		this.requesterSystem = requesterSystem;
 		this.preferredProviders = preferredProviders;
+		this.onlyPreferred = onlyPreferred;
 	}
 
 	public ArrowheadService getRequestedService() {
@@ -69,6 +71,14 @@ public class ICNProposal {
 
 	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
 		this.preferredProviders = preferredProviders;
+	}
+
+	public boolean isOnlyPreferred() {
+		return onlyPreferred;
+	}
+
+	public void setOnlyPreferred(boolean onlyPreferred) {
+		this.onlyPreferred = onlyPreferred;
 	}
 	
 	

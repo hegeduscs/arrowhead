@@ -17,20 +17,22 @@ public class ICNRequestForm {
 	private ArrowheadCloud targetCloud;
 	private ArrowheadSystem requesterSystem;
 	private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
+	private boolean onlyPreferred;
 	
 	public ICNRequestForm() {
 	}
 
-	public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo,
-			ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem,
-			List<ArrowheadSystem> preferredProviders) {
+	public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, 
+			ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem, 
+			List<ArrowheadSystem> preferredProviders, boolean onlyPreferred) {
 		this.requestedService = requestedService;
 		this.authenticationInfo = authenticationInfo;
 		this.targetCloud = targetCloud;
 		this.requesterSystem = requesterSystem;
 		this.preferredProviders = preferredProviders;
+		this.onlyPreferred = onlyPreferred;
 	}
-	
+
 	public ArrowheadSystem getRequesterSystem() {
 		return requesterSystem;
 	}
@@ -69,6 +71,14 @@ public class ICNRequestForm {
 
 	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
 		this.preferredProviders = preferredProviders;
+	}
+
+	public boolean isOnlyPreferred() {
+		return onlyPreferred;
+	}
+
+	public void setOnlyPreferred(boolean onlyPreferred) {
+		this.onlyPreferred = onlyPreferred;
 	}
 
 	public boolean isPayloadUsable(){

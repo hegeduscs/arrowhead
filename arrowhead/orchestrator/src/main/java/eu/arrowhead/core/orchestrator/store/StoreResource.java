@@ -51,20 +51,12 @@ public class StoreResource {
 		log.info("Querying the Orchestration Store for all entries.");
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		store = storeService.getAllStoreEntries();
-		
-		Collections.sort(store);
-		for(OrchestrationStore entry : store){
-			if(entry.getPriority() == 0)
-				store.remove(entry);
-			else
-				break;
-		}
-		
 		if(store.isEmpty()){
 			log.info("The Orchestration Store is empty.");
 			throw new DataNotFoundException("The Orchestration Store is empty.");
 		}
 		
+		Collections.sort(store);
 		log.info("Returned Orchestration Store size: " + store.size());
 		return new OrchestrationStoreQueryResponse(store);
 	}
@@ -152,14 +144,7 @@ public class StoreResource {
 		}
 		
 		Collections.sort(entryList);
-		for(OrchestrationStore entry : entryList){
-			if(entry.getPriority() == 0)
-				entryList.remove(entry);
-			else
-				break;
-		}
 		log.info("Returning the Orchestration Store entry list with a size of " + entryList.size());
-		
 		return new OrchestrationStoreQueryResponse(entryList);
 	}
 	
