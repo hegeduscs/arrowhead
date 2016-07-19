@@ -28,7 +28,7 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
 
-@Path("orchestrator")
+@Path("orchestrator/store")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrchestratorApi {
@@ -46,12 +46,12 @@ public class OrchestratorApi {
 	 * Returns an Orchestration Store entry from the database specified by the
 	 * database generated id.
 	 * 
-	 * @param {int} - id
+	 * @param int id
 	 * @return OrchestrationStore
 	 * @throws DataNotFoundException
 	 */
 	@GET
-	@Path("store/{id}")
+	@Path("{id}")
 	public Response getStoreEntry(@PathParam("id") int id){
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
@@ -70,7 +70,7 @@ public class OrchestratorApi {
 	 * @throws DataNotFoundException
 	 */
 	@GET
-	@Path("store/all")
+	@Path("all")
 	public List<OrchestrationStore> getAllStoreEntries(){
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
@@ -89,7 +89,7 @@ public class OrchestratorApi {
 	 * @throws DataNotFoundException
 	 */
 	@GET
-	@Path("store/allactive")
+	@Path("all_active")
 	public List<OrchestrationStore> getActiveStoreEntries(){
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		restrictionMap.put("isActive", true);
@@ -104,24 +104,21 @@ public class OrchestratorApi {
 	
 	/**
 	 * Returns the Orchestration Store entries from the database specified by
-	 * the consumer and/or the service.
+	 * the consumer (and the service).
 	 * 
-	 * @param {OrchestrationStoreQuery}
-	 *            query
+	 * @param OrchestrationStoreQuery query
 	 * @return List<OrchestrationStore>
 	 * @throws BadPayloadException, DataNotFoundException
 	 */
 	@PUT
-	@Path("/store")
 	public Response getStoreEntries(OrchestrationStoreQuery query) {
-		
-		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
-		HashMap<String, Object> rm = new HashMap<String, Object>();
-		
-		if(query.getRequesterSystem() == null || !query.getRequesterSystem().isValid()){
+		if(!query.isPayloadUsable()){
 			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
 					+ "is/are missing. (systemGroup, systemName)");
 		}
+		
+		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+		HashMap<String, Object> rm = new HashMap<String, Object>();
 		
 		rm.put("systemGroup", query.getRequesterSystem().getSystemGroup());
 		rm.put("systemName", query.getRequesterSystem().getSystemName());
@@ -131,7 +128,7 @@ public class OrchestratorApi {
 		if(query.isOnlyActive()){
 			restrictionMap.put("isActive", true);
 		}
-		else if(query.isPayloadUsable()){ //FUNCTION CHANGED, dont forget to refactor this whole method
+		if(query.getRequestedService() != null && query.getRequestedService().isValid()){
 			rm.clear();
 			rm.put("serviceGroup", query.getRequestedService().getServiceGroup());
 			rm.put("serviceDefinition", query.getRequestedService().getServiceDefinition());
@@ -150,70 +147,34 @@ public class OrchestratorApi {
 				new GenericEntity<List<OrchestrationStore>>(store) {};
 		return Response.ok(entity).build();
 	}
-	
-	/**
-	 * Sets the Store entry specified by the name path parameter to be active. 
-	 * Any other entries with the same consumer will be set to be inactive.
-	 * 
-	 * @param {String} - name
-	 * @return OrchestrationStore
-	 * @throws DataNotFoundException
-	 */
-	@GET
-	@Path("store/active/{name}")
-	public Response setActiveEntry(@PathParam("name") String name){
-		
-		restrictionMap.put("name", name);
-		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
-		if(entry == null){
-			throw new DataNotFoundException("Requested entry was not found in the database.");
-		}
-		
-		restrictionMap.remove("name");
-		restrictionMap.put("consumer", entry.getConsumer());
-		restrictionMap.put("isActive", true);
-		OrchestrationStore activeEntry = dm.get(OrchestrationStore.class, restrictionMap);
-		if(activeEntry != null){
-			activeEntry.setActive(false);
-			dm.merge(activeEntry);
-		}
-		
-		entry.setActive(true);
-		dm.merge(entry);
-		
-		return Response.ok(entry).build();
-	}
 
 	/**
 	 * Adds a list of Orchestration Store entries to the database. Elements which would throw
-	 * BadPayloadException (caused by missing/incomplete consumer, service, name or 
-	 * provider) are being skipped. 
-	 * The returned list only contains the elements which was saved in the process.
+	 * BadPayloadException (caused by missing/incomplete consumer, service or negative priority) 
+	 * are being skipped. The returned list only contains the elements which was saved in the process.
 	 *
-	 * @param {List<OrchestrationStore>}
-	 *            serviceList
+	 * @param List<OrchestrationStore> serviceList
 	 * @return List<OrchestrationStore>
 	 */
 	@POST
-	@Path("/store")
 	public List<OrchestrationStore> addStoreEntries(List<OrchestrationStore> storeEntries) {
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		for (OrchestrationStore entry : storeEntries) {
-			if(entry.isPayloadUsable()){ //TODO kell ide check arra, hogy a priority > 0 legyen?
-				restrictionMap.clear();
-				restrictionMap.put("serviceGroup", entry.getService().getServiceGroup());
-				restrictionMap.put("serviceDefinition", entry.getService().getServiceDefinition());
-				ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
-				if (service == null) {
-					service = dm.save(entry.getService());
-				}
-				
+			if(entry.isPayloadUsable()){
 				restrictionMap.clear();
 				restrictionMap.put("systemGroup", entry.getConsumer().getSystemGroup());
 				restrictionMap.put("systemName", entry.getConsumer().getSystemName());
 				ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 				if (consumer == null) {
 					consumer = dm.save(entry.getConsumer());
+				}
+				
+				restrictionMap.clear();
+				restrictionMap.put("serviceGroup", entry.getService().getServiceGroup());
+				restrictionMap.put("serviceDefinition", entry.getService().getServiceDefinition());
+				ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
+				if (service == null) {
+					service = dm.save(entry.getService());
 				}
 				
 				ArrowheadSystem providerSystem = null;
@@ -226,10 +187,7 @@ public class OrchestratorApi {
 						providerSystem = dm.save(entry.getProviderSystem());
 					}
 				}
-				else{
-					entry.setProviderSystem(providerSystem);
-				}
-				
+
 				ArrowheadCloud providerCloud = null;
 				if(entry.getProviderCloud() != null && entry.getProviderCloud().isValid()){
 					restrictionMap.clear();
@@ -240,19 +198,11 @@ public class OrchestratorApi {
 						providerCloud = dm.save(entry.getProviderCloud());
 					}
 				}
-				else{
-					entry.setProviderCloud(providerCloud);
-				}
 				
 				entry.setConsumer(consumer);
 				entry.setService(service);
-				if(providerSystem != null){
-					entry.setProviderSystem(providerSystem);
-				}
-				if(providerCloud != null){
-					entry.setProviderCloud(providerCloud);
-				}
-				
+				entry.setProviderSystem(providerSystem);	
+				entry.setProviderCloud(providerCloud);
 				entry.setLastUpdated(new Date());
 				dm.merge(entry);
 				store.add(entry);
@@ -263,35 +213,60 @@ public class OrchestratorApi {
 	}
 	
 	/**
-	 * Updates an Orchestration Store entry specified by the name field of the payload.
+	 * Toggles the isActive boolean for the Orchestration Store entry specified by the id field.
 	 * 
-	 * @param {OrchestrationStore} - payload
+	 * @param int id
+	 * @return OrchestrationStore
+	 * @throws DataNotFoundException
+	 */
+	@GET
+	@Path("active/{id}")
+	public Response toggleIsActive(@PathParam("id") int id){
+		restrictionMap.put("id", id);
+		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
+		if(entry == null){
+			throw new DataNotFoundException("Orchestration Store entry with this id "
+					+ "was not found in the database.");
+		}
+		else{
+			entry.setActive(!entry.isActive());
+			dm.merge(entry);
+			return Response.ok(entry).build();
+		}
+	}
+	
+	/**
+	 * Updates an Orchestration Store entry specified by the id field of the payload.
+	 * 
+	 * @param OrchestrationStore payload
 	 * @return OrchestrationStore
 	 * @throws BadPayloadException, DataNotFoundException
 	 */
 	@PUT
-	@Path("/store/update")
+	@Path("update}")
 	public Response updateEntry(OrchestrationStore payload){
 		
 		if(!payload.isPayloadUsable()){
-			throw new BadPayloadException("Bad payload: one of the mandatory fields is "
+			throw new BadPayloadException("Bad payload: mandatory field(s) is/are "
 					+ "missing from the payload.");
 		}
 		
-		restrictionMap.put("name", payload.getName());
+		restrictionMap.put("id", payload.getId());
 		OrchestrationStore storeEntry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(storeEntry == null){
-			throw new DataNotFoundException("Store entry specified by the name was "
+			throw new DataNotFoundException("Store entry specified by the id was "
 					+ "not found in the database.");
 		}
 		else{
 			storeEntry.setConsumer(payload.getConsumer());
 			storeEntry.setService(payload.getService());
-			storeEntry.setOrchestrationRule(payload.getOrchestrationRule());
 			storeEntry.setProviderCloud(payload.getProviderCloud());
 			storeEntry.setProviderSystem(payload.getProviderSystem());
 			storeEntry.setPriority(payload.getPriority());
+			storeEntry.setActive(payload.isActive());
+			storeEntry.setName(payload.getName());
 			storeEntry.setLastUpdated(new Date());
+			storeEntry.setOrchestrationRule(payload.getOrchestrationRule());
 			storeEntry = dm.merge(storeEntry);
 			
 			return Response.status(Status.ACCEPTED).entity(storeEntry).build();
@@ -303,18 +278,59 @@ public class OrchestratorApi {
 	 * the path parameter. Returns 200 if the delete is succesful, 204 (no
 	 * content) if the entry was not in the database to begin with.
 	 * 
-	 * @param {String}
-	 *            name
+	 * @param int id
 	 */
 	@DELETE
-	@Path("/store/{name}")
-	public Response deleteEntry(@PathParam("name") String name) {
-		restrictionMap.put("name", name);
+	@Path("{id}")
+	public Response deleteEntry(@PathParam("id") String id) {
+		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if (entry == null) {
 			return Response.noContent().build();
 		} else {
 			dm.delete(entry);
+			return Response.ok().build();
+		}
+	}
+	
+	/**
+	 * Deletes the Orchestration Store entries from the database specified by
+	 * the consumer (and the service). Returns 200 if the delete is succesful, 
+	 * 204 (no content) if no matching entries were in the database to begin with.
+	 * 
+	 * @param OrchestrationStoreQuery query
+	 */
+	@DELETE
+	public Response deleteEntries(OrchestrationStoreQuery query){
+		if(!query.isPayloadUsable()){
+			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
+					+ "is/are missing. (systemGroup, systemName)");
+		}
+		
+		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+		HashMap<String, Object> rm = new HashMap<String, Object>();
+		
+		rm.put("systemGroup", query.getRequesterSystem().getSystemGroup());
+		rm.put("systemName", query.getRequesterSystem().getSystemName());
+		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, rm);
+		restrictionMap.put("consumer", consumer);
+
+		if(query.getRequestedService() != null && query.getRequestedService().isValid()){
+			rm.clear();
+			rm.put("serviceGroup", query.getRequestedService().getServiceGroup());
+			rm.put("serviceDefinition", query.getRequestedService().getServiceDefinition());
+			ArrowheadService service = dm.get(ArrowheadService.class, rm);
+			restrictionMap.put("service", service);
+		}
+		
+		store = dm.getAll(OrchestrationStore.class, restrictionMap);
+		if(store.isEmpty()){
+			return Response.noContent().build();
+		}
+		else{
+			for(OrchestrationStore entry: store){
+				dm.delete(entry);
+			}
 			return Response.ok().build();
 		}
 	}
