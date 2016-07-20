@@ -81,7 +81,7 @@ public class GatekeeperResource {
 		List<String> cloudURIs = new ArrayList<String>();
 		if(requestForm.getSearchPerimeter() == null || requestForm.getSearchPerimeter().isEmpty()){
 			cloudURIs = SysConfig.getNeighborCloudURIs();
-			log.info(cloudURIs.size() + "NeighborCloud URIs acquired.");
+			log.info(cloudURIs.size() + " NeighborCloud URI(s) acquired.");
 		}
 		else{
 			/*
@@ -94,14 +94,15 @@ public class GatekeeperResource {
 				URI = SysConfig.getURI(cloud.getAddress(), cloud.getPort(), 
 						cloud.getGatekeeperServiceURI());
 				cloudURIs.add(URI);
-				log.info(cloudURIs.size() + "preferred cloud URIs acquired.");
+				log.info(cloudURIs.size() + " preferred cloud URI(s) acquired.");
 			}
 		}
 		
 		List<GSDAnswer> gsdAnswerList = new ArrayList<GSDAnswer>();
+		Response response = null;
 		for(String URI : cloudURIs){
 			URI = UriBuilder.fromPath(URI).path("gsd_poll").toString();
-			Response response = Utility.sendRequest(URI, "PUT", gsdPoll);
+			response = Utility.sendRequest(URI, "PUT", gsdPoll);
 			log.info("Sent GSD Poll request to: " + URI);
 			GSDAnswer gsdAnswer = response.readEntity(GSDAnswer.class);
 			if(gsdAnswer != null){
@@ -112,7 +113,7 @@ public class GatekeeperResource {
 		
 		log.info("Sending GSD Poll results to Orchestrator.");
 		GSDResult gsdResult = new GSDResult(gsdAnswerList);
-		return Response.ok().entity(gsdResult).build();
+		return Response.status(response.getStatus()).entity(gsdResult).build();
 	}
 	
     /**
