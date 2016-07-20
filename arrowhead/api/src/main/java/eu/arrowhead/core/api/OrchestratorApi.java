@@ -49,7 +49,7 @@ public class OrchestratorApi {
 	 * Returns an Orchestration Store entry from the database specified by the
 	 * database generated id.
 	 * 
-	 * @param int id
+	 * @param Integer id
 	 * @return OrchestrationStore
 	 * @throws DataNotFoundException
 	 */
@@ -188,6 +188,17 @@ public class OrchestratorApi {
 				if (service == null) {
 					service = dm.save(entry.getService());
 				}
+				
+				ArrowheadCloud providerCloud = null;
+				if(entry.getProviderCloud() != null && entry.getProviderCloud().isValid()){
+					restrictionMap.clear();
+					restrictionMap.put("operator", entry.getProviderCloud().getOperator());
+					restrictionMap.put("cloudName", entry.getProviderCloud().getCloudName());
+					providerCloud = dm.get(ArrowheadCloud.class, restrictionMap);
+					if(providerCloud == null){
+						providerCloud = dm.save(entry.getProviderCloud());
+					}
+				}
 
 				ArrowheadSystem providerSystem = null;
 				if(entry.getProviderSystem() != null && entry.getProviderSystem().isValid()){
@@ -200,17 +211,6 @@ public class OrchestratorApi {
 					}
 				}
 
-				ArrowheadCloud providerCloud = null;
-				if(entry.getProviderCloud() != null && entry.getProviderCloud().isValid()){
-					restrictionMap.clear();
-					restrictionMap.put("operator", entry.getProviderCloud().getOperator());
-					restrictionMap.put("cloudName", entry.getProviderCloud().getCloudName());
-					providerCloud = dm.get(ArrowheadCloud.class, restrictionMap);
-					if(providerCloud == null){
-						providerCloud = dm.save(entry.getProviderCloud());
-					}
-				}
-				
 				entry.setConsumer(consumer);
 				entry.setService(service);
 				entry.setProviderSystem(providerSystem);
@@ -228,7 +228,7 @@ public class OrchestratorApi {
 	/**
 	 * Toggles the isActive boolean for the Orchestration Store entry specified by the id field.
 	 * 
-	 * @param int id
+	 * @param Integer id
 	 * @return OrchestrationStore
 	 * @throws DataNotFoundException
 	 */
@@ -243,7 +243,7 @@ public class OrchestratorApi {
 					+ "was not found in the database.");
 		}
 		else{
-			entry.setActive(!entry.isActive());
+			entry.setIsActive(!entry.getIsActive());
 			dm.merge(entry);
 			log.info("toggleIsActive succesfully returns.");
 			return Response.ok(entry).build();
@@ -251,20 +251,20 @@ public class OrchestratorApi {
 	}
 	
 	/**
-	 * Updates an Orchestration Store entry specified by the id field of the payload.
+	 * Updates the non-entity fields of an Orchestration Store entry specified by the 
+	 * id field of the payload. Entity fields have their own update method in CommonApi.class.
 	 * 
 	 * @param OrchestrationStore payload
 	 * @return OrchestrationStore
 	 * @throws BadPayloadException, DataNotFoundException
 	 */
 	@PUT
-	@Path("update}")
+	@Path("update")
 	public Response updateEntry(OrchestrationStore payload){
 		
-		if(!payload.isPayloadUsable()){
+		if(payload.getId() == null){
 			log.info("updateEntry throws BadPayloadException.");
-			throw new BadPayloadException("Bad payload: mandatory field(s) is/are "
-					+ "missing from the payload.");
+			throw new BadPayloadException("Bad payload: id field is missing from the payload.");
 		}
 		
 		restrictionMap.put("id", payload.getId());
@@ -275,12 +275,8 @@ public class OrchestratorApi {
 					+ payload.getId() +") was not found in the database.");
 		}
 		else{
-			storeEntry.setConsumer(payload.getConsumer());
-			storeEntry.setService(payload.getService());
-			storeEntry.setProviderCloud(payload.getProviderCloud());
-			storeEntry.setProviderSystem(payload.getProviderSystem());
 			storeEntry.setPriority(payload.getPriority());
-			storeEntry.setActive(payload.isActive());
+			storeEntry.setIsActive(payload.getIsActive());
 			storeEntry.setName(payload.getName());
 			storeEntry.setLastUpdated(new Date());
 			storeEntry.setOrchestrationRule(payload.getOrchestrationRule());
@@ -296,11 +292,11 @@ public class OrchestratorApi {
 	 * the path parameter. Returns 200 if the delete is succesful, 204 (no
 	 * content) if the entry was not in the database to begin with.
 	 * 
-	 * @param int id
+	 * @param Integer id
 	 */
 	@DELETE
 	@Path("{id}")
-	public Response deleteEntry(@PathParam("id") String id) {
+	public Response deleteEntry(@PathParam("id") Integer id) {
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if (entry == null) {
@@ -321,29 +317,17 @@ public class OrchestratorApi {
 	 * @param OrchestrationStoreQuery query
 	 */
 	@DELETE
-	public Response deleteEntries(OrchestrationStoreQuery query){
-		if(!query.isPayloadUsable()){
-			log.info("deleteEntries throws BadPayloadException.");
-			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
-					+ "is/are missing. (systemGroup, systemName)");
-		}
-		
+	@Path("systemgroup/{systemGroup}/systemname/{systemName}")
+	public Response deleteEntries(@PathParam("systemGroup") String systemGroup, 
+			@PathParam("systemName") String systemName){
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
-		HashMap<String, Object> rm = new HashMap<String, Object>();
 		
-		rm.put("systemGroup", query.getRequesterSystem().getSystemGroup());
-		rm.put("systemName", query.getRequesterSystem().getSystemName());
-		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, rm);
+		restrictionMap.put("systemGroup", systemGroup);
+		restrictionMap.put("systemName", systemName);
+		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
+		
+		restrictionMap.clear();
 		restrictionMap.put("consumer", consumer);
-
-		if(query.getRequestedService() != null && query.getRequestedService().isValid()){
-			rm.clear();
-			rm.put("serviceGroup", query.getRequestedService().getServiceGroup());
-			rm.put("serviceDefinition", query.getRequestedService().getServiceDefinition());
-			ArrowheadService service = dm.get(ArrowheadService.class, rm);
-			restrictionMap.put("service", service);
-		}
-		
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
 			log.info("deleteEntries had no effect.");

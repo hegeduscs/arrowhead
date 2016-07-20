@@ -67,6 +67,7 @@ public class ArrowheadCloud {
 		this.authenticationInfo = cloud.getAuthenticationInfo();
 	}
 
+	@XmlTransient
 	public int getId() {
 		return id;
 	}

@@ -175,6 +175,12 @@ public class DatabaseManager {
 			transaction = session.beginTransaction();
 			session.delete(object);
 			transaction.commit();
+		} catch (ConstraintViolationException e) {
+			if (transaction != null)
+				transaction.rollback();
+			throw new DuplicateEntryException(
+					"ConstraintViolationException: there is a reference to this object in another table, "
+					+ "which prevents the delete operation. (" + object.getClass() + ")");
 		} catch (Exception e) {
 			if (transaction != null)
 				transaction.rollback();

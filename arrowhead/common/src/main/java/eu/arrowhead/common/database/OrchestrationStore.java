@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -36,7 +37,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 	
 	@Column(name="id")
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
-	private int id;
+	private Integer id;
 	
 	@JoinColumn(name="consumer_system_id")
 	@ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.MERGE)
@@ -98,8 +99,12 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 		this.orchestrationRule = orchestrationRule;
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
+	}
+	
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public ArrowheadSystem getConsumer() {
@@ -142,11 +147,11 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 		this.priority = priority;
 	}
 
-	public boolean isActive() {
+	public boolean getIsActive() {
 		return isActive;
 	}
 
-	public void setActive(boolean isActive) {
+	public void setIsActive(boolean isActive) {
 		this.isActive = isActive;
 	}
 
