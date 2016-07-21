@@ -29,7 +29,6 @@ import eu.arrowhead.common.model.messages.OrchestrationStoreQueryResponse;
 @Consumes(MediaType.APPLICATION_JSON)
 public class StoreResource {
 	
-	private StoreService storeService = new StoreService();
 	private static Logger log = Logger.getLogger(StoreResource.class.getName());
 	
 	@GET
@@ -50,7 +49,7 @@ public class StoreResource {
 	public OrchestrationStoreQueryResponse getAllStoreEntries(){
 		log.info("Querying the Orchestration Store for all entries.");
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
-		store = storeService.getAllStoreEntries();
+		store = StoreService.getAllStoreEntries();
 		if(store.isEmpty()){
 			log.info("The Orchestration Store is empty.");
 			throw new DataNotFoundException("The Orchestration Store is empty.");
@@ -91,7 +90,7 @@ public class StoreResource {
 			log.info("Querying the Orchestration Store for active entries of the consumer: " 
 					+ query.getRequesterSystem());
 			List<OrchestrationStore> retrievedList = 
-					storeService.getActiveStoreEntries(query.getRequesterSystem());
+					StoreService.getActiveStoreEntries(query.getRequesterSystem());
 			if(retrievedList != null && !retrievedList.isEmpty()){
 				log.info("Returning the active entry list with a size of " + retrievedList.size());
 				Collections.sort(retrievedList);
@@ -113,7 +112,7 @@ public class StoreResource {
 			log.info("Querying the Orchestration Store for entries of the consumer: "
 					+ query.getRequesterSystem());
 			List<OrchestrationStore> retrievedList = 
-					storeService.getStoreEntries(query.getRequesterSystem());
+					StoreService.getStoreEntries(query.getRequesterSystem());
 			if(retrievedList != null && !retrievedList.isEmpty())
 				entryList.addAll(retrievedList);
 			else{
@@ -131,7 +130,7 @@ public class StoreResource {
 		else{
 			log.info("Querying the Orchestration Store for entries of the consumer/service pair.");
 			List<OrchestrationStore> retrievedList = 
-					storeService.getStoreEntries(query.getRequesterSystem(), query.getRequestedService());
+					StoreService.getStoreEntries(query.getRequesterSystem(), query.getRequestedService());
 			if(retrievedList != null && !retrievedList.isEmpty())
 				entryList.addAll(retrievedList);
 			else{

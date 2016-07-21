@@ -8,15 +8,15 @@ import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 
-public class StoreService {
+public final class StoreService {
 	
-	DatabaseManager dm = DatabaseManager.getInstance();
-	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+	private static DatabaseManager dm = DatabaseManager.getInstance();
+	private static HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	
 	/**
 	 * This method returns all the Orchestration Store entries belonging to a consumer.
 	 */
-	public List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer){
+	public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer){
 		ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), 
 				consumer.getSystemName());
 		if(savedConsumer == null)
@@ -30,7 +30,7 @@ public class StoreService {
 	 * This method returns a list of Orchestration Store entries specified by the consumer system
 	 * and the requested service.
 	 */
-	public List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service){
+	public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service){
 		ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), 
 				consumer.getSystemName());
 		ArrowheadService savedService = getRequestedService(service.getServiceGroup(),
@@ -46,7 +46,7 @@ public class StoreService {
 	/**
 	 * This method returns the active Orchestration Store entries for a consumer.
 	 */
-	public List<OrchestrationStore> getActiveStoreEntries(ArrowheadSystem consumer){
+	public static List<OrchestrationStore> getActiveStoreEntries(ArrowheadSystem consumer){
 		ArrowheadSystem savedConsumer =	getConsumerSystem(consumer.getSystemGroup(), 
 				consumer.getSystemName());
 		if(savedConsumer == null)
@@ -60,14 +60,14 @@ public class StoreService {
 	/**
 	 * This method returns all the entries of the Orchestration Store.
 	 */
-	public List<OrchestrationStore> getAllStoreEntries(){
+	public static List<OrchestrationStore> getAllStoreEntries(){
 		return dm.getAll(OrchestrationStore.class, restrictionMap);
 	}
 	
 	/**
 	 * This method returns an ArrowheadSystem from the database.
 	 */
-	public ArrowheadSystem getConsumerSystem(String systemGroup, String systemName){
+	private static ArrowheadSystem getConsumerSystem(String systemGroup, String systemName){
 		HashMap<String, Object> rm = new HashMap<String, Object>();
 		rm.put("systemGroup", systemGroup);
 		rm.put("systemName", systemName);
@@ -77,7 +77,7 @@ public class StoreService {
 	/**
 	 * This method returns an ArrowheadService from the database.
 	 */
-	public ArrowheadService getRequestedService(String serviceGroup, String serviceDefinition){
+	private static ArrowheadService getRequestedService(String serviceGroup, String serviceDefinition){
 		HashMap<String, Object> rm = new HashMap<String, Object>();
 		rm.put("serviceGroup", serviceGroup);
 		rm.put("serviceDefinition", serviceDefinition);

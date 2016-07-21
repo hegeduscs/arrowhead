@@ -66,7 +66,7 @@ public class AuthorizationResource {
 		restrictionMap.put("systemName", request.getConsumer().getSystemName());
 		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 		if(consumer == null){
-			log.info("Consumer is not in the database.");
+			log.info("Consumer is not in the database. (DataNotFoundException)");
 			throw new DataNotFoundException(
 				"Consumer System is not in the authorization database. (SG: " + 
 				request.getConsumer().getSystemGroup() + 
@@ -81,7 +81,7 @@ public class AuthorizationResource {
 		restrictionMap.put("serviceDefinition", request.getService().getServiceDefinition());
 		ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
 		if (service == null) {
-			log.info("Service is not in the database.");
+			log.info("Service is not in the database. Returning NOT AUTHORIZED state.");
 			for (eu.arrowhead.common.model.ArrowheadSystem provider : request.getProviders()) {
 				authorizationState.put(provider, false);
 			}
@@ -95,6 +95,7 @@ public class AuthorizationResource {
 			restrictionMap.put("systemGroup", provider.getSystemGroup());
 			restrictionMap.put("systemName", provider.getSystemName());
 			ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
+			
 			restrictionMap.clear();
 			restrictionMap.put("consumer", consumer);
 			restrictionMap.put("provider", retrievedSystem);
@@ -104,8 +105,10 @@ public class AuthorizationResource {
 			
 			if (authRight == null) {
 				authorizationState.put(provider, false);
+				log.info("This (consumer/provider/service) request is NOT AUTHORIZED.");
 			} else {
 				authorizationState.put(provider, true);
+				log.info("This (consumer/provider/service) request is AUTHORIZED.");
 			}
 		}
 		

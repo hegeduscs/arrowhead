@@ -51,7 +51,8 @@ public class GatekeeperResource {
 	
 	@GET
     public String getIt() {
-	    return "This is the Gatekeeper Resource stub.";
+	    return "This is the Gatekeeper Resource. "
+	    		+ "REST methods: init_gsd, gsd_poll, init_icn, icn_proposal.";
     }
 	
 	/**
@@ -106,7 +107,8 @@ public class GatekeeperResource {
 			log.info("Sent GSD Poll request to: " + URI);
 			GSDAnswer gsdAnswer = response.readEntity(GSDAnswer.class);
 			if(gsdAnswer != null){
-				log.info("NeighborCloud " + gsdAnswer.getProviderCloud() + " responded to GSD Poll");
+				log.info("A NeighborCloud named " + gsdAnswer.getProviderCloud().getCloudName() 
+						+ " responded to GSD Poll");
 				gsdAnswerList.add(gsdAnswer);
 			}
 		}
@@ -223,7 +225,8 @@ public class GatekeeperResource {
     @PUT
     @Path("icn_proposal")
     public Response ICNProposal (ICNProposal icnProposal) {
-    	log.info("Gatekeeper received an ICN proposal.");
+    	log.info("Gatekeeper received an ICN proposal from: " 
+    			+ icnProposal.getRequesterCloud().getCloudName());
     	
     	//Polling the Authorization System about the consumer Cloud
 		ArrowheadCloud cloud = icnProposal.getRequesterCloud();
@@ -267,7 +270,7 @@ public class GatekeeperResource {
 							orchestrationFlags, null, icnProposal.getPreferredProviders());
 			String orchestratorURI = SysConfig.getOrchestratorURI();
 			
-			log.info("Sending ServiceRequestForm to the Orchestrator.");
+			log.info("Sending ServiceRequestForm to the Orchestrator. URI: " + orchestratorURI);
 			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm);
 			OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
 			

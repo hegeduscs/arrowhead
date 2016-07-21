@@ -85,7 +85,7 @@ public class OrchestratorApi {
 		}
 			
 		Collections.sort(store);
-		log.info("getAllStoreEntries succesfully returns.");
+		log.info("getAllStoreEntries successfully returns.");
 		return store;
 	}
 	
@@ -107,7 +107,7 @@ public class OrchestratorApi {
 		}
 		
 		Collections.sort(store);
-		log.info("getActiveStoreEntries succesfully returns.");
+		log.info("getActiveStoreEntries successfully returns.");
 		return store;
 	}
 	
@@ -156,7 +156,7 @@ public class OrchestratorApi {
 		Collections.sort(store);
 		GenericEntity<List<OrchestrationStore>> entity = 
 				new GenericEntity<List<OrchestrationStore>>(store) {};
-		log.info("getStoreEntries succesfully returns.");
+		log.info("getStoreEntries successfully returns.");
 		return Response.ok(entity).build();
 	}
 
@@ -221,7 +221,7 @@ public class OrchestratorApi {
 			}
 		}
 		
-		log.info("addStoreEntries succesfully returns. Arraylist size: " + store.size());
+		log.info("addStoreEntries successfully returns. Arraylist size: " + store.size());
 		return store;
 	}
 	
@@ -282,7 +282,7 @@ public class OrchestratorApi {
 			storeEntry.setOrchestrationRule(payload.getOrchestrationRule());
 			storeEntry = dm.merge(storeEntry);
 			
-			log.info("updateEntry succesfully returns.");
+			log.info("updateEntry successfully returns.");
 			return Response.status(Status.ACCEPTED).entity(storeEntry).build();
 		}
 	}
@@ -304,7 +304,7 @@ public class OrchestratorApi {
 			return Response.noContent().build();
 		} else {
 			dm.delete(entry);
-			log.info("deleteEntry succesfully returns.");
+			log.info("deleteEntry successfully returns.");
 			return Response.ok().build();
 		}
 	}
@@ -338,7 +338,7 @@ public class OrchestratorApi {
 				dm.delete(entry);
 			}
 			
-			log.info("deleteEntries succesfully returns.");
+			log.info("deleteEntries successfully returns.");
 			return Response.ok().build();
 		}
 	}
