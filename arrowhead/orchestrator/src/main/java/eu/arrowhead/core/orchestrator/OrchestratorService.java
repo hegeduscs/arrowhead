@@ -3,6 +3,7 @@ package eu.arrowhead.core.orchestrator;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -21,6 +22,8 @@ import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
 import eu.arrowhead.common.model.messages.ICNRequestForm;
 import eu.arrowhead.common.model.messages.ICNResult;
+import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
+import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
@@ -113,17 +116,63 @@ public class OrchestratorService {
 		return icnResult.getInstructions();
 	}
 	
-	public OrchestrationResponse overrideStoreNotSet(){
-		//TODO: Query Orchestration Store
-		//TODO: Iterating on rules based on priority
-		//TODO: Additional tasks based on ProviderCloud
-		//TODO: IF yes: ICN
-		//TODO: IF no: Query Service Registry + cross-check with authorization
+	public OrchestrationResponse overrideStoreNotSet(Boolean storeOnlyActive){
 		List<OrchestrationForm> oflist = new ArrayList<OrchestrationForm>();
-		oflist.add(this.getDummyOF());
-		System.out.println("Generating token (somehow)");
-		OrchestrationResponse or = new OrchestrationResponse(oflist);
-		return or;
+		String token = null;
+		if (storeOnlyActive == true){
+			OrchestrationStoreQueryResponse osqr = this.storeQuery(storeOnlyActive);
+			oflist = this.storeToOform(osqr);
+			if (oflist.isEmpty())
+				return null;
+			if (serviceRequestForm.getOrchestrationFlags().get("generateToken")){
+				token = this.generateToken();
+			}
+			OrchestrationResponse or = new OrchestrationResponse(oflist);
+			return or;
+		}
+		OrchestrationStoreQueryResponse osqr = this.storeQuery(storeOnlyActive);
+		List<OrchestrationStore> orlist = new ArrayList<OrchestrationStore>();
+		orlist = osqr.getEntryList();
+		//creating the list of active Systems from the Service Registry Query
+		ServiceQueryResult sqr = this.queryServiceRegistry();
+		List<ProvidedService> pslist = new ArrayList<ProvidedService>();
+		pslist = sqr.getServiceQueryData();
+		List<ArrowheadSystem> srlist = new ArrayList<ArrowheadSystem>();
+		for (int i=0; i<pslist.size(); i++){
+			srlist.add(pslist.get(i).getProvider());
+		}
+		//creating the list of authorized Systems from Authorization Query
+		List<ArrowheadSystem> systemfromstore = new ArrayList<ArrowheadSystem>();
+		for (int i=0; i<orlist.size(); i++){
+			systemfromstore.add(orlist.get(i).getProviderSystem());
+		}
+		IntraCloudAuthResponse icres = this.queryAuthorization(systemfromstore);
+		List<ArrowheadSystem> authenticatedSystems = new ArrayList<ArrowheadSystem>();
+		for(Map.Entry<ArrowheadSystem, Boolean> entry : icres.getAuthorizationMap().entrySet()){
+			if(entry.getValue())
+				authenticatedSystems.add(entry.getKey());
+		}
+		//iterating based on priority
+		ArrowheadSystem temp;
+		for (int i=0; i<orlist.size(); i++){
+			if(orlist.get(i).getProviderCloud()!=null){
+				ICNResult res = this.startICN(orlist.get(i).getProviderCloud());
+				return res.getInstructions();
+			}
+			temp = orlist.get(i).getProviderSystem();
+			if(srlist.contains(temp) && authenticatedSystems.contains(temp)){
+				if (serviceRequestForm.getOrchestrationFlags().get("generateToken")){
+					token = this.generateToken();
+				}
+				OrchestrationStore tempentry = orlist.get(i);
+				OrchestrationForm orform = new OrchestrationForm(tempentry.getService(), tempentry.getProviderSystem(), tempentry.getProviderSystem().getAddress(), token);
+				oflist.add(orform);
+				OrchestrationResponse or = new OrchestrationResponse(oflist);
+				return or;
+			}	
+		}
+		//if we get there no authenticated and active System can be found, so error
+		return null;
 	}
 	
 	public OrchestrationResponse regularOrchestration(){
@@ -144,6 +193,9 @@ public class OrchestratorService {
 		OrchestrationResponse or = new OrchestrationResponse(oflist);
 		return or;
 	}
+	
+	
+	//From this section the methods are sub-methods for the Orchestrations
 	
 	public OrchestrationForm getDummyOF(){
 		ArrowheadService ah_service = new ArrowheadService("AITIA", "Very good service", null, null);
@@ -225,6 +277,37 @@ public class OrchestratorService {
 		ICNRequestForm reqform = new ICNRequestForm(serviceRequestForm.getRequestedService(), "Placeholder", target, serviceRequestForm.getRequesterSystem(), serviceRequestForm.getPreferredProviders(), onlyPreferred);
 		Response response = Utility.sendRequest(URI, "PUT", reqform);
 		ICNResult res = response.readEntity(ICNResult.class);
+		return res;
+	}
+	
+	public OrchestrationStoreQueryResponse storeQuery(Boolean onlyActive){
+		String URI = SysConfig.getOrchestratorURI();
+		URI = UriBuilder.fromPath(URI).path("store").toString();
+		OrchestrationStoreQuery osq = new OrchestrationStoreQuery(serviceRequestForm.getRequestedService(), serviceRequestForm.getRequesterSystem(), onlyActive);
+		Response response = Utility.sendRequest(URI, "PUT", osq);
+		OrchestrationStoreQueryResponse osqr = response.readEntity(OrchestrationStoreQueryResponse.class);
+		return osqr;
+	}
+	
+	public List<OrchestrationForm> storeToOform(OrchestrationStoreQueryResponse osqr){
+		List<OrchestrationForm> oflist = new ArrayList<OrchestrationForm>();
+		List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
+		entryList = osqr.getEntryList();
+		for (OrchestrationStore oStore : entryList){
+			OrchestrationForm oForm = new OrchestrationForm(oStore.getService(), oStore.getProviderSystem(), oStore.getProviderSystem().getAddress(), oStore.getProviderSystem().getAuthenticationInfo());
+			oflist.add(oForm);
+		}
+		return oflist;
+	}
+	
+	public IntraCloudAuthResponse queryAuthorization(List<ArrowheadSystem> systemList){
+		String URI = SysConfig.getAuthorizationURI();
+		String systemGroup = serviceRequestForm.getRequesterSystem().getSystemGroup();
+		String systemName = serviceRequestForm.getRequesterSystem().getSystemName();
+		URI = UriBuilder.fromPath(URI).path("SystemGroup").path(systemGroup).path("System").path(systemName).toString();
+		IntraCloudAuthRequest iareq = new IntraCloudAuthRequest(serviceRequestForm.getRequesterSystem(), systemList, serviceRequestForm.getRequestedService(), false);
+		Response response = Utility.sendRequest(URI, "PUT", iareq);
+		IntraCloudAuthResponse res = response.readEntity(IntraCloudAuthResponse.class);
 		return res;
 	}
 

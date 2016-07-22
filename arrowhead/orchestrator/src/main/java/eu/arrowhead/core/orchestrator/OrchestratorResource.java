@@ -85,7 +85,8 @@ public class OrchestratorResource {
 		}
 		if (serviceRequestForm.getOrchestrationFlags().get("overrideStore") == false){
 			System.out.println("Regular Orchestration process, the overrideStore flag is false.");
-			or = service.overrideStoreNotSet();
+			Boolean storeOnlyActive = serviceRequestForm.getOrchestrationFlags().get("storeOnlyActive");
+			or = service.overrideStoreNotSet(storeOnlyActive);
 			return Response.status(Status.OK).entity(or).build();
 		}
 		System.out.println("Regular Orchestration process, the overrideStore flag is true.");
