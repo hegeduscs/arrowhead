@@ -13,8 +13,14 @@ import org.apache.log4j.Logger;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.database.OrchestrationStore;
+import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
+import eu.arrowhead.common.model.messages.GSDAnswer;
+import eu.arrowhead.common.model.messages.GSDRequestForm;
+import eu.arrowhead.common.model.messages.GSDResult;
+import eu.arrowhead.common.model.messages.ICNRequestForm;
+import eu.arrowhead.common.model.messages.ICNResult;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
@@ -52,6 +58,8 @@ public class OrchestratorService {
 		List<ProvidedService> psList = new ArrayList<ProvidedService>();
 		psList = sqr.getServiceQueryData();
 		//Matchmaking
+		if (this.extMatchMaking(psList) == null)
+			return null;
 		ProvidedService pS = this.extMatchMaking(psList);
 		//Additional Tasks
 		this.extAT();
@@ -94,14 +102,15 @@ public class OrchestratorService {
 	}
 	
 	public OrchestrationResponse triggerInterCloud(){
-		//TODO: GSD
+		//GSD
+		GSDResult res = this.startGSD();
 		//TODO: Inter-cloud matchmaking
+		List<GSDAnswer> gsdList = new ArrayList<GSDAnswer>();
+		gsdList = res.getResponse();
+		ArrowheadCloud targetCloud = this.intercloudMatchMaking(gsdList);
 		//TODO: ICN
-		List<OrchestrationForm> oflist = new ArrayList<OrchestrationForm>();
-		oflist.add(this.getDummyOF());
-		System.out.println("Generating token (somehow)");
-		OrchestrationResponse or = new OrchestrationResponse(oflist);
-		return or;
+		ICNResult icnResult = this.startICN(targetCloud);
+		return icnResult.getInstructions();
 	}
 	
 	public OrchestrationResponse overrideStoreNotSet(){
@@ -185,6 +194,38 @@ public class OrchestratorService {
 	
 	public String generateToken(){
 		return "Placeholder";
+	}
+	
+	public GSDResult startGSD(){
+		String URI = SysConfig.getGatekeeperURI();
+		URI = UriBuilder.fromPath(URI).path("init_gsd").toString();
+		GSDRequestForm reqform = new GSDRequestForm(serviceRequestForm.getRequestedService(), serviceRequestForm.getPreferredClouds());
+		Response response = Utility.sendRequest(URI, "PUT", reqform);
+		GSDResult res = response.readEntity(GSDResult.class);
+		return res;
+	}
+	
+	public ArrowheadCloud intercloudMatchMaking(List<GSDAnswer> list){
+		if (list.isEmpty())
+			return null;
+		List<ArrowheadCloud> preferedClouds = new ArrayList<ArrowheadCloud>();
+		for (int i=0; i<list.size(); i++){
+			if (serviceRequestForm.getPreferredClouds().contains(list.get(i).getProviderCloud()))
+				preferedClouds.add(list.get(i).getProviderCloud());
+		}
+		if(preferedClouds.isEmpty() == false) //if the preferedClouds isn't empty we return the first value
+			return preferedClouds.get(0);
+		return list.get(0).getProviderCloud(); //if the preferedClouds is empty, we return the first entry of the list we got
+	}
+	
+	public ICNResult startICN(ArrowheadCloud target){
+		Boolean onlyPreferred = serviceRequestForm.getOrchestrationFlags().get("onlyPreferred");
+		String URI = SysConfig.getGatekeeperURI();
+		URI = UriBuilder.fromPath(URI).path("init_icn").toString();
+		ICNRequestForm reqform = new ICNRequestForm(serviceRequestForm.getRequestedService(), "Placeholder", target, serviceRequestForm.getRequesterSystem(), serviceRequestForm.getPreferredProviders(), onlyPreferred);
+		Response response = Utility.sendRequest(URI, "PUT", reqform);
+		ICNResult res = response.readEntity(ICNResult.class);
+		return res;
 	}
 
 }
