@@ -61,9 +61,9 @@ public class OrchestratorService {
 		List<ProvidedService> psList = new ArrayList<ProvidedService>();
 		psList = sqr.getServiceQueryData();
 		//Matchmaking
-		if (this.extMatchMaking(psList) == null)
+		ProvidedService pS = this.intraCloudMatchMaking(psList);
+		if (pS==null)
 			return null;
-		ProvidedService pS = this.extMatchMaking(psList);
 		//Additional Tasks
 		this.extAT();
 		//Generating Token
@@ -177,7 +177,7 @@ public class OrchestratorService {
 		List<ArrowheadSystem> authenticatedsystems = this.createAuthenticatedList(srlist);
 		int servicesize = psList.size();
 		for (int i=0; i<servicesize; i++){
-			ProvidedService pS = this.extMatchMaking(psList);
+			ProvidedService pS = this.intraCloudMatchMaking(psList);
 			if (authenticatedsystems.contains(pS.getProvider())){
 				if (serviceRequestForm.getOrchestrationFlags().get("generateToken")){
 					token = this.generateToken();
@@ -187,7 +187,8 @@ public class OrchestratorService {
 				OrchestrationResponse or = new OrchestrationResponse(oflist);
 				return or;
 			}
-			psList.remove(0); //always have to remove zero, because this shifts to the left
+			int index = psList.indexOf(pS);
+			psList.remove(index);
 		}
 		if (serviceRequestForm.getOrchestrationFlags().get("enableInterCloud")){
 			//GSD
@@ -226,7 +227,7 @@ public class OrchestratorService {
 		return sqr;
 	}
 	
-	public ProvidedService extMatchMaking(List<ProvidedService> psList){
+	public ProvidedService intraCloudMatchMaking(List<ProvidedService> psList){
 		if (psList.isEmpty())
 			return null;
 		if (serviceRequestForm.getPreferredProviders().isEmpty()){
