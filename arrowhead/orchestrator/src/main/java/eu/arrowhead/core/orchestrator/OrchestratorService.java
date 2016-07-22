@@ -107,11 +107,11 @@ public class OrchestratorService {
 	public OrchestrationResponse triggerInterCloud(){
 		//GSD
 		GSDResult res = this.startGSD();
-		//TODO: Inter-cloud matchmaking
+		//Inter-cloud matchmaking
 		List<GSDAnswer> gsdList = new ArrayList<GSDAnswer>();
 		gsdList = res.getResponse();
 		ArrowheadCloud targetCloud = this.intercloudMatchMaking(gsdList);
-		//TODO: ICN
+		//ICN
 		ICNResult icnResult = this.startICN(targetCloud);
 		return icnResult.getInstructions();
 	}
@@ -135,23 +135,15 @@ public class OrchestratorService {
 		orlist = osqr.getEntryList();
 		//creating the list of active Systems from the Service Registry Query
 		ServiceQueryResult sqr = this.queryServiceRegistry();
-		List<ProvidedService> pslist = new ArrayList<ProvidedService>();
-		pslist = sqr.getServiceQueryData();
 		List<ArrowheadSystem> srlist = new ArrayList<ArrowheadSystem>();
-		for (int i=0; i<pslist.size(); i++){
-			srlist.add(pslist.get(i).getProvider());
-		}
+		srlist = this.createListFromSQR(sqr);
 		//creating the list of authorized Systems from Authorization Query
+		List<ArrowheadSystem> authenticatedSystems = new ArrayList<ArrowheadSystem>();
 		List<ArrowheadSystem> systemfromstore = new ArrayList<ArrowheadSystem>();
 		for (int i=0; i<orlist.size(); i++){
 			systemfromstore.add(orlist.get(i).getProviderSystem());
 		}
-		IntraCloudAuthResponse icres = this.queryAuthorization(systemfromstore);
-		List<ArrowheadSystem> authenticatedSystems = new ArrayList<ArrowheadSystem>();
-		for(Map.Entry<ArrowheadSystem, Boolean> entry : icres.getAuthorizationMap().entrySet()){
-			if(entry.getValue())
-				authenticatedSystems.add(entry.getKey());
-		}
+		authenticatedSystems = this.createAuthenticatedList(systemfromstore);
 		//iterating based on priority
 		ArrowheadSystem temp;
 		for (int i=0; i<orlist.size(); i++){
@@ -176,22 +168,40 @@ public class OrchestratorService {
 	}
 	
 	public OrchestrationResponse regularOrchestration(){
-		//TODO: Query Service Registry
-		//TODO: Cross-check with Authorization
-		//TODO: Filtering for preferred
-		//TODO: Intra-cloud matchmaking
-		//TODO: IF Orchestration was successful -> DONE
-		//TODO: IF not, deciding based on EnableInterCloud
-		//TODO: IF EnableInterCloud is false -> ERROR
-		//TODO: IF EnableIntercloud is true
-		//TODO: GSD
-		//TODO: Inter-cloud matchmaking
-		//TODO: ICN
+		String token = null;
 		List<OrchestrationForm> oflist = new ArrayList<OrchestrationForm>();
-		oflist.add(this.getDummyOF());
-		System.out.println("Generating token (somehow)");
-		OrchestrationResponse or = new OrchestrationResponse(oflist);
-		return or;
+		ServiceQueryResult sqr = this.queryServiceRegistry();
+		List<ProvidedService> psList = new ArrayList<ProvidedService>();
+		psList = sqr.getServiceQueryData();
+		List<ArrowheadSystem> srlist = this.createListFromSQR(sqr);
+		List<ArrowheadSystem> authenticatedsystems = this.createAuthenticatedList(srlist);
+		int servicesize = psList.size();
+		for (int i=0; i<servicesize; i++){
+			ProvidedService pS = this.extMatchMaking(psList);
+			if (authenticatedsystems.contains(pS.getProvider())){
+				if (serviceRequestForm.getOrchestrationFlags().get("generateToken")){
+					token = this.generateToken();
+				}
+				OrchestrationForm of = new OrchestrationForm(pS.getOffered(), pS.getProvider(), pS.getServiceURI(), token);
+				oflist.add(of);
+				OrchestrationResponse or = new OrchestrationResponse(oflist);
+				return or;
+			}
+			psList.remove(0); //always have to remove zero, because this shifts to the left
+		}
+		if (serviceRequestForm.getOrchestrationFlags().get("enableInterCloud")){
+			//GSD
+			GSDResult res = this.startGSD();
+			//Intercloud Matchmaking
+			List<GSDAnswer> gsdList = new ArrayList<GSDAnswer>();
+			gsdList = res.getResponse();
+			ArrowheadCloud targetCloud = this.intercloudMatchMaking(gsdList);
+			//ICN
+			ICNResult icnResult = this.startICN(targetCloud);
+			return icnResult.getInstructions();
+			
+		}
+		return null;
 	}
 	
 	
@@ -219,8 +229,11 @@ public class OrchestratorService {
 	public ProvidedService extMatchMaking(List<ProvidedService> psList){
 		if (psList.isEmpty())
 			return null;
-		if (serviceRequestForm.getPreferredProviders().isEmpty())
+		if (serviceRequestForm.getPreferredProviders().isEmpty()){
+			if (serviceRequestForm.getOrchestrationFlags().get("onlyPreferred"))
+				return null; //if the preferred list is empty, and we can only look at preferred services, then null
 			return psList.get(0); //if there is no preference returning the first match
+		}
 		int cloudSize = serviceRequestForm.getPreferredClouds().size();
 		if (serviceRequestForm.getPreferredClouds().isEmpty())
 			cloudSize = 1; //because of the for cycle
@@ -267,6 +280,8 @@ public class OrchestratorService {
 		}
 		if(preferedClouds.isEmpty() == false) //if the preferedClouds isn't empty we return the first value
 			return preferedClouds.get(0);
+		if(serviceRequestForm.getOrchestrationFlags().get("onlyPreferred"))
+			return null;
 		return list.get(0).getProviderCloud(); //if the preferedClouds is empty, we return the first entry of the list we got
 	}
 	
@@ -309,6 +324,26 @@ public class OrchestratorService {
 		Response response = Utility.sendRequest(URI, "PUT", iareq);
 		IntraCloudAuthResponse res = response.readEntity(IntraCloudAuthResponse.class);
 		return res;
+	}
+	
+	public List<ArrowheadSystem> createListFromSQR(ServiceQueryResult sqr){
+		List<ProvidedService> pslist = new ArrayList<ProvidedService>();
+		pslist = sqr.getServiceQueryData();
+		List<ArrowheadSystem> srlist = new ArrayList<ArrowheadSystem>();
+		for (int i=0; i<pslist.size(); i++){
+			srlist.add(pslist.get(i).getProvider());
+		}
+		return srlist;
+	}
+	
+	public List<ArrowheadSystem> createAuthenticatedList(List<ArrowheadSystem> systems){
+		IntraCloudAuthResponse icres = this.queryAuthorization(systems);
+		List<ArrowheadSystem> authenticatedSystems = new ArrayList<ArrowheadSystem>();
+		for(Map.Entry<ArrowheadSystem, Boolean> entry : icres.getAuthorizationMap().entrySet()){
+			if(entry.getValue())
+				authenticatedSystems.add(entry.getKey());
+		}
+		return authenticatedSystems;
 	}
 
 }
