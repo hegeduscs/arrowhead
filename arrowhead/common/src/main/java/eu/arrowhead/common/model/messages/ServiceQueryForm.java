@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import eu.arrowhead.common.model.ServiceMetadata;
+
 @XmlRootElement
 public class ServiceQueryForm {
 

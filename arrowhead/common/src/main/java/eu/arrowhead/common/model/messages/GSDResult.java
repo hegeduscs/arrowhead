@@ -25,5 +25,10 @@ public class GSDResult {
 		this.response = response;
 	}
 	
+	public boolean isPayloadUsable(){
+		if(response == null || response.isEmpty())
+			return false;
+		return true;
+	}
 
 }

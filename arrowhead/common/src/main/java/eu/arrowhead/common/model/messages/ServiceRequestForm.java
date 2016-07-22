@@ -105,7 +105,8 @@ public class ServiceRequestForm {
 	}
 
 	public boolean isPayloadUsable(){
-		if(requesterSystem == null || !requesterSystem.isValid())
+		if(requesterSystem == null || !requesterSystem.isValid() ||
+				requestedService == null || !requestedService.isValid())
 			return false;
 		return true;
 	}

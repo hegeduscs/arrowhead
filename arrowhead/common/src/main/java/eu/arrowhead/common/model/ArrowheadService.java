@@ -19,8 +19,6 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
-import eu.arrowhead.common.model.messages.ServiceMetadata;
-
 /**
  * Entity class for storing Arrowhead Services in the database.
  * The "service_group" and service_definition" columns must be unique together.

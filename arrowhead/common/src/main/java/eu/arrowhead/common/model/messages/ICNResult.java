@@ -26,5 +26,12 @@ public class ICNResult {
 		this.instructions = instructions;
 	}
 	
+	public boolean isPayloadUsable(){
+		if(instructions == null)
+			return false;
+		if(instructions.getResponse() == null || instructions.getResponse().isEmpty())
+			return false;
+		return true;
+	}
 	
 }

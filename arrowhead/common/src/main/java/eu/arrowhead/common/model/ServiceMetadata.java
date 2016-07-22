@@ -1,4 +1,4 @@
-package eu.arrowhead.common.model.messages;
+package eu.arrowhead.common.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

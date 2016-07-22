@@ -130,5 +130,61 @@ public class ArrowheadCloud {
 		return true;
 	}
 	
+	public boolean isValidForICN(){
+		if(operator == null || cloudName == null || address == null || port == null || 
+				gatekeeperServiceURI == null)
+			return false;
+		return true;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ArrowheadCloud))
+			return false;
+		ArrowheadCloud other = (ArrowheadCloud) obj;
+		if (address == null) {
+			if (other.address != null)
+				return false;
+		} else if (!address.equals(other.address))
+			return false;
+		if (cloudName == null) {
+			if (other.cloudName != null)
+				return false;
+		} else if (!cloudName.equals(other.cloudName))
+			return false;
+		if (gatekeeperServiceURI == null) {
+			if (other.gatekeeperServiceURI != null)
+				return false;
+		} else if (!gatekeeperServiceURI.equals(other.gatekeeperServiceURI))
+			return false;
+		if (operator == null) {
+			if (other.operator != null)
+				return false;
+		} else if (!operator.equals(other.operator))
+			return false;
+		if (port == null) {
+			if (other.port != null)
+				return false;
+		} else if (!port.equals(other.port))
+			return false;
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((address == null) ? 0 : address.hashCode());
+		result = prime * result + ((cloudName == null) ? 0 : cloudName.hashCode());
+		result = prime * result + ((gatekeeperServiceURI == null) ? 0 : gatekeeperServiceURI.hashCode());
+		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
+		result = prime * result + ((port == null) ? 0 : port.hashCode());
+		return result;
+	}
+	
 
 }

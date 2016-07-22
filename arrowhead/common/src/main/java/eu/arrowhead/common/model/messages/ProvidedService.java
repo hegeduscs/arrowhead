@@ -55,5 +55,12 @@ public class ProvidedService {
 	public void setOffered(ArrowheadService offered) {
 		this.offered = offered;
 	}
-
+	
+	public boolean isPayloadUsable(){
+		if(provider == null || !provider.isValid() || serviceURI == null)
+			return false;
+		return true;
+	}
+	
+	
 }

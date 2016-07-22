@@ -72,7 +72,7 @@ public class ICNRequestForm {
 	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
 		this.preferredProviders = preferredProviders;
 	}
-
+	
 	public boolean isOnlyPreferred() {
 		return onlyPreferred;
 	}
@@ -90,4 +90,5 @@ public class ICNRequestForm {
 		return true;
 	}
 
+	
 }

@@ -23,7 +23,7 @@ public class NewOrchestratorResource {
 	
 	@POST
 	public Response orchestrationProcess(ServiceRequestForm srf){
-		
+		//srf.isPayloadUsable check
 		return null;
 	}
 
