@@ -19,6 +19,9 @@ import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQueryResponse;
+import eu.arrowhead.common.model.messages.ProvidedService;
+import eu.arrowhead.common.model.messages.ServiceQueryForm;
+import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import javax.ws.rs.core.Response;
 
@@ -40,6 +43,27 @@ public class OrchestratorService {
 	public OrchestratorService() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+	
+	public OrchestrationResponse externalRequest(){
+		//Query Service Registry
+		String token = null;
+		ServiceQueryResult sqr = this.queryServiceRegistry();
+		List<ProvidedService> psList = new ArrayList<ProvidedService>();
+		psList = sqr.getServiceQueryData();
+		//Matchmaking
+		ProvidedService pS = this.extMatchMaking(psList);
+		//Additional Tasks
+		this.extAT();
+		//Generating Token
+		if (serviceRequestForm.getOrchestrationFlags().get("generateToken")){
+			token = this.generateToken();
+		}
+		List<OrchestrationForm> oflist = new ArrayList<OrchestrationForm>();
+		OrchestrationForm of = new OrchestrationForm(pS.getOffered(), pS.getProvider(), pS.getServiceURI(), token);
+		oflist.add(of);
+		OrchestrationResponse or = new OrchestrationResponse(oflist);
+		return or;
 	}
 	
 	public OrchestrationResponse legacyModeOrchestration(){
@@ -73,17 +97,6 @@ public class OrchestratorService {
 		//TODO: GSD
 		//TODO: Inter-cloud matchmaking
 		//TODO: ICN
-		List<OrchestrationForm> oflist = new ArrayList<OrchestrationForm>();
-		oflist.add(this.getDummyOF());
-		System.out.println("Generating token (somehow)");
-		OrchestrationResponse or = new OrchestrationResponse(oflist);
-		return or;
-	}
-	
-	public OrchestrationResponse externalRequest(){
-		//TODO: Query Service Registry
-		//TODO: Matchmaking
-		//TODO: Additional Tasks
 		List<OrchestrationForm> oflist = new ArrayList<OrchestrationForm>();
 		oflist.add(this.getDummyOF());
 		System.out.println("Generating token (somehow)");
@@ -128,6 +141,50 @@ public class OrchestratorService {
 		ArrowheadSystem ah_system = new ArrowheadSystem("AITIA", "1", "192.168.1.1", "8080", "not good");
 		OrchestrationForm of = new OrchestrationForm(ah_service, ah_system, "localhost", "not good");
 		return of;
+	}
+	
+	public ServiceQueryResult queryServiceRegistry(){
+		String URI = SysConfig.getServiceRegistryURI();
+		String serviceGroup = serviceRequestForm.getRequestedService().getServiceGroup();
+		String serviceDefinition = serviceRequestForm.getRequestedService().getServiceDefinition();
+		URI = UriBuilder.fromPath(URI).path(serviceGroup).path(serviceDefinition).toString();
+		ServiceQueryForm sqf = new ServiceQueryForm(serviceRequestForm);
+		//tsig_key has to be set
+		Response response = Utility.sendRequest(URI, "PUT", sqf);
+		ServiceQueryResult sqr = response.readEntity(ServiceQueryResult.class);
+		return sqr;
+	}
+	
+	public ProvidedService extMatchMaking(List<ProvidedService> psList){
+		if (psList.isEmpty())
+			return null;
+		if (serviceRequestForm.getPreferredProviders().isEmpty())
+			return psList.get(0); //if there is no preference returning the first match
+		int cloudSize = serviceRequestForm.getPreferredClouds().size();
+		if (serviceRequestForm.getPreferredClouds().isEmpty())
+			cloudSize = 1; //because of the for cycle
+		int systemSize = serviceRequestForm.getPreferredProviders().size();
+		List<ProvidedService> preferedList = new ArrayList<ProvidedService>(); //the list of providers in the preferdlist aswell
+		if (systemSize > cloudSize){
+			for (int i = cloudSize -1; i<systemSize; i++){ //iterating through list got from SR
+				ArrowheadSystem temp = psList.get(i).getProvider();
+				if (serviceRequestForm.getPreferredProviders().contains(temp)) //if the system from the SR is prefered
+						preferedList.add(psList.get(i));
+			}
+		}
+		if (preferedList.isEmpty() == false) //if we found active and prefered systems, we return the first one
+			return preferedList.get(0);
+		if (psList.isEmpty() == false) //if there are no active and prefered systems but there are active systems we return the first one
+			return psList.get(0);
+		return null;
+	}
+	
+	public void extAT(){
+		//placeholder
+	}
+	
+	public String generateToken(){
+		return "Placeholder";
 	}
 
 }

@@ -68,19 +68,19 @@ public class OrchestratorResource {
 		OrchestrationResponse or;
 		System.out.println("Received the Orchestration request.");
 		service = new OrchestratorService(serviceRequestForm);
-		if (serviceRequestForm.getRequestedService().isValid()==false){
-			System.out.println("Legacy mode orchestration initialized.");
-			or = service.legacyModeOrchestration();
-			return Response.status(Status.OK).entity(or).build();
-		}
-		if (serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud") == true){
-			System.out.println("Normal Orchestration: Inter Cloud matchmaking is enabled");
-			or = service.triggerInterCloud();
-			return Response.status(Status.OK).entity(or).build();
-		}
 		if (serviceRequestForm.getOrchestrationFlags().get("externalServiceRequest") == true){
 			System.out.println("The received ServiceRequestForm indicates this is an external request.");
 			or = service.externalRequest();
+			return Response.status(Status.OK).entity(or).build();
+		}
+/*		if (serviceRequestForm.getRequestedService().isValid()==false){
+			System.out.println("Legacy mode orchestration initialized.");
+			or = service.legacyModeOrchestration();
+			return Response.status(Status.OK).entity(or).build();
+		}*/
+		if (serviceRequestForm.getOrchestrationFlags().get("triggerInterCloud") == true){
+			System.out.println("Normal Orchestration: Inter Cloud matchmaking is enabled");
+			or = service.triggerInterCloud();
 			return Response.status(Status.OK).entity(or).build();
 		}
 		if (serviceRequestForm.getOrchestrationFlags().get("overrideStore") == false){
