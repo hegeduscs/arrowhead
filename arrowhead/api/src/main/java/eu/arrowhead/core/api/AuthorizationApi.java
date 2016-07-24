@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
 import eu.arrowhead.common.configuration.DatabaseManager;
 import eu.arrowhead.common.database.InterCloudAuthorization;
 import eu.arrowhead.common.database.IntraCloudAuthorization;
-import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
@@ -63,7 +62,7 @@ public class AuthorizationApi {
 		List<IntraCloudAuthorization> authRights = new ArrayList<IntraCloudAuthorization>();
 		authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
 		if(authRights.isEmpty()){
-			log.info("getIntraCloudAuthRights throws DataNotFoundException.");
+			log.info("AuthorizationApi:getIntraCloudAuthRights throws DataNotFoundException.");
 			throw new DataNotFoundException("IntraCloud authorization rights "
 					+ "were not found in the database.");
 		}
@@ -76,8 +75,8 @@ public class AuthorizationApi {
 	 * Checks whether the consumer System can use a Service from a list of
 	 * provider Systems.
 	 * 
-	 * @param {IntraCloudAuthRequest} request - POJO with the necessary informations
-	 * @return IntraCloudAuthResponse - POJO containing a HashMap<ArrowheadSystem, boolean>
+	 * @param IntraCloudAuthRequest request
+	 * @return IntraCloudAuthResponse
 	 * @throws DataNotFoundException, BadPayloadException
 	 */
 	//TODO token generation if flag set true
@@ -87,7 +86,7 @@ public class AuthorizationApi {
 	public Response isSystemAuthorized(IntraCloudAuthRequest request) {
 		log.info("Entered the isSystemAuthorized function");
 		if (!request.isPayloadUsable()) {
-			log.info("isSystemAuthorized throws BadPayloadException.");
+			log.info("AuthorizationApi:isSystemAuthorized throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: Missing/incomplete consumer, service"
 					+ " or providerList in the request payload.");
 		}
@@ -97,7 +96,8 @@ public class AuthorizationApi {
 		restrictionMap.put("systemName", request.getConsumer().getSystemName());
 		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 		if(consumer == null){
-			log.info("Consumer is not in the authorization database. (DataNotFoundException)");
+			log.info("Consumer is not in the authorization database. "
+					+ "(AuthorizationApi:isSystemAuthorized DataNotFoundException)");
 			throw new DataNotFoundException(
 				"Consumer System is not in the database. (SG: " + 
 				request.getConsumer().getSystemGroup() + ", SN: " + 
@@ -153,7 +153,7 @@ public class AuthorizationApi {
 	 * services between Systems. (Not bidirectional.) OneToMany relation between
 	 * consumer and providers, OneToMany relation between consumer and services.
 	 * 
-	 * @param {IntraCloudAuthEntry} entry - POJO with the necessary informations
+	 * @param IntraCloudAuthEntry entry
 	 * @return JAX-RS Response with status code 201 and ArrowheadSystem entity
 	 *         (the consumer system)
 	 * @throws DuplicateEntryException, BadPayloadException
@@ -163,7 +163,7 @@ public class AuthorizationApi {
 	public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
 		log.info("Entered the addSystemToAuthorized function");
 		if (!entry.isPayloadUsable()) {
-			log.info("addSystemToAuthorized throws BadPayloadException.");
+			log.info("AuthorizationApi:addSystemToAuthorized throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: Missing/incomplete consumer, "
 					+ "serviceList or providerList in the entry payload.");
 		}
@@ -219,8 +219,8 @@ public class AuthorizationApi {
 	/**
 	 * Deletes all the authorization right relations where the given System is the consumer.
 	 * 
-	 * @param {String} systemGroup
-	 * @param {String} systemName
+	 * @param String systemGroup
+	 * @param String systemName
 	 * @return JAX-RS Response with status code 200 (if delete is succesfull)
 	 * or 204 (if nothing happens).
 	 */
@@ -257,8 +257,8 @@ public class AuthorizationApi {
 	/**
 	 * Returns the list of consumable Services of a System.
 	 * 
-	 * @param {String} systemGroup
-	 * @param {String} systemName
+	 * @param String systemGroup
+	 * @param String systemName
 	 * @return List<ArrowheadService>
 	 * @throws DataNotFoundException
 	 */
@@ -270,7 +270,7 @@ public class AuthorizationApi {
 		restrictionMap.put("systemName", systemName);
 		ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
 		if(system == null){
-			log.info("getSystemServices throws DataNotFoundException.");
+			log.info("AuthorizationApi:getSystemServices throws DataNotFoundException.");
        	 	throw new DataNotFoundException(
        	 		"This System is not in the authorization database. (SG: " + systemGroup + 
 				", SN: " + systemName + ")");
@@ -301,7 +301,7 @@ public class AuthorizationApi {
 		List<InterCloudAuthorization> authRights = new ArrayList<InterCloudAuthorization>();
 		authRights = dm.getAll(InterCloudAuthorization.class, restrictionMap);
 		if(authRights.isEmpty()){
-			log.info("getInterCloudAuthRights throws DataNotFoundException.");
+			log.info("AuthorizationApi:getInterCloudAuthRights throws DataNotFoundException.");
 			throw new DataNotFoundException("InterCloud authorization rights "
 					+ "were not found in the database.");
 		}
@@ -313,7 +313,7 @@ public class AuthorizationApi {
 	/**
 	 * Checks whether an external Cloud can use a local Service.
 	 * 
-	 * @param {InterCloudAuthRequest} request - POJO with the necessary informations
+	 * @param InterCloudAuthRequest request
 	 * @return boolean
 	 * @throws DataNotFoundException, BadPayloadException
 	 */
@@ -323,7 +323,7 @@ public class AuthorizationApi {
 	public Response isCloudAuthorized(InterCloudAuthRequest request) {
 		log.info("Entered the isCloudAuthorized function");
 		if (!request.isPayloadUsable()) {
-			log.info("isCloudAuthorized throws BadPayloadException.");
+			log.info("AuthorizationApi:isCloudAuthorized throws BadPayloadException.");
 			throw new BadPayloadException(
 				"Bad payload: Missing/incomplete cloud or service in the request payload.");
 		}
@@ -332,7 +332,8 @@ public class AuthorizationApi {
 		restrictionMap.put("cloudName", request.getCloud().getCloudName());
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
         if(cloud == null){
-        	log.info("Consumer Cloud is not in the authorization database. (DataNotFoundException)");
+        	log.info("Consumer Cloud is not in the authorization database. "
+        			+ "(AuthorizationApi:isCloudAuthorized DataNotFoundException)");
        	 	throw new DataNotFoundException(
        	 			"Consumer Cloud is not in the authorization database. (OP: " 
        	 			+ request.getCloud().getOperator() + ", CN: " 
@@ -366,7 +367,7 @@ public class AuthorizationApi {
 	/**
 	 * Adds a new Cloud and its consumable Services to the database.
 	 * 
-	 * @param {InterCloudAuthEntry} entry - POJO with the necessary informations
+	 * @param InterCloudAuthEntry entry
 	 * @return JAX-RS Response with status code 201 and ArrowheadCloud entity
 	 * @throws DuplicateEntryException, BadPayloadException
 	 */
@@ -375,7 +376,7 @@ public class AuthorizationApi {
 	public Response addCloudToAuthorized(InterCloudAuthEntry entry) {
 		log.info("Entered the addCloudToAuthorized function");
 		if (!entry.isPayloadUsable()) {
-			log.info("addCloudToAuthorized throws BadPayloadException.");
+			log.info("AuthorizationApi:addCloudToAuthorized throws BadPayloadException.");
 			throw new BadPayloadException(
 				"Bad payload: Missing/incomplete cloud or serviceList in the entry payload.");
 		}
@@ -417,8 +418,8 @@ public class AuthorizationApi {
 	/**
 	 * Deletes the authorization rights of the Cloud.
 	 * 
-	 * @param {String} operatorName
-	 * @param {String} cloudName
+	 * @param String operatorName
+	 * @param String cloudName
 	 * @return JAX-RS Response with status code 200 (if delete is succesfull)
 	 * or 204 (if nothing happens).
 	 */
@@ -455,8 +456,8 @@ public class AuthorizationApi {
 	/**
 	 * Returns the list of consumable Services of a Cloud.
 	 * 
-	 * @param {String} operatorName
-	 * @param {String} cloudName
+	 * @param String operatorName
+	 * @param String cloudName
 	 * @return List<ArrowheadService>
 	 * @throws DataNotFoundException
 	 */
@@ -469,7 +470,7 @@ public class AuthorizationApi {
 		restrictionMap.put("cloudName", cloudName);
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);;
 		if(cloud == null){
-			log.info("getCloudServices throws DataNotFoundException.");
+			log.info("AuthorizationApi:getCloudServices throws DataNotFoundException.");
        	 	throw new DataNotFoundException(
        	 		"Consumer Cloud is not in the authorization database. (OP: " + operator + 
 				", CN: " + cloudName + ")");

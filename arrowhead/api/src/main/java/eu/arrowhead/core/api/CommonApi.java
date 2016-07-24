@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -13,7 +12,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -39,8 +37,6 @@ public class CommonApi {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getIt() {
-		
-		log.info("logging works!!!!");
 		return "Got it!";
 	}
 	
@@ -56,6 +52,7 @@ public class CommonApi {
 		List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
 		serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
 		if (serviceList.isEmpty()) {
+			log.info("CommonApi:getAllServices throws DataNotFoundException");
 			throw new DataNotFoundException("ArrowheadServices not found in the database.");
 		}
 
@@ -66,8 +63,7 @@ public class CommonApi {
 	 * Returns a list of ArrowheadServices from the database specified by the
 	 * service group.
 	 * 
-	 * @param {String}
-	 *            serviceGroup
+	 * @param String serviceGroup
 	 * @return List<ArrowheadService>
 	 * @throws DataNotFoundException 
 	 */
@@ -78,6 +74,7 @@ public class CommonApi {
 		restrictionMap.put("serviceGroup", serviceGroup);
 		serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
 		if (serviceList.isEmpty()) {
+			log.info("CommonApi:getServiceGroup throws DataNotFoundException");
 			throw new DataNotFoundException("ArrowheadServices not found in the database from this service group.");
 		}
 
@@ -88,10 +85,8 @@ public class CommonApi {
 	 * Returns an ArrowheadService from the database specified by the service
 	 * group and service definition.
 	 * 
-	 * @param {String}
-	 *            serviceGroup
-	 * @param {String}
-	 *            serviceDefinition
+	 * @param String serviceGroup
+	 * @param String serviceDefinition
 	 * @return ArrowheadService
 	 * @throws DataNotFoundException 
 	 */
@@ -104,6 +99,7 @@ public class CommonApi {
 		restrictionMap.put("serviceDefinition", serviceDefinition);
 		service = dm.get(ArrowheadService.class, restrictionMap);
 		if(service == null){
+			log.info("CommonApi:getService throws DataNotFoundException");
 			throw new DataNotFoundException("Requested ArrowheadService not found in the database.");
 		}
 
@@ -116,8 +112,7 @@ public class CommonApi {
 	 * (caused by missing serviceGroup or serviceDefinition) are being skipped. 
 	 * The returned list only contains the elements which was saved in the process.
 	 *
-	 * @param {List<ArrowheadService>}
-	 *            serviceList
+	 * @param List<ArrowheadService> serviceList
 	 * @return List<ArrowheadService>
 	 */
 	@POST
@@ -145,8 +140,7 @@ public class CommonApi {
 	 * Updates an existing ArrowheadService in the database. Returns 204 (no
 	 * content) if the specified ArrowheadService was not in the database.
 	 * 
-	 * @param {ArrowheadService}
-	 *            service
+	 * @param ArrowheadService service
 	 * @throws BadPayloadException
 	 */
 	@PUT
@@ -154,6 +148,7 @@ public class CommonApi {
 	public Response updateService(ArrowheadService service) {
 		
 		if(!service.isValid()){
+			log.info("CommonApi:updateService throws BadPayloadException");
 			throw new BadPayloadException("Bad payload: missing service group "
 					+ "or service definition in the entry payload.");
 		}
@@ -176,10 +171,8 @@ public class CommonApi {
 	 * group and service definition. Returns 200 if the delete is succesful, 204
 	 * (no content) if the service was not in the database to begin with.
 	 * 
-	 * @param {String}
-	 *            serviceGroup
-	 * @param {String}
-	 *            serviceDefinition
+	 * @param String serviceGroup
+	 * @param String serviceDefinition
 	 */
 	@DELETE
 	@Path("/services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
@@ -208,6 +201,7 @@ public class CommonApi {
 		List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
 		systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
 		if (systemList.isEmpty()) {
+			log.info("CommonApi:getAllSystems throws DataNotFoundException");
 			throw new DataNotFoundException("ArrowheadSystems not found in the database.");
 		}
 
@@ -218,8 +212,7 @@ public class CommonApi {
 	 * Returns a list of ArrowheadSystems from the database specified by the
 	 * system group.
 	 * 
-	 * @param {String}
-	 *            systemGroup
+	 * @param String systemGroup
 	 * @return List<ArrowheadSystem>
 	 * @throws DataNotFoundException
 	 */
@@ -230,6 +223,7 @@ public class CommonApi {
 		restrictionMap.put("systemGroup", systemGroup);
 		systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
 		if (systemList.isEmpty()) {
+			log.info("CommonApi:getSystemGroup throws DataNotFoundException");
 			throw new DataNotFoundException("ArrowheadSystems not found in the "
 					+ "database from this system group.");
 		}
@@ -241,10 +235,8 @@ public class CommonApi {
 	 * Returns an ArrowheadSystem from the database specified by the system
 	 * group and system name.
 	 * 
-	 * @param {String}
-	 *            systemGroup
-	 * @param {String}
-	 *            systemName
+	 * @param String systemGroup
+	 * @param String systemName
 	 * @return ArrowheadSystem
 	 * @throws DataNotFoundException
 	 */
@@ -257,6 +249,7 @@ public class CommonApi {
 		restrictionMap.put("systemName", systemName);
 		system = dm.get(ArrowheadSystem.class, restrictionMap);
 		if(system == null){
+			log.info("CommonApi:getSystem throws DataNotFoundException");
 			throw new DataNotFoundException("Requested ArrowheadSystem not found in the database.");
 		}
 
@@ -269,8 +262,7 @@ public class CommonApi {
 	 * (caused by missing systemGroup or systemName) are being skipped. 
 	 * The returned list only contains the elements which was saved in the process.
 	 *
-	 * @param {List<ArrowheadSystem>}
-	 *            systemList
+	 * @param List<ArrowheadSystem> systemList
 	 * @return List<ArrowheadSystem>
 	 */
 	@POST
@@ -298,8 +290,7 @@ public class CommonApi {
 	 * Updates an existing ArrowheadSystem in the database. Returns 204 (no
 	 * content) if the specified ArrowheadSystem was not in the database.
 	 * 
-	 * @param {ArrowheadSystem}
-	 *            system
+	 * @param ArrowheadSystem system
 	 * @throws BadPayloadException
 	 */
 	@PUT
@@ -307,6 +298,7 @@ public class CommonApi {
 	public Response updateSystem(ArrowheadSystem system) {
 		
 		if(!system.isValid()){
+			log.info("CommonApi:updateSystem throws BadPayloadException");
 			throw new BadPayloadException("Bad payload: missing system group or"
 					+ "system name in the entry payload.");
 		}
@@ -331,10 +323,8 @@ public class CommonApi {
 	 * group and system name. Returns 200 if the delete is succesful, 204 (no
 	 * content) if the system was not in the database to begin with.
 	 * 
-	 * @param {String}
-	 *            systemGroup
-	 * @param {String}
-	 *            systemName
+	 * @param String systemGroup
+	 * @param String systemName
 	 */
 	@DELETE
 	@Path("/systems/systemgroup/{systemGroup}/systemname/{systemName}")
@@ -363,6 +353,7 @@ public class CommonApi {
 		List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
 		cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
 		if (cloudList.isEmpty()) {
+			log.info("CommonApi:getAllClouds throws DataNotFoundException");
 			throw new DataNotFoundException("ArrowheadClouds not found in the database.");
 		}
 
@@ -373,8 +364,7 @@ public class CommonApi {
 	 * Returns a list of ArrowheadClouds from the database specified by the
 	 * operator.
 	 * 
-	 * @param {String}
-	 *            operator
+	 * @param String operator
 	 * @return List<ArrowheadCloud>
 	 * @throws DataNotFoundException
 	 */
@@ -385,6 +375,7 @@ public class CommonApi {
 		restrictionMap.put("operator", operator);
 		cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
 		if (cloudList.isEmpty()) {
+			log.info("CommonApi:getCloudList throws DataNotFoundException");
 			throw new DataNotFoundException("ArrowheadClouds not found in the database "
 					+ "from this operator.");
 		}
@@ -396,10 +387,8 @@ public class CommonApi {
 	 * Returns an ArrowheadCloud from the database specified by the operator and
 	 * cloud name.
 	 * 
-	 * @param {String}
-	 *            operator
-	 * @param {String}
-	 *            cloudName
+	 * @param String operator
+	 * @param String cloudName
 	 * @return ArrowheadCloud
 	 * @throws DataNotFoundException
 	 */
@@ -411,6 +400,7 @@ public class CommonApi {
 		restrictionMap.put("cloudname", cloudname);
 		cloud = dm.get(ArrowheadCloud.class, restrictionMap);
 		if(cloud == null){
+			log.info("CommonApi:getCloud throws DataNotFoundException");
 			throw new DataNotFoundException("Requested ArrowheadCloud not found in the database.");
 		}
 
@@ -423,8 +413,7 @@ public class CommonApi {
 	 * (caused by missing operator or cloudName) are being skipped. 
 	 * The returned list only contains the elements which was saved in the process.
 	 *
-	 * @param {List<ArrowheadCloud>}
-	 *            cloudList
+	 * @param List<ArrowheadCloud> cloudList
 	 * @return List<ArrowheadCloud>
 	 */
 	@POST
@@ -452,8 +441,7 @@ public class CommonApi {
 	 * Updates an existing ArrowheadCloud in the database. Returns 204 (no
 	 * content) if the specified ArrowheadCloud was not in the database.
 	 * 
-	 * @param {ArrowheadCloud}
-	 *            cloud
+	 * @param ArrowheadCloud cloud
 	 * @throws BadPayloadException
 	 */
 	@PUT
@@ -461,6 +449,7 @@ public class CommonApi {
 	public Response updateCloud(ArrowheadCloud cloud) {
 		
 		if(!cloud.isValid()){
+			log.info("CommonApi:updateCloud throws BadPayloadException");
 			throw new BadPayloadException("Bad payload: missing operator or"
 					+ " cloud name in the entry payload.");
 		}
@@ -486,10 +475,8 @@ public class CommonApi {
 	 * and cloud name. Returns 200 if the delete is succesful, 204 (no content)
 	 * if the cloud was not in the database to begin with.
 	 * 
-	 * @param {String}
-	 *            operator
-	 * @param {String}
-	 *            cloudName
+	 * @param String operator
+	 * @param String cloudName
 	 */
 	@DELETE
 	@Path("/clouds/operator/{operator}/cloudname/{cloudName}")

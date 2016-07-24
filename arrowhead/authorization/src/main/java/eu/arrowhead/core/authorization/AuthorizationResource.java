@@ -42,9 +42,9 @@ public class AuthorizationResource {
 	 * Checks whether the consumer System can use a Service from a list of
 	 * provider Systems.
 	 * 
-	 * @param {IntraCloudAuthRequest} request - POJO with the necessary informations
+	 * @param IntraCloudAuthRequest request
 	 * @exception DataNotFoundException, BadPayloadException
-	 * @return IntraCloudAuthResponse - POJO containing a HashMap<ArrowheadSystem, boolean>
+	 * @return IntraCloudAuthResponse
 	 */
 	//TODO token generation if flag set true
 	//TODO token generator function 
@@ -54,19 +54,19 @@ public class AuthorizationResource {
 		log.info("Entered the AuthorizationResource:isSystemAuthorized function");
 		
 		if (!request.isPayloadUsable()) {
-			log.info("Payload is not usable");
+			log.info("Payload is not usable (AuthorizationResource:isSystemAuthorized BadPayloadException)");
 			throw new BadPayloadException("Bad payload: Missing/incomplete consumer, service"
 					+ " or providerList in the request payload.");
 		}
 		log.info("Payload is usable");
-		
 		
 		IntraCloudAuthResponse response = new IntraCloudAuthResponse();
 		restrictionMap.put("systemGroup", request.getConsumer().getSystemGroup());
 		restrictionMap.put("systemName", request.getConsumer().getSystemName());
 		ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 		if(consumer == null){
-			log.info("Consumer is not in the database. (DataNotFoundException)");
+			log.info("Consumer is not in the database. "
+					+ "(AuthorizationResource:isSystemAuthorized DataNotFoundException)");
 			throw new DataNotFoundException(
 				"Consumer System is not in the authorization database. (SG: " + 
 				request.getConsumer().getSystemGroup() + 
@@ -120,7 +120,7 @@ public class AuthorizationResource {
 	/**
 	 * Checks whether an external Cloud can use a local Service.
 	 * 
-	 * @param {InterCloudAuthRequest} request - POJO with the necessary informations
+	 * @param InterCloudAuthRequest request
 	 * @exception DataNotFoundException, BadPayloadException
 	 * @return boolean
 	 */
@@ -131,7 +131,7 @@ public class AuthorizationResource {
 		log.info("Entered the AuthorizationResource:isCloudAuthorized function");
 		
 		if (!request.isPayloadUsable()) {
-			log.info("Payload is not usable");
+			log.info("Payload is not usable (AuthorizationResource:isCloudAuthorized BadPayloadException)");
 			throw new BadPayloadException(
 				"Bad payload: Missing/incomplete cloud or service in the request payload.");
 		}
@@ -141,7 +141,8 @@ public class AuthorizationResource {
 		restrictionMap.put("cloudName", request.getCloud().getCloudName());
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
         if(cloud == null){
-        	log.info("Consumer is not in the database.");
+        	log.info("Consumer is not in the database. "
+        			+ "(AuthorizationResource:isCloudAuthorized DataNotFoundException)");
        	 	throw new DataNotFoundException(
        	 			"Consumer Cloud is not in the authorization database. (OP: " 
        	 			+ request.getCloud().getOperator() + 

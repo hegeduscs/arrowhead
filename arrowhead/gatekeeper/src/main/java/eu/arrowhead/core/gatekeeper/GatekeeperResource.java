@@ -67,10 +67,10 @@ public class GatekeeperResource {
 	@PUT
 	@Path("init_gsd")
 	public Response GSDRequest(GSDRequestForm requestForm) {
-		log.info("Entered the GateKeeperResource for GSD Polling.");
+		log.info("Entered the GSDRequest method.");
 		
 		if(!requestForm.isPayloadUsable()){
-			log.info("Payload is not usable.");
+			log.info("Payload is not usable. (GatekeeperResource:GSDRequest BadPayloadException)");
 			throw new BadPayloadException("Bad payload: missing/incomplete requestedService."
 					+ "Mandatory fields: serviceGroup, serviceDefinition, interfaces.");
 		}
@@ -79,11 +79,13 @@ public class GatekeeperResource {
 		log.info("Own cloud info acquired");
 		GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
 		
+		//If no preferred Clouds were given, send GSD poll requests to the neighbor Clouds
 		List<String> cloudURIs = new ArrayList<String>();
 		if(requestForm.getSearchPerimeter() == null || requestForm.getSearchPerimeter().isEmpty()){
 			cloudURIs = SysConfig.getNeighborCloudURIs();
 			log.info(cloudURIs.size() + " NeighborCloud URI(s) acquired.");
 		}
+		//If there are preferred Clouds given, send GSD poll requests there
 		else{
 			/*
 			 * Using a Set removes duplicate entries (which are needed for the Orchestrator) 
@@ -99,6 +101,7 @@ public class GatekeeperResource {
 			}
 		}
 		
+		//Finalizing the URIs, process the responses
 		List<GSDAnswer> gsdAnswerList = new ArrayList<GSDAnswer>();
 		Response response = null;
 		for(String URI : cloudURIs){
@@ -129,7 +132,9 @@ public class GatekeeperResource {
 	@PUT
     @Path("gsd_poll")
     public Response GSDPoll(GSDPoll gsdPoll) {
-		log.info("Gatekeeper received a GSD Poll request");
+		log.info("Entered the GSDPoll method.");
+		log.info("Gatekeeper received a GSD poll from: " 
+    			+ gsdPoll.getRequesterCloud().getCloudName());
     	
 		//Polling the Authorization System about the consumer Cloud
 		ArrowheadCloud cloud = gsdPoll.getRequesterCloud();
@@ -187,10 +192,10 @@ public class GatekeeperResource {
     @PUT
     @Path("init_icn")
     public Response ICNRequest(ICNRequestForm requestForm) {
-    	log.info("Entered the GateKeeperResource for ICN Proposal.");
+    	log.info("Entered the ICNRequest method.");
     	
     	if(!requestForm.isPayloadUsable()){
-    		log.info("Payload is not usable.");
+    		log.info("Payload is not usable. (GatekeeperResource:ICNRequest BadPayloadException)");
     		throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.");
     	}
     	
@@ -225,6 +230,7 @@ public class GatekeeperResource {
     @PUT
     @Path("icn_proposal")
     public Response ICNProposal (ICNProposal icnProposal) {
+    	log.info("Entered the ICNProposal method.");
     	log.info("Gatekeeper received an ICN proposal from: " 
     			+ icnProposal.getRequesterCloud().getCloudName());
     	

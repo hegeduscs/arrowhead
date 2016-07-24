@@ -59,7 +59,7 @@ public class OrchestratorApi {
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(entry == null){
-			log.info("getStoreEntry throws DataNotFoundException.");
+			log.info("OrchestrationApi:getStoreEntry throws DataNotFoundException");
 			throw new DataNotFoundException("Requested store entry was not found in the database.");
 		}
 		else{
@@ -80,7 +80,7 @@ public class OrchestratorApi {
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
-			log.info("getAllStoreEntries throws DataNotFoundException.");
+			log.info("OrchestrationApi:getAllStoreEntries throws DataNotFoundException.");
 			throw new DataNotFoundException("The Orchestration Store is empty.");
 		}
 			
@@ -102,7 +102,7 @@ public class OrchestratorApi {
 		restrictionMap.put("isActive", true);
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
-			log.info("getActiveStoreEntries throws DataNotFoundException.");
+			log.info("OrchestrationApi:getActiveStoreEntries throws DataNotFoundException.");
 			throw new DataNotFoundException("Active Orchestration Store entries were not found.");
 		}
 		
@@ -122,7 +122,7 @@ public class OrchestratorApi {
 	@PUT
 	public Response getStoreEntries(OrchestrationStoreQuery query) {
 		if(!query.isPayloadUsable()){
-			log.info("getStoreEntries throws BadPayloadException.");
+			log.info("OrchestrationApi:getStoreEntries throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
 					+ "is/are missing. (systemGroup, systemName)");
 		}
@@ -148,7 +148,7 @@ public class OrchestratorApi {
 		
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
-			log.info("getStoreEntries throws DataNotFoundException.");
+			log.info("OrchestrationApi:getStoreEntries throws DataNotFoundException.");
 			throw new DataNotFoundException("Store entries specified by the payload "
 					+ "were not found in the database.");
 		}
@@ -238,7 +238,7 @@ public class OrchestratorApi {
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(entry == null){
-			log.info("toggleIsActive throws DataNotFoundException.");
+			log.info("OrchestrationApi:toggleIsActive throws DataNotFoundException.");
 			throw new DataNotFoundException("Orchestration Store entry with this id "
 					+ "was not found in the database.");
 		}
@@ -263,14 +263,14 @@ public class OrchestratorApi {
 	public Response updateEntry(OrchestrationStore payload){
 		
 		if(payload.getId() == null){
-			log.info("updateEntry throws BadPayloadException.");
+			log.info("OrchestrationApi:updateEntry throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: id field is missing from the payload.");
 		}
 		
 		restrictionMap.put("id", payload.getId());
 		OrchestrationStore storeEntry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(storeEntry == null){
-			log.info("updateEntry throws DataNotFoundException.");
+			log.info("OrchestrationApi:updateEntry throws DataNotFoundException.");
 			throw new DataNotFoundException("Store entry specified by the id(" 
 					+ payload.getId() +") was not found in the database.");
 		}

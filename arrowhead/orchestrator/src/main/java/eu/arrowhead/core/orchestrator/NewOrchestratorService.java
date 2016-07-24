@@ -24,6 +24,8 @@ import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
 import eu.arrowhead.common.model.messages.ICNRequestForm;
 import eu.arrowhead.common.model.messages.ICNResult;
+import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
+import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ProvidedService;
@@ -37,6 +39,55 @@ public final class NewOrchestratorService {
 
 	//TODO srf paraméter lecserélése csak azokra amit felhasználtam a public függvényekben
 	//(ha csabival szükségesnek gondoljuk)
+	//TODO public függvényeknél extra logok ahol értelmes
+	//TODO a végleges függvények felkommentezése (kék)
+	
+	/**
+	 * 
+	 * @param srf
+	 * @return
+	 */
+	public static OrchestrationResponse regularOrchestration(ServiceRequestForm srf){
+		log.info("Entered the regularOrchestration method.");
+		
+		Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+		orchestrationFlags = srf.getOrchestrationFlags();
+		
+		//Querying the Service Registry
+		List<ProvidedService> psList = new ArrayList<ProvidedService>();
+		psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), 
+				orchestrationFlags.get("pingProviders"));
+		
+		//Cross-checking the SR response with the Authorization
+		List<ArrowheadSystem> providerSystems = new ArrayList<ArrowheadSystem>();
+		for(ProvidedService service : psList){
+			providerSystems.add(service.getProvider());
+		}
+		providerSystems = queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), 
+				providerSystems, orchestrationFlags.get("generateToken"));
+		
+		//Filtering out the non-authorized systems from the SR response
+		for(ProvidedService service : psList){
+			if(!providerSystems.contains(service.getProvider())){
+				psList.remove(service);
+			}
+		}
+		
+		//If needed, removing the non-preferred providers from the remaining list
+		if(orchestrationFlags.get("onlyPreferred")){
+			log.info("Only preferred matchmaking is requested.");
+			psList = removeNonPreferred(psList, srf.getPreferredProviders());
+		}
+		
+		if(orchestrationFlags.get("matchmaking")){
+			//review intracloud matchmaking for redundancy
+		}
+		
+		
+		return null;
+	}
+
+	
 	/**
 	 * 
 	 * @param srf
@@ -49,20 +100,16 @@ public final class NewOrchestratorService {
 		orchestrationFlags = srf.getOrchestrationFlags();
 		
 		//Querying the Service Registry
-		ServiceQueryResult serviceQueryResult = queryServiceRegistry(srf.getRequestedService(), 
-				orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+		List<ProvidedService> psList = new ArrayList<ProvidedService>();
+		psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), 
+				orchestrationFlags.get("pingProviders"));
 		
 		//If needed, removing the non-preferred providers from the SR response
-		List<ProvidedService> psList = new ArrayList<ProvidedService>();
-		psList = serviceQueryResult.getServiceQueryData();
 		if(orchestrationFlags.get("onlyPreferred")){
 			log.info("Only preferred matchmaking is requested.");
 			psList = removeNonPreferred(psList, srf.getPreferredProviders());
 		}
-		
-		//Do additional tasks here if needed (e.g. configuring the Network Manager)
-		
-		
+
 		//Compiling the Orchestration Response
 		return compileOrchestrationResponse(srf.getRequestedService(), 
 				psList, orchestrationFlags.get("generateToken"));
@@ -102,7 +149,7 @@ public final class NewOrchestratorService {
 	 * @param pingProviders
 	 * @return
 	 */
-	private static ServiceQueryResult queryServiceRegistry(ArrowheadService service,
+	private static List<ProvidedService> queryServiceRegistry(ArrowheadService service,
 			boolean metadataSearch, boolean pingProviders){
 		log.info("Entered the queryServiceRegistry method.");
 		
@@ -120,13 +167,14 @@ public final class NewOrchestratorService {
 		ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
 		
 		if(serviceQueryResult.isPayloadEmpty()){
-			log.info("ServiceRegistry query came back empty.");
+			log.info("ServiceRegistry query came back empty. "
+					+ "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
 			throw new DataNotFoundException("ServiceRegistry query came back empty.");
 		}
 		log.info("ServiceRegistry query successful. Number of providers: " 
 				+ serviceQueryResult.getServiceQueryData().size());
 		
-		return serviceQueryResult;
+		return serviceQueryResult.getServiceQueryData();
 	}
 	
 	/**
@@ -142,7 +190,8 @@ public final class NewOrchestratorService {
 		log.info("Entered the intraCloudMatchmaking method.");
 		
 		if(psList.size() == 0){
-			log.info("IntraCloudMatchmaking received an empty ProvidedService list.");
+			log.info("IntraCloudMatchmaking received an empty ProvidedService list. "
+					+ "(OrchestratorService:intraCloudMatchmaking BadPayloadException)");
 			throw new BadPayloadException("ProvidedService list is empty, Intra-Cloud matchmaking is"
 					+ "not possible in the Orchestration process.");
 		}
@@ -159,7 +208,7 @@ public final class NewOrchestratorService {
 			for(ArrowheadSystem system : preferredList){
 				for(ProvidedService ps : psList){
 					if(system.equals(ps.getProvider())){
-						log.info("Preferred local System found in the Service Registry response. "
+						log.info("Preferred local System found in the list of ProvidedServices. "
 								+ "Intra-Cloud matchmaking finished.");
 						return ps;
 					}
@@ -168,14 +217,14 @@ public final class NewOrchestratorService {
 			
 			//No match found, return the first ProvidedService entry if it is allowed.
 			if(onlyPreferred){
-				log.info("No preferred local System found in the Service Registry response. "
+				log.info("No preferred local System found in the list of ProvidedServices. "
 						+ "Intra-Cloud matchmaking failed.");
 				throw new DataNotFoundException("No preferred local System found in the "
-						+ "Service Registry response. Intra-Cloud matchmaking failed");
+						+ "list of ProvidedServices. Intra-Cloud matchmaking failed");
 			}
 			else{
 				//Implement custom matchmaking algorithm here
-				log.info("No preferred local System found in the Service Registry response. "
+				log.info("No preferred local System found in the list of ProvidedServices. "
 						+ "Returning the first ProvidedService entry.");
 				return psList.get(0);
 			}
@@ -197,12 +246,13 @@ public final class NewOrchestratorService {
 		}
 	}
 	
-	//this is only used on the externalServiceRequest branch
+	//this is only used on the externalServiceRequest branch -- not true anymore
 	//TODO decide if this is necessary. IF YES review it, do logging, etc
 	private static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, 
 			List<ArrowheadSystem> preferredProviders){
 		if(psList.isEmpty() || preferredProviders.isEmpty()){
-			throw new BadPayloadException("ProvidedService or PreferredProviders list is empty.");
+			throw new BadPayloadException("ProvidedService or PreferredProviders list is empty. "
+					+ "(OrchestrationService:removeNonPreferred BadPayloadException)");
 		}
 		
 		List<ProvidedService> preferredList = new ArrayList<ProvidedService>();
@@ -215,8 +265,8 @@ public final class NewOrchestratorService {
 		}
 		
 		if(preferredList.isEmpty()){
-			throw new DataNotFoundException("No preferred local System found in "
-					+ "the Service Registry response.");
+			throw new DataNotFoundException("No preferred local System found in the the list of provider Systems. "
+					+ "(OrchestrationService:removeNonPreferred DataNotFoundException)");
 		}
 		
 		return preferredList;
@@ -267,7 +317,8 @@ public final class NewOrchestratorService {
 		GSDResult result = response.readEntity(GSDResult.class);
 		
 		if(!result.isPayloadUsable()){
-			log.info("GlobalServiceDiscovery yielded no result.");
+			log.info("GlobalServiceDiscovery yielded no result. "
+					+ "(OrchestratorService:startGSD DataNotFoundException)");
 			throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.");
 		}
 		
@@ -356,12 +407,45 @@ public final class NewOrchestratorService {
 		ICNResult result = response.readEntity(ICNResult.class);
 		
 		if(!result.isPayloadUsable()){
-			log.info("ICN yielded no result.");
+			log.info("ICN yielded no result. (OrchestratorService:startICN DataNotFoundException)");
 			throw new DataNotFoundException("ICN yielded no result.");
 		}
 		
 		log.info(result.getInstructions().getResponse().size() + " possible providers in the ICN result.");
 		return result;
+	}
+	
+	/**
+	 * 
+	 * @param consumer
+	 * @param service
+	 * @param providerList
+	 * @param generateToken
+	 * @return
+	 */
+	private static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, 
+			ArrowheadService service, List<ArrowheadSystem> providerList, boolean generateToken) {
+		log.info("Entered the queryAuthorization method.");
+		
+		//Getting the URI + compiling the request payload
+		String URI = SysConfig.getAuthorizationURI();
+		URI = UriBuilder.fromPath(URI).path("intracloud").toString();
+		IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, 
+				service, generateToken);
+		log.info("Intra-Cloud authorization request ready to send to: " + URI);
+		
+		//Extracting the useful payload from the response, sending back the authorized Systems
+		Response response = Utility.sendRequest(URI, "PUT", request);
+		IntraCloudAuthResponse authResponse = response.readEntity(IntraCloudAuthResponse.class);
+		List<ArrowheadSystem> authorizedSystems = new ArrayList<ArrowheadSystem>();
+		for(Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap().entrySet()){
+			if(entry.getValue())
+				authorizedSystems.add(entry.getKey());
+		}
+		
+		log.info("Authorization query is done, sending back the authorized Systems. "
+				+ authorizedSystems.size());
+		return authorizedSystems;
 	}
 	
 }

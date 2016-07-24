@@ -103,7 +103,7 @@ public class OwnCloud {
 	}
 	
 	public boolean isPayloadUsable(){
-		if(operator == null || cloudName == null)
+		if(operator == null || cloudName == null || address == null)
 			return false;
 		return true;
 	}

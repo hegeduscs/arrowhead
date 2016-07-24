@@ -51,7 +51,8 @@ public class StoreResource {
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		store = StoreService.getAllStoreEntries();
 		if(store.isEmpty()){
-			log.info("The Orchestration Store is empty.");
+			log.info("The Orchestration Store is empty. "
+					+ "(StoreResource:getAllStoreEntries DataNotFoundException)");
 			throw new DataNotFoundException("The Orchestration Store is empty.");
 		}
 		
@@ -64,7 +65,7 @@ public class StoreResource {
 	 * Returns the Orchestration Store entries from the database specified by
 	 * the consumer (and the service).
 	 * 
-	 * @param {OrchestrationStoreQuery} - query
+	 * @param OrchestrationStoreQuery query
 	 * @return OrchestrationStoreQueryResponse
 	 * @throws DataNotFoundException, BadPayloadException
 	 */

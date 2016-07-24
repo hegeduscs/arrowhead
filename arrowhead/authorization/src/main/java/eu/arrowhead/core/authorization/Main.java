@@ -52,7 +52,7 @@ public class Main {
         	server.shutdownNow();
         }
         if(secureServer != null){
-        	log.info("Stopping server at: " + BASE_URI);
+        	log.info("Stopping server at: " + BASE_URI_SECURED);
         	secureServer.shutdownNow();
         }
         
