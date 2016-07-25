@@ -125,14 +125,7 @@ public class ArrowheadCloud {
 	}
 	
 	public boolean isValid(){
-		if(operator == null || cloudName == null)
-			return false;
-		return true;
-	}
-	
-	public boolean isValidForICN(){
-		if(operator == null || cloudName == null || address == null || port == null || 
-				gatekeeperServiceURI == null)
+		if(operator == null || cloudName == null || address == null || gatekeeperServiceURI == null)
 			return false;
 		return true;
 	}
@@ -186,5 +179,9 @@ public class ArrowheadCloud {
 		return result;
 	}
 	
+	@Override
+	public String toString(){
+		return "(" + operator + ":" + cloudName + ")";
+	}
 
 }

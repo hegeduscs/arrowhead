@@ -103,5 +103,10 @@ public class ArrowheadService {
 		return true;
 	}
 	
+	@Override
+	public String toString(){
+		return "(" + serviceGroup + ":" + serviceDefinition + ")";
+	}
+	
 	
 }

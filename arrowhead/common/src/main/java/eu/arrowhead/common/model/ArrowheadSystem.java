@@ -100,7 +100,7 @@ public class ArrowheadSystem {
 	}
 	
 	public boolean isValid(){
-		if(systemGroup == null || systemName == null)
+		if(systemGroup == null || systemName == null || address == null)
 			return false;
 		return true;
 	}
@@ -146,6 +146,11 @@ public class ArrowheadSystem {
 		result = prime * result + ((systemGroup == null) ? 0 : systemGroup.hashCode());
 		result = prime * result + ((systemName == null) ? 0 : systemName.hashCode());
 		return result;
+	}
+	
+	@Override
+	public String toString(){
+		return "(" + systemGroup + ":" + systemName + ")";
 	}
 	
 	

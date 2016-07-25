@@ -13,7 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -183,6 +182,9 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 		if(consumer == null || service == null || !consumer.isValid() || !service.isValid())
 			return false;
 		if(priority == null || priority < 0)
+			return false;
+		if((providerSystem == null || !providerSystem.isValid()) && 
+				(providerCloud == null || !providerCloud.isValid()))
 			return false;
 		return true;
 	}
