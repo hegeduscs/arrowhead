@@ -1,6 +1,7 @@
 package eu.arrowhead.core.orchestrator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,10 +43,10 @@ public final class NewOrchestratorService {
 
 	//TODO végig menni a végleges kódon és rendesen fellogolni, kommentezni, kék kommentek készítése
 	
-	/**
-	 * 
-	 * @param srf
-	 * @return
+	/** 
+	 * @param ServiceRequestForm srf
+	 * @return OrchestrationResponse
+	 * @throws DataNotFoundException
 	 */
 	public static OrchestrationResponse regularOrchestration(ServiceRequestForm srf){
 		log.info("Entered the regularOrchestration method.");
@@ -66,7 +67,11 @@ public final class NewOrchestratorService {
 		providerSystems = queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), 
 				providerSystems);
 		
-		//Filtering out the non-authorized systems from the SR response
+		/*
+		 * The Authorization check only returns the provider systems where the 
+		 * requester system is authorized to consume the service. We filter out the 
+		 * non-authorized systems from the SR response.
+		 */
 		for(ProvidedService service : psList){
 			if(!providerSystems.contains(service.getProvider())){
 				psList.remove(service);
@@ -79,6 +84,10 @@ public final class NewOrchestratorService {
 			psList = removeNonPreferred(psList, srf.getPreferredProviders());
 		}
 		
+		/*
+		 * If matchmaking is requested, we pick out 1 ProvidedService entity from the list
+		 * If only preferred Providers are allowed, matchmaking might not be possible.
+		 */
 		if(orchestrationFlags.get("matchmaking")){
 			ProvidedService ps = intraCloudMatchmaking(psList, orchestrationFlags.get("onlyPreferred"), 
 					srf.getPreferredProviders(), srf.getPreferredClouds().size());
@@ -99,21 +108,7 @@ public final class NewOrchestratorService {
 				ArrowheadCloud targetCloud = interCloudMatchmaking(result, srf.getPreferredClouds(), 
 						orchestrationFlags.get("onlyPreferred"));
 				
-				//TODO három helyen csinálom ezt a 8 sort, érdemes kiszervezni külön fgvbe?
-				//Getting the preferred Providers which belong to the preferred Cloud
-				int firstCloudIndex = srf.getPreferredClouds().indexOf(targetCloud);
-				int lastCloudIndex = srf.getPreferredClouds().lastIndexOf(targetCloud);
-				if(firstCloudIndex != -1 && lastCloudIndex != -1){
-					srf.setPreferredProviders(srf.getPreferredProviders().subList(firstCloudIndex, lastCloudIndex));
-				}
-				else{
-					srf.getPreferredProviders().clear();
-				}
-				
-				ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
-						targetCloud, srf.getRequesterSystem(), srf.getPreferredProviders(), 
-						orchestrationFlags.get("onlyPreferred"));
-				ICNResult icnResult = startICN(requestForm);
+				ICNResult icnResult = startICN(compileICNRequestForm(srf,targetCloud));
 				
 				if(orchestrationFlags.get("matchmaking")){
 					return icnMatchmaking(icnResult);
@@ -176,20 +171,7 @@ public final class NewOrchestratorService {
 		ArrowheadCloud targetCloud = interCloudMatchmaking(result, srf.getPreferredClouds(), 
 				orchestrationFlags.get("onlyPreferred"));
 		
-		//Getting the preferred Providers which belong to the preferred Cloud
-		int firstCloudIndex = srf.getPreferredClouds().indexOf(targetCloud);
-		int lastCloudIndex = srf.getPreferredClouds().lastIndexOf(targetCloud);
-		if(firstCloudIndex != -1 && lastCloudIndex != -1){
-			srf.setPreferredProviders(srf.getPreferredProviders().subList(firstCloudIndex, lastCloudIndex));
-		}
-		else{
-			srf.getPreferredProviders().clear();
-		}
-		
-		ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
-				targetCloud, srf.getRequesterSystem(), srf.getPreferredProviders(), 
-				orchestrationFlags.get("onlyPreferred"));
-		ICNResult icnResult = startICN(requestForm);
+		ICNResult icnResult = startICN(compileICNRequestForm(srf,targetCloud));
 		
 		if(orchestrationFlags.get("matchmaking")){
 			return icnMatchmaking(icnResult);
@@ -199,6 +181,12 @@ public final class NewOrchestratorService {
 		}
 	}
 	
+	//TODO this function needs to be reviewed heavily
+	/**
+	 * 
+	 * @param srf
+	 * @return
+	 */
 	public static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf){
 		log.info("Entered the orchestrationFromStore method.");
 		
@@ -222,45 +210,62 @@ public final class NewOrchestratorService {
 			}
 		}
 		
-		//The entryList already comes in priority order from the StoreResource
+		List<OrchestrationStore> intraStoreList = new ArrayList<OrchestrationStore>();
 		for(OrchestrationStore entry : entryList){
 			if(entry.getProviderCloud() == null){
-				//Querying the Service Registry
-				List<ProvidedService> psList = new ArrayList<ProvidedService>();
-				//TODO SR query el fog szállni exceptionnel, ha a psList empty lenne, itt az nem kívánt
-				psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), 
-						orchestrationFlags.get("pingProviders"));
-				
-				for(ProvidedService ps : psList){
-					if(ps.getProvider().equals(entry.getProviderSystem())){
-						//Cross-check with Authorization
-						//TODO good workaround for this list initialization? since we only wanna check 1 provider
-						List<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
-					}
-					//this if branch is not finished yet
-				}
-			}
-			else{
-				//Getting the preferred Providers which belong to the preferred Cloud
-				int firstCloudIndex = srf.getPreferredClouds().indexOf(entry.getProviderCloud());
-				int lastCloudIndex = srf.getPreferredClouds().lastIndexOf(entry.getProviderCloud());
-				if(firstCloudIndex != -1 && lastCloudIndex != -1){
-					srf.setPreferredProviders(srf.getPreferredProviders().subList(firstCloudIndex, lastCloudIndex));
-				}
-				else{
-					srf.getPreferredProviders().clear();
-				}
-				
-				//TODO review copied requestform, not final yet
-				ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
-						null, srf.getRequesterSystem(), srf.getPreferredProviders(), 
-						orchestrationFlags.get("onlyPreferred"));
-				ICNResult icnResult = startICN(requestForm);
-				//icn matchmaking? vagy a kövi sorban már visszatérhetünk returnnel, ha nem dobott exceptiont a startICN
+				intraStoreList.add(entry);
 			}
 		}
 		
-		return null;
+		//Querying the Service Registry
+		List<ProvidedService> psList = new ArrayList<ProvidedService>();
+		List<ArrowheadSystem> serviceProviders = new ArrayList<ArrowheadSystem>();
+		try{
+			psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), 
+					orchestrationFlags.get("pingProviders"));
+			
+			for(ProvidedService ps : psList){
+				serviceProviders.add(ps.getProvider());
+			}
+		}
+		catch(DataNotFoundException ex){
+		}
+		
+		List<ArrowheadSystem> intraProviders = new ArrayList<ArrowheadSystem>();
+		for(OrchestrationStore entry : intraStoreList){
+			//If the Store entry didn't had a providerCloud, it must have had a providerSystem
+			intraProviders.add(entry.getProviderSystem());
+		}
+		
+		List<ArrowheadSystem> authorizedIntraProviders = new ArrayList<ArrowheadSystem>();
+		authorizedIntraProviders = queryAuthorization(srf.getRequesterSystem(), 
+				srf.getRequestedService(), intraProviders);
+		
+		for(OrchestrationStore entry : entryList){
+			if(entry.getProviderCloud() == null){
+				if(serviceProviders.contains(entry.getProviderSystem()) && 
+						authorizedIntraProviders.contains(entry.getProviderSystem())){
+					List<OrchestrationStore> tempList = new ArrayList<>(Arrays.asList(entry));
+					return compileOrchestrationResponse(tempList, orchestrationFlags.get("generateToken"));
+				}
+			}
+			else{
+				try{
+					ICNResult icnResult = startICN(compileICNRequestForm(srf, entry.getProviderCloud()));
+					if(orchestrationFlags.get("matchmaking")){
+						return icnMatchmaking(icnResult);
+					}
+					else{
+						return icnResult.getInstructions();
+					}
+				}
+				catch(DataNotFoundException ex){
+					
+				}
+			}
+		}
+		
+		throw new DataNotFoundException("OrchestrationFromStore failed.");
 	}
 	
 	
@@ -368,7 +373,7 @@ public final class NewOrchestratorService {
 	 */
 	private static ProvidedService intraCloudMatchmaking(List<ProvidedService> psList, 
 			boolean onlyPreferred, List<ArrowheadSystem> preferredList, int notLocalSystems){
-		log.info("Entered the intraCloudMatchmaking method.");
+		log.info("Entered the intraCloudMatchmaking method. psList size: " + psList.size());
 		
 		if(psList.isEmpty()){
 			log.info("IntraCloudMatchmaking received an empty ProvidedService list. "
@@ -636,6 +641,31 @@ public final class NewOrchestratorService {
 				response.readEntity(OrchestrationStoreQueryResponse.class);
 		
 		return storeResponse.getEntryList();
+	}
+	
+	/**
+	 * 
+	 * @param srf
+	 * @param targetCloud
+	 * @return
+	 */
+	private static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf, ArrowheadCloud targetCloud){
+		log.info("Entered the compileICNRequestForm method.");
+		
+		//Getting the preferred Providers which belong to the preferred Cloud
+		int firstCloudIndex = srf.getPreferredClouds().indexOf(targetCloud);
+		int lastCloudIndex = srf.getPreferredClouds().lastIndexOf(targetCloud);
+		if(firstCloudIndex != -1 && lastCloudIndex != -1){
+			srf.setPreferredProviders(srf.getPreferredProviders().subList(firstCloudIndex, lastCloudIndex));
+		}
+		else{
+			srf.getPreferredProviders().clear();
+		}
+		
+		ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
+				targetCloud, srf.getRequesterSystem(), srf.getPreferredProviders(), 
+				srf.getOrchestrationFlags().get("onlyPreferred"));
+		return requestForm;
 	}
 	
 }

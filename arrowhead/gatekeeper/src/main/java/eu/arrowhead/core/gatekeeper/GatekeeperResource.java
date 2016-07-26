@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.messages.GSDAnswer;
@@ -140,13 +141,12 @@ public class GatekeeperResource {
 		ArrowheadCloud cloud = gsdPoll.getRequesterCloud();
 		ArrowheadService service = gsdPoll.getRequestedService();
 		InterCloudAuthRequest authRequest = new InterCloudAuthRequest(cloud, service, false);
-		
 		String authURI = SysConfig.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
 		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
 		log.info("Authorization System queried for requester Cloud: " + 
 				gsdPoll.getRequesterCloud().getCloudName());
-		
+
 		//If the consumer Cloud is not authorized null is returned
 		if(!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()){
 			log.info("Requester Cloud is UNAUTHORIZED");
@@ -170,7 +170,7 @@ public class GatekeeperResource {
 			log.info("ServiceRegistry queried for requested Service: " + service.getServiceDefinition());
 			ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
 			if(result.isPayloadEmpty()){
-				log.info("ServiceRegistry query came back empty.");
+				log.info("ServiceRegistry query came back empty for " + service.toString());
 				return Response.noContent().entity(null).build();
 			}
 			
