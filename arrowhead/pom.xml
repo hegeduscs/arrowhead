@@ -18,7 +18,7 @@
 		<module>main</module>
 	</modules>
 	<properties>
-		<jersey.version>2.22.1</jersey.version>
+		<jersey.version>2.23.1</jersey.version>
 		<log4j.version>1.2.17</log4j.version>
 		<mvn.compiler.version>3.1</mvn.compiler.version>
 		<mvn.glassfish.version>2.1</mvn.glassfish.version>

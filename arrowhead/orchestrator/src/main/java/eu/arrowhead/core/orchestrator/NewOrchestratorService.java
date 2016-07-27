@@ -181,7 +181,6 @@ public final class NewOrchestratorService {
 		}
 	}
 	
-	//TODO this function needs to be reviewed heavily
 	/**
 	 * 
 	 * @param srf
@@ -260,7 +259,6 @@ public final class NewOrchestratorService {
 					}
 				}
 				catch(DataNotFoundException ex){
-					
 				}
 			}
 		}
@@ -288,7 +286,7 @@ public final class NewOrchestratorService {
 			}
 			
 			OrchestrationForm of = new OrchestrationForm(service, ps.getProvider(), 
-					ps.getServiceURI(), token);
+					ps.getServiceURI(), token, null);
 			ofList.add(of);
 		}
 		log.info("OrchestrationForm created for " + psList.size() + " providers.");
@@ -313,7 +311,7 @@ public final class NewOrchestratorService {
 			}
 			
 			OrchestrationForm of = new OrchestrationForm(entry.getService(), entry.getProviderSystem(), 
-					entry.getOrchestrationRule(), token);
+					null, token, entry.getOrchestrationRule());
 			ofList.add(of);
 		}
 		log.info("OrchestrationForm created for " + entryList.size() + " providers.");
@@ -432,7 +430,6 @@ public final class NewOrchestratorService {
 		}
 	}
 	
-	//TODO logging + review
 	private static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, 
 			List<ArrowheadSystem> preferredProviders){
 		if(psList.isEmpty() || preferredProviders.isEmpty()){

@@ -267,7 +267,6 @@ public class GatekeeperResource {
 			orchestrationFlags.put("overrideStore", false);
 			orchestrationFlags.put("storeOnlyActive", false);
 			orchestrationFlags.put("matchmaking", false);
-			orchestrationFlags.put("hasPreferences", false);
 			orchestrationFlags.put("onlyPreferred", icnProposal.isOnlyPreferred());
 			orchestrationFlags.put("generateToken", false);
 			

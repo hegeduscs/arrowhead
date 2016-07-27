@@ -71,7 +71,7 @@ public class OrchestratorService {
 			token = this.generateToken();
 		}
 		List<OrchestrationForm> oflist = new ArrayList<OrchestrationForm>();
-		OrchestrationForm of = new OrchestrationForm(pS.getOffered(), pS.getProvider(), pS.getServiceURI(), token);
+		OrchestrationForm of = new OrchestrationForm(pS.getOffered(), pS.getProvider(), pS.getServiceURI(), token, null);
 		oflist.add(of);
 		OrchestrationResponse or = new OrchestrationResponse(oflist);
 		return or;
@@ -94,7 +94,7 @@ public class OrchestratorService {
 			OrchestrationStoreQueryResponse osqr = response.readEntity(OrchestrationStoreQueryResponse.class);
 			List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
 			for (OrchestrationStore oStore : entryList){
-				OrchestrationForm oForm = new OrchestrationForm(oStore.getService(), oStore.getProviderSystem(), oStore.getProviderSystem().getAddress(), oStore.getProviderSystem().getAuthenticationInfo());
+				OrchestrationForm oForm = new OrchestrationForm(oStore.getService(), oStore.getProviderSystem(), oStore.getProviderSystem().getAddress(), oStore.getProviderSystem().getAuthenticationInfo(), null);
 				oflist.add(oForm);
 			}
 		}
@@ -157,7 +157,7 @@ public class OrchestratorService {
 					token = this.generateToken();
 				}
 				OrchestrationStore tempentry = orlist.get(i);
-				OrchestrationForm orform = new OrchestrationForm(tempentry.getService(), tempentry.getProviderSystem(), tempentry.getProviderSystem().getAddress(), token);
+				OrchestrationForm orform = new OrchestrationForm(tempentry.getService(), tempentry.getProviderSystem(), tempentry.getProviderSystem().getAddress(), token, null);
 				oflist.add(orform);
 				OrchestrationResponse or = new OrchestrationResponse(oflist);
 				return or;
@@ -182,7 +182,7 @@ public class OrchestratorService {
 				if (serviceRequestForm.getOrchestrationFlags().get("generateToken")){
 					token = this.generateToken();
 				}
-				OrchestrationForm of = new OrchestrationForm(pS.getOffered(), pS.getProvider(), pS.getServiceURI(), token);
+				OrchestrationForm of = new OrchestrationForm(pS.getOffered(), pS.getProvider(), pS.getServiceURI(), token, null);
 				oflist.add(of);
 				OrchestrationResponse or = new OrchestrationResponse(oflist);
 				return or;
@@ -211,7 +211,7 @@ public class OrchestratorService {
 	public OrchestrationForm getDummyOF(){
 		ArrowheadService ah_service = new ArrowheadService("AITIA", "Very good service", null, null);
 		ArrowheadSystem ah_system = new ArrowheadSystem("AITIA", "1", "192.168.1.1", "8080", "not good");
-		OrchestrationForm of = new OrchestrationForm(ah_service, ah_system, "localhost", "not good");
+		OrchestrationForm of = new OrchestrationForm(ah_service, ah_system, "localhost", "not good", null);
 		return of;
 	}
 	
@@ -310,7 +310,7 @@ public class OrchestratorService {
 		List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
 		entryList = osqr.getEntryList();
 		for (OrchestrationStore oStore : entryList){
-			OrchestrationForm oForm = new OrchestrationForm(oStore.getService(), oStore.getProviderSystem(), oStore.getProviderSystem().getAddress(), oStore.getProviderSystem().getAuthenticationInfo());
+			OrchestrationForm oForm = new OrchestrationForm(oStore.getService(), oStore.getProviderSystem(), oStore.getProviderSystem().getAddress(), oStore.getProviderSystem().getAuthenticationInfo(), null);
 			oflist.add(oForm);
 		}
 		return oflist;

@@ -12,16 +12,18 @@ public class OrchestrationForm {
 	private ArrowheadSystem provider;
 	private String serviceURI;
 	private String authorizationToken;
+	private String instruction;
 
 	public OrchestrationForm() {
 	}
 
 	public OrchestrationForm(ArrowheadService service, ArrowheadSystem provider, String serviceURI,
-			String authorizationToken) {
+			String authorizationToken, String instruction) {
 		this.service = service;
 		this.provider = provider;
 		this.serviceURI = serviceURI;
 		this.authorizationToken = authorizationToken;
+		this.instruction = instruction;
 	}
 
 	public ArrowheadService getService() {
@@ -54,6 +56,14 @@ public class OrchestrationForm {
 
 	public void setAuthorizationToken(String authorizationToken) {
 		this.authorizationToken = authorizationToken;
+	}
+
+	public String getInstruction() {
+		return instruction;
+	}
+
+	public void setInstruction(String instruction) {
+		this.instruction = instruction;
 	}
 
 	
