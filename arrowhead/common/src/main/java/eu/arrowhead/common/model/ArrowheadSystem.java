@@ -104,6 +104,16 @@ public class ArrowheadSystem {
 			return false;
 		return true;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((address == null) ? 0 : address.hashCode());
+		result = prime * result + ((systemGroup == null) ? 0 : systemGroup.hashCode());
+		result = prime * result + ((systemName == null) ? 0 : systemName.hashCode());
+		return result;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -119,11 +129,6 @@ public class ArrowheadSystem {
 				return false;
 		} else if (!address.equals(other.address))
 			return false;
-		if (port == null) {
-			if (other.port != null)
-				return false;
-		} else if (!port.equals(other.port))
-			return false;
 		if (systemGroup == null) {
 			if (other.systemGroup != null)
 				return false;
@@ -136,18 +141,7 @@ public class ArrowheadSystem {
 			return false;
 		return true;
 	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((address == null) ? 0 : address.hashCode());
-		result = prime * result + ((port == null) ? 0 : port.hashCode());
-		result = prime * result + ((systemGroup == null) ? 0 : systemGroup.hashCode());
-		result = prime * result + ((systemName == null) ? 0 : systemName.hashCode());
-		return result;
-	}
-	
+
 	@Override
 	public String toString(){
 		return "(" + systemGroup + ":" + systemName + ")";

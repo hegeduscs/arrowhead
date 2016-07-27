@@ -67,7 +67,7 @@ public class Main {
 		URI uri = UriBuilder.fromUri(BASE_URI).build();
 
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(OrchestratorResource.class, 
+		config.registerClasses(NewOrchestratorResource.class, 
 								StoreResource.class);
 		config.packages("eu.arrowhead.common");
 

@@ -72,11 +72,13 @@ public final class NewOrchestratorService {
 		 * requester system is authorized to consume the service. We filter out the 
 		 * non-authorized systems from the SR response.
 		 */
+		List<ProvidedService> temp = new ArrayList<ProvidedService>();
 		for(ProvidedService service : psList){
 			if(!providerSystems.contains(service.getProvider())){
-				psList.remove(service);
+				temp.add(service);
 			}
 		}
+		psList.removeAll(temp);
 		
 		//If needed, removing the non-preferred providers from the remaining list
 		if(orchestrationFlags.get("onlyPreferred")){
@@ -219,6 +221,8 @@ public final class NewOrchestratorService {
 		//Querying the Service Registry
 		List<ProvidedService> psList = new ArrayList<ProvidedService>();
 		List<ArrowheadSystem> serviceProviders = new ArrayList<ArrowheadSystem>();
+		List<ArrowheadSystem> intraProviders = new ArrayList<ArrowheadSystem>();
+		List<ArrowheadSystem> authorizedIntraProviders = new ArrayList<ArrowheadSystem>();
 		try{
 			psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), 
 					orchestrationFlags.get("pingProviders"));
@@ -226,19 +230,17 @@ public final class NewOrchestratorService {
 			for(ProvidedService ps : psList){
 				serviceProviders.add(ps.getProvider());
 			}
+			
+			for(OrchestrationStore entry : intraStoreList){
+				//If the Store entry didn't had a providerCloud, it must have had a providerSystem
+				intraProviders.add(entry.getProviderSystem());
+			}
+			
+			authorizedIntraProviders = queryAuthorization(srf.getRequesterSystem(), 
+					srf.getRequestedService(), intraProviders);
 		}
 		catch(DataNotFoundException ex){
 		}
-		
-		List<ArrowheadSystem> intraProviders = new ArrayList<ArrowheadSystem>();
-		for(OrchestrationStore entry : intraStoreList){
-			//If the Store entry didn't had a providerCloud, it must have had a providerSystem
-			intraProviders.add(entry.getProviderSystem());
-		}
-		
-		List<ArrowheadSystem> authorizedIntraProviders = new ArrayList<ArrowheadSystem>();
-		authorizedIntraProviders = queryAuthorization(srf.getRequesterSystem(), 
-				srf.getRequestedService(), intraProviders);
 		
 		for(OrchestrationStore entry : entryList){
 			if(entry.getProviderCloud() == null){
@@ -278,6 +280,9 @@ public final class NewOrchestratorService {
 			List<ProvidedService> psList, boolean generateToken){
 		log.info("Entered the (first) compileOrchestrationResponse method.");
 		
+		//Returning only those interfaces that were found in the SR
+		service.setInterfaces(psList.get(0).getServiceInterface());
+		
 		String token = null;
 		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
 		for(ProvidedService ps : psList){
@@ -302,7 +307,7 @@ public final class NewOrchestratorService {
 	private static OrchestrationResponse compileOrchestrationResponse(List<OrchestrationStore> entryList, 
 			boolean generateToken){
 		log.info("Entered the (second) compileOrchestrationResponse method.");
-		
+				
 		String token = null;
 		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
 		for(OrchestrationStore entry : entryList){
@@ -339,15 +344,18 @@ public final class NewOrchestratorService {
 				service.getInterfaces(), pingProviders, metadataSearch, tsig_key);
 		
 		//Sending the query, returning the result
-		log.info("Querying ServiceRegistry for requested Service: " + service.getServiceDefinition());
+		log.info("Querying ServiceRegistry for requested Service: " + service.toString());
 		Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
 		ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
 		
+		//If there are non-valid entries in the Service Registry response, we filter those out
+		List<ProvidedService> temp = new ArrayList<ProvidedService>();
 		for(ProvidedService ps: serviceQueryResult.getServiceQueryData()){
 			if(!ps.isPayloadUsable()){
-				serviceQueryResult.getServiceQueryData().remove(ps);
+				temp.add(ps);
 			}
 		}
+		serviceQueryResult.getServiceQueryData().removeAll(temp);
 		
 		if(serviceQueryResult.isPayloadEmpty()){
 			log.info("ServiceRegistry query came back empty. "
@@ -376,13 +384,14 @@ public final class NewOrchestratorService {
 		if(psList.isEmpty()){
 			log.info("IntraCloudMatchmaking received an empty ProvidedService list. "
 					+ "(OrchestratorService:intraCloudMatchmaking BadPayloadException)");
-			throw new BadPayloadException("ProvidedService list is empty, Intra-Cloud matchmaking is"
+			throw new BadPayloadException("ProvidedService list is empty, Intra-Cloud matchmaking is "
 					+ "not possible in the Orchestration process.");
 		}
 		
 		//We delete all the preferredProviders from the list which belong to another cloud
-		preferredList.subList(0, notLocalSystems - 1).clear();
-		log.info(notLocalSystems + " not local Systems deleted from the preferred list.");
+		preferredList.subList(0, notLocalSystems).clear();
+		log.info(notLocalSystems + " not local Systems deleted from the preferred list. "
+				+ "Remaining providers: " + preferredList.size());
 		
 		if(!preferredList.isEmpty()){	
 			/*
@@ -596,6 +605,12 @@ public final class NewOrchestratorService {
 		for(Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap().entrySet()){
 			if(entry.getValue())
 				authorizedSystems.add(entry.getKey());
+		}
+		
+		if(authorizedSystems.isEmpty()){
+			log.info("OrchestratorService:queryAuthorization throws DataNotFoundException");
+			throw new DataNotFoundException("The consumer system is not authorized to receive servicing "
+					+ "from any of the provider systems.");
 		}
 		
 		log.info("Authorization query is done, sending back the authorized Systems. "

@@ -129,6 +129,17 @@ public class ArrowheadCloud {
 			return false;
 		return true;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((address == null) ? 0 : address.hashCode());
+		result = prime * result + ((cloudName == null) ? 0 : cloudName.hashCode());
+		result = prime * result + ((gatekeeperServiceURI == null) ? 0 : gatekeeperServiceURI.hashCode());
+		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
+		return result;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -159,26 +170,9 @@ public class ArrowheadCloud {
 				return false;
 		} else if (!operator.equals(other.operator))
 			return false;
-		if (port == null) {
-			if (other.port != null)
-				return false;
-		} else if (!port.equals(other.port))
-			return false;
 		return true;
 	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((address == null) ? 0 : address.hashCode());
-		result = prime * result + ((cloudName == null) ? 0 : cloudName.hashCode());
-		result = prime * result + ((gatekeeperServiceURI == null) ? 0 : gatekeeperServiceURI.hashCode());
-		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
-		result = prime * result + ((port == null) ? 0 : port.hashCode());
-		return result;
-	}
-	
+
 	@Override
 	public String toString(){
 		return "(" + operator + ":" + cloudName + ")";
