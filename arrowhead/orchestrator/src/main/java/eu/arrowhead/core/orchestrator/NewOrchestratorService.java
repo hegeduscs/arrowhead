@@ -54,76 +54,82 @@ public final class NewOrchestratorService {
 		Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
 		orchestrationFlags = srf.getOrchestrationFlags();
 		
-		//Querying the Service Registry
-		List<ProvidedService> psList = new ArrayList<ProvidedService>();
-		psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), 
-				orchestrationFlags.get("pingProviders"));
-		
-		//Cross-checking the SR response with the Authorization
-		List<ArrowheadSystem> providerSystems = new ArrayList<ArrowheadSystem>();
-		for(ProvidedService service : psList){
-			providerSystems.add(service.getProvider());
-		}
-		providerSystems = queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), 
-				providerSystems);
-		
-		/*
-		 * The Authorization check only returns the provider systems where the 
-		 * requester system is authorized to consume the service. We filter out the 
-		 * non-authorized systems from the SR response.
-		 */
-		List<ProvidedService> temp = new ArrayList<ProvidedService>();
-		for(ProvidedService service : psList){
-			if(!providerSystems.contains(service.getProvider())){
-				temp.add(service);
+		try{
+			//Querying the Service Registry
+			List<ProvidedService> psList = new ArrayList<ProvidedService>();
+			psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), 
+					orchestrationFlags.get("pingProviders"));
+			
+			//Cross-checking the SR response with the Authorization
+			List<ArrowheadSystem> providerSystems = new ArrayList<ArrowheadSystem>();
+			for(ProvidedService service : psList){
+				providerSystems.add(service.getProvider());
 			}
-		}
-		psList.removeAll(temp);
-		
-		//If needed, removing the non-preferred providers from the remaining list
-		if(orchestrationFlags.get("onlyPreferred")){
-			log.info("Only preferred matchmaking is requested.");
-			psList = removeNonPreferred(psList, srf.getPreferredProviders());
-		}
-		
-		/*
-		 * If matchmaking is requested, we pick out 1 ProvidedService entity from the list
-		 * If only preferred Providers are allowed, matchmaking might not be possible.
-		 */
-		if(orchestrationFlags.get("matchmaking")){
-			ProvidedService ps = intraCloudMatchmaking(psList, orchestrationFlags.get("onlyPreferred"), 
-					srf.getPreferredProviders(), srf.getPreferredClouds().size());
-			psList.clear();
-			psList.add(ps);
-		}
-		
-		if(!psList.isEmpty()){
+			providerSystems = queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), 
+					providerSystems);
+			
+			/*
+			 * The Authorization check only returns the provider systems where the 
+			 * requester system is authorized to consume the service. We filter out the 
+			 * non-authorized systems from the SR response.
+			 */
+			List<ProvidedService> temp = new ArrayList<ProvidedService>();
+			for(ProvidedService service : psList){
+				if(!providerSystems.contains(service.getProvider())){
+					temp.add(service);
+				}
+			}
+			psList.removeAll(temp);
+			
+			//If needed, removing the non-preferred providers from the remaining list
+			if(orchestrationFlags.get("onlyPreferred")){
+				log.info("Only preferred matchmaking is requested.");
+				psList = removeNonPreferred(psList, srf.getPreferredProviders());
+			}
+			
+			/*
+			 * If matchmaking is requested, we pick out 1 ProvidedService entity from the list
+			 * If only preferred Providers are allowed, matchmaking might not be possible.
+			 */
+			if(orchestrationFlags.get("matchmaking")){
+				ProvidedService ps = intraCloudMatchmaking(psList, orchestrationFlags.get("onlyPreferred"), 
+						srf.getPreferredProviders(), srf.getPreferredClouds().size());
+				psList.clear();
+				psList.add(ps);
+			}
+			
 			return compileOrchestrationResponse(srf.getRequestedService(), psList, 
 					orchestrationFlags.get("generateToken"));
 		}
+		catch(DataNotFoundException ex){
+			if(!orchestrationFlags.get("enableInterCloud")){
+				throw new DataNotFoundException(ex.getMessage());
+			}
+		}
+		catch(BadPayloadException ex){
+			if(!orchestrationFlags.get("enableInterCloud")){
+				throw new BadPayloadException(ex.getMessage());
+			}
+		}
+		/*
+		 * If the code reaches this part, that means the Intra-Cloud Orchestration failed, 
+		 * but the enableInterCloud flag is set to true.
+		 */
+		
+		//Telling the Gatekeeper to do a GSD
+		GSDResult result = startGSD(srf.getRequestedService(), srf.getPreferredClouds());
+		
+		//Picking a target Cloud from the ones that responded to the GSD poll.
+		ArrowheadCloud targetCloud = interCloudMatchmaking(result, srf.getPreferredClouds(), 
+				orchestrationFlags.get("onlyPreferred"));
+		
+		ICNResult icnResult = startICN(compileICNRequestForm(srf,targetCloud));
+		
+		if(orchestrationFlags.get("matchmaking")){
+			return icnMatchmaking(icnResult);
+		}
 		else{
-			if(orchestrationFlags.get("enableInterCloud")){
-				//Telling the Gatekeeper to do a GSD
-				GSDResult result = startGSD(srf.getRequestedService(), srf.getPreferredClouds());
-				
-				//Picking a target Cloud from the ones that responded to the GSD poll.
-				ArrowheadCloud targetCloud = interCloudMatchmaking(result, srf.getPreferredClouds(), 
-						orchestrationFlags.get("onlyPreferred"));
-				
-				ICNResult icnResult = startICN(compileICNRequestForm(srf,targetCloud));
-				
-				if(orchestrationFlags.get("matchmaking")){
-					return icnMatchmaking(icnResult);
-				}
-				else{
-					return icnResult.getInstructions();
-				}
-			}
-			else{
-				log.info("Regular, local only orchestration yielded no results. " + 
-					"(OrchestratorService:regularOrchestration DataNotFoundException)");
-				throw new DataNotFoundException("Regular, local only orchestration yielded no results.");
-			}
+			return icnResult.getInstructions();
 		}
 	}
 
@@ -280,9 +286,6 @@ public final class NewOrchestratorService {
 			List<ProvidedService> psList, boolean generateToken){
 		log.info("Entered the (first) compileOrchestrationResponse method.");
 		
-		//Returning only those interfaces that were found in the SR
-		service.setInterfaces(psList.get(0).getServiceInterface());
-		
 		String token = null;
 		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
 		for(ProvidedService ps : psList){
@@ -290,6 +293,8 @@ public final class NewOrchestratorService {
 				//placeholder, call should be made to the AuthorizationResource
 			}
 			
+			//Returning only those interfaces that were found in the SR
+			service.setInterfaces(ps.getServiceInterface());
 			OrchestrationForm of = new OrchestrationForm(service, ps.getProvider(), 
 					ps.getServiceURI(), token, null);
 			ofList.add(of);
@@ -365,7 +370,7 @@ public final class NewOrchestratorService {
 		if(serviceQueryResult.isPayloadEmpty()){
 			log.info("ServiceRegistry query came back empty. "
 					+ "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
-			throw new DataNotFoundException("ServiceRegistry query came back empty for " 
+			throw new DataNotFoundException("ServiceRegistry query came back empty for service " 
 					+ service.toString());
 		}
 		log.info("ServiceRegistry query successful. Number of providers: " 
