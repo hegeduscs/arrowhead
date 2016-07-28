@@ -347,7 +347,12 @@ public final class NewOrchestratorService {
 		log.info("Querying ServiceRegistry for requested Service: " + service.toString());
 		Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
 		ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
-		
+		if(serviceQueryResult == null){
+			log.info("ServiceRegistry query came back empty. "
+					+ "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
+			throw new DataNotFoundException("ServiceRegistry query came back empty for " 
+					+ service.toString() + " (Interfaces field for service can not be empty)");
+		}
 		//If there are non-valid entries in the Service Registry response, we filter those out
 		List<ProvidedService> temp = new ArrayList<ProvidedService>();
 		for(ProvidedService ps: serviceQueryResult.getServiceQueryData()){

@@ -11,11 +11,9 @@ public class ServiceQueryResult {
 	private List<ProvidedService> serviceQueryData = new ArrayList<ProvidedService>();
 
 	public ServiceQueryResult() {
-		super();
 	}
 
 	public ServiceQueryResult(List<ProvidedService> serviceQueryData) {
-		super();
 		this.serviceQueryData = serviceQueryData;
 	}
 
