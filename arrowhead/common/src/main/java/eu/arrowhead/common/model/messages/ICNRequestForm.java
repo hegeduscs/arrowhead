@@ -82,8 +82,7 @@ public class ICNRequestForm {
 	}
 
 	public boolean isPayloadUsable(){
-		if(requestedService == null || authenticationInfo == null 
-				|| targetCloud == null || requesterSystem == null)
+		if(requestedService == null || targetCloud == null || requesterSystem == null)
 			return false;
 		if(!requestedService.isValid() || !targetCloud.isValid() || !requesterSystem.isValid())
 			return false;
