@@ -50,11 +50,14 @@ public final class Utility {
 		    if(response.getStatus() == 503){
 		    	throw new UnavailableServerException("The server at (" + URI + ") did not respond.");
 		    }
-		    return response;
 		    
-		//TODO kitalálni vhogy a több kérésen átmenő esetben a ténylegesen offline system URIját visszadobni
-		    //2 catch ág, legyen egy UnavailableServerException catch is, ami azt a URIt fogja visszaadni
-		}catch(Exception e){
+		    return response;
+		}
+		catch(UnavailableServerException e){
+			e.printStackTrace();
+			throw new UnavailableServerException(e.getMessage());
+		}
+		catch(Exception e){
 		    e.printStackTrace();
 		    //Internal Server Error, Not Found
 		    if(response == null || response.getStatus() == 500 || response.getStatus() == 404){
