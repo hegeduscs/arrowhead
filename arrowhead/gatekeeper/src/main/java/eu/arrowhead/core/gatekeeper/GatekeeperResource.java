@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.messages.GSDAnswer;
