@@ -111,8 +111,8 @@ public class GatekeeperResource {
 			log.info("Sent GSD Poll request to: " + URI);
 			GSDAnswer gsdAnswer = response.readEntity(GSDAnswer.class);
 			if(gsdAnswer != null){
-				log.info("A NeighborCloud named " + gsdAnswer.getProviderCloud().getCloudName() 
-						+ " responded to GSD Poll");
+				log.info("A Cloud named " + gsdAnswer.getProviderCloud().getCloudName() 
+						+ " responded to GSD Poll positively");
 				gsdAnswerList.add(gsdAnswer);
 			}
 		}
