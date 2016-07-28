@@ -407,6 +407,7 @@ public class AuthorizationApi {
 			authRight.setCloud(cloud);
 			authRight.setService(retrievedService);
 			authRight = dm.merge(authRight);
+			savedAuthRights.add(authRight);
 		}
 
 		log.info(savedAuthRights.size() + " authorization rights created.");
