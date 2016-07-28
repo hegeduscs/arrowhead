@@ -674,14 +674,15 @@ public final class NewOrchestratorService {
 	private static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf, ArrowheadCloud targetCloud){
 		log.info("Entered the compileICNRequestForm method.");
 		
+		List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
 		//Getting the preferred Providers which belong to the preferred Cloud
 		int firstCloudIndex = srf.getPreferredClouds().indexOf(targetCloud);
 		int lastCloudIndex = srf.getPreferredClouds().lastIndexOf(targetCloud);
-		if(firstCloudIndex != -1 && lastCloudIndex != -1){
-			srf.setPreferredProviders(srf.getPreferredProviders().subList(firstCloudIndex, lastCloudIndex));
+		if(firstCloudIndex == -1 && firstCloudIndex != lastCloudIndex){
+			preferredProviders.addAll(srf.getPreferredProviders().subList(firstCloudIndex, lastCloudIndex));
 		}
-		else{
-			srf.getPreferredProviders().clear();
+		else if(firstCloudIndex == -1 && firstCloudIndex == lastCloudIndex){
+			preferredProviders.add(srf.getPreferredProviders().get(firstCloudIndex));
 		}
 		
 		ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
