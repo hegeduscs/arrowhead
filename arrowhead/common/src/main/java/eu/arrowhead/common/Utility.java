@@ -22,10 +22,10 @@ public final class Utility {
 	public static <T> Response sendRequest(String URI, String method, T payload){
 		Response response = null;
 		try{
-		    ClientConfig configuration = new ClientConfig();
+		    /*ClientConfig configuration = new ClientConfig();
 		    configuration.property(ClientProperties.CONNECT_TIMEOUT, 10000);
-		    configuration.property(ClientProperties.READ_TIMEOUT, 10000);
-		    Client client = ClientBuilder.newClient(configuration);
+		    configuration.property(ClientProperties.READ_TIMEOUT, 10000);*/
+		    Client client = ClientBuilder.newClient();
 
 		    WebTarget target = client.target(UriBuilder.fromUri(URI).build());
 		    switch(method){
