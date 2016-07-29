@@ -99,9 +99,9 @@ public class StoreResource {
 			}
 			else{
 				log.info("No active Orchestration Store entries were found"
-						+ "for this consumer: " + query.getRequesterSystem().getSystemName());
+						+ "for this consumer: " + query.getRequesterSystem().toString());
 				throw new DataNotFoundException("No active Orchestration Store entries were found"
-						+ "for this consumer: " + query.getRequesterSystem().getSystemName()); 
+						+ "for this consumer: " + query.getRequesterSystem().toString()); 
 			}
 		}
 		
@@ -118,9 +118,9 @@ public class StoreResource {
 				entryList.addAll(retrievedList);
 			else{
 				log.info("No Orchestration Store entries were found"
-						+ "for this consumer: " + query.getRequesterSystem().getSystemName());
+						+ "for this consumer: " + query.getRequesterSystem().toString());
 				throw new DataNotFoundException("No Orchestration Store entries were found"
-						+ "for this consumer: " + query.getRequesterSystem().getSystemName());
+						+ "for this consumer: " + query.getRequesterSystem().toString());
 			}
 		}
 		
@@ -138,8 +138,8 @@ public class StoreResource {
 				log.info("No Orchestration Store entries were found for this consumer/service pair.");
 				throw new DataNotFoundException("No Orchestration Store entries were found"
 						+ "for this consumer/service pair: " 
-						+ query.getRequesterSystem().getSystemName() + "/"
-						+ query.getRequestedService().getServiceDefinition());
+						+ query.getRequesterSystem().toString() + "/"
+						+ query.getRequestedService().toString());
 			}
 		}
 		

@@ -18,6 +18,7 @@ import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
@@ -659,6 +660,10 @@ public final class NewOrchestratorService {
 		OrchestrationStoreQuery query = new OrchestrationStoreQuery(service, consumer, onlyActive);
 		
 		Response response = Utility.sendRequest(URI, "PUT", query);
+		if(response.getStatus() == 404){
+			ErrorMessage error = response.readEntity(ErrorMessage.class);
+			throw new DataNotFoundException(error.getErrorMessage());
+		}
 		OrchestrationStoreQueryResponse storeResponse = 
 				response.readEntity(OrchestrationStoreQueryResponse.class);
 		

@@ -24,5 +24,4 @@ public class OrchestrationStoreQueryResponse {
 		this.entryList = entryList;
 	}
 	
-	
 }
