@@ -138,6 +138,7 @@ public class ArrowheadCloud {
 		result = prime * result + ((cloudName == null) ? 0 : cloudName.hashCode());
 		result = prime * result + ((gatekeeperServiceURI == null) ? 0 : gatekeeperServiceURI.hashCode());
 		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
+		result = prime * result + ((port == null) ? 0 : port.hashCode());
 		return result;
 	}
 
@@ -147,7 +148,7 @@ public class ArrowheadCloud {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof ArrowheadCloud))
+		if (getClass() != obj.getClass())
 			return false;
 		ArrowheadCloud other = (ArrowheadCloud) obj;
 		if (address == null) {
@@ -169,6 +170,11 @@ public class ArrowheadCloud {
 			if (other.operator != null)
 				return false;
 		} else if (!operator.equals(other.operator))
+			return false;
+		if (port == null) {
+			if (other.port != null)
+				return false;
+		} else if (!port.equals(other.port))
 			return false;
 		return true;
 	}

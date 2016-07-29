@@ -681,17 +681,14 @@ public final class NewOrchestratorService {
 		
 		List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
 		//Getting the preferred Providers which belong to the preferred Cloud
-		int firstCloudIndex = srf.getPreferredClouds().indexOf(targetCloud);
-		int lastCloudIndex = srf.getPreferredClouds().lastIndexOf(targetCloud);
-		if(firstCloudIndex == -1 && firstCloudIndex != lastCloudIndex){
-			preferredProviders.addAll(srf.getPreferredProviders().subList(firstCloudIndex, lastCloudIndex));
-		}
-		else if(firstCloudIndex == -1 && firstCloudIndex == lastCloudIndex){
-			preferredProviders.add(srf.getPreferredProviders().get(firstCloudIndex));
+		for(int i = 0; i < srf.getPreferredClouds().size(); i++){
+			if(srf.getPreferredClouds().get(i).equals(targetCloud)){
+				preferredProviders.add(srf.getPreferredProviders().get(i));
+			}
 		}
 		
 		ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
-				targetCloud, srf.getRequesterSystem(), srf.getPreferredProviders(), 
+				targetCloud, srf.getRequesterSystem(), preferredProviders, 
 				srf.getOrchestrationFlags().get("onlyPreferred"));
 		return requestForm;
 	}
