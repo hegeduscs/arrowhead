@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -17,6 +18,7 @@ import eu.arrowhead.common.exception.DuplicateEntryException;
 
 public class DatabaseManager {
 	
+	private static Logger log = Logger.getLogger(DatabaseManager.class.getName());
 	private static DatabaseManager instance = null;
 	private static SessionFactory sessionFactory;
 
@@ -128,6 +130,7 @@ public class DatabaseManager {
 		} catch (ConstraintViolationException e) {
 			if (transaction != null)
 				transaction.rollback();
+			log.info("DatabaseManager:save throws DuplicateEntryException");
 			throw new DuplicateEntryException(
 					"DuplicateEntryException: there is already an entry in the database with these parameters. "
 					+ "Please check the unique fields of the " + object.getClass());
@@ -153,6 +156,7 @@ public class DatabaseManager {
 		} catch (ConstraintViolationException e) {
 			if (transaction != null)
 				transaction.rollback();
+			log.info("DatabaseManager:merge throws DuplicateEntryException");
 			throw new DuplicateEntryException(
 					"DuplicateEntryException: there is already an entry in the database with these parameters. "
 							+ "Please check the unique fields of the " + object.getClass());
@@ -178,6 +182,7 @@ public class DatabaseManager {
 		} catch (ConstraintViolationException e) {
 			if (transaction != null)
 				transaction.rollback();
+			log.info("DatabaseManager:delete throws ConstraintViolationException");
 			throw new DuplicateEntryException(
 					"ConstraintViolationException: there is a reference to this object in another table, "
 					+ "which prevents the delete operation. (" + object.getClass() + ")");
