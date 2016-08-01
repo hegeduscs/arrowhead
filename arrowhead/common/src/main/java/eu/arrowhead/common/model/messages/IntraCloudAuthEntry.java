@@ -52,10 +52,10 @@ public class IntraCloudAuthEntry {
 	}
 
 	public boolean isPayloadUsable(){
-		if(consumer == null || serviceList.isEmpty() || providerList.isEmpty() || !consumer.isValid())
+		if(consumer == null || serviceList.isEmpty() || providerList.isEmpty() || !consumer.isValidForDatabase())
 			return false;
 		for(ArrowheadSystem provider : providerList)
-			if(!provider.isValid())
+			if(!provider.isValidForDatabase())
 				return false;
 		for(ArrowheadService service : serviceList)
 			if(!service.isValid())

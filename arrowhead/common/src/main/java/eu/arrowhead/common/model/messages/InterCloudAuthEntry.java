@@ -42,7 +42,7 @@ public class InterCloudAuthEntry {
 	}
 
 	public boolean isPayloadUsable(){
-		if(cloud == null || serviceList.isEmpty() || !cloud.isValid())
+		if(cloud == null || serviceList.isEmpty() || !cloud.isValidForDatabase())
 			return false;
 		for(ArrowheadService service : serviceList)
 			if(!service.isValid())

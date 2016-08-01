@@ -110,7 +110,7 @@ public class GatekeeperResource {
 			log.info("Sent GSD Poll request to: " + URI);
 			GSDAnswer gsdAnswer = response.readEntity(GSDAnswer.class);
 			if(gsdAnswer != null){
-				log.info("A Cloud named " + gsdAnswer.getProviderCloud().getCloudName() 
+				log.info("A Cloud " + gsdAnswer.getProviderCloud().toString() 
 						+ " responded to GSD Poll positively");
 				gsdAnswerList.add(gsdAnswer);
 			}
@@ -132,9 +132,8 @@ public class GatekeeperResource {
 	@PUT
     @Path("gsd_poll")
     public Response GSDPoll(GSDPoll gsdPoll) {
-		log.info("Entered the GSDPoll method.");
-		log.info("Gatekeeper received a GSD poll from: " 
-    			+ gsdPoll.getRequesterCloud().getCloudName());
+		log.info("Entered the GSDPoll method. Gatekeeper received a GSD poll from: " 
+				+ gsdPoll.getRequesterCloud().toString());
     	
 		//Polling the Authorization System about the consumer Cloud
 		ArrowheadCloud cloud = gsdPoll.getRequesterCloud();
@@ -144,7 +143,7 @@ public class GatekeeperResource {
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
 		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
 		log.info("Authorization System queried for requester Cloud: " + 
-				gsdPoll.getRequesterCloud().getCloudName());
+				gsdPoll.getRequesterCloud().toString());
 
 		//If the consumer Cloud is not authorized null is returned
 		if(!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()){
@@ -166,7 +165,7 @@ public class GatekeeperResource {
 			
 			//Sending back provider Cloud information if the SR poll has results
 			Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
-			log.info("ServiceRegistry queried for requested Service: " + service.getServiceDefinition());
+			log.info("ServiceRegistry queried for requested Service: " + service.toString());
 			ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
 			if(result.isPayloadEmpty()){
 				log.info("ServiceRegistry query came back empty for " + service.toString());
@@ -194,7 +193,7 @@ public class GatekeeperResource {
     	log.info("Entered the ICNRequest method.");
     	
     	if(!requestForm.isPayloadUsable()){
-    		log.info("Payload is not usable. (GatekeeperResource:ICNRequest BadPayloadException)");
+    		log.info("GatekeeperResource:ICNRequest BadPayloadException");
     		throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.");
     	}
     	
@@ -202,7 +201,7 @@ public class GatekeeperResource {
     	ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), 
     			requestForm.getAuthenticationInfo(), SysConfig.getOwnCloud(), 
     			requestForm.getRequesterSystem(), requestForm.getPreferredProviders(),
-    			requestForm.isOnlyPreferred());
+    			requestForm.getNegotiationFlags());
     	
     	String icnURI = SysConfig.getURI(requestForm.getTargetCloud().getAddress(),
     			requestForm.getTargetCloud().getPort(), 
@@ -229,9 +228,8 @@ public class GatekeeperResource {
     @PUT
     @Path("icn_proposal")
     public Response ICNProposal (ICNProposal icnProposal) {
-    	log.info("Entered the ICNProposal method.");
-    	log.info("Gatekeeper received an ICN proposal from: " 
-    			+ icnProposal.getRequesterCloud().getCloudName());
+    	log.info("Entered the ICNProposal method. Gatekeeper received an ICN proposal from: " 
+    			+ icnProposal.getRequesterCloud().toString());
     	
     	//Polling the Authorization System about the consumer Cloud
 		ArrowheadCloud cloud = icnProposal.getRequesterCloud();
@@ -241,7 +239,7 @@ public class GatekeeperResource {
 		String authURI = SysConfig.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
 		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
-		log.info("Authorization System queried for requester Cloud: " + cloud.getCloudName());
+		log.info("Authorization System queried for requester Cloud: " + cloud.toString());
 		
 		//If the consumer Cloud is not authorized null is returned
 		if(!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()){
@@ -266,8 +264,8 @@ public class GatekeeperResource {
 			orchestrationFlags.put("overrideStore", false);
 			orchestrationFlags.put("storeOnlyActive", false);
 			orchestrationFlags.put("matchmaking", false);
-			orchestrationFlags.put("onlyPreferred", icnProposal.isOnlyPreferred());
-			orchestrationFlags.put("generateToken", false);
+			orchestrationFlags.put("onlyPreferred", icnProposal.getNegotiationFlags().get("onlyPreferred"));
+			orchestrationFlags.put("generateToken", icnProposal.getNegotiationFlags().get("generateToken"));
 			
 			ServiceRequestForm serviceRequestForm = 
 					new ServiceRequestForm(icnProposal.getRequesterSystem(), service, null,

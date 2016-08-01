@@ -45,7 +45,7 @@ public class OrchestrationStoreQuery {
 	}
 	
 	public boolean isPayloadUsable(){
-		if(requesterSystem == null || !requesterSystem.isValid())
+		if(requesterSystem == null || !requesterSystem.isValidForDatabase())
 			return false;
 		return true;
 	}

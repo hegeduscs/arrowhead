@@ -1,7 +1,9 @@
 package eu.arrowhead.common.model.messages;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -17,20 +19,20 @@ public class ICNRequestForm {
 	private ArrowheadCloud targetCloud;
 	private ArrowheadSystem requesterSystem;
 	private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
-	private boolean onlyPreferred;
+	private Map<String, Boolean> negotiationFlags = new HashMap<String, Boolean>();
 	
 	public ICNRequestForm() {
 	}
 
-	public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, 
-			ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem, 
-			List<ArrowheadSystem> preferredProviders, boolean onlyPreferred) {
+	public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud targetCloud,
+			ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredProviders,
+			Map<String, Boolean> negotiationFlags) {
 		this.requestedService = requestedService;
 		this.authenticationInfo = authenticationInfo;
 		this.targetCloud = targetCloud;
 		this.requesterSystem = requesterSystem;
 		this.preferredProviders = preferredProviders;
-		this.onlyPreferred = onlyPreferred;
+		this.negotiationFlags = negotiationFlags;
 	}
 
 	public ArrowheadSystem getRequesterSystem() {
@@ -72,13 +74,13 @@ public class ICNRequestForm {
 	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
 		this.preferredProviders = preferredProviders;
 	}
-	
-	public boolean isOnlyPreferred() {
-		return onlyPreferred;
+
+	public Map<String, Boolean> getNegotiationFlags() {
+		return negotiationFlags;
 	}
 
-	public void setOnlyPreferred(boolean onlyPreferred) {
-		this.onlyPreferred = onlyPreferred;
+	public void setNegotiationFlags(Map<String, Boolean> negotiationFlags) {
+		this.negotiationFlags = negotiationFlags;
 	}
 
 	public boolean isPayloadUsable(){

@@ -153,7 +153,7 @@ public class ConfigurationApi {
 	/**
 	 * Adds a list of CoreSystems to the database. Elements which would
 	 * cause DuplicateEntryException or BadPayloadException 
-	 * (caused by missing systemName) are being skipped. 
+	 * (caused by missing systemName, address or serviceURI) are being skipped. 
 	 * The returned list only contains the elements which was saved in the process.
 	 *
 	 * @param List<CoreSystem> coreSystemList
@@ -181,7 +181,7 @@ public class ConfigurationApi {
 	/**
 	 * Adds a list of NeighborClouds to the database. Elements which would
 	 * cause DuplicateEntryException or BadPayloadException 
-	 * (caused by missing operator or cloudName) are being skipped. 
+	 * (caused by missing operator, cloudName, address or serviceURI) are being skipped. 
 	 * The returned list only contains the elements which was saved in the process.
 	 *
 	 * @param List<NeighborCloud> coreSystemList
@@ -258,7 +258,8 @@ public class ConfigurationApi {
 		
 		if(!cs.isPayloadUsable()){
 			log.info("ConfigurationApi:updateCoreSystem throws BadPayloadException");
-			throw new BadPayloadException("Bad payload: missing system name in the entry payload.");
+			throw new BadPayloadException("Bad payload: missing systemName, address or "
+					+ "serviceURI in the entry payload.");
 		}
 		
 		restrictionMap.put("systemName", cs.getSystemName());

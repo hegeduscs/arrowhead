@@ -130,6 +130,12 @@ public class ArrowheadCloud {
 		return true;
 	}
 	
+	public boolean isValidForDatabase(){
+		if(operator == null || cloudName == null)
+			return false;
+		return true;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

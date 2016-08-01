@@ -67,8 +67,7 @@ public class Main {
 		URI uri = UriBuilder.fromUri(BASE_URI).build();
 
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(NewOrchestratorResource.class, 
-								StoreResource.class);
+		config.registerClasses(OrchestratorResource.class, StoreResource.class);
 		config.packages("eu.arrowhead.common");
 
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
@@ -83,8 +82,7 @@ public class Main {
 		URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
 		
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(OrchestratorResource.class, 
-								StoreResource.class);
+		config.registerClasses(OrchestratorResource.class, StoreResource.class);
 		config.packages("eu.arrowhead.common");
 
 		SSLContextConfigurator sslCon = new SSLContextConfigurator();

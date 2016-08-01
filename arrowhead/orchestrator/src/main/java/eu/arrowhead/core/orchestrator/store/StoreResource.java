@@ -80,7 +80,7 @@ public class StoreResource {
 		if(!query.isPayloadUsable()){
 			log.info("BadPayloadException at the getStoreEntries method.");
 			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
-					+ "is/are missing. (systemGroup, systemName)");
+					+ "is/are missing.");
 		}
 		
 		/*

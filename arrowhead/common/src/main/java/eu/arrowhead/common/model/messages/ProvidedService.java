@@ -57,7 +57,7 @@ public class ProvidedService {
 	}
 	
 	public boolean isPayloadUsable(){
-		if(provider == null || !provider.isValid() || provider.getAddress() == null || serviceURI == null)
+		if(provider == null || !provider.isValid() || serviceURI == null)
 			return false;
 		return true;
 	}

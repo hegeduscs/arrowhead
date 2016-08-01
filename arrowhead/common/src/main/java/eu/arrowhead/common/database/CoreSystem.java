@@ -91,7 +91,7 @@ public class CoreSystem {
 	}
 
 	public boolean isPayloadUsable(){
-		if(systemName == null)
+		if(systemName == null || address == null || serviceURI == null)
 			return false;
 		return true;
 	}

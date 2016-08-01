@@ -105,6 +105,12 @@ public class ArrowheadSystem {
 		return true;
 	}
 	
+	public boolean isValidForDatabase(){
+		if(systemGroup == null || systemName == null)
+			return false;
+		return true;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

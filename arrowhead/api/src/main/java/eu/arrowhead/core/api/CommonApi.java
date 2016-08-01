@@ -259,7 +259,7 @@ public class CommonApi {
 	/**
 	 * Adds a list of ArrowheadSystems to the database. Elements which would
 	 * cause DuplicateEntryException or BadPayloadException 
-	 * (caused by missing systemGroup or systemName) are being skipped. 
+	 * (caused by missing systemGroup, systemName or address) are being skipped. 
 	 * The returned list only contains the elements which was saved in the process.
 	 *
 	 * @param List<ArrowheadSystem> systemList
@@ -299,8 +299,8 @@ public class CommonApi {
 		
 		if(!system.isValid()){
 			log.info("CommonApi:updateSystem throws BadPayloadException");
-			throw new BadPayloadException("Bad payload: missing system group or"
-					+ "system name in the entry payload.");
+			throw new BadPayloadException("Bad payload: missing system group, "
+					+ "system name or address in the entry payload.");
 		}
 		
 		restrictionMap.put("systemGroup", system.getSystemGroup());
@@ -410,7 +410,7 @@ public class CommonApi {
 	/**
 	 * Adds a list of ArrowheadClouds to the database. Elements which would
 	 * cause DuplicateEntryException or BadPayloadException 
-	 * (caused by missing operator or cloudName) are being skipped. 
+	 * (caused by missing operator, cloudName, address or serviceURI) are being skipped. 
 	 * The returned list only contains the elements which was saved in the process.
 	 *
 	 * @param List<ArrowheadCloud> cloudList
@@ -450,8 +450,8 @@ public class CommonApi {
 		
 		if(!cloud.isValid()){
 			log.info("CommonApi:updateCloud throws BadPayloadException");
-			throw new BadPayloadException("Bad payload: missing operator or"
-					+ " cloud name in the entry payload.");
+			throw new BadPayloadException("Bad payload: missing operator, "
+					+ " cloudName, address or serviceURI in the entry payload.");
 		}
 		
 		restrictionMap.put("operator", cloud.getOperator());

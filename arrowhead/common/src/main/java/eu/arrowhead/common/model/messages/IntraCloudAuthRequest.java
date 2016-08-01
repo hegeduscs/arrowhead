@@ -61,10 +61,10 @@ public class IntraCloudAuthRequest {
 
 	public boolean isPayloadUsable(){
 		if(consumer == null|| service == null || providers.isEmpty() || 
-				!consumer.isValid() || !service.isValid())
+				!consumer.isValidForDatabase() || !service.isValid())
 			return false;
 		for(ArrowheadSystem provider : providers)
-			if(!provider.isValid())
+			if(!provider.isValidForDatabase())
 				return false;
 		return true;
 	}

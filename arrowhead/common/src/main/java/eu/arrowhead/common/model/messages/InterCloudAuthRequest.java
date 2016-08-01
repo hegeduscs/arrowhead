@@ -46,7 +46,7 @@ public class InterCloudAuthRequest {
 	}
 
 	public boolean isPayloadUsable(){
-		if(cloud == null || service == null || !cloud.isValid() || !service.isValid())
+		if(cloud == null || service == null || !cloud.isValidForDatabase() || !service.isValid())
 			return false;
 		return true;
 	}
