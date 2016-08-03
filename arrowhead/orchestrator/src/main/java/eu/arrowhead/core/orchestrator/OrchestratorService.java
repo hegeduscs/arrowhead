@@ -38,11 +38,12 @@ import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 
+/**
+ * @author umlaufz
+ */
 public final class OrchestratorService {
 	
 	private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
-
-	//TODO végig menni a végleges kódon és rendesen fellogolni, kommentezni, kék kommentek készítése
 	
 	/** 
 	 * This method represents the regular orchestration process where the requester System 
@@ -188,11 +189,12 @@ public final class OrchestratorService {
 				orchestrationFlags.get("onlyPreferred"));
 		
 		//Telling the Gatekeeper to start the Inter-Cloud Negotiations process
-		ICNResult icnResult = startICN(compileICNRequestForm(srf,targetCloud));
+		ICNRequestForm icnRequestForm = compileICNRequestForm(srf,targetCloud);
+		ICNResult icnResult = startICN(icnRequestForm);
 		
 		//If matchmaking is requested, we pick one provider from the ICN result
 		if(orchestrationFlags.get("matchmaking")){
-			return icnMatchmaking(icnResult);
+			return icnMatchmaking(icnResult, icnRequestForm.getPreferredProviders());
 		}
 		else{
 			return icnResult.getInstructions();
@@ -298,10 +300,11 @@ public final class OrchestratorService {
 			 */
 			else{
 				try{
-					ICNResult icnResult = startICN(compileICNRequestForm(srf, entry.getProviderCloud()));
+					ICNRequestForm icnRequestForm = compileICNRequestForm(srf, entry.getProviderCloud());
+					ICNResult icnResult = startICN(icnRequestForm);
 					//Use matchmaking on the ICN result if requested
 					if(orchestrationFlags.get("matchmaking")){
-						return icnMatchmaking(icnResult);
+						return icnMatchmaking(icnResult, icnRequestForm.getPreferredProviders());
 					}
 					else{
 						return icnResult.getInstructions();
@@ -322,11 +325,15 @@ public final class OrchestratorService {
 	
 	
 	/**
+	 * This method compiles the OrchestrationResponse object. 
+	 * The regularOrchestration and externalServiceRequest processes use this version of the method. 
+	 * (The triggerInterCloud method gets back the same response from an externalServiceRequest 
+	 * at a remote Cloud.)
 	 * 
-	 * @param service
-	 * @param psList
-	 * @param generateToken
-	 * @return
+	 * @param ArrowheadService service
+	 * @param List<ProvidedService> psList
+	 * @param boolean generateToken
+	 * @return OrchestrationResponse
 	 */
 	private static OrchestrationResponse compileOrchestrationResponse(ArrowheadService service, 
 			List<ProvidedService> psList, boolean generateToken){
@@ -334,12 +341,13 @@ public final class OrchestratorService {
 		
 		String token = null;
 		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+		//We create an OrchestrationForm for every provider
 		for(ProvidedService ps : psList){
 			if(generateToken){
-				//placeholder, call should be made to the AuthorizationResource
+				//placeholder for token generation, call should be made to the AuthorizationResource
 			}
 			
-			//Returning only those interfaces that were found in the SR
+			//Returning only those service interfaces that were found in the SR entry
 			service.setInterfaces(ps.getServiceInterface());
 			OrchestrationForm of = new OrchestrationForm(service, ps.getProvider(), 
 					ps.getServiceURI(), token, null);
@@ -347,13 +355,17 @@ public final class OrchestratorService {
 		}
 		log.info("OrchestrationForm created for " + psList.size() + " providers.");
 		
+		//The OrchestrationResponse contains a list of OrchestrationForms
 		return new OrchestrationResponse(ofList);
 	}
 	
 	/**
+	 * This method compiles the OrchestrationResponse object.
+	 * Only the orchestrationFromStore method uses this version of the method.
 	 * 
-	 * @param entryList
-	 * @return
+	 * @param List<OrchestrationStore> entryList
+	 * @param boolean generateToken
+	 * @return OrchestrationResponse
 	 */
 	private static OrchestrationResponse compileOrchestrationResponse(List<OrchestrationStore> entryList, 
 			boolean generateToken){
@@ -361,9 +373,10 @@ public final class OrchestratorService {
 				
 		String token = null;
 		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+		//We create an OrchestrationForm for every Store entry
 		for(OrchestrationStore entry : entryList){
 			if(generateToken){
-				//placeholder, call should be made to the AuthorizationResource
+				//placeholder for token generation, call should be made to the AuthorizationResource
 			}
 			
 			OrchestrationForm of = new OrchestrationForm(entry.getService(), entry.getProviderSystem(), 
@@ -372,15 +385,18 @@ public final class OrchestratorService {
 		}
 		log.info("OrchestrationForm created for " + entryList.size() + " providers.");
 		
+		//The OrchestrationResponse contains a list of OrchestrationForms
 		return new OrchestrationResponse(ofList);
 	}
 	
 	/**
+	 * This method queries the Service Registry core system for a specific ArrowheadService.
+	 * The returned list consists of possible service providers.
 	 * 
-	 * @param service
-	 * @param metadataSearch
-	 * @param pingProviders
-	 * @return
+	 * @param ArrowheadService service
+	 * @param boolean metadataSearch
+	 * @param boolean pingProviders
+	 * @return List<ProvidedService>
 	 */
 	private static List<ProvidedService> queryServiceRegistry(ArrowheadService service,
 			boolean metadataSearch, boolean pingProviders){
@@ -394,7 +410,7 @@ public final class OrchestratorService {
 		ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), 
 				service.getInterfaces(), pingProviders, metadataSearch, tsig_key);
 		
-		//Sending the query, returning the result
+		//Sending the request, parsing the returned result
 		log.info("Querying ServiceRegistry for requested Service: " + service.toString());
 		Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
 		ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
@@ -426,12 +442,16 @@ public final class OrchestratorService {
 	}
 	
 	/**
+	 * Intra-Cloud matchmaking method. As the last step of the local orchestration process
+	 * (if requested) we pick out 1 provider from the remaining list. Providers preferred
+	 * by the consumer have higher priority. Custom matchmaking algorithm can be implemented,
+	 * as of now it just returns the first provider from the list.
 	 * 
-	 * @param psList
-	 * @param onlyPreferred
-	 * @param preferredList
-	 * @param notLocalSystems
-	 * @return
+	 * @param List<ProvidedService> psList
+	 * @param boolean onlyPreferred
+	 * @param List<ArrowheadSystem> preferredList
+	 * @param int notLocalSystems
+	 * @return ProvidedService
 	 */
 	private static ProvidedService intraCloudMatchmaking(List<ProvidedService> psList, 
 			boolean onlyPreferred, List<ArrowheadSystem> preferredList, int notLocalSystems){
@@ -444,15 +464,16 @@ public final class OrchestratorService {
 					+ "not possible in the Orchestration process.");
 		}
 		
-		//We delete all the preferredProviders from the list which belong to another cloud
+		//We delete all the preferredProviders from the list which belong to a remote cloud
 		preferredList.subList(0, notLocalSystems).clear();
 		log.info(notLocalSystems + " not local Systems deleted from the preferred list. "
 				+ "Remaining providers: " + preferredList.size());
 		
+		//First we try to return with a preferred provider
 		if(!preferredList.isEmpty()){	
 			/*
 			 * We iterate through both ArrowheadSystem list, and return with the proper ProvidedService
-			 * if we find a match.
+			 * object if we find a match.
 			 */
 			for(ArrowheadSystem system : preferredList){
 				for(ProvidedService ps : psList){
@@ -495,9 +516,20 @@ public final class OrchestratorService {
 		}
 	}
 	
+	/**
+	 * This method filters out all the entries of the given ProvidedService list, which does not
+	 * have a preferred provider.
+	 * 
+	 * @param List<ProvidedService> psList
+	 * @param List<ArrowheadSystem> preferredProviders
+	 * @return List<ProvidedService>
+	 */
 	private static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, 
 			List<ArrowheadSystem> preferredProviders){
+		log.info("Entered the removeNonPreferred method.");
+		
 		if(psList.isEmpty() || preferredProviders.isEmpty()){
+			log.info("OrchestratorService:removeNonPreferred BadPayloadException");
 			throw new BadPayloadException("ProvidedService or PreferredProviders list is empty. "
 					+ "(OrchestrationService:removeNonPreferred BadPayloadException)");
 		}
@@ -512,30 +544,34 @@ public final class OrchestratorService {
 		}
 		
 		if(preferredList.isEmpty()){
+			log.info("OrchestratorService:removeNonPreferred DataNotFoundException");
 			throw new DataNotFoundException("No preferred local System found in the the list of provider Systems. "
 					+ "(OrchestrationService:removeNonPreferred DataNotFoundException)");
 		}
 		
+		log.info("removeNonPreferred returns with " + preferredList.size() + " ProvidedServices.");
 		return preferredList;
 	}
 	
 	/**
+	 * This method initiates the GSD process by sending a request to the Gatekeeper core system.
 	 * 
-	 * @param requestedService
-	 * @param preferredClouds
-	 * @return
+	 * @param ArrowheadService requestedService
+	 * @param List<ArrowheadCloud> preferredClouds
+	 * @return GSDResult
 	 */
 	private static GSDResult startGSD(ArrowheadService requestedService, 
 			List<ArrowheadCloud> preferredClouds){
 		log.info("Entered the startGSD method.");
 		
+		//Compiling the URI and the request payload
 		String URI = SysConfig.getGatekeeperURI();
 		URI = UriBuilder.fromPath(URI).path("init_gsd").toString();
 		GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds);
 		
+		//Sending the request, do sanity check on the returned result
 		Response response = Utility.sendRequest(URI, "PUT", requestForm);
 		GSDResult result = response.readEntity(GSDResult.class);
-		
 		if(!result.isPayloadUsable()){
 			log.info("GlobalServiceDiscovery yielded no result. "
 					+ "(OrchestratorService:startGSD DataNotFoundException)");
@@ -547,11 +583,14 @@ public final class OrchestratorService {
 	}
 	
 	/**
+	 * Inter-Cloud matchmaking is mandaroty for picking out a target Cloud to do ICN with.
+	 * Clouds preferred by the consumer have higher priority. Custom matchmaking algorithm 
+	 * can be implemented, as of now it just returns the first Cloud from the list.
 	 * 
-	 * @param result
-	 * @param preferredClouds
-	 * @param onlyPreferred
-	 * @return
+	 * @param GSDResult result
+	 * @param List<ArrowheadCloud> preferredClouds
+	 * @param boolean onlyPreferred
+	 * @return ArrowheadCloud
 	 */
 	private static ArrowheadCloud interCloudMatchmaking(GSDResult result, 
 			List<ArrowheadCloud> preferredClouds, boolean onlyPreferred){
@@ -613,18 +652,19 @@ public final class OrchestratorService {
 	}
 	
 	/**
+	 * This method initiates the ICN process by sending a request to the Gatekeeper core system.
 	 * 
-	 * @param requestForm
-	 * @return
+	 * @param ICNRequestForm requestForm
+	 * @return ICNResult
 	 */
 	private static ICNResult startICN(ICNRequestForm requestForm){
 		log.info("Entered the startICN method.");
 		
+		//Compiling the URI, sending the request, do sanity check on the returned result
 		String URI = SysConfig.getGatekeeperURI();
 		URI = UriBuilder.fromPath(URI).path("init_icn").toString();
 		Response response = Utility.sendRequest(URI, "PUT", requestForm);
 		ICNResult result = response.readEntity(ICNResult.class);
-		
 		if(!result.isPayloadUsable()){
 			log.info("ICN yielded no result. (OrchestratorService:startICN DataNotFoundException)");
 			throw new DataNotFoundException("ICN yielded no result.");
@@ -635,18 +675,19 @@ public final class OrchestratorService {
 	}
 	
 	/**
+	 * This method queries the Authorization core system with a consumer/service/providerList triplet.
+	 * The returned list only contains the authorized providers.
 	 * 
-	 * @param consumer
-	 * @param service
-	 * @param providerList
-	 * @param generateToken
-	 * @return
+	 * @param ArrowheadSystem consumer
+	 * @param ArrowheadService service
+	 * @param List<ArrowheadSystem> providerList
+	 * @return List<ArrowheadSystem>
 	 */
 	private static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, 
 			ArrowheadService service, List<ArrowheadSystem> providerList) {
 		log.info("Entered the queryAuthorization method.");
 		
-		//Getting the URI + compiling the request payload
+		//Compiling the URI and the request payload
 		String URI = SysConfig.getAuthorizationURI();
 		URI = UriBuilder.fromPath(URI).path("intracloud").toString();
 		IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, 
@@ -662,6 +703,7 @@ public final class OrchestratorService {
 				authorizedSystems.add(entry.getKey());
 		}
 		
+		//Throwing exception if none of the providers are authorized for this consumer/service pair.
 		if(authorizedSystems.isEmpty()){
 			log.info("OrchestratorService:queryAuthorization throws DataNotFoundException");
 			throw new DataNotFoundException("The consumer system is not authorized to receive servicing "
@@ -674,35 +716,64 @@ public final class OrchestratorService {
 	}
 	
 	/**
+	 * Matchmaking method for ICN results. As the last step of the inter-cloud 
+	 * orchestration process (if requested) we pick out 1 provider from the ICN result list. 
+	 * Providers preferred by the consumer have higher priority. Custom matchmaking algorithm 
+	 * can be implemented, as of now it just returns the first provider from the list.
 	 * 
-	 * @param icnResult
-	 * @return
+	 * @param ICNResult icnResult
+	 * @return OrchestrationResponse
 	 */
-	private static OrchestrationResponse icnMatchmaking(ICNResult icnResult){
+	private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, 
+			List<ArrowheadSystem> preferredProviders){
 		log.info("Entered the icnMatchmaking method.");
 		
-		List<OrchestrationForm> of = new ArrayList<OrchestrationForm>();
-		//implement custom matchmaking algorithm here
-		of.add(icnResult.getInstructions().getResponse().get(0));
-		icnResult.getInstructions().setResponse(of);
+		/*
+		 * We first try to find a match between preferredProviders and the received
+		 * providers from the ICN result.
+		 */
+		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+		for(ArrowheadSystem preferredProvider : preferredProviders){
+			for(OrchestrationForm of : icnResult.getInstructions().getResponse()){
+				if(preferredProvider.equals(of.getProvider())){
+					ofList.add(of);
+					icnResult.getInstructions().setResponse(ofList);
+					log.info("Preferred provider System found in the ICNResult, "
+							+ "ICN matchmaking finished.");
+					return icnResult.getInstructions();
+				}
+			}
+		}
+		
+		//If that fails, we just select the first OrchestrationForm
+		//Implement custom matchmaking algorithm here
+		ofList.add(icnResult.getInstructions().getResponse().get(0));
+		icnResult.getInstructions().setResponse(ofList);
+		log.info("No preferred provider System was found in the ICNResult, "
+				+ "returning the first OrchestrationForm entry.");
 		return icnResult.getInstructions();
 	}
 	
 	/**
+	 * This method queries the Orchestration Store for entries where the consumer System
+	 * our requester System from the ServiceRequestForm. The other 2 paramteres can further
+	 * narrow down this list.
 	 * 
-	 * @param consumer
-	 * @param service
-	 * @param onlyActive
-	 * @return
+	 * @param ArrowheadService consumer
+	 * @param ArrowheadSystem service
+	 * @param boolean onlyActive
+	 * @return List<OrchestrationStore>
 	 */
 	private static List<OrchestrationStore> queryOrchestrationStore(ArrowheadService service,
 			ArrowheadSystem consumer, boolean onlyActive){
 		log.info("Entered the queryOrchestrationStore method.");
 		
+		//Compiling the URI and the request payload
 		String URI = SysConfig.getOrchestratorURI();
 		URI = UriBuilder.fromPath(URI).path("store").toString();
 		OrchestrationStoreQuery query = new OrchestrationStoreQuery(service, consumer, onlyActive);
 		
+		//Sending the request, do sanity check on the returned result
 		Response response = Utility.sendRequest(URI, "PUT", query);
 		if(response.getStatus() == 404){
 			ErrorMessage error = response.readEntity(ErrorMessage.class);
@@ -711,14 +782,17 @@ public final class OrchestratorService {
 		OrchestrationStoreQueryResponse storeResponse = 
 				response.readEntity(OrchestrationStoreQueryResponse.class);
 		
+		log.info("Successfull Orchestration Store query, returning a list of " 
+				+ storeResponse.getEntryList().size());
 		return storeResponse.getEntryList();
 	}
 	
 	/**
+	 * From the given parameteres this method compiles an ICNRequestForm to start the ICN process.
 	 * 
-	 * @param srf
-	 * @param targetCloud
-	 * @return
+	 * @param ServiceRequestForm srf
+	 * @param ArrowheadCloud targetCloud
+	 * @return ICNRequestForm
 	 */
 	private static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf, ArrowheadCloud targetCloud){
 		log.info("Entered the compileICNRequestForm method.");
@@ -727,10 +801,15 @@ public final class OrchestratorService {
 		//Getting the preferred Providers which belong to the preferred Cloud
 		for(int i = 0; i < srf.getPreferredClouds().size(); i++){
 			if(srf.getPreferredClouds().get(i).equals(targetCloud)){
-				preferredProviders.add(srf.getPreferredProviders().get(i));
+				//We might have a preferred Cloud but no preferred Provider inside the Cloud
+				if(srf.getPreferredProviders().get(i) != null){
+					preferredProviders.add(srf.getPreferredProviders().get(i));
+				}
 			}
 		}
+		log.info(preferredProviders.size() + " preferred providers selected for this Cloud.");
 		
+		//Compiling the payload
 		Map<String, Boolean> negotiationFlags = new HashMap<String, Boolean>();
 		negotiationFlags.put("onlyPreferred", srf.getOrchestrationFlags().get("onlyPreferred"));
 		negotiationFlags.put("generateToken", srf.getOrchestrationFlags().get("generateToken"));

@@ -15,8 +15,6 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 
 /**
- * @author umlaufz 
- * 
  * This utility class provides configuration informations to the core systems.
  */
 public final class SysConfig {
@@ -29,7 +27,6 @@ public final class SysConfig {
 	private SysConfig(){
 	}
 	
-	//TODO felülvizsgálni, hogy lehet-e hatékonyabb, de ekvivalens megoldás ehhez a fgvhez
 	/*
 	 * Some level of flexibility in the URI creation, in order to avoid
 	 * implementation mistakes.
@@ -42,17 +39,13 @@ public final class SysConfig {
 		
 		UriBuilder ub = null;
 		if (address.startsWith(baseURI)) {
-			if (port != null) {
-				ub = UriBuilder.fromPath(address + ":" + port);
-			} else {
-				ub = UriBuilder.fromPath(address);
-			}
-		} else {
-			if (port != null) {
-				ub = UriBuilder.fromPath(baseURI).path(address + ":" + port);
-			} else {
-				ub = UriBuilder.fromPath(baseURI).path(address);
-			}
+			ub = UriBuilder.fromPath(address);
+		}
+		else{
+			ub = UriBuilder.fromPath(baseURI).path(address);
+		}
+		if(port != null){
+			ub.path(":" + port);
 		}
 		ub.path(serviceURI);
 

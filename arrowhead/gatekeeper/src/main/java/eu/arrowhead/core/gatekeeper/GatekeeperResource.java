@@ -197,6 +197,7 @@ public class GatekeeperResource {
     		throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.");
     	}
     	
+    	//Compiling the payload and then getting the URI
     	log.info("Compiling ICN proposal");
     	ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), 
     			requestForm.getAuthenticationInfo(), SysConfig.getOwnCloud(), 
@@ -208,6 +209,7 @@ public class GatekeeperResource {
     			requestForm.getTargetCloud().getGatekeeperServiceURI());
     	icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
     	
+    	//Sending the the request and then parsing the result
     	log.info("Sending ICN proposal to provider Cloud: " + icnURI);
     	Response response = Utility.sendRequest(icnURI, "PUT", icnProposal);
     	ICNResult result = new ICNResult(response.readEntity(ICNEnd.class));
@@ -254,7 +256,6 @@ public class GatekeeperResource {
 		else{
 			log.info("Requester Cloud is AUTHORIZED");
 			
-			//TODO review the flag values here
 			Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
 			orchestrationFlags.put("triggerInterCloud", false);
 			orchestrationFlags.put("externalServiceRequest", true);
