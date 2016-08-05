@@ -37,15 +37,22 @@ public final class SysConfig {
 			throw new NullPointerException("Address and serviceURI can not be null.");
 		}
 		
-		UriBuilder ub = null;
-		if (address.startsWith(baseURI)) {
-			ub = UriBuilder.fromPath(address);
-		}
-		else{
-			ub = UriBuilder.fromPath(baseURI).path(address);
-		}
-		if(port != null){
-			ub.path(":" + port);
+ 		UriBuilder ub = null;
+ 		if (address.startsWith(baseURI)) {
+ 			if (port != null) {
+ 				ub = UriBuilder.fromPath(address + ":" + port);
+ 			} 
+ 			else {
+				ub = UriBuilder.fromPath(address);
+			}
+		} 
+ 		else {
+			if (port != null) {
+				ub = UriBuilder.fromPath(baseURI).path(address + ":" + port);
+			} 
+			else {
+				ub = UriBuilder.fromPath(baseURI).path(address);
+			}
 		}
 		ub.path(serviceURI);
 
