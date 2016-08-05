@@ -183,7 +183,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 			return false;
 		if(priority == null || priority < 0)
 			return false;
-		if(isActive && (providerCloud != null || providerCloud.isValid()))
+		if(isActive && (providerCloud != null && providerCloud.isValid()))
 			return false;
 		if((providerSystem == null || !providerSystem.isValid()) && 
 				(providerCloud == null || !providerCloud.isValid()))
