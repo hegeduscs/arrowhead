@@ -27,10 +27,11 @@ public final class Utility {
 		
 		Response response = null;
 		try{
-			//TODO uncomment when finished testing? also test the behaviour of it
-		    /*ClientConfig configuration = new ClientConfig();
+			//TODO test the behaviour of it
+			//+app propertiesbe kiszervezni a ms értékeket
+		    ClientConfig configuration = new ClientConfig();
 		    configuration.property(ClientProperties.CONNECT_TIMEOUT, 10000);
-		    configuration.property(ClientProperties.READ_TIMEOUT, 10000);*/
+		    configuration.property(ClientProperties.READ_TIMEOUT, 10000);
 		    Client client = ClientBuilder.newClient();
 
 		    WebTarget target = client.target(UriBuilder.fromUri(URI).build());
@@ -52,18 +53,12 @@ public final class Utility {
 		                + "to the Utility.sendRequest() method");
 		    }
 		    
-		    //TODO check if this actually returns the URI we want
-		    //Service Unavailable
-		    if(response.getStatus() == 503){
-		    	log.info("UnavailableServerException at " + URI);
-		    	throw new UnavailableServerException("The server at (" + URI + ") did not respond.");
-		    }
-		    
 		    return response;
 		}
 		//We need to catch this exception separately, so we can get back the original URI that was unavailable
 		catch(UnavailableServerException e){
 			e.printStackTrace();
+			log.info(URI + "received an UnavailableServerException from a target.");
 			throw new UnavailableServerException(e.getMessage());
 		}
 		//This catches the JAX-RS exception which is actually thrown when trying to send to an invalid URI
