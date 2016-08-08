@@ -136,7 +136,7 @@ public class Main {
 		}
 		
 		timer.schedule(pingTask, 60000l, (interval * 60l * 1000l));
-
+		//timer.cancel() meghívása System in után!
 	}
 
 	public synchronized static Properties getProp() {

@@ -10,7 +10,6 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 public class IntraCloudAuthResponse {
 	
 	private HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<ArrowheadSystem, Boolean>();
-	//TODO add token hashmap
 	
 	public IntraCloudAuthResponse() {
 	}

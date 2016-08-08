@@ -28,6 +28,7 @@ public final class Utility {
 		Response response = null;
 		try{
 			//TODO uncomment when finished testing? also test the behaviour of it
+			//+app propertiesbe kiszervezni
 		    /*ClientConfig configuration = new ClientConfig();
 		    configuration.property(ClientProperties.CONNECT_TIMEOUT, 10000);
 		    configuration.property(ClientProperties.READ_TIMEOUT, 10000);*/
