@@ -15,7 +15,6 @@
 		<module>authorization</module>
 		<module>orchestrator</module>
 		<module>api</module>
-		<module>main</module>
 	</modules>
 	<properties>
 		<jersey.version>2.23.1</jersey.version>
@@ -83,34 +82,4 @@
 
 		</dependencies>
 	</dependencyManagement>
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>${mvn.compiler.version}</version>
-					<inherited>true</inherited>
-					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.glassfish</groupId>
-					<artifactId>maven-glassfish-plugin</artifactId>
-					<version>${mvn.glassfish.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.2.1</version>
-					<configuration>
-						<mainClass>eu.arrowhead.main.Main</mainClass>
-						<executable>java</executable>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
 </project>
