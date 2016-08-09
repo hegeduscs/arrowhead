@@ -41,7 +41,7 @@ public class GSDRequestForm {
 	public boolean isPayloadUsable(){
 		if(requestedService == null)
 			return false;
-		if(!requestedService.isValid())
+		if(!requestedService.isValidStrict())
 			return false;
 		if(requestedService.getInterfaces() == null || requestedService.getInterfaces().isEmpty())
 			return false;

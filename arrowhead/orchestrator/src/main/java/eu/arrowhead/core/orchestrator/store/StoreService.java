@@ -38,6 +38,18 @@ public final class StoreService {
 		if(savedConsumer == null || savedService == null)
 			return null;
 		
+		boolean hasMatchingInterfaces = false;
+		for(String givenInterface : service.getInterfaces()){
+			for(String savedInterface : savedService.getInterfaces()){
+				if(givenInterface.equals(savedInterface)){
+					hasMatchingInterfaces = true;
+				}
+			}
+		}
+		if(!hasMatchingInterfaces){
+			return null;
+		}
+		
 		restrictionMap.put("consumer", savedConsumer);
 		restrictionMap.put("service", savedService);
 		return dm.getAll(OrchestrationStore.class, restrictionMap);

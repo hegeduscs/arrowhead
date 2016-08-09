@@ -179,7 +179,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore>{
 	}
 
 	public boolean isPayloadUsable(){
-		if(consumer == null || service == null || !consumer.isValid() || !service.isValid())
+		if(consumer == null || service == null || !consumer.isValid() || !service.isValidStrict())
 			return false;
 		if(priority == null || priority < 0)
 			return false;

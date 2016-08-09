@@ -103,7 +103,13 @@ public class ArrowheadService {
 		this.serviceMetadata = metaData;
 	}
 	
-	public boolean isValid(){
+	public boolean isValidStrict(){
+		if(serviceGroup == null || serviceDefinition == null || interfaces.isEmpty())
+			return false;
+		return true;
+	}
+	
+	public boolean isValidSoft(){
 		if(serviceGroup == null || serviceDefinition == null)
 			return false;
 		return true;

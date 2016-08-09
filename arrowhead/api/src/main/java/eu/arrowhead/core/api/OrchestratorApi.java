@@ -138,7 +138,7 @@ public class OrchestratorApi {
 		if(query.isOnlyActive()){
 			restrictionMap.put("isActive", true);
 		}
-		if(query.getRequestedService() != null && query.getRequestedService().isValid()){
+		if(query.getRequestedService() != null && query.getRequestedService().isValidSoft()){
 			rm.clear();
 			rm.put("serviceGroup", query.getRequestedService().getServiceGroup());
 			rm.put("serviceDefinition", query.getRequestedService().getServiceDefinition());

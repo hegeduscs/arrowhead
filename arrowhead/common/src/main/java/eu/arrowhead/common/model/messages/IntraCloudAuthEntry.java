@@ -58,7 +58,7 @@ public class IntraCloudAuthEntry {
 			if(!provider.isValidForDatabase())
 				return false;
 		for(ArrowheadService service : serviceList)
-			if(!service.isValid())
+			if(!service.isValidSoft())
 				return false;
 		return true;
 	}

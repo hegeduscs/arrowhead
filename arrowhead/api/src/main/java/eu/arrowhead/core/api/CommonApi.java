@@ -121,7 +121,7 @@ public class CommonApi {
 			
 		List<ArrowheadService> savedServices = new ArrayList<ArrowheadService>();
 		for (ArrowheadService service : serviceList) {
-			if(service.isValid()){
+			if(service.isValidSoft()){
 				restrictionMap.clear();
 				restrictionMap.put("serviceGroup", service.getServiceGroup());
 				restrictionMap.put("serviceDefinition", service.getServiceDefinition());
@@ -147,7 +147,7 @@ public class CommonApi {
 	@Path("/services")
 	public Response updateService(ArrowheadService service) {
 		
-		if(!service.isValid()){
+		if(!service.isValidSoft()){
 			log.info("CommonApi:updateService throws BadPayloadException");
 			throw new BadPayloadException("Bad payload: missing service group "
 					+ "or service definition in the entry payload.");

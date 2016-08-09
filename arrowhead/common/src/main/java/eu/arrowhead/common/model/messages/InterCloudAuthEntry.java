@@ -45,7 +45,7 @@ public class InterCloudAuthEntry {
 		if(cloud == null || serviceList.isEmpty() || !cloud.isValidForDatabase())
 			return false;
 		for(ArrowheadService service : serviceList)
-			if(!service.isValid())
+			if(!service.isValidSoft())
 				return false;
 		return true;
 	}
