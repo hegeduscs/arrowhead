@@ -10,7 +10,8 @@ public class BadPayloadExceptionMapper implements ExceptionMapper<BadPayloadExce
 
 	@Override
 	public Response toResponse(BadPayloadException ex) {
-		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400, "No documentation yet.");
+		ex.printStackTrace();
+		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
 		return Response.status(Status.BAD_REQUEST)
 				.entity(errorMessage)
 				.build();

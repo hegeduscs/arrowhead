@@ -10,7 +10,8 @@ public class InvalidParameterExceptionMapper implements ExceptionMapper<InvalidP
 
 	@Override
 	public Response toResponse(InvalidParameterException ex) {
-		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400, "No documentation yet.");
+		ex.printStackTrace();
+		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
 		return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
 	}
 

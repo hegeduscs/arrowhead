@@ -10,7 +10,8 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
 
 	@Override
 	public Response toResponse(AuthenticationException ex) {
-		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 401, "No documentation yet.");
+		ex.printStackTrace();
+		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 401);
 		return Response.status(Status.UNAUTHORIZED)
 				.entity(errorMessage)
 				.build();

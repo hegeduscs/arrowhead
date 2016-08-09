@@ -49,8 +49,8 @@ public class Main {
 		// providers
 
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(SecureServiceRegistryResource.class, SecurityFilter.class, EmptyPayloadFilter.class,
-				LoggingRequestFilter.class, LoggingResponseFilter.class);
+		config.registerClasses(SecureServiceRegistryResource.class, SecurityFilter.class);
+		config.packages("eu.arrowhead.common");
 
 		URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
 
@@ -85,8 +85,8 @@ public class Main {
 		// providers
 
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(ServiceRegistryResource.class, EmptyPayloadFilter.class, LoggingRequestFilter.class,
-				LoggingResponseFilter.class);
+		config.registerClasses(ServiceRegistryResource.class);
+		config.packages("eu.arrowhead.common");
 
 		URI uri = UriBuilder.fromUri(BASE_URI).build();
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
@@ -109,21 +109,23 @@ public class Main {
 		log.info("Starting Server!");
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
-		
+		HttpServer server = null;
+		HttpServer secureServer = null;
 		if (args != null && args.length > 0) {
 			switch (args[0]) {
-			case "insec":
-				startServer();
+			case "secure":
+				secureServer = startSecureServer();
 				log.debug(String.format("Jersey app started with WADL available at "
-						+ "%sapplication.wadl", BASE_URI));
+						+ "%sapplication.wadl", BASE_URI_SECURED));
 				break;
-			default:
-				break;
+			case "both":
+				server = startServer();
+				secureServer = startSecureServer();
 			}
-		} else {
-			startSecureServer();
-			log.debug(String.format("Jersey app started with WADL available at " + "%sapplication.wadl",
-					BASE_URI_SECURED));
+		} 
+		else {
+			server = startServer();
+			log.debug(String.format("Jersey app started with WADL available at " + "%sapplication.wadl", BASE_URI));
 		}
 
 		TimerTask pingTask = new PingTask();
@@ -136,7 +138,21 @@ public class Main {
 		}
 		
 		timer.schedule(pingTask, 60000l, (interval * 60l * 1000l));
-		//timer.cancel() meghívása System in után!
+		
+		System.out.println("Press enter to shutdown Service Registry Server(s)...");
+        System.in.read();
+		
+        timer.cancel();
+        if(server != null){
+        	log.info("Stopping server at: " + BASE_URI);
+        	server.shutdownNow();
+        }
+        if(secureServer != null){
+        	log.info("Stopping server at: " + BASE_URI_SECURED);
+        	secureServer.shutdownNow();
+        }
+        
+        System.out.println("Api Server(s) stopped");
 	}
 
 	public synchronized static Properties getProp() {

@@ -12,7 +12,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
 	public Response toResponse(Exception ex) {
 		ex.printStackTrace();
 		ErrorMessage errorMessage = new ErrorMessage("Class: " + ex.getClass().toString() + 
-				" Message: " + ex.getMessage(), 500, "No documentation yet.");
+				" Message: " + ex.getMessage(), 500);
 		return Response.status(Status.INTERNAL_SERVER_ERROR)
 				.entity(errorMessage)
 				.build();
