@@ -323,74 +323,6 @@ public final class OrchestratorService {
 		throw new DataNotFoundException("OrchestrationFromStore failed.");
 	}
 	
-	
-	/**
-	 * This method compiles the OrchestrationResponse object. 
-	 * The regularOrchestration and externalServiceRequest processes use this version of the method. 
-	 * (The triggerInterCloud method gets back the same response from an externalServiceRequest 
-	 * at a remote Cloud.)
-	 * 
-	 * @param ArrowheadService service
-	 * @param List<ProvidedService> psList
-	 * @param boolean generateToken
-	 * @return OrchestrationResponse
-	 */
-	private static OrchestrationResponse compileOrchestrationResponse(ArrowheadService service, 
-			List<ProvidedService> psList, boolean generateToken){
-		log.info("Entered the (first) compileOrchestrationResponse method.");
-		
-		String token = null;
-		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
-		//We create an OrchestrationForm for every provider
-		for(ProvidedService ps : psList){
-			if(generateToken){
-				//placeholder for token generation, call should be made to the AuthorizationResource
-			}
-			
-			//Returning only those service interfaces that were found in the SR entry
-			service.setInterfaces(ps.getServiceInterface());
-			//TODO metadata handling when SR is fixed
-			service.setServiceMetadata(null);
-			OrchestrationForm of = new OrchestrationForm(service, ps.getProvider(), 
-					ps.getServiceURI(), token, null);
-			ofList.add(of);
-		}
-		log.info("OrchestrationForm created for " + psList.size() + " providers.");
-		
-		//The OrchestrationResponse contains a list of OrchestrationForms
-		return new OrchestrationResponse(ofList);
-	}
-	
-	/**
-	 * This method compiles the OrchestrationResponse object.
-	 * Only the orchestrationFromStore method uses this version of the method.
-	 * 
-	 * @param List<OrchestrationStore> entryList
-	 * @param boolean generateToken
-	 * @return OrchestrationResponse
-	 */
-	private static OrchestrationResponse compileOrchestrationResponse(List<OrchestrationStore> entryList, 
-			boolean generateToken){
-		log.info("Entered the (second) compileOrchestrationResponse method.");
-				
-		String token = null;
-		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
-		//We create an OrchestrationForm for every Store entry
-		for(OrchestrationStore entry : entryList){
-			if(generateToken){
-				//placeholder for token generation, call should be made to the AuthorizationResource
-			}
-			
-			OrchestrationForm of = new OrchestrationForm(entry.getService(), entry.getProviderSystem(), 
-					null, token, entry.getOrchestrationRule());
-			ofList.add(of);
-		}
-		log.info("OrchestrationForm created for " + entryList.size() + " providers.");
-		
-		//The OrchestrationResponse contains a list of OrchestrationForms
-		return new OrchestrationResponse(ofList);
-	}
-	
 	/**
 	 * This method queries the Service Registry core system for a specific ArrowheadService.
 	 * The returned list consists of possible service providers.
@@ -441,6 +373,84 @@ public final class OrchestratorService {
 				+ serviceQueryResult.getServiceQueryData().size());
 		
 		return serviceQueryResult.getServiceQueryData();
+	}
+	
+	/**
+	 * This method queries the Authorization core system with a consumer/service/providerList triplet.
+	 * The returned list only contains the authorized providers.
+	 * 
+	 * @param ArrowheadSystem consumer
+	 * @param ArrowheadService service
+	 * @param List<ArrowheadSystem> providerList
+	 * @return List<ArrowheadSystem>
+	 */
+	private static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, 
+			ArrowheadService service, List<ArrowheadSystem> providerList) {
+		log.info("Entered the queryAuthorization method.");
+		
+		//Compiling the URI and the request payload
+		String URI = SysConfig.getAuthorizationURI();
+		URI = UriBuilder.fromPath(URI).path("intracloud").toString();
+		IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, 
+				service, false);
+		log.info("Intra-Cloud authorization request ready to send to: " + URI);
+		
+		//Extracting the useful payload from the response, sending back the authorized Systems
+		Response response = Utility.sendRequest(URI, "PUT", request);
+		IntraCloudAuthResponse authResponse = response.readEntity(IntraCloudAuthResponse.class);
+		List<ArrowheadSystem> authorizedSystems = new ArrayList<ArrowheadSystem>();
+		for(Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap().entrySet()){
+			if(entry.getValue())
+				authorizedSystems.add(entry.getKey());
+		}
+		
+		//Throwing exception if none of the providers are authorized for this consumer/service pair.
+		if(authorizedSystems.isEmpty()){
+			log.info("OrchestratorService:queryAuthorization throws DataNotFoundException");
+			throw new DataNotFoundException("The consumer system is not authorized to receive servicing "
+					+ "from any of the provider systems.");
+		}
+		
+		log.info("Authorization query is done, sending back the authorized Systems. "
+				+ authorizedSystems.size());
+		return authorizedSystems;
+	}
+	
+	/**
+	 * This method filters out all the entries of the given ProvidedService list, which does not
+	 * have a preferred provider.
+	 * 
+	 * @param List<ProvidedService> psList
+	 * @param List<ArrowheadSystem> preferredProviders
+	 * @return List<ProvidedService>
+	 */
+	private static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, 
+			List<ArrowheadSystem> preferredProviders){
+		log.info("Entered the removeNonPreferred method.");
+		
+		if(psList.isEmpty() || preferredProviders.isEmpty()){
+			log.info("OrchestratorService:removeNonPreferred BadPayloadException");
+			throw new BadPayloadException("ProvidedService or PreferredProviders list is empty. "
+					+ "(OrchestrationService:removeNonPreferred BadPayloadException)");
+		}
+		
+		List<ProvidedService> preferredList = new ArrayList<ProvidedService>();
+		for(ArrowheadSystem system : preferredProviders){
+			for(ProvidedService ps : psList){
+				if(system.equals(ps.getProvider())){
+					preferredList.add(ps);
+				}
+			}
+		}
+		
+		if(preferredList.isEmpty()){
+			log.info("OrchestratorService:removeNonPreferred DataNotFoundException");
+			throw new DataNotFoundException("No preferred local System found in the the list of provider Systems. "
+					+ "(OrchestrationService:removeNonPreferred DataNotFoundException)");
+		}
+		
+		log.info("removeNonPreferred returns with " + preferredList.size() + " ProvidedServices.");
+		return preferredList;
 	}
 	
 	/**
@@ -516,43 +526,6 @@ public final class OrchestratorService {
 				return psList.get(0);
 			}
 		}
-	}
-	
-	/**
-	 * This method filters out all the entries of the given ProvidedService list, which does not
-	 * have a preferred provider.
-	 * 
-	 * @param List<ProvidedService> psList
-	 * @param List<ArrowheadSystem> preferredProviders
-	 * @return List<ProvidedService>
-	 */
-	private static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, 
-			List<ArrowheadSystem> preferredProviders){
-		log.info("Entered the removeNonPreferred method.");
-		
-		if(psList.isEmpty() || preferredProviders.isEmpty()){
-			log.info("OrchestratorService:removeNonPreferred BadPayloadException");
-			throw new BadPayloadException("ProvidedService or PreferredProviders list is empty. "
-					+ "(OrchestrationService:removeNonPreferred BadPayloadException)");
-		}
-		
-		List<ProvidedService> preferredList = new ArrayList<ProvidedService>();
-		for(ArrowheadSystem system : preferredProviders){
-			for(ProvidedService ps : psList){
-				if(system.equals(ps.getProvider())){
-					preferredList.add(ps);
-				}
-			}
-		}
-		
-		if(preferredList.isEmpty()){
-			log.info("OrchestratorService:removeNonPreferred DataNotFoundException");
-			throw new DataNotFoundException("No preferred local System found in the the list of provider Systems. "
-					+ "(OrchestrationService:removeNonPreferred DataNotFoundException)");
-		}
-		
-		log.info("removeNonPreferred returns with " + preferredList.size() + " ProvidedServices.");
-		return preferredList;
 	}
 	
 	/**
@@ -654,6 +627,45 @@ public final class OrchestratorService {
 	}
 	
 	/**
+	 * From the given parameteres this method compiles an ICNRequestForm to start the ICN process.
+	 * 
+	 * @param ServiceRequestForm srf
+	 * @param ArrowheadCloud targetCloud
+	 * @return ICNRequestForm
+	 */
+	private static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf, ArrowheadCloud targetCloud){
+		log.info("Entered the compileICNRequestForm method.");
+		
+		List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
+		if(srf.getPreferredProviders() == null || srf.getPreferredProviders().size() == 0){
+			preferredProviders = null;
+			log.info("No preferredProviders were given, sending ICNRequestForm without it.");
+		}
+		else{
+			//Getting the preferred Providers which belong to the preferred Cloud
+			for(int i = 0; i < srf.getPreferredClouds().size(); i++){
+				if(srf.getPreferredClouds().get(i).equals(targetCloud)){
+					//We might have a preferred Cloud but no preferred Provider inside the Cloud
+					if(srf.getPreferredProviders().size() > i && srf.getPreferredProviders().get(i) != null 
+							&& srf.getPreferredProviders().get(i).isValid()){
+						preferredProviders.add(srf.getPreferredProviders().get(i));
+					}
+				}
+			}
+			log.info(preferredProviders.size() + " preferred providers selected for this Cloud.");
+		}
+		
+		//Compiling the payload
+		Map<String, Boolean> negotiationFlags = new HashMap<String, Boolean>();
+		negotiationFlags.put("onlyPreferred", srf.getOrchestrationFlags().get("onlyPreferred"));
+		negotiationFlags.put("generateToken", srf.getOrchestrationFlags().get("generateToken"));
+		ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
+				targetCloud, srf.getRequesterSystem(), preferredProviders, negotiationFlags);
+		
+		return requestForm;
+	}
+	
+	/**
 	 * This method initiates the ICN process by sending a request to the Gatekeeper core system.
 	 * 
 	 * @param ICNRequestForm requestForm
@@ -674,47 +686,6 @@ public final class OrchestratorService {
 		
 		log.info(result.getInstructions().getResponse().size() + " possible providers in the ICN result.");
 		return result;
-	}
-	
-	/**
-	 * This method queries the Authorization core system with a consumer/service/providerList triplet.
-	 * The returned list only contains the authorized providers.
-	 * 
-	 * @param ArrowheadSystem consumer
-	 * @param ArrowheadService service
-	 * @param List<ArrowheadSystem> providerList
-	 * @return List<ArrowheadSystem>
-	 */
-	private static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, 
-			ArrowheadService service, List<ArrowheadSystem> providerList) {
-		log.info("Entered the queryAuthorization method.");
-		
-		//Compiling the URI and the request payload
-		String URI = SysConfig.getAuthorizationURI();
-		URI = UriBuilder.fromPath(URI).path("intracloud").toString();
-		IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, 
-				service, false);
-		log.info("Intra-Cloud authorization request ready to send to: " + URI);
-		
-		//Extracting the useful payload from the response, sending back the authorized Systems
-		Response response = Utility.sendRequest(URI, "PUT", request);
-		IntraCloudAuthResponse authResponse = response.readEntity(IntraCloudAuthResponse.class);
-		List<ArrowheadSystem> authorizedSystems = new ArrayList<ArrowheadSystem>();
-		for(Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap().entrySet()){
-			if(entry.getValue())
-				authorizedSystems.add(entry.getKey());
-		}
-		
-		//Throwing exception if none of the providers are authorized for this consumer/service pair.
-		if(authorizedSystems.isEmpty()){
-			log.info("OrchestratorService:queryAuthorization throws DataNotFoundException");
-			throw new DataNotFoundException("The consumer system is not authorized to receive servicing "
-					+ "from any of the provider systems.");
-		}
-		
-		log.info("Authorization query is done, sending back the authorized Systems. "
-				+ authorizedSystems.size());
-		return authorizedSystems;
 	}
 	
 	/**
@@ -790,41 +761,70 @@ public final class OrchestratorService {
 	}
 	
 	/**
-	 * From the given parameteres this method compiles an ICNRequestForm to start the ICN process.
+	 * This method compiles the OrchestrationResponse object. 
+	 * The regularOrchestration and externalServiceRequest processes use this version of the method. 
+	 * (The triggerInterCloud method gets back the same response from an externalServiceRequest 
+	 * at a remote Cloud.)
 	 * 
-	 * @param ServiceRequestForm srf
-	 * @param ArrowheadCloud targetCloud
-	 * @return ICNRequestForm
+	 * @param ArrowheadService service
+	 * @param List<ProvidedService> psList
+	 * @param boolean generateToken
+	 * @return OrchestrationResponse
 	 */
-	private static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf, ArrowheadCloud targetCloud){
-		log.info("Entered the compileICNRequestForm method.");
+	private static OrchestrationResponse compileOrchestrationResponse(ArrowheadService service, 
+			List<ProvidedService> psList, boolean generateToken){
+		log.info("Entered the (first) compileOrchestrationResponse method.");
 		
-		List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
-		if(srf.getPreferredProviders() == null || srf.getPreferredProviders().size() == 0){
-			preferredProviders = null;
-			log.info("No preferredProviders were given, sending ICNRequestForm without it.");
-		}
-		else{
-			//Getting the preferred Providers which belong to the preferred Cloud
-			for(int i = 0; i < srf.getPreferredClouds().size(); i++){
-				if(srf.getPreferredClouds().get(i).equals(targetCloud)){
-					//We might have a preferred Cloud but no preferred Provider inside the Cloud
-					if(srf.getPreferredProviders().size() > i && srf.getPreferredProviders().get(i).isValid()){
-						preferredProviders.add(srf.getPreferredProviders().get(i));
-					}
-				}
+		String token = null;
+		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+		//We create an OrchestrationForm for every provider
+		for(ProvidedService ps : psList){
+			if(generateToken){
+				//placeholder for token generation, call should be made to the AuthorizationResource
 			}
-			log.info(preferredProviders.size() + " preferred providers selected for this Cloud.");
+			
+			//Returning only those service interfaces that were found in the SR entry
+			service.setInterfaces(ps.getServiceInterface());
+			//TODO metadata handling when SR is fixed
+			service.setServiceMetadata(null);
+			OrchestrationForm of = new OrchestrationForm(service, ps.getProvider(), 
+					ps.getServiceURI(), token, null);
+			ofList.add(of);
 		}
+		log.info("OrchestrationForm created for " + psList.size() + " providers.");
 		
-		//Compiling the payload
-		Map<String, Boolean> negotiationFlags = new HashMap<String, Boolean>();
-		negotiationFlags.put("onlyPreferred", srf.getOrchestrationFlags().get("onlyPreferred"));
-		negotiationFlags.put("generateToken", srf.getOrchestrationFlags().get("generateToken"));
-		ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
-				targetCloud, srf.getRequesterSystem(), preferredProviders, negotiationFlags);
+		//The OrchestrationResponse contains a list of OrchestrationForms
+		return new OrchestrationResponse(ofList);
+	}
+	
+	/**
+	 * This method compiles the OrchestrationResponse object.
+	 * Only the orchestrationFromStore method uses this version of the method.
+	 * 
+	 * @param List<OrchestrationStore> entryList
+	 * @param boolean generateToken
+	 * @return OrchestrationResponse
+	 */
+	private static OrchestrationResponse compileOrchestrationResponse(List<OrchestrationStore> entryList, 
+			boolean generateToken){
+		log.info("Entered the (second) compileOrchestrationResponse method.");
+				
+		String token = null;
+		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+		//We create an OrchestrationForm for every Store entry
+		for(OrchestrationStore entry : entryList){
+			if(generateToken){
+				//placeholder for token generation, call should be made to the AuthorizationResource
+			}
+			
+			OrchestrationForm of = new OrchestrationForm(entry.getService(), entry.getProviderSystem(), 
+					null, token, entry.getOrchestrationRule());
+			ofList.add(of);
+		}
+		log.info("OrchestrationForm created for " + entryList.size() + " providers.");
 		
-		return requestForm;
+		//The OrchestrationResponse contains a list of OrchestrationForms
+		return new OrchestrationResponse(ofList);
 	}
 	
 	
