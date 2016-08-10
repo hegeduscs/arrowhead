@@ -33,7 +33,7 @@ public final class SysConfig {
 	 */
 	public static String getURI(String address, String port, String serviceURI) {
 		if(address == null || serviceURI == null){
-			log.info("Address and serviceURI can not be null (SysConfig:getURI throws NPE");
+			log.info("Address and serviceURI can not be null (SysConfig:getURI throws NPE)");
 			throw new NullPointerException("Address and serviceURI can not be null.");
 		}
 		

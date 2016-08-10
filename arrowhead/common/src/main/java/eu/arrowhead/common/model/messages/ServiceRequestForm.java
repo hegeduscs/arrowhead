@@ -117,7 +117,7 @@ public class ServiceRequestForm {
 		if(requesterSystem == null || !requesterSystem.isValid() ||
 				requestedService == null || !requestedService.isValidStrict())
 			return false;
-		if(orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty() && preferredClouds.isEmpty())
+		if(orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty())
 			return false;
 		return true;
 	}

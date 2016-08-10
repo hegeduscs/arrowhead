@@ -638,7 +638,6 @@ public final class OrchestratorService {
 		
 		List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
 		if(srf.getPreferredProviders() == null || srf.getPreferredProviders().size() == 0){
-			preferredProviders = null;
 			log.info("No preferredProviders were given, sending ICNRequestForm without it.");
 		}
 		else{
