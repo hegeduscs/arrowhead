@@ -706,14 +706,16 @@ public final class OrchestratorService {
 		 * providers from the ICN result.
 		 */
 		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
-		for(ArrowheadSystem preferredProvider : preferredProviders){
-			for(OrchestrationForm of : icnResult.getInstructions().getResponse()){
-				if(preferredProvider.equals(of.getProvider())){
-					ofList.add(of);
-					icnResult.getInstructions().setResponse(ofList);
-					log.info("Preferred provider System found in the ICNResult, "
-							+ "ICN matchmaking finished.");
-					return icnResult.getInstructions();
+		if(preferredProviders != null && !preferredProviders.isEmpty()){
+			for(ArrowheadSystem preferredProvider : preferredProviders){
+				for(OrchestrationForm of : icnResult.getInstructions().getResponse()){
+					if(preferredProvider.equals(of.getProvider())){
+						ofList.add(of);
+						icnResult.getInstructions().setResponse(ofList);
+						log.info("Preferred provider System found in the ICNResult, "
+								+ "ICN matchmaking finished.");
+						return icnResult.getInstructions();
+					}
 				}
 			}
 		}
