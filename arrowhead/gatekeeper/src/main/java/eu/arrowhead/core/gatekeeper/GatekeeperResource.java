@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.messages.GSDAnswer;
@@ -106,7 +107,13 @@ public class GatekeeperResource {
 		Response response = null;
 		for(String URI : cloudURIs){
 			URI = UriBuilder.fromPath(URI).path("gsd_poll").toString();
-			response = Utility.sendRequest(URI, "PUT", gsdPoll);
+			try{
+				response = Utility.sendRequest(URI, "PUT", gsdPoll);
+			}
+			//We skip the offline gatekeepers
+			catch(UnavailableServerException ex){
+				continue;
+			}
 			log.info("Sent GSD Poll request to: " + URI);
 			GSDAnswer gsdAnswer = response.readEntity(GSDAnswer.class);
 			if(gsdAnswer != null){

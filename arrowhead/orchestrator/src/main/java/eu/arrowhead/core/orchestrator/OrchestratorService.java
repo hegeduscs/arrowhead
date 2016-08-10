@@ -800,16 +800,22 @@ public final class OrchestratorService {
 		log.info("Entered the compileICNRequestForm method.");
 		
 		List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
-		//Getting the preferred Providers which belong to the preferred Cloud
-		for(int i = 0; i < srf.getPreferredClouds().size(); i++){
-			if(srf.getPreferredClouds().get(i).equals(targetCloud)){
-				//We might have a preferred Cloud but no preferred Provider inside the Cloud
-				if(srf.getPreferredProviders().get(i) != null){
-					preferredProviders.add(srf.getPreferredProviders().get(i));
+		if(srf.getPreferredProviders() == null || srf.getPreferredProviders().size() == 0){
+			preferredProviders = null;
+			log.info("No preferredProviders were given, sending ICNRequestForm without it.");
+		}
+		else{
+			//Getting the preferred Providers which belong to the preferred Cloud
+			for(int i = 0; i < srf.getPreferredClouds().size(); i++){
+				if(srf.getPreferredClouds().get(i).equals(targetCloud)){
+					//We might have a preferred Cloud but no preferred Provider inside the Cloud
+					if(srf.getPreferredProviders().size() > i && srf.getPreferredProviders().get(i).isValid()){
+						preferredProviders.add(srf.getPreferredProviders().get(i));
+					}
 				}
 			}
+			log.info(preferredProviders.size() + " preferred providers selected for this Cloud.");
 		}
-		log.info(preferredProviders.size() + " preferred providers selected for this Cloud.");
 		
 		//Compiling the payload
 		Map<String, Boolean> negotiationFlags = new HashMap<String, Boolean>();
