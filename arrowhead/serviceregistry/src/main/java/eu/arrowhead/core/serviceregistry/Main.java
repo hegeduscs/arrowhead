@@ -103,8 +103,6 @@ public class Main {
 	 * @param args
 	 * @throws IOException
 	 */
-	//TODO átírjuk a többi mintájára? a provider beregelés történhet egyszerűbben is. csinálható itt is enterrel
-	//leállítás, vagy a TimerTask miatt nem, ami esetleg nem külön threaden futna - ki kell próbálni
 	public static void main(String[] args) throws IOException {
 		log.info("Starting Server!");
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");

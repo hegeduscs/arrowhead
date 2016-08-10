@@ -95,8 +95,14 @@ public class GatekeeperResource {
 			Set<ArrowheadCloud> preferredClouds = new LinkedHashSet<>(requestForm.getSearchPerimeter());
 			String URI = null;
 			for(ArrowheadCloud cloud : preferredClouds){
-				URI = SysConfig.getURI(cloud.getAddress(), cloud.getPort(), 
-						cloud.getGatekeeperServiceURI());
+				try{
+					URI = SysConfig.getURI(cloud.getAddress(), cloud.getPort(), 
+							cloud.getGatekeeperServiceURI());
+				}
+				//We skip the clouds with missing information
+				catch(NullPointerException ex){
+					continue;
+				}
 				cloudURIs.add(URI);
 				log.info(cloudURIs.size() + " preferred cloud URI(s) acquired.");
 			}
