@@ -153,7 +153,7 @@ public class AuthorizationResource {
 		if(service == null){
 			log.info("Service is not in the database. Returning NOT AUTHORIZED state."
 					+ request.getService().toString());
-			return Response.status(Status.OK).entity(isAuthorized).build();
+			return Response.status(Status.OK).entity(new InterCloudAuthResponse(isAuthorized)).build();
 		}
 		
 		InterCloudAuthorization authRight = new InterCloudAuthorization();
@@ -171,8 +171,7 @@ public class AuthorizationResource {
 			log.info("This (cloud/service) request is NOT AUTHORIZED.");
 		}
 		
-		InterCloudAuthResponse response = new InterCloudAuthResponse(isAuthorized);
-		return Response.status(Status.OK).entity(response).build();
+		return Response.status(Status.OK).entity(new InterCloudAuthResponse(isAuthorized)).build();
 	}
 
 	
