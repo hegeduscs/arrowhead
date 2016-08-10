@@ -349,6 +349,8 @@ public final class OrchestratorService {
 			
 			//Returning only those service interfaces that were found in the SR entry
 			service.setInterfaces(ps.getServiceInterface());
+			//TODO metadata handling when SR is fixed
+			service.setServiceMetadata(null);
 			OrchestrationForm of = new OrchestrationForm(service, ps.getProvider(), 
 					ps.getServiceURI(), token, null);
 			ofList.add(of);
