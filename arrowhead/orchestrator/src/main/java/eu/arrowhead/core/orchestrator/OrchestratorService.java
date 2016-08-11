@@ -223,15 +223,23 @@ public final class OrchestratorService {
 		
 		//Legacy behavior handled differently, returning all "active" entries belonging to the consumer
 		if(orchestrationFlags.get("storeOnlyActive")){
-			if(!entryList.isEmpty()){
-				return compileOrchestrationResponse(entryList, orchestrationFlags.get("generateToken"));
+			//If a service is provided in the ServiceRequestForm, we used that to further filter the results.
+			if(srf.getRequestedService() != null && srf.getRequestedService().isValidStrict()){
+				List<OrchestrationStore> tempList = new ArrayList<OrchestrationStore>();
+				for(OrchestrationStore entry : entryList){
+					if(!entry.getService().equals(srf.getRequestedService())){
+						tempList.add(entry);
+					}
+				}
+				entryList.removeAll(tempList);
+				if(entryList.isEmpty()){
+					log.info("No active Orchestration Store entries "
+							+ "were found for this consumer/service pair.");
+					throw new DataNotFoundException("No active Orchestration Store entries "
+							+ "were found for this consumer/service pair.");
+				}
 			}
-			else{
-				log.info("No active store entry were found for this consumer System. "
-						+ "(OrchestrationService:orchestrationFromStore DataNotFoundException)");
-				throw new DataNotFoundException("No active store entry were found for this consumer System: "
-						+ srf.getRequesterSystem().toString());
-			}
+			return compileOrchestrationResponse(entryList, orchestrationFlags.get("generateToken"));
 		}
 		
 		//We pick out the intra-cloud Store entries
@@ -287,6 +295,7 @@ public final class OrchestratorService {
 				/*
 				 * Both of the provider lists (from SR and Auth query) need to contain the provider
 				 * of the Store entry. We return with a provider if it fills this requirement.
+				 * (Store orchestration will always only return 1 provider.)
 				 */
 				if(serviceProviders.contains(entry.getProviderSystem()) && 
 						authorizedIntraProviders.contains(entry.getProviderSystem())){
@@ -295,20 +304,15 @@ public final class OrchestratorService {
 				}
 			}
 			/*
-			 * Intra-Cloud store entries must be handlend inside the for loop, since every 
+			 * Inter-Cloud store entries must be handlend inside the for loop, since every 
 			 * provider Cloud means a different ICN process.
 			 */
 			else{
 				try{
 					ICNRequestForm icnRequestForm = compileICNRequestForm(srf, entry.getProviderCloud());
 					ICNResult icnResult = startICN(icnRequestForm);
-					//Use matchmaking on the ICN result if requested
-					if(orchestrationFlags.get("matchmaking")){
-						return icnMatchmaking(icnResult, icnRequestForm.getPreferredProviders());
-					}
-					else{
-						return icnResult.getInstructions();
-					}
+					//Use matchmaking on the ICN result. (Store orchestration will always only return 1 provider.)
+					return icnMatchmaking(icnResult, entry);
 				}
 				/*
 				 * If the ICN process failed on this store entry, we catch the exception
@@ -700,7 +704,7 @@ public final class OrchestratorService {
 	 */
 	private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, 
 			List<ArrowheadSystem> preferredProviders){
-		log.info("Entered the icnMatchmaking method.");
+		log.info("Entered the (first) icnMatchmaking method.");
 		
 		/*
 		 * We first try to find a match between preferredProviders and the received
@@ -728,6 +732,35 @@ public final class OrchestratorService {
 		log.info("No preferred provider System was found in the ICNResult, "
 				+ "returning the first OrchestrationForm entry.");
 		return icnResult.getInstructions();
+	}
+	
+	/**
+	 * Matchmaking method for ICN results. This version of the method is used by the
+	 * orchestrationFromStore method. The method searches for the provider 
+	 * (which was given in the Store entry) in the ICN result.
+	 * 
+	 * @param ICNResult icnResult
+	 * @param OrchestrationStore entry
+	 * @return OrchestrationResponse
+	 * @throws DataNotFoundException
+	 */
+	private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, OrchestrationStore entry){
+		log.info("Entered the (second) icnMatchmaking method.");
+		
+		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+		for(OrchestrationForm of : icnResult.getInstructions().getResponse()){
+			if(entry.getProviderSystem().equals(of.getProvider())){
+				ofList.add(of);
+				icnResult.getInstructions().setResponse(ofList);
+				log.info("Preferred provider System found in the ICNResult, "
+						+ "ICN matchmaking finished.");
+				return icnResult.getInstructions();
+			}
+		}
+		
+		log.info("Second icnMatchmaking method throws DataNotFoundException"); 
+		throw new DataNotFoundException("The given provider in the Store "
+				+ "entry was not found in the ICN result.");
 	}
 	
 	/**

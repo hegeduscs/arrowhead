@@ -119,6 +119,37 @@ public class ArrowheadService {
 	public String toString(){
 		return "(" + serviceGroup + ":" + serviceDefinition + ")";
 	}
-	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((serviceDefinition == null) ? 0 : serviceDefinition.hashCode());
+		result = prime * result + ((serviceGroup == null) ? 0 : serviceGroup.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ArrowheadService other = (ArrowheadService) obj;
+		if (serviceDefinition == null) {
+			if (other.serviceDefinition != null)
+				return false;
+		} else if (!serviceDefinition.equals(other.serviceDefinition))
+			return false;
+		if (serviceGroup == null) {
+			if (other.serviceGroup != null)
+				return false;
+		} else if (!serviceGroup.equals(other.serviceGroup))
+			return false;
+		return true;
+	}
+
 	
 }

@@ -114,8 +114,10 @@ public class ServiceRequestForm {
 	}
 
 	public boolean isPayloadUsable(){
-		if(requesterSystem == null || !requesterSystem.isValid() ||
-				requestedService == null || !requestedService.isValidStrict())
+		if(requesterSystem == null || !requesterSystem.isValid())
+			return false;
+		if(!orchestrationFlags.get("storeOnlyActive") && 
+				(requestedService == null || !requestedService.isValidStrict()))
 			return false;
 		if(orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty())
 			return false;
