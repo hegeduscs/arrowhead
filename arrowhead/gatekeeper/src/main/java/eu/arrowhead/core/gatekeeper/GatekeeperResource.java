@@ -273,8 +273,8 @@ public class GatekeeperResource {
 			orchestrationFlags.put("triggerInterCloud", false);
 			orchestrationFlags.put("externalServiceRequest", true);
 			orchestrationFlags.put("enableInterCloud", false);
-			orchestrationFlags.put("metadataSearch", false);
-			orchestrationFlags.put("pingProviders", false);
+			orchestrationFlags.put("metadataSearch", icnProposal.getNegotiationFlags().get("metadataSearch"));
+			orchestrationFlags.put("pingProviders", icnProposal.getNegotiationFlags().get("pingProviders"));
 			orchestrationFlags.put("overrideStore", false);
 			orchestrationFlags.put("storeOnlyActive", false);
 			orchestrationFlags.put("matchmaking", false);

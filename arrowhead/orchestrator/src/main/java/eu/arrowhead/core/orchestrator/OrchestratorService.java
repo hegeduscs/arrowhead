@@ -656,6 +656,8 @@ public final class OrchestratorService {
 		
 		//Compiling the payload
 		Map<String, Boolean> negotiationFlags = new HashMap<String, Boolean>();
+		negotiationFlags.put("metadataSearch", srf.getOrchestrationFlags().get("metadataSearch"));
+		negotiationFlags.put("pingProviders", srf.getOrchestrationFlags().get("pingProviders"));
 		negotiationFlags.put("onlyPreferred", srf.getOrchestrationFlags().get("onlyPreferred"));
 		negotiationFlags.put("generateToken", srf.getOrchestrationFlags().get("generateToken"));
 		ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null,
