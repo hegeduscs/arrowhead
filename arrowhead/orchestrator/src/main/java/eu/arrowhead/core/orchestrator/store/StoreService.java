@@ -17,6 +17,7 @@ public final class StoreService {
 	 * This method returns all the Orchestration Store entries belonging to a consumer.
 	 */
 	public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer){
+		restrictionMap.clear();
 		ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), 
 				consumer.getSystemName());
 		if(savedConsumer == null)
@@ -31,6 +32,7 @@ public final class StoreService {
 	 * and the requested service.
 	 */
 	public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service){
+		restrictionMap.clear();
 		ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), 
 				consumer.getSystemName());
 		ArrowheadService savedService = getRequestedService(service.getServiceGroup(),
@@ -59,6 +61,7 @@ public final class StoreService {
 	 * This method returns the active Orchestration Store entries for a consumer.
 	 */
 	public static List<OrchestrationStore> getActiveStoreEntries(ArrowheadSystem consumer){
+		restrictionMap.clear();
 		ArrowheadSystem savedConsumer =	getConsumerSystem(consumer.getSystemGroup(), 
 				consumer.getSystemName());
 		if(savedConsumer == null)
@@ -73,6 +76,7 @@ public final class StoreService {
 	 * This method returns all the entries of the Orchestration Store.
 	 */
 	public static List<OrchestrationStore> getAllStoreEntries(){
+		restrictionMap.clear();
 		return dm.getAll(OrchestrationStore.class, restrictionMap);
 	}
 	
