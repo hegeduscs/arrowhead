@@ -309,6 +309,21 @@ public final class OrchestratorService {
 			 */
 			else{
 				try{
+					/*
+					 * Setting up the SRF for the compileICNRequestForm method.
+					 * In case of orchestrationFromStore the preferences are the stored Cloud (and System),
+					 * and not what is inside the SRF payload. (Should be null when requesting Store orchestration)
+					 */
+					List<ArrowheadCloud> providerCloud = new ArrayList<>(Arrays.asList(entry.getProviderCloud()));
+					srf.setPreferredClouds(providerCloud);
+					if(entry.getProviderSystem() != null){
+						List<ArrowheadSystem> providerSystem = new ArrayList<>(Arrays.asList(entry.getProviderSystem()));
+						srf.setPreferredProviders(providerSystem);
+					}
+					else{
+						srf.setPreferredProviders(null);
+					}
+					
 					ICNRequestForm icnRequestForm = compileICNRequestForm(srf, entry.getProviderCloud());
 					ICNResult icnResult = startICN(icnRequestForm);
 					//Use matchmaking on the ICN result. (Store orchestration will always only return 1 provider.)
