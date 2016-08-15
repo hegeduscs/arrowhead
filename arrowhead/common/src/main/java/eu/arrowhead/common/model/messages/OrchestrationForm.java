@@ -13,6 +13,7 @@ public class OrchestrationForm {
 	private String serviceURI;
 	private String authorizationToken;
 	private String instruction;
+	private String signature;
 
 	public OrchestrationForm() {
 	}
@@ -66,5 +67,13 @@ public class OrchestrationForm {
 		this.instruction = instruction;
 	}
 
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		this.signature = signature;
+	}
+	
 	
 }

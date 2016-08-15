@@ -6,15 +6,20 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
+import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.DatabaseManager;
 import eu.arrowhead.common.database.InterCloudAuthorization;
 import eu.arrowhead.common.database.IntraCloudAuthorization;
+import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
@@ -24,6 +29,7 @@ import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.InterCloudAuthResponse;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
+import eu.arrowhead.common.ssl.SecurityUtils;
 
 /**
  * @author umlaufz, hegeduscs 
@@ -34,6 +40,8 @@ import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthorizationResource {
 
+	@Context
+	Configuration configuration;
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());
@@ -46,12 +54,18 @@ public class AuthorizationResource {
 	 * @exception DataNotFoundException, BadPayloadException
 	 * @return IntraCloudAuthResponse
 	 */
-	//TODO token generation if flag set true
-	//TODO token generator function 
 	@PUT
 	@Path("/intracloud")
-	public Response isSystemAuthorized(IntraCloudAuthRequest request) {
+	public Response isSystemAuthorized(@Context SecurityContext sc, IntraCloudAuthRequest request) {
 		log.info("Entered the AuthorizationResource:isSystemAuthorized function");
+		
+		if (sc.isSecure()) {
+			System.out.println("Got a request from a secure channel.");
+			if(!Utility.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized acces!");
+			}
+		}
 		
 		if (!request.isPayloadUsable()) {
 			log.info("AuthorizationResource:isSystemAuthorized BadPayloadException");
@@ -125,8 +139,16 @@ public class AuthorizationResource {
 	 */
 	@PUT
 	@Path("/intercloud")
-	public Response isCloudAuthorized(InterCloudAuthRequest request) {
+	public Response isCloudAuthorized(@Context SecurityContext sc, InterCloudAuthRequest request) {
 		log.info("Entered the AuthorizationResource:isCloudAuthorized function");
+		
+		if (sc.isSecure()) {
+			System.out.println("Got a request from a secure channel.");
+			if(!Utility.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized acces!");
+			}
+		}
 		
 		if (!request.isPayloadUsable()) {
 			log.info("AuthorizationResource:isCloudAuthorized BadPayloadException");

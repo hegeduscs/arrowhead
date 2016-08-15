@@ -5,8 +5,10 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
@@ -14,6 +16,7 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 
 import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.common.ssl.SecurityUtils;
 
 public final class Utility {
 	
@@ -27,12 +30,10 @@ public final class Utility {
 		
 		Response response = null;
 		try{
-			//TODO test the behaviour of it
-			//+app propertiesbe kiszervezni a ms értékeket
 		    ClientConfig configuration = new ClientConfig();
-		    configuration.property(ClientProperties.CONNECT_TIMEOUT, 10000);
-		    configuration.property(ClientProperties.READ_TIMEOUT, 10000);
-		    Client client = ClientBuilder.newClient();
+		    configuration.property(ClientProperties.CONNECT_TIMEOUT, 30000);
+		    configuration.property(ClientProperties.READ_TIMEOUT, 30000);
+		    Client client = ClientBuilder.newClient(configuration);
 
 		    WebTarget target = client.target(UriBuilder.fromUri(URI).build());
 		    switch(method){
@@ -55,22 +56,46 @@ public final class Utility {
 		    
 		    return response;
 		}
-		//We need to catch this exception separately, so we can get back the original URI that was unavailable
-		catch(UnavailableServerException e){
-			e.printStackTrace();
-			log.info(URI + "received an UnavailableServerException from a target.");
-			throw new UnavailableServerException(e.getMessage());
-		}
-		//This catches the JAX-RS exception which is actually thrown when trying to send to an invalid URI
 		catch(Exception e){
 		    e.printStackTrace();
 		    //Internal Server Error, Not Found
 		    if(response == null || response.getStatus() == 500 || response.getStatus() == 404){
 		    	log.info("UnavailableServerException at " + URI);
-		        throw new UnavailableServerException("The server at (" + URI + ") did not respond.");
+		        throw new UnavailableServerException("Server(s) timed out. Check logs for details.");
 		    }
 		}
 		
 		return Response.status(Status.NOT_FOUND).build();
 	}
+	
+	public static boolean isClientAuthorized(SecurityContext sc, Configuration configuration){
+		String subjectname = sc.getUserPrincipal().getName();
+		System.out.println("Received message with subject: " + subjectname);
+		String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
+		System.out.println("Client CN: " + clientCN);
+		String serverCN = (String) configuration.getProperty("server_common_name");
+		System.out.println("Server CN: " + serverCN);
+		
+		String[] cnFields = serverCN.split("\\.", -1);
+		String allowedCN = null;
+		if(cnFields.length < 3){
+			//error, serverCN is shorter than it should be
+			return false;
+		}
+		else{
+			allowedCN = "orchestrator.coresystems";
+			for(int i = 2; i < cnFields.length; i++){
+				allowedCN = allowedCN.concat(cnFields[i]);
+			}
+		}
+		
+		System.out.println(allowedCN);
+		if(!clientCN.equalsIgnoreCase(allowedCN)){
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
 }

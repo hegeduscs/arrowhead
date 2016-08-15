@@ -12,8 +12,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
@@ -48,6 +51,8 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatekeeperResource {
 	
+	@Context
+	Configuration configuration;
 	private static Logger log = Logger.getLogger(GatekeeperResource.class.getName());
 	
 	@GET
@@ -67,7 +72,7 @@ public class GatekeeperResource {
 	 */
 	@PUT
 	@Path("init_gsd")
-	public Response GSDRequest(GSDRequestForm requestForm) {
+	public Response GSDRequest(@Context SecurityContext sc, GSDRequestForm requestForm) {
 		log.info("Entered the GSDRequest method.");
 		
 		if(!requestForm.isPayloadUsable()){
@@ -202,7 +207,7 @@ public class GatekeeperResource {
 	 */
     @PUT
     @Path("init_icn")
-    public Response ICNRequest(ICNRequestForm requestForm) {
+    public Response ICNRequest(@Context SecurityContext sc, ICNRequestForm requestForm) {
     	log.info("Entered the ICNRequest method.");
     	
     	if(!requestForm.isPayloadUsable()){
