@@ -34,7 +34,7 @@ public class OwnCloud {
 	private String port;
 	@Column(name="authentication_info")
 	private String authenticationInfo;
-	@Column(name="service_uri")
+	@Column(name="gatekeeper_service_uri")
 	private String gatekeeperServiceURI;
 	
 	public OwnCloud(){
