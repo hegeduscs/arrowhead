@@ -1,8 +1,11 @@
 package eu.arrowhead.common.configuration;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
@@ -21,10 +24,14 @@ public class DatabaseManager {
 	private static Logger log = Logger.getLogger(DatabaseManager.class.getName());
 	private static DatabaseManager instance = null;
 	private static SessionFactory sessionFactory;
+	private static Properties prop;
+	private static final String dbUser = getProp().getProperty("db_user", "root");
+	private static final String dbPassword = getProp().getProperty("db_password", "root");
 
 	private DatabaseManager() {
 		if (sessionFactory == null) {
-			sessionFactory = new Configuration().configure().buildSessionFactory();	
+			sessionFactory = new Configuration().configure().setProperty("hibernate.connection.username", dbUser)
+					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();	
 		}
 	}
 
@@ -193,6 +200,23 @@ public class DatabaseManager {
 		} finally {
 			session.close();
 		}
+	}
+	
+	public synchronized static Properties getProp() {
+		try {
+			if (prop == null) {
+				prop = new Properties();
+				File file = new File("config" + File.separator + "app.properties");
+				FileInputStream inputStream = new FileInputStream(file);
+				if (inputStream != null) {
+					prop.load(inputStream);
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		return prop;
 	}
 
 }

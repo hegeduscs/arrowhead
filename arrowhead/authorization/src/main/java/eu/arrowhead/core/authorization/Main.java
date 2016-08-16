@@ -21,7 +21,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.ssl.SecurityUtils;
 
-
 public class Main {
 
 	private static Logger log = Logger.getLogger(Main.class.getName());
