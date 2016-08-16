@@ -44,7 +44,8 @@ public class DatabaseManager {
 
 	public SessionFactory getSessionFactory() {
 		if (sessionFactory == null) {
-			sessionFactory = new Configuration().configure().buildSessionFactory();
+			sessionFactory = new Configuration().configure().setProperty("hibernate.connection.username", dbUser)
+					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();	
 		}
 		return sessionFactory;
 	}
