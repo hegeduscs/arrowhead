@@ -3,6 +3,7 @@ package eu.arrowhead.core.authorization;
 import java.util.HashMap;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -45,6 +46,11 @@ public class AuthorizationResource {
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());
+	
+	@GET
+    public String getIt() {
+	    return "This is the Authorization Resource.";
+    }
 
 	/**
 	 * Checks whether the consumer System can use a Service from a list of
