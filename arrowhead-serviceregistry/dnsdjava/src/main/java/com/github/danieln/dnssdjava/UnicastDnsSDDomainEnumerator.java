@@ -8,9 +8,8 @@ package com.github.danieln.dnssdjava;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
@@ -40,7 +39,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
 	 */
 	UnicastDnsSDDomainEnumerator(List<Name> computerDomains) {
 		this.computerDomains = computerDomains;
-		logger.log(Level.INFO, "Created DNS-SD DomainEnumerator for computer domains: {0}", computerDomains);
+		logger.debug("Created DNS-SD DomainEnumerator for computer domains: " + computerDomains);
 	}
 
 	public Collection<String> getBrowsingDomains() {

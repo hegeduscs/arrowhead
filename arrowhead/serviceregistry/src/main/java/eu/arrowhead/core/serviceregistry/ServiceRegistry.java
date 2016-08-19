@@ -187,20 +187,20 @@ public class ServiceRegistry {
 						ServiceData service = browser.getServiceData(instance);
 						if (service != null) {
 							for (String serviceInterface : queryForm.getServiceInterfaces()) {
-								ProvidedService providerService = buildProviderService(service, serviceGroup, serviceName,
-										serviceInterface);
+								ProvidedService providerService = buildProviderService(service, serviceGroup, serviceName,serviceInterface);
 								if (providerService != null) {
-									Map<String, String> properties = service.getProperties();
 									
 									if (queryForm.isMetadataSearch() || queryForm.isPingProviders()) {
 
 										boolean replied = true;
 										if (queryForm.isPingProviders()) {
-											replied = pingService(needToRemoveInstances, instance, service, properties, replied);
+											replied = pingService(needToRemoveInstances, instance, service, replied);
 										}
 
 										if (replied && queryForm.getServiceMetadata() != null && queryForm.isMetadataSearch()) {
 											boolean found = false;
+											Map<String, String> properties = service.getProperties();
+											
 											for (ServiceMetadata entry : queryForm.getServiceMetadata()) {
 												String metaData = (entry != null) ? properties
 														.get("ahsrvmetad_" + entry.getKey()) : null;
@@ -209,14 +209,15 @@ public class ServiceRegistry {
 													log.info("Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
 															+ providerService.getServiceInterface()
 															+ ", "
-															+ providerService.getProvider().getSystemName() + ", " + metaData);
+															+ providerService.getProvider().getSystemName() 
+															+ ", " 
+															+ metaData);
 													list.add(providerService);
 													found = true;
 												}
 											}
-										} else if (replied && queryForm.getServiceMetadata() != null
-												&& !queryForm.isMetadataSearch()) {
-											log.info("Service is found by interface and metadata and added to ServiceQueryResult, interface and name are : "
+										} else if (replied && queryForm.getServiceMetadata() != null && !queryForm.isMetadataSearch()) {
+											log.info("Service is found by interface and added to ServiceQueryResult, interface and name are : "
 													+ providerService.getServiceInterface()
 													+ ", "
 													+ providerService.getProvider().getSystemName());
@@ -343,29 +344,9 @@ public class ServiceRegistry {
 					for (ServiceType type : types) {
 						Collection<ServiceName> instances = browser.getServiceInstances(type);						
 						for (ServiceName instance : instances) {
-							ServiceData service = browser.getServiceData(instance);
-							ProvidedService providerService = null;
-							if (service != null) {
-
-								String interfaceType = null;
-
-								String serviceType = service.getName().getType().toString();
-								int dotIndex = serviceType.indexOf(".");
-								if (dotIndex != -1) {
-									serviceType = serviceType.substring(0, dotIndex);
-									String[] array = serviceType.split("_");
-									if (array.length == 4) {
-										interfaceType = array[3];
-									}
-								}
-
-								providerService = createProvidedService(service, interfaceType);
-
-								if (providerService != null) {
-									Map<String, String> properties = service.getProperties();
-									pingService(needToRemoveInstances, instance, service, properties, true);
-								}
-
+							ServiceData service = browser.getServiceData(instance);							
+							if (service != null) {									
+									pingService(needToRemoveInstances, instance, service, true);
 							}							
 						}
 					}
@@ -380,34 +361,6 @@ public class ServiceRegistry {
 				throw new DnsException(ex.getMessage());
 			}
 		}
-	}
-
-	private ProvidedService createProvidedService(ServiceData service, String interfaceType) {
-		ProvidedService providerService;
-		providerService = new ProvidedService();
-		ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
-
-		Map<String, String> properties = service.getProperties();
-		String systemGroup = properties.get("ahsysgrp");
-		String systemName = properties.get("ahsysname");
-		String authInfo = properties.get("ahsysauthinfo");
-		String serviceURI = properties.get("path");
-
-		String ipAddress = service.getHost();
-		ipAddress = removeLastChar(ipAddress, '.');
-
-		String port = new Integer(service.getPort()).toString();
-
-		arrowheadSystem.setAuthenticationInfo(authInfo);
-		arrowheadSystem.setAddress(ipAddress);
-		arrowheadSystem.setPort(port);
-		arrowheadSystem.setSystemGroup(systemGroup);
-		arrowheadSystem.setSystemName(systemName);
-
-		providerService.setProvider(arrowheadSystem);
-		providerService.setServiceURI(serviceURI);
-		providerService.setServiceInterface(interfaceType);
-		return providerService;
 	}
 
 	private ProvidedService createProvidedService(ServiceData service, String interfaceType, String serviceGroup,
@@ -441,20 +394,8 @@ public class ServiceRegistry {
 			interfaces.add(interfaceType);
 			offered.setInterfaces(interfaces);
 
-			List<ServiceMetadata> metaData = null;
-			for (Map.Entry<String, String> entry : properties.entrySet()) {
-				if (entry.getKey() != null && entry.getValue() != null && entry.getKey().contains("ahsrvmetad_")) {
-					if (metaData == null) {
-						metaData = new ArrayList<ServiceMetadata>();
-					}
-					String key = entry.getKey().substring("ahsrvmetad_".length());
-					metaData.add(new ServiceMetadata(key, entry.getValue()));
-				}
-			}
-
-			if (metaData != null && !metaData.isEmpty()) {
-				offered.setServiceMetadata(metaData);
-			} 
+			setMetadataForOffered(offered, properties);
+			
 			providerService.setProvider(arrowheadSystem);
 			providerService.setServiceURI(serviceURI);			
 			providerService.setOffered(offered);
@@ -467,8 +408,24 @@ public class ServiceRegistry {
 
 	}
 
-	private boolean pingService(Collection<ServiceName> needToRemoveInstances, ServiceName instance, ServiceData service,
-			Map<String, String> properties, boolean replied) {
+	private void setMetadataForOffered(ArrowheadService offered, Map<String, String> properties) {
+		List<ServiceMetadata> metaData = null;
+		for (Map.Entry<String, String> entry : properties.entrySet()) {
+			if (entry.getKey() != null && entry.getValue() != null && entry.getKey().contains("ahsrvmetad_")) {
+				if (metaData == null) {
+					metaData = new ArrayList<ServiceMetadata>();
+				}
+				String key = entry.getKey().substring("ahsrvmetad_".length());
+				metaData.add(new ServiceMetadata(key, entry.getValue()));
+			}
+		}
+		if (metaData != null && !metaData.isEmpty()) {
+			offered.setServiceMetadata(metaData);
+		}
+	}
+
+	private boolean pingService(Collection<ServiceName> needToRemoveInstances, ServiceName instance, ServiceData service, boolean replied) {
+		Map<String, String> properties = service.getProperties();
 		String path = properties.get("path");
 		String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
 		int timeout = new Integer(getAppProp().getProperty("ping.timeout", "10000")).intValue();
@@ -518,7 +475,7 @@ public class ServiceRegistry {
 
 			if (interfaceType != null && interfaceType.equals(serviceInterface) && serviceGroupDns != null
 					&& serviceGroupDns.equals(serviceGroup) && serviceNameDns != null && serviceNameDns.equals(serviceName)) {
-				providerService = createProvidedService(service, interfaceType);
+				providerService = createProvidedService(service, interfaceType, serviceGroup, serviceName);				
 			}
 		}
 		return providerService;

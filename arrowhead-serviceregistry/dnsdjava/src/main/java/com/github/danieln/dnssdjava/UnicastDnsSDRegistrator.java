@@ -12,9 +12,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
@@ -28,7 +27,6 @@ import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SRVRecord;
 import org.xbill.DNS.Section;
-import org.xbill.DNS.SetResponse;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TSIG;
 import org.xbill.DNS.TXTRecord;
@@ -60,7 +58,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			this.registrationDomain = registrationDomain;			
 			this.resolver = setDirectResolver(resolverSocaddr);			
 			this.servicesName = Name.concatenate(SERVICES_DNSSD_UDP, registrationDomain);
-			logger.log(Level.INFO, "Created DNS-SD Registrator for domain {0}", registrationDomain);
+			logger.debug("Created DNS-SD Registrator for domain : " + registrationDomain);
 		} catch (NameTooLongException e) {
 			throw new IllegalArgumentException("Domain name too long: " + registrationDomain, e);
 		}
@@ -76,7 +74,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			this.registrationDomain = registrationDomain;			
 			this.resolver = findUpdateResolver(registrationDomain);			
 			this.servicesName = Name.concatenate(SERVICES_DNSSD_UDP, registrationDomain);
-			logger.log(Level.INFO, "Created DNS-SD Registrator for domain {0}", registrationDomain);
+			logger.debug("Created DNS-SD Registrator for domain : " + registrationDomain);
 		} catch (NameTooLongException e) {
 			throw new IllegalArgumentException("Domain name too long: " + registrationDomain, e);
 		}
@@ -100,14 +98,14 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 						simpleResolver = new SimpleResolver();
 						InetAddress addr = Address.getByName(srv.getTarget().toString());
 						InetSocketAddress socaddr = new InetSocketAddress(addr, srv.getPort());
-						logger.log(Level.INFO, "Using DNS server {0} to perform updates.", socaddr);
+						logger.debug("Using DNS server " + socaddr + " to perform updates.");
 						simpleResolver.setAddress(socaddr);
 						break;
 					}
 				}
 			}
 		} catch (NameTooLongException e) {
-			logger.log(Level.WARNING, "Failed to lookup update DNS server", e);
+			logger.warn("Failed to lookup update DNS server", e);
 		}
 		if (simpleResolver == null) {
 			simpleResolver = new SimpleResolver();
@@ -204,9 +202,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			}
 			update.add(new SRVRecord(dnsName, DClass.IN, timeToLive, 0, 0, serviceData.getPort(), target));
 			update.add(new TXTRecord(dnsName, DClass.IN, timeToLive, strings));
-			System.out.print("update= ");
-			System.out.println(update.toString());
-
+			logger.debug("update= " + update);
 			Message response = resolver.send(update);
 			switch (response.getRcode()) {
 				case Rcode.NOERROR:
@@ -257,14 +253,13 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			switch (response.getRcode()) {
 				case Rcode.NOERROR:
 					flushCache(update);
-					logger.log(Level.FINE, "Removed service type record {0}", typeName);
+					logger.debug("Removed service type record " +  typeName);
 					break;
 				case Rcode.YXDOMAIN:	// Prerequisite failed, service instances exists
-					logger.log(Level.FINE, "Did not remove service type record {0}, instances left.", typeName);
+					logger.debug("Did not remove service type record " + typeName + ", instances left.");
 					break;
 				default:
-					logger.log(Level.WARNING, "Failed to remove service type {0}, server returned status {1}",
-							new Object[] { typeName, Rcode.string(response.getRcode()) });
+					logger.warn("Failed to remove service type " +typeName+ ", server returned status " + Rcode.string(response.getRcode()));
 			}
 			return true;
 		} catch (TextParseException ex) {
@@ -282,7 +277,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 		Cache cache = Lookup.getDefaultCache(DClass.IN);
 		Record[] records = update.getSectionArray(Section.UPDATE);
 		for (Record rec : records) {
-			logger.log(Level.FINE, "Flush name {0} due to update: {1}", new Object[] { rec.getName(), rec });
+			logger.debug("Flush name " + rec.getName() + " due to update: " + rec );
 			cache.flushName(rec.getName());
 		}
 	}

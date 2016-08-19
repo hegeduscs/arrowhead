@@ -10,8 +10,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
@@ -41,7 +41,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 	 */
 	UnicastDnsSDBrowser(List<Name> browserDomains) {
 		this.browserDomains = browserDomains;
-		logger.log(Level.INFO, "Created DNS-SD Browser for domains: {0}", browserDomains);
+		logger.debug("Created DNS-SD Browser for domains: " + browserDomains);
 	}
 
 	public Collection<ServiceType> getServiceTypes() {
@@ -133,7 +133,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 							String transport = name.getLabelString(1);
 							results.add(new ServiceType(type, transport));
 						} catch (IllegalArgumentException e) {
-							logger.warning("Invalid service type " + name + ": " + e.getMessage());
+							logger.warn("Invalid service type " + name + ": " + e.getMessage());
 						}
 					}
 				}
@@ -184,7 +184,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 						try {
 							results.add(ServiceName.fromDnsName(name));
 						} catch (IllegalArgumentException e) {
-							logger.warning("Invalid service instance " + name + ": " + e.getMessage());
+							logger.warn("Invalid service instance " + name + ": " + e.getMessage());
 						}
 					}
 				}

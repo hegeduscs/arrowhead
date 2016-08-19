@@ -2,8 +2,6 @@ package com.github.danieln.dnssdjava;
 
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Test application for doing testing during development.
@@ -14,7 +12,6 @@ public class TestApp {
 
 	public static void main(String args[]) {
 
-		Logger.getLogger("com.github.danieln.dnssdjava").setLevel(Level.ALL);
 		DnsSDDomainEnumerator dom = DnsSDFactory.getInstance().createDomainEnumerator();
 		
 		String nameString = null;
