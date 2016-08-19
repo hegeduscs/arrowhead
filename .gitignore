@@ -140,3 +140,7 @@ arrowhead/serviceregistry/src/main/resources/log4j.properties_tmit
 core/.settings/org.hibernate.eclipse.console.prefs
 arrowhead/api/.project
 arrowhead/main/.project
+arrowhead/api/bin/.settings/org.hibernate.eclipse.console.prefs
+arrowhead/api/bin/.settings/org.eclipse.core.resources.prefs
+arrowhead/api/bin/.project
+arrowhead/api/bin/.settings/org.eclipse.m2e.core.prefs
