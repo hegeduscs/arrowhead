@@ -132,7 +132,7 @@ public class GatekeeperResource {
 		for(String URI : cloudURIs){
 			URI = UriBuilder.fromPath(URI).path("gsd_poll").toString();
 			try{
-				response = Utility.sendRequest(URI, "PUT", gsdPoll, false);
+				response = Utility.sendRequest(URI, "PUT", gsdPoll);
 			}
 			//We skip the offline gatekeepers
 			catch(UnavailableServerException ex){
@@ -172,7 +172,7 @@ public class GatekeeperResource {
 		InterCloudAuthRequest authRequest = new InterCloudAuthRequest(cloud, service, false);
 		String authURI = SysConfig.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
-		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest, false);
+		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
 		log.info("Authorization System queried for requester Cloud: " + 
 				gsdPoll.getRequesterCloud().toString());
 
@@ -195,7 +195,7 @@ public class GatekeeperResource {
 					service.getInterfaces(), false, false, tsig_key);
 			
 			//Sending back provider Cloud information if the SR poll has results
-			Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm, false);
+			Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
 			log.info("ServiceRegistry queried for requested Service: " + service.toString());
 			ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
 			if(result.isPayloadEmpty()){
@@ -253,7 +253,7 @@ public class GatekeeperResource {
     	
     	//Sending the the request and then parsing the result
     	log.info("Sending ICN proposal to provider Cloud: " + icnURI);
-    	Response response = Utility.sendRequest(icnURI, "PUT", icnProposal, false);
+    	Response response = Utility.sendRequest(icnURI, "PUT", icnProposal);
     	ICNResult result = new ICNResult(response.readEntity(ICNEnd.class));
 
     	log.info("Returning ICN result to Orchestrator.");
@@ -271,13 +271,9 @@ public class GatekeeperResource {
      */
     @PUT
     @Path("icn_proposal")
-    public Response ICNProposal (@Context SecurityContext sc, ICNProposal icnProposal) {
+    public Response ICNProposal (ICNProposal icnProposal) {
     	log.info("Entered the ICNProposal method. Gatekeeper received an ICN proposal from: " 
     			+ icnProposal.getRequesterCloud().toString());
-    	
-    	if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-		}
     	
     	//Polling the Authorization System about the consumer Cloud
 		ArrowheadCloud cloud = icnProposal.getRequesterCloud();
@@ -286,7 +282,7 @@ public class GatekeeperResource {
 		
 		String authURI = SysConfig.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
-		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest, false);
+		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
 		log.info("Authorization System queried for requester Cloud: " + cloud.toString());
 		
 		//If the consumer Cloud is not authorized null is returned
@@ -321,7 +317,7 @@ public class GatekeeperResource {
 			orchestratorURI = UriBuilder.fromPath(orchestratorURI).path("orchestration").toString();
 			
 			log.info("Sending ServiceRequestForm to the Orchestrator. URI: " + orchestratorURI);
-			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm, false);
+			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm);
 			OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
 			
 			log.info("Returning the OrchestrationResponse to the requester Cloud.");

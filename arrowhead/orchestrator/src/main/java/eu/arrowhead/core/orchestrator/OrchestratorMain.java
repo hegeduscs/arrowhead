@@ -1,4 +1,4 @@
-package eu.arrowhead.core.gatekeeper;
+package eu.arrowhead.core.orchestrator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,6 +8,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
+import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
@@ -20,14 +21,16 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.ssl.SecurityUtils;
+import eu.arrowhead.core.orchestrator.store.StoreResource;
 
-public class Main {
 
-	private static Logger log = Logger.getLogger(Main.class.getName());
+public class OrchestratorMain {
+	
+	private static Logger log = Logger.getLogger(OrchestratorMain.class.getName());
 	private static Properties prop;
 	
-	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8446/");
-	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8447/");
+	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8444/orchestrator/");
+	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8445/orchestrator/");
 
 	public static void main(String[] args) throws IOException {
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -48,7 +51,7 @@ public class Main {
 			server = startServer();
 		}
 		
-		System.out.println("Press enter to shutdown Gatekeeper Server(s)...");
+		System.out.println("Press enter to shutdown Orchestrator Server(s)...");
         System.in.read();
         
         if(server != null){
@@ -56,11 +59,11 @@ public class Main {
         	server.shutdownNow();
         }
         if(secureServer != null){
-        	log.info("Stopping server at: " + BASE_URI_SECURED);
+        	log.info("Stopping server at: " + BASE_URI);
         	secureServer.shutdownNow();
         }
         
-        System.out.println("Gatekeeper Server(s) stopped");
+        System.out.println("Orchestrator Server(s) stopped");
 	}
 	
 	public static HttpServer startServer() throws IOException {
@@ -69,8 +72,9 @@ public class Main {
 		URI uri = UriBuilder.fromUri(BASE_URI).build();
 
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(GatekeeperResource.class);
+		config.registerClasses(OrchestratorResource.class, StoreResource.class);
 		config.packages("eu.arrowhead.common");
+		config.property("isSecure",false);
 
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
 		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);		
@@ -82,8 +86,9 @@ public class Main {
 		log.info("Starting server at: " + BASE_URI_SECURED);
 		
 		URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+		
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(GatekeeperResource.class, eu.arrowhead.common.ssl.SecurityFilter.class);
+		config.registerClasses(OrchestratorResource.class, StoreResource.class);
 		config.packages("eu.arrowhead.common");
 
 		SSLContextConfigurator sslCon = new SSLContextConfigurator();
@@ -100,7 +105,10 @@ public class Main {
 		sslCon.setTrustStoreFile(truststorePath);
 		sslCon.setTrustStorePass(truststorePass);
 		
-    	X509Certificate serverCert = null;
+		SSLContext sslContext = sslCon.createSSLContext();
+        eu.arrowhead.common.Utility.setSSLContext(sslContext);
+		
+		X509Certificate serverCert = null;
 		try {
 			KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
 			serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
@@ -110,7 +118,7 @@ public class Main {
 		String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
 		log.info("Certificate of the secure server: " + serverCN);
 		config.property("server_common_name", serverCN);
-
+		
 		final HttpServer server = GrizzlyHttpServerFactory.
 				createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
 				.setClientMode(false).setNeedClientAuth(true));
@@ -135,6 +143,4 @@ public class Main {
 		
 		return prop;
 	}
-	
-
 }

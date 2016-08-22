@@ -45,7 +45,7 @@ public class ConfigurationApi {
 	public String getIt(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -68,7 +68,7 @@ public class ConfigurationApi {
 	public List<CoreSystem> getAllCoreSystems(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -98,7 +98,7 @@ public class ConfigurationApi {
 	public List<NeighborCloud> getAllNeighborClouds(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -128,7 +128,7 @@ public class ConfigurationApi {
 	public List<OwnCloud> getAllOwnClouds(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -159,7 +159,7 @@ public class ConfigurationApi {
 	public Response getCoreSystem(@Context SecurityContext sc, @PathParam("systemName") String systemName) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -193,7 +193,7 @@ public class ConfigurationApi {
 			@PathParam("cloudName") String cloudName) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -235,7 +235,7 @@ public class ConfigurationApi {
 	public List<CoreSystem> addCoreSystems(@Context SecurityContext sc, List<CoreSystem> coreSystemList) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -274,7 +274,7 @@ public class ConfigurationApi {
 	public List<NeighborCloud> addNeighborClouds(@Context SecurityContext sc, List<NeighborCloud> neighborCloudList) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -321,7 +321,7 @@ public class ConfigurationApi {
 	public OwnCloud addOwnCloud(@Context SecurityContext sc, OwnCloud ownCloud) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -360,7 +360,7 @@ public class ConfigurationApi {
 	public Response updateCoreSystem(@Context SecurityContext sc, CoreSystem cs) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -403,7 +403,7 @@ public class ConfigurationApi {
 	public Response updateNeighborCloud(@Context SecurityContext sc, NeighborCloud nc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -451,7 +451,7 @@ public class ConfigurationApi {
 	public Response deleteCoreSystem(@Context SecurityContext sc, @PathParam("systemName") String systemName) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -484,7 +484,7 @@ public class ConfigurationApi {
 			@PathParam("cloudName") String cloudName) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}

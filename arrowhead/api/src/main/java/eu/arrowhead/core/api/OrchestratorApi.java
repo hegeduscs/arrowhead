@@ -49,7 +49,7 @@ public class OrchestratorApi {
 	public String getIt(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -74,7 +74,7 @@ public class OrchestratorApi {
 	public Response getStoreEntry(@Context SecurityContext sc, @PathParam("id") int id){
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -106,7 +106,7 @@ public class OrchestratorApi {
 	public List<OrchestrationStore> getAllStoreEntries(@Context SecurityContext sc){
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -138,7 +138,7 @@ public class OrchestratorApi {
 	public List<OrchestrationStore> getActiveStoreEntries(@Context SecurityContext sc){
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -172,7 +172,7 @@ public class OrchestratorApi {
 	public Response getStoreEntries(@Context SecurityContext sc, OrchestrationStoreQuery query) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -232,7 +232,7 @@ public class OrchestratorApi {
 	public List<OrchestrationStore> addStoreEntries(@Context SecurityContext sc, List<OrchestrationStore> storeEntries) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -308,7 +308,7 @@ public class OrchestratorApi {
 	public Response toggleIsActive(@Context SecurityContext sc, @PathParam("id") int id){
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -350,7 +350,7 @@ public class OrchestratorApi {
 	public Response updateEntry(@Context SecurityContext sc, OrchestrationStore payload){
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -400,7 +400,7 @@ public class OrchestratorApi {
 	public Response deleteEntry(@Context SecurityContext sc, @PathParam("id") Integer id) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -434,7 +434,7 @@ public class OrchestratorApi {
 			@PathParam("systemName") String systemName){
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}

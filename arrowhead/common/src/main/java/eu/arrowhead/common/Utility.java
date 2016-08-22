@@ -38,10 +38,15 @@ public final class Utility {
 		}
 	};
 
-	public static <T> Response sendRequest(String URI, String method, T payload, boolean isSecure){
+	public static <T> Response sendRequest(String URI, String method, T payload){
 		log.info("Sending " + method + " request to: " + URI);
 		
 		Response response = null;
+		boolean isSecure = false;
+		if(URI.startsWith("https")){
+			isSecure = true;
+		}
+		
 		try{
 		    ClientConfig configuration = new ClientConfig();
 		    configuration.property(ClientProperties.CONNECT_TIMEOUT, 30000);

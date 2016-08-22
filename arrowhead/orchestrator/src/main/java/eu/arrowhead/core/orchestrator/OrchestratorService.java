@@ -44,7 +44,6 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
 public final class OrchestratorService {
 	
 	private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
-	public static boolean isSecure = false;
 	
 	/** 
 	 * This method represents the regular orchestration process where the requester System 
@@ -367,7 +366,7 @@ public final class OrchestratorService {
 		//Sending the request, parsing the returned result
 		log.info("Querying ServiceRegistry for requested Service: " + service.toString());
 		//TODO if SR secured, send SSLContext
-		Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm, isSecure);
+		Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
 		ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
 		if(serviceQueryResult == null){
 			log.info("ServiceRegistry query came back empty. "
@@ -417,7 +416,7 @@ public final class OrchestratorService {
 		log.info("Intra-Cloud authorization request ready to send to: " + URI);
 		
 		//Extracting the useful payload from the response, sending back the authorized Systems
-		Response response = Utility.sendRequest(URI, "PUT", request, isSecure);
+		Response response = Utility.sendRequest(URI, "PUT", request);
 		IntraCloudAuthResponse authResponse = response.readEntity(IntraCloudAuthResponse.class);
 		List<ArrowheadSystem> authorizedSystems = new ArrayList<ArrowheadSystem>();
 		for(Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap().entrySet()){
@@ -566,7 +565,7 @@ public final class OrchestratorService {
 		GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds);
 		
 		//Sending the request, do sanity check on the returned result
-		Response response = Utility.sendRequest(URI, "PUT", requestForm, isSecure);
+		Response response = Utility.sendRequest(URI, "PUT", requestForm);
 		GSDResult result = response.readEntity(GSDResult.class);
 		if(!result.isPayloadUsable()){
 			log.info("GlobalServiceDiscovery yielded no result. "
@@ -699,7 +698,7 @@ public final class OrchestratorService {
 		//Compiling the URI, sending the request, do sanity check on the returned result
 		String URI = SysConfig.getGatekeeperURI();
 		URI = UriBuilder.fromPath(URI).path("init_icn").toString();
-		Response response = Utility.sendRequest(URI, "PUT", requestForm, isSecure);
+		Response response = Utility.sendRequest(URI, "PUT", requestForm);
 		ICNResult result = response.readEntity(ICNResult.class);
 		if(!result.isPayloadUsable()){
 			log.info("ICN yielded no result. (OrchestratorService:startICN DataNotFoundException)");
@@ -800,7 +799,7 @@ public final class OrchestratorService {
 		OrchestrationStoreQuery query = new OrchestrationStoreQuery(service, consumer, onlyActive);
 		
 		//Sending the request, do sanity check on the returned result
-		Response response = Utility.sendRequest(URI, "PUT", query, isSecure);
+		Response response = Utility.sendRequest(URI, "PUT", query);
 		if(response.getStatus() == 404){
 			ErrorMessage error = response.readEntity(ErrorMessage.class);
 			throw new DataNotFoundException(error.getErrorMessage());

@@ -23,9 +23,9 @@ import javax.ws.rs.core.UriBuilder;
  * Main class.
  *
  */
-public class Main {
+public class ServiceRegistryMain {
 
-	private static Logger log = Logger.getLogger(Main.class.getName());
+	private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
 	// Base URI the Grizzly HTTP server will listen on
 
 	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8080/core/");

@@ -1,4 +1,4 @@
-package eu.arrowhead.core.authorization;
+package eu.arrowhead.core.api;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,6 +8,8 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
@@ -21,13 +23,14 @@ import org.glassfish.jersey.server.ResourceConfig;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.ssl.SecurityUtils;
 
-public class Main {
 
-	private static Logger log = Logger.getLogger(Main.class.getName());
+public class ApiMain {
+	
+	private static Logger log = Logger.getLogger(ApiMain.class.getName());
 	private static Properties prop;
 	
-	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8448/");
-	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8449/");
+	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8450/api/");
+	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8451/api/");
 
 	public static void main(String[] args) throws IOException {
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -48,7 +51,7 @@ public class Main {
 			server = startServer();
 		}
 		
-		System.out.println("Press enter to shutdown Authorization Server(s)...");
+		System.out.println("Press enter to shutdown Api Server(s)...");
         System.in.read();
         
         if(server != null){
@@ -60,7 +63,7 @@ public class Main {
         	secureServer.shutdownNow();
         }
         
-        System.out.println("Authorization Server(s) stopped");
+        System.out.println("Api Server(s) stopped");
 	}
 	
 	public static HttpServer startServer() throws IOException {
@@ -69,7 +72,10 @@ public class Main {
 		URI uri = UriBuilder.fromUri(BASE_URI).build();
 
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(AuthorizationResource.class);
+		config.registerClasses(AuthorizationApi.class, 
+								CommonApi.class, 
+								ConfigurationApi.class,
+								OrchestratorApi.class);
 		config.packages("eu.arrowhead.common");
 
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
@@ -84,7 +90,10 @@ public class Main {
 		URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
 		
 		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(AuthorizationResource.class);
+		config.registerClasses(AuthorizationApi.class, 
+								CommonApi.class, 
+								ConfigurationApi.class,
+								OrchestratorApi.class);
 		config.packages("eu.arrowhead.common");
 
 		SSLContextConfigurator sslCon = new SSLContextConfigurator();
@@ -137,5 +146,35 @@ public class Main {
 		return prop;
 	}
 	
-
+	public static boolean isClientAuthorized(SecurityContext sc, Configuration configuration){
+		String subjectname = sc.getUserPrincipal().getName();
+		String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
+		log.info("The client common name for the request: " + clientCN);
+		String serverCN = (String) configuration.getProperty("server_common_name");
+		
+		String[] serverFields = serverCN.split("\\.", -1);
+		String[] clientFields = clientCN.split("\\.", -1);
+		String serverCNend = "";
+		String clientCNend = "";
+		if(serverFields.length < 3 || clientFields.length < 3){
+			log.info("SSL error: one of the CNs have less than 3 fields!");
+			return false;
+		}
+		else{
+			for(int i = 2; i < serverFields.length; i++){
+				serverCNend = serverCNend.concat(serverFields[i]);
+			}
+			
+			for(int i = 2; i < clientFields.length; i++){
+				clientCNend = clientCNend.concat(clientFields[i]);
+			}
+		}
+		
+		if(!clientCNend.equalsIgnoreCase(serverCNend)){
+			log.info("SSL error: common names are not equal!");
+			return false;
+		}
+		
+		return true;
+	}
 }

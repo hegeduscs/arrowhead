@@ -44,7 +44,7 @@ public class CommonApi {
 	public String getIt(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -67,7 +67,7 @@ public class CommonApi {
 	public List<ArrowheadService> getAllServices(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -99,7 +99,7 @@ public class CommonApi {
 	public List<ArrowheadService> getServiceGroup(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -134,7 +134,7 @@ public class CommonApi {
 			@PathParam("serviceDefinition") String serviceDefinition) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -169,7 +169,7 @@ public class CommonApi {
 	public List<ArrowheadService> addServices(@Context SecurityContext sc, List<ArrowheadService> serviceList) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -207,7 +207,7 @@ public class CommonApi {
 	public Response updateService(@Context SecurityContext sc, ArrowheadService service) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -249,7 +249,7 @@ public class CommonApi {
 			@PathParam("serviceDefinition") String serviceDefinition) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -280,7 +280,7 @@ public class CommonApi {
 	public List<ArrowheadSystem> getAllSystems(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -312,7 +312,7 @@ public class CommonApi {
 	public List<ArrowheadSystem> getSystemGroup(@Context SecurityContext sc, @PathParam("systemGroup") String systemGroup) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -348,7 +348,7 @@ public class CommonApi {
 			@PathParam("systemName") String systemName) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -383,7 +383,7 @@ public class CommonApi {
 	public List<ArrowheadSystem> addSystems(@Context SecurityContext sc, List<ArrowheadSystem> systemList) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -422,7 +422,7 @@ public class CommonApi {
 	public Response updateSystem(@Context SecurityContext sc, ArrowheadSystem system) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -466,7 +466,7 @@ public class CommonApi {
 			@PathParam("systemName") String systemName) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -497,7 +497,7 @@ public class CommonApi {
 	public List<ArrowheadCloud> getAllClouds(@Context SecurityContext sc) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -529,7 +529,7 @@ public class CommonApi {
 	public List<ArrowheadCloud> getCloudList(@Context SecurityContext sc, @PathParam("operator") String operator) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -565,7 +565,7 @@ public class CommonApi {
 			@PathParam("cloudname") String cloudname) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -600,7 +600,7 @@ public class CommonApi {
 	public List<ArrowheadCloud> addClouds(@Context SecurityContext sc, List<ArrowheadCloud> cloudList) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -639,7 +639,7 @@ public class CommonApi {
 	public Response updateCloud(@Context SecurityContext sc, ArrowheadCloud cloud) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
@@ -684,7 +684,7 @@ public class CommonApi {
 			@PathParam("cloudName") String cloudName) {
 		if (sc.isSecure()) {
 			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!Main.isClientAuthorized(sc, configuration)){
+			if(!ApiMain.isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
 				log.info("Unauthorized access! (SSL)");
 			}
