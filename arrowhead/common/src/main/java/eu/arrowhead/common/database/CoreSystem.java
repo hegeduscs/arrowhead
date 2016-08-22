@@ -23,27 +23,36 @@ public class CoreSystem {
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
     @XmlTransient
     private int id;
+	
 	@Column(name="system_name")
 	private String systemName;
+	
 	@Column(name="address")
 	private String address;
+	
 	@Column(name="port")
 	private String port;
+	
 	@Column(name="service_uri")
 	private String serviceURI;
+	
 	@Column(name="authentication_info")
 	private String authenticationInfo;
+	
+	@Column(name="is_secure")
+	private boolean isSecure;
 	
 	public CoreSystem(){
 	}
 	
 	public CoreSystem(String systemName, String address, String port, 
-				String serviceURI, String authenticationInfo) {
+				String serviceURI, String authenticationInfo, boolean isSecure) {
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
 		this.serviceURI = serviceURI;
 		this.authenticationInfo = authenticationInfo;
+		this.isSecure = isSecure;
 	}
 	
 	public int getId() {
@@ -88,6 +97,14 @@ public class CoreSystem {
 
 	public void setAuthenticationInfo(String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
+	}
+
+	public boolean getIsSecure() {
+		return isSecure;
+	}
+
+	public void setIsSecure(boolean isSecure) {
+		this.isSecure = isSecure;
 	}
 
 	public boolean isPayloadUsable(){

@@ -4,8 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
@@ -15,6 +19,9 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+
+import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.ssl.SecurityUtils;
 
 
 public class Main {
@@ -91,16 +98,28 @@ public class Main {
 
 		SSLContextConfigurator sslCon = new SSLContextConfigurator();
 
-		//TODO review app.properties and default values here too
-		String keystorePath = getProp().getProperty("ssl.keystore", "/home/arrowhead_test.jks");
-		String keystorePass = getProp().getProperty("ssl.keystorepass", "arrowhead");
-		String truststorePath = getProp().getProperty("ssl.truststore", "/home/arrowhead_test.jks");
-		String truststorePass = getProp().getProperty("ssl.truststorepass", "arrowhead");
+		String keystorePath = getProp().getProperty("ssl.keystore");
+		String keystorePass = getProp().getProperty("ssl.keystorepass");
+		String keyPass = getProp().getProperty("ssl.keypass");
+		String truststorePath = getProp().getProperty("ssl.truststore");
+		String truststorePass = getProp().getProperty("ssl.truststorepass");
 		
 		sslCon.setKeyStoreFile(keystorePath);
 		sslCon.setKeyStorePass(keystorePass);
+		sslCon.setKeyPass(keyPass);
 		sslCon.setTrustStoreFile(truststorePath);
 		sslCon.setTrustStorePass(truststorePass);
+		
+		X509Certificate serverCert = null;
+		try {
+			KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+			serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
+		} catch (Exception ex) {
+			throw new AuthenticationException(ex.getMessage());
+		}  				
+		String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+		log.info("Certificate of the secure server: " + serverCN);
+		config.property("server_common_name", serverCN);
 
 		final HttpServer server = GrizzlyHttpServerFactory.
 				createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
@@ -125,5 +144,37 @@ public class Main {
 		}
 		
 		return prop;
+	}
+	
+	public static boolean isClientAuthorized(SecurityContext sc, Configuration configuration){
+		String subjectname = sc.getUserPrincipal().getName();
+		String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
+		log.info("The client common name for the request: " + clientCN);
+		String serverCN = (String) configuration.getProperty("server_common_name");
+		
+		String[] serverFields = serverCN.split("\\.", -1);
+		String[] clientFields = clientCN.split("\\.", -1);
+		String serverCNend = "";
+		String clientCNend = "";
+		if(serverFields.length < 3 || clientFields.length < 3){
+			log.info("SSL error: one of the CNs have less than 3 fields!");
+			return false;
+		}
+		else{
+			for(int i = 2; i < serverFields.length; i++){
+				serverCNend = serverCNend.concat(serverFields[i]);
+			}
+			
+			for(int i = 2; i < clientFields.length; i++){
+				clientCNend = clientCNend.concat(clientFields[i]);
+			}
+		}
+		
+		if(!clientCNend.equalsIgnoreCase(serverCNend)){
+			log.info("SSL error: common names are not equal!");
+			return false;
+		}
+		
+		return true;
 	}
 }

@@ -16,11 +16,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
-import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.configuration.DatabaseManager;
 import eu.arrowhead.common.database.InterCloudAuthorization;
 import eu.arrowhead.common.database.IntraCloudAuthorization;
-import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
@@ -33,8 +31,7 @@ import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.ssl.SecurityUtils;
 
 /**
- * @author umlaufz, hegeduscs 
- * Note: PathParam values are NOT case sensitive.
+ * This is the REST resource for the Authorization Core System.
  */
 @Path("authorization")
 @Produces(MediaType.APPLICATION_JSON)
@@ -66,10 +63,13 @@ public class AuthorizationResource {
 		log.info("Entered the AuthorizationResource:isSystemAuthorized function");
 		
 		if (sc.isSecure()) {
-			System.out.println("Got a request from a secure channel.");
-			if(!Utility.isClientAuthorized(sc, configuration)){
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized acces!");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
 			}
 		}
 		
@@ -149,10 +149,13 @@ public class AuthorizationResource {
 		log.info("Entered the AuthorizationResource:isCloudAuthorized function");
 		
 		if (sc.isSecure()) {
-			System.out.println("Got a request from a secure channel.");
-			if(!Utility.isClientAuthorized(sc, configuration)){
+			System.out.println("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!isClientAuthorized(sc, configuration)){
 				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized acces!");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
 			}
 		}
 		
@@ -200,6 +203,32 @@ public class AuthorizationResource {
 		}
 		
 		return Response.status(Status.OK).entity(new InterCloudAuthResponse(isAuthorized)).build();
+	}
+	
+	private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration){
+		String subjectname = sc.getUserPrincipal().getName();
+		String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
+		log.info("The client common name for the request: " + clientCN);
+		String serverCN = (String) configuration.getProperty("server_common_name");
+		
+		String[] serverFields = serverCN.split("\\.", -1);
+		String allowedCN = "orchestrator.coresystems";
+		if(serverFields.length < 3){
+			log.info("SSL error: server CN have less than 3 fields!");
+			return false;
+		}
+		else{
+			for(int i = 2; i < serverFields.length; i++){
+				allowedCN = allowedCN.concat("." + serverFields[i]);
+			}
+		}
+		
+		if(!clientCN.equalsIgnoreCase(allowedCN)){
+			log.info("SSL error: common names are not equal!");
+			return false;
+		}
+		
+		return true;
 	}
 
 	

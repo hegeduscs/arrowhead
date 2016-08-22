@@ -12,8 +12,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
@@ -30,13 +33,26 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CommonApi {
 	
+	@Context
+	Configuration configuration;
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	private static Logger log = Logger.getLogger(CommonApi.class.getName());
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt() {
+	public String getIt(@Context SecurityContext sc) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		return "Got it!";
 	}
 	
@@ -48,7 +64,18 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/services")
-	public List<ArrowheadService> getAllServices() {
+	public List<ArrowheadService> getAllServices(@Context SecurityContext sc) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
 		serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
 		if (serviceList.isEmpty()) {
@@ -69,7 +96,18 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/services/servicegroup/{serviceGroup}")
-	public List<ArrowheadService> getServiceGroup(@PathParam("serviceGroup") String serviceGroup) {
+	public List<ArrowheadService> getServiceGroup(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
 		restrictionMap.put("serviceGroup", serviceGroup);
 		serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
@@ -92,8 +130,19 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
-	public ArrowheadService getService(@PathParam("serviceGroup") String serviceGroup,
+	public ArrowheadService getService(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup,
 			@PathParam("serviceDefinition") String serviceDefinition) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		ArrowheadService service = new ArrowheadService();
 		restrictionMap.put("serviceGroup", serviceGroup);
 		restrictionMap.put("serviceDefinition", serviceDefinition);
@@ -117,8 +166,18 @@ public class CommonApi {
 	 */
 	@POST
 	@Path("/services")
-	public List<ArrowheadService> addServices(List<ArrowheadService> serviceList) {
-			
+	public List<ArrowheadService> addServices(@Context SecurityContext sc, List<ArrowheadService> serviceList) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadService> savedServices = new ArrayList<ArrowheadService>();
 		for (ArrowheadService service : serviceList) {
 			if(service.isValidSoft()){
@@ -145,7 +204,17 @@ public class CommonApi {
 	 */
 	@PUT
 	@Path("/services")
-	public Response updateService(ArrowheadService service) {
+	public Response updateService(@Context SecurityContext sc, ArrowheadService service) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
 		
 		if(!service.isValidSoft()){
 			log.info("CommonApi:updateService throws BadPayloadException");
@@ -176,8 +245,19 @@ public class CommonApi {
 	 */
 	@DELETE
 	@Path("/services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
-	public Response deleteService(@PathParam("serviceGroup") String serviceGroup,
+	public Response deleteService(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup,
 			@PathParam("serviceDefinition") String serviceDefinition) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		restrictionMap.put("serviceGroup", serviceGroup);
 		restrictionMap.put("serviceDefinition", serviceDefinition);
 		ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
@@ -197,7 +277,18 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/systems")
-	public List<ArrowheadSystem> getAllSystems() {
+	public List<ArrowheadSystem> getAllSystems(@Context SecurityContext sc) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
 		systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
 		if (systemList.isEmpty()) {
@@ -218,7 +309,18 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/systems/systemgroup/{systemGroup}")
-	public List<ArrowheadSystem> getSystemGroup(@PathParam("systemGroup") String systemGroup) {
+	public List<ArrowheadSystem> getSystemGroup(@Context SecurityContext sc, @PathParam("systemGroup") String systemGroup) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
 		restrictionMap.put("systemGroup", systemGroup);
 		systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
@@ -242,8 +344,19 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/systems/systemgroup/{systemGroup}/systemname/{systemName}")
-	public ArrowheadSystem getSystem(@PathParam("systemGroup") String systemGroup,
+	public ArrowheadSystem getSystem(@Context SecurityContext sc, @PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		ArrowheadSystem system = new ArrowheadSystem();
 		restrictionMap.put("systemGroup", systemGroup);
 		restrictionMap.put("systemName", systemName);
@@ -267,7 +380,18 @@ public class CommonApi {
 	 */
 	@POST
 	@Path("/systems")
-	public List<ArrowheadSystem> addSystems(List<ArrowheadSystem> systemList) {
+	public List<ArrowheadSystem> addSystems(@Context SecurityContext sc, List<ArrowheadSystem> systemList) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadSystem> savedSystems = new ArrayList<ArrowheadSystem>();
 		for (ArrowheadSystem system : systemList) {
 			if(system.isValid()){
@@ -295,7 +419,17 @@ public class CommonApi {
 	 */
 	@PUT
 	@Path("/systems")
-	public Response updateSystem(ArrowheadSystem system) {
+	public Response updateSystem(@Context SecurityContext sc, ArrowheadSystem system) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
 		
 		if(!system.isValid()){
 			log.info("CommonApi:updateSystem throws BadPayloadException");
@@ -328,8 +462,19 @@ public class CommonApi {
 	 */
 	@DELETE
 	@Path("/systems/systemgroup/{systemGroup}/systemname/{systemName}")
-	public Response deleteSystem(@PathParam("systemGroup") String systemGroup,
+	public Response deleteSystem(@Context SecurityContext sc, @PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		restrictionMap.put("systemGroup", systemGroup);
 		restrictionMap.put("systemName", systemName);
 		ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
@@ -349,7 +494,18 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/clouds")
-	public List<ArrowheadCloud> getAllClouds() {
+	public List<ArrowheadCloud> getAllClouds(@Context SecurityContext sc) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
 		cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
 		if (cloudList.isEmpty()) {
@@ -370,7 +526,18 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/clouds/operator/{operator}")
-	public List<ArrowheadCloud> getCloudList(@PathParam("operator") String operator) {
+	public List<ArrowheadCloud> getCloudList(@Context SecurityContext sc, @PathParam("operator") String operator) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
 		restrictionMap.put("operator", operator);
 		cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
@@ -394,7 +561,19 @@ public class CommonApi {
 	 */
 	@GET
 	@Path("/clouds/operator/{operator}/cloudname/{cloudName}")
-	public ArrowheadCloud getCloud(@PathParam("operator") String operator, @PathParam("cloudname") String cloudname) {
+	public ArrowheadCloud getCloud(@Context SecurityContext sc, @PathParam("operator") String operator, 
+			@PathParam("cloudname") String cloudname) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		ArrowheadCloud cloud = new ArrowheadCloud();
 		restrictionMap.put("operator", operator);
 		restrictionMap.put("cloudname", cloudname);
@@ -418,7 +597,18 @@ public class CommonApi {
 	 */
 	@POST
 	@Path("/clouds")
-	public List<ArrowheadCloud> addClouds(List<ArrowheadCloud> cloudList) {
+	public List<ArrowheadCloud> addClouds(@Context SecurityContext sc, List<ArrowheadCloud> cloudList) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		List<ArrowheadCloud> savedClouds = new ArrayList<ArrowheadCloud>();
 		for (ArrowheadCloud cloud : cloudList) {
 			if(cloud.isValid()){
@@ -446,7 +636,17 @@ public class CommonApi {
 	 */
 	@PUT
 	@Path("/clouds")
-	public Response updateCloud(ArrowheadCloud cloud) {
+	public Response updateCloud(@Context SecurityContext sc, ArrowheadCloud cloud) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
 		
 		if(!cloud.isValid()){
 			log.info("CommonApi:updateCloud throws BadPayloadException");
@@ -480,7 +680,19 @@ public class CommonApi {
 	 */
 	@DELETE
 	@Path("/clouds/operator/{operator}/cloudname/{cloudName}")
-	public Response deleteCloud(@PathParam("operator") String operator, @PathParam("cloudName") String cloudName) {
+	public Response deleteCloud(@Context SecurityContext sc, @PathParam("operator") String operator, 
+			@PathParam("cloudName") String cloudName) {
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!Main.isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+		
 		restrictionMap.put("operator", operator);
 		restrictionMap.put("cloudName", cloudName);
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);

@@ -8,6 +8,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
+import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
@@ -73,6 +74,7 @@ public class Main {
 		final ResourceConfig config = new ResourceConfig();
 		config.registerClasses(OrchestratorResource.class, StoreResource.class);
 		config.packages("eu.arrowhead.common");
+		config.property("isSecure",false);
 
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
 		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);		
@@ -91,15 +93,21 @@ public class Main {
 
 		SSLContextConfigurator sslCon = new SSLContextConfigurator();
 
-		String keystorePath = getProp().getProperty("ssl.keystore", "orchestrator.jks");
-		String keystorePass = getProp().getProperty("ssl.keystorepass", "12345");
-		String truststorePath = getProp().getProperty("ssl.truststore", "cloud.jks");
-		String truststorePass = getProp().getProperty("ssl.truststorepass", "12345");
+		String keystorePath = getProp().getProperty("ssl.keystore");
+		String keystorePass = getProp().getProperty("ssl.keystorepass");
+		String keyPass = getProp().getProperty("ssl.keypass");
+		String truststorePath = getProp().getProperty("ssl.truststore");
+		String truststorePass = getProp().getProperty("ssl.truststorepass");
 		
 		sslCon.setKeyStoreFile(keystorePath);
 		sslCon.setKeyStorePass(keystorePass);
+		sslCon.setKeyPass(keyPass);
 		sslCon.setTrustStoreFile(truststorePath);
 		sslCon.setTrustStorePass(truststorePass);
+		
+		SSLContext sslContext = sslCon.createSSLContext();
+        config.property("isSecure", true);
+        eu.arrowhead.common.Utility.setSSLContext(sslContext);
 		
 		X509Certificate serverCert = null;
 		try {
@@ -109,8 +117,9 @@ public class Main {
 			throw new AuthenticationException(ex.getMessage());
 		}  				
 		String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+		log.info("Certificate of the secure server: " + serverCN);
 		config.property("server_common_name", serverCN);
-
+		
 		final HttpServer server = GrizzlyHttpServerFactory.
 				createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
 				.setClientMode(false).setNeedClientAuth(true));

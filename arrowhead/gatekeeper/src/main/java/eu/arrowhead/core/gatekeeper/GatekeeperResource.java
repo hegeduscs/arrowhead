@@ -42,9 +42,10 @@ import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import eu.arrowhead.common.ssl.SecurityUtils;
 
 /**
- * @author umlaufz
+ * This is the REST resource for the Gatekeeper Core System.
  */
 @Path("gatekeeper")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -56,6 +57,7 @@ public class GatekeeperResource {
 	private static Logger log = Logger.getLogger(GatekeeperResource.class.getName());
 	
 	@GET
+	@Produces(MediaType.TEXT_PLAIN)
     public String getIt() {
 	    return "This is the Gatekeeper Resource. "
 	    		+ "REST methods: init_gsd, gsd_poll, init_icn, icn_proposal.";
@@ -74,6 +76,17 @@ public class GatekeeperResource {
 	@Path("init_gsd")
 	public Response GSDRequest(@Context SecurityContext sc, GSDRequestForm requestForm) {
 		log.info("Entered the GSDRequest method.");
+		
+		if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
 		
 		if(!requestForm.isPayloadUsable()){
 			log.info("Payload is not usable. (GatekeeperResource:GSDRequest BadPayloadException)");
@@ -102,7 +115,7 @@ public class GatekeeperResource {
 			for(ArrowheadCloud cloud : preferredClouds){
 				try{
 					URI = SysConfig.getURI(cloud.getAddress(), cloud.getPort(), 
-							cloud.getGatekeeperServiceURI());
+							cloud.getGatekeeperServiceURI(), sc.isSecure());
 				}
 				//We skip the clouds with missing information
 				catch(NullPointerException ex){
@@ -119,7 +132,7 @@ public class GatekeeperResource {
 		for(String URI : cloudURIs){
 			URI = UriBuilder.fromPath(URI).path("gsd_poll").toString();
 			try{
-				response = Utility.sendRequest(URI, "PUT", gsdPoll);
+				response = Utility.sendRequest(URI, "PUT", gsdPoll, false);
 			}
 			//We skip the offline gatekeepers
 			catch(UnavailableServerException ex){
@@ -159,7 +172,7 @@ public class GatekeeperResource {
 		InterCloudAuthRequest authRequest = new InterCloudAuthRequest(cloud, service, false);
 		String authURI = SysConfig.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
-		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
+		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest, false);
 		log.info("Authorization System queried for requester Cloud: " + 
 				gsdPoll.getRequesterCloud().toString());
 
@@ -182,7 +195,7 @@ public class GatekeeperResource {
 					service.getInterfaces(), false, false, tsig_key);
 			
 			//Sending back provider Cloud information if the SR poll has results
-			Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
+			Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm, false);
 			log.info("ServiceRegistry queried for requested Service: " + service.toString());
 			ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
 			if(result.isPayloadEmpty()){
@@ -210,6 +223,17 @@ public class GatekeeperResource {
     public Response ICNRequest(@Context SecurityContext sc, ICNRequestForm requestForm) {
     	log.info("Entered the ICNRequest method.");
     	
+    	if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+			if(!isClientAuthorized(sc, configuration)){
+				//throw new AuthenticationException("This client is not allowed to use this resource.");
+				log.info("Unauthorized access! (SSL)");
+			}
+			else{
+				log.info("Identification is successful! (SSL)");
+			}
+		}
+    	
     	if(!requestForm.isPayloadUsable()){
     		log.info("GatekeeperResource:ICNRequest BadPayloadException");
     		throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.");
@@ -224,12 +248,12 @@ public class GatekeeperResource {
     	
     	String icnURI = SysConfig.getURI(requestForm.getTargetCloud().getAddress(),
     			requestForm.getTargetCloud().getPort(), 
-    			requestForm.getTargetCloud().getGatekeeperServiceURI());
+    			requestForm.getTargetCloud().getGatekeeperServiceURI(), sc.isSecure());
     	icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
     	
     	//Sending the the request and then parsing the result
     	log.info("Sending ICN proposal to provider Cloud: " + icnURI);
-    	Response response = Utility.sendRequest(icnURI, "PUT", icnProposal);
+    	Response response = Utility.sendRequest(icnURI, "PUT", icnProposal, false);
     	ICNResult result = new ICNResult(response.readEntity(ICNEnd.class));
 
     	log.info("Returning ICN result to Orchestrator.");
@@ -247,9 +271,13 @@ public class GatekeeperResource {
      */
     @PUT
     @Path("icn_proposal")
-    public Response ICNProposal (ICNProposal icnProposal) {
+    public Response ICNProposal (@Context SecurityContext sc, ICNProposal icnProposal) {
     	log.info("Entered the ICNProposal method. Gatekeeper received an ICN proposal from: " 
     			+ icnProposal.getRequesterCloud().toString());
+    	
+    	if (sc.isSecure()) {
+			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+		}
     	
     	//Polling the Authorization System about the consumer Cloud
 		ArrowheadCloud cloud = icnProposal.getRequesterCloud();
@@ -258,7 +286,7 @@ public class GatekeeperResource {
 		
 		String authURI = SysConfig.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
-		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
+		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest, false);
 		log.info("Authorization System queried for requester Cloud: " + cloud.toString());
 		
 		//If the consumer Cloud is not authorized null is returned
@@ -293,13 +321,39 @@ public class GatekeeperResource {
 			orchestratorURI = UriBuilder.fromPath(orchestratorURI).path("orchestration").toString();
 			
 			log.info("Sending ServiceRequestForm to the Orchestrator. URI: " + orchestratorURI);
-			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm);
+			Response response = Utility.sendRequest(orchestratorURI, "POST", serviceRequestForm, false);
 			OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
 			
 			log.info("Returning the OrchestrationResponse to the requester Cloud.");
 			return Response.status(response.getStatus()).entity(new ICNEnd(orchResponse)).build();	
 		}
     }
+    
+    private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration){
+		String subjectname = sc.getUserPrincipal().getName();
+		String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
+		log.info("The client common name for the request: " + clientCN);
+		String serverCN = (String) configuration.getProperty("server_common_name");
+		
+		String[] serverFields = serverCN.split("\\.", -1);
+		String allowedCN = "orchestrator.coresystems";
+		if(serverFields.length < 3){
+			log.info("SSL error: server CN have less than 3 fields!");
+			return false;
+		}
+		else{
+			for(int i = 2; i < serverFields.length; i++){
+				allowedCN = allowedCN.concat("." + serverFields[i]);
+			}
+		}
+		
+		if(!clientCN.equalsIgnoreCase(allowedCN)){
+			log.info("SSL error: common names are not equal!");
+			return false;
+		}
+		
+		return true;
+	}
 
     
 }

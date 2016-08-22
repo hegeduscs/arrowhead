@@ -2,8 +2,6 @@ package eu.arrowhead.common.model.messages;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 

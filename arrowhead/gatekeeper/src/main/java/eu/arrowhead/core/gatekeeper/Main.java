@@ -88,13 +88,15 @@ public class Main {
 
 		SSLContextConfigurator sslCon = new SSLContextConfigurator();
 
-		String keystorePath = getProp().getProperty("ssl.keystore", "gatekeeper.jks");
-		String keystorePass = getProp().getProperty("ssl.keystorepass", "12345");
-		String truststorePath = getProp().getProperty("ssl.truststore", "cloud.jks");
-		String truststorePass = getProp().getProperty("ssl.truststorepass", "12345");
+		String keystorePath = getProp().getProperty("ssl.keystore");
+		String keystorePass = getProp().getProperty("ssl.keystorepass");
+		String keyPass = getProp().getProperty("ssl.keypass");
+		String truststorePath = getProp().getProperty("ssl.truststore");
+		String truststorePass = getProp().getProperty("ssl.truststorepass");
 		
 		sslCon.setKeyStoreFile(keystorePath);
 		sslCon.setKeyStorePass(keystorePass);
+		sslCon.setKeyPass(keyPass);
 		sslCon.setTrustStoreFile(truststorePath);
 		sslCon.setTrustStorePass(truststorePass);
 		
@@ -106,6 +108,7 @@ public class Main {
 			throw new AuthenticationException(ex.getMessage());
 		}  				
 		String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+		log.info("Certificate of the secure server: " + serverCN);
 		config.property("server_common_name", serverCN);
 
 		final HttpServer server = GrizzlyHttpServerFactory.

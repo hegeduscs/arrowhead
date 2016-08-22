@@ -20,7 +20,6 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 public final class SysConfig {
 
 	private static Logger log = Logger.getLogger(SysConfig.class.getName());
-	private static final String baseURI = "http://";
 	private static DatabaseManager dm = DatabaseManager.getInstance();
 	private static HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	
@@ -31,10 +30,18 @@ public final class SysConfig {
 	 * Some level of flexibility in the URI creation, in order to avoid
 	 * implementation mistakes.
 	 */
-	public static String getURI(String address, String port, String serviceURI) {
+	public static String getURI(String address, String port, String serviceURI, boolean isSecure) {
 		if(address == null || serviceURI == null){
 			log.info("Address and serviceURI can not be null (SysConfig:getURI throws NPE)");
 			throw new NullPointerException("Address and serviceURI can not be null.");
+		}
+		
+		String baseURI = null;
+		if(isSecure){
+			baseURI = "https://";
+		}
+		else{
+			baseURI = "http://";
 		}
 		
  		UriBuilder ub = null;
@@ -63,12 +70,13 @@ public final class SysConfig {
 	public static String getOrchestratorURI() {
 		restrictionMap.clear();
 		restrictionMap.put("systemName", "orchestrator");
-		CoreSystem orchestration = dm.get(CoreSystem.class, restrictionMap);
-		if(orchestration == null){
+		CoreSystem orchestrator = dm.get(CoreSystem.class, restrictionMap);
+		if(orchestrator == null){
 			log.info("SysConfig:getOrchestratorURI DNFException");
 			throw new DataNotFoundException("Orchestration Core System not found in the database!");
 		}
-		return getURI(orchestration.getAddress(), orchestration.getPort(), orchestration.getServiceURI());
+		return getURI(orchestrator.getAddress(), orchestrator.getPort(), 
+				orchestrator.getServiceURI(), orchestrator.getIsSecure());
 	}
 
 	public static String getServiceRegistryURI() {
@@ -79,7 +87,8 @@ public final class SysConfig {
 			log.info("SysConfig:getServiceRegistryURI DNFException");
 			throw new DataNotFoundException("Service Registry Core System not found in the database!");
 		}
-		return getURI(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceURI());
+		return getURI(serviceRegistry.getAddress(), serviceRegistry.getPort(), 
+				serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
 	}
 
 	public static String getAuthorizationURI() {
@@ -90,7 +99,8 @@ public final class SysConfig {
 			log.info("SysConfig:getAuthorizationURI DNFException");
 			throw new DataNotFoundException("Authoriaztion Core System not found in the database!");
 		}
-		return getURI(authorization.getAddress(), authorization.getPort(), authorization.getServiceURI());
+		return getURI(authorization.getAddress(), authorization.getPort(), 
+				authorization.getServiceURI(), authorization.getIsSecure());
 	}
 
 	public static String getGatekeeperURI() {
@@ -101,7 +111,8 @@ public final class SysConfig {
 			log.info("SysConfig:getGatekeeperURI DNFException");
 			throw new DataNotFoundException("Gatekeeper Core System not found in the database!");
 		}
-		return getURI(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceURI());
+		return getURI(gatekeeper.getAddress(), gatekeeper.getPort(), 
+				gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
 	}
 
 	public static String getQoSURI() {
@@ -112,7 +123,7 @@ public final class SysConfig {
 			log.info("SysConfig:getQoSURI DNFException");
 			throw new DataNotFoundException("QoS Core System not found in the database!");
 		}
-		return getURI(QoS.getAddress(), QoS.getPort(), QoS.getServiceURI());
+		return getURI(QoS.getAddress(), QoS.getPort(), QoS.getServiceURI(), QoS.getIsSecure());
 	}
 	
 	public static String getApiURI(){
@@ -123,7 +134,7 @@ public final class SysConfig {
 			log.info("SysConfig:getApiURI DNFException");
 			throw new DataNotFoundException("API Core System not found in the database!");
 		}
-		return getURI(api.getAddress(), api.getPort(), api.getServiceURI());
+		return getURI(api.getAddress(), api.getPort(), api.getServiceURI(), api.getIsSecure());
 	}
 
 	public static List<String> getNeighborCloudURIs() {
@@ -134,7 +145,7 @@ public final class SysConfig {
 		List<String> URIList = new ArrayList<String>();
 		for (NeighborCloud cloud : cloudList) {
 			URIList.add(getURI(cloud.getCloud().getAddress(),
-					cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI()));
+					cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), false));
 		}
 
 		return URIList;

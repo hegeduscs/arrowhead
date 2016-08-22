@@ -8,10 +8,6 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import eu.arrowhead.common.filter.EmptyPayloadFilter;
-import eu.arrowhead.common.filter.LoggingRequestFilter;
-import eu.arrowhead.common.filter.LoggingResponseFilter;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
