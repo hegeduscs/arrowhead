@@ -75,7 +75,7 @@
 			            </manifestEntries>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>eu.arrowhead.core.orchestrator.Main</mainClass>
+							<mainClass>eu.arrowhead.core.orchestrator.OrchestratorMain</mainClass>
 							<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
 					</archive>

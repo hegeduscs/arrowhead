@@ -8,8 +8,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
@@ -146,35 +144,5 @@ public class ApiMain {
 		return prop;
 	}
 	
-	public static boolean isClientAuthorized(SecurityContext sc, Configuration configuration){
-		String subjectname = sc.getUserPrincipal().getName();
-		String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
-		log.info("The client common name for the request: " + clientCN);
-		String serverCN = (String) configuration.getProperty("server_common_name");
-		
-		String[] serverFields = serverCN.split("\\.", -1);
-		String[] clientFields = clientCN.split("\\.", -1);
-		String serverCNend = "";
-		String clientCNend = "";
-		if(serverFields.length < 3 || clientFields.length < 3){
-			log.info("SSL error: one of the CNs have less than 3 fields!");
-			return false;
-		}
-		else{
-			for(int i = 2; i < serverFields.length; i++){
-				serverCNend = serverCNend.concat(serverFields[i]);
-			}
-			
-			for(int i = 2; i < clientFields.length; i++){
-				clientCNend = clientCNend.concat(clientFields[i]);
-			}
-		}
-		
-		if(!clientCNend.equalsIgnoreCase(serverCNend)){
-			log.info("SSL error: common names are not equal!");
-			return false;
-		}
-		
-		return true;
-	}
+	
 }

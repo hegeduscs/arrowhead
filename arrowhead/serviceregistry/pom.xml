@@ -81,7 +81,7 @@
 			            </manifestEntries>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>eu.arrowhead.core.serviceregistry.Main</mainClass>
+							<mainClass>eu.arrowhead.core.serviceregistry.ServiceRegistryMain</mainClass>
 							<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
 					</archive>

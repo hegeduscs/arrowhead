@@ -14,12 +14,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
@@ -38,26 +35,13 @@ import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrchestratorApi {
 
-	@Context
-	Configuration configuration;
 	private static Logger log = Logger.getLogger(OrchestratorApi.class.getName());
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt(@Context SecurityContext sc) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public String getIt() {
 		return "Got it";
 	}
 	
@@ -71,18 +55,8 @@ public class OrchestratorApi {
 	 */
 	@GET
 	@Path("{id}")
-	public Response getStoreEntry(@Context SecurityContext sc, @PathParam("id") int id){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response getStoreEntry(@PathParam("id") int id){
+
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(entry == null){
@@ -103,18 +77,8 @@ public class OrchestratorApi {
 	 */
 	@GET
 	@Path("all")
-	public List<OrchestrationStore> getAllStoreEntries(@Context SecurityContext sc){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public List<OrchestrationStore> getAllStoreEntries(){
+
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
 		if(store.isEmpty()){
@@ -135,18 +99,8 @@ public class OrchestratorApi {
 	 */
 	@GET
 	@Path("all_active")
-	public List<OrchestrationStore> getActiveStoreEntries(@Context SecurityContext sc){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public List<OrchestrationStore> getActiveStoreEntries(){
+
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		restrictionMap.put("isActive", true);
 		store = dm.getAll(OrchestrationStore.class, restrictionMap);
@@ -169,18 +123,8 @@ public class OrchestratorApi {
 	 * @throws BadPayloadException, DataNotFoundException
 	 */
 	@PUT
-	public Response getStoreEntries(@Context SecurityContext sc, OrchestrationStoreQuery query) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response getStoreEntries(OrchestrationStoreQuery query) {
+
 		if(!query.isPayloadUsable()){
 			log.info("OrchestrationApi:getStoreEntries throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
@@ -229,18 +173,8 @@ public class OrchestratorApi {
 	 * @return List<OrchestrationStore>
 	 */
 	@POST
-	public List<OrchestrationStore> addStoreEntries(@Context SecurityContext sc, List<OrchestrationStore> storeEntries) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public List<OrchestrationStore> addStoreEntries(List<OrchestrationStore> storeEntries) {
+
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		for (OrchestrationStore entry : storeEntries) {
 			if(entry.isPayloadUsable()){
@@ -305,18 +239,8 @@ public class OrchestratorApi {
 	 */
 	@GET
 	@Path("active/{id}")
-	public Response toggleIsActive(@Context SecurityContext sc, @PathParam("id") int id){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response toggleIsActive(@PathParam("id") int id){
+
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if(entry == null){
@@ -347,18 +271,8 @@ public class OrchestratorApi {
 	 */
 	@PUT
 	@Path("update")
-	public Response updateEntry(@Context SecurityContext sc, OrchestrationStore payload){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response updateEntry(OrchestrationStore payload){
+
 		if(payload.getId() == null){
 			log.info("OrchestrationApi:updateEntry throws BadPayloadException.");
 			throw new BadPayloadException("Bad payload: id field is missing from the payload.");
@@ -397,18 +311,8 @@ public class OrchestratorApi {
 	 */
 	@DELETE
 	@Path("{id}")
-	public Response deleteEntry(@Context SecurityContext sc, @PathParam("id") Integer id) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response deleteEntry(@PathParam("id") Integer id) {
+
 		restrictionMap.put("id", id);
 		OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
 		if (entry == null) {
@@ -430,19 +334,8 @@ public class OrchestratorApi {
 	 */
 	@DELETE
 	@Path("systemgroup/{systemGroup}/systemname/{systemName}")
-	public Response deleteEntries(@Context SecurityContext sc, @PathParam("systemGroup") String systemGroup, 
+	public Response deleteEntries(@PathParam("systemGroup") String systemGroup, 
 			@PathParam("systemName") String systemName){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		
 		restrictionMap.put("systemGroup", systemGroup);

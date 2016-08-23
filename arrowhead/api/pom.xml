@@ -75,7 +75,7 @@
 			            </manifestEntries>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>eu.arrowhead.core.api.Main</mainClass>
+							<mainClass>eu.arrowhead.core.api.ApiMain</mainClass>
 							<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
 					</archive>

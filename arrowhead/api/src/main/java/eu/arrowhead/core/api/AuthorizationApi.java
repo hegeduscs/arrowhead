@@ -14,12 +14,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
@@ -44,26 +41,13 @@ import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthorizationApi {
 
-	@Context
-	Configuration configuration;
 	private static Logger log = Logger.getLogger(AuthorizationApi.class.getName());
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt(@Context SecurityContext sc) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public String getIt() {
 		return "Got it";
 	}
 	
@@ -75,17 +59,7 @@ public class AuthorizationApi {
 	 */
 	@GET
 	@Path("/intracloud")
-	public List<IntraCloudAuthorization> getIntraCloudAuthRights(@Context SecurityContext sc){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
+	public List<IntraCloudAuthorization> getIntraCloudAuthRights(){
 		
 		List<IntraCloudAuthorization> authRights = new ArrayList<IntraCloudAuthorization>();
 		authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
@@ -111,19 +85,8 @@ public class AuthorizationApi {
 	//TODO token generator function 
 	@PUT
 	@Path("/intracloud")
-	public Response isSystemAuthorized(@Context SecurityContext sc, IntraCloudAuthRequest request) {
+	public Response isSystemAuthorized(IntraCloudAuthRequest request) {
 		log.info("Entered the isSystemAuthorized function");
-		
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		if (!request.isPayloadUsable()) {
 			log.info("AuthorizationApi:isSystemAuthorized throws BadPayloadException.");
@@ -198,19 +161,8 @@ public class AuthorizationApi {
 	 */
 	@POST
 	@Path("/intracloud")
-	public Response addSystemToAuthorized(@Context SecurityContext sc, IntraCloudAuthEntry entry) {
+	public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
 		log.info("Entered the addSystemToAuthorized function");
-		
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		if (!entry.isPayloadUsable()) {
 			log.info("AuthorizationApi:addSystemToAuthorized throws BadPayloadException.");
@@ -275,20 +227,9 @@ public class AuthorizationApi {
 	 */
 	@DELETE
 	@Path("/intracloud/systemgroup/{systemGroup}/systemname/{systemName}")
-	public Response deleteSystemRelations(@Context SecurityContext sc, @PathParam("systemGroup") String systemGroup,
+	public Response deleteSystemRelations(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
 		log.info("Entered the deleteSystemRelations method.");
-		
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		restrictionMap.put("systemGroup", systemGroup);
 		restrictionMap.put("systemName", systemName);
@@ -325,18 +266,8 @@ public class AuthorizationApi {
 	 */
 	@GET
 	@Path("/intracloud/systemgroup/{systemGroup}/systemname/{systemName}/services")
-	public Set<ArrowheadService> getSystemServices(@Context SecurityContext sc, @PathParam("systemGroup") String systemGroup,
+	public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup,
 			@PathParam("systemName") String systemName) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		restrictionMap.put("systemGroup", systemGroup);
 		restrictionMap.put("systemName", systemName);
@@ -369,17 +300,7 @@ public class AuthorizationApi {
 	 */
 	@GET
 	@Path("/intercloud")
-	public List<InterCloudAuthorization> getInterCloudAuthRights(@Context SecurityContext sc){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
+	public List<InterCloudAuthorization> getInterCloudAuthRights(){
 		
 		List<InterCloudAuthorization> authRights = new ArrayList<InterCloudAuthorization>();
 		authRights = dm.getAll(InterCloudAuthorization.class, restrictionMap);
@@ -402,19 +323,8 @@ public class AuthorizationApi {
 	 */
 	@PUT
 	@Path("/intercloud")
-	public Response isCloudAuthorized(@Context SecurityContext sc, InterCloudAuthRequest request) {
+	public Response isCloudAuthorized(InterCloudAuthRequest request) {
 		log.info("Entered the isCloudAuthorized function");
-		
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		if (!request.isPayloadUsable()) {
 			log.info("AuthorizationApi:isCloudAuthorized throws BadPayloadException.");
@@ -468,19 +378,8 @@ public class AuthorizationApi {
 	 */
 	@POST
 	@Path("/intercloud")
-	public Response addCloudToAuthorized(@Context SecurityContext sc, InterCloudAuthEntry entry) {
+	public Response addCloudToAuthorized(InterCloudAuthEntry entry) {
 		log.info("Entered the addCloudToAuthorized function");
-		
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		if (!entry.isPayloadUsable()) {
 			log.info("AuthorizationApi:addCloudToAuthorized throws BadPayloadException.");
@@ -531,20 +430,9 @@ public class AuthorizationApi {
 	 */
 	@DELETE
 	@Path("/intercloud/operator/{operator}/cloudname/{cloudName}")
-	public Response deleteCloudRelations(@Context SecurityContext sc, @PathParam("operator") String operator,
+	public Response deleteCloudRelations(@PathParam("operator") String operator,
 			@PathParam("cloudName") String cloudName) {
 		log.info("Entered the deleteCloudRelations method.");
-		
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		restrictionMap.put("operator", operator);
 		restrictionMap.put("cloudName", cloudName);
@@ -581,18 +469,8 @@ public class AuthorizationApi {
 	 */
 	@GET
 	@Path("/intercloud/operator/{operator}/cloudname/{cloudName}/services")
-	public Set<ArrowheadService> getCloudServices(@Context SecurityContext sc, @PathParam("operator") String operator,
+	public Set<ArrowheadService> getCloudServices(@PathParam("operator") String operator,
 			@PathParam("cloudName") String cloudName) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		restrictionMap.put("operator", operator);
 		restrictionMap.put("cloudName", cloudName);

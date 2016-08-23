@@ -12,11 +12,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
@@ -34,26 +31,13 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConfigurationApi {
 	
-	@Context
-	Configuration configuration;
 	DatabaseManager dm = DatabaseManager.getInstance();
 	HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 	private static Logger log = Logger.getLogger(ConfigurationApi.class.getName());
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt(@Context SecurityContext sc) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public String getIt() {	
 		return "Got it";
 	}
 	
@@ -65,18 +49,8 @@ public class ConfigurationApi {
 	 */
 	@GET
 	@Path("/coresystems")
-	public List<CoreSystem> getAllCoreSystems(@Context SecurityContext sc) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public List<CoreSystem> getAllCoreSystems() {
+
 		List<CoreSystem> systemList = new ArrayList<CoreSystem>();
 		systemList = dm.getAll(CoreSystem.class, restrictionMap);
 		if(systemList.isEmpty()){
@@ -95,18 +69,8 @@ public class ConfigurationApi {
 	 */
 	@GET
 	@Path("/neighborhood")
-	public List<NeighborCloud> getAllNeighborClouds(@Context SecurityContext sc) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public List<NeighborCloud> getAllNeighborClouds() {
+
 		List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();
 		cloudList = dm.getAll(NeighborCloud.class, restrictionMap);
 		if(cloudList.isEmpty()){
@@ -125,18 +89,8 @@ public class ConfigurationApi {
 	 */
 	@GET
 	@Path("/owncloud")
-	public List<OwnCloud> getAllOwnClouds(@Context SecurityContext sc) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public List<OwnCloud> getAllOwnClouds() {
+
 		List<OwnCloud> cloudList = new ArrayList<OwnCloud>();
 		cloudList = dm.getAll(OwnCloud.class, restrictionMap);
 		if(cloudList.isEmpty()){
@@ -156,18 +110,8 @@ public class ConfigurationApi {
 	 */
 	@GET
 	@Path("/coresystems/{systemName}")
-	public Response getCoreSystem(@Context SecurityContext sc, @PathParam("systemName") String systemName) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response getCoreSystem(@PathParam("systemName") String systemName) {
+
 		restrictionMap.put("systemName", systemName);
 		CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
 		if(coreSystem == null){
@@ -189,19 +133,9 @@ public class ConfigurationApi {
 	 */
 	@GET
 	@Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")
-	public Response getNeighborCloud(@Context SecurityContext sc, @PathParam("operator") String operator, 
+	public Response getNeighborCloud(@PathParam("operator") String operator, 
 			@PathParam("cloudName") String cloudName) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+
 		restrictionMap.put("operator", operator);
 		restrictionMap.put("cloudName", cloudName);
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
@@ -232,18 +166,8 @@ public class ConfigurationApi {
 	 */
 	@POST
 	@Path("/coresystems")
-	public List<CoreSystem> addCoreSystems(@Context SecurityContext sc, List<CoreSystem> coreSystemList) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public List<CoreSystem> addCoreSystems(List<CoreSystem> coreSystemList) {
+
 		List<CoreSystem> savedCoreSystems = new ArrayList<CoreSystem>();
 		for (CoreSystem cs : coreSystemList) {
 			if(cs.isPayloadUsable()){
@@ -271,18 +195,8 @@ public class ConfigurationApi {
 	 */
 	@POST
 	@Path("/neighborhood")
-	public List<NeighborCloud> addNeighborClouds(@Context SecurityContext sc, List<NeighborCloud> neighborCloudList) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public List<NeighborCloud> addNeighborClouds(List<NeighborCloud> neighborCloudList) {
+
 		List<NeighborCloud> savedNeighborClouds = new ArrayList<NeighborCloud>();
 		for (NeighborCloud nc : neighborCloudList) {
 			if(nc.isPayloadUsable()){
@@ -318,18 +232,8 @@ public class ConfigurationApi {
 	 */
 	@POST
 	@Path("/owncloud")
-	public OwnCloud addOwnCloud(@Context SecurityContext sc, OwnCloud ownCloud) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public OwnCloud addOwnCloud(OwnCloud ownCloud) {
+
 		if(!ownCloud.isPayloadUsable()){
 			log.info("ConfigurationApi:addOwnCloud throws BadPayloadException");
 			throw new BadPayloadException("Bad payload: missing operator, cloudName "
@@ -357,18 +261,8 @@ public class ConfigurationApi {
 	 */
 	@PUT
 	@Path("/coresystems")
-	public Response updateCoreSystem(@Context SecurityContext sc, CoreSystem cs) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response updateCoreSystem(CoreSystem cs) {
+
 		if(!cs.isPayloadUsable()){
 			log.info("ConfigurationApi:updateCoreSystem throws BadPayloadException");
 			throw new BadPayloadException("Bad payload: missing systemName, address or "
@@ -400,18 +294,8 @@ public class ConfigurationApi {
 	 */
 	@PUT
 	@Path("/neighborhood")
-	public Response updateNeighborCloud(@Context SecurityContext sc, NeighborCloud nc) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response updateNeighborCloud(NeighborCloud nc) {
+
 		if(!nc.isPayloadUsable()){
 			log.info("ConfigurationApi:updateNeighborCloud throws BadPayloadException");
 			throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud"
@@ -448,18 +332,8 @@ public class ConfigurationApi {
 	 */
 	@DELETE
 	@Path("/coresystems/{systemName}")
-	public Response deleteCoreSystem(@Context SecurityContext sc, @PathParam("systemName") String systemName) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public Response deleteCoreSystem(@PathParam("systemName") String systemName) {
+
 		restrictionMap.put("systemName", systemName);
 		CoreSystem retrievedSystem = dm.get(CoreSystem.class, restrictionMap);
 		if (retrievedSystem == null) {
@@ -480,19 +354,9 @@ public class ConfigurationApi {
 	 */
 	@DELETE
 	@Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")
-	public Response deleteNeighborCloud(@Context SecurityContext sc, @PathParam("operator") String operator,
+	public Response deleteNeighborCloud(@PathParam("operator") String operator, 
 			@PathParam("cloudName") String cloudName) {
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!ApiMain.isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+
 		restrictionMap.put("operator", operator);
 		restrictionMap.put("cloudName", cloudName);
 		ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);

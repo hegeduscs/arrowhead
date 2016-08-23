@@ -12,11 +12,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
@@ -42,7 +39,6 @@ import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
-import eu.arrowhead.common.ssl.SecurityUtils;
 
 /**
  * This is the REST resource for the Gatekeeper Core System.
@@ -52,8 +48,6 @@ import eu.arrowhead.common.ssl.SecurityUtils;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatekeeperResource {
 	
-	@Context
-	Configuration configuration;
 	private static Logger log = Logger.getLogger(GatekeeperResource.class.getName());
 	
 	@GET
@@ -74,19 +68,8 @@ public class GatekeeperResource {
 	 */
 	@PUT
 	@Path("init_gsd")
-	public Response GSDRequest(@Context SecurityContext sc, GSDRequestForm requestForm) {
+	public Response GSDRequest(GSDRequestForm requestForm) {
 		log.info("Entered the GSDRequest method.");
-		
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
 		
 		if(!requestForm.isPayloadUsable()){
 			log.info("Payload is not usable. (GatekeeperResource:GSDRequest BadPayloadException)");
@@ -115,7 +98,7 @@ public class GatekeeperResource {
 			for(ArrowheadCloud cloud : preferredClouds){
 				try{
 					URI = SysConfig.getURI(cloud.getAddress(), cloud.getPort(), 
-							cloud.getGatekeeperServiceURI(), sc.isSecure());
+							cloud.getGatekeeperServiceURI(), false);
 				}
 				//We skip the clouds with missing information
 				catch(NullPointerException ex){
@@ -220,19 +203,8 @@ public class GatekeeperResource {
 	 */
     @PUT
     @Path("init_icn")
-    public Response ICNRequest(@Context SecurityContext sc, ICNRequestForm requestForm) {
+    public Response ICNRequest(ICNRequestForm requestForm) {
     	log.info("Entered the ICNRequest method.");
-    	
-    	if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
     	
     	if(!requestForm.isPayloadUsable()){
     		log.info("GatekeeperResource:ICNRequest BadPayloadException");
@@ -248,7 +220,7 @@ public class GatekeeperResource {
     	
     	String icnURI = SysConfig.getURI(requestForm.getTargetCloud().getAddress(),
     			requestForm.getTargetCloud().getPort(), 
-    			requestForm.getTargetCloud().getGatekeeperServiceURI(), sc.isSecure());
+    			requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     	icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
     	
     	//Sending the the request and then parsing the result
@@ -325,31 +297,5 @@ public class GatekeeperResource {
 		}
     }
     
-    private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration){
-		String subjectname = sc.getUserPrincipal().getName();
-		String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
-		log.info("The client common name for the request: " + clientCN);
-		String serverCN = (String) configuration.getProperty("server_common_name");
-		
-		String[] serverFields = serverCN.split("\\.", -1);
-		String allowedCN = "orchestrator.coresystems";
-		if(serverFields.length < 3){
-			log.info("SSL error: server CN have less than 3 fields!");
-			return false;
-		}
-		else{
-			for(int i = 2; i < serverFields.length; i++){
-				allowedCN = allowedCN.concat("." + serverFields[i]);
-			}
-		}
-		
-		if(!clientCN.equalsIgnoreCase(allowedCN)){
-			log.info("SSL error: common names are not equal!");
-			return false;
-		}
-		
-		return true;
-	}
-
     
 }
