@@ -41,8 +41,8 @@ public class AccessControlFilter implements ContainerRequestFilter {
 				}
 				else{
 					log.info("Unauthorized access! (SSL)");
-					throw new AuthenticationException
-					("This client is not allowed to use this resource: " + requestTarget);
+					/*throw new AuthenticationException
+					("This client is not allowed to use this resource: " + requestTarget);*/
 				}
 			}
 			else{
@@ -52,8 +52,8 @@ public class AccessControlFilter implements ContainerRequestFilter {
 				}
 				else{
 					log.info("Unauthorized access! (SSL)");
-					throw new AuthenticationException
-					("This client is not allowed to use this resource: " + requestTarget);
+					/*throw new AuthenticationException
+					("This client is not allowed to use this resource: " + requestTarget);*/
 				}
 			}
 		}
