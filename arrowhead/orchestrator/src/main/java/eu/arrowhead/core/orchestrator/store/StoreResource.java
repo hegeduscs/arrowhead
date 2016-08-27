@@ -13,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.SecurityContext;
 
 import org.apache.log4j.Logger;
 
@@ -22,7 +21,6 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQueryResponse;
-import eu.arrowhead.common.ssl.SecurityUtils;
 
 /**
  * @author umlaufz
@@ -52,18 +50,7 @@ public class StoreResource {
 	 */
 	@GET
 	@Path("/all")
-	public OrchestrationStoreQueryResponse getAllStoreEntries(@Context SecurityContext sc){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public OrchestrationStoreQueryResponse getAllStoreEntries(){	
 		log.info("Querying the Orchestration Store for all entries.");
 		List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 		store = StoreService.getAllStoreEntries();
@@ -87,18 +74,7 @@ public class StoreResource {
 	 * @throws DataNotFoundException, BadPayloadException
 	 */
 	@PUT
-	public OrchestrationStoreQueryResponse getStoreEntries(@Context SecurityContext sc, OrchestrationStoreQuery query){
-		if (sc.isSecure()) {
-			log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-			if(!isClientAuthorized(sc, configuration)){
-				//throw new AuthenticationException("This client is not allowed to use this resource.");
-				log.info("Unauthorized access! (SSL)");
-			}
-			else{
-				log.info("Identification is successful! (SSL)");
-			}
-		}
-		
+	public OrchestrationStoreQueryResponse getStoreEntries(OrchestrationStoreQuery query){
 		List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
 		
 		/*
@@ -174,32 +150,6 @@ public class StoreResource {
 		Collections.sort(entryList);
 		log.info("Returning the Orchestration Store entry list with a size of " + entryList.size());
 		return new OrchestrationStoreQueryResponse(entryList);
-	}
-	
-	private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration){
-		String subjectname = sc.getUserPrincipal().getName();
-		String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
-		log.info("The client common name for the request: " + clientCN);
-		String serverCN = (String) configuration.getProperty("server_common_name");
-		
-		String[] serverFields = serverCN.split("\\.", -1);
-		String allowedCN = "orchestrator.coresystems";
-		if(serverFields.length < 3){
-			log.info("SSL error: server CN have less than 3 fields!");
-			return false;
-		}
-		else{
-			for(int i = 2; i < serverFields.length; i++){
-				allowedCN = allowedCN.concat("." + serverFields[i]);
-			}
-		}
-		
-		if(!clientCN.equalsIgnoreCase(allowedCN)){
-			log.info("SSL error: common names are not equal!");
-			return false;
-		}
-		
-		return true;
 	}
 	
 	
