@@ -567,7 +567,7 @@ public final class OrchestratorService {
 		//Sending the request, do sanity check on the returned result
 		Response response = Utility.sendRequest(URI, "PUT", requestForm);
 		GSDResult result = response.readEntity(GSDResult.class);
-		if(!result.isPayloadUsable()){
+		if(result == null || !result.isPayloadUsable()){
 			log.info("GlobalServiceDiscovery yielded no result. "
 					+ "(OrchestratorService:startGSD DataNotFoundException)");
 			throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.");
