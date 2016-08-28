@@ -207,6 +207,9 @@ public class ConfigurationApi {
 				if (cloud == null) {
 					dm.save(nc.getCloud());
 				}
+				else{
+					nc.setCloud(cloud);
+				}
 				
 				restrictionMap.clear();
 				restrictionMap.put("cloud", cloud);
