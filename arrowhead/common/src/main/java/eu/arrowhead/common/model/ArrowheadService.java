@@ -3,6 +3,7 @@ package eu.arrowhead.common.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -40,6 +41,7 @@ public class ArrowheadService {
 	
 	@ElementCollection(fetch = FetchType.LAZY)
 	@LazyCollection(LazyCollectionOption.FALSE)
+	@CollectionTable(name = "arrowheadservice_interfaces")
 	private List<String> interfaces = new ArrayList<String>();
 	
 	@Transient
