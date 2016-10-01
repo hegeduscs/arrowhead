@@ -1,0 +1,223 @@
+package eu.arrowhead.common.configuration;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Map.Entry;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.ConstraintViolationException;
+
+import eu.arrowhead.common.exception.DuplicateEntryException;
+
+public class DatabaseManager {
+	
+	private static Logger log = Logger.getLogger(DatabaseManager.class.getName());
+	private static DatabaseManager instance = null;
+	private static SessionFactory sessionFactory;
+	private static Properties prop;
+	private static final String dbUser = getProp().getProperty("db_user", "root");
+	private static final String dbPassword = getProp().getProperty("db_password", "root");
+
+	private DatabaseManager() {
+		if (sessionFactory == null) {
+			sessionFactory = new Configuration().configure().setProperty("hibernate.connection.username", dbUser)
+					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();	
+		}
+	}
+
+	public static DatabaseManager getInstance() {
+		if (instance == null) {
+			instance = new DatabaseManager();
+		}
+		return instance;
+	}
+
+	public SessionFactory getSessionFactory() {
+		if (sessionFactory == null) {
+			sessionFactory = new Configuration().configure().setProperty("hibernate.connection.username", dbUser)
+					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();	
+		}
+		return sessionFactory;
+	}
+
+	public <T> T get(Class<T> queryClass, int id) {
+		T object = null;
+
+		Session session = getSessionFactory().openSession();
+		Transaction transaction = null;
+
+		try {
+			transaction = session.beginTransaction();
+			object = session.get(queryClass, id);
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null)
+				transaction.rollback();
+			throw e;
+		} finally {
+			session.close();
+		}
+
+		return object;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T get(Class<T> queryClass, Map<String, Object> restrictionMap) {
+		T object = null;
+
+		Session session = getSessionFactory().openSession();
+		Transaction transaction = null;
+
+		try {
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(queryClass);
+			if (restrictionMap != null && !restrictionMap.isEmpty()) {
+				for (Entry<String, Object> entry : restrictionMap.entrySet()) {
+					criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
+				}
+			}
+			object = (T) criteria.uniqueResult();
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null)
+				transaction.rollback();
+			throw e;
+		} finally {
+			session.close();
+		}
+
+		return object;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap){
+		List<T> retrievedList = new ArrayList<T>();
+
+		Session session = getSessionFactory().openSession();
+		Transaction transaction = null;
+
+		try {
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(queryClass);
+			if (restrictionMap != null && !restrictionMap.isEmpty()) {
+				for (Entry<String, Object> entry : restrictionMap.entrySet()) {
+					criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
+				}
+			}
+			retrievedList = (List<T>) criteria.list();
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null)
+				transaction.rollback();
+			throw e;
+		} finally {
+			session.close();
+		}
+
+		return retrievedList;
+	}
+
+	public <T> T save(T object) {
+		Session session = getSessionFactory().openSession();
+		Transaction transaction = null;
+
+		try {
+			transaction = session.beginTransaction();
+			session.save(object);
+			transaction.commit();
+		} catch (ConstraintViolationException e) {
+			if (transaction != null)
+				transaction.rollback();
+			log.info("DatabaseManager:save throws DuplicateEntryException");
+			throw new DuplicateEntryException(
+					"DuplicateEntryException: there is already an entry in the database with these parameters. "
+					+ "Please check the unique fields of the " + object.getClass());
+		} catch (Exception e) {
+			if (transaction != null)
+				transaction.rollback();
+			throw e;
+		} finally {
+			session.close();
+		}
+
+		return object;
+	}
+	
+	public <T> T merge(T object) {
+		Session session = getSessionFactory().openSession();
+		Transaction transaction = null;
+
+		try {
+			transaction = session.beginTransaction();
+			session.merge(object);
+			transaction.commit();
+		} catch (ConstraintViolationException e) {
+			if (transaction != null)
+				transaction.rollback();
+			log.info("DatabaseManager:merge throws DuplicateEntryException");
+			throw new DuplicateEntryException(
+					"DuplicateEntryException: there is already an entry in the database with these parameters. "
+							+ "Please check the unique fields of the " + object.getClass());
+		} catch (Exception e) {
+			if (transaction != null)
+				transaction.rollback();
+			throw e;
+		} finally {
+			session.close();
+		}
+
+		return object;
+	}
+
+	public <T> void delete(T object) {
+		Session session = getSessionFactory().openSession();
+		Transaction transaction = null;
+
+		try {
+			transaction = session.beginTransaction();
+			session.delete(object);
+			transaction.commit();
+		} catch (ConstraintViolationException e) {
+			if (transaction != null)
+				transaction.rollback();
+			log.info("DatabaseManager:delete throws ConstraintViolationException");
+			throw new DuplicateEntryException(
+					"ConstraintViolationException: there is a reference to this object in another table, "
+					+ "which prevents the delete operation. (" + object.getClass() + ")");
+		} catch (Exception e) {
+			if (transaction != null)
+				transaction.rollback();
+			throw e;
+		} finally {
+			session.close();
+		}
+	}
+	
+	public synchronized static Properties getProp() {
+		try {
+			if (prop == null) {
+				prop = new Properties();
+				File file = new File("config" + File.separator + "app.properties");
+				FileInputStream inputStream = new FileInputStream(file);
+				if (inputStream != null) {
+					prop.load(inputStream);
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		return prop;
+	}
+
+}
