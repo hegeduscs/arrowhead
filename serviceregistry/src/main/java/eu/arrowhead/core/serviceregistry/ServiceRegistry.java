@@ -385,7 +385,7 @@ public class ServiceRegistry {
 	private ProvidedService createProvidedService(ServiceData service, String interfaceType) {
 		ProvidedService providerService;
 		providerService = new ProvidedService();
-		ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
+		ArrowheadSystem arrowheadSystem = new ArrowheadSystem();		
 
 		Map<String, String> properties = service.getProperties();
 		String systemGroup = properties.get("ahsysgrp");
@@ -406,7 +406,8 @@ public class ServiceRegistry {
 
 		providerService.setProvider(arrowheadSystem);
 		providerService.setServiceURI(serviceURI);
-		providerService.setServiceInterface(interfaceType);
+		providerService.setServiceInterface(interfaceType);		
+		
 		return providerService;
 	}
 
@@ -518,7 +519,7 @@ public class ServiceRegistry {
 
 			if (interfaceType != null && interfaceType.equals(serviceInterface) && serviceGroupDns != null
 					&& serviceGroupDns.equals(serviceGroup) && serviceNameDns != null && serviceNameDns.equals(serviceName)) {
-				providerService = createProvidedService(service, interfaceType);
+				providerService = createProvidedService(service, interfaceType, serviceGroup, serviceName);
 			}
 		}
 		return providerService;
