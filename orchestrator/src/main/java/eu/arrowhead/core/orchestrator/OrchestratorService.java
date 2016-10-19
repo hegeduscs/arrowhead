@@ -106,8 +106,7 @@ public final class OrchestratorService {
 			}
 			
 			//All the filtering is done, need to compile the response
-			return compileOrchestrationResponse(srf.getRequestedService(), psList, 
-					orchestrationFlags.get("generateToken"));
+			return compileOrchestrationResponse(psList, orchestrationFlags.get("generateToken"));
 		}
 		/*
 		 * If the Intra-Cloud orchestration fails somewhere (SR, Auth, filtering, matchmaking) 
@@ -164,8 +163,7 @@ public final class OrchestratorService {
 		}
 
 		//Compiling the orchestration response
-		return compileOrchestrationResponse(srf.getRequestedService(), 
-				psList, orchestrationFlags.get("generateToken"));
+		return compileOrchestrationResponse(psList, orchestrationFlags.get("generateToken"));
 	}
 	
 	/**
@@ -239,7 +237,7 @@ public final class OrchestratorService {
 							+ "were found for this consumer/service pair.");
 				}
 			}
-			return compileOrchestrationResponse(entryList, orchestrationFlags.get("generateToken"));
+			return compileOrchestrationResponseFromStore(entryList, orchestrationFlags.get("generateToken"));
 		}
 		
 		//Priority list based store orchestration 
@@ -300,7 +298,8 @@ public final class OrchestratorService {
 				if(serviceProviders.contains(entry.getProviderSystem()) && 
 						authorizedIntraProviders.contains(entry.getProviderSystem())){
 					List<OrchestrationStore> tempList = new ArrayList<>(Arrays.asList(entry));
-					return compileOrchestrationResponse(tempList, orchestrationFlags.get("generateToken"));
+					return compileOrchestrationResponseFromStore
+							(tempList, orchestrationFlags.get("generateToken"));
 				}
 			}
 			/*
@@ -823,8 +822,8 @@ public final class OrchestratorService {
 	 * @param boolean generateToken
 	 * @return OrchestrationResponse
 	 */
-	private static OrchestrationResponse compileOrchestrationResponse(ArrowheadService service, 
-			List<ProvidedService> psList, boolean generateToken){
+	private static OrchestrationResponse compileOrchestrationResponse(List<ProvidedService> psList,
+			boolean generateToken){
 		log.info("Entered the (first) compileOrchestrationResponse method.");
 		
 		String token = null;
@@ -835,11 +834,7 @@ public final class OrchestratorService {
 				//placeholder for token generation, call should be made to the AuthorizationResource
 			}
 			
-			//Returning only those service interfaces that were found in the SR entry
-			service.setInterfaces(ps.getServiceInterface());
-			//TODO metadata handling when SR is fixed
-			service.setServiceMetadata(null);
-			OrchestrationForm of = new OrchestrationForm(service, ps.getProvider(), 
+			OrchestrationForm of = new OrchestrationForm(ps.getOffered(), ps.getProvider(), 
 					ps.getServiceURI(), token, null);
 			ofList.add(of);
 		}
@@ -857,7 +852,7 @@ public final class OrchestratorService {
 	 * @param boolean generateToken
 	 * @return OrchestrationResponse
 	 */
-	private static OrchestrationResponse compileOrchestrationResponse(List<OrchestrationStore> entryList, 
+	private static OrchestrationResponse compileOrchestrationResponseFromStore(List<OrchestrationStore> entryList, 
 			boolean generateToken){
 		log.info("Entered the (second) compileOrchestrationResponse method.");
 				
