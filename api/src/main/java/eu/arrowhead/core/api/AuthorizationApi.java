@@ -216,6 +216,29 @@ public class AuthorizationApi {
 				new GenericEntity<List<IntraCloudAuthorization>>(savedAuthRights) {};
 		return Response.status(Status.CREATED).entity(entity).build();
 	}
+	
+	/**
+	 * Deletes the IntraCloudAuthorization entry with the id specified by
+	 * the path parameter. Returns 200 if the delete is succesful, 204 (no
+	 * content) if the entry was not in the database to begin with.
+	 * 
+	 * @param Integer id
+	 */
+	@DELETE
+	@Path("/intracloud/{id}")
+	public Response deleteIntraEntry(@PathParam("id") Integer id) {
+
+		restrictionMap.put("id", id);
+		IntraCloudAuthorization entry = dm.get(IntraCloudAuthorization.class, restrictionMap);
+		if (entry == null) {
+			log.info("deleteIntraEntry had no effect.");
+			return Response.noContent().build();
+		} else {
+			dm.delete(entry);
+			log.info("deleteIntraEntry successfully returns.");
+			return Response.ok().build();
+		}
+	}
 
 	/**
 	 * Deletes all the authorization right relations where the given System is the consumer.
@@ -418,6 +441,29 @@ public class AuthorizationApi {
 		GenericEntity<List<InterCloudAuthorization>> entity = 
 				new GenericEntity<List<InterCloudAuthorization>>(savedAuthRights) {};
 		return Response.status(Status.CREATED).entity(entity).build();
+	}
+	
+	/**
+	 * Deletes the InterCloudAuthorization entry with the id specified by
+	 * the path parameter. Returns 200 if the delete is succesful, 204 (no
+	 * content) if the entry was not in the database to begin with.
+	 * 
+	 * @param Integer id
+	 */
+	@DELETE
+	@Path("/intercloud/{id}")
+	public Response deleteInterEntry(@PathParam("id") Integer id) {
+
+		restrictionMap.put("id", id);
+		InterCloudAuthorization entry = dm.get(InterCloudAuthorization.class, restrictionMap);
+		if (entry == null) {
+			log.info("deleteInterEntry had no effect.");
+			return Response.noContent().build();
+		} else {
+			dm.delete(entry);
+			log.info("deleteInterEntry successfully returns.");
+			return Response.ok().build();
+		}
 	}
 
 	/**

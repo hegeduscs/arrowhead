@@ -303,7 +303,7 @@ public class OrchestratorApi {
 	}
 
 	/**
-	 * Deletes the Orchestration Store entry with the name specified by
+	 * Deletes the Orchestration Store entry with the id specified by
 	 * the path parameter. Returns 200 if the delete is succesful, 204 (no
 	 * content) if the entry was not in the database to begin with.
 	 * 
