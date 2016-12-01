@@ -2,6 +2,7 @@ package eu.arrowhead.core.orchestrator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import eu.arrowhead.core.orchestrator.store.StoreService;
 
 /**
  * @author umlaufz
@@ -792,7 +794,8 @@ public final class OrchestratorService {
 			ArrowheadSystem consumer, boolean onlyActive){
 		log.info("Entered the queryOrchestrationStore method.");
 		
-		//Compiling the URI and the request payload
+		//Replacing this method with a more direct solution, without HTTP call
+		/*//Compiling the URI and the request payload
 		String URI = SysConfig.getOrchestratorURI();
 		URI = UriBuilder.fromPath(URI).path("store").toString();
 		OrchestrationStoreQuery query = new OrchestrationStoreQuery(service, consumer, onlyActive);
@@ -808,7 +811,66 @@ public final class OrchestratorService {
 		
 		log.info("Successfull Orchestration Store query, returning a list of " 
 				+ storeResponse.getEntryList().size());
-		return storeResponse.getEntryList();
+		return storeResponse.getEntryList();*/
+		
+		/*
+		 * If the onlyActive boolean is set to true, we return all the active
+		 * entries belonging to the requesterSystem.
+		 */
+		if(onlyActive){
+			log.info("Querying the Orchestration Store for active entries of the consumer: " + consumer.toString());
+			List<OrchestrationStore> retrievedList = StoreService.getActiveStoreEntries(consumer);
+			if(retrievedList != null && !retrievedList.isEmpty()){
+				log.info("Returning the active entry list with a size of " + retrievedList.size());
+				Collections.sort(retrievedList);
+				return retrievedList;
+			}
+			else{
+				log.info("No active Orchestration Store entries were found "
+						+ "for this consumer: " + consumer.toString());
+				throw new DataNotFoundException("No active Orchestration Store entries were found "
+						+ "for this consumer: " + consumer.toString()); 
+			}
+		}
+		
+		/*
+		 * If the payload does not have a requestedService, but the onlyActive boolean is false,
+		 * we return all the Orchestration Store entries belonging to the requesterSystem.
+		 */
+		else if(service == null){
+			log.info("Querying the Orchestration Store for entries of the consumer: " + consumer.toString());
+			List<OrchestrationStore> retrievedList = StoreService.getStoreEntries(consumer);
+			if(retrievedList != null && !retrievedList.isEmpty()){
+				Collections.sort(retrievedList);
+				return retrievedList;
+			}
+			else{
+				log.info("No Orchestration Store entries were found"
+						+ "for this consumer: " + consumer.toString());
+				throw new DataNotFoundException("No Orchestration Store entries were found "
+						+ "for this consumer: " + consumer.toString());
+			}
+		}
+		
+		/*
+		 * If the payload does have a requestedService, we return all the Orchestration Store
+		 * entries specified by the requesterSystem and requestedService.
+		 */
+		else{
+			log.info("Querying the Orchestration Store for entries of the consumer/service pair.");
+			List<OrchestrationStore> retrievedList = 
+					StoreService.getStoreEntries(consumer, service);
+			if(retrievedList != null && !retrievedList.isEmpty()){
+				Collections.sort(retrievedList);
+				return retrievedList;
+			}
+			else{
+				log.info("No Orchestration Store entries were found for this consumer/service pair.");
+				throw new DataNotFoundException("No Orchestration Store entries were found "
+						+ "for this consumer/service pair: " 
+						+ consumer.toString() + "/" + service.toString());
+			}
+		}
 	}
 	
 	/**
