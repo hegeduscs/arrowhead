@@ -32,6 +32,9 @@ public class ServiceRegistryMain {
 	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/core/");
 
 	private static Properties prop;
+	
+	public static HttpServer server = null;
+	public static HttpServer secureServer = null;
 
 	/**
 	 * Starts Grizzly HTTP server exposing JAX-RS resources defined in this
@@ -103,27 +106,47 @@ public class ServiceRegistryMain {
 		log.info("Starting Server!");
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
-		HttpServer server = null;
-		HttpServer secureServer = null;
-		if (args != null && args.length > 0) {
-			switch (args[0]) {
-			case "secure":
-				secureServer = startSecureServer();
-				log.debug(String.format("Jersey app started with WADL available at "
-						+ "%sapplication.wadl", BASE_URI_SECURED));
-				break;
-			case "both":
-				server = startServer();
-				secureServer = startSecureServer();
+		boolean daemon = false;
+		int mode = 0;
+		
+		for(int i=0;i<args.length;++i) {			
+			if(args[i].equals("-d")) {
+				daemon = true;
+				System.out.println("Starting server as daemon!");
 			}
-		} 
-		else {
-			server = startServer();
-			log.debug(String.format("Jersey app started with WADL available at " + "%sapplication.wadl", BASE_URI));
+			else if(args[i].equals("-m")) {
+				++i;
+				switch (args[i]) {
+				case "secure":
+					mode = 1;
+					break;
+				case "both":
+					mode = 2;
+					break;
+				default:
+					log.error("Unkown mode: " + args[i]);					
+				}	
+				
+			}
 		}
+		
+		switch (mode) {
+		case 0:
+			server = startServer();
+			break;
+		case 1:
+			System.out.println("Starting secure server...");
+			secureServer = startSecureServer();
+			break;
+		case 2:
+			System.out.println("Starting secure and unsecure servers...");
+			server = startServer();
+			secureServer = startSecureServer();
+			break;
+		}	
 
 		TimerTask pingTask = new PingTask();
-		Timer timer = new Timer();
+		final Timer timer = new Timer();
 		int interval = 10;
 		try {
 			interval = Integer.parseInt(getProp().getProperty("ping.interval", "10"));	
@@ -133,10 +156,29 @@ public class ServiceRegistryMain {
 		
 		timer.schedule(pingTask, 60000l, (interval * 60l * 1000l));
 		
-		System.out.println("Press enter to shutdown Service Registry Server(s)...");
-        System.in.read();
-		
-        timer.cancel();
+		if(daemon) {
+			System.out.println("In daemon mode, process will terminate for TERM signal...");
+	        Runtime.getRuntime().addShutdownHook(new Thread()
+	        {
+	            @Override
+	            public void run()
+	            {
+	            	System.out.println("Received TERM signal, shutting down...");
+	            	 timer.cancel();
+	            	shutdown();
+	            }
+	        });
+		}		
+		else {
+			System.out.println("Press enter to shutdown ServiceRegistry Server(s)...");
+	        System.in.read();	
+	        timer.cancel();
+	        shutdown();
+		}       
+     
+	}
+	
+	public static void shutdown() {
         if(server != null){
         	log.info("Stopping server at: " + BASE_URI);
         	server.shutdownNow();
@@ -144,9 +186,8 @@ public class ServiceRegistryMain {
         if(secureServer != null){
         	log.info("Stopping server at: " + BASE_URI_SECURED);
         	secureServer.shutdownNow();
-        }
-        
-        System.out.println("Api Server(s) stopped");
+        }        
+        System.out.println("Authorization Server(s) stopped");
 	}
 
 	public synchronized static Properties getProp() {

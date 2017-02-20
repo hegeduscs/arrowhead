@@ -29,29 +29,72 @@ public class ApiMain {
 	
 	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8450/api/");
 	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8451/api/");
+	
+	public static HttpServer server = null;
+	public static HttpServer secureServer = null;
 
 	public static void main(String[] args) throws IOException {
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 		
-		HttpServer server = null;
-		HttpServer secureServer = null;
-		if (args != null && args.length > 0) {
-			switch (args[0]) {
-			case "secure":
-				secureServer = startSecureServer();
-				break;
-			case "both":
-				server = startServer();
-				secureServer = startSecureServer();
+		boolean daemon = false;
+		int mode = 0;
+		
+		for(int i=0;i<args.length;++i) {			
+			if(args[i].equals("-d")) {
+				daemon = true;
+				System.out.println("Starting server as daemon!");
+			}
+			else if(args[i].equals("-m")) {
+				++i;
+				switch (args[i]) {
+				case "secure":
+					mode = 1;
+					break;
+				case "both":
+					mode = 2;
+					break;
+				default:
+					log.error("Unkown mode: " + args[i]);					
+				}	
+				
 			}
 		}
-		else{
-			server = startServer();
-		}
 		
-		System.out.println("Press enter to shutdown Api Server(s)...");
-        System.in.read();
-        
+		switch (mode) {
+		case 0:
+			server = startServer();
+			break;
+		case 1:
+			System.out.println("Starting secure server...");
+			secureServer = startSecureServer();
+			break;
+		case 2:
+			System.out.println("Starting secure and unsecure servers...");
+			server = startServer();
+			secureServer = startSecureServer();
+			break;
+		}	
+		
+		if(daemon) {
+			System.out.println("In daemon mode, process will terminate for TERM signal...");
+	        Runtime.getRuntime().addShutdownHook(new Thread()
+	        {
+	            @Override
+	            public void run()
+	            {
+	            	System.out.println("Received TERM signal, shutting down...");
+	            	shutdown();
+	            }
+	        });
+		}		
+		else {
+			System.out.println("Press enter to shutdown API Server(s)...");
+	        System.in.read();	        
+	        shutdown();
+		}
+	}
+	
+	public static void shutdown() {
         if(server != null){
         	log.info("Stopping server at: " + BASE_URI);
         	server.shutdownNow();
@@ -59,10 +102,10 @@ public class ApiMain {
         if(secureServer != null){
         	log.info("Stopping server at: " + BASE_URI_SECURED);
         	secureServer.shutdownNow();
-        }
-        
-        System.out.println("Api Server(s) stopped");
+        }        
+        System.out.println("Authorization Server(s) stopped");
 	}
+
 	
 	public static HttpServer startServer() throws IOException {
 		log.info("Starting server at: " + BASE_URI);
