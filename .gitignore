@@ -1,5 +1,8 @@
 /core/src/main/resources/hibernate.cfg.xml
 /core/target
+app.properties
+log4j.properties
+dns.properties
 arrowhead-serviceregistry/.project
 arrowhead-serviceregistry/.settings/org.eclipse.m2e.core.prefs
 arrowhead-serviceregistry/.settings/org.jboss.ide.eclipse.as.core.prefs
