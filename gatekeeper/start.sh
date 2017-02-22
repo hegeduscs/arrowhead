@@ -1,1 +1,1 @@
-../authorization/start.sh
+../scripts/start.sh
