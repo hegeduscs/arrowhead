@@ -40,8 +40,9 @@ stop() {
 }
 
 status() {
-  if [ -f $PIDFILE ] && kill -0 $(cat $PIDFILE); then
-    echoYellow 'Service is running PID:' $(cat $PIDFILE) >&2
+  if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE"); then
+    PID=`cat $PIDFILE`
+    echoYellow "Service is running PID: $PID" >&2
   else
     echoYellow 'Service is not running' >&2
   fi
