@@ -10,10 +10,6 @@
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
-			<groupId>eu.arrowhead</groupId>
-			<artifactId>common</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
@@ -68,5 +64,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+	 <dependency>
+	  <groupId>${project.groupId}</groupId>
+	  <artifactId>common</artifactId>
+	  <version>${project.version}</version>
+	 </dependency>
 	</dependencies>
 </project>

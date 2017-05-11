@@ -10,11 +10,6 @@
 */
 package eu.arrowhead.qos;
 
-import eu.arrowhead.qos.algorithms.VerifierAlgorithmFactory;
-import eu.arrowhead.qos.database.model.Network;
-import eu.arrowhead.qos.database.model.Network_Device;
-import eu.arrowhead.qos.database.model.QoS_Resource_Reservation;
-import eu.arrowhead.qos.drivers.DriversFactory;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.DriverNotFoundException;
 import eu.arrowhead.common.exception.ReservationException;
@@ -26,6 +21,11 @@ import eu.arrowhead.common.model.messages.QoSReserve;
 import eu.arrowhead.common.model.messages.QoSVerificationResponse;
 import eu.arrowhead.common.model.messages.QoSVerifierResponse;
 import eu.arrowhead.common.model.messages.QoSVerify;
+import eu.arrowhead.qos.algorithms.VerifierAlgorithmFactory;
+import eu.arrowhead.qos.database.model.Network;
+import eu.arrowhead.qos.database.model.Network_Device;
+import eu.arrowhead.qos.database.model.QoS_Resource_Reservation;
+import eu.arrowhead.qos.drivers.DriversFactory;
 import eu.arrowhead.qos.factories.QoSFactory;
 import eu.arrowhead.qos.factories.SCSFactory;
 import java.io.FileNotFoundException;
@@ -200,12 +200,8 @@ public class QoSManagerService {
 
 				boolean response = contactMonitoring(rule);
 				qosreservationResponse = new QoSReservationResponse(response,
-																	new QoSReservationCommand(message.
-																		getService(), message.
-																							  getProvider(), message.
-																							  getConsumer(),
-																							  responseS, message.
-																							  getRequestedQoS()));
+                                        new QoSReservationCommand(message.getService(), message.getConsumer(), 
+                                                message.getProvider(), responseS, message.getRequestedQoS()));
 				return qosreservationResponse;
 
 			} else {
