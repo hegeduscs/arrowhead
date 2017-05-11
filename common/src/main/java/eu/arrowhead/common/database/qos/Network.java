@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
 import java.util.Map;
 import javax.persistence.Column;

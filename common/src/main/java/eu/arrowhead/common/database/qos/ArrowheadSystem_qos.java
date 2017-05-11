@@ -1,4 +1,4 @@
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "arrowhead_system", uniqueConstraints = {
 	@UniqueConstraint(columnNames = {"system_group", "system_name"})})
 @XmlRootElement
-public class ArrowheadSystem {
+public class ArrowheadSystem_qos {
 
 	@Column(name = "arrowhead_system_id")
 	@Id
@@ -40,10 +40,10 @@ public class ArrowheadSystem {
 	@Column(name = "authentication_info")
 	private String authenticationInfo;
 
-	public ArrowheadSystem() {
+	public ArrowheadSystem_qos() {
 	}
 
-	public ArrowheadSystem(String systemGroup, String systemName, String address,
+	public ArrowheadSystem_qos(String systemGroup, String systemName, String address,
 						   String port,
 						   String authenticationInfo) {
 		this.systemGroup = systemGroup;
@@ -182,10 +182,10 @@ public class ArrowheadSystem {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof ArrowheadSystem)) {
+		if (!(obj instanceof ArrowheadSystem_qos)) {
 			return false;
 		}
-		ArrowheadSystem other = (ArrowheadSystem) obj;
+		ArrowheadSystem_qos other = (ArrowheadSystem_qos) obj;
 		if (address == null) {
 			if (other.address != null) {
 				return false;

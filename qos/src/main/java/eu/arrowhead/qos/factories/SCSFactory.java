@@ -10,11 +10,7 @@
 */
 package eu.arrowhead.qos.factories;
 
-import eu.arrowhead.qos.database.model.ISCSRepository;
-import eu.arrowhead.qos.database.model.SCSRepositoryImpl;
-import eu.arrowhead.qos.database.model.Network;
-import eu.arrowhead.qos.database.model.Network_Device;
-import eu.arrowhead.qos.database.model.Node;
+import eu.arrowhead.common.database.qos.*;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.ArrayList;
@@ -202,13 +198,13 @@ public class SCSFactory {
 	 ************** Converts From/To DTO ************
 	 * ***********************************************
 	 */
-	protected eu.arrowhead.qos.database.model.ArrowheadSystem converFromDTO(
+	protected eu.arrowhead.common.database.qos.ArrowheadSystem_qos converFromDTO(
 		ArrowheadSystem system) {
 		if (system == null) {
 			return null;
 		}
 
-		eu.arrowhead.qos.database.model.ArrowheadSystem systemDB = new eu.arrowhead.qos.database.model.ArrowheadSystem();
+		eu.arrowhead.common.database.qos.ArrowheadSystem_qos systemDB = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
 		systemDB.setAuthenticationInfo(system.getAuthenticationInfo());
 		systemDB.setAddress(system.getAddress());
 		systemDB.setPort(system.getPort());
@@ -217,10 +213,10 @@ public class SCSFactory {
 		return systemDB;
 	}
 
-	protected static eu.arrowhead.qos.database.model.ArrowheadSystem convertFromDTO(
+	protected static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
 		eu.arrowhead.common.model.ArrowheadSystem in) {
 
-		eu.arrowhead.qos.database.model.ArrowheadSystem out = new eu.arrowhead.qos.database.model.ArrowheadSystem();
+		eu.arrowhead.common.database.qos.ArrowheadSystem_qos out = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
 
 		out.setAuthenticationInfo(in.getAuthenticationInfo());
 		out.setAddress(in.getAddress());
@@ -232,7 +228,7 @@ public class SCSFactory {
 	}
 
 	protected static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
-		eu.arrowhead.qos.database.model.ArrowheadSystem in) {
+		eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
 
 		eu.arrowhead.common.model.ArrowheadSystem out = new eu.arrowhead.common.model.ArrowheadSystem();
 
@@ -246,24 +242,24 @@ public class SCSFactory {
 	}
 
 	protected static List<ArrowheadSystem> convertToDTO_List(
-		List<eu.arrowhead.qos.database.model.ArrowheadSystem> in) {
+		List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
 		if (in == null) {
 			return null;
 		}
 		List<ArrowheadSystem> out = new ArrayList<>();
-		for (eu.arrowhead.qos.database.model.ArrowheadSystem system : in) {
+		for (eu.arrowhead.common.database.qos.ArrowheadSystem_qos system : in) {
 			out.add(convertToDTO(system));
 		}
 
 		return out;
 	}
 
-	protected static List<eu.arrowhead.qos.database.model.ArrowheadSystem> convertFromDTO_List(
+	protected static List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> convertFromDTO_List(
 		List<ArrowheadSystem> in) {
 		if (in == null) {
 			return null;
 		}
-		List<eu.arrowhead.qos.database.model.ArrowheadSystem> out = new ArrayList<>();
+		List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> out = new ArrayList<>();
 		for (ArrowheadSystem system : in) {
 			out.add(convertFromDTO(system));
 		}
@@ -271,10 +267,10 @@ public class SCSFactory {
 		return out;
 	}
 
-	protected static eu.arrowhead.qos.database.model.ArrowheadService convertFromDTO(
+	protected static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(
 		eu.arrowhead.common.model.ArrowheadService in) {
 
-		eu.arrowhead.qos.database.model.ArrowheadService out = new eu.arrowhead.qos.database.model.ArrowheadService();
+		eu.arrowhead.common.database.qos.ArrowheadService_qos out = new eu.arrowhead.common.database.qos.ArrowheadService_qos();
 
 		out.setInterfaces(in.getInterfaces());
 		out.setServiceDefinition(in.getServiceDefinition());
@@ -284,7 +280,7 @@ public class SCSFactory {
 	}
 
 	protected static eu.arrowhead.common.model.ArrowheadService convertToDTO(
-		eu.arrowhead.qos.database.model.ArrowheadService in) {
+		eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
 
 		eu.arrowhead.common.model.ArrowheadService out = new eu.arrowhead.common.model.ArrowheadService();
 
@@ -296,13 +292,13 @@ public class SCSFactory {
 	}
 
 	protected static List<ArrowheadService> convertToDTO_ArrowheadServices(
-		List<eu.arrowhead.qos.database.model.ArrowheadService> in) {
+		List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
 
 		if (in == null) {
 			return null;
 		}
 		List<ArrowheadService> out = new ArrayList<>();
-		for (eu.arrowhead.qos.database.model.ArrowheadService system : in) {
+		for (eu.arrowhead.common.database.qos.ArrowheadService_qos system : in) {
 			out.add(convertToDTO(system));
 		}
 

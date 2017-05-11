@@ -1,4 +1,4 @@
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,7 +23,7 @@ public class DeployedSystem {
 
 	@OneToOne
 	@JoinColumn(name = "arrowhead_system_id")
-	private ArrowheadSystem system;
+	private ArrowheadSystem_qos system;
 
 	@ManyToOne
 	@JoinColumn(name = "network_device_id")
@@ -33,18 +33,18 @@ public class DeployedSystem {
 
 	}
 
-	public DeployedSystem(ArrowheadSystem system, Network_Device networkDevice) {
+	public DeployedSystem(ArrowheadSystem_qos system, Network_Device networkDevice) {
 		super();
 		this.system = system;
 		this.networkDevice = networkDevice;
 	}
 
 	/**
-	 * Get ArrowheadSystem.
+	 * Get ArrowheadSystem_qos.
 	 *
 	 * @return Returns Arrowhead Sytem.
 	 */
-	public ArrowheadSystem getSystem() {
+	public ArrowheadSystem_qos getSystem() {
 		return system;
 	}
 
@@ -53,7 +53,7 @@ public class DeployedSystem {
 	 *
 	 * @param system Arrowhead System.
 	 */
-	public void setSystem(ArrowheadSystem system) {
+	public void setSystem(ArrowheadSystem_qos system) {
 		this.system = system;
 	}
 

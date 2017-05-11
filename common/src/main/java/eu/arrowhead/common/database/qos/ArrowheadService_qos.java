@@ -8,7 +8,7 @@
 * JU grant nr. 332987.
 * ISEP, Polytechnic Institute of Porto.
 */
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 @Table(name = "arrowhead_service", uniqueConstraints = {
 	@UniqueConstraint(columnNames = {"service_group", "service_definition"})})
 @XmlRootElement
-public class ArrowheadService {
+public class ArrowheadService_qos {
 
 	@Column(name = "id")
 	@Id
@@ -51,10 +51,10 @@ public class ArrowheadService {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<String> interfaces = new ArrayList<String>();
 
-	public ArrowheadService() {
+	public ArrowheadService_qos() {
 	}
 
-	public ArrowheadService(String serviceGroup, String serviceDefinition,
+	public ArrowheadService_qos(String serviceGroup, String serviceDefinition,
 							List<String> interfaces) {
 		this.serviceGroup = serviceGroup;
 		this.serviceDefinition = serviceDefinition;

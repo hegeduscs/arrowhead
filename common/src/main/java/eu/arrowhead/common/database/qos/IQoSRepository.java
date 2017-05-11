@@ -1,19 +1,6 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
-import eu.arrowhead.qos.database.model.ArrowheadService;
-import eu.arrowhead.qos.database.model.ArrowheadSystem;
-import eu.arrowhead.qos.database.model.Message_Stream;
-import eu.arrowhead.qos.database.model.QoS_Resource_Reservation;
+
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +13,7 @@ public interface IQoSRepository {
 	 * @return returns list of qos reservations.
 	 */
 	public List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(
-		ArrowheadSystem system);
+		ArrowheadSystem_qos system);
 
 	/**
 	 * get all qos reservations.
@@ -56,14 +43,14 @@ public interface IQoSRepository {
 	 *
 	 * @return return list of arrowhead system
 	 */
-	public List<ArrowheadSystem> getAllArrowheadSystems();
+	public List<ArrowheadSystem_qos> getAllArrowheadSystems();
 
 	/**
 	 * get all arrowhead services
 	 *
 	 * @return return list of arrowhead services
 	 */
-	public List<ArrowheadService> getAllArrowheadServices();
+	public List<ArrowheadService_qos> getAllArrowheadServices();
 
 	/**
 	 * get message stream
@@ -79,7 +66,7 @@ public interface IQoSRepository {
 	 * @param system arrowhead system
 	 * @return returns arrowhead system
 	 */
-	public ArrowheadSystem getArrowheadSystem(ArrowheadSystem system);
+	public ArrowheadSystem_qos getArrowheadSystem(ArrowheadSystem_qos system);
 
 	/**
 	 * get arrowhead service
@@ -87,7 +74,7 @@ public interface IQoSRepository {
 	 * @param service arrowhead service
 	 * @return returns arrowhead service
 	 */
-	public ArrowheadService getArrowheadService(ArrowheadService service);
+	public ArrowheadService_qos getArrowheadService(ArrowheadService_qos service);
 
 	/**
 	 * save message stream
@@ -111,7 +98,7 @@ public interface IQoSRepository {
 	 * @param system arrowhead system
 	 * @return returns true if arrowhead system was deleted
 	 */
-	public boolean deleteArrowheadSystem(ArrowheadSystem system);
+	public boolean deleteArrowheadSystem(ArrowheadSystem_qos system);
 
 	/**
 	 * delete arrowhead service
@@ -119,6 +106,6 @@ public interface IQoSRepository {
 	 * @param service arrowhead service
 	 * @return returns true if arrowhead service was deleted
 	 */
-	public boolean deleteArrowheadService(ArrowheadService service);
+	public boolean deleteArrowheadService(ArrowheadService_qos service);
 
 }

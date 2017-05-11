@@ -1,19 +1,6 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
-import eu.arrowhead.qos.database.model.ArrowheadSystem;
-import eu.arrowhead.qos.database.model.Network;
-import eu.arrowhead.qos.database.model.Network_Device;
-import eu.arrowhead.qos.database.model.Node;
+
 import java.util.List;
 
 public interface ISCSRepository {
@@ -24,7 +11,7 @@ public interface ISCSRepository {
 	 * @param provider arrowhead system
 	 * @return returns node
 	 */
-	public Node getNodeFromSystem(ArrowheadSystem provider);
+	public Node getNodeFromSystem(ArrowheadSystem_qos provider);
 
 	/**
 	 * get network device where the arrowhead system is deployed
@@ -32,7 +19,7 @@ public interface ISCSRepository {
 	 * @param provider arrowhead system
 	 * @return returns network device
 	 */
-	public Network_Device getNetworkDeviceFromSystem(ArrowheadSystem provider);
+	public Network_Device getNetworkDeviceFromSystem(ArrowheadSystem_qos provider);
 
 	/**
 	 * get network where the network device is deployed
@@ -64,7 +51,7 @@ public interface ISCSRepository {
 	 * @param arrowheadSystem arrowhead system
 	 * @return returns arrowhead system
 	 */
-	public ArrowheadSystem saveArrowheadSystem(ArrowheadSystem arrowheadSystem);
+	public ArrowheadSystem_qos saveArrowheadSystem(ArrowheadSystem_qos arrowheadSystem);
 
 	/**
 	 * save network device
@@ -103,7 +90,7 @@ public interface ISCSRepository {
 	 *
 	 * @return returns list of arrowhead systems
 	 */
-	public List<ArrowheadSystem> getAllArrowheadSystems();
+	public List<ArrowheadSystem_qos> getAllArrowheadSystems();
 
 	/**
 	 * delete node

@@ -1,4 +1,4 @@
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
 import java.util.HashMap;
 import java.util.Map;

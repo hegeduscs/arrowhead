@@ -1,20 +1,6 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
-import eu.arrowhead.qos.database.model.ArrowheadSystem;
-import eu.arrowhead.qos.database.model.DeployedSystem;
-import eu.arrowhead.qos.database.model.Network;
-import eu.arrowhead.qos.database.model.Network_Device;
-import eu.arrowhead.qos.database.model.Node;
+
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +38,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 		List<DeployedSystem> deployedSystems = new ArrayList<>();
 		Map<String, String> networkCapabilities = new HashMap<>();
 		Map<String, String> capabilities = new HashMap<>();
-		ArrowheadSystem sC = new ArrowheadSystem("Cs", "C1", "192.168.1.67", "9997", "noAuth");
+		ArrowheadSystem_qos sC = new ArrowheadSystem_qos("Cs", "C1", "192.168.1.67", "9997", "noAuth");
 		networkCapabilities.put("bandwitdh", "100");
 		Network_Device nD = new Network_Device("intel wifi", "FF:FF:FF:FF:FF:FB", networkCapabilities, net);
 		capabilities.put("processorArchitecture", "x86");
@@ -72,7 +58,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 		deployedSystems = new ArrayList<>();
 		networkCapabilities = new HashMap<>();
 		capabilities = new HashMap<>();
-		ArrowheadSystem sP = new ArrowheadSystem("Ps", "P1", "192.168.1.67", "9997", "noAuth");
+		ArrowheadSystem_qos sP = new ArrowheadSystem_qos("Ps", "P1", "192.168.1.67", "9997", "noAuth");
 		networkCapabilities.put("bandwitdh", "100");
 
 		Network_Device nD = new Network_Device("intel wifi", "FF:FF:FF:FF:FF:FC", networkCapabilities, net);
@@ -298,7 +284,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 	/**
 	 * TODO
 	 */
-	public Node getNodeFromSystem(ArrowheadSystem system) {
+	public Node getNodeFromSystem(ArrowheadSystem_qos system) {
 		HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 		// TODO: avoid getAll and use a restrictionMap for a Map<>
 		List<Node> list = getAll(Node.class, restrictionMap);
@@ -322,7 +308,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 	}
 
 	@Override
-	public Network_Device getNetworkDeviceFromSystem(ArrowheadSystem system) {
+	public Network_Device getNetworkDeviceFromSystem(ArrowheadSystem_qos system) {
 		HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 		// TODO: avoid getAll and use a restrictionMap for a Map<>
 		List<Node> list = getAll(Node.class, restrictionMap);
@@ -401,9 +387,9 @@ public class SCSRepositoryImpl implements ISCSRepository {
 	}
 
 	@Override
-	public List<ArrowheadSystem> getAllArrowheadSystems() {
+	public List<ArrowheadSystem_qos> getAllArrowheadSystems() {
 		HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
-		return getAll(ArrowheadSystem.class, restrictionMap);
+		return getAll(ArrowheadSystem_qos.class, restrictionMap);
 	}
 
 	@Override
@@ -444,7 +430,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 	}
 
 	@Override
-	public ArrowheadSystem saveArrowheadSystem(ArrowheadSystem network) {
+	public ArrowheadSystem_qos saveArrowheadSystem(ArrowheadSystem_qos network) {
 		return save(network);
 	}
 

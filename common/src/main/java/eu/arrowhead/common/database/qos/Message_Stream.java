@@ -1,4 +1,4 @@
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
 import java.util.Map;
 import javax.persistence.CascadeType;
@@ -31,15 +31,15 @@ public class Message_Stream {
 
 	@NotNull
 	@ManyToOne(cascade = CascadeType.ALL)
-	private ArrowheadService service;
+	private ArrowheadService_qos service;
 
 	@NotNull
 	@ManyToOne(cascade = CascadeType.ALL)
-	private ArrowheadSystem consumer;
+	private ArrowheadSystem_qos consumer;
 
 	@NotNull
 	@ManyToOne(cascade = CascadeType.ALL)
-	private ArrowheadSystem provider;
+	private ArrowheadSystem_qos provider;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
 	private QoS_Resource_Reservation qualityOfService;
@@ -59,8 +59,8 @@ public class Message_Stream {
 
 	}
 
-	public Message_Stream(ArrowheadService service, ArrowheadSystem consumer,
-						  ArrowheadSystem provider,
+	public Message_Stream(ArrowheadService_qos service, ArrowheadSystem_qos consumer,
+						  ArrowheadSystem_qos provider,
 						  Map<String, String> qualityOfService,
 						  Map<String, String> configuration, String type) {
 		this.service = service;
@@ -95,7 +95,7 @@ public class Message_Stream {
 	 *
 	 * @return Returns Service.
 	 */
-	public ArrowheadService getService() {
+	public ArrowheadService_qos getService() {
 		return service;
 	}
 
@@ -104,7 +104,7 @@ public class Message_Stream {
 	 *
 	 * @param service Arrowhead Service.
 	 */
-	public void setService(ArrowheadService service) {
+	public void setService(ArrowheadService_qos service) {
 		this.service = service;
 		getCode();
 	}
@@ -114,7 +114,7 @@ public class Message_Stream {
 	 *
 	 * @return Arrowhead System.
 	 */
-	public ArrowheadSystem getConsumer() {
+	public ArrowheadSystem_qos getConsumer() {
 		return consumer;
 	}
 
@@ -123,7 +123,7 @@ public class Message_Stream {
 	 *
 	 * @param consumer Arrowhead System.
 	 */
-	public void setConsumer(ArrowheadSystem consumer) {
+	public void setConsumer(ArrowheadSystem_qos consumer) {
 		this.consumer = consumer;
 		getCode();
 	}
@@ -133,7 +133,7 @@ public class Message_Stream {
 	 *
 	 * @return Arrowhead System.
 	 */
-	public ArrowheadSystem getProvider() {
+	public ArrowheadSystem_qos getProvider() {
 		return provider;
 	}
 
@@ -142,7 +142,7 @@ public class Message_Stream {
 	 *
 	 * @param provider Arrowhead System
 	 */
-	public void setProvider(ArrowheadSystem provider) {
+	public void setProvider(ArrowheadSystem_qos provider) {
 		this.provider = provider;
 		getCode();
 	}

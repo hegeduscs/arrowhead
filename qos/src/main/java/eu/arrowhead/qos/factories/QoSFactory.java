@@ -10,10 +10,7 @@
 */
 package eu.arrowhead.qos.factories;
 
-import eu.arrowhead.qos.database.model.IQoSRepository;
-import eu.arrowhead.qos.database.model.QoSRepositoryImpl;
-import eu.arrowhead.qos.database.model.Message_Stream;
-import eu.arrowhead.qos.database.model.QoS_Resource_Reservation;
+import eu.arrowhead.common.database.qos.*;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.QoSReservationForm;
@@ -54,7 +51,7 @@ public class QoSFactory {
 	/**
 	 * Return all the QoS reservations of the selected system.
 	 *
-	 * @param provider ArrowheadSystem.
+	 * @param provider ArrowheadSystem_qos.
 	 *
 	 * @return Returns all the QoSReservations.
 	 */
@@ -67,10 +64,10 @@ public class QoSFactory {
 	/**
 	 * Saves a messagae stream.
 	 *
-	 * @param provider ArrowheadSystem that provides the service.
-	 * @param consumer ArrowheadSystem that consumes the service.
-	 * @param service ArrowheadService is the service that will be consumed and
-	 * provided.
+	 * @param provider ArrowheadSystem_qos that provides the service.
+	 * @param consumer ArrowheadSystem_qos that consumes the service.
+	 * @param service ArrowheadService_qos is the service that will be consumed and
+ provided.
 	 * @param qualityOfService Requestet QoS.
 	 * @param messageConfigurationParameters Stream configuration parameters
 	 * between consumer and provider.
@@ -103,8 +100,7 @@ public class QoSFactory {
 		List<QoSReservationForm> output = new ArrayList<>();
 		for (Message_Stream m : repo.
 			getQoS_Resource_ReservationsFromFilter(filter)) {
-			output.
-				add(new QoSReservationForm(convertToDTO(m.getService()), convertToDTO(m.
+			output.add(new QoSReservationForm(convertToDTO(m.getService()), convertToDTO(m.
 										   getProvider()),
 										   convertToDTO(m.getConsumer()), m.
 										   getQualityOfService().
@@ -162,7 +158,7 @@ public class QoSFactory {
 	/**
 	 * Get arrowhead system
 	 *
-	 * @param system ArrowheadSystem to be searched on db.
+	 * @param system ArrowheadSystem_qos to be searched on db.
 	 * @return Returns the system found on the db.
 	 */
 	public ArrowheadSystem getArrowheadSystem(ArrowheadSystem system) {
@@ -172,7 +168,7 @@ public class QoSFactory {
 	/**
 	 * Get service.
 	 *
-	 * @param service ArrowheadService to be searched on db.
+	 * @param service ArrowheadService_qos to be searched on db.
 	 * @return Returns a arrowheadService.
 	 */
 	public ArrowheadService getArrowheadService(ArrowheadService service) {
@@ -218,10 +214,10 @@ public class QoSFactory {
 		return repo.deleteArrowheadService(convertFromDTO(service));
 	}
 
-	protected static eu.arrowhead.qos.database.model.ArrowheadSystem convertFromDTO(
+	protected static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
 		eu.arrowhead.common.model.ArrowheadSystem in) {
 
-		eu.arrowhead.qos.database.model.ArrowheadSystem out = new eu.arrowhead.qos.database.model.ArrowheadSystem();
+		eu.arrowhead.common.database.qos.ArrowheadSystem_qos out = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
 
 		out.setAuthenticationInfo(in.getAuthenticationInfo());
 		out.setAddress(in.getAddress());
@@ -233,7 +229,7 @@ public class QoSFactory {
 	}
 
 	protected static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
-		eu.arrowhead.qos.database.model.ArrowheadSystem in) {
+		eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
 
 		eu.arrowhead.common.model.ArrowheadSystem out = new eu.arrowhead.common.model.ArrowheadSystem();
 
@@ -247,24 +243,24 @@ public class QoSFactory {
 	}
 
 	protected static List<ArrowheadSystem> convertToDTO_List(
-		List<eu.arrowhead.qos.database.model.ArrowheadSystem> in) {
+		List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
 		if (in == null) {
 			return null;
 		}
 		List<ArrowheadSystem> out = new ArrayList<>();
-		for (eu.arrowhead.qos.database.model.ArrowheadSystem system : in) {
+		for (eu.arrowhead.common.database.qos.ArrowheadSystem_qos system : in) {
 			out.add(convertToDTO(system));
 		}
 
 		return out;
 	}
 
-	protected static List<eu.arrowhead.qos.database.model.ArrowheadSystem> convertFromDTO_List(
+	protected static List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> convertFromDTO_List(
 		List<ArrowheadSystem> in) {
 		if (in == null) {
 			return null;
 		}
-		List<eu.arrowhead.qos.database.model.ArrowheadSystem> out = new ArrayList<>();
+		List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> out = new ArrayList<>();
 		for (ArrowheadSystem system : in) {
 			out.add(convertFromDTO(system));
 		}
@@ -272,10 +268,10 @@ public class QoSFactory {
 		return out;
 	}
 
-	protected static eu.arrowhead.qos.database.model.ArrowheadService convertFromDTO(
+	protected static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(
 		eu.arrowhead.common.model.ArrowheadService in) {
 
-		eu.arrowhead.qos.database.model.ArrowheadService out = new eu.arrowhead.qos.database.model.ArrowheadService();
+		eu.arrowhead.common.database.qos.ArrowheadService_qos out = new eu.arrowhead.common.database.qos.ArrowheadService_qos();
 
 		out.setInterfaces(in.getInterfaces());
 		out.setServiceDefinition(in.getServiceDefinition());
@@ -285,7 +281,7 @@ public class QoSFactory {
 	}
 
 	protected static eu.arrowhead.common.model.ArrowheadService convertToDTO(
-		eu.arrowhead.qos.database.model.ArrowheadService in) {
+		eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
 
 		eu.arrowhead.common.model.ArrowheadService out = new eu.arrowhead.common.model.ArrowheadService();
 
@@ -297,13 +293,13 @@ public class QoSFactory {
 	}
 
 	protected static List<ArrowheadService> convertToDTO_ArrowheadServices(
-		List<eu.arrowhead.qos.database.model.ArrowheadService> in) {
+		List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
 
 		if (in == null) {
 			return null;
 		}
 		List<ArrowheadService> out = new ArrayList<>();
-		for (eu.arrowhead.qos.database.model.ArrowheadService system : in) {
+		for (eu.arrowhead.common.database.qos.ArrowheadService_qos system : in) {
 			out.add(convertToDTO(system));
 		}
 

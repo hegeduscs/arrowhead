@@ -1,19 +1,5 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
-package eu.arrowhead.qos.database.model;
+package eu.arrowhead.common.database.qos;
 
-import eu.arrowhead.qos.database.model.ArrowheadService;
-import eu.arrowhead.qos.database.model.ArrowheadSystem;
-import eu.arrowhead.qos.database.model.Message_Stream;
-import eu.arrowhead.qos.database.model.QoS_Resource_Reservation;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -272,7 +258,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
 
 	@Override
 	public List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(
-		ArrowheadSystem system) {
+		ArrowheadSystem_qos system) {
 		List<Message_Stream> list = getAllMessage_Streams();
 		List<QoS_Resource_Reservation> output = new ArrayList<>();
 		for (Message_Stream mS : list) {
@@ -298,15 +284,15 @@ public class QoSRepositoryImpl implements IQoSRepository {
 	}
 
 	@Override
-	public List<ArrowheadSystem> getAllArrowheadSystems() {
+	public List<ArrowheadSystem_qos> getAllArrowheadSystems() {
 		HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
-		return getAll(ArrowheadSystem.class, restrictionMap);
+		return getAll(ArrowheadSystem_qos.class, restrictionMap);
 	}
 
 	@Override
-	public List<ArrowheadService> getAllArrowheadServices() {
+	public List<ArrowheadService_qos> getAllArrowheadServices() {
 		HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
-		return getAll(ArrowheadService.class, restrictionMap);
+		return getAll(ArrowheadService_qos.class, restrictionMap);
 	}
 
 	@Override
@@ -317,19 +303,19 @@ public class QoSRepositoryImpl implements IQoSRepository {
 	}
 
 	@Override
-	public ArrowheadSystem getArrowheadSystem(ArrowheadSystem system) {
+	public ArrowheadSystem_qos getArrowheadSystem(ArrowheadSystem_qos system) {
 		HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 		restrictionMap.put("system_group", system.getSystemGroup());
 		restrictionMap.put("system_name", system.getSystemName());
-		return get(ArrowheadSystem.class, restrictionMap);
+		return get(ArrowheadSystem_qos.class, restrictionMap);
 	}
 
 	@Override
-	public ArrowheadService getArrowheadService(ArrowheadService service) {
+	public ArrowheadService_qos getArrowheadService(ArrowheadService_qos service) {
 		HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 		restrictionMap.put("service_group", service.getServiceGroup());
 		restrictionMap.put("service_definition", service.getServiceDefinition());
-		return get(ArrowheadService.class, restrictionMap);
+		return get(ArrowheadService_qos.class, restrictionMap);
 	}
 
 	@Override
@@ -349,8 +335,8 @@ public class QoSRepositoryImpl implements IQoSRepository {
 	}
 
 	@Override
-	public boolean deleteArrowheadSystem(ArrowheadSystem system) {
-		ArrowheadSystem mS = getArrowheadSystem(system);
+	public boolean deleteArrowheadSystem(ArrowheadSystem_qos system) {
+		ArrowheadSystem_qos mS = getArrowheadSystem(system);
 		if (mS == null) {
 			return false;
 		}
@@ -359,8 +345,8 @@ public class QoSRepositoryImpl implements IQoSRepository {
 	}
 
 	@Override
-	public boolean deleteArrowheadService(ArrowheadService service) {
-		ArrowheadService mS = getArrowheadService(service);
+	public boolean deleteArrowheadService(ArrowheadService_qos service) {
+		ArrowheadService_qos mS = getArrowheadService(service);
 		if (mS == null) {
 			return false;
 		}
