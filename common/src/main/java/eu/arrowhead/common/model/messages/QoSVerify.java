@@ -1,12 +1,11 @@
 package eu.arrowhead.common.model.messages;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class QoSVerify {
@@ -14,19 +13,23 @@ public class QoSVerify {
 	private ArrowheadSystem consumer;
 	private ArrowheadService requestedService;
 	private List<ArrowheadSystem> provider = new ArrayList<ArrowheadSystem>();
-	private String requestedQoS;
+	private Map<String, String> requestedQoS;
+	private Map<String, String> commands;
 
 	public QoSVerify() {
 		super();
 	}
 
-	public QoSVerify(ArrowheadSystem consumer, ArrowheadService requestedService, List<ArrowheadSystem> provider,
-			String requestedQoS) {
+	public QoSVerify(ArrowheadSystem consumer, ArrowheadService requestedService,
+					 List<ArrowheadSystem> provider,
+					 Map<String, String> specifications,
+					 Map<String, String> commands) {
 		super();
 		this.consumer = consumer;
 		this.requestedService = requestedService;
 		this.provider = provider;
-		this.requestedQoS = requestedQoS;
+		this.requestedQoS = specifications;
+		this.commands = commands;
 	}
 
 	public ArrowheadSystem getConsumer() {
@@ -53,12 +56,20 @@ public class QoSVerify {
 		this.provider = provider;
 	}
 
-	public String getRequestedQoS() {
+	public Map<String, String> getRequestedQoS() {
 		return requestedQoS;
 	}
 
-	public void setRequestedQoS(String requestedQoS) {
+	public void setRequestedQoS(Map<String, String> requestedQoS) {
 		this.requestedQoS = requestedQoS;
+	}
+
+	public Map<String, String> getCommands() {
+		return commands;
+	}
+
+	public void setCommands(Map<String, String> commands) {
+		this.commands = commands;
 	}
 
 }
