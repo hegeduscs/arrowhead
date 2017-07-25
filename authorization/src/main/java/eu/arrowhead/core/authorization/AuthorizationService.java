@@ -19,8 +19,8 @@ import javax.ws.rs.core.Response;
 
 import com.google.gson.Gson;
 
-import eu.arrowhead.common.configuration.DatabaseManager;
-import eu.arrowhead.common.configuration.SysConfig;
+import eu.arrowhead.common.DatabaseManager;
+import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
@@ -70,7 +70,7 @@ public class AuthorizationService {
 		if (consumerCloud.getCloudName() != null) {
 			c = c.concat(".").concat(consumerCloud.getCloudName()).concat(".").concat(consumerCloud.getOperator());
 		} else {
-			ArrowheadCloud ownCloud = SysConfig.getOwnCloud();
+			ArrowheadCloud ownCloud = Utility.getOwnCloud();
 			c = c.concat(".").concat(ownCloud.getCloudName()).concat(".").concat(ownCloud.getOperator());
 		}
 		rawTokenInfo.setC(c);

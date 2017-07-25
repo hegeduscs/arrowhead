@@ -11,3 +11,4 @@ ping.scheduled=false
 ping.interval=10
 db_user=root
 db_password=root
+db_address=jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead

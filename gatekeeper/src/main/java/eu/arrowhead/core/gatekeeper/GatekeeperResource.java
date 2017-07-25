@@ -20,7 +20,6 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.model.ArrowheadCloud;
@@ -77,14 +76,14 @@ public class GatekeeperResource {
 					+ "Mandatory fields: serviceGroup, serviceDefinition, interfaces.");
 		}
 
-		ArrowheadCloud ownCloud = SysConfig.getOwnCloud();
+		ArrowheadCloud ownCloud = Utility.getOwnCloud();
 		log.info("Own cloud info acquired");
 		GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
 		
 		//If no preferred Clouds were given, send GSD poll requests to the neighbor Clouds
 		List<String> cloudURIs = new ArrayList<String>();
 		if(requestForm.getSearchPerimeter() == null || requestForm.getSearchPerimeter().isEmpty()){
-			cloudURIs = SysConfig.getNeighborCloudURIs();
+			cloudURIs = Utility.getNeighborCloudURIs();
 			log.info(cloudURIs.size() + " NeighborCloud URI(s) acquired.");
 		}
 		//If there are preferred Clouds given, send GSD poll requests there
@@ -97,7 +96,7 @@ public class GatekeeperResource {
 			String URI = null;
 			for(ArrowheadCloud cloud : preferredClouds){
 				try{
-					URI = SysConfig.getURI(cloud.getAddress(), cloud.getPort(), 
+					URI = Utility.getURI(cloud.getAddress(), cloud.getPort(), 
 							cloud.getGatekeeperServiceURI(), false);
 				}
 				//We skip the clouds with missing information
@@ -153,7 +152,7 @@ public class GatekeeperResource {
 		ArrowheadCloud cloud = gsdPoll.getRequesterCloud();
 		ArrowheadService service = gsdPoll.getRequestedService();
 		InterCloudAuthRequest authRequest = new InterCloudAuthRequest(cloud, service, false);
-		String authURI = SysConfig.getAuthorizationURI();
+		String authURI = Utility.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
 		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
 		log.info("Authorization System queried for requester Cloud: " + 
@@ -170,10 +169,10 @@ public class GatekeeperResource {
 			log.info("Requester Cloud is AUTHORIZED");
 			
 			//Compiling the URI and the request payload
-			String srURI = SysConfig.getServiceRegistryURI();
+			String srURI = Utility.getServiceRegistryURI();
 			srURI = UriBuilder.fromPath(srURI).path(service.getServiceGroup())
 					.path(service.getServiceDefinition()).toString();
-			String tsig_key = SysConfig.getCoreSystem("serviceregistry").getAuthenticationInfo();
+			String tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
 			ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), 
 					service.getInterfaces(), false, false, tsig_key);
 			
@@ -187,7 +186,7 @@ public class GatekeeperResource {
 			}
 			
 			log.info("Sending back GSD answer to requester Cloud.");
-			GSDAnswer answer = new GSDAnswer(service, SysConfig.getOwnCloud());
+			GSDAnswer answer = new GSDAnswer(service, Utility.getOwnCloud());
 			return Response.ok().entity(answer).build();
 		}
     }
@@ -214,11 +213,11 @@ public class GatekeeperResource {
     	//Compiling the payload and then getting the URI
     	log.info("Compiling ICN proposal");
     	ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), 
-    			requestForm.getAuthenticationInfo(), SysConfig.getOwnCloud(), 
+    			requestForm.getAuthenticationInfo(), Utility.getOwnCloud(), 
     			requestForm.getRequesterSystem(), requestForm.getPreferredProviders(),
     			requestForm.getNegotiationFlags());
     	
-    	String icnURI = SysConfig.getURI(requestForm.getTargetCloud().getAddress(),
+    	String icnURI = Utility.getURI(requestForm.getTargetCloud().getAddress(),
     			requestForm.getTargetCloud().getPort(), 
     			requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     	icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
@@ -252,7 +251,7 @@ public class GatekeeperResource {
 		ArrowheadService service = icnProposal.getRequestedService();
 		InterCloudAuthRequest authRequest = new InterCloudAuthRequest(cloud, service, false);
 		
-		String authURI = SysConfig.getAuthorizationURI();
+		String authURI = Utility.getAuthorizationURI();
 		authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
 		Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
 		log.info("Authorization System queried for requester Cloud: " + cloud.toString());
@@ -285,7 +284,7 @@ public class GatekeeperResource {
 			ServiceRequestForm serviceRequestForm = 
 					new ServiceRequestForm(icnProposal.getRequesterSystem(), service, null,
 							orchestrationFlags, null, icnProposal.getPreferredProviders(), null);
-			String orchestratorURI = SysConfig.getOrchestratorURI();
+			String orchestratorURI = Utility.getOrchestratorURI();
 			orchestratorURI = UriBuilder.fromPath(orchestratorURI).path("orchestration").toString();
 			
 			log.info("Sending ServiceRequestForm to the Orchestrator. URI: " + orchestratorURI);

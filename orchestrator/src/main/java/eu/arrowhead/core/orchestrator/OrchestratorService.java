@@ -1,7 +1,6 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.configuration.SysConfig;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.exception.*;
 import eu.arrowhead.common.model.*;
@@ -384,10 +383,10 @@ public final class OrchestratorService {
         log.info("Entered the queryServiceRegistry method.");
 
         //Compiling the URI and the request payload
-        String srURI = SysConfig.getServiceRegistryURI();
+        String srURI = Utility.getServiceRegistryURI();
         srURI = UriBuilder.fromPath(srURI).path(service.getServiceGroup())
                 .path(service.getServiceDefinition()).toString();
-        String tsig_key = SysConfig.getCoreSystem("serviceregistry").getAuthenticationInfo();
+        String tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
         ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(),
                 service.getInterfaces(), pingProviders, metadataSearch, tsig_key);
 
@@ -438,7 +437,7 @@ public final class OrchestratorService {
         log.info("Entered the queryAuthorization method.");
 
         //Compiling the URI and the request payload
-        String URI = SysConfig.getAuthorizationURI();
+        String URI = Utility.getAuthorizationURI();
         URI = UriBuilder.fromPath(URI).path("intracloud").toString();
         IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList,
                 service, false);
@@ -587,7 +586,7 @@ public final class OrchestratorService {
         log.info("Entered the startGSD method.");
 
         //Compiling the URI and the request payload
-        String URI = SysConfig.getGatekeeperURI();
+        String URI = Utility.getGatekeeperURI();
         URI = UriBuilder.fromPath(URI).path("init_gsd").toString();
         GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds);
 
@@ -720,7 +719,7 @@ public final class OrchestratorService {
         log.info("Entered the startICN method.");
 
         //Compiling the URI, sending the request, do sanity check on the returned result
-        String URI = SysConfig.getGatekeeperURI();
+        String URI = Utility.getGatekeeperURI();
         URI = UriBuilder.fromPath(URI).path("init_icn").toString();
         Response response = Utility.sendRequest(URI, "PUT", requestForm);
         ICNResult result = response.readEntity(ICNResult.class);
@@ -820,7 +819,7 @@ public final class OrchestratorService {
 
         //Replacing this method with a more direct solution, without HTTP call
         /*//Compiling the URI and the request payload
-		String URI = SysConfig.getOrchestratorURI();
+		String URI = Utility.getOrchestratorURI();
 		URI = UriBuilder.fromPath(URI).path("store").toString();
 		OrchestrationStoreQuery query = new OrchestrationStoreQuery(service, consumer, onlyActive);
 		
@@ -963,7 +962,7 @@ public final class OrchestratorService {
             QoSVerify qosVerify) {
         Client client = ClientBuilder.newClient();
         log.info("orchestrator: inside the getQoSVerificationResponse function");
-        String URI = SysConfig.getQoSURI() + "/QoSVerify";
+        String URI = Utility.getQoSURI() + "/QoSVerify";
         log.
                 info("orchestrator: sending QoSVerify to this address: " + URI);
         try {
@@ -988,7 +987,7 @@ public final class OrchestratorService {
      */
     private static QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
         log.info("orchestrator: inside the doQoSReservation function");
-        String URI = SysConfig.getQoSURI() + "/QoSReserve";
+        String URI = Utility.getQoSURI() + "/QoSReserve";
         log.
                 info("orchestrator: sending QoSReserve to this address: " + URI);
         Response response = Utility.sendRequest(URI, "PUT", qosReserve);

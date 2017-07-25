@@ -1,4 +1,4 @@
-package eu.arrowhead.common.configuration;
+package eu.arrowhead.common;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,21 +25,16 @@ public class DatabaseManager {
 	private static DatabaseManager instance = null;
 	private static SessionFactory sessionFactory;
 	private static Properties prop;
-	//TODO outsource the db address to prop file
-	/*private static final String dbUser = getProp().getProperty("db_user", "root");
+	private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead");
+	private static final String dbUser = getProp().getProperty("db_user", "root");
 	private static final String dbPassword = getProp().getProperty("db_password", "root");
-	private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead");*/
-	private static final String dbUser = "admin";
-	private static final String dbPassword = "123Admin!";
-	private static final String dbAddress = "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead";
 
-	//TODO commit back this change - dbAddress!
 	private DatabaseManager() {
 		if (sessionFactory == null) {
 			sessionFactory = new Configuration().configure()
+					.setProperty("hibernate.connection.url", dbAddress)
 					.setProperty("hibernate.connection.username", dbUser)
-					.setProperty("hibernate.connection.password", dbPassword)
-					.setProperty("hibernate.connection.url", dbAddress).buildSessionFactory();
+					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
 		}
 	}
 
@@ -52,8 +47,10 @@ public class DatabaseManager {
 
 	public SessionFactory getSessionFactory() {
 		if (sessionFactory == null) {
-			sessionFactory = new Configuration().configure().setProperty("hibernate.connection.username", dbUser)
-					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();	
+			sessionFactory = new Configuration().configure()
+					.setProperty("hibernate.connection.url", dbAddress)
+					.setProperty("hibernate.connection.username", dbUser)
+					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
 		}
 		return sessionFactory;
 	}
