@@ -7,3 +7,4 @@ base_uri=http://0.0.0.0:8444/orchestrator
 base_uri_secured=https://0.0.0.0:8445/orchestrator
 db_user=root
 db_password=root
+db_address=jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead
