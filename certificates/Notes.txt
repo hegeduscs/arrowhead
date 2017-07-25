@@ -1,0 +1,21 @@
+How to extract crt and key files from jks:
+
+1. Export the .der file
+keytool -export -alias sample -file sample.der -keystore my.jks
+
+2.Convert the .der file to unencrypted PEM (crt file)
+openssl x509 -inform der -in sample.der -out sample.crt
+
+3.Export the .p12 file
+keytool -importkeystore -srckeystore my.jks -destkeystore keystore.p12 -deststoretype PKCS12 -destkeypass pass
+
+4.Convert the .p12 file to unencrypted PEM (key file)
+openssl pkcs12 -in keystore.p12 -nodes -nocerts -out server.key
+
+
+How to export public key in Base64: 
+1. Open the jks in Keystore Explorer
+2. Right click on certificate
+3. Export -> Export Public Key
+4. Remove --BEGIN-- and --END-- from .openssl file
+5. Insert into Auth_info field in Arrowhead database

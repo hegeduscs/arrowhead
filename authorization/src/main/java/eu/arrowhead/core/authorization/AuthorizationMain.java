@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
@@ -25,25 +26,35 @@ public class AuthorizationMain {
 
 	private static Logger log = Logger.getLogger(AuthorizationMain.class.getName());
 	private static Properties prop;
-	
+
 	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8448/");
 	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8449/");
-	
+
 	public static HttpServer server = null;
 	public static HttpServer secureServer = null;
+	public static X509Certificate serverCert = null;
+	public static PrivateKey privateKey = null;
 
 	public static void main(String[] args) throws IOException {
 		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
-		
+
+		try {
+			String keystorePath = getProp().getProperty("ssl.keystore");
+			String keystorePass = getProp().getProperty("ssl.keystorepass");
+			KeyStore keyStore = eu.arrowhead.common.ssl.SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+			privateKey = eu.arrowhead.common.ssl.SecurityUtils.getPrivateKey(keyStore, keystorePass);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
 		boolean daemon = false;
 		int mode = 0;
-		
-		for(int i=0;i<args.length;++i) {			
-			if(args[i].equals("-d")) {
+
+		for (int i = 0; i < args.length; ++i) {
+			if (args[i].equals("-d")) {
 				daemon = true;
 				System.out.println("Starting server as daemon!");
-			}
-			else if(args[i].equals("-m")) {
+			} else if (args[i].equals("-m")) {
 				++i;
 				switch (args[i]) {
 				case "secure":
@@ -53,12 +64,12 @@ public class AuthorizationMain {
 					mode = 2;
 					break;
 				default:
-					log.error("Unkown mode: " + args[i]);					
-				}	
-				
+					log.error("Unkown mode: " + args[i]);
+				}
+
 			}
 		}
-		
+
 		switch (mode) {
 		case 0:
 			server = startServer();
@@ -72,42 +83,39 @@ public class AuthorizationMain {
 			server = startServer();
 			secureServer = startSecureServer();
 			break;
-		}	
-		
-		if(daemon) {
+		}
+
+		if (daemon) {
 			System.out.println("In daemon mode, process will terminate for TERM signal...");
-	        Runtime.getRuntime().addShutdownHook(new Thread()
-	        {
-	            @Override
-	            public void run()
-	            {
-	            	System.out.println("Received TERM signal, shutting down...");
-	            	shutdown();
-	            }
-	        });
-		}		
-		else {
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				@Override
+				public void run() {
+					System.out.println("Received TERM signal, shutting down...");
+					shutdown();
+				}
+			});
+		} else {
 			System.out.println("Press enter to shutdown Authorization Server(s)...");
-	        System.in.read();	        
-	        shutdown();
+			System.in.read();
+			shutdown();
 		}
 	}
-	
+
 	public static void shutdown() {
-        if(server != null){
-        	log.info("Stopping server at: " + BASE_URI);
-        	server.shutdownNow();
-        }
-        if(secureServer != null){
-        	log.info("Stopping server at: " + BASE_URI_SECURED);
-        	secureServer.shutdownNow();
-        }        
-        System.out.println("Authorization Server(s) stopped");
+		if (server != null) {
+			log.info("Stopping server at: " + BASE_URI);
+			server.shutdownNow();
+		}
+		if (secureServer != null) {
+			log.info("Stopping server at: " + BASE_URI_SECURED);
+			secureServer.shutdownNow();
+		}
+		System.out.println("Authorization Server(s) stopped");
 	}
-	
+
 	public static HttpServer startServer() throws IOException {
 		log.info("Starting server at: " + BASE_URI);
-		
+
 		URI uri = UriBuilder.fromUri(BASE_URI).build();
 
 		final ResourceConfig config = new ResourceConfig();
@@ -115,16 +123,16 @@ public class AuthorizationMain {
 		config.packages("eu.arrowhead.common");
 
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
-		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);		
-		server.start();		
+		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+		server.start();
 		return server;
 	}
-	
+
 	public static HttpServer startSecureServer() throws IOException {
 		log.info("Starting server at: " + BASE_URI_SECURED);
-		
+
 		URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-		
+
 		final ResourceConfig config = new ResourceConfig();
 		config.registerClasses(AuthorizationResource.class);
 		config.packages("eu.arrowhead.common");
@@ -136,32 +144,30 @@ public class AuthorizationMain {
 		String keyPass = getProp().getProperty("ssl.keypass");
 		String truststorePath = getProp().getProperty("ssl.truststore");
 		String truststorePass = getProp().getProperty("ssl.truststorepass");
-		
+
 		sslCon.setKeyStoreFile(keystorePath);
 		sslCon.setKeyStorePass(keystorePass);
 		sslCon.setKeyPass(keyPass);
 		sslCon.setTrustStoreFile(truststorePath);
 		sslCon.setTrustStorePass(truststorePass);
-		
-		X509Certificate serverCert = null;
+
 		try {
 			KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
 			serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
 		} catch (Exception ex) {
 			throw new AuthenticationException(ex.getMessage());
-		}  				
+		}
 		String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
 		log.info("Certificate of the secure server: " + serverCN);
 		config.property("server_common_name", serverCN);
 
-		final HttpServer server = GrizzlyHttpServerFactory.
-				createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
-				.setClientMode(false).setNeedClientAuth(true));
+		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true,
+				new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
 		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
 		server.start();
 		return server;
 	}
-	
+
 	public synchronized static Properties getProp() {
 		try {
 			if (prop == null) {
@@ -175,9 +181,8 @@ public class AuthorizationMain {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		
+
 		return prop;
 	}
-	
 
 }
