@@ -284,7 +284,7 @@ public class GatekeeperResource {
 			
 			ServiceRequestForm serviceRequestForm = 
 					new ServiceRequestForm(icnProposal.getRequesterSystem(), service, null,
-							orchestrationFlags, null, icnProposal.getPreferredProviders());
+							orchestrationFlags, null, icnProposal.getPreferredProviders(), null);
 			String orchestratorURI = SysConfig.getOrchestratorURI();
 			orchestratorURI = UriBuilder.fromPath(orchestratorURI).path("orchestration").toString();
 			
