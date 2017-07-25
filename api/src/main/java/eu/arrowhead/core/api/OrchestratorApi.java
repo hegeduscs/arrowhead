@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
-import eu.arrowhead.common.configuration.DatabaseManager;
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
