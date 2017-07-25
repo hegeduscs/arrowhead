@@ -2,20 +2,11 @@ package eu.arrowhead.common.model.messages;
 
 public class RawTokenInfo {
 
-	private String d;
 	private String s;
 	private String c;
-	private String i;
+	private Long e;
 	
 	public RawTokenInfo() {
-	}
-
-	public String getD() {
-		return d;
-	}
-
-	public void setD(String d) {
-		this.d = d;
 	}
 
 	public String getS() {
@@ -34,16 +25,16 @@ public class RawTokenInfo {
 		this.c = c;
 	}
 
-	public String getI() {
-		return i;
+	public Long getE() {
+		return e;
 	}
 
-	public void setI(String i) {
-		this.i = i;
+	public void setE(Long e) {
+		this.e = e;
 	}
 
 	@Override
 	public String toString() {
-		return "ClassPojo [d = " + d + ", s = " + s + ", c = " + c + ", i = " + i + "]";
+		return "ClassPojo [s = " + s + ", c = " + c + ", e = " + e + "]";
 	}
 }

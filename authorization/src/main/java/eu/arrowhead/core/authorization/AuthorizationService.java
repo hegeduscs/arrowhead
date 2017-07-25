@@ -75,16 +75,14 @@ public class AuthorizationService {
 		}
 		rawTokenInfo.setC(c);
 		
-		//TODO ?????
-		String s = service.getInterfaces() + "." + service.getServiceDefinition() + "." + service.getServiceGroup(); 
+		String s = service.getInterfaces().get(0) + "." + service.getServiceDefinition() + "." + service.getServiceGroup();
 		rawTokenInfo.setS(s);
 		
-		String i = Long.toString(System.currentTimeMillis());
-		rawTokenInfo.setI(i);
-		
-		String d = Integer.toString(duration);
-		rawTokenInfo.setD(d);
-
+		long endTime = System.currentTimeMillis() + duration;
+		/*String e = Long.toString(endTime);
+		rawTokenInfo.setE(e);
+*/
+		rawTokenInfo.setE(endTime);
 		Gson gson = new Gson();
 		String json = gson.toJson(rawTokenInfo);
 		if (json.length() > 200) {
