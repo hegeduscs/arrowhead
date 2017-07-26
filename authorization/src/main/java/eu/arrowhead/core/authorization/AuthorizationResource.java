@@ -87,7 +87,7 @@ public class AuthorizationResource {
 				tokenGenerationResponse.setSignature(signature);
 			}
 		} catch (Exception ex) {
-			
+			ex.printStackTrace();
 			return Response.status(500).build();
 		}
 		

@@ -67,7 +67,7 @@ public class AuthorizationService {
 		RawTokenInfo rawTokenInfo = new RawTokenInfo();
 
 		String c = consumer.getSystemName() + "." + consumer.getSystemGroup();
-		if (consumerCloud.getCloudName() != null) {
+		if (consumerCloud != null) {
 			c = c.concat(".").concat(consumerCloud.getCloudName()).concat(".").concat(consumerCloud.getOperator());
 		} else {
 			ArrowheadCloud ownCloud = Utility.getOwnCloud();

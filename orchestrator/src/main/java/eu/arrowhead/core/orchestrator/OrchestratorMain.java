@@ -105,7 +105,7 @@ public class OrchestratorMain {
         	log.info("Stopping server at: " + BASE_URI_SECURED);
         	secureServer.shutdownNow();
         }        
-        System.out.println("Authorization Server(s) stopped");
+        System.out.println("Orchestrator Server(s) stopped");
 	}
 	
 	public static HttpServer startServer() throws IOException {

@@ -94,7 +94,7 @@ public final class OrchestratorService {
 			/**
 			 * **********************************************************
 			 */
-			List<ArrowheadSystem> possibleProviders = new ArrayList<>();
+			/*List<ArrowheadSystem> possibleProviders = new ArrayList<>();
 			// percorrer os provided service
 			for (ProvidedService system : psList) {
 				possibleProviders.add(system.getProvider());
@@ -104,7 +104,7 @@ public final class OrchestratorService {
 				 * *********************************************************
 				 * ******************* TODO: Verify QoS *********************
 				 * **********************************************************
-				 */
+				 *
 				QoSVerify qosVerification;
 
 				qosVerification = new QoSVerify(srf.getRequesterSystem(), srf.getRequestedService(), possibleProviders,
@@ -122,13 +122,13 @@ public final class OrchestratorService {
 						}
 					}
 				}
-			}
+			}*/
 			/**
 			 * ***********************************************************
 			 * ***************** TODO: Reverve QoS ***********************
 			 * ***********************************************************
 			 */
-			QoSReserve qosReservation;
+			/*QoSReserve qosReservation;
 			QoSReservationResponse qosReservationResponse;
 			for (ArrowheadSystem system : possibleProviders) {
 				qosReservation = new QoSReserve(system, srf.getRequesterSystem(), srf.getRequestedService(),
@@ -139,7 +139,7 @@ public final class OrchestratorService {
 				if (!possibleProviders.contains(pS.getProvider())) {
 					psList.remove(pS);
 				}
-			}
+			}*/
 
 			// All the filtering is done, need to compile the response
 			return compileOrchestrationResponse(psList, true, srf);
@@ -951,7 +951,6 @@ public final class OrchestratorService {
 			boolean generateToken, ServiceRequestForm srf) {
 		log.info("Entered the (first) compileOrchestrationResponse method.");
 
-		String token = null;
 		List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
 		List<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
 		
