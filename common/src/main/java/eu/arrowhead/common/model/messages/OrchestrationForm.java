@@ -19,12 +19,13 @@ public class OrchestrationForm {
 	}
 
 	public OrchestrationForm(ArrowheadService service, ArrowheadSystem provider, String serviceURI,
-			String authorizationToken, String instruction) {
+			String authorizationToken, String instruction, String signature) {
 		this.service = service;
 		this.provider = provider;
 		this.serviceURI = serviceURI;
 		this.authorizationToken = authorizationToken;
 		this.instruction = instruction;
+		this.signature = signature;
 	}
 
 	public ArrowheadService getService() {

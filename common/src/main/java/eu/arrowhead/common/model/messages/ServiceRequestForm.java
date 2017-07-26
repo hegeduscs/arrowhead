@@ -13,12 +13,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class ServiceRequestForm {
 
 	private ArrowheadSystem requesterSystem;
+	private ArrowheadCloud requesterCloud;
 	private ArrowheadService requestedService;
-	private Map<String, String> requestedQoS;
 	private Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
-	private List<ArrowheadCloud> preferredClouds = new ArrayList<ArrowheadCloud>();
 	private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
-	private Map<String, String> commands;
+	private List<ArrowheadCloud> preferredClouds = new ArrayList<ArrowheadCloud>();
+	private Map<String, String> requestedQoS = new HashMap<String, String>();
+	private Map<String, String> commands = new HashMap<String, String>();
 
 	public ServiceRequestForm() {
 		this.orchestrationFlags.put("triggerInterCloud", false);
@@ -30,20 +31,39 @@ public class ServiceRequestForm {
 		this.orchestrationFlags.put("storeOnlyActive", false);
 		this.orchestrationFlags.put("matchmaking", false);
 		this.orchestrationFlags.put("onlyPreferred", false);
-		this.orchestrationFlags.put("generateToken", false);
 	}
 
-	public ServiceRequestForm(ArrowheadSystem requesterSystem,
-							  ArrowheadService requestedService,
-							  Map<String, String> requestedQoS,
+	public ServiceRequestForm(ArrowheadSystem requesterSystem, 
+							  ArrowheadCloud requesterCloud,
+							  ArrowheadService requestedService, 
+							  Map<String, Boolean> orchestrationFlags,
+							  List<ArrowheadSystem> preferredProviders, 
 							  List<ArrowheadCloud> preferredClouds,
-							  List<ArrowheadSystem> preferredProviders,
+							  Map<String, String> requestedQoS, 
 							  Map<String, String> commands) {
 		this.requesterSystem = requesterSystem;
+		this.requesterCloud = requesterCloud;
 		this.requestedService = requestedService;
-		this.requestedQoS = requestedQoS;
-		this.preferredClouds = preferredClouds;
+		this.orchestrationFlags = orchestrationFlags;
 		this.preferredProviders = preferredProviders;
+		this.preferredClouds = preferredClouds;
+		this.requestedQoS = requestedQoS;
+		this.commands = commands;
+	}
+
+	public ServiceRequestForm(ArrowheadSystem requesterSystem, 
+							  ArrowheadCloud requesterCloud,
+							  ArrowheadService requestedService, 
+							  List<ArrowheadSystem> preferredProviders,
+							  List<ArrowheadCloud> preferredClouds, 
+							  Map<String, String> requestedQoS, 
+							  Map<String, String> commands) {
+		this.requesterSystem = requesterSystem;
+		this.requesterCloud = requesterCloud;
+		this.requestedService = requestedService;
+		this.preferredProviders = preferredProviders;
+		this.preferredClouds = preferredClouds;
+		this.requestedQoS = requestedQoS;
 		this.commands = commands;
 		this.orchestrationFlags.put("triggerInterCloud", false);
 		this.orchestrationFlags.put("externalServiceRequest", false);
@@ -54,23 +74,6 @@ public class ServiceRequestForm {
 		this.orchestrationFlags.put("storeOnlyActive", false);
 		this.orchestrationFlags.put("matchmaking", false);
 		this.orchestrationFlags.put("onlyPreferred", false);
-		this.orchestrationFlags.put("generateToken", false);
-	}
-
-	public ServiceRequestForm(ArrowheadSystem requesterSystem,
-							  ArrowheadService requestedService,
-							  Map<String, String> requestedQoS,
-							  Map<String, Boolean> orchestrationFlags,
-							  List<ArrowheadCloud> preferredClouds,
-							  List<ArrowheadSystem> preferredProviders,
-							  Map<String, String> commands) {
-		this.requesterSystem = requesterSystem;
-		this.requestedService = requestedService;
-		this.requestedQoS = requestedQoS;
-		this.orchestrationFlags = orchestrationFlags;
-		this.preferredClouds = preferredClouds;
-		this.preferredProviders = preferredProviders;
-		this.commands = commands;
 	}
 
 	public ArrowheadSystem getRequesterSystem() {
@@ -81,12 +84,44 @@ public class ServiceRequestForm {
 		this.requesterSystem = requesterSystem;
 	}
 
+	public ArrowheadCloud getRequesterCloud() {
+		return requesterCloud;
+	}
+
+	public void setRequesterCloud(ArrowheadCloud requesterCloud) {
+		this.requesterCloud = requesterCloud;
+	}
+
 	public ArrowheadService getRequestedService() {
 		return requestedService;
 	}
 
 	public void setRequestedService(ArrowheadService requestedService) {
 		this.requestedService = requestedService;
+	}
+
+	public Map<String, Boolean> getOrchestrationFlags() {
+		return orchestrationFlags;
+	}
+
+	public void setOrchestrationFlags(Map<String, Boolean> orchestrationFlags) {
+		this.orchestrationFlags = orchestrationFlags;
+	}
+
+	public List<ArrowheadSystem> getPreferredProviders() {
+		return preferredProviders;
+	}
+
+	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
+		this.preferredProviders = preferredProviders;
+	}
+
+	public List<ArrowheadCloud> getPreferredClouds() {
+		return preferredClouds;
+	}
+
+	public void setPreferredClouds(List<ArrowheadCloud> preferredClouds) {
+		this.preferredClouds = preferredClouds;
 	}
 
 	public Map<String, String> getRequestedQoS() {
@@ -105,40 +140,15 @@ public class ServiceRequestForm {
 		this.commands = commands;
 	}
 
-	public Map<String, Boolean> getOrchestrationFlags() {
-		return orchestrationFlags;
-	}
-
-	public void setOrchestrationFlags(Map<String, Boolean> orchestrationFlags) {
-		this.orchestrationFlags = orchestrationFlags;
-	}
-
-	public List<ArrowheadCloud> getPreferredClouds() {
-		return preferredClouds;
-	}
-
-	public void setPreferredClouds(List<ArrowheadCloud> preferredClouds) {
-		this.preferredClouds = preferredClouds;
-	}
-
-	public List<ArrowheadSystem> getPreferredProviders() {
-		return preferredProviders;
-	}
-
-	public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
-		this.preferredProviders = preferredProviders;
-	}
-
 	public boolean isPayloadUsable() {
 		if (requesterSystem == null || !requesterSystem.isValid()) {
 			return false;
 		}
 		if (!orchestrationFlags.get("storeOnlyActive")
-			&& (requestedService == null || !requestedService.isValidStrict())) {
+				&& (requestedService == null || !requestedService.isValidStrict())) {
 			return false;
 		}
-		if (orchestrationFlags.get("onlyPreferred") && preferredProviders.
-			isEmpty()) {
+		if (orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) {
 			return false;
 		}
 		return true;

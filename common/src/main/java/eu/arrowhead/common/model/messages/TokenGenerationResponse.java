@@ -1,11 +1,12 @@
 package eu.arrowhead.common.model.messages;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TokenGenerationResponse {
 
-	private List<String> token;
-	private List<String> signature;
+	private List<String> token = new ArrayList<String>();
+	private List<String> signature = new ArrayList<String>();
 
 	public TokenGenerationResponse() {
 	}
