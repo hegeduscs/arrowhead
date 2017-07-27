@@ -1,5 +1,8 @@
 package eu.arrowhead.core.serviceregistry;
 
+import eu.arrowhead.common.model.messages.ServiceQueryForm;
+import eu.arrowhead.common.model.messages.ServiceQueryResult;
+import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -12,63 +15,58 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
-import eu.arrowhead.common.model.messages.ServiceQueryForm;
-import eu.arrowhead.common.model.messages.ServiceQueryResult;
-import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
-
 @Path("serviceregistry")
 public class SecureServiceRegistryResource {
 
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt(@Context SecurityContext sc) {
-		return "This is the Service Registry.";
-	}
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public String getIt(@Context SecurityContext sc) {
+    return "This is the Service Registry.";
+  }
 
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/{serviceGroup}/{service}/{interf}")
-	public void publishingToRegistry(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup,
-			@PathParam("service") String service, @PathParam("interf") String interf, ServiceRegistryEntry entry) {
-		ServiceRegistry.getInstance().register(serviceGroup, service, interf, entry);
-	}
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path("/{serviceGroup}/{service}/{interf}")
+  public void publishingToRegistry(@Context SecurityContext sc,
+      @PathParam("serviceGroup") String serviceGroup,
+      @PathParam("service") String service, @PathParam("interf") String interf,
+      ServiceRegistryEntry entry) {
+    ServiceRegistry.getInstance().register(serviceGroup, service, interf, entry);
+  }
 
-	@DELETE
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/{serviceGroup}/{service}/{interf}")
-	public void removingFromRegistry(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup,
-			@PathParam("service") String service, @PathParam("interf") String interf, ServiceRegistryEntry entry) {
-		ServiceRegistry.getInstance().unRegister(serviceGroup, service, interf, entry);
-	}
+  @DELETE
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path("/{serviceGroup}/{service}/{interf}")
+  public void removingFromRegistry(@Context SecurityContext sc,
+      @PathParam("serviceGroup") String serviceGroup,
+      @PathParam("service") String service, @PathParam("interf") String interf,
+      ServiceRegistryEntry entry) {
+    ServiceRegistry.getInstance().unRegister(serviceGroup, service, interf, entry);
+  }
 
-	/**
-	 * Query paramaters are the fields from Service
-	 * 
-	 * Query Form GET-be query parameternek egy string lista kell IDD-k
-	 * 
-	 * @param serviceGroup
-	 * @param service
-	 * @param interf
-	 * @param serviceMetadata
-	 * @param pingProviders
-	 * @return Providers: List of (ArrowheadSystem, ServiceURI:String)
-	 */
-	@PUT
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path(value = "/{serviceGroup}/{service}")
-	public ServiceQueryResult getServiceQueryForm(@Context SecurityContext sc, @PathParam("serviceGroup") String serviceGroup,
-			@PathParam("service") String service, ServiceQueryForm queryForm) {
-		return ServiceRegistry.getInstance().provideServices(serviceGroup, service, queryForm);
-	}
+  /**
+   * Query paramaters are the fields from Service
+   *
+   * Query Form GET-be query parameternek egy string lista kell IDD-k
+   *
+   * @return Providers: List of (ArrowheadSystem, ServiceURI:String)
+   */
+  @PUT
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path(value = "/{serviceGroup}/{service}")
+  public ServiceQueryResult getServiceQueryForm(@Context SecurityContext sc,
+      @PathParam("serviceGroup") String serviceGroup,
+      @PathParam("service") String service, ServiceQueryForm queryForm) {
+    return ServiceRegistry.getInstance().provideServices(serviceGroup, service, queryForm);
+  }
 
-	/**
-	 * 
-	 * @return All registered service
-	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path(value = "/all")
-	public ServiceQueryResult getAllServices(@Context SecurityContext sc) {
-		return ServiceRegistry.getInstance().provideAllServices();
-	}
+  /**
+   * @return All registered service
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path(value = "/all")
+  public ServiceQueryResult getAllServices(@Context SecurityContext sc) {
+    return ServiceRegistry.getInstance().provideAllServices();
+  }
 }

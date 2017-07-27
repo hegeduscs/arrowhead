@@ -17,85 +17,85 @@ import org.hibernate.annotations.LazyCollectionOption;
 @XmlRootElement
 public class QoS_Resource_Reservation {
 
-	@Column(name = "id")
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+  @Column(name = "id")
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private int id;
 
-	@Column(name = "state")
-	private String state;
+  @Column(name = "state")
+  private String state;
 
-	@ElementCollection
-	@LazyCollection(LazyCollectionOption.FALSE)
-	private Map<String, String> qosParameters;
+  @ElementCollection
+  @LazyCollection(LazyCollectionOption.FALSE)
+  private Map<String, String> qosParameters;
 
-	public QoS_Resource_Reservation() {
+  public QoS_Resource_Reservation() {
 
-	}
+  }
 
-	public QoS_Resource_Reservation(String state) {
-		super();
-		this.state = state;
-	}
+  public QoS_Resource_Reservation(String state) {
+    super();
+    this.state = state;
+  }
 
-	public QoS_Resource_Reservation(String state,
-									Map<String, String> qosParameters) {
-		this.state = state;
-		this.qosParameters = qosParameters;
-	}
+  public QoS_Resource_Reservation(String state,
+      Map<String, String> qosParameters) {
+    this.state = state;
+    this.qosParameters = qosParameters;
+  }
 
-	/**
-	 * Get ID
-	 *
-	 * @return returns integer with ID
-	 */
-	public int getId() {
-		return id;
-	}
+  /**
+   * Get ID
+   *
+   * @return returns integer with ID
+   */
+  public int getId() {
+    return id;
+  }
 
-	/**
-	 * set ID
-	 *
-	 * @param id integer ID
-	 */
-	public void setId(int id) {
-		this.id = id;
-	}
+  /**
+   * set ID
+   *
+   * @param id integer ID
+   */
+  public void setId(int id) {
+    this.id = id;
+  }
 
-	/**
-	 * get state of qos reservation
-	 *
-	 * @return returns state
-	 */
-	public String getState() {
-		return state;
-	}
+  /**
+   * get state of qos reservation
+   *
+   * @return returns state
+   */
+  public String getState() {
+    return state;
+  }
 
-	/**
-	 * set qos reservation state
-	 *
-	 * @param state qos reservation state
-	 */
-	public void setState(String state) {
-		this.state = state;
-	}
+  /**
+   * set qos reservation state
+   *
+   * @param state qos reservation state
+   */
+  public void setState(String state) {
+    this.state = state;
+  }
 
-	/**
-	 * get qos parameters
-	 *
-	 * @return returns map with qos parameters
-	 */
-	public Map<String, String> getQosParameters() {
-		return qosParameters;
-	}
+  /**
+   * get qos parameters
+   *
+   * @return returns map with qos parameters
+   */
+  public Map<String, String> getQosParameters() {
+    return qosParameters;
+  }
 
-	/**
-	 * set qos parameters
-	 *
-	 * @param qosParameter map with the qos parameters
-	 */
-	public void setQosParameter(Map<String, String> qosParameter) {
-		this.qosParameters = qosParameter;
-	}
+  /**
+   * set qos parameters
+   *
+   * @param qosParameter map with the qos parameters
+   */
+  public void setQosParameter(Map<String, String> qosParameter) {
+    this.qosParameters = qosParameter;
+  }
 
 }

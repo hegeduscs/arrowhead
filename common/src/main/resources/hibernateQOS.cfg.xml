@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE hibernate-configuration PUBLIC
-"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
-"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+  "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
-	<session-factory>
-		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
-		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/qos_store</property>
-		<property name="hibernate.connection.username">root</property>
-		<property name="hibernate.connection.password">root</property>
-		<property name="show_sql">true</property>
-		<property name="hibernate.hbm2ddl.auto">update</property>
-		<mapping class="eu.arrowhead.common.database.qos.ArrowheadSystem_qos"/>
-		<mapping class="eu.arrowhead.common.database.qos.ArrowheadService_qos"/>
-		<mapping class="eu.arrowhead.common.database.qos.Message_Stream"/>
-		<mapping class="eu.arrowhead.common.database.qos.QoS_Resource_Reservation"/>
-	</session-factory>
+  <session-factory>
+    <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+    <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+    <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/qos_store</property>
+    <property name="hibernate.connection.username">root</property>
+    <property name="hibernate.connection.password">root</property>
+    <property name="show_sql">true</property>
+    <property name="hibernate.hbm2ddl.auto">update</property>
+    <mapping class="eu.arrowhead.common.database.qos.ArrowheadSystem_qos"/>
+    <mapping class="eu.arrowhead.common.database.qos.ArrowheadService_qos"/>
+    <mapping class="eu.arrowhead.common.database.qos.Message_Stream"/>
+    <mapping class="eu.arrowhead.common.database.qos.QoS_Resource_Reservation"/>
+  </session-factory>
 </hibernate-configuration>

@@ -16,60 +16,59 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class RemoveMonitorRule {
 
-    private ArrowheadSystem provider;
-    private ArrowheadSystem consumer;
+  private ArrowheadSystem provider;
+  private ArrowheadSystem consumer;
 
-    /**
-     * Creates a new instance with no parameters initialized.
-     */
-    public RemoveMonitorRule() {
-    }
+  /**
+   * Creates a new instance with no parameters initialized.
+   */
+  public RemoveMonitorRule() {
+  }
 
-    /**
-     * Creates a new instance with the given service provider, and service
-     * consumer.
-     *
-     * @param provider the service provider
-     * @param consumer the service consumer
-     */
-    public RemoveMonitorRule(ArrowheadSystem provider, ArrowheadSystem consumer) {
-        this.provider = provider;
-        this.consumer = consumer;
-    }
+  /**
+   * Creates a new instance with the given service provider, and service consumer.
+   *
+   * @param provider the service provider
+   * @param consumer the service consumer
+   */
+  public RemoveMonitorRule(ArrowheadSystem provider, ArrowheadSystem consumer) {
+    this.provider = provider;
+    this.consumer = consumer;
+  }
 
-    /**
-     * Gets the service provider
-     *
-     * @return the service provider
-     */
-    public ArrowheadSystem getProvider() {
-        return provider;
-    }
+  /**
+   * Gets the service provider
+   *
+   * @return the service provider
+   */
+  public ArrowheadSystem getProvider() {
+    return provider;
+  }
 
-    /**
-     * Sets the service provider
-     *
-     * @param provider the service provider
-     */
-    public void setProvider(ArrowheadSystem provider) {
-        this.provider = provider;
-    }
+  /**
+   * Sets the service provider
+   *
+   * @param provider the service provider
+   */
+  public void setProvider(ArrowheadSystem provider) {
+    this.provider = provider;
+  }
 
-    /**
-     * Gets the service consumer
-     *
-     * @return the service consumer
-     */
-    public ArrowheadSystem getConsumer() {
-        return consumer;
-    }
+  /**
+   * Gets the service consumer
+   *
+   * @return the service consumer
+   */
+  public ArrowheadSystem getConsumer() {
+    return consumer;
+  }
 
-    /**
-     * Sets the service consumer
-     *
-     * @param consumer the service consumer
-     */
-    public void setConsumer(ArrowheadSystem consumer) {
-        this.consumer = consumer;
-    }
+  /**
+   * Sets the service consumer
+   *
+   * @param consumer the service consumer
+   */
+  public void setConsumer(ArrowheadSystem consumer) {
+    this.consumer = consumer;
+  }
 }

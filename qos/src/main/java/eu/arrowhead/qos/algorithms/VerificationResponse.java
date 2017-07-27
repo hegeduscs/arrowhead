@@ -11,36 +11,35 @@
 package eu.arrowhead.qos.algorithms;
 
 /**
- *
  * @author Paulo
  */
 public class VerificationResponse {
 
-	private Boolean isPossible;
-	private String reason;
+  private Boolean isPossible;
+  private String reason;
 
-	public VerificationResponse() {
-	}
+  public VerificationResponse() {
+  }
 
-	public VerificationResponse(Boolean isPossible, String reason) {
-		this.isPossible = isPossible;
-		this.reason = reason;
-	}
+  public VerificationResponse(Boolean isPossible, String reason) {
+    this.isPossible = isPossible;
+    this.reason = reason;
+  }
 
-	public Boolean getIsPossible() {
-		return isPossible;
-	}
+  public Boolean getIsPossible() {
+    return isPossible;
+  }
 
-	public void setIsPossible(Boolean isPossible) {
-		this.isPossible = isPossible;
-	}
+  public void setIsPossible(Boolean isPossible) {
+    this.isPossible = isPossible;
+  }
 
-	public String getReason() {
-		return reason;
-	}
+  public String getReason() {
+    return reason;
+  }
 
-	public void setReason(String reason) {
-		this.reason = reason;
-	}
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
 
 }

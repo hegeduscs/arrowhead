@@ -20,80 +20,78 @@ import java.util.Map;
 
 public class DriversFactory {
 
-	private static DriversFactory instance;
-	Class[] paramVerificationInfo = new Class[1];
+  private static DriversFactory instance;
+  Class[] paramVerificationInfo = new Class[1];
 
-	protected DriversFactory() {
-		//
-		super();
-		//VerificationInfo parameter
-		paramVerificationInfo[0] = ReservationInfo.class;
-	}
+  protected DriversFactory() {
+    //
+    super();
+    //VerificationInfo parameter
+    paramVerificationInfo[0] = ReservationInfo.class;
+  }
 
-	/**
-	 * Returns a instance from this singleton class.
-	 *
-	 * @return
-	 */
-	public static DriversFactory getInstance() {
-		if (instance == null) {
-			instance = new DriversFactory();
-		}
-		return instance;
-	}
+  /**
+   * Returns a instance from this singleton class.
+   */
+  public static DriversFactory getInstance() {
+    if (instance == null) {
+      instance = new DriversFactory();
+    }
+    return instance;
+  }
 
-	/**
-	 *
-	 * @param networkType Network type (ex. fttse)
-	 * @param networkConfiguration Network configuration parameters on a map.
-	 * @param provider ArrowheadSystem.
-	 * @param consumer ArrowheadSystem.
-	 * @param service ArrowheadService.
-	 * @param commands Map of the selected commands from the user.
-	 * @param requestedQoS Map of the desired requestedQoS.
-	 * @return Returns the generatedCommands from the QoSDriver.
-	 * @throws ReservationException The StreamConfiguration found an error.
-	 * @throws DriverNotFoundException The selected type doesnt have an assigned
-	 * driver.
-	 */
-	public Map<String, String> generateCommands(String communicationProtocol,
-												Map<String, String> networkConfiguration,
-												ArrowheadSystem provider,
-												ArrowheadSystem consumer,
-												ArrowheadService service,
-												Map<String, String> commands,
-												Map<String, String> requestedQoS) throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+  /**
+   * @param networkType Network type (ex. fttse)
+   * @param networkConfiguration Network configuration parameters on a map.
+   * @param provider ArrowheadSystem.
+   * @param consumer ArrowheadSystem.
+   * @param service ArrowheadService.
+   * @param commands Map of the selected commands from the user.
+   * @param requestedQoS Map of the desired requestedQoS.
+   * @return Returns the generatedCommands from the QoSDriver.
+   * @throws ReservationException The StreamConfiguration found an error.
+   * @throws DriverNotFoundException The selected type doesnt have an assigned driver.
+   */
+  public Map<String, String> generateCommands(String communicationProtocol,
+      Map<String, String> networkConfiguration,
+      ArrowheadSystem provider,
+      ArrowheadSystem consumer,
+      ArrowheadService service,
+      Map<String, String> commands,
+      Map<String, String> requestedQoS)
+      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
-		// Class Invoking
-		Class cls = findClass(communicationProtocol);
-		Object obj = cls.newInstance();
-		// Method Invoking
-		Method method = findMethod(cls);
+    // Class Invoking
+    Class cls = findClass(communicationProtocol);
+    Object obj = cls.newInstance();
+    // Method Invoking
+    Method method = findMethod(cls);
 
-		Map<String, String> streamConfiguration = (Map<String, String>) method.
-			invoke(obj, new ReservationInfo(networkConfiguration,
-											provider, consumer, service, commands, requestedQoS));
+    Map<String, String> streamConfiguration = (Map<String, String>) method.
+        invoke(obj, new ReservationInfo(networkConfiguration,
+            provider, consumer, service, commands, requestedQoS));
 
-		if (streamConfiguration == null) {
-			throw new ReservationException();
-		}
+    if (streamConfiguration == null) {
+      throw new ReservationException();
+    }
 
-		return streamConfiguration;
+    return streamConfiguration;
 
-	}
+  }
 
-	public Class findClass(String communicationProtocol) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		// Class Invoking
-		Class cls;
-		cls = Class.forName("eu.arrowhead.qos.communication.drivers." + communicationProtocol.
-			toUpperCase());
-		return cls;
-	}
+  public Class findClass(String communicationProtocol)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    // Class Invoking
+    Class cls;
+    cls = Class.forName("eu.arrowhead.qos.communication.drivers." + communicationProtocol.
+        toUpperCase());
+    return cls;
+  }
 
-	public Method findMethod(Class cls) throws NoSuchMethodException {
-		Method method = cls.
-			getDeclaredMethod("reserveQoS", paramVerificationInfo);
-		return method;
-	}
+  public Method findMethod(Class cls) throws NoSuchMethodException {
+    Method method = cls.
+        getDeclaredMethod("reserveQoS", paramVerificationInfo);
+    return method;
+  }
 
 }

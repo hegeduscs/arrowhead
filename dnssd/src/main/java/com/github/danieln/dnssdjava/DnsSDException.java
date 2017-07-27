@@ -8,21 +8,22 @@ package com.github.danieln.dnssdjava;
 
 /**
  * Thrown when a DNS-SD operation fails.
+ *
  * @author Daniel Nilsson
  */
 public class DnsSDException extends Exception {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public DnsSDException() {
-	}
+  public DnsSDException() {
+  }
 
-	public DnsSDException(String message) {
-		super(message);
-	}
+  public DnsSDException(String message) {
+    super(message);
+  }
 
-	public DnsSDException(String message, Throwable cause) {
-		super(message, cause);
-	}
-	
+  public DnsSDException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
 }

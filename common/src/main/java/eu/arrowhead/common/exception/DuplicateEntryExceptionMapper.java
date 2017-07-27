@@ -8,13 +8,13 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class DuplicateEntryExceptionMapper implements ExceptionMapper<DuplicateEntryException> {
 
-	@Override
-	public Response toResponse(DuplicateEntryException ex) {
-		ex.printStackTrace();
-		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
-		return Response.status(Status.BAD_REQUEST)
-				.entity(errorMessage)
-				.build();
-	}
+  @Override
+  public Response toResponse(DuplicateEntryException ex) {
+    ex.printStackTrace();
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
+    return Response.status(Status.BAD_REQUEST)
+        .entity(errorMessage)
+        .build();
+  }
 
 }

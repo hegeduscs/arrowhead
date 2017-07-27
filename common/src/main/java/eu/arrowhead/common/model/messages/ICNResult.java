@@ -4,34 +4,33 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class ICNResult {
-	
-	OrchestrationResponse instructions;
 
-	public ICNResult() {
-	}
+  OrchestrationResponse instructions;
 
-	public ICNResult(OrchestrationResponse instructions) {
-		this.instructions = instructions;
-	}
-	
-	public ICNResult(ICNEnd icnEnd) {
-		this.instructions = icnEnd.getInstructions();
-	}
+  public ICNResult() {
+  }
 
-	public OrchestrationResponse getInstructions() {
-		return instructions;
-	}
+  public ICNResult(OrchestrationResponse instructions) {
+    this.instructions = instructions;
+  }
 
-	public void setInstructions(OrchestrationResponse instructions) {
-		this.instructions = instructions;
-	}
-	
-	public boolean isPayloadUsable(){
-		if(instructions == null)
-			return false;
-		if(instructions.getResponse() == null || instructions.getResponse().isEmpty())
-			return false;
-		return true;
-	}
-	
+  public ICNResult(ICNEnd icnEnd) {
+    this.instructions = icnEnd.getInstructions();
+  }
+
+  public OrchestrationResponse getInstructions() {
+    return instructions;
+  }
+
+  public void setInstructions(OrchestrationResponse instructions) {
+    this.instructions = instructions;
+  }
+
+  public boolean isPayloadUsable() {
+    if (instructions == null) {
+      return false;
+    }
+    return instructions.getResponse() != null && !instructions.getResponse().isEmpty();
+  }
+
 }

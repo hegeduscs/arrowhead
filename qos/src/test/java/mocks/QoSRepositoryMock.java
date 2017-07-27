@@ -7,7 +7,6 @@ package mocks;
  */
 
 /**
- *
  * @author Paulo
  */
 public class QoSRepositoryMock {

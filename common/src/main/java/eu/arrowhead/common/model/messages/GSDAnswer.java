@@ -1,40 +1,39 @@
 package eu.arrowhead.common.model.messages;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class GSDAnswer {
-	
-	private ArrowheadService requestedService;
-	private ArrowheadCloud providerCloud;
-	
-	public GSDAnswer() {
-	}
 
-	public GSDAnswer(ArrowheadService requestedService,
-			ArrowheadCloud providerCloud) {
-		this.requestedService = requestedService;
-		this.providerCloud = providerCloud;
-	}
+  private ArrowheadService requestedService;
+  private ArrowheadCloud providerCloud;
 
-	public ArrowheadService getRequestedService() {
-		return requestedService;
-	}
+  public GSDAnswer() {
+  }
 
-	public void setRequestedService(ArrowheadService requestedService) {
-		this.requestedService = requestedService;
-	}
+  public GSDAnswer(ArrowheadService requestedService,
+      ArrowheadCloud providerCloud) {
+    this.requestedService = requestedService;
+    this.providerCloud = providerCloud;
+  }
 
-	public ArrowheadCloud getProviderCloud() {
-		return providerCloud;
-	}
+  public ArrowheadService getRequestedService() {
+    return requestedService;
+  }
 
-	public void setProviderCloud(ArrowheadCloud providerCloud) {
-		this.providerCloud = providerCloud;
-	}
+  public void setRequestedService(ArrowheadService requestedService) {
+    this.requestedService = requestedService;
+  }
 
-	
+  public ArrowheadCloud getProviderCloud() {
+    return providerCloud;
+  }
+
+  public void setProviderCloud(ArrowheadCloud providerCloud) {
+    this.providerCloud = providerCloud;
+  }
+
+
 }

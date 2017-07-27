@@ -10,18 +10,17 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 /**
- *
  * @author ID0084D
  */
 @Provider
 public class ReservationExceptionMapper implements ExceptionMapper<ReservationException> {
 
-	@Override
-	public Response toResponse(ReservationException ex) {
-		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
-		return Response.status(Response.Status.BAD_REQUEST)
-			.entity(errorMessage)
-			.build();
-	}
+  @Override
+  public Response toResponse(ReservationException ex) {
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
+    return Response.status(Response.Status.BAD_REQUEST)
+        .entity(errorMessage)
+        .build();
+  }
 
 }

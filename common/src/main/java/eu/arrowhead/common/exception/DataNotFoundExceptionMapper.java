@@ -6,15 +6,15 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class DataNotFoundExceptionMapper implements ExceptionMapper<DataNotFoundException>{
+public class DataNotFoundExceptionMapper implements ExceptionMapper<DataNotFoundException> {
 
-	@Override
-	public Response toResponse(DataNotFoundException ex) {
-		ex.printStackTrace();
-		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 404);
-		return Response.status(Status.NOT_FOUND)
-				.entity(errorMessage)
-				.build();
-	}
+  @Override
+  public Response toResponse(DataNotFoundException ex) {
+    ex.printStackTrace();
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 404);
+    return Response.status(Status.NOT_FOUND)
+        .entity(errorMessage)
+        .build();
+  }
 
 }

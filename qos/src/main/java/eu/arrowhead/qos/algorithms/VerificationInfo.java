@@ -15,85 +15,84 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author Paulo
  */
 public class VerificationInfo {
 
-	Map<String, String> provierDeviceCapabilities;
-	Map<String, String> consumerDeviceCapabilities;
-	List<QoS_Resource_Reservation> providerDeviceQoSReservations;
-	List<QoS_Resource_Reservation> consumerDeviceQoSReservations;
-	Map<String, String> requestedQoS;
-	Map<String, String> commands;
+  Map<String, String> provierDeviceCapabilities;
+  Map<String, String> consumerDeviceCapabilities;
+  List<QoS_Resource_Reservation> providerDeviceQoSReservations;
+  List<QoS_Resource_Reservation> consumerDeviceQoSReservations;
+  Map<String, String> requestedQoS;
+  Map<String, String> commands;
 
-	public VerificationInfo() {
-	}
+  public VerificationInfo() {
+  }
 
-	public VerificationInfo(Map<String, String> provierDeviceCapabilities,
-							Map<String, String> consumerDeviceCapabilities,
-							List<QoS_Resource_Reservation> providerDeviceQoSReservations,
-							List<QoS_Resource_Reservation> consumerDeviceQoSReservations,
-							Map<String, String> requestedQoS,
-							Map<String, String> commands) {
-		this.provierDeviceCapabilities = provierDeviceCapabilities;
-		this.consumerDeviceCapabilities = consumerDeviceCapabilities;
-		this.providerDeviceQoSReservations = providerDeviceQoSReservations;
-		this.consumerDeviceQoSReservations = consumerDeviceQoSReservations;
-		this.requestedQoS = requestedQoS;
-		this.commands = commands;
-	}
+  public VerificationInfo(Map<String, String> provierDeviceCapabilities,
+      Map<String, String> consumerDeviceCapabilities,
+      List<QoS_Resource_Reservation> providerDeviceQoSReservations,
+      List<QoS_Resource_Reservation> consumerDeviceQoSReservations,
+      Map<String, String> requestedQoS,
+      Map<String, String> commands) {
+    this.provierDeviceCapabilities = provierDeviceCapabilities;
+    this.consumerDeviceCapabilities = consumerDeviceCapabilities;
+    this.providerDeviceQoSReservations = providerDeviceQoSReservations;
+    this.consumerDeviceQoSReservations = consumerDeviceQoSReservations;
+    this.requestedQoS = requestedQoS;
+    this.commands = commands;
+  }
 
-	public Map<String, String> getProvierDeviceCapabilities() {
-		return provierDeviceCapabilities;
-	}
+  public Map<String, String> getProvierDeviceCapabilities() {
+    return provierDeviceCapabilities;
+  }
 
-	public void setProvierDeviceCapabilities(
-		Map<String, String> provierDeviceCapabilities) {
-		this.provierDeviceCapabilities = provierDeviceCapabilities;
-	}
+  public void setProvierDeviceCapabilities(
+      Map<String, String> provierDeviceCapabilities) {
+    this.provierDeviceCapabilities = provierDeviceCapabilities;
+  }
 
-	public Map<String, String> getConsumerDeviceCapabilities() {
-		return consumerDeviceCapabilities;
-	}
+  public Map<String, String> getConsumerDeviceCapabilities() {
+    return consumerDeviceCapabilities;
+  }
 
-	public void setConsumerDeviceCapabilities(
-		Map<String, String> consumerDeviceCapabilities) {
-		this.consumerDeviceCapabilities = consumerDeviceCapabilities;
-	}
+  public void setConsumerDeviceCapabilities(
+      Map<String, String> consumerDeviceCapabilities) {
+    this.consumerDeviceCapabilities = consumerDeviceCapabilities;
+  }
 
-	public List<QoS_Resource_Reservation> getProviderDeviceQoSReservations() {
-		return providerDeviceQoSReservations;
-	}
+  public List<QoS_Resource_Reservation> getProviderDeviceQoSReservations() {
+    return providerDeviceQoSReservations;
+  }
 
-	public void setProviderDeviceQoSReservations(
-		List<QoS_Resource_Reservation> providerDeviceQoSReservations) {
-		this.providerDeviceQoSReservations = providerDeviceQoSReservations;
-	}
+  public void setProviderDeviceQoSReservations(
+      List<QoS_Resource_Reservation> providerDeviceQoSReservations) {
+    this.providerDeviceQoSReservations = providerDeviceQoSReservations;
+  }
 
-	public List<QoS_Resource_Reservation> getConsumerDeviceQoSReservations() {
-		return consumerDeviceQoSReservations;
-	}
+  public List<QoS_Resource_Reservation> getConsumerDeviceQoSReservations() {
+    return consumerDeviceQoSReservations;
+  }
 
-	public void setConsumerDeviceQoSReservations(
-		List<QoS_Resource_Reservation> consumerDeviceQoSReservations) {
-		this.consumerDeviceQoSReservations = consumerDeviceQoSReservations;
-	}
+  public void setConsumerDeviceQoSReservations(
+      List<QoS_Resource_Reservation> consumerDeviceQoSReservations) {
+    this.consumerDeviceQoSReservations = consumerDeviceQoSReservations;
+  }
 
-	public Map<String, String> getRequestedQoS() {
-		return requestedQoS;
-	}
+  public Map<String, String> getRequestedQoS() {
+    return requestedQoS;
+  }
 
-	public void setRequestedQoS(Map<String, String> requestedQoS) {
-		this.requestedQoS = requestedQoS;
-	}
+  public void setRequestedQoS(Map<String, String> requestedQoS) {
+    this.requestedQoS = requestedQoS;
+  }
 
-	public Map<String, String> getCommands() {
-		return commands;
-	}
+  public Map<String, String> getCommands() {
+    return commands;
+  }
 
-	public void setCommands(Map<String, String> commands) {
-		this.commands = commands;
-	}
+  public void setCommands(Map<String, String> commands) {
+    this.commands = commands;
+  }
 
 }

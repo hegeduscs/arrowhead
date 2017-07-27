@@ -2,39 +2,39 @@ package eu.arrowhead.common.model.messages;
 
 public class RawTokenInfo {
 
-	private String s;
-	private String c;
-	private Long e;
-	
-	public RawTokenInfo() {
-	}
+  private String s;
+  private String c;
+  private Long e;
 
-	public String getS() {
-		return s;
-	}
+  public RawTokenInfo() {
+  }
 
-	public void setS(String s) {
-		this.s = s;
-	}
+  public String getS() {
+    return s;
+  }
 
-	public String getC() {
-		return c;
-	}
+  public void setS(String s) {
+    this.s = s;
+  }
 
-	public void setC(String c) {
-		this.c = c;
-	}
+  public String getC() {
+    return c;
+  }
 
-	public Long getE() {
-		return e;
-	}
+  public void setC(String c) {
+    this.c = c;
+  }
 
-	public void setE(Long e) {
-		this.e = e;
-	}
+  public Long getE() {
+    return e;
+  }
 
-	@Override
-	public String toString() {
-		return "ClassPojo [s = " + s + ", c = " + c + ", e = " + e + "]";
-	}
+  public void setE(Long e) {
+    this.e = e;
+  }
+
+  @Override
+  public String toString() {
+    return "ClassPojo [s = " + s + ", c = " + c + ", e = " + e + "]";
+  }
 }

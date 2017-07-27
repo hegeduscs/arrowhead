@@ -10,7 +10,11 @@
 */
 package eu.arrowhead.qos.factories;
 
-import eu.arrowhead.common.database.qos.*;
+import eu.arrowhead.common.database.qos.ISCSRepository;
+import eu.arrowhead.common.database.qos.Network;
+import eu.arrowhead.common.database.qos.Network_Device;
+import eu.arrowhead.common.database.qos.Node;
+import eu.arrowhead.common.database.qos.SCSRepositoryImpl;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.ArrayList;
@@ -18,291 +22,291 @@ import java.util.List;
 
 /**
  * @author Paulo
- *
  */
+
 /**
  * @author Paulo
  *
  */
 public class SCSFactory {
 
-	private static SCSFactory instance;
-	private ISCSRepository repo;
+  private static SCSFactory instance;
+  private ISCSRepository repo;
 
-	protected SCSFactory() {
-		super();
-		repo = new SCSRepositoryImpl();
-	}
+  protected SCSFactory() {
+    super();
+    repo = new SCSRepositoryImpl();
+  }
 
-	/**
-	 * Returns a instance from this singleton class.
-	 *
-	 * @return
-	 */
-	public static SCSFactory getInstance() {
-		if (instance == null) {
-			instance = new SCSFactory();
-		}
-		return instance;
-	}
+  /**
+   * Returns a instance from this singleton class.
+   *
+   * @return
+   */
+  public static SCSFactory getInstance() {
+    if (instance == null) {
+      instance = new SCSFactory();
+    }
+    return instance;
+  }
 
-	public ISCSRepository getRepo() {
-		return repo;
-	}
+  protected static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
+      eu.arrowhead.common.model.ArrowheadSystem in) {
 
-	public void setRepo(ISCSRepository repo) {
-		this.repo = repo;
-	}
+    eu.arrowhead.common.database.qos.ArrowheadSystem_qos out = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
 
-	/**
-	 * Get NetworkDevice from System.
-	 *
-	 * @param system System which is deployed on the network device.
-	 * @return Returns the network device where the system is deployed.
-	 */
-	public Network_Device getNetworkDeviceFromSystem(ArrowheadSystem system) {
-		return repo.getNetworkDeviceFromSystem(converFromDTO(system));
-	}
+    out.setAuthenticationInfo(in.getAuthenticationInfo());
+    out.setAddress(in.getAddress());
+    out.setPort(in.getPort());
+    out.setSystemGroup(in.getSystemGroup());
+    out.setSystemName(in.getSystemName());
 
-	/**
-	 * Get Node from system.
-	 *
-	 * @param system System which is deployed on the network device.
-	 * @return Returns the node where the system is deployed.
-	 */
-	public Node getNodeFromSystem(ArrowheadSystem system) {
-		return repo.getNodeFromSystem(converFromDTO(system));
-	}
+    return out;
+  }
 
-	/**
-	 * Get network from a network device.
-	 *
-	 * @param networkDevice Network device.
-	 * @return Returns the network from where the network device belongs.
-	 */
-	public Network getNetworkFromNetworkDevice(Network_Device networkDevice) {
-		return repo.getNetworkFromNetworkDevice(networkDevice);
-	}
+  protected static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
+      eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
 
-	/**
-	 * Save node.
-	 *
-	 * @param node Node to be saved.
-	 * @return Returns the saved node.
-	 */
-	public Node saveNode(Node node) {
-		return repo.saveNode(node);
-	}
+    eu.arrowhead.common.model.ArrowheadSystem out = new eu.arrowhead.common.model.ArrowheadSystem();
 
-	/**
-	 * Save network.
-	 *
-	 * @param network Network to be saved.
-	 * @return Returns the saved network.
-	 */
-	public Network saveNetwork(Network network) {
-		return repo.saveNetwork(network);
-	}
+    out.setAuthenticationInfo(in.getAuthenticationInfo());
+    out.setAddress(in.getAddress());
+    out.setPort(in.getPort());
+    out.setSystemGroup(in.getSystemGroup());
+    out.setSystemName(in.getSystemName());
 
-	/**
-	 * Update a already saved network.
-	 *
-	 * @param network Network to be updated.
-	 * @return Returns the updated network.
-	 */
-	public Network updateNetwork(Network network) {
-		return repo.updateNetwork(network);
-	}
+    return out;
+  }
 
-	/**
-	 * Add network device to a network.
-	 *
-	 * @param network Network.
-	 * @param networkDevice NetworkDevice.
-	 * @return Returns the network from where the network device was added.
-	 */
-	public Network addNetworkDeviceToNetwork(Network network,
-											 Network_Device networkDevice) {
-		return repo.addNetworkDeviceToNetwork(network, networkDevice);
-	}
+  protected static List<ArrowheadSystem> convertToDTO_List(
+      List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
+    if (in == null) {
+      return null;
+    }
+    List<ArrowheadSystem> out = new ArrayList<>();
+    for (eu.arrowhead.common.database.qos.ArrowheadSystem_qos system : in) {
+      out.add(convertToDTO(system));
+    }
 
-	/**
-	 * Get all nodes.
-	 *
-	 * @return Return a list of nodes.
-	 */
-	public List<Node> getAllNodes() {
-		return repo.getAllNodes();
-	}
+    return out;
+  }
 
-	/**
-	 * Get all networks.
-	 *
-	 * @return Returns a list of networks.
-	 */
-	public List<Network> getAllNetworks() {
-		return repo.getAllNetworks();
-	}
+  protected static List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> convertFromDTO_List(
+      List<ArrowheadSystem> in) {
+    if (in == null) {
+      return null;
+    }
+    List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> out = new ArrayList<>();
+    for (ArrowheadSystem system : in) {
+      out.add(convertFromDTO(system));
+    }
 
-	/**
-	 * Get all arrowhead systems.
-	 *
-	 * @return Returns a list of systems.
-	 */
-	public List<ArrowheadSystem> getAllArrowheadSystems() {
-		return convertToDTO_List(repo.getAllArrowheadSystems());
-	}
+    return out;
+  }
 
-	/**
-	 * Delete node.
-	 *
-	 * @param node Node to be deleted.
-	 * @return Returns true if the node was successfully deleted.
-	 */
-	public boolean deleteNode(Node node) {
-		return repo.deleteNode(node);
-	}
+  protected static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(
+      eu.arrowhead.common.model.ArrowheadService in) {
 
-	/**
-	 * Delete a network.
-	 *
-	 * @param network Network to be deleted.
-	 * @return Returns true if the network was successfully deleted.
-	 */
-	public boolean deleteNetwork(Network network) {
-		return repo.deleteNetwork(network);
-	}
+    eu.arrowhead.common.database.qos.ArrowheadService_qos out = new eu.arrowhead.common.database.qos.ArrowheadService_qos();
 
-	/**
-	 * Get node.
-	 *
-	 * @param n Node.
-	 * @return Returns the already saved node.
-	 */
-	public Node getNode(Node n) {
-		return repo.getNode(n);
-	}
+    out.setInterfaces(in.getInterfaces());
+    out.setServiceDefinition(in.getServiceDefinition());
+    out.setServiceGroup(in.getServiceGroup());
 
-	/**
-	 * Get a network.
-	 *
-	 * @param network Network to search.
-	 * @return Returns the network found on the db.
-	 */
-	public Network getNetwork(Network network) {
-		return repo.getNetwork(network);
-	}
+    return out;
+  }
 
-	/**
-	 * **********************************************
-	 ************** Converts From/To DTO ************
-	 * ***********************************************
-	 */
-	protected eu.arrowhead.common.database.qos.ArrowheadSystem_qos converFromDTO(
-		ArrowheadSystem system) {
-		if (system == null) {
-			return null;
-		}
+  protected static eu.arrowhead.common.model.ArrowheadService convertToDTO(
+      eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
 
-		eu.arrowhead.common.database.qos.ArrowheadSystem_qos systemDB = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
-		systemDB.setAuthenticationInfo(system.getAuthenticationInfo());
-		systemDB.setAddress(system.getAddress());
-		systemDB.setPort(system.getPort());
-		systemDB.setSystemGroup(system.getSystemGroup());
-		systemDB.setSystemName(system.getSystemName());
-		return systemDB;
-	}
+    eu.arrowhead.common.model.ArrowheadService out = new eu.arrowhead.common.model.ArrowheadService();
 
-	protected static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
-		eu.arrowhead.common.model.ArrowheadSystem in) {
+    out.setInterfaces(in.getInterfaces());
+    out.setServiceDefinition(in.getServiceDefinition());
+    out.setServiceGroup(in.getServiceGroup());
 
-		eu.arrowhead.common.database.qos.ArrowheadSystem_qos out = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
+    return out;
+  }
 
-		out.setAuthenticationInfo(in.getAuthenticationInfo());
-		out.setAddress(in.getAddress());
-		out.setPort(in.getPort());
-		out.setSystemGroup(in.getSystemGroup());
-		out.setSystemName(in.getSystemName());
+  protected static List<ArrowheadService> convertToDTO_ArrowheadServices(
+      List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
 
-		return out;
-	}
+    if (in == null) {
+      return null;
+    }
+    List<ArrowheadService> out = new ArrayList<>();
+    for (eu.arrowhead.common.database.qos.ArrowheadService_qos system : in) {
+      out.add(convertToDTO(system));
+    }
 
-	protected static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
-		eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
+    return out;
+  }
 
-		eu.arrowhead.common.model.ArrowheadSystem out = new eu.arrowhead.common.model.ArrowheadSystem();
+  public ISCSRepository getRepo() {
+    return repo;
+  }
 
-		out.setAuthenticationInfo(in.getAuthenticationInfo());
-		out.setAddress(in.getAddress());
-		out.setPort(in.getPort());
-		out.setSystemGroup(in.getSystemGroup());
-		out.setSystemName(in.getSystemName());
+  public void setRepo(ISCSRepository repo) {
+    this.repo = repo;
+  }
 
-		return out;
-	}
+  /**
+   * Get NetworkDevice from System.
+   *
+   * @param system System which is deployed on the network device.
+   * @return Returns the network device where the system is deployed.
+   */
+  public Network_Device getNetworkDeviceFromSystem(ArrowheadSystem system) {
+    return repo.getNetworkDeviceFromSystem(converFromDTO(system));
+  }
 
-	protected static List<ArrowheadSystem> convertToDTO_List(
-		List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
-		if (in == null) {
-			return null;
-		}
-		List<ArrowheadSystem> out = new ArrayList<>();
-		for (eu.arrowhead.common.database.qos.ArrowheadSystem_qos system : in) {
-			out.add(convertToDTO(system));
-		}
+  /**
+   * Get Node from system.
+   *
+   * @param system System which is deployed on the network device.
+   * @return Returns the node where the system is deployed.
+   */
+  public Node getNodeFromSystem(ArrowheadSystem system) {
+    return repo.getNodeFromSystem(converFromDTO(system));
+  }
 
-		return out;
-	}
+  /**
+   * Get network from a network device.
+   *
+   * @param networkDevice Network device.
+   * @return Returns the network from where the network device belongs.
+   */
+  public Network getNetworkFromNetworkDevice(Network_Device networkDevice) {
+    return repo.getNetworkFromNetworkDevice(networkDevice);
+  }
 
-	protected static List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> convertFromDTO_List(
-		List<ArrowheadSystem> in) {
-		if (in == null) {
-			return null;
-		}
-		List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> out = new ArrayList<>();
-		for (ArrowheadSystem system : in) {
-			out.add(convertFromDTO(system));
-		}
+  /**
+   * Save node.
+   *
+   * @param node Node to be saved.
+   * @return Returns the saved node.
+   */
+  public Node saveNode(Node node) {
+    return repo.saveNode(node);
+  }
 
-		return out;
-	}
+  /**
+   * Save network.
+   *
+   * @param network Network to be saved.
+   * @return Returns the saved network.
+   */
+  public Network saveNetwork(Network network) {
+    return repo.saveNetwork(network);
+  }
 
-	protected static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(
-		eu.arrowhead.common.model.ArrowheadService in) {
+  /**
+   * Update a already saved network.
+   *
+   * @param network Network to be updated.
+   * @return Returns the updated network.
+   */
+  public Network updateNetwork(Network network) {
+    return repo.updateNetwork(network);
+  }
 
-		eu.arrowhead.common.database.qos.ArrowheadService_qos out = new eu.arrowhead.common.database.qos.ArrowheadService_qos();
+  /**
+   * Add network device to a network.
+   *
+   * @param network Network.
+   * @param networkDevice NetworkDevice.
+   * @return Returns the network from where the network device was added.
+   */
+  public Network addNetworkDeviceToNetwork(Network network,
+      Network_Device networkDevice) {
+    return repo.addNetworkDeviceToNetwork(network, networkDevice);
+  }
 
-		out.setInterfaces(in.getInterfaces());
-		out.setServiceDefinition(in.getServiceDefinition());
-		out.setServiceGroup(in.getServiceGroup());
+  /**
+   * Get all nodes.
+   *
+   * @return Return a list of nodes.
+   */
+  public List<Node> getAllNodes() {
+    return repo.getAllNodes();
+  }
 
-		return out;
-	}
+  /**
+   * Get all networks.
+   *
+   * @return Returns a list of networks.
+   */
+  public List<Network> getAllNetworks() {
+    return repo.getAllNetworks();
+  }
 
-	protected static eu.arrowhead.common.model.ArrowheadService convertToDTO(
-		eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
+  /**
+   * Get all arrowhead systems.
+   *
+   * @return Returns a list of systems.
+   */
+  public List<ArrowheadSystem> getAllArrowheadSystems() {
+    return convertToDTO_List(repo.getAllArrowheadSystems());
+  }
 
-		eu.arrowhead.common.model.ArrowheadService out = new eu.arrowhead.common.model.ArrowheadService();
+  /**
+   * Delete node.
+   *
+   * @param node Node to be deleted.
+   * @return Returns true if the node was successfully deleted.
+   */
+  public boolean deleteNode(Node node) {
+    return repo.deleteNode(node);
+  }
 
-		out.setInterfaces(in.getInterfaces());
-		out.setServiceDefinition(in.getServiceDefinition());
-		out.setServiceGroup(in.getServiceGroup());
+  /**
+   * Delete a network.
+   *
+   * @param network Network to be deleted.
+   * @return Returns true if the network was successfully deleted.
+   */
+  public boolean deleteNetwork(Network network) {
+    return repo.deleteNetwork(network);
+  }
 
-		return out;
-	}
+  /**
+   * Get node.
+   *
+   * @param n Node.
+   * @return Returns the already saved node.
+   */
+  public Node getNode(Node n) {
+    return repo.getNode(n);
+  }
 
-	protected static List<ArrowheadService> convertToDTO_ArrowheadServices(
-		List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
+  /**
+   * Get a network.
+   *
+   * @param network Network to search.
+   * @return Returns the network found on the db.
+   */
+  public Network getNetwork(Network network) {
+    return repo.getNetwork(network);
+  }
 
-		if (in == null) {
-			return null;
-		}
-		List<ArrowheadService> out = new ArrayList<>();
-		for (eu.arrowhead.common.database.qos.ArrowheadService_qos system : in) {
-			out.add(convertToDTO(system));
-		}
+  /**
+   * **********************************************
+   ************** Converts From/To DTO ************
+   * ***********************************************
+   */
+  protected eu.arrowhead.common.database.qos.ArrowheadSystem_qos converFromDTO(
+      ArrowheadSystem system) {
+    if (system == null) {
+      return null;
+    }
 
-		return out;
-	}
+    eu.arrowhead.common.database.qos.ArrowheadSystem_qos systemDB = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
+    systemDB.setAuthenticationInfo(system.getAuthenticationInfo());
+    systemDB.setAddress(system.getAddress());
+    systemDB.setPort(system.getPort());
+    systemDB.setSystemGroup(system.getSystemGroup());
+    systemDB.setSystemName(system.getSystemName());
+    return systemDB;
+  }
 
 }

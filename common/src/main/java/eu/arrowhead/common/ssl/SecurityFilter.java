@@ -3,7 +3,6 @@ package eu.arrowhead.common.ssl;
 import java.io.IOException;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
-
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -16,53 +15,53 @@ import javax.ws.rs.ext.Provider;
 @Provider
 @Priority(Priorities.AUTHENTICATION) //Highest priority constant, this filter gets executed first
 public class SecurityFilter implements ContainerRequestFilter {
-	
-    @Inject
-    javax.inject.Provider<UriInfo> uriInfo;
 
-	@Override
-	public void filter(ContainerRequestContext context) throws IOException {
-		X509Certificate[] chain =
-			      (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
+  @Inject
+  javax.inject.Provider<UriInfo> uriInfo;
 
-		if (chain != null && chain.length > 0) {
-			String subject = chain[0].getSubjectDN().getName();
-		    Authorizer securityContext = new Authorizer(subject);
-		    context.setSecurityContext(securityContext);
-		}
-	}
-	
-	public class Authorizer implements SecurityContext {
-		
-		private String user;
-		private Principal principal;
-		
-	    public Authorizer(final String user) {
-	        this.user = user;
-	        this.principal = new Principal() {
+  @Override
+  public void filter(ContainerRequestContext context) throws IOException {
+    X509Certificate[] chain =
+        (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
 
-	            public String getName() {
-	                return user;
-	            }
-	        };
-	    }
-	    
-	    public Principal getUserPrincipal() {
-	        return this.principal;
-	    }
+    if (chain != null && chain.length > 0) {
+      String subject = chain[0].getSubjectDN().getName();
+      Authorizer securityContext = new Authorizer(subject);
+      context.setSecurityContext(securityContext);
+    }
+  }
 
-	    public boolean isUserInRole(String role) {
-	        return (role.equals(user));
-	    }
+  public class Authorizer implements SecurityContext {
 
-	    public boolean isSecure() {
-	        return "https".equals(uriInfo.get().getRequestUri().getScheme());
-	    }
+    private String user;
+    private Principal principal;
 
-	    public String getAuthenticationScheme() {
-	        return SecurityContext.BASIC_AUTH;
-	    }
-	}
+    public Authorizer(final String user) {
+      this.user = user;
+      this.principal = new Principal() {
 
-	
+        public String getName() {
+          return user;
+        }
+      };
+    }
+
+    public Principal getUserPrincipal() {
+      return this.principal;
+    }
+
+    public boolean isUserInRole(String role) {
+      return (role.equals(user));
+    }
+
+    public boolean isSecure() {
+      return "https".equals(uriInfo.get().getRequestUri().getScheme());
+    }
+
+    public String getAuthenticationScheme() {
+      return SecurityContext.BASIC_AUTH;
+    }
+  }
+
+
 }

@@ -13,48 +13,47 @@ package eu.arrowhead.qos.drivers;
 import java.util.Map;
 
 /**
- *
  * @author Paulo
  */
 public class ReservationResponse {
 
-	public Boolean sucess;
-	public String reason;
-	public Map<String, String> networkConfiguration;
+  public Boolean sucess;
+  public String reason;
+  public Map<String, String> networkConfiguration;
 
-	public ReservationResponse() {
-	}
+  public ReservationResponse() {
+  }
 
-	public ReservationResponse(Boolean sucess, String reason,
-							   Map<String, String> networkConfiguration) {
-		this.sucess = sucess;
-		this.reason = reason;
-		this.networkConfiguration = networkConfiguration;
-	}
+  public ReservationResponse(Boolean sucess, String reason,
+      Map<String, String> networkConfiguration) {
+    this.sucess = sucess;
+    this.reason = reason;
+    this.networkConfiguration = networkConfiguration;
+  }
 
-	public Boolean getSucess() {
-		return sucess;
-	}
+  public Boolean getSucess() {
+    return sucess;
+  }
 
-	public void setSucess(Boolean sucess) {
-		this.sucess = sucess;
-	}
+  public void setSucess(Boolean sucess) {
+    this.sucess = sucess;
+  }
 
-	public String getReason() {
-		return reason;
-	}
+  public String getReason() {
+    return reason;
+  }
 
-	public void setReason(String reason) {
-		this.reason = reason;
-	}
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
 
-	public Map<String, String> getNetworkConfiguration() {
-		return networkConfiguration;
-	}
+  public Map<String, String> getNetworkConfiguration() {
+    return networkConfiguration;
+  }
 
-	public void setNetworkConfiguration(
-		Map<String, String> networkConfiguration) {
-		this.networkConfiguration = networkConfiguration;
-	}
+  public void setNetworkConfiguration(
+      Map<String, String> networkConfiguration) {
+    this.networkConfiguration = networkConfiguration;
+  }
 
 }

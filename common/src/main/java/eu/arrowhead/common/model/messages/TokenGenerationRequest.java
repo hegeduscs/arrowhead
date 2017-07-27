@@ -1,68 +1,67 @@
 package eu.arrowhead.common.model.messages;
 
-import java.util.List;
-
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
+import java.util.List;
 
 public class TokenGenerationRequest {
-	
-	private ArrowheadSystem consumer;
-	private ArrowheadCloud consumerCloud;
-	private List<ArrowheadSystem> providers;
-	private ArrowheadService service;
-	private int duration;
-	
-	public TokenGenerationRequest() {
-	}
 
-	public TokenGenerationRequest(ArrowheadSystem consumer, ArrowheadCloud consumerCloud,
-			List<ArrowheadSystem> providers, ArrowheadService service, int duration) {
-		this.consumer = consumer;
-		this.consumerCloud = consumerCloud;
-		this.providers = providers;
-		this.service = service;
-		this.duration = duration;
-	}
+  private ArrowheadSystem consumer;
+  private ArrowheadCloud consumerCloud;
+  private List<ArrowheadSystem> providers;
+  private ArrowheadService service;
+  private int duration;
 
-	public ArrowheadSystem getConsumer() {
-		return consumer;
-	}
+  public TokenGenerationRequest() {
+  }
 
-	public ArrowheadCloud getConsumerCloud() {
-		return consumerCloud;
-	}
+  public TokenGenerationRequest(ArrowheadSystem consumer, ArrowheadCloud consumerCloud,
+      List<ArrowheadSystem> providers, ArrowheadService service, int duration) {
+    this.consumer = consumer;
+    this.consumerCloud = consumerCloud;
+    this.providers = providers;
+    this.service = service;
+    this.duration = duration;
+  }
 
-	public List<ArrowheadSystem> getProviders() {
-		return providers;
-	}
+  public ArrowheadSystem getConsumer() {
+    return consumer;
+  }
 
-	public ArrowheadService getService() {
-		return service;
-	}
+  public void setConsumer(ArrowheadSystem consumer) {
+    this.consumer = consumer;
+  }
 
-	public int getDuration() {
-		return duration;
-	}
+  public ArrowheadCloud getConsumerCloud() {
+    return consumerCloud;
+  }
 
-	public void setConsumer(ArrowheadSystem consumer) {
-		this.consumer = consumer;
-	}
+  public void setConsumerCloud(ArrowheadCloud consumerCloud) {
+    this.consumerCloud = consumerCloud;
+  }
 
-	public void setConsumerCloud(ArrowheadCloud consumerCloud) {
-		this.consumerCloud = consumerCloud;
-	}
+  public List<ArrowheadSystem> getProviders() {
+    return providers;
+  }
 
-	public void setProviders(List<ArrowheadSystem> providers) {
-		this.providers = providers;
-	}
+  public void setProviders(List<ArrowheadSystem> providers) {
+    this.providers = providers;
+  }
 
-	public void setService(ArrowheadService service) {
-		this.service = service;
-	}
+  public ArrowheadService getService() {
+    return service;
+  }
 
-	public void setDuration(int duration) {
-		this.duration = duration;
-	}
+  public void setService(ArrowheadService service) {
+    this.service = service;
+  }
+
+  public int getDuration() {
+    return duration;
+  }
+
+  public void setDuration(int duration) {
+    this.duration = duration;
+  }
 }

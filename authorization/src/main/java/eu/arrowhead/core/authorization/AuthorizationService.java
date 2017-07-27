@@ -1,24 +1,6 @@
 package eu.arrowhead.core.authorization;
 
-import java.io.File;
-import java.io.FileInputStream;
-
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.X509EncodedKeySpec;
-
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-
-import javax.crypto.Cipher;
-import javax.ws.rs.core.Response;
-
 import com.google.gson.Gson;
-
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -27,125 +9,142 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.ArrowheadToken;
 import eu.arrowhead.common.model.messages.RawTokenInfo;
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
+import javax.crypto.Cipher;
+import javax.ws.rs.core.Response;
 
 public class AuthorizationService {
-	private static Properties prop;
 
-	public static List<PublicKey> getProviderPublicKeys(List<ArrowheadSystem> providers) {
-		try {
-			DatabaseManager databaseManager = DatabaseManager.getInstance();
+  private static Properties prop;
 
-			HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+  public static List<PublicKey> getProviderPublicKeys(List<ArrowheadSystem> providers) {
+    try {
+      DatabaseManager databaseManager = DatabaseManager.getInstance();
 
-			List<PublicKey> keys = new ArrayList<PublicKey>();
+      HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
 
-			for (ArrowheadSystem provider : providers) {
-				restrictionMap.clear();
-				restrictionMap.put("systemGroup", provider.getSystemGroup());
-				restrictionMap.put("systemName", provider.getSystemName());
-				ArrowheadSystem foundProvider = databaseManager.get(ArrowheadSystem.class, restrictionMap);
+      List<PublicKey> keys = new ArrayList<PublicKey>();
 
-				if (foundProvider == null) {
-					throw new DataNotFoundException("Consumer System is not in the authorization database.");
-				}
-				String authenticationInfo = foundProvider.getAuthenticationInfo();
-				PublicKey key = getPublicKey(authenticationInfo);
-				keys.add(key);
-			}
+      for (ArrowheadSystem provider : providers) {
+        restrictionMap.clear();
+        restrictionMap.put("systemGroup", provider.getSystemGroup());
+        restrictionMap.put("systemName", provider.getSystemName());
+        ArrowheadSystem foundProvider = databaseManager.get(ArrowheadSystem.class, restrictionMap);
 
-			return keys;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+        if (foundProvider == null) {
+          throw new DataNotFoundException("Consumer System is not in the authorization database.");
+        }
+        String authenticationInfo = foundProvider.getAuthenticationInfo();
+        PublicKey key = getPublicKey(authenticationInfo);
+        keys.add(key);
+      }
 
-		return null;
-	}
+      return keys;
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
 
-	public static ArrowheadToken generateSingleToken(ArrowheadSystem provider, PublicKey providerKey, ArrowheadSystem consumer,
-			ArrowheadCloud consumerCloud, ArrowheadService service, int duration) throws Exception {
-		
-		RawTokenInfo rawTokenInfo = new RawTokenInfo();
+    return null;
+  }
 
-		String c = consumer.getSystemName() + "." + consumer.getSystemGroup();
-		if (consumerCloud != null) {
-			c = c.concat(".").concat(consumerCloud.getCloudName()).concat(".").concat(consumerCloud.getOperator());
-		} else {
-			ArrowheadCloud ownCloud = Utility.getOwnCloud();
-			c = c.concat(".").concat(ownCloud.getCloudName()).concat(".").concat(ownCloud.getOperator());
-		}
-		rawTokenInfo.setC(c);
-		
-		String s = service.getInterfaces().get(0) + "." + service.getServiceDefinition() + "." + service.getServiceGroup();
-		rawTokenInfo.setS(s);
-		
-		if (duration != 0) {
-			long endTime = System.currentTimeMillis() + duration;
-			rawTokenInfo.setE(endTime);
-		} else {
-			rawTokenInfo.setE(0L);
-		}
-		
-		Gson gson = new Gson();
-		String json = gson.toJson(rawTokenInfo);
-		if (json.length() > 200) {
-			throw new Exception("JSON is too large");
-		}
+  public static ArrowheadToken generateSingleToken(ArrowheadSystem provider, PublicKey providerKey,
+      ArrowheadSystem consumer,
+      ArrowheadCloud consumerCloud, ArrowheadService service, int duration) throws Exception {
 
-		byte[] jsonbytes = json.getBytes("UTF8");
+    RawTokenInfo rawTokenInfo = new RawTokenInfo();
 
-		try {
-			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, providerKey);
-			byte[] token = cipher.doFinal(jsonbytes);
+    String c = consumer.getSystemName() + "." + consumer.getSystemGroup();
+    if (consumerCloud != null) {
+      c = c.concat(".").concat(consumerCloud.getCloudName()).concat(".")
+          .concat(consumerCloud.getOperator());
+    } else {
+      ArrowheadCloud ownCloud = Utility.getOwnCloud();
+      c = c.concat(".").concat(ownCloud.getCloudName()).concat(".").concat(ownCloud.getOperator());
+    }
+    rawTokenInfo.setC(c);
 
-			Signature signature = Signature.getInstance("SHA1withRSA");
-			signature.initSign(AuthorizationMain.privateKey);
-			signature.update(token);
-			String tokenString = Base64.getEncoder().encodeToString(token);
-			byte[] sigBytes = signature.sign();
-			String sign = Base64.getEncoder().encodeToString(sigBytes);
+    String s = service.getInterfaces().get(0) + "." + service.getServiceDefinition() + "." + service
+        .getServiceGroup();
+    rawTokenInfo.setS(s);
 
-			ArrowheadToken arrowheadToken = new ArrowheadToken();
-			arrowheadToken.setToken(tokenString);
-			arrowheadToken.setSignature(sign);
+    if (duration != 0) {
+      long endTime = System.currentTimeMillis() + duration;
+      rawTokenInfo.setE(endTime);
+    } else {
+      rawTokenInfo.setE(0L);
+    }
 
-			return arrowheadToken;
-		} catch (Exception ex) {
-			Response.status(500).build();
-			ex.printStackTrace();
-			return null;
-		}
-	}
+    Gson gson = new Gson();
+    String json = gson.toJson(rawTokenInfo);
+    if (json.length() > 200) {
+      throw new Exception("JSON is too large");
+    }
 
-	public synchronized static Properties getProp() {
-		try {
-			if (prop == null) {
-				prop = new Properties();
-				File file = new File("config" + File.separator + "app.properties");
-				FileInputStream inputStream = new FileInputStream(file);
-				if (inputStream != null) {
-					prop.load(inputStream);
-				}
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+    byte[] jsonbytes = json.getBytes("UTF8");
 
-		return prop;
-	}
+    try {
+      Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+      cipher.init(Cipher.ENCRYPT_MODE, providerKey);
+      byte[] token = cipher.doFinal(jsonbytes);
 
-	public static PublicKey getPublicKey(String stringKey) {
-		try {
-			byte[] byteKey = Base64.getDecoder().decode(stringKey);
-			X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
-			KeyFactory kf = KeyFactory.getInstance("RSA");
+      Signature signature = Signature.getInstance("SHA1withRSA");
+      signature.initSign(AuthorizationMain.privateKey);
+      signature.update(token);
+      String tokenString = Base64.getEncoder().encodeToString(token);
+      byte[] sigBytes = signature.sign();
+      String sign = Base64.getEncoder().encodeToString(sigBytes);
 
-			return kf.generatePublic(X509publicKey);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+      ArrowheadToken arrowheadToken = new ArrowheadToken();
+      arrowheadToken.setToken(tokenString);
+      arrowheadToken.setSignature(sign);
 
-		return null;
-	}
+      return arrowheadToken;
+    } catch (Exception ex) {
+      Response.status(500).build();
+      ex.printStackTrace();
+      return null;
+    }
+  }
+
+  public synchronized static Properties getProp() {
+    try {
+      if (prop == null) {
+        prop = new Properties();
+        File file = new File("config" + File.separator + "app.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+        if (inputStream != null) {
+          prop.load(inputStream);
+        }
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
+    return prop;
+  }
+
+  public static PublicKey getPublicKey(String stringKey) {
+    try {
+      byte[] byteKey = Base64.getDecoder().decode(stringKey);
+      X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
+      KeyFactory kf = KeyFactory.getInstance("RSA");
+
+      return kf.generatePublic(X509publicKey);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
 
 }

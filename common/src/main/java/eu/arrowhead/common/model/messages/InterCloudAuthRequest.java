@@ -1,54 +1,52 @@
 package eu.arrowhead.common.model.messages;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class InterCloudAuthRequest {
-	
-	private ArrowheadCloud cloud;
-	private ArrowheadService service;
-	private boolean generateToken;
-	
-	public InterCloudAuthRequest(){
-	}
 
-	public InterCloudAuthRequest(ArrowheadCloud cloud, ArrowheadService service, boolean generateToken) {
-		this.cloud = cloud;
-		this.service = service;
-		this.generateToken = generateToken;
-	}
+  private ArrowheadCloud cloud;
+  private ArrowheadService service;
+  private boolean generateToken;
 
-	public ArrowheadCloud getCloud() {
-		return cloud;
-	}
+  public InterCloudAuthRequest() {
+  }
 
-	public void setCloud(ArrowheadCloud cloud) {
-		this.cloud = cloud;
-	}
+  public InterCloudAuthRequest(ArrowheadCloud cloud, ArrowheadService service,
+      boolean generateToken) {
+    this.cloud = cloud;
+    this.service = service;
+    this.generateToken = generateToken;
+  }
 
-	public ArrowheadService getService() {
-		return service;
-	}
+  public ArrowheadCloud getCloud() {
+    return cloud;
+  }
 
-	public void setService(ArrowheadService service) {
-		this.service = service;
-	}
+  public void setCloud(ArrowheadCloud cloud) {
+    this.cloud = cloud;
+  }
 
-	public boolean isGenerateToken() {
-		return generateToken;
-	}
+  public ArrowheadService getService() {
+    return service;
+  }
 
-	public void setGenerateToken(boolean generateToken) {
-		this.generateToken = generateToken;
-	}
+  public void setService(ArrowheadService service) {
+    this.service = service;
+  }
 
-	public boolean isPayloadUsable(){
-		if(cloud == null || service == null || !cloud.isValidForDatabase() || !service.isValidSoft())
-			return false;
-		return true;
-	}
-	
+  public boolean isGenerateToken() {
+    return generateToken;
+  }
+
+  public void setGenerateToken(boolean generateToken) {
+    this.generateToken = generateToken;
+  }
+
+  public boolean isPayloadUsable() {
+    return cloud != null && service != null && cloud.isValidForDatabase() && service.isValidSoft();
+  }
+
 }

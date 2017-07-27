@@ -1,13 +1,13 @@
 package eu.arrowhead.common;
 
+import eu.arrowhead.common.exception.DuplicateEntryException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
-
+import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -17,212 +17,220 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
-import eu.arrowhead.common.exception.DuplicateEntryException;
-
 public class DatabaseManager {
-	
-	private static Logger log = Logger.getLogger(DatabaseManager.class.getName());
-	private static DatabaseManager instance = null;
-	private static SessionFactory sessionFactory;
-	private static Properties prop;
-	private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead");
-	private static final String dbUser = getProp().getProperty("db_user", "root");
-	private static final String dbPassword = getProp().getProperty("db_password", "root");
 
-	private DatabaseManager() {
-		if (sessionFactory == null) {
-			sessionFactory = new Configuration().configure()
-					.setProperty("hibernate.connection.url", dbAddress)
-					.setProperty("hibernate.connection.username", dbUser)
-					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
-		}
-	}
+  private static Logger log = Logger.getLogger(DatabaseManager.class.getName());
+  private static DatabaseManager instance = null;
+  private static SessionFactory sessionFactory;
+  private static Properties prop;
+  private static final String dbAddress = getProp()
+      .getProperty("db_address", "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead");
+  private static final String dbUser = getProp().getProperty("db_user", "root");
+  private static final String dbPassword = getProp().getProperty("db_password", "root");
 
-	public static DatabaseManager getInstance() {
-		if (instance == null) {
-			instance = new DatabaseManager();
-		}
-		return instance;
-	}
+  private DatabaseManager() {
+    if (sessionFactory == null) {
+      sessionFactory = new Configuration().configure()
+          .setProperty("hibernate.connection.url", dbAddress)
+          .setProperty("hibernate.connection.username", dbUser)
+          .setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+    }
+  }
 
-	public SessionFactory getSessionFactory() {
-		if (sessionFactory == null) {
-			sessionFactory = new Configuration().configure()
-					.setProperty("hibernate.connection.url", dbAddress)
-					.setProperty("hibernate.connection.username", dbUser)
-					.setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
-		}
-		return sessionFactory;
-	}
+  public static DatabaseManager getInstance() {
+    if (instance == null) {
+      instance = new DatabaseManager();
+    }
+    return instance;
+  }
 
-	public <T> T get(Class<T> queryClass, int id) {
-		T object = null;
+  public synchronized static Properties getProp() {
+    try {
+      if (prop == null) {
+        prop = new Properties();
+        File file = new File("config" + File.separator + "app.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+        if (inputStream != null) {
+          prop.load(inputStream);
+        }
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
 
-		Session session = getSessionFactory().openSession();
-		Transaction transaction = null;
+    return prop;
+  }
 
-		try {
-			transaction = session.beginTransaction();
-			object = session.get(queryClass, id);
-			transaction.commit();
-		} catch (Exception e) {
-			if (transaction != null)
-				transaction.rollback();
-			throw e;
-		} finally {
-			session.close();
-		}
+  public SessionFactory getSessionFactory() {
+    if (sessionFactory == null) {
+      sessionFactory = new Configuration().configure()
+          .setProperty("hibernate.connection.url", dbAddress)
+          .setProperty("hibernate.connection.username", dbUser)
+          .setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+    }
+    return sessionFactory;
+  }
 
-		return object;
-	}
+  public <T> T get(Class<T> queryClass, int id) {
+    T object = null;
 
-	@SuppressWarnings("unchecked")
-	public <T> T get(Class<T> queryClass, Map<String, Object> restrictionMap) {
-		T object = null;
+    Session session = getSessionFactory().openSession();
+    Transaction transaction = null;
 
-		Session session = getSessionFactory().openSession();
-		Transaction transaction = null;
+    try {
+      transaction = session.beginTransaction();
+      object = session.get(queryClass, id);
+      transaction.commit();
+    } catch (Exception e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      session.close();
+    }
 
-		try {
-			transaction = session.beginTransaction();
-			Criteria criteria = session.createCriteria(queryClass);
-			if (restrictionMap != null && !restrictionMap.isEmpty()) {
-				for (Entry<String, Object> entry : restrictionMap.entrySet()) {
-					criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
-				}
-			}
-			object = (T) criteria.uniqueResult();
-			transaction.commit();
-		} catch (Exception e) {
-			if (transaction != null)
-				transaction.rollback();
-			throw e;
-		} finally {
-			session.close();
-		}
+    return object;
+  }
 
-		return object;
-	}
+  @SuppressWarnings("unchecked")
+  public <T> T get(Class<T> queryClass, Map<String, Object> restrictionMap) {
+    T object = null;
 
-	@SuppressWarnings("unchecked")
-	public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap){
-		List<T> retrievedList = new ArrayList<T>();
+    Session session = getSessionFactory().openSession();
+    Transaction transaction = null;
 
-		Session session = getSessionFactory().openSession();
-		Transaction transaction = null;
+    try {
+      transaction = session.beginTransaction();
+      Criteria criteria = session.createCriteria(queryClass);
+      if (restrictionMap != null && !restrictionMap.isEmpty()) {
+        for (Entry<String, Object> entry : restrictionMap.entrySet()) {
+          criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
+        }
+      }
+      object = (T) criteria.uniqueResult();
+      transaction.commit();
+    } catch (Exception e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      session.close();
+    }
 
-		try {
-			transaction = session.beginTransaction();
-			Criteria criteria = session.createCriteria(queryClass);
-			if (restrictionMap != null && !restrictionMap.isEmpty()) {
-				for (Entry<String, Object> entry : restrictionMap.entrySet()) {
-					criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
-				}
-			}
-			retrievedList = (List<T>) criteria.list();
-			transaction.commit();
-		} catch (Exception e) {
-			if (transaction != null)
-				transaction.rollback();
-			throw e;
-		} finally {
-			session.close();
-		}
+    return object;
+  }
 
-		return retrievedList;
-	}
+  @SuppressWarnings("unchecked")
+  public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
+    List<T> retrievedList = new ArrayList<T>();
 
-	public <T> T save(T object) {
-		Session session = getSessionFactory().openSession();
-		Transaction transaction = null;
+    Session session = getSessionFactory().openSession();
+    Transaction transaction = null;
 
-		try {
-			transaction = session.beginTransaction();
-			session.save(object);
-			transaction.commit();
-		} catch (ConstraintViolationException e) {
-			if (transaction != null)
-				transaction.rollback();
-			log.info("DatabaseManager:save throws DuplicateEntryException");
-			throw new DuplicateEntryException(
-					"DuplicateEntryException: there is already an entry in the database with these parameters. "
-					+ "Please check the unique fields of the " + object.getClass());
-		} catch (Exception e) {
-			if (transaction != null)
-				transaction.rollback();
-			throw e;
-		} finally {
-			session.close();
-		}
+    try {
+      transaction = session.beginTransaction();
+      Criteria criteria = session.createCriteria(queryClass);
+      if (restrictionMap != null && !restrictionMap.isEmpty()) {
+        for (Entry<String, Object> entry : restrictionMap.entrySet()) {
+          criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
+        }
+      }
+      retrievedList = (List<T>) criteria.list();
+      transaction.commit();
+    } catch (Exception e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      session.close();
+    }
 
-		return object;
-	}
-	
-	public <T> T merge(T object) {
-		Session session = getSessionFactory().openSession();
-		Transaction transaction = null;
+    return retrievedList;
+  }
 
-		try {
-			transaction = session.beginTransaction();
-			session.merge(object);
-			transaction.commit();
-		} catch (ConstraintViolationException e) {
-			if (transaction != null)
-				transaction.rollback();
-			log.info("DatabaseManager:merge throws DuplicateEntryException");
-			throw new DuplicateEntryException(
-					"DuplicateEntryException: there is already an entry in the database with these parameters. "
-							+ "Please check the unique fields of the " + object.getClass());
-		} catch (Exception e) {
-			if (transaction != null)
-				transaction.rollback();
-			throw e;
-		} finally {
-			session.close();
-		}
+  public <T> T save(T object) {
+    Session session = getSessionFactory().openSession();
+    Transaction transaction = null;
 
-		return object;
-	}
+    try {
+      transaction = session.beginTransaction();
+      session.save(object);
+      transaction.commit();
+    } catch (ConstraintViolationException e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      log.info("DatabaseManager:save throws DuplicateEntryException");
+      throw new DuplicateEntryException(
+          "DuplicateEntryException: there is already an entry in the database with these parameters. "
+              + "Please check the unique fields of the " + object.getClass());
+    } catch (Exception e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      session.close();
+    }
 
-	public <T> void delete(T object) {
-		Session session = getSessionFactory().openSession();
-		Transaction transaction = null;
+    return object;
+  }
 
-		try {
-			transaction = session.beginTransaction();
-			session.delete(object);
-			transaction.commit();
-		} catch (ConstraintViolationException e) {
-			if (transaction != null)
-				transaction.rollback();
-			log.info("DatabaseManager:delete throws ConstraintViolationException");
-			throw new DuplicateEntryException(
-					"ConstraintViolationException: there is a reference to this object in another table, "
-					+ "which prevents the delete operation. (" + object.getClass() + ")");
-		} catch (Exception e) {
-			if (transaction != null)
-				transaction.rollback();
-			throw e;
-		} finally {
-			session.close();
-		}
-	}
-	
-	public synchronized static Properties getProp() {
-		try {
-			if (prop == null) {
-				prop = new Properties();
-				File file = new File("config" + File.separator + "app.properties");
-				FileInputStream inputStream = new FileInputStream(file);
-				if (inputStream != null) {
-					prop.load(inputStream);
-				}
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		
-		return prop;
-	}
+  public <T> T merge(T object) {
+    Session session = getSessionFactory().openSession();
+    Transaction transaction = null;
+
+    try {
+      transaction = session.beginTransaction();
+      session.merge(object);
+      transaction.commit();
+    } catch (ConstraintViolationException e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      log.info("DatabaseManager:merge throws DuplicateEntryException");
+      throw new DuplicateEntryException(
+          "DuplicateEntryException: there is already an entry in the database with these parameters. "
+              + "Please check the unique fields of the " + object.getClass());
+    } catch (Exception e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      session.close();
+    }
+
+    return object;
+  }
+
+  public <T> void delete(T object) {
+    Session session = getSessionFactory().openSession();
+    Transaction transaction = null;
+
+    try {
+      transaction = session.beginTransaction();
+      session.delete(object);
+      transaction.commit();
+    } catch (ConstraintViolationException e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      log.info("DatabaseManager:delete throws ConstraintViolationException");
+      throw new DuplicateEntryException(
+          "ConstraintViolationException: there is a reference to this object in another table, "
+              + "which prevents the delete operation. (" + object.getClass() + ")");
+    } catch (Exception e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      session.close();
+    }
+  }
 
 }

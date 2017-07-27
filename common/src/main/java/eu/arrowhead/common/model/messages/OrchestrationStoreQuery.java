@@ -5,50 +5,48 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 
 public class OrchestrationStoreQuery {
-	
-	private ArrowheadService requestedService;
-	private ArrowheadSystem requesterSystem;
-	private Boolean onlyActive = false;
-	
-	public OrchestrationStoreQuery() {
-	}
 
-	public OrchestrationStoreQuery(ArrowheadService requestedService, ArrowheadSystem requesterSystem,
-			Boolean onlyActive) {
-		this.requestedService = requestedService;
-		this.requesterSystem = requesterSystem;
-		this.onlyActive = onlyActive;
-	}
+  private ArrowheadService requestedService;
+  private ArrowheadSystem requesterSystem;
+  private Boolean onlyActive = false;
 
-	public ArrowheadService getRequestedService() {
-		return requestedService;
-	}
+  public OrchestrationStoreQuery() {
+  }
 
-	public void setRequestedService(ArrowheadService requestedService) {
-		this.requestedService = requestedService;
-	}
+  public OrchestrationStoreQuery(ArrowheadService requestedService, ArrowheadSystem requesterSystem,
+      Boolean onlyActive) {
+    this.requestedService = requestedService;
+    this.requesterSystem = requesterSystem;
+    this.onlyActive = onlyActive;
+  }
 
-	public ArrowheadSystem getRequesterSystem() {
-		return requesterSystem;
-	}
+  public ArrowheadService getRequestedService() {
+    return requestedService;
+  }
 
-	public void setRequesterSystem(ArrowheadSystem requesterSystem) {
-		this.requesterSystem = requesterSystem;
-	}
+  public void setRequestedService(ArrowheadService requestedService) {
+    this.requestedService = requestedService;
+  }
 
-	public Boolean isOnlyActive() {
-		return onlyActive;
-	}
+  public ArrowheadSystem getRequesterSystem() {
+    return requesterSystem;
+  }
 
-	public void setOnlyActive(Boolean onlyActive) {
-		this.onlyActive = onlyActive;
-	}
-	
-	public boolean isPayloadUsable(){
-		if(requesterSystem == null || !requesterSystem.isValidForDatabase())
-			return false;
-		return true;
-	}
-	
-	
+  public void setRequesterSystem(ArrowheadSystem requesterSystem) {
+    this.requesterSystem = requesterSystem;
+  }
+
+  public Boolean isOnlyActive() {
+    return onlyActive;
+  }
+
+  public void setOnlyActive(Boolean onlyActive) {
+    this.onlyActive = onlyActive;
+  }
+
+  public boolean isPayloadUsable() {
+    return requesterSystem != null && requesterSystem.isValidForDatabase();
+  }
+
+
 }

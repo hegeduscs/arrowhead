@@ -10,26 +10,26 @@
 */
 package eu.arrowhead.qos.communication.algorithms;
 
+import eu.arrowhead.common.model.messages.QoSVerifierResponse;
 import eu.arrowhead.qos.algorithms.IVerifierAlgorithm;
 import eu.arrowhead.qos.algorithms.VerificationInfo;
 import eu.arrowhead.qos.algorithms.VerificationResponse;
-import eu.arrowhead.common.model.messages.QoSVerifierResponse;
 
 public class FTTSE implements IVerifierAlgorithm {
 
-	private final String BANDWIDTH = "bandwidth";
-	private final String DELAY = "delay";
+  private final String BANDWIDTH = "bandwidth";
+  private final String DELAY = "delay";
 
-	public FTTSE() {
-		super();
-	}
+  public FTTSE() {
+    super();
+  }
 
-	@Override
-	public VerificationResponse verifyQoS(VerificationInfo info) {
-		QoSVerifierResponse response = new QoSVerifierResponse();
-		response.setResponse(true);
+  @Override
+  public VerificationResponse verifyQoS(VerificationInfo info) {
+    QoSVerifierResponse response = new QoSVerifierResponse();
+    response.setResponse(true);
 
-		return new VerificationResponse(true, null);
-	}
+    return new VerificationResponse(true, null);
+  }
 
 }

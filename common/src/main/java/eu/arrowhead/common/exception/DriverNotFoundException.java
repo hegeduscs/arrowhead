@@ -12,16 +12,15 @@ package eu.arrowhead.common.exception;
 */
 
 /**
- * Related to the drivers of each communication protocol. Whenever the
- * DriverFactory doesn't recognize the type, this exception will be launched.
+ * Related to the drivers of each communication protocol. Whenever the DriverFactory doesn't
+ * recognize the type, this exception will be launched.
  *
  * @author CISTER/INESC-TEC
- *
  */
 public class DriverNotFoundException extends Exception {
 
-    public DriverNotFoundException(String message) {
-        super(message);
-    }
+  public DriverNotFoundException(String message) {
+    super(message);
+  }
 
 }

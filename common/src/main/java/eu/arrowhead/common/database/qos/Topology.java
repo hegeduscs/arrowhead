@@ -17,74 +17,74 @@ import org.hibernate.annotations.LazyCollectionOption;
 @XmlRootElement
 public class Topology {
 
-	@Column(name = "id")
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private String id;
+  @Column(name = "id")
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private String id;
 
-	@ElementCollection
-	@LazyCollection(LazyCollectionOption.FALSE)
-	private Map<String, String> configurations;
+  @ElementCollection
+  @LazyCollection(LazyCollectionOption.FALSE)
+  private Map<String, String> configurations;
 
-	@Column(name = "status")
-	private String status;
+  @Column(name = "status")
+  private String status;
 
-	public Topology(Network_Device device) {
-		super();
-	}
+  public Topology(Network_Device device) {
+    super();
+  }
 
-	/**
-	 * get configuration
-	 *
-	 * @return returns map with configuration
-	 */
-	public Map<String, String> getConfigurations() {
-		return configurations;
-	}
+  /**
+   * get configuration
+   *
+   * @return returns map with configuration
+   */
+  public Map<String, String> getConfigurations() {
+    return configurations;
+  }
 
-	/**
-	 * set configuration
-	 *
-	 * @param configurations map with configuration
-	 */
-	public void setConfigurations(Map<String, String> configurations) {
-		this.configurations = configurations;
-	}
+  /**
+   * set configuration
+   *
+   * @param configurations map with configuration
+   */
+  public void setConfigurations(Map<String, String> configurations) {
+    this.configurations = configurations;
+  }
 
-	/**
-	 * get ID
-	 *
-	 * @return returns ID
-	 */
-	public String getId() {
-		return id;
-	}
+  /**
+   * get ID
+   *
+   * @return returns ID
+   */
+  public String getId() {
+    return id;
+  }
 
-	/**
-	 * set ID
-	 *
-	 * @param id ID
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+  /**
+   * set ID
+   *
+   * @param id ID
+   */
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	/**
-	 * get status
-	 *
-	 * @return returns status
-	 */
-	public String getStatus() {
-		return status;
-	}
+  /**
+   * get status
+   *
+   * @return returns status
+   */
+  public String getStatus() {
+    return status;
+  }
 
-	/**
-	 * set status
-	 *
-	 * @param status status
-	 */
-	public void setStatus(String status) {
-		this.status = status;
-	}
+  /**
+   * set status
+   *
+   * @param status status
+   */
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
 }

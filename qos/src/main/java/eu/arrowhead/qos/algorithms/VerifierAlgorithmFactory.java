@@ -19,41 +19,43 @@ import java.util.Map;
 
 public class VerifierAlgorithmFactory {
 
-	private static VerifierAlgorithmFactory instance;
-	Class[] paramVerificationInfo = new Class[1];
+  private static VerifierAlgorithmFactory instance;
+  Class[] paramVerificationInfo = new Class[1];
 
-	protected VerifierAlgorithmFactory() {
-		super();
-		//VerificationInfo parameter
-		paramVerificationInfo[0] = VerificationInfo.class;
-	}
+  protected VerifierAlgorithmFactory() {
+    super();
+    //VerificationInfo parameter
+    paramVerificationInfo[0] = VerificationInfo.class;
+  }
 
-	public static VerifierAlgorithmFactory getInstance() {
-		if (instance == null) {
-			instance = new VerifierAlgorithmFactory();
-		}
-		return instance;
-	}
+  public static VerifierAlgorithmFactory getInstance() {
+    if (instance == null) {
+      instance = new VerifierAlgorithmFactory();
+    }
+    return instance;
+  }
 
-	public QoSVerifierResponse verify(String communicationProtocol,
-									  Map<String, String> provierDeviceCapabilities,
-									  Map<String, String> consumerDeviceCapabilities,
-									  List<QoS_Resource_Reservation> providerDeviceQoSReservations,
-									  List<QoS_Resource_Reservation> consumerDeviceQoSReservations,
-									  Map<String, String> requestedQoS,
-									  Map<String, String> commands) throws InstantiationException, ClassNotFoundException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-		Class cls;
+  public QoSVerifierResponse verify(String communicationProtocol,
+      Map<String, String> provierDeviceCapabilities,
+      Map<String, String> consumerDeviceCapabilities,
+      List<QoS_Resource_Reservation> providerDeviceQoSReservations,
+      List<QoS_Resource_Reservation> consumerDeviceQoSReservations,
+      Map<String, String> requestedQoS,
+      Map<String, String> commands)
+      throws InstantiationException, ClassNotFoundException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+    Class cls;
 
-		// Class Invoking
-		cls = Class.forName("qosmanager.algorithms." + communicationProtocol.
-			toUpperCase());
-		Object obj = cls.newInstance();
-		// Method Invoking
-		Method method = cls.
-			getDeclaredMethod("verifyQoS", paramVerificationInfo);
-		return (QoSVerifierResponse) method.
-			invoke(obj, new VerificationInfo(provierDeviceCapabilities, consumerDeviceCapabilities, providerDeviceQoSReservations, consumerDeviceQoSReservations, requestedQoS, commands));
+    // Class Invoking
+    cls = Class.forName("qosmanager.algorithms." + communicationProtocol.
+        toUpperCase());
+    Object obj = cls.newInstance();
+    // Method Invoking
+    Method method = cls.
+        getDeclaredMethod("verifyQoS", paramVerificationInfo);
+    return (QoSVerifierResponse) method.
+        invoke(obj, new VerificationInfo(provierDeviceCapabilities, consumerDeviceCapabilities,
+            providerDeviceQoSReservations, consumerDeviceQoSReservations, requestedQoS, commands));
 
-	}
+  }
 
 }

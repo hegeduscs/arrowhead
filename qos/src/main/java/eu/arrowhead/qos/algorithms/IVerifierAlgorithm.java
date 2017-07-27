@@ -12,13 +12,13 @@ package eu.arrowhead.qos.algorithms;
 
 public interface IVerifierAlgorithm {
 
-	/**
-	 * Verify if the desired qos is possible
-	 *
-	 * @param info Contains provider, consumer systems, the requested service
-	 * and QoS and the all the capabilities.
-	 * @return Returns true or false with a rejetction motivation.
-	 */
-	public VerificationResponse verifyQoS(VerificationInfo info);
+  /**
+   * Verify if the desired qos is possible
+   *
+   * @param info Contains provider, consumer systems, the requested service and QoS and the all the
+   * capabilities.
+   * @return Returns true or false with a rejetction motivation.
+   */
+  VerificationResponse verifyQoS(VerificationInfo info);
 
 }

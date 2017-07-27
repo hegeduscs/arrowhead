@@ -1,5 +1,7 @@
 package eu.arrowhead.core.gatekeeper;
 
+import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.ssl.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,9 +9,7 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-
 import javax.ws.rs.core.UriBuilder;
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -18,165 +18,157 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.ssl.SecurityUtils;
-
 public class GatekeeperMain {
 
-	private static Logger log = Logger.getLogger(GatekeeperMain.class.getName());
-	private static Properties prop;
-	
-	public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8446/");
-	public static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8447/");
+  public static HttpServer server = null;
+  public static HttpServer secureServer = null;
+  private static Logger log = Logger.getLogger(GatekeeperMain.class.getName());
+  private static Properties prop;
+  public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8446/");
+  public static final String BASE_URI_SECURED = getProp()
+      .getProperty("base_uri_secured", "https://0.0.0.0:8447/");
 
-	public static HttpServer server = null;
-	public static HttpServer secureServer = null;
+  public static void main(String[] args) throws IOException {
+    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
-	public static void main(String[] args) throws IOException {
-		PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
-		
-		boolean daemon = false;
-		int mode = 0;
-		
-		for(int i=0;i<args.length;++i) {			
-			if(args[i].equals("-d")) {
-				daemon = true;
-				System.out.println("Starting server as daemon!");
-			}
-			else if(args[i].equals("-m")) {
-				++i;
-				switch (args[i]) {
-				case "secure":
-					mode = 1;
-					break;
-				case "both":
-					mode = 2;
-					break;
-				default:
-					log.error("Unkown mode: " + args[i]);					
-				}	
-				
-			}
-		}
-		
-		switch (mode) {
-		case 0:
-			server = startServer();
-			break;
-		case 1:
-			System.out.println("Starting secure server...");
-			secureServer = startSecureServer();
-			break;
-		case 2:
-			System.out.println("Starting secure and unsecure servers...");
-			server = startServer();
-			secureServer = startSecureServer();
-			break;
-		}	
-		
-		if(daemon) {
-			System.out.println("In daemon mode, process will terminate for TERM signal...");
-	        Runtime.getRuntime().addShutdownHook(new Thread()
-	        {
-	            @Override
-	            public void run()
-	            {
-	            	System.out.println("Received TERM signal, shutting down...");
-	            	shutdown();
-	            }
-	        });
-		}		
-		else {
-			System.out.println("Press enter to shutdown Gatekeeper Server(s)...");
-	        System.in.read();	        
-	        shutdown();
-		}
-	}
-	
-	public static void shutdown() {
-        if(server != null){
-        	log.info("Stopping server at: " + BASE_URI);
-        	server.shutdownNow();
+    boolean daemon = false;
+    int mode = 0;
+
+    for (int i = 0; i < args.length; ++i) {
+      if (args[i].equals("-d")) {
+        daemon = true;
+        System.out.println("Starting server as daemon!");
+      } else if (args[i].equals("-m")) {
+        ++i;
+        switch (args[i]) {
+          case "secure":
+            mode = 1;
+            break;
+          case "both":
+            mode = 2;
+            break;
+          default:
+            log.error("Unkown mode: " + args[i]);
         }
-        if(secureServer != null){
-        	log.info("Stopping server at: " + BASE_URI_SECURED);
-        	secureServer.shutdownNow();
-        }        
-        System.out.println("Authorization Server(s) stopped");
-	}
-	
-	public static HttpServer startServer() throws IOException {
-		log.info("Starting server at: " + BASE_URI);
-		
-		URI uri = UriBuilder.fromUri(BASE_URI).build();
 
-		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(GatekeeperResource.class);
-		config.packages("eu.arrowhead.common");
+      }
+    }
 
-		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
-		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);		
-		server.start();		
-		return server;
-	}
-	
-	public static HttpServer startSecureServer() throws IOException {
-		log.info("Starting server at: " + BASE_URI_SECURED);
-		
-		URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-		final ResourceConfig config = new ResourceConfig();
-		config.registerClasses(GatekeeperResource.class, eu.arrowhead.common.ssl.SecurityFilter.class);
-		config.packages("eu.arrowhead.common");
+    switch (mode) {
+      case 0:
+        server = startServer();
+        break;
+      case 1:
+        System.out.println("Starting secure server...");
+        secureServer = startSecureServer();
+        break;
+      case 2:
+        System.out.println("Starting secure and unsecure servers...");
+        server = startServer();
+        secureServer = startSecureServer();
+        break;
+    }
 
-		SSLContextConfigurator sslCon = new SSLContextConfigurator();
+    if (daemon) {
+      System.out.println("In daemon mode, process will terminate for TERM signal...");
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        @Override
+        public void run() {
+          System.out.println("Received TERM signal, shutting down...");
+          shutdown();
+        }
+      });
+    } else {
+      System.out.println("Press enter to shutdown Gatekeeper Server(s)...");
+      System.in.read();
+      shutdown();
+    }
+  }
 
-		String keystorePath = getProp().getProperty("ssl.keystore");
-		String keystorePass = getProp().getProperty("ssl.keystorepass");
-		String keyPass = getProp().getProperty("ssl.keypass");
-		String truststorePath = getProp().getProperty("ssl.truststore");
-		String truststorePass = getProp().getProperty("ssl.truststorepass");
-		
-		sslCon.setKeyStoreFile(keystorePath);
-		sslCon.setKeyStorePass(keystorePass);
-		sslCon.setKeyPass(keyPass);
-		sslCon.setTrustStoreFile(truststorePath);
-		sslCon.setTrustStorePass(truststorePass);
-		
-    	X509Certificate serverCert = null;
-		try {
-			KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-			serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-		} catch (Exception ex) {
-			throw new AuthenticationException(ex.getMessage());
-		}  				
-		String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
-		log.info("Certificate of the secure server: " + serverCN);
-		config.property("server_common_name", serverCN);
+  public static void shutdown() {
+    if (server != null) {
+      log.info("Stopping server at: " + BASE_URI);
+      server.shutdownNow();
+    }
+    if (secureServer != null) {
+      log.info("Stopping server at: " + BASE_URI_SECURED);
+      secureServer.shutdownNow();
+    }
+    System.out.println("Authorization Server(s) stopped");
+  }
 
-		final HttpServer server = GrizzlyHttpServerFactory.
-				createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
-				.setClientMode(false).setNeedClientAuth(true));
-		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-		server.start();
-		return server;
-	}
-	
-	public synchronized static Properties getProp() {
-		try {
-			if (prop == null) {
-				prop = new Properties();
-				File file = new File("config" + File.separator + "app.properties");
-				FileInputStream inputStream = new FileInputStream(file);
-				if (inputStream != null) {
-					prop.load(inputStream);
-				}
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		
-		return prop;
-	}
-	
+  public static HttpServer startServer() throws IOException {
+    log.info("Starting server at: " + BASE_URI);
+
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
+
+    final ResourceConfig config = new ResourceConfig();
+    config.registerClasses(GatekeeperResource.class);
+    config.packages("eu.arrowhead.common");
+
+    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+    server.start();
+    return server;
+  }
+
+  public static HttpServer startSecureServer() throws IOException {
+    log.info("Starting server at: " + BASE_URI_SECURED);
+
+    URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+    final ResourceConfig config = new ResourceConfig();
+    config.registerClasses(GatekeeperResource.class, eu.arrowhead.common.ssl.SecurityFilter.class);
+    config.packages("eu.arrowhead.common");
+
+    SSLContextConfigurator sslCon = new SSLContextConfigurator();
+
+    String keystorePath = getProp().getProperty("ssl.keystore");
+    String keystorePass = getProp().getProperty("ssl.keystorepass");
+    String keyPass = getProp().getProperty("ssl.keypass");
+    String truststorePath = getProp().getProperty("ssl.truststore");
+    String truststorePass = getProp().getProperty("ssl.truststorepass");
+
+    sslCon.setKeyStoreFile(keystorePath);
+    sslCon.setKeyStorePass(keystorePass);
+    sslCon.setKeyPass(keyPass);
+    sslCon.setTrustStoreFile(truststorePath);
+    sslCon.setTrustStorePass(truststorePass);
+
+    X509Certificate serverCert = null;
+    try {
+      KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+      serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
+    } catch (Exception ex) {
+      throw new AuthenticationException(ex.getMessage());
+    }
+    String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+    log.info("Certificate of the secure server: " + serverCN);
+    config.property("server_common_name", serverCN);
+
+    final HttpServer server = GrizzlyHttpServerFactory.
+        createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
+            .setClientMode(false).setNeedClientAuth(true));
+    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+    server.start();
+    return server;
+  }
+
+  public synchronized static Properties getProp() {
+    try {
+      if (prop == null) {
+        prop = new Properties();
+        File file = new File("config" + File.separator + "app.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+        if (inputStream != null) {
+          prop.load(inputStream);
+        }
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
+    return prop;
+  }
+
 
 }

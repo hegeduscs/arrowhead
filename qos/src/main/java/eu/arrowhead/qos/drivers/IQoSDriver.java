@@ -1,4 +1,5 @@
 package eu.arrowhead.qos.drivers;
+
 /* This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, you can obtain one at http://mozilla.org/MPL/2.0/. 
@@ -11,12 +12,12 @@ package eu.arrowhead.qos.drivers;
 */
 public interface IQoSDriver {
 
-	/**
-	 * Configures a stream between a provider and a consumer.
-	 *
-	 * @param info Necessary information to the driver.
-	 * @return Returns the stream configuration parameters.
-	 */
-	public ReservationResponse reserveQoS(ReservationInfo info);
+  /**
+   * Configures a stream between a provider and a consumer.
+   *
+   * @param info Necessary information to the driver.
+   * @return Returns the stream configuration parameters.
+   */
+  ReservationResponse reserveQoS(ReservationInfo info);
 
 }

@@ -29,40 +29,39 @@ import org.apache.log4j.Logger;
 
 /**
  * @author pardavib, mereszd
- *
  */
 @Path("QoSManager")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class QoSResource {
 
-	private static Logger log = Logger.getLogger(QoSResource.class.getName());
-	private final QoSManagerService service = new QoSManagerService();
+  private static Logger log = Logger.getLogger(QoSResource.class.getName());
+  private final QoSManagerService service = new QoSManagerService();
 
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String home() {
-		return "I am online!";
-	}
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public String home() {
+    return "I am online!";
+  }
 
-	@PUT
-	@Path("/QoSVerify")
-	public Response qosVerification(
-		QoSVerify qosVerify) {
-		QoSVerificationResponse qvr = service.qoSVerify(qosVerify);
-		return Response.status(Status.OK).entity(qvr).build();
-	}
+  @PUT
+  @Path("/QoSVerify")
+  public Response qosVerification(
+      QoSVerify qosVerify) {
+    QoSVerificationResponse qvr = service.qoSVerify(qosVerify);
+    return Response.status(Status.OK).entity(qvr).build();
+  }
 
-	@PUT
-	@Path("/QoSReserve")
-	public Response qosReservation(
-		QoSReserve qosReservation)
-		throws ReservationException, DriverNotFoundException, IOException {
+  @PUT
+  @Path("/QoSReserve")
+  public Response qosReservation(
+      QoSReserve qosReservation)
+      throws ReservationException, DriverNotFoundException, IOException {
 
-		log.info("QoS: Reserving resouces.");
-		QoSReservationResponse qosrr = service.qoSReserve(qosReservation);
-		return Response.status(Status.OK).entity(qosrr).build();
+    log.info("QoS: Reserving resouces.");
+    QoSReservationResponse qosrr = service.qoSReserve(qosReservation);
+    return Response.status(Status.OK).entity(qosrr).build();
 
-	}
+  }
 
 }

@@ -16,63 +16,63 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class DeployedSystem {
 
-	@Column(name = "id")
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+  @Column(name = "id")
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private int id;
 
-	@OneToOne
-	@JoinColumn(name = "arrowhead_system_id")
-	private ArrowheadSystem_qos system;
+  @OneToOne
+  @JoinColumn(name = "arrowhead_system_id")
+  private ArrowheadSystem_qos system;
 
-	@ManyToOne
-	@JoinColumn(name = "network_device_id")
-	private Network_Device networkDevice;
+  @ManyToOne
+  @JoinColumn(name = "network_device_id")
+  private Network_Device networkDevice;
 
-	protected DeployedSystem() {
+  protected DeployedSystem() {
 
-	}
+  }
 
-	public DeployedSystem(ArrowheadSystem_qos system, Network_Device networkDevice) {
-		super();
-		this.system = system;
-		this.networkDevice = networkDevice;
-	}
+  public DeployedSystem(ArrowheadSystem_qos system, Network_Device networkDevice) {
+    super();
+    this.system = system;
+    this.networkDevice = networkDevice;
+  }
 
-	/**
-	 * Get ArrowheadSystem_qos.
-	 *
-	 * @return Returns Arrowhead Sytem.
-	 */
-	public ArrowheadSystem_qos getSystem() {
-		return system;
-	}
+  /**
+   * Get ArrowheadSystem_qos.
+   *
+   * @return Returns Arrowhead Sytem.
+   */
+  public ArrowheadSystem_qos getSystem() {
+    return system;
+  }
 
-	/**
-	 * Set Arrowhead System
-	 *
-	 * @param system Arrowhead System.
-	 */
-	public void setSystem(ArrowheadSystem_qos system) {
-		this.system = system;
-	}
+  /**
+   * Set Arrowhead System
+   *
+   * @param system Arrowhead System.
+   */
+  public void setSystem(ArrowheadSystem_qos system) {
+    this.system = system;
+  }
 
-	/**
-	 * Get Network Device.
-	 *
-	 * @return Network Device.
-	 */
-	public Network_Device getNetworkDevice() {
-		return networkDevice;
-	}
+  /**
+   * Get Network Device.
+   *
+   * @return Network Device.
+   */
+  public Network_Device getNetworkDevice() {
+    return networkDevice;
+  }
 
-	/**
-	 * Set Network Device.
-	 *
-	 * @param networkDevice Network Device.
-	 */
-	public void setNetworkDevice(Network_Device networkDevice) {
-		this.networkDevice = networkDevice;
-	}
+  /**
+   * Set Network Device.
+   *
+   * @param networkDevice Network Device.
+   */
+  public void setNetworkDevice(Network_Device networkDevice) {
+    this.networkDevice = networkDevice;
+  }
 
 }
