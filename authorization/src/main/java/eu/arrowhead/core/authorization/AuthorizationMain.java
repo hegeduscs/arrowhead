@@ -57,32 +57,32 @@ public class AuthorizationMain {
 			} else if (args[i].equals("-m")) {
 				++i;
 				switch (args[i]) {
-				case "secure":
-					mode = 1;
-					break;
-				case "both":
-					mode = 2;
-					break;
-				default:
-					log.error("Unkown mode: " + args[i]);
+					case "secure":
+						mode = 1;
+						break;
+					case "both":
+						mode = 2;
+						break;
+					default:
+						log.error("Unkown mode: " + args[i]);
 				}
 
 			}
 		}
 
 		switch (mode) {
-		case 0:
-			server = startServer();
-			break;
-		case 1:
-			System.out.println("Starting secure server...");
-			secureServer = startSecureServer();
-			break;
-		case 2:
-			System.out.println("Starting secure and unsecure servers...");
-			server = startServer();
-			secureServer = startSecureServer();
-			break;
+			case 0:
+				server = startServer();
+				break;
+			case 1:
+				System.out.println("Starting secure server...");
+				secureServer = startSecureServer();
+				break;
+			case 2:
+				System.out.println("Starting secure and unsecure servers...");
+				server = startServer();
+				secureServer = startSecureServer();
+				break;
 		}
 
 		if (daemon) {
@@ -162,7 +162,7 @@ public class AuthorizationMain {
 		config.property("server_common_name", serverCN);
 
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true,
-				new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
+																			new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
 		server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
 		server.start();
 		return server;
