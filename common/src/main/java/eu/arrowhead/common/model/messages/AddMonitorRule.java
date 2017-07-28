@@ -36,7 +36,7 @@ public class AddMonitorRule {
    * @param softRealTime the soft real time clause
    */
   public AddMonitorRule(String protocol, ArrowheadSystem provider, ArrowheadSystem consumer,
-      Map<String, String> parameters, boolean softRealTime) {
+                        Map<String, String> parameters, boolean softRealTime) {
     this.protocol = protocol;
     this.provider = provider;
     this.consumer = consumer;

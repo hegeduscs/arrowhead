@@ -27,7 +27,7 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name = "orchestration_store", uniqueConstraints = {@UniqueConstraint(
-		columnNames = {"consumer_system_id", "arrowhead_service_id", "provider_system_id",
+    columnNames = {"consumer_system_id", "arrowhead_service_id", "provider_system_id",
         "provider_cloud_id", "priority", "is_active"})})
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
@@ -74,7 +74,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service,
-      ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, Integer priority) {
+                            ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
+                            Integer priority) {
     this.consumer = consumer;
     this.service = service;
     this.providerSystem = providerSystem;
@@ -83,8 +84,10 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service,
-      ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, Integer priority,
-      boolean isActive, String name, Date lastUpdated, String orchestrationRule) {
+                            ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
+                            Integer priority,
+                            boolean isActive, String name, Date lastUpdated,
+                            String orchestrationRule) {
     this.consumer = consumer;
     this.service = service;
     this.providerSystem = providerSystem;
@@ -177,15 +180,15 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public boolean isPayloadUsable() {
-		if (consumer == null || service == null || !consumer.isValid() || !service.isValidStrict()) {
-			return false;
-		}
-		if (priority == null || priority < 0) {
-			return false;
-		}
-		if (isActive && providerCloud != null) {
-			return false;
-		}
+    if (consumer == null || service == null || !consumer.isValid() || !service.isValidStrict()) {
+      return false;
+    }
+    if (priority == null || priority < 0) {
+      return false;
+    }
+    if (isActive && providerCloud != null) {
+      return false;
+    }
     return (providerSystem != null && providerSystem.isValid());
   }
 

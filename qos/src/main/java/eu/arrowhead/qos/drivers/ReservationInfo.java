@@ -30,10 +30,10 @@ public class ReservationInfo {
   }
 
   public ReservationInfo(Map<String, String> networkConfiguration,
-      ArrowheadSystem provider, ArrowheadSystem consumer,
-      ArrowheadService service,
-      Map<String, String> commands,
-      Map<String, String> requestedQoS) {
+                         ArrowheadSystem provider, ArrowheadSystem consumer,
+                         ArrowheadService service,
+                         Map<String, String> commands,
+                         Map<String, String> requestedQoS) {
     this.networkConfiguration = networkConfiguration;
     this.provider = provider;
     this.consumer = consumer;

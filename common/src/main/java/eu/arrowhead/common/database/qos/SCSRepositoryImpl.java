@@ -25,7 +25,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
       sessionFactory = new Configuration().configure(URL).
           buildSessionFactory();
       /*try {
-				bootstrap();
+        bootstrap();
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
 			}*/
@@ -41,7 +41,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     ArrowheadSystem_qos sC = new ArrowheadSystem_qos("Cs", "C1", "192.168.1.67", "9997", "noAuth");
     networkCapabilities.put("bandwitdh", "100");
     Network_Device nD = new Network_Device("intel wifi", "FF:FF:FF:FF:FF:FB", networkCapabilities,
-        net);
+                                           net);
     capabilities.put("processorArchitecture", "x86");
     deployedSystems.add(new DeployedSystem(sC, nD));
 
@@ -63,7 +63,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     networkCapabilities.put("bandwitdh", "100");
 
     Network_Device nD = new Network_Device("intel wifi", "FF:FF:FF:FF:FF:FC", networkCapabilities,
-        net);
+                                           net);
     capabilities.put("processorArchitecture", "x86");
     deployedSystems.add(new DeployedSystem(sP, nD));
 
@@ -175,7 +175,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 
   @SuppressWarnings("unchecked")
   private <T> List<T> getAll(Class<T> queryClass,
-      Map<String, Object> restrictionMap) {
+                             Map<String, Object> restrictionMap) {
     List<T> retrievedList = new ArrayList<T>();
 
     Session session = getSessionFactory().openSession();
@@ -292,7 +292,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     List<Node> list = getAll(Node.class, restrictionMap);
 
 		/*
-		 * for (Node n : list) { if
+     * for (Node n : list) { if
 		 * (n.getDeployedSystems().containsKey(provider)) return n; }
 		 */
     for (Node n : list) {
@@ -368,7 +368,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 
   @Override
   public Network addNetworkDeviceToNetwork(Network network,
-      Network_Device networkDevice) {
+                                           Network_Device networkDevice) {
     Network net = getNetwork(network);
     if (net == null) {
       return null;

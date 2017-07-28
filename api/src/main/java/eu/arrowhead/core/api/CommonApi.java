@@ -89,7 +89,7 @@ public class CommonApi {
   @GET
   @Path("/services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
   public ArrowheadService getService(@PathParam("serviceGroup") String serviceGroup,
-      @PathParam("serviceDefinition") String serviceDefinition) {
+                                     @PathParam("serviceDefinition") String serviceDefinition) {
 
     ArrowheadService service = new ArrowheadService();
     restrictionMap.put("serviceGroup", serviceGroup);
@@ -146,7 +146,7 @@ public class CommonApi {
     if (!service.isValidSoft()) {
       log.info("CommonApi:updateService throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing service group "
-          + "or service definition in the entry payload.");
+                                        + "or service definition in the entry payload.");
     }
 
     restrictionMap.put("serviceGroup", service.getServiceGroup());
@@ -173,7 +173,7 @@ public class CommonApi {
   @DELETE
   @Path("/services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
   public Response deleteService(@PathParam("serviceGroup") String serviceGroup,
-      @PathParam("serviceDefinition") String serviceDefinition) {
+                                @PathParam("serviceDefinition") String serviceDefinition) {
 
     restrictionMap.put("serviceGroup", serviceGroup);
     restrictionMap.put("serviceDefinition", serviceDefinition);
@@ -221,7 +221,7 @@ public class CommonApi {
     if (systemList.isEmpty()) {
       log.info("CommonApi:getSystemGroup throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadSystems not found in the "
-          + "database from this system group.");
+                                          + "database from this system group.");
     }
 
     return systemList;
@@ -237,7 +237,7 @@ public class CommonApi {
   @GET
   @Path("/systems/systemgroup/{systemGroup}/systemname/{systemName}")
   public ArrowheadSystem getSystem(@PathParam("systemGroup") String systemGroup,
-      @PathParam("systemName") String systemName) {
+                                   @PathParam("systemName") String systemName) {
 
     ArrowheadSystem system = new ArrowheadSystem();
     restrictionMap.put("systemGroup", systemGroup);
@@ -295,7 +295,7 @@ public class CommonApi {
     if (!system.isValid()) {
       log.info("CommonApi:updateSystem throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing system group, "
-          + "system name or address in the entry payload.");
+                                        + "system name or address in the entry payload.");
     }
 
     restrictionMap.put("systemGroup", system.getSystemGroup());
@@ -324,7 +324,7 @@ public class CommonApi {
   @DELETE
   @Path("/systems/systemgroup/{systemGroup}/systemname/{systemName}")
   public Response deleteSystem(@PathParam("systemGroup") String systemGroup,
-      @PathParam("systemName") String systemName) {
+                               @PathParam("systemName") String systemName) {
 
     restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
@@ -372,7 +372,7 @@ public class CommonApi {
     if (cloudList.isEmpty()) {
       log.info("CommonApi:getCloudList throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadClouds not found in the database "
-          + "from this operator.");
+                                          + "from this operator.");
     }
 
     return cloudList;
@@ -388,7 +388,7 @@ public class CommonApi {
   @GET
   @Path("/clouds/operator/{operator}/cloudname/{cloudName}")
   public ArrowheadCloud getCloud(@PathParam("operator") String operator,
-      @PathParam("cloudname") String cloudname) {
+                                 @PathParam("cloudname") String cloudname) {
 
     ArrowheadCloud cloud = new ArrowheadCloud();
     restrictionMap.put("operator", operator);
@@ -446,7 +446,7 @@ public class CommonApi {
     if (!cloud.isValid()) {
       log.info("CommonApi:updateCloud throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing operator, "
-          + " cloudName, address or serviceURI in the entry payload.");
+                                        + " cloudName, address or serviceURI in the entry payload.");
     }
 
     restrictionMap.put("operator", cloud.getOperator());
@@ -476,7 +476,7 @@ public class CommonApi {
   @DELETE
   @Path("/clouds/operator/{operator}/cloudname/{cloudName}")
   public Response deleteCloud(@PathParam("operator") String operator,
-      @PathParam("cloudName") String cloudName) {
+                              @PathParam("cloudName") String cloudName) {
 
     restrictionMap.put("operator", operator);
     restrictionMap.put("cloudName", cloudName);

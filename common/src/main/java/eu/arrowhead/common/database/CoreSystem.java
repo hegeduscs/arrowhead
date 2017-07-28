@@ -47,7 +47,7 @@ public class CoreSystem {
   }
 
   public CoreSystem(String systemName, String address, String port,
-      String serviceURI, String authenticationInfo, boolean isSecure) {
+                    String serviceURI, String authenticationInfo, boolean isSecure) {
     this.systemName = systemName;
     this.address = address;
     this.port = port;

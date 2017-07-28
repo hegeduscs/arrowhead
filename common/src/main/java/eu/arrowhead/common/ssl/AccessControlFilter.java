@@ -25,7 +25,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
   javax.inject.Provider<UriInfo> uriInfo;
 
   private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration,
-      boolean onlyFromOrchestrator) {
+                                            boolean onlyFromOrchestrator) {
     String subjectname = sc.getUserPrincipal().getName();
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
     String serverCN = (String) configuration.getProperty("server_common_name");
@@ -81,7 +81,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
         } else {
           log.info("Unauthorized access! (SSL)");
           /*throw new AuthenticationException
-					("This client is not allowed to use this resource: " + requestTarget);*/
+          ("This client is not allowed to use this resource: " + requestTarget);*/
         }
       } else {
         if (isClientAuthorized(sc, configuration, false)) {
@@ -89,7 +89,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
           return;
         } else {
           log.info("Unauthorized access! (SSL)");
-					/*throw new AuthenticationException
+          /*throw new AuthenticationException
 					("This client is not allowed to use this resource: " + requestTarget);*/
         }
       }

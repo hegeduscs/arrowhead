@@ -17,7 +17,7 @@ public class QoSVerificationResponse {
   }
 
   public QoSVerificationResponse(Map<ArrowheadSystem, Boolean> response,
-      Map<ArrowheadSystem, RejectMotivationTypes> rejectMotivation) {
+                                 Map<ArrowheadSystem, RejectMotivationTypes> rejectMotivation) {
     super();
     this.response = response;
     this.rejectMotivation = rejectMotivation;
@@ -45,7 +45,7 @@ public class QoSVerificationResponse {
   }
 
   public void addRejectMotivation(ArrowheadSystem system,
-      QoSVerifierResponse.RejectMotivationTypes rejectType) {
+                                  QoSVerifierResponse.RejectMotivationTypes rejectType) {
     rejectMotivation.put(system, rejectType);
   }
 

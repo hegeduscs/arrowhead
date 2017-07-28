@@ -14,7 +14,7 @@ public class LoggingResponseFilter implements ContainerResponseFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext,
-      ContainerResponseContext responseContext)
+                     ContainerResponseContext responseContext)
       throws IOException {
     log.debug("OUT." + responseContext.getStatus() + ": " + responseContext.getStatusInfo()
         .getReasonPhrase());

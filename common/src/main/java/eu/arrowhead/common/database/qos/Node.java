@@ -47,7 +47,7 @@ public class Node {
   }
 
   public Node(String device_model_code, List<DeployedSystem> deployedSystems,
-      Map<String, String> processingCapabilities) {
+              Map<String, String> processingCapabilities) {
     this.device_model_code = device_model_code;
     this.deployedSystems = deployedSystems;
     this.processingCapabilities = processingCapabilities;

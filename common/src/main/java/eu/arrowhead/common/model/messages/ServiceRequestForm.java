@@ -34,13 +34,13 @@ public class ServiceRequestForm {
   }
 
   public ServiceRequestForm(ArrowheadSystem requesterSystem,
-      ArrowheadCloud requesterCloud,
-      ArrowheadService requestedService,
-      Map<String, Boolean> orchestrationFlags,
-      List<ArrowheadSystem> preferredProviders,
-      List<ArrowheadCloud> preferredClouds,
-      Map<String, String> requestedQoS,
-      Map<String, String> commands) {
+                            ArrowheadCloud requesterCloud,
+                            ArrowheadService requestedService,
+                            Map<String, Boolean> orchestrationFlags,
+                            List<ArrowheadSystem> preferredProviders,
+                            List<ArrowheadCloud> preferredClouds,
+                            Map<String, String> requestedQoS,
+                            Map<String, String> commands) {
     this.requesterSystem = requesterSystem;
     this.requesterCloud = requesterCloud;
     this.requestedService = requestedService;
@@ -52,12 +52,12 @@ public class ServiceRequestForm {
   }
 
   public ServiceRequestForm(ArrowheadSystem requesterSystem,
-      ArrowheadCloud requesterCloud,
-      ArrowheadService requestedService,
-      List<ArrowheadSystem> preferredProviders,
-      List<ArrowheadCloud> preferredClouds,
-      Map<String, String> requestedQoS,
-      Map<String, String> commands) {
+                            ArrowheadCloud requesterCloud,
+                            ArrowheadService requestedService,
+                            List<ArrowheadSystem> preferredProviders,
+                            List<ArrowheadCloud> preferredClouds,
+                            Map<String, String> requestedQoS,
+                            Map<String, String> commands) {
     this.requesterSystem = requesterSystem;
     this.requesterCloud = requesterCloud;
     this.requestedService = requestedService;

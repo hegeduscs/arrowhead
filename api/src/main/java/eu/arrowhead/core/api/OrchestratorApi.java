@@ -120,7 +120,7 @@ public class OrchestratorApi {
     if (!query.isPayloadUsable()) {
       log.info("OrchestrationApi:getStoreEntries throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
-          + "is/are missing.");
+                                        + "is/are missing.");
     }
 
     List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
@@ -146,7 +146,7 @@ public class OrchestratorApi {
     if (store.isEmpty()) {
       log.info("OrchestrationApi:getStoreEntries throws DataNotFoundException.");
       throw new DataNotFoundException("Store entries specified by the payload "
-          + "were not found in the database.");
+                                          + "were not found in the database.");
     }
 
     Collections.sort(store);
@@ -239,7 +239,7 @@ public class OrchestratorApi {
     if (entry == null) {
       log.info("OrchestrationApi:toggleIsActive throws DataNotFoundException.");
       throw new DataNotFoundException("Orchestration Store entry with this id "
-          + "was not found in the database.");
+                                          + "was not found in the database.");
     } else if (entry.getProviderCloud() != null) {
       log.info("OrchestrationApi:toggleIsActive throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be active.");
@@ -274,7 +274,7 @@ public class OrchestratorApi {
     if (storeEntry == null) {
       log.info("OrchestrationApi:updateEntry throws DataNotFoundException.");
       throw new DataNotFoundException("Store entry specified by the id("
-          + payload.getId() + ") was not found in the database.");
+                                          + payload.getId() + ") was not found in the database.");
     } else if (storeEntry.getProviderCloud() != null && payload.getIsActive()) {
       log.info("OrchestrationApi:toggleIsActive throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be active.");
@@ -324,7 +324,7 @@ public class OrchestratorApi {
   @DELETE
   @Path("systemgroup/{systemGroup}/systemname/{systemName}")
   public Response deleteEntries(@PathParam("systemGroup") String systemGroup,
-      @PathParam("systemName") String systemName) {
+                                @PathParam("systemName") String systemName) {
     List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
 
     restrictionMap.put("systemGroup", systemGroup);

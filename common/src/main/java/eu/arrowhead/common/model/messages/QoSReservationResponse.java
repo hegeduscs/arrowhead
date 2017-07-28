@@ -14,7 +14,7 @@ public class QoSReservationResponse {
   }
 
   public QoSReservationResponse(boolean response,
-      QoSReservationCommand command) {
+                                QoSReservationCommand command) {
     super();
     this.response = response;
     this.command = command;

@@ -51,7 +51,7 @@ public class StoreResource {
     store = StoreService.getAllStoreEntries();
     if (store.isEmpty()) {
       log.info("The Orchestration Store is empty. "
-          + "(StoreResource:getAllStoreEntries DataNotFoundException)");
+                   + "(StoreResource:getAllStoreEntries DataNotFoundException)");
       throw new DataNotFoundException("The Orchestration Store is empty.");
     }
 
@@ -73,22 +73,22 @@ public class StoreResource {
     List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
 
 		/*
-		 * If the payload does not have an identifiable requesterSystem
+     * If the payload does not have an identifiable requesterSystem
 		 * we throw a BadPayloadException.
 		 */
     if (!query.isPayloadUsable()) {
       log.info("BadPayloadException at the getStoreEntries method.");
       throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
-          + "is/are missing.");
+                                        + "is/are missing.");
     }
-		
+
 		/*
 		 * If the onlyActive boolean is set to true, we return all the active
 		 * entries belonging to the requesterSystem.
 		 */
     else if (query.isOnlyActive()) {
       log.info("Querying the Orchestration Store for active entries of the consumer: "
-          + query.getRequesterSystem());
+                   + query.getRequesterSystem());
       List<OrchestrationStore> retrievedList =
           StoreService.getActiveStoreEntries(query.getRequesterSystem());
       if (retrievedList != null && !retrievedList.isEmpty()) {
@@ -97,9 +97,10 @@ public class StoreResource {
         return new OrchestrationStoreQueryResponse(retrievedList);
       } else {
         log.info("No active Orchestration Store entries were found "
-            + "for this consumer: " + query.getRequesterSystem().toString());
+                     + "for this consumer: " + query.getRequesterSystem().toString());
         throw new DataNotFoundException("No active Orchestration Store entries were found "
-            + "for this consumer: " + query.getRequesterSystem().toString());
+                                            + "for this consumer: " + query.getRequesterSystem()
+            .toString());
       }
     }
 		
@@ -109,16 +110,17 @@ public class StoreResource {
 		 */
     else if (query.getRequestedService() == null) {
       log.info("Querying the Orchestration Store for entries of the consumer: "
-          + query.getRequesterSystem());
+                   + query.getRequesterSystem());
       List<OrchestrationStore> retrievedList =
           StoreService.getStoreEntries(query.getRequesterSystem());
       if (retrievedList != null && !retrievedList.isEmpty()) {
         entryList.addAll(retrievedList);
       } else {
         log.info("No Orchestration Store entries were found"
-            + "for this consumer: " + query.getRequesterSystem().toString());
+                     + "for this consumer: " + query.getRequesterSystem().toString());
         throw new DataNotFoundException("No Orchestration Store entries were found "
-            + "for this consumer: " + query.getRequesterSystem().toString());
+                                            + "for this consumer: " + query.getRequesterSystem()
+            .toString());
       }
     }
 		
@@ -135,9 +137,9 @@ public class StoreResource {
       } else {
         log.info("No Orchestration Store entries were found for this consumer/service pair.");
         throw new DataNotFoundException("No Orchestration Store entries were found "
-            + "for this consumer/service pair: "
-            + query.getRequesterSystem().toString() + "/"
-            + query.getRequestedService().toString());
+                                            + "for this consumer/service pair: "
+                                            + query.getRequesterSystem().toString() + "/"
+                                            + query.getRequestedService().toString());
       }
     }
 

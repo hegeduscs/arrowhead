@@ -125,7 +125,7 @@ public class ConfigurationApi {
   @GET
   @Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")
   public Response getNeighborCloud(@PathParam("operator") String operator,
-      @PathParam("cloudName") String cloudName) {
+                                   @PathParam("cloudName") String cloudName) {
 
     restrictionMap.put("operator", operator);
     restrictionMap.put("cloudName", cloudName);
@@ -227,7 +227,7 @@ public class ConfigurationApi {
     if (!ownCloud.isPayloadUsable()) {
       log.info("ConfigurationApi:addOwnCloud throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing operator, cloudName "
-          + "or address field! (ConfigurationApi:addOwnCloud)");
+                                        + "or address field! (ConfigurationApi:addOwnCloud)");
     }
 
     List<OwnCloud> ownClouds = new ArrayList<OwnCloud>();
@@ -255,7 +255,7 @@ public class ConfigurationApi {
     if (!cs.isPayloadUsable()) {
       log.info("ConfigurationApi:updateCoreSystem throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing systemName, address or "
-          + "serviceURI in the entry payload.");
+                                        + "serviceURI in the entry payload.");
     }
 
     restrictionMap.put("systemName", cs.getSystemName());
@@ -287,7 +287,7 @@ public class ConfigurationApi {
     if (!nc.isPayloadUsable()) {
       log.info("ConfigurationApi:updateNeighborCloud throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud"
-          + "in the entry payload.");
+                                        + "in the entry payload.");
     }
 
     restrictionMap.put("operator", nc.getCloud().getOperator());
@@ -342,7 +342,7 @@ public class ConfigurationApi {
   @DELETE
   @Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")
   public Response deleteNeighborCloud(@PathParam("operator") String operator,
-      @PathParam("cloudName") String cloudName) {
+                                      @PathParam("cloudName") String cloudName) {
 
     restrictionMap.put("operator", operator);
     restrictionMap.put("cloudName", cloudName);

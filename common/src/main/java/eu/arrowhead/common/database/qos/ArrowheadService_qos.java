@@ -55,7 +55,7 @@ public class ArrowheadService_qos {
   }
 
   public ArrowheadService_qos(String serviceGroup, String serviceDefinition,
-      List<String> interfaces) {
+                              List<String> interfaces) {
     this.serviceGroup = serviceGroup;
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;

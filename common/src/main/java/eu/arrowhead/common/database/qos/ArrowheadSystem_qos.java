@@ -44,8 +44,8 @@ public class ArrowheadSystem_qos {
   }
 
   public ArrowheadSystem_qos(String systemGroup, String systemName, String address,
-      String port,
-      String authenticationInfo) {
+                             String port,
+                             String authenticationInfo) {
     this.systemGroup = systemGroup;
     this.systemName = systemName;
     this.address = address;

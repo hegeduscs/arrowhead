@@ -128,7 +128,7 @@ public final class SecurityUtils {
 
     if (privatekey == null) {
       throw new Exception("Error in Utils::getPrivateKey(): no private key "
-          + "returned for alias: " + elem + " ,pass: " + pass);
+                              + "returned for alias: " + elem + " ,pass: " + pass);
     }
 
     return privatekey;

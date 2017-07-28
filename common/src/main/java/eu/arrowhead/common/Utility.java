@@ -87,7 +87,7 @@ public final class Utility {
           break;
         default:
           throw new NotAllowedException("Invalid method type was given "
-              + "to the Utility.sendRequest() method");
+                                            + "to the Utility.sendRequest() method");
       }
 
       return response;
@@ -149,7 +149,7 @@ public final class Utility {
       throw new DataNotFoundException("Orchestration Core System not found in the database!");
     }
     return getURI(orchestrator.getAddress(), orchestrator.getPort(),
-        orchestrator.getServiceURI(), orchestrator.getIsSecure());
+                  orchestrator.getServiceURI(), orchestrator.getIsSecure());
   }
 
   public static String getServiceRegistryURI() {
@@ -161,7 +161,7 @@ public final class Utility {
       throw new DataNotFoundException("Service Registry Core System not found in the database!");
     }
     return getURI(serviceRegistry.getAddress(), serviceRegistry.getPort(),
-        serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
+                  serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
   }
 
   public static String getAuthorizationURI() {
@@ -173,7 +173,7 @@ public final class Utility {
       throw new DataNotFoundException("Authoriaztion Core System not found in the database!");
     }
     return getURI(authorization.getAddress(), authorization.getPort(),
-        authorization.getServiceURI(), authorization.getIsSecure());
+                  authorization.getServiceURI(), authorization.getIsSecure());
   }
 
   public static String getGatekeeperURI() {
@@ -185,7 +185,7 @@ public final class Utility {
       throw new DataNotFoundException("Gatekeeper Core System not found in the database!");
     }
     return getURI(gatekeeper.getAddress(), gatekeeper.getPort(),
-        gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
+                  gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
   }
 
   public static String getQoSURI() {
@@ -218,7 +218,8 @@ public final class Utility {
     List<String> URIList = new ArrayList<String>();
     for (NeighborCloud cloud : cloudList) {
       URIList.add(getURI(cloud.getCloud().getAddress(),
-          cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), false));
+                         cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(),
+                         false));
     }
 
     return URIList;
@@ -231,8 +232,8 @@ public final class Utility {
     if (cloudList.isEmpty()) {
       log.info("Utility:getOwnCloud DNFException");
       throw new DataNotFoundException("No 'Own Cloud' entry in the configuration database."
-          + "Please make sure to enter one in the 'own_cloud' table."
-          + "This information is needed for the Gatekeeper System.");
+                                          + "Please make sure to enter one in the 'own_cloud' table."
+                                          + "This information is needed for the Gatekeeper System.");
     }
 
     ArrowheadCloud ownCloud = new ArrowheadCloud(cloudList.get(0));
@@ -246,7 +247,7 @@ public final class Utility {
     if (coreSystem == null) {
       log.info("Utility:getCoreSystem DNFException");
       throw new DataNotFoundException("Requested Core System "
-          + "(" + systemName + ") not found in the database!");
+                                          + "(" + systemName + ") not found in the database!");
     }
 
     return coreSystem;

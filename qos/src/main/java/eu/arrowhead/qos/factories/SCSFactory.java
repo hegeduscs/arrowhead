@@ -26,7 +26,6 @@ import java.util.List;
 
 /**
  * @author Paulo
- *
  */
 public class SCSFactory {
 
@@ -40,8 +39,6 @@ public class SCSFactory {
 
   /**
    * Returns a instance from this singleton class.
-   *
-   * @return
    */
   public static SCSFactory getInstance() {
     if (instance == null) {
@@ -218,7 +215,7 @@ public class SCSFactory {
    * @return Returns the network from where the network device was added.
    */
   public Network addNetworkDeviceToNetwork(Network network,
-      Network_Device networkDevice) {
+                                           Network_Device networkDevice) {
     return repo.addNetworkDeviceToNetwork(network, networkDevice);
   }
 
@@ -290,8 +287,7 @@ public class SCSFactory {
   }
 
   /**
-   * **********************************************
-   ************** Converts From/To DTO ************
+   * ********************************************** ************* Converts From/To DTO ************
    * ***********************************************
    */
   protected eu.arrowhead.common.database.qos.ArrowheadSystem_qos converFromDTO(

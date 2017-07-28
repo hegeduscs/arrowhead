@@ -58,8 +58,10 @@ public class AuthorizationService {
   }
 
   public static ArrowheadToken generateSingleToken(ArrowheadSystem provider, PublicKey providerKey,
-      ArrowheadSystem consumer,
-      ArrowheadCloud consumerCloud, ArrowheadService service, int duration) throws Exception {
+                                                   ArrowheadSystem consumer,
+                                                   ArrowheadCloud consumerCloud,
+                                                   ArrowheadService service, int duration)
+      throws Exception {
 
     RawTokenInfo rawTokenInfo = new RawTokenInfo();
 

@@ -282,7 +282,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
           break;
         default:
           logger.log(Level.WARNING, "Failed to remove service type {0}, server returned status {1}",
-              new Object[]{typeName, Rcode.string(response.getRcode())});
+                     new Object[]{typeName, Rcode.string(response.getRcode())});
       }
       return true;
     } catch (TextParseException ex) {

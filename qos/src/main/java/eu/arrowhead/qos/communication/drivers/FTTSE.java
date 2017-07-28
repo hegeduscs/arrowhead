@@ -118,9 +118,9 @@ public class FTTSE implements IQoSDriver {
    * @return Returns the parameters of the stream to be configured.
    */
   public Map<String, String> generateCommands(Integer streamID,
-      Integer elementaryCycle,
-      Integer mtu,
-      Map<String, String> requestedQoS) {
+                                              Integer elementaryCycle,
+                                              Integer mtu,
+                                              Map<String, String> requestedQoS) {
     Map<String, String> commands = new HashMap<>();
     Integer period = 5;
     Integer size = calculateSize(mtu);

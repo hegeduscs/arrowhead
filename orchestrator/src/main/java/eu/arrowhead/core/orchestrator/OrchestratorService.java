@@ -70,8 +70,8 @@ public final class OrchestratorService {
       // Querying the Service Registry
       List<ProvidedService> psList = new ArrayList<ProvidedService>();
       psList = queryServiceRegistry(srf.getRequestedService(),
-          orchestrationFlags.get("metadataSearch"),
-          orchestrationFlags.get("pingProviders"));
+                                    orchestrationFlags.get("metadataSearch"),
+                                    orchestrationFlags.get("pingProviders"));
 
       // Cross-checking the SR response with the Authorization
       List<ArrowheadSystem> providerSystems = new ArrayList<ArrowheadSystem>();
@@ -79,7 +79,7 @@ public final class OrchestratorService {
         providerSystems.add(service.getProvider());
       }
       providerSystems = queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(),
-          providerSystems);
+                                           providerSystems);
 
 			/*
        * The Authorization check only returns the provider systems where
@@ -101,22 +101,23 @@ public final class OrchestratorService {
       }
 
 			/*
-			 * If matchmaking is requested, we pick out 1 ProvidedService entity
+       * If matchmaking is requested, we pick out 1 ProvidedService entity
 			 * from the list. If only preferred Providers are allowed,
 			 * matchmaking might not be possible.
 			 */
       if (orchestrationFlags.get("matchmaking")) {
         ProvidedService ps = intraCloudMatchmaking(psList, orchestrationFlags.get("onlyPreferred"),
-            srf.getPreferredProviders(), srf.getPreferredClouds().size());
+                                                   srf.getPreferredProviders(),
+                                                   srf.getPreferredClouds().size());
         psList.clear();
         psList.add(ps);
       }
 
-      /**
+      /*
        * **********************************************************
        */
-			/*List<ArrowheadSystem> possibleProviders = new ArrayList<>();
-			// percorrer os provided service
+      /*List<ArrowheadSystem> possibleProviders = new ArrayList<>();
+      // percorrer os provided service
 			for (ProvidedService system : psList) {
 				possibleProviders.add(system.getProvider());
 			}
@@ -144,13 +145,13 @@ public final class OrchestratorService {
 					}
 				}
 			}*/
-      /**
+      /*
        * ***********************************************************
        * ***************** TODO: Reverve QoS ***********************
        * ***********************************************************
        */
-			/*QoSReserve qosReservation;
-			QoSReservationResponse qosReservationResponse;
+      /*QoSReserve qosReservation;
+      QoSReservationResponse qosReservationResponse;
 			for (ArrowheadSystem system : possibleProviders) {
 				qosReservation = new QoSReserve(system, srf.getRequesterSystem(), srf.getRequestedService(),
 						srf.getRequestedQoS(), srf.getCommands());
@@ -165,7 +166,7 @@ public final class OrchestratorService {
       // All the filtering is done, need to compile the response
       return compileOrchestrationResponse(psList, true, srf);
     } /*
-			 * If the Intra-Cloud orchestration fails somewhere (SR, Auth,
+       * If the Intra-Cloud orchestration fails somewhere (SR, Auth,
 			 * filtering, matchmaking) we catch the exception, because
 			 * Inter-Cloud orchestration might be allowed. If not, we throw the
 			 * same exception again.
@@ -182,8 +183,8 @@ public final class OrchestratorService {
         throw new BadPayloadException(ex.getMessage());
       }
     }
-		/*
-		 * If the code reaches this part, that means the Intra-Cloud
+    /*
+     * If the code reaches this part, that means the Intra-Cloud
 		 * orchestration failed, but the Inter-Cloud orchestration is allowed,
 		 * so we try that too.
 		 */
@@ -209,11 +210,11 @@ public final class OrchestratorService {
     // Querying the Service Registry to get the list of Provider Systems
     List<ProvidedService> psList = new ArrayList<ProvidedService>();
     psList = queryServiceRegistry(srf.getRequestedService(),
-        orchestrationFlags.get("metadataSearch"),
-        orchestrationFlags.get("pingProviders"));
+                                  orchestrationFlags.get("metadataSearch"),
+                                  orchestrationFlags.get("pingProviders"));
 
 		/*
-		 * If needed, removing the non-preferred providers from the SR response.
+     * If needed, removing the non-preferred providers from the SR response.
 		 * (If needed, matchmaking is done at the request sender Cloud.)
 		 */
     if (orchestrationFlags.get("onlyPreferred")) {
@@ -243,7 +244,7 @@ public final class OrchestratorService {
 
     // Picking a target Cloud from the ones that responded to the GSD poll
     ArrowheadCloud targetCloud = interCloudMatchmaking(result, srf.getPreferredClouds(),
-        orchestrationFlags.get("onlyPreferred"));
+                                                       orchestrationFlags.get("onlyPreferred"));
 
     // Telling the Gatekeeper to start the Inter-Cloud Negotiations process
     ICNRequestForm icnRequestForm = compileICNRequestForm(srf, targetCloud);
@@ -274,7 +275,7 @@ public final class OrchestratorService {
     // Querying the Orchestration Store for matching entries
     List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
     entryList = queryOrchestrationStore(srf.getRequestedService(), srf.getRequesterSystem(),
-        orchestrationFlags.get("storeOnlyActive"));
+                                        orchestrationFlags.get("storeOnlyActive"));
 
     // Default configuration orchestration based on isActive entries
     if (orchestrationFlags.get("storeOnlyActive")) {
@@ -290,14 +291,14 @@ public final class OrchestratorService {
         entryList.removeAll(tempList);
         if (entryList.isEmpty()) {
           log.info("No active Orchestration Store entries "
-              + "were found for this consumer/service pair.");
+                       + "were found for this consumer/service pair.");
           throw new DataNotFoundException(
               "No active Orchestration Store entries "
                   + "were found for this consumer/service pair.");
         }
       }
       return compileOrchestrationResponseFromStore(entryList,
-          orchestrationFlags.get("generateToken"));
+                                                   orchestrationFlags.get("generateToken"));
     }
 
     // Priority list based store orchestration
@@ -309,7 +310,7 @@ public final class OrchestratorService {
     }
 
 		/*
-		 * Before we iterate through the entry list to pick out a provider, we
+     * Before we iterate through the entry list to pick out a provider, we
 		 * have to poll the Service Registry and Authorization Systems, so we
 		 * have these 2 other ArrowheadSystem provider lists to cross-check the
 		 * entry list with.
@@ -321,8 +322,8 @@ public final class OrchestratorService {
     try {
       // Querying the Service Registry with the intra-cloud Store entries
       psList = queryServiceRegistry(srf.getRequestedService(),
-          orchestrationFlags.get("metadataSearch"),
-          orchestrationFlags.get("pingProviders"));
+                                    orchestrationFlags.get("metadataSearch"),
+                                    orchestrationFlags.get("pingProviders"));
 
       // Compile the list of providers which are in the Service Registry
       for (ProvidedService ps : psList) {
@@ -340,8 +341,8 @@ public final class OrchestratorService {
 
       // Querying the Authorization System
       authorizedIntraProviders = queryAuthorization(srf.getRequesterSystem(),
-          srf.getRequestedService(),
-          intraProviders);
+                                                    srf.getRequestedService(),
+                                                    intraProviders);
     } /*
 			 * If the SR or Authorization query throws DNFException, we have to
 			 * catch it, because the inter-cloud store entries can still be
@@ -364,7 +365,7 @@ public final class OrchestratorService {
             && authorizedIntraProviders.contains(entry.getProviderSystem())) {
           List<OrchestrationStore> tempList = new ArrayList<>(Arrays.asList(entry));
           return compileOrchestrationResponseFromStore(tempList,
-              orchestrationFlags.get("generateToken"));
+                                                       orchestrationFlags.get("generateToken"));
         }
       } /*
 				 * Inter-Cloud store entries must be handlend inside the for
@@ -419,8 +420,8 @@ public final class OrchestratorService {
    * @return List<ProvidedService>
    */
   private static List<ProvidedService> queryServiceRegistry(ArrowheadService service,
-      boolean metadataSearch,
-      boolean pingProviders) {
+                                                            boolean metadataSearch,
+                                                            boolean pingProviders) {
     log.info("Entered the queryServiceRegistry method.");
 
     // Compiling the URI and the request payload
@@ -430,8 +431,8 @@ public final class OrchestratorService {
         .toString();
     String tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
     ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(),
-        service.getInterfaces(),
-        pingProviders, metadataSearch, tsig_key);
+                                                      service.getInterfaces(),
+                                                      pingProviders, metadataSearch, tsig_key);
 
     // Sending the request, parsing the returned result
     log.info("Querying ServiceRegistry for requested Service: " + service.toString());
@@ -440,7 +441,7 @@ public final class OrchestratorService {
     ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
     if (serviceQueryResult == null) {
       log.info("ServiceRegistry query came back empty. "
-          + "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
+                   + "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
       throw new DataNotFoundException(
           "ServiceRegistry query came back empty for " + service.toString()
               + " (Interfaces field for service can not be empty)");
@@ -457,12 +458,12 @@ public final class OrchestratorService {
 
     if (serviceQueryResult.isPayloadEmpty()) {
       log.info("ServiceRegistry query came back empty. "
-          + "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
+                   + "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
       throw new DataNotFoundException(
           "ServiceRegistry query came back empty for service " + service.toString());
     }
     log.info("ServiceRegistry query successful. Number of providers: "
-        + serviceQueryResult.getServiceQueryData().size());
+                 + serviceQueryResult.getServiceQueryData().size());
 
     return serviceQueryResult.getServiceQueryData();
   }
@@ -477,15 +478,15 @@ public final class OrchestratorService {
    * @return List<ArrowheadSystem>
    */
   private static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer,
-      ArrowheadService service,
-      List<ArrowheadSystem> providerList) {
+                                                          ArrowheadService service,
+                                                          List<ArrowheadSystem> providerList) {
     log.info("Entered the queryAuthorization method.");
 
     // Compiling the URI and the request payload
     String URI = Utility.getAuthorizationURI();
     URI = UriBuilder.fromPath(URI).path("intracloud").toString();
     IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, service,
-        false);
+                                                              false);
     log.info("Intra-Cloud authorization request ready to send to: " + URI);
 
     // Extracting the useful payload from the response, sending back the
@@ -505,7 +506,7 @@ public final class OrchestratorService {
     if (authorizedSystems.isEmpty()) {
       log.info("OrchestratorService:queryAuthorization throws DataNotFoundException");
       throw new DataNotFoundException("The consumer system is not authorized to receive servicing "
-          + "from any of the provider systems.");
+                                          + "from any of the provider systems.");
     }
 
     log.info(
@@ -523,13 +524,13 @@ public final class OrchestratorService {
    * @return List<ProvidedService>
    */
   private static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList,
-      List<ArrowheadSystem> preferredProviders) {
+                                                          List<ArrowheadSystem> preferredProviders) {
     log.info("Entered the removeNonPreferred method.");
 
     if (psList.isEmpty() || preferredProviders.isEmpty()) {
       log.info("OrchestratorService:removeNonPreferred BadPayloadException");
       throw new BadPayloadException("ProvidedService or PreferredProviders list is empty. "
-          + "(OrchestrationService:removeNonPreferred BadPayloadException)");
+                                        + "(OrchestrationService:removeNonPreferred BadPayloadException)");
     }
 
     List<ProvidedService> preferredList = new ArrayList<ProvidedService>();
@@ -565,23 +566,24 @@ public final class OrchestratorService {
    * @return ProvidedService
    */
   private static ProvidedService intraCloudMatchmaking(List<ProvidedService> psList,
-      boolean onlyPreferred,
-      List<ArrowheadSystem> preferredList, int notLocalSystems) {
+                                                       boolean onlyPreferred,
+                                                       List<ArrowheadSystem> preferredList,
+                                                       int notLocalSystems) {
     log.info("Entered the intraCloudMatchmaking method. psList size: " + psList.size());
 
     if (psList.isEmpty()) {
       log.info("IntraCloudMatchmaking received an empty ProvidedService list. "
-          + "(OrchestratorService:intraCloudMatchmaking BadPayloadException)");
+                   + "(OrchestratorService:intraCloudMatchmaking BadPayloadException)");
       throw new BadPayloadException("ProvidedService list is empty, Intra-Cloud matchmaking is "
-          + "not possible in the Orchestration process.");
+                                        + "not possible in the Orchestration process.");
     }
 
     // We delete all the preferredProviders from the list which belong to a
     // remote cloud
     preferredList.subList(0, notLocalSystems).clear();
     log.info(notLocalSystems + " not local Systems deleted from the preferred list. "
-        + "Remaining providers: "
-        + preferredList.size());
+                 + "Remaining providers: "
+                 + preferredList.size());
 
     // First we try to return with a preferred provider
     if (!preferredList.isEmpty()) {
@@ -593,7 +595,7 @@ public final class OrchestratorService {
         for (ProvidedService ps : psList) {
           if (system.equals(ps.getProvider())) {
             log.info("Preferred local System found in the list of ProvidedServices. "
-                + "Intra-Cloud matchmaking finished.");
+                         + "Intra-Cloud matchmaking finished.");
             return ps;
           }
         }
@@ -603,19 +605,19 @@ public final class OrchestratorService {
       // allowed.
       if (onlyPreferred) {
         log.info("No preferred local System found in the list of ProvidedServices. "
-            + "Intra-Cloud matchmaking failed.");
+                     + "Intra-Cloud matchmaking failed.");
         throw new DataNotFoundException("No preferred local System found in the "
-            + "list of ProvidedServices. Intra-Cloud matchmaking failed");
+                                            + "list of ProvidedServices. Intra-Cloud matchmaking failed");
       } else {
         // Implement custom matchmaking algorithm here
         log.info("No preferred local System found in the list of ProvidedServices. "
-            + "Returning the first ProvidedService entry.");
+                     + "Returning the first ProvidedService entry.");
         return psList.get(0);
       }
     } else if (onlyPreferred) {
       log.info("Bad request sent to the IntraCloudMatchmaking.");
       throw new BadPayloadException("Bad request sent to the Intra-Cloud matchmaking."
-          + "(onlyPreferred flag is true, but no local preferredProviders)");
+                                        + "(onlyPreferred flag is true, but no local preferredProviders)");
     } else {
 			/*
 			 * If there are no preferences we return with the first possible
@@ -635,7 +637,7 @@ public final class OrchestratorService {
    * @return GSDResult
    */
   private static GSDResult startGSD(ArrowheadService requestedService,
-      List<ArrowheadCloud> preferredClouds) {
+                                    List<ArrowheadCloud> preferredClouds) {
     log.info("Entered the startGSD method.");
 
     // Compiling the URI and the request payload
@@ -648,7 +650,7 @@ public final class OrchestratorService {
     GSDResult result = response.readEntity(GSDResult.class);
     if (result == null || !result.isPayloadUsable()) {
       log.info("GlobalServiceDiscovery yielded no result. "
-          + "(OrchestratorService:startGSD DataNotFoundException)");
+                   + "(OrchestratorService:startGSD DataNotFoundException)");
       throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.");
     }
 
@@ -667,8 +669,8 @@ public final class OrchestratorService {
    * @return ArrowheadCloud
    */
   private static ArrowheadCloud interCloudMatchmaking(GSDResult result,
-      List<ArrowheadCloud> preferredClouds,
-      boolean onlyPreferred) {
+                                                      List<ArrowheadCloud> preferredClouds,
+                                                      boolean onlyPreferred) {
     log.info("Entered the interCloudMatchmaking method.");
 
     // Extracting the valid ArrowheadClouds from the GSDResult
@@ -682,7 +684,7 @@ public final class OrchestratorService {
     // Using a set to remove duplicate entries from the preferredClouds list
     Set<ArrowheadCloud> prefClouds = new LinkedHashSet<>(preferredClouds);
     log.info("Number of partner Clouds from GSD: " + partnerClouds.size()
-        + ", number of preferred Clouds from SRF: " + prefClouds.size());
+                 + ", number of preferred Clouds from SRF: " + prefClouds.size());
 
     if (!prefClouds.isEmpty()) {
       // We iterate through both ArrowheadCloud list, and return with 1 if
@@ -691,7 +693,7 @@ public final class OrchestratorService {
         for (ArrowheadCloud partnerCloud : partnerClouds) {
           if (preferredCloud.equals(partnerCloud)) {
             log.info("Preferred Cloud found in the GSD response. "
-                + "Inter-Cloud matchmaking finished.");
+                         + "Inter-Cloud matchmaking finished.");
             return partnerCloud;
           }
         }
@@ -706,13 +708,13 @@ public final class OrchestratorService {
       } else {
         // Implement custom matchmaking algorithm here
         log.info("No preferred Cloud found in the partner Clouds. "
-            + "Returning the first ProvidedService entry.");
+                     + "Returning the first ProvidedService entry.");
         return partnerClouds.get(0);
       }
     } else if (onlyPreferred) {
       log.info("Bad request sent to the InterCloudMatchmaking.");
       throw new BadPayloadException("Bad request sent to the Inter-Cloud matchmaking."
-          + "(onlyPreferred flag is true, but no preferredClouds)");
+                                        + "(onlyPreferred flag is true, but no preferredClouds)");
     } else {
 			/*
 			 * If there are no preferences we return with the first possible
@@ -732,7 +734,7 @@ public final class OrchestratorService {
    * @return ICNRequestForm
    */
   private static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf,
-      ArrowheadCloud targetCloud) {
+                                                      ArrowheadCloud targetCloud) {
     log.info("Entered the compileICNRequestForm method.");
 
     List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
@@ -761,7 +763,8 @@ public final class OrchestratorService {
     negotiationFlags.put("onlyPreferred", srf.getOrchestrationFlags().get("onlyPreferred"));
     negotiationFlags.put("generateToken", srf.getOrchestrationFlags().get("generateToken"));
     ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), null, targetCloud,
-        srf.getRequesterSystem(), preferredProviders, negotiationFlags);
+                                                    srf.getRequesterSystem(), preferredProviders,
+                                                    negotiationFlags);
 
     return requestForm;
   }
@@ -801,7 +804,7 @@ public final class OrchestratorService {
    * @return OrchestrationResponse
    */
   private static OrchestrationResponse icnMatchmaking(ICNResult icnResult,
-      List<ArrowheadSystem> preferredProviders) {
+                                                      List<ArrowheadSystem> preferredProviders) {
     log.info("Entered the (first) icnMatchmaking method.");
 
 		/*
@@ -828,7 +831,7 @@ public final class OrchestratorService {
     ofList.add(icnResult.getInstructions().getResponse().get(0));
     icnResult.getInstructions().setResponse(ofList);
     log.info("No preferred provider System was found in the ICNResult, "
-        + "returning the first OrchestrationForm entry.");
+                 + "returning the first OrchestrationForm entry.");
     return icnResult.getInstructions();
   }
 
@@ -842,7 +845,7 @@ public final class OrchestratorService {
    * @return OrchestrationResponse
    */
   private static OrchestrationResponse icnMatchmaking(ICNResult icnResult,
-      OrchestrationStore entry) {
+                                                      OrchestrationStore entry) {
     log.info("Entered the (second) icnMatchmaking method.");
 
     List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
@@ -871,8 +874,8 @@ public final class OrchestratorService {
    * @return List<OrchestrationStore>
    */
   private static List<OrchestrationStore> queryOrchestrationStore(ArrowheadService service,
-      ArrowheadSystem consumer,
-      boolean onlyActive) {
+                                                                  ArrowheadSystem consumer,
+                                                                  boolean onlyActive) {
     log.info("Entered the queryOrchestrationStore method.");
 
     // Replacing this method with a more direct solution, without HTTP call
@@ -910,9 +913,9 @@ public final class OrchestratorService {
         return retrievedList;
       } else {
         log.info("No active Orchestration Store entries were found " + "for this consumer: "
-            + consumer.toString());
+                     + consumer.toString());
         throw new DataNotFoundException("No active Orchestration Store entries were found "
-            + "for this consumer: " + consumer.toString());
+                                            + "for this consumer: " + consumer.toString());
       }
     } /*
 			 * If the payload does not have a requestedService, but the
@@ -945,7 +948,8 @@ public final class OrchestratorService {
       } else {
         log.info("No Orchestration Store entries were found for this consumer/service pair.");
         throw new DataNotFoundException("No Orchestration Store entries were found "
-            + "for this consumer/service pair: " + consumer.toString() + "/" + service.toString());
+                                            + "for this consumer/service pair: " + consumer
+            .toString() + "/" + service.toString());
       }
     }
   }
@@ -961,7 +965,8 @@ public final class OrchestratorService {
    * @return OrchestrationResponse
    */
   private static OrchestrationResponse compileOrchestrationResponse(List<ProvidedService> psList,
-      boolean generateToken, ServiceRequestForm srf) {
+                                                                    boolean generateToken,
+                                                                    ServiceRequestForm srf) {
     log.info("Entered the (first) compileOrchestrationResponse method.");
 
     List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
@@ -976,8 +981,10 @@ public final class OrchestratorService {
       String authURI = Utility.getAuthorizationURI();
       authURI = UriBuilder.fromPath(authURI).path("token").toString();
       TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(),
-          srf.getRequesterCloud(),
-          providerList, srf.getRequestedService(), 0);
+                                                                       srf.getRequesterCloud(),
+                                                                       providerList,
+                                                                       srf.getRequestedService(),
+                                                                       0);
 
       Response authResponse = Utility.sendRequest(authURI, "PUT", tokenRequest);
       tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
@@ -988,8 +995,9 @@ public final class OrchestratorService {
 
     for (int i = 0; i < psList.size(); i++) {
       OrchestrationForm of = new OrchestrationForm(psList.get(i).getOffered(),
-          psList.get(i).getProvider(),
-          psList.get(i).getServiceURI(), tokens.get(i), null, signatures.get(i));
+                                                   psList.get(i).getProvider(),
+                                                   psList.get(i).getServiceURI(), tokens.get(i),
+                                                   null, signatures.get(i));
       ofList.add(of);
     }
 
@@ -1054,8 +1062,8 @@ public final class OrchestratorService {
       return new QoSVerificationResponse();
     } catch (ProcessingException | UnavailableServerException e) {
       log.info("orchestrator: Error accessing QoSVerify with this address" + URI
-          + " returning this exception "
-          + e.getMessage() + " with cause " + e.getCause());
+                   + " returning this exception "
+                   + e.getMessage() + " with cause " + e.getCause());
       return new QoSVerificationResponse();
     }
 

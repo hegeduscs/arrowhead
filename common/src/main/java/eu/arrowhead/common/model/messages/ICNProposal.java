@@ -23,9 +23,9 @@ public class ICNProposal {
   }
 
   public ICNProposal(ArrowheadService requestedService, String authenticationInfo,
-      ArrowheadCloud requesterCloud,
-      ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredProviders,
-      Map<String, Boolean> negotiationFlags) {
+                     ArrowheadCloud requesterCloud,
+                     ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredProviders,
+                     Map<String, Boolean> negotiationFlags) {
     this.requestedService = requestedService;
     this.authenticationInfo = authenticationInfo;
     this.requesterCloud = requesterCloud;

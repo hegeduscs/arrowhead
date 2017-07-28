@@ -102,13 +102,14 @@ public class QoSManagerService {
       QoSVerifierResponse response;
       try {
         response = algorithmFactory.verify(network.
-                getNetworkType(),
-            provider_network_device.
-                getNetworkCapabilities(), consumer_network_device.
+                                               getNetworkType(),
+                                           provider_network_device.
+                                               getNetworkCapabilities(), consumer_network_device.
                 getNetworkCapabilities(),
-            providerDeviceQoSReservations, consumerDeviceQoSReservations, message.
+                                           providerDeviceQoSReservations,
+                                           consumerDeviceQoSReservations, message.
                 getRequestedQoS(),
-            message.getCommands());
+                                           message.getCommands());
 
         updateQoSVerificationResponse(system, response, qosVerificationResponse);
       } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException ex) {
@@ -164,9 +165,9 @@ public class QoSManagerService {
     try {
       responseS = DriversFactory.getInstance().
           generateCommands(network.getNetworkType(),
-              network.getNetworkConfigurations(), provider, consumer, message.
+                           network.getNetworkConfigurations(), provider, consumer, message.
                   getService(), message.getCommands(),
-              message.getRequestedQoS());
+                           message.getRequestedQoS());
       /**
        * **** IF SUCCESS: Saving Quality of Service Reservation on
        * DataBase *
@@ -174,9 +175,9 @@ public class QoSManagerService {
       /* Create Message Stream */
       wasSucessful = qosfactory.
           saveMessageStream(provider, consumer, message.getService(),
-              message.getRequestedQoS(),
-              responseS,
-              network.getNetworkType());
+                            message.getRequestedQoS(),
+                            responseS,
+                            network.getNetworkType());
 
       scsfactory.updateNetwork(network);
 
@@ -198,8 +199,11 @@ public class QoSManagerService {
 
         boolean response = contactMonitoring(rule);
         qosreservationResponse = new QoSReservationResponse(response,
-            new QoSReservationCommand(message.getService(), message.getConsumer(),
-                message.getProvider(), responseS, message.getRequestedQoS()));
+                                                            new QoSReservationCommand(
+                                                                message.getService(),
+                                                                message.getConsumer(),
+                                                                message.getProvider(), responseS,
+                                                                message.getRequestedQoS()));
         return qosreservationResponse;
 
       } else {
@@ -220,8 +224,8 @@ public class QoSManagerService {
    * @param qosVerificationResponse Reject Motivation Reason.
    */
   protected void updateQoSVerificationResponse(ArrowheadSystem system,
-      QoSVerifierResponse v,
-      QoSVerificationResponse qosVerificationResponse) {
+                                               QoSVerifierResponse v,
+                                               QoSVerificationResponse qosVerificationResponse) {
     boolean isPossible = v.getResponse();
     qosVerificationResponse.addResponse(system, v.getResponse());
     if (!isPossible) {

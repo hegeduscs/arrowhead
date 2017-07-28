@@ -60,9 +60,9 @@ public class Message_Stream {
   }
 
   public Message_Stream(ArrowheadService_qos service, ArrowheadSystem_qos consumer,
-      ArrowheadSystem_qos provider,
-      Map<String, String> qualityOfService,
-      Map<String, String> configuration, String type) {
+                        ArrowheadSystem_qos provider,
+                        Map<String, String> qualityOfService,
+                        Map<String, String> configuration, String type) {
     this.service = service;
     this.consumer = consumer;
     this.provider = provider;

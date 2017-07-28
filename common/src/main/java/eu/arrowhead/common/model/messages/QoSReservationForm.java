@@ -20,8 +20,8 @@ public class QoSReservationForm {
   }
 
   public QoSReservationForm(ArrowheadService service, ArrowheadSystem provider,
-      ArrowheadSystem consumer,
-      Map<String, String> requestedQoS) {
+                            ArrowheadSystem consumer,
+                            Map<String, String> requestedQoS) {
     super();
     this.service = service;
     this.provider = provider;

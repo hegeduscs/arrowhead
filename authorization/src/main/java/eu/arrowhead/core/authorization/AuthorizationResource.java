@@ -72,8 +72,10 @@ public class AuthorizationResource {
 
         ArrowheadToken arrowheadToken = AuthorizationService
             .generateSingleToken(provider, providerPublicKey,
-                tokenGenerationRequest.getConsumer(), tokenGenerationRequest.getConsumerCloud(),
-                tokenGenerationRequest.getService(), tokenGenerationRequest.getDuration());
+                                 tokenGenerationRequest.getConsumer(),
+                                 tokenGenerationRequest.getConsumerCloud(),
+                                 tokenGenerationRequest.getService(),
+                                 tokenGenerationRequest.getDuration());
 
         token.add(arrowheadToken.getToken());
         tokenGenerationResponse.setToken(token);
@@ -114,7 +116,7 @@ public class AuthorizationResource {
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.info("Consumer is not in the database. "
-          + "(AuthorizationResource:isSystemAuthorized DataNotFoundException)");
+                   + "(AuthorizationResource:isSystemAuthorized DataNotFoundException)");
       throw new DataNotFoundException(
           "Consumer System is not in the authorization database. " + request.getConsumer()
               .toString());
@@ -129,7 +131,7 @@ public class AuthorizationResource {
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
       log.info("Service is not in the database. Returning NOT AUTHORIZED state. "
-          + request.getService().toString());
+                   + request.getService().toString());
       for (ArrowheadSystem provider : request.getProviders()) {
         authorizationState.put(provider, false);
       }
@@ -188,7 +190,7 @@ public class AuthorizationResource {
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
       log.info("Consumer is not in the database. "
-          + "(AuthorizationResource:isCloudAuthorized DataNotFoundException)");
+                   + "(AuthorizationResource:isCloudAuthorized DataNotFoundException)");
       throw new DataNotFoundException(
           "Consumer Cloud is not in the authorization database. " + request.getCloud().toString());
     }
@@ -200,7 +202,7 @@ public class AuthorizationResource {
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
       log.info("Service is not in the database. Returning NOT AUTHORIZED state."
-          + request.getService().toString());
+                   + request.getService().toString());
       return Response.status(Status.OK).entity(new InterCloudAuthResponse(isAuthorized)).build();
     }
 

@@ -51,7 +51,7 @@ public class ArrowheadService {
   }
 
   public ArrowheadService(String serviceGroup, String serviceDefinition,
-      List<String> interfaces, List<ServiceMetadata> serviceMetadata) {
+                          List<String> interfaces, List<ServiceMetadata> serviceMetadata) {
     this.serviceGroup = serviceGroup;
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;
@@ -88,9 +88,8 @@ public class ArrowheadService {
   }
 
   public void setInterfaces(String oneInterface) {
-    List<String> interfaces = new ArrayList<String>();
-    interfaces.add(oneInterface);
-    this.interfaces = interfaces;
+    this.interfaces.clear();
+    this.interfaces.add(oneInterface);
   }
 
   public void setInterfaces(List<String> interfaces) {

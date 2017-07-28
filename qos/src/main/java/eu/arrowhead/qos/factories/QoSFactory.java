@@ -166,14 +166,15 @@ public class QoSFactory {
    * @return Return true when successful.
    */
   public boolean saveMessageStream(ArrowheadSystem provider,
-      ArrowheadSystem consumer,
-      ArrowheadService service,
-      Map<String, String> qualityOfService,
-      Map<String, String> messageConfigurationParameters,
-      String type) {
+                                   ArrowheadSystem consumer,
+                                   ArrowheadService service,
+                                   Map<String, String> qualityOfService,
+                                   Map<String, String> messageConfigurationParameters,
+                                   String type) {
 
     Message_Stream m = new Message_Stream(convertFromDTO(service), convertFromDTO(consumer),
-        convertFromDTO(provider), qualityOfService, messageConfigurationParameters, type);
+                                          convertFromDTO(provider), qualityOfService,
+                                          messageConfigurationParameters, type);
     return repo.saveMessageStream(m) != null;
   }
 
@@ -190,7 +191,7 @@ public class QoSFactory {
         getQoS_Resource_ReservationsFromFilter(filter)) {
       output.add(new QoSReservationForm(convertToDTO(m.getService()), convertToDTO(m.
           getProvider()),
-          convertToDTO(m.getConsumer()), m.
+                                        convertToDTO(m.getConsumer()), m.
           getQualityOfService().
           getQosParameters()));
     }

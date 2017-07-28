@@ -15,7 +15,7 @@ public class InterCloudAuthRequest {
   }
 
   public InterCloudAuthRequest(ArrowheadCloud cloud, ArrowheadService service,
-      boolean generateToken) {
+                               boolean generateToken) {
     this.cloud = cloud;
     this.service = service;
     this.generateToken = generateToken;

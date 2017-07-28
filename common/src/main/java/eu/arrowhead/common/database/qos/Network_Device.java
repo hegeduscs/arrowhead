@@ -50,8 +50,8 @@ public class Network_Device {
   }
 
   public Network_Device(String name, String macAddress,
-      Map<String, String> networkCapabilities,
-      Network network) {
+                        Map<String, String> networkCapabilities,
+                        Network network) {
     this.name = name;
     this.macAddress = macAddress;
     this.networkCapabilities = networkCapabilities;

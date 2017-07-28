@@ -45,7 +45,7 @@ public class IntraCloudAuthorization {
   }
 
   public IntraCloudAuthorization(ArrowheadSystem consumer, ArrowheadSystem provider,
-      ArrowheadService service) {
+                                 ArrowheadService service) {
     this.consumer = consumer;
     this.provider = provider;
     this.service = service;

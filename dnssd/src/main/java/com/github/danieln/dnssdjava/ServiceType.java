@@ -21,6 +21,7 @@ public class ServiceType {
   private final String type;
   private final Transport transport;
   private final List<String> subtypes;
+
   /**
    * Create a new ServiceType.
    *

@@ -28,9 +28,10 @@ public class SecureServiceRegistryResource {
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("/{serviceGroup}/{service}/{interf}")
   public void publishingToRegistry(@Context SecurityContext sc,
-      @PathParam("serviceGroup") String serviceGroup,
-      @PathParam("service") String service, @PathParam("interf") String interf,
-      ServiceRegistryEntry entry) {
+                                   @PathParam("serviceGroup") String serviceGroup,
+                                   @PathParam("service") String service,
+                                   @PathParam("interf") String interf,
+                                   ServiceRegistryEntry entry) {
     ServiceRegistry.getInstance().register(serviceGroup, service, interf, entry);
   }
 
@@ -38,9 +39,10 @@ public class SecureServiceRegistryResource {
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("/{serviceGroup}/{service}/{interf}")
   public void removingFromRegistry(@Context SecurityContext sc,
-      @PathParam("serviceGroup") String serviceGroup,
-      @PathParam("service") String service, @PathParam("interf") String interf,
-      ServiceRegistryEntry entry) {
+                                   @PathParam("serviceGroup") String serviceGroup,
+                                   @PathParam("service") String service,
+                                   @PathParam("interf") String interf,
+                                   ServiceRegistryEntry entry) {
     ServiceRegistry.getInstance().unRegister(serviceGroup, service, interf, entry);
   }
 
@@ -55,8 +57,9 @@ public class SecureServiceRegistryResource {
   @Produces(MediaType.APPLICATION_JSON)
   @Path(value = "/{serviceGroup}/{service}")
   public ServiceQueryResult getServiceQueryForm(@Context SecurityContext sc,
-      @PathParam("serviceGroup") String serviceGroup,
-      @PathParam("service") String service, ServiceQueryForm queryForm) {
+                                                @PathParam("serviceGroup") String serviceGroup,
+                                                @PathParam("service") String service,
+                                                ServiceQueryForm queryForm) {
     return ServiceRegistry.getInstance().provideServices(serviceGroup, service, queryForm);
   }
 

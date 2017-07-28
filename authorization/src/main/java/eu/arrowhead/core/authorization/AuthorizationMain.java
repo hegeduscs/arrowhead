@@ -158,7 +158,11 @@ public class AuthorizationMain {
     config.property("server_common_name", serverCN);
 
     final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true,
-        new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
+                                                                        new SSLEngineConfigurator(
+                                                                            sslCon)
+                                                                            .setClientMode(false)
+                                                                            .setNeedClientAuth(
+                                                                                true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;

@@ -17,10 +17,11 @@ public class EmptyPayloadFilter implements ContainerRequestFilter {
       int contentLength = requestContext.getLength();
       if (contentLength == 0) {
         ErrorMessage em = new ErrorMessage("Payload is null (unusal for POST/PUT request)! "
-            + "If you want to send an empty payload, try sending empty brackets ({})", 400);
+                                               + "If you want to send an empty payload, try sending empty brackets ({})",
+                                           400);
         requestContext.abortWith(Response.status(Response.Status.BAD_REQUEST)
-            .entity(em)
-            .build());
+                                     .entity(em)
+                                     .build());
       }
     }
   }

@@ -15,7 +15,7 @@ public class GSDPoll {
   }
 
   public GSDPoll(ArrowheadService requestedService,
-      ArrowheadCloud requesterCloud) {
+                 ArrowheadCloud requesterCloud) {
     this.requestedService = requestedService;
     this.requesterCloud = requesterCloud;
   }

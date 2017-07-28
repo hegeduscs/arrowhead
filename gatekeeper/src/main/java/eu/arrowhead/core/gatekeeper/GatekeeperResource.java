@@ -67,7 +67,7 @@ public class GatekeeperResource {
     if (!requestForm.isPayloadUsable()) {
       log.info("Payload is not usable. (GatekeeperResource:GSDRequest BadPayloadException)");
       throw new BadPayloadException("Bad payload: missing/incomplete requestedService."
-          + "Mandatory fields: serviceGroup, serviceDefinition, interfaces.");
+                                        + "Mandatory fields: serviceGroup, serviceDefinition, interfaces.");
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
@@ -84,7 +84,7 @@ public class GatekeeperResource {
     // If there are preferred Clouds given, send GSD poll requests there
     else {
       /*
-			 * Using a Set removes duplicate entries (which are needed for the
+       * Using a Set removes duplicate entries (which are needed for the
 			 * Orchestrator) from the Cloud list.
 			 */
       Set<ArrowheadCloud> preferredClouds = new LinkedHashSet<>(requestForm.getSearchPerimeter());
@@ -119,7 +119,7 @@ public class GatekeeperResource {
       GSDAnswer gsdAnswer = response.readEntity(GSDAnswer.class);
       if (gsdAnswer != null) {
         log.info("A Cloud " + gsdAnswer.getProviderCloud().toString()
-            + " responded to GSD Poll positively");
+                     + " responded to GSD Poll positively");
         gsdAnswerList.add(gsdAnswer);
       }
     }
@@ -140,7 +140,7 @@ public class GatekeeperResource {
   @Path("gsd_poll")
   public Response GSDPoll(GSDPoll gsdPoll) {
     log.info("Entered the GSDPoll method. Gatekeeper received a GSD poll from: "
-        + gsdPoll.getRequesterCloud().toString());
+                 + gsdPoll.getRequesterCloud().toString());
 
     // Polling the Authorization System about the consumer Cloud
     ArrowheadCloud cloud = gsdPoll.getRequesterCloud();
@@ -170,8 +170,8 @@ public class GatekeeperResource {
           .toString();
       String tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
       ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(),
-          service.getInterfaces(),
-          false, false, tsig_key);
+                                                        service.getInterfaces(),
+                                                        false, false, tsig_key);
 
       // Sending back provider Cloud information if the SR poll has
       // results
@@ -208,13 +208,15 @@ public class GatekeeperResource {
     // Compiling the payload and then getting the URI
     log.info("Compiling ICN proposal");
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(),
-        requestForm.getAuthenticationInfo(), Utility.getOwnCloud(),
-        requestForm.getRequesterSystem(),
-        requestForm.getPreferredProviders(), requestForm.getNegotiationFlags());
+                                              requestForm.getAuthenticationInfo(),
+                                              Utility.getOwnCloud(),
+                                              requestForm.getRequesterSystem(),
+                                              requestForm.getPreferredProviders(),
+                                              requestForm.getNegotiationFlags());
 
     String icnURI = Utility.getURI(requestForm.getTargetCloud().getAddress(),
-        requestForm.getTargetCloud().getPort(),
-        requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
+                                   requestForm.getTargetCloud().getPort(),
+                                   requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
 
     // Sending the the request and then parsing the result
@@ -236,7 +238,7 @@ public class GatekeeperResource {
   @Path("icn_proposal")
   public Response ICNProposal(ICNProposal icnProposal) {
     log.info("Entered the ICNProposal method. Gatekeeper received an ICN proposal from: "
-        + icnProposal.getRequesterCloud().toString());
+                 + icnProposal.getRequesterCloud().toString());
 
     // Polling the Authorization System about the consumer Cloud
     ArrowheadCloud cloud = icnProposal.getRequesterCloud();
@@ -255,7 +257,7 @@ public class GatekeeperResource {
     }
 
 		/*
-		 * If it is authorized, send a ServiceRequestForm to the Orchestrator
+     * If it is authorized, send a ServiceRequestForm to the Orchestrator
 		 * and return the OrchestrationResponse
 		 */
     else {

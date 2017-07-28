@@ -25,12 +25,13 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
 
   @Override
   public DnsSDRegistrator createRegistrator(String registeringDomain,
-      InetSocketAddress resolverSocaddr) throws DnsSDException {
+                                            InetSocketAddress resolverSocaddr)
+      throws DnsSDException {
     try {
       return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain), resolverSocaddr);
     } catch (UnknownHostException ex) {
       throw new DnsSDException("Failed to find DNS update server for domain: " + registeringDomain,
-          ex);
+                               ex);
     } catch (TextParseException ex) {
       throw new IllegalArgumentException("Invalid domain name: " + registeringDomain, ex);
     }
@@ -68,7 +69,7 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
       return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain));
     } catch (UnknownHostException ex) {
       throw new DnsSDException("Failed to find DNS update server for domain: " + registeringDomain,
-          ex);
+                               ex);
     } catch (TextParseException ex) {
       throw new IllegalArgumentException("Invalid domain name: " + registeringDomain, ex);
     }

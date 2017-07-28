@@ -51,7 +51,7 @@ public class Network {
   }
 
   public Network(String name, String networkIP, String networkType,
-      Map<String, String> networkConfigurations) {
+                 Map<String, String> networkConfigurations) {
     this.name = name;
     this.networkIP = networkIP;
     this.networkType = networkType;

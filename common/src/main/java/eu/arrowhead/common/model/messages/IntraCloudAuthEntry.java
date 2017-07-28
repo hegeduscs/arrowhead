@@ -19,7 +19,7 @@ public class IntraCloudAuthEntry {
   }
 
   public IntraCloudAuthEntry(ArrowheadSystem consumer, ArrayList<ArrowheadSystem> providerList,
-      ArrayList<ArrowheadService> serviceList) {
+                             ArrayList<ArrowheadService> serviceList) {
     this.consumer = consumer;
     this.providerList = providerList;
     this.serviceList = serviceList;

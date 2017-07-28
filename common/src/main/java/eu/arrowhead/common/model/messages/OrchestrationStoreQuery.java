@@ -14,7 +14,7 @@ public class OrchestrationStoreQuery {
   }
 
   public OrchestrationStoreQuery(ArrowheadService requestedService, ArrowheadSystem requesterSystem,
-      Boolean onlyActive) {
+                                 Boolean onlyActive) {
     this.requestedService = requestedService;
     this.requesterSystem = requesterSystem;
     this.onlyActive = onlyActive;

@@ -46,8 +46,8 @@ public class QoSResource {
 
   @PUT
   @Path("/QoSVerify")
-  public Response qosVerification(
-      QoSVerify qosVerify) {
+  public Response qosVerification(QoSVerify qosVerify) {
+
     QoSVerificationResponse qvr = service.qoSVerify(qosVerify);
     return Response.status(Status.OK).entity(qvr).build();
   }

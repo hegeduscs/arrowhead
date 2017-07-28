@@ -18,7 +18,7 @@ public class IntraCloudAuthRequest {
   }
 
   public IntraCloudAuthRequest(ArrowheadSystem consumer, Collection<ArrowheadSystem> providers,
-      ArrowheadService service, boolean generateToken) {
+                               ArrowheadService service, boolean generateToken) {
     this.consumer = consumer;
     this.providers = providers;
     this.service = service;

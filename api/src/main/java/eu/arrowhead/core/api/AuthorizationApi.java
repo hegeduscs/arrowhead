@@ -62,7 +62,7 @@ public class AuthorizationApi {
     if (authRights.isEmpty()) {
       log.info("AuthorizationApi:getIntraCloudAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("IntraCloud authorization rights "
-          + "were not found in the database.");
+                                          + "were not found in the database.");
     }
 
     log.info("getIntraCloudAuthRights successfully returns " + authRights.size() + " entries.");
@@ -86,7 +86,7 @@ public class AuthorizationApi {
     if (!request.isPayloadUsable()) {
       log.info("AuthorizationApi:isSystemAuthorized throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: Missing/incomplete consumer, service"
-          + " or providerList in the request payload.");
+                                        + " or providerList in the request payload.");
     }
 
     IntraCloudAuthResponse response = new IntraCloudAuthResponse();
@@ -95,7 +95,7 @@ public class AuthorizationApi {
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.info("Consumer is not in the authorization database. "
-          + "(AuthorizationApi:isSystemAuthorized DataNotFoundException)");
+                   + "(AuthorizationApi:isSystemAuthorized DataNotFoundException)");
       throw new DataNotFoundException(
           "Consumer System is not in the database. " + request.getConsumer().toString());
     }
@@ -161,7 +161,7 @@ public class AuthorizationApi {
     if (!entry.isPayloadUsable()) {
       log.info("AuthorizationApi:addSystemToAuthorized throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: Missing/incomplete consumer, "
-          + "serviceList or providerList in the entry payload.");
+                                        + "serviceList or providerList in the entry payload.");
     }
 
     restrictionMap.put("systemGroup", entry.getConsumer().getSystemGroup());
@@ -169,7 +169,7 @@ public class AuthorizationApi {
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.info("Consumer System " + entry.getConsumer().toString()
-          + " was not in the database, saving it now.");
+                   + " was not in the database, saving it now.");
       consumer = dm.save(entry.getConsumer());
     }
 
@@ -185,7 +185,7 @@ public class AuthorizationApi {
       retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
       if (retrievedSystem == null) {
         log.info("Provider System " + providerSystem.toString()
-            + " was not in the database, saving it now.");
+                     + " was not in the database, saving it now.");
         retrievedSystem = dm.save(providerSystem);
       }
       for (ArrowheadService service : entry.getServiceList()) {
@@ -246,7 +246,7 @@ public class AuthorizationApi {
   @DELETE
   @Path("/intracloud/systemgroup/{systemGroup}/systemname/{systemName}")
   public Response deleteSystemRelations(@PathParam("systemGroup") String systemGroup,
-      @PathParam("systemName") String systemName) {
+                                        @PathParam("systemName") String systemName) {
     log.info("Entered the deleteSystemRelations method.");
 
     restrictionMap.put("systemGroup", systemGroup);
@@ -284,7 +284,7 @@ public class AuthorizationApi {
   @GET
   @Path("/intracloud/systemgroup/{systemGroup}/systemname/{systemName}/services")
   public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup,
-      @PathParam("systemName") String systemName) {
+                                                 @PathParam("systemName") String systemName) {
 
     restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
@@ -323,7 +323,7 @@ public class AuthorizationApi {
     if (authRights.isEmpty()) {
       log.info("AuthorizationApi:getInterCloudAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("InterCloud authorization rights "
-          + "were not found in the database.");
+                                          + "were not found in the database.");
     }
 
     log.info("getInterCloudAuthRights successfully returns " + authRights.size() + " entries.");
@@ -353,7 +353,7 @@ public class AuthorizationApi {
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
       log.info("Consumer Cloud is not in the authorization database. "
-          + "(AuthorizationApi:isCloudAuthorized DataNotFoundException)");
+                   + "(AuthorizationApi:isCloudAuthorized DataNotFoundException)");
       throw new DataNotFoundException(
           "Consumer Cloud is not in the authorization database. "
               + request.getCloud().toString());
@@ -366,7 +366,7 @@ public class AuthorizationApi {
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
       log.info("Service is not in the database. Returning NOT AUTHORIZED state. "
-          + request.getService().toString());
+                   + request.getService().toString());
       return Response.status(Status.OK).entity(isAuthorized).build();
     }
 
@@ -472,7 +472,7 @@ public class AuthorizationApi {
   @DELETE
   @Path("/intercloud/operator/{operator}/cloudname/{cloudName}")
   public Response deleteCloudRelations(@PathParam("operator") String operator,
-      @PathParam("cloudName") String cloudName) {
+                                       @PathParam("cloudName") String cloudName) {
     log.info("Entered the deleteCloudRelations method.");
 
     restrictionMap.put("operator", operator);
@@ -510,7 +510,7 @@ public class AuthorizationApi {
   @GET
   @Path("/intercloud/operator/{operator}/cloudname/{cloudName}/services")
   public Set<ArrowheadService> getCloudServices(@PathParam("operator") String operator,
-      @PathParam("cloudName") String cloudName) {
+                                                @PathParam("cloudName") String cloudName) {
 
     restrictionMap.put("operator", operator);
     restrictionMap.put("cloudName", cloudName);

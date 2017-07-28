@@ -49,7 +49,7 @@ public class ArrowheadCloud {
   }
 
   public ArrowheadCloud(String operator, String cloudName, String address, String port,
-      String gatekeeperServiceURI, String authenticationInfo) {
+                        String gatekeeperServiceURI, String authenticationInfo) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;

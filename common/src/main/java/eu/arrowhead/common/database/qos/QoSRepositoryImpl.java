@@ -110,7 +110,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
 
   @SuppressWarnings("unchecked")
   private <T> List<T> getAll(Class<T> queryClass,
-      Map<String, Object> restrictionMap) {
+                             Map<String, Object> restrictionMap) {
     List<T> retrievedList = new ArrayList<T>();
 
     Session session = getSessionFactory().openSession();

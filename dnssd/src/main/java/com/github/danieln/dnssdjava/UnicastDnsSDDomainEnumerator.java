@@ -43,7 +43,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
   UnicastDnsSDDomainEnumerator(List<Name> computerDomains) {
     this.computerDomains = computerDomains;
     logger.log(Level.INFO, "Created DNS-SD DomainEnumerator for computer domains: {0}",
-        computerDomains);
+               computerDomains);
   }
 
   public Collection<String> getBrowsingDomains() {

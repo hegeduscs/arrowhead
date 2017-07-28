@@ -21,9 +21,9 @@ public class QoSVerify {
   }
 
   public QoSVerify(ArrowheadSystem consumer, ArrowheadService requestedService,
-      List<ArrowheadSystem> provider,
-      Map<String, String> specifications,
-      Map<String, String> commands) {
+                   List<ArrowheadSystem> provider,
+                   Map<String, String> specifications,
+                   Map<String, String> commands) {
     super();
     this.consumer = consumer;
     this.requestedService = requestedService;

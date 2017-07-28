@@ -107,9 +107,9 @@ public class ApiMain {
 
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(AuthorizationApi.class,
-        CommonApi.class,
-        ConfigurationApi.class,
-        OrchestratorApi.class);
+                           CommonApi.class,
+                           ConfigurationApi.class,
+                           OrchestratorApi.class);
     config.packages("eu.arrowhead.common");
 
     final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
@@ -125,9 +125,9 @@ public class ApiMain {
 
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(AuthorizationApi.class,
-        CommonApi.class,
-        ConfigurationApi.class,
-        OrchestratorApi.class);
+                           CommonApi.class,
+                           ConfigurationApi.class,
+                           OrchestratorApi.class);
     config.packages("eu.arrowhead.common");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();

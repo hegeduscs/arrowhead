@@ -20,8 +20,8 @@ public class ServiceQueryForm {
   }
 
   public ServiceQueryForm(List<ServiceMetadata> serviceMetadata, List<String> serviceInterfaces,
-      boolean pingProviders,
-      boolean metadataSearch, String tsig_key) {
+                          boolean pingProviders,
+                          boolean metadataSearch, String tsig_key) {
     this.serviceMetadata = serviceMetadata;
     this.serviceInterfaces = serviceInterfaces;
     this.pingProviders = pingProviders;

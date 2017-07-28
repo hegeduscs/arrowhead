@@ -180,7 +180,8 @@ public abstract class DnsSDFactory {
   }
 
   public abstract DnsSDRegistrator createRegistrator(String registeringDomain,
-      InetSocketAddress resolverSocaddr) throws DnsSDException;
+                                                     InetSocketAddress resolverSocaddr)
+      throws DnsSDException;
 
 
 }

@@ -112,7 +112,7 @@ public class ServiceRegistry {
   }
 
   public void register(String serviceGroup, String serviceName, String interf,
-      ServiceRegistryEntry entry) {
+                       ServiceRegistryEntry entry) {
     if (!parametersIsValid(serviceGroup, serviceName, interf)) {
       throw new InvalidParameterException("Invalid parameters in URL!");
     }
@@ -152,7 +152,7 @@ public class ServiceRegistry {
   }
 
   public void unRegister(String serviceGroup, String serviceName, String interf,
-      ServiceRegistryEntry entry) {
+                         ServiceRegistryEntry entry) {
     if (!parametersIsValid(serviceGroup, serviceName, interf)) {
       throw new InvalidParameterException("Invalid parameters in URL!");
     }
@@ -179,7 +179,7 @@ public class ServiceRegistry {
   }
 
   public ServiceQueryResult provideServices(String serviceGroup, String serviceName,
-      ServiceQueryForm queryForm) {
+                                            ServiceQueryForm queryForm) {
 
     if (queryForm.getServiceInterfaces() != null && !queryForm.getServiceInterfaces().isEmpty()) {
       try {
@@ -206,8 +206,8 @@ public class ServiceRegistry {
             if (service != null) {
               for (String serviceInterface : queryForm.getServiceInterfaces()) {
                 ProvidedService providerService = buildProviderService(service, serviceGroup,
-                    serviceName,
-                    serviceInterface);
+                                                                       serviceName,
+                                                                       serviceInterface);
                 if (providerService != null) {
                   Map<String, String> properties = service.getProperties();
 
@@ -216,7 +216,7 @@ public class ServiceRegistry {
                     boolean replied = true;
                     if (queryForm.isPingProviders()) {
                       replied = pingService(needToRemoveInstances, instance, service, properties,
-                          replied);
+                                            replied);
                     }
 
                     if (replied && queryForm.getServiceMetadata() != null && queryForm
@@ -323,7 +323,7 @@ public class ServiceRegistry {
               }
             }
             providerService = createProvidedService(service, interfaceType, serviceGroup,
-                serviceName);
+                                                    serviceName);
 
             if (providerService != null) {
               list.add(providerService);
@@ -438,8 +438,8 @@ public class ServiceRegistry {
   }
 
   private ProvidedService createProvidedService(ServiceData service, String interfaceType,
-      String serviceGroup,
-      String serviceName) {
+                                                String serviceGroup,
+                                                String serviceName) {
     try {
 
       ProvidedService providerService = new ProvidedService();
@@ -497,8 +497,8 @@ public class ServiceRegistry {
   }
 
   private boolean pingService(Collection<ServiceName> needToRemoveInstances, ServiceName instance,
-      ServiceData service,
-      Map<String, String> properties, boolean replied) {
+                              ServiceData service,
+                              Map<String, String> properties, boolean replied) {
     String path = properties.get("path");
     String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
     int timeout = new Integer(getAppProp().getProperty("ping.timeout", "10000")).intValue();
@@ -506,7 +506,7 @@ public class ServiceRegistry {
     String host = removeLastChar(service.getHost(), '.');
     if (!pingHost(host, port, timeout)) {
       log.info("Can't access the service in the following URL" + targetUrl + ", in " + timeout
-          + "millisec");
+                   + "millisec");
       needToRemoveInstances.add(instance);
       replied = false;
     }
@@ -527,8 +527,8 @@ public class ServiceRegistry {
   }
 
   private ProvidedService buildProviderService(ServiceData service, String serviceGroup,
-      String serviceName,
-      String serviceInterface) {
+                                               String serviceName,
+                                               String serviceInterface) {
     ProvidedService providerService = null;
 
     if (serviceInterface != null && !serviceInterface.isEmpty() && serviceGroup != null
