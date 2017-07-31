@@ -16,8 +16,7 @@ public class TokenGenerationRequest {
   public TokenGenerationRequest() {
   }
 
-  public TokenGenerationRequest(ArrowheadSystem consumer, ArrowheadCloud consumerCloud,
-                                List<ArrowheadSystem> providers, ArrowheadService service,
+  public TokenGenerationRequest(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, List<ArrowheadSystem> providers, ArrowheadService service,
                                 int duration) {
     this.consumer = consumer;
     this.consumerCloud = consumerCloud;

@@ -20,9 +20,7 @@ public class QoSReserve {
     this.requestedQoS = new HashMap<>();
   }
 
-  public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer,
-                    ArrowheadService service,
-                    Map<String, String> requestedQoS,
+  public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service, Map<String, String> requestedQoS,
                     Map<String, String> commands) {
     super();
     this.provider = provider;

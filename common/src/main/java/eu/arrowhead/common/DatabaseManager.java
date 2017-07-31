@@ -23,17 +23,14 @@ public class DatabaseManager {
   private static DatabaseManager instance = null;
   private static SessionFactory sessionFactory;
   private static Properties prop;
-  private static final String dbAddress = getProp()
-      .getProperty("db_address", "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead");
+  private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead");
   private static final String dbUser = getProp().getProperty("db_user", "root");
   private static final String dbPassword = getProp().getProperty("db_password", "root");
 
   private DatabaseManager() {
     if (sessionFactory == null) {
-      sessionFactory = new Configuration().configure()
-          .setProperty("hibernate.connection.url", dbAddress)
-          .setProperty("hibernate.connection.username", dbUser)
-          .setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+      sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
+          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
     }
   }
 
@@ -63,10 +60,8 @@ public class DatabaseManager {
 
   private SessionFactory getSessionFactory() {
     if (sessionFactory == null) {
-      sessionFactory = new Configuration().configure()
-          .setProperty("hibernate.connection.url", dbAddress)
-          .setProperty("hibernate.connection.username", dbUser)
-          .setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+      sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
+          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
     }
     return sessionFactory;
   }
@@ -165,8 +160,8 @@ public class DatabaseManager {
       }
       log.info("DatabaseManager:save throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. "
-              + "Please check the unique fields of the " + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
+              + object.getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -193,8 +188,8 @@ public class DatabaseManager {
       }
       log.info("DatabaseManager:merge throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. "
-              + "Please check the unique fields of the " + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
+              + object.getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -221,8 +216,8 @@ public class DatabaseManager {
       }
       log.info("DatabaseManager:delete throws ConstraintViolationException");
       throw new DuplicateEntryException(
-          "ConstraintViolationException: there is a reference to this object in another table, "
-              + "which prevents the delete operation. (" + object.getClass() + ")");
+          "ConstraintViolationException: there is a reference to this object in another table, " + "which prevents the delete operation. (" + object
+              .getClass() + ")");
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();

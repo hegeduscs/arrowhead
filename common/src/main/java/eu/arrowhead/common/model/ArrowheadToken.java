@@ -8,6 +8,11 @@ public class ArrowheadToken {
   public ArrowheadToken() {
   }
 
+  public ArrowheadToken(String token, String signature) {
+    this.token = token;
+    this.signature = signature;
+  }
+
   public String getToken() {
     return token;
   }

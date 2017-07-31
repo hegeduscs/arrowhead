@@ -101,17 +101,14 @@ class QoSManagerService {
       // Run Algorithm
       QoSVerifierResponse response;
       try {
-        response = algorithmFactory.verify(network.getNetworkType(),
-                                           provider_network_device.getNetworkCapabilities(),
-                                           consumer_network_device.getNetworkCapabilities(),
-                                           providerDeviceQoSReservations,
-                                           consumerDeviceQoSReservations,
-                                           message.getRequestedQoS(),
-                                           message.getCommands());
+        response = algorithmFactory
+            .verify(network.getNetworkType(), provider_network_device.getNetworkCapabilities(), consumer_network_device.getNetworkCapabilities(),
+                    providerDeviceQoSReservations, consumerDeviceQoSReservations, message.getRequestedQoS(), message.getCommands());
 
         updateQoSVerificationResponse(system, response, qosVerificationResponse);
       }//TODO fix this catch branch... and others like it
-      catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException ex) {
+      catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException |
+          InvocationTargetException ex) {
         Logger.getLogger(QoSManagerService.class.getName()).
             log(Level.SEVERE, null, ex);
       }
@@ -129,8 +126,7 @@ class QoSManagerService {
    * @throws ReservationException The reservation on the devices was not possible.
    * @throws DriverNotFoundException The network type doesnt have a driver assigned.
    */
-  public QoSReservationResponse qoSReserve(QoSReserve message)
-      throws ReservationException, DriverNotFoundException, IOException {
+  public QoSReservationResponse qoSReserve(QoSReserve message) throws ReservationException, DriverNotFoundException, IOException {
     QoSReservationResponse qosreservationResponse;
 
     // Go To System Configuration Store get NetworkDevice
@@ -163,20 +159,15 @@ class QoSManagerService {
     Boolean wasSucessful = false;
     try {
       responseS = DriversFactory.getInstance().
-          generateCommands(network.getNetworkType(),
-                           network.getNetworkConfigurations(), provider, consumer, message.
-                  getService(), message.getCommands(),
-                           message.getRequestedQoS());
+          generateCommands(network.getNetworkType(), network.getNetworkConfigurations(), provider, consumer, message.
+              getService(), message.getCommands(), message.getRequestedQoS());
       /**
        * **** IF SUCCESS: Saving Quality of Service Reservation on
        * DataBase *
        */
       /* Create Message Stream */
       wasSucessful = qosfactory.
-          saveMessageStream(provider, consumer, message.getService(),
-                            message.getRequestedQoS(),
-                            responseS,
-                            network.getNetworkType());
+          saveMessageStream(provider, consumer, message.getService(), message.getRequestedQoS(), responseS, network.getNetworkType());
 
       scsfactory.updateNetwork(network);
 
@@ -197,12 +188,9 @@ class QoSManagerService {
         rule.setParameters(temp);
 
         boolean response = contactMonitoring(rule);
-        qosreservationResponse = new QoSReservationResponse(response,
-                                                            new QoSReservationCommand(
-                                                                message.getService(),
-                                                                message.getConsumer(),
-                                                                message.getProvider(), responseS,
-                                                                message.getRequestedQoS()));
+        qosreservationResponse = new QoSReservationResponse(response, new QoSReservationCommand(message.getService(), message.getConsumer(),
+                                                                                                message.getProvider(), responseS,
+                                                                                                message.getRequestedQoS()));
         return qosreservationResponse;
 
       } else {
@@ -222,9 +210,7 @@ class QoSManagerService {
    * @param v Was possible.
    * @param qosVerificationResponse Reject Motivation Reason.
    */
-  private void updateQoSVerificationResponse(ArrowheadSystem system,
-                                             QoSVerifierResponse v,
-                                             QoSVerificationResponse qosVerificationResponse) {
+  private void updateQoSVerificationResponse(ArrowheadSystem system, QoSVerifierResponse v, QoSVerificationResponse qosVerificationResponse) {
     boolean isPossible = v.getResponse();
     qosVerificationResponse.addResponse(system, v.getResponse());
     if (!isPossible) {

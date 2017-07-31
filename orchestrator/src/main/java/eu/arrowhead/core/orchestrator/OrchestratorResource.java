@@ -33,9 +33,8 @@ public class OrchestratorResource {
   }
 
   /**
-   * This method initiates the correct orchestration process determined by orchestration flags in
-   * the service request form. The returned response (can) consists a list of endpoints where the
-   * requester System can consume the requested Service.
+   * This method initiates the correct orchestration process determined by orchestration flags in the service request form. The returned response
+   * (can) consists a list of endpoints where the requester System can consume the requested Service.
    *
    * @return OrchestrationResponse
    */
@@ -45,31 +44,26 @@ public class OrchestratorResource {
 
     if (!srf.isPayloadUsable()) {
       log.info("OrchestratorResource:orchestrationProcess throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service request form has missing/incomplete "
-                                        + "mandatory fields.");
+      throw new BadPayloadException("Bad payload: service request form has missing/incomplete " + "mandatory fields.");
     }
 
     OrchestrationResponse orchResponse = new OrchestrationResponse();
     if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
       log.info("Received an externalServiceRequest.");
       orchResponse = OrchestratorService.externalServiceRequest(srf);
-      log.info("externalServiceRequest orchestration returned with "
-                   + orchResponse.getResponse().size() + " orchestration forms.");
+      log.info("externalServiceRequest orchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     } else if (srf.getOrchestrationFlags().get("triggerInterCloud")) {
       log.info("Received a triggerInterCloud request.");
       orchResponse = OrchestratorService.triggerInterCloud(srf);
-      log.info("triggerInterCloud orchestration returned with "
-                   + orchResponse.getResponse().size() + " orchestration forms.");
+      log.info("triggerInterCloud orchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     } else if (!srf.getOrchestrationFlags().get("overrideStore")) { //overrideStore == false
       log.info("Received an orchestrationFromStore request.");
       orchResponse = OrchestratorService.orchestrationFromStore(srf);
-      log.info("orchestrationFromStore returned with "
-                   + orchResponse.getResponse().size() + " orchestration forms.");
+      log.info("orchestrationFromStore returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     } else {
       log.info("Received a regularOrchestration request.");
       orchResponse = OrchestratorService.dynamicOrchestration(srf);
-      log.info("regularOrchestration returned with "
-                   + orchResponse.getResponse().size() + " orchestration forms.");
+      log.info("regularOrchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     }
 
     return Response.status(Status.OK).entity(orchResponse).build();

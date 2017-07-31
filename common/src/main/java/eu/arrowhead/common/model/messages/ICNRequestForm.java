@@ -22,10 +22,8 @@ public class ICNRequestForm {
   public ICNRequestForm() {
   }
 
-  public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo,
-                        ArrowheadCloud targetCloud,
-                        ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredProviders,
-                        Map<String, Boolean> negotiationFlags) {
+  public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem,
+                        List<ArrowheadSystem> preferredProviders, Map<String, Boolean> negotiationFlags) {
     this.requestedService = requestedService;
     this.authenticationInfo = authenticationInfo;
     this.targetCloud = targetCloud;

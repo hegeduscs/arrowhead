@@ -24,8 +24,7 @@ import org.xbill.DNS.Type;
  */
 class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
 
-  private static final Logger logger = Logger
-      .getLogger(UnicastDnsSDDomainEnumerator.class.getName());
+  private static final Logger logger = Logger.getLogger(UnicastDnsSDDomainEnumerator.class.getName());
 
   private static final Name B_DNSSD_UDP = Name.fromConstantString("b._dns-sd._udp");
   private static final Name DB_DNSSD_UDP = Name.fromConstantString("db._dns-sd._udp");
@@ -42,8 +41,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    */
   UnicastDnsSDDomainEnumerator(List<Name> computerDomains) {
     this.computerDomains = computerDomains;
-    logger.log(Level.INFO, "Created DNS-SD DomainEnumerator for computer domains: {0}",
-               computerDomains);
+    logger.log(Level.INFO, "Created DNS-SD DomainEnumerator for computer domains: {0}", computerDomains);
   }
 
   public Collection<String> getBrowsingDomains() {
@@ -97,8 +95,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
   }
 
   /**
-   * Get all domains pointed to by the given resource record name, looking in a single computer
-   * domain.
+   * Get all domains pointed to by the given resource record name, looking in a single computer domain.
    *
    * @param rrName the DNS resource record name.
    * @return a collection of domain names.

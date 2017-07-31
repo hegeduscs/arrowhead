@@ -18,8 +18,7 @@ public class IntraCloudAuthEntry {
   public IntraCloudAuthEntry() {
   }
 
-  public IntraCloudAuthEntry(ArrowheadSystem consumer, ArrayList<ArrowheadSystem> providerList,
-                             ArrayList<ArrowheadService> serviceList) {
+  public IntraCloudAuthEntry(ArrowheadSystem consumer, ArrayList<ArrowheadSystem> providerList, ArrayList<ArrowheadService> serviceList) {
     this.consumer = consumer;
     this.providerList = providerList;
     this.serviceList = serviceList;
@@ -50,8 +49,7 @@ public class IntraCloudAuthEntry {
   }
 
   public boolean isPayloadUsable() {
-    if (consumer == null || serviceList.isEmpty() || providerList.isEmpty() || !consumer
-        .isValidForDatabase()) {
+    if (consumer == null || serviceList.isEmpty() || providerList.isEmpty() || !consumer.isValidForDatabase()) {
       return false;
     }
     for (ArrowheadSystem provider : providerList) {

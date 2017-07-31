@@ -10,11 +10,10 @@ import java.nio.charset.Charset;
 import org.xbill.DNS.Name;
 
 /**
- * A unique identifier for a service instance. A service name consists of the triple domain, service
- * type and name. The domain is the fully qualified domain where the service is registered. The
- * service type specified the protocol to use when accessing the service. The name identifies this
- * particular instance of the service. Instance names should be human readable and can contain
- * spaces, punctuation and international characters. <p> Instances of the class are immutable.
+ * A unique identifier for a service instance. A service name consists of the triple domain, service type and name. The domain is the fully qualified
+ * domain where the service is registered. The service type specified the protocol to use when accessing the service. The name identifies this
+ * particular instance of the service. Instance names should be human readable and can contain spaces, punctuation and international characters. <p>
+ * Instances of the class are immutable.
  *
  * @author Daniel Nilsson
  */
@@ -40,8 +39,8 @@ public class ServiceName {
   }
 
   /**
-   * Returns a ServiceName object representing the service specified in the String. The argument is
-   * expected to be in the format returned by {@link #toString()}.
+   * Returns a ServiceName object representing the service specified in the String. The argument is expected to be in the format returned by {@link
+   * #toString()}.
    *
    * @param s the string to be parsed.
    * @return a ServiceName representing the service specified by the argument.
@@ -95,8 +94,7 @@ public class ServiceName {
   }
 
   /**
-   * Decode a raw DNS label into a string. The methods in dnsjava don't understand UTF-8 and escapes
-   * some characters, we don't want that here.
+   * Decode a raw DNS label into a string. The methods in dnsjava don't understand UTF-8 and escapes some characters, we don't want that here.
    *
    * @param label the raw label data.
    * @return the decoded string.
@@ -229,8 +227,7 @@ public class ServiceName {
   }
 
   /**
-   * Encode a string into a raw DNS label. The methods in dnsjava don't understand UTF-8 and escapes
-   * some characters, we don't want that here.
+   * Encode a string into a raw DNS label. The methods in dnsjava don't understand UTF-8 and escapes some characters, we don't want that here.
    *
    * @param s the string to encode.
    * @return the raw DNS label.

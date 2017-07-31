@@ -19,12 +19,10 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 /**
- * Entity class for storing Arrowhead Services in the database. The "service_group" and
- * service_definition" columns must be unique together.
+ * Entity class for storing Arrowhead Services in the database. The "service_group" and service_definition" columns must be unique together.
  */
 @Entity
-@Table(name = "arrowhead_service", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"service_group", "service_definition"})})
+@Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_group", "service_definition"})})
 @XmlRootElement
 public class ArrowheadService {
 
@@ -50,8 +48,7 @@ public class ArrowheadService {
   public ArrowheadService() {
   }
 
-  public ArrowheadService(String serviceGroup, String serviceDefinition,
-                          List<String> interfaces, List<ServiceMetadata> serviceMetadata) {
+  public ArrowheadService(String serviceGroup, String serviceDefinition, List<String> interfaces, List<ServiceMetadata> serviceMetadata) {
     this.serviceGroup = serviceGroup;
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;

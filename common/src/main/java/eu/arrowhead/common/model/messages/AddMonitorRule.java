@@ -25,18 +25,15 @@ public class AddMonitorRule {
   }
 
   /**
-   * Creates a new instance with the given monitor protocol, service provider, service consumer,
-   * monitor parameters and a soft real time clause.
+   * Creates a new instance with the given monitor protocol, service provider, service consumer, monitor parameters and a soft real time clause.
    *
    * @param protocol the monitor protocol
    * @param provider the service provider
    * @param consumer the service consumer
-   * @param parameters the monitor parameters. It works by getting the value of the parameter (key)
-   * e.g. key=bandwidth, value=100
+   * @param parameters the monitor parameters. It works by getting the value of the parameter (key) e.g. key=bandwidth, value=100
    * @param softRealTime the soft real time clause
    */
-  public AddMonitorRule(String protocol, ArrowheadSystem provider, ArrowheadSystem consumer,
-                        Map<String, String> parameters, boolean softRealTime) {
+  public AddMonitorRule(String protocol, ArrowheadSystem provider, ArrowheadSystem consumer, Map<String, String> parameters, boolean softRealTime) {
     this.protocol = protocol;
     this.provider = provider;
     this.consumer = consumer;

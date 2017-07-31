@@ -57,26 +57,21 @@ class AuthorizationService {
     return null;
   }
 
-  public static ArrowheadToken generateSingleToken(ArrowheadSystem provider, PublicKey providerKey,
-                                                   ArrowheadSystem consumer,
-                                                   ArrowheadCloud consumerCloud,
-                                                   ArrowheadService service, int duration)
-      throws Exception {
+  public static ArrowheadToken generateSingleToken(ArrowheadSystem provider, PublicKey providerKey, ArrowheadSystem consumer,
+                                                   ArrowheadCloud consumerCloud, ArrowheadService service, int duration) throws Exception {
 
     RawTokenInfo rawTokenInfo = new RawTokenInfo();
 
     String c = consumer.getSystemName() + "." + consumer.getSystemGroup();
     if (consumerCloud != null) {
-      c = c.concat(".").concat(consumerCloud.getCloudName()).concat(".")
-          .concat(consumerCloud.getOperator());
+      c = c.concat(".").concat(consumerCloud.getCloudName()).concat(".").concat(consumerCloud.getOperator());
     } else {
       ArrowheadCloud ownCloud = Utility.getOwnCloud();
       c = c.concat(".").concat(ownCloud.getCloudName()).concat(".").concat(ownCloud.getOperator());
     }
     rawTokenInfo.setC(c);
 
-    String s = service.getInterfaces().get(0) + "." + service.getServiceDefinition() + "." + service
-        .getServiceGroup();
+    String s = service.getInterfaces().get(0) + "." + service.getServiceDefinition() + "." + service.getServiceGroup();
     rawTokenInfo.setS(s);
 
     if (duration != 0) {

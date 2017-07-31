@@ -19,9 +19,7 @@ public class QoSReservationForm {
     // TODO Auto-generated constructor stub
   }
 
-  public QoSReservationForm(ArrowheadService service, ArrowheadSystem provider,
-                            ArrowheadSystem consumer,
-                            Map<String, String> requestedQoS) {
+  public QoSReservationForm(ArrowheadService service, ArrowheadSystem provider, ArrowheadSystem consumer, Map<String, String> requestedQoS) {
     super();
     this.service = service;
     this.provider = provider;

@@ -6,8 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Test application for doing testing during development. The code is not meant as an example of how
- * to use the library.
+ * Test application for doing testing during development. The code is not meant as an example of how to use the library.
  *
  * @author Daniel Nilsson
  */
@@ -21,8 +20,7 @@ class TestApp {
     String nameString = null;
     try {
       DnsSDRegistrator reg = DnsSDFactory.getInstance().createRegistrator(dom);
-      ServiceName name = reg
-          .makeServiceName("My\\Test.Service", ServiceType.valueOf("_http._tcp,_printer"));
+      ServiceName name = reg.makeServiceName("My\\Test.Service", ServiceType.valueOf("_http._tcp,_printer"));
       nameString = name.toString();
       ServiceData data = new ServiceData(name, reg.getLocalHostName(), 8080);
       if (reg.registerService(data)) {

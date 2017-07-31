@@ -41,8 +41,7 @@ public class QoSFactory {
     return instance;
   }
 
-  private static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
-      eu.arrowhead.common.model.ArrowheadSystem in) {
+  private static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(eu.arrowhead.common.model.ArrowheadSystem in) {
 
     eu.arrowhead.common.database.qos.ArrowheadSystem_qos out = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
 
@@ -55,8 +54,7 @@ public class QoSFactory {
     return out;
   }
 
-  private static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
-      eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
+  private static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
 
     eu.arrowhead.common.model.ArrowheadSystem out = new eu.arrowhead.common.model.ArrowheadSystem();
 
@@ -69,8 +67,7 @@ public class QoSFactory {
     return out;
   }
 
-  private static List<ArrowheadSystem> convertToDTO_List(
-      List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
+  private static List<ArrowheadSystem> convertToDTO_List(List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
     if (in == null) {
       return null;
     }
@@ -82,8 +79,7 @@ public class QoSFactory {
     return out;
   }
 
-  protected static List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> convertFromDTO_List(
-      List<ArrowheadSystem> in) {
+  protected static List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> convertFromDTO_List(List<ArrowheadSystem> in) {
     if (in == null) {
       return null;
     }
@@ -95,8 +91,7 @@ public class QoSFactory {
     return out;
   }
 
-  private static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(
-      eu.arrowhead.common.model.ArrowheadService in) {
+  private static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(eu.arrowhead.common.model.ArrowheadService in) {
 
     eu.arrowhead.common.database.qos.ArrowheadService_qos out = new eu.arrowhead.common.database.qos.ArrowheadService_qos();
 
@@ -107,8 +102,7 @@ public class QoSFactory {
     return out;
   }
 
-  private static eu.arrowhead.common.model.ArrowheadService convertToDTO(
-      eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
+  private static eu.arrowhead.common.model.ArrowheadService convertToDTO(eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
 
     eu.arrowhead.common.model.ArrowheadService out = new eu.arrowhead.common.model.ArrowheadService();
 
@@ -119,8 +113,7 @@ public class QoSFactory {
     return out;
   }
 
-  private static List<ArrowheadService> convertToDTO_ArrowheadServices(
-      List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
+  private static List<ArrowheadService> convertToDTO_ArrowheadServices(List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
 
     if (in == null) {
       return null;
@@ -147,8 +140,7 @@ public class QoSFactory {
    * @param provider ArrowheadSystem_qos.
    * @return Returns all the QoSReservations.
    */
-  public List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(
-      ArrowheadSystem provider) {
+  public List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(ArrowheadSystem provider) {
     return repo.
         getQoSReservationsFromArrowheadSystem(convertFromDTO(provider));
   }
@@ -160,20 +152,14 @@ public class QoSFactory {
    * @param consumer ArrowheadSystem_qos that consumes the service.
    * @param service ArrowheadService_qos is the service that will be consumed and provided.
    * @param qualityOfService Requestet QoS.
-   * @param messageConfigurationParameters Stream configuration parameters between consumer and
-   * provider.
+   * @param messageConfigurationParameters Stream configuration parameters between consumer and provider.
    * @param type Network Type.
    * @return Return true when successful.
    */
-  public boolean saveMessageStream(ArrowheadSystem provider,
-                                   ArrowheadSystem consumer,
-                                   ArrowheadService service,
-                                   Map<String, String> qualityOfService,
-                                   Map<String, String> messageConfigurationParameters,
-                                   String type) {
+  public boolean saveMessageStream(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service, Map<String, String> qualityOfService,
+                                   Map<String, String> messageConfigurationParameters, String type) {
 
-    Message_Stream m = new Message_Stream(convertFromDTO(service), convertFromDTO(consumer),
-                                          convertFromDTO(provider), qualityOfService,
+    Message_Stream m = new Message_Stream(convertFromDTO(service), convertFromDTO(consumer), convertFromDTO(provider), qualityOfService,
                                           messageConfigurationParameters, type);
     return repo.saveMessageStream(m) != null;
   }
@@ -184,14 +170,12 @@ public class QoSFactory {
    * @param filter QoS specification (ex. bandwidth, delay).
    * @return Returns QoSReservation.
    */
-  public List<QoSReservationForm> getQoSReservationFromFilter(
-      Map<String, String> filter) {
+  public List<QoSReservationForm> getQoSReservationFromFilter(Map<String, String> filter) {
     List<QoSReservationForm> output = new ArrayList<>();
     for (Message_Stream m : repo.
         getQoS_Resource_ReservationsFromFilter(filter)) {
       output.add(new QoSReservationForm(convertToDTO(m.getService()), convertToDTO(m.
-          getProvider()),
-                                        convertToDTO(m.getConsumer()), m.
+          getProvider()), convertToDTO(m.getConsumer()), m.
           getQualityOfService().
           getQosParameters()));
     }

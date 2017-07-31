@@ -15,14 +15,11 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * @author umlaufz This class maps the inter cloud authorization rights. The table entry itself is
- * the authorization right. The "consumer_cloud_id" and "arrowhead_service_id" columns must be
- * unique together.
+ * @author umlaufz This class maps the inter cloud authorization rights. The table entry itself is the authorization right. The "consumer_cloud_id"
+ * and "arrowhead_service_id" columns must be unique together.
  */
 @Entity
-@Table(name = "inter_cloud_authorization", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"consumer_cloud_id",
-        "arrowhead_service_id"})})
+@Table(name = "inter_cloud_authorization", uniqueConstraints = {@UniqueConstraint(columnNames = {"consumer_cloud_id", "arrowhead_service_id"})})
 public class InterCloudAuthorization {
 
   @Column(name = "id")

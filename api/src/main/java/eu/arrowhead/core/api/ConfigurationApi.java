@@ -121,8 +121,7 @@ public class ConfigurationApi {
    */
   @GET
   @Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")
-  public Response getNeighborCloud(@PathParam("operator") String operator,
-                                   @PathParam("cloudName") String cloudName) {
+  public Response getNeighborCloud(@PathParam("operator") String operator, @PathParam("cloudName") String cloudName) {
 
     restrictionMap.put("operator", operator);
     restrictionMap.put("cloudName", cloudName);
@@ -144,9 +143,8 @@ public class ConfigurationApi {
   }
 
   /**
-   * Adds a list of CoreSystems to the database. Elements which would cause DuplicateEntryException
-   * or BadPayloadException (caused by missing systemName, address or serviceURI) are being skipped.
-   * The returned list only contains the elements which was saved in the process.
+   * Adds a list of CoreSystems to the database. Elements which would cause DuplicateEntryException or BadPayloadException (caused by missing
+   * systemName, address or serviceURI) are being skipped. The returned list only contains the elements which was saved in the process.
    *
    * @return List<CoreSystem>
    */
@@ -171,10 +169,8 @@ public class ConfigurationApi {
   }
 
   /**
-   * Adds a list of NeighborClouds to the database. Elements which would cause
-   * DuplicateEntryException or BadPayloadException (caused by missing operator, cloudName, address
-   * or serviceURI) are being skipped. The returned list only contains the elements which was saved
-   * in the process.
+   * Adds a list of NeighborClouds to the database. Elements which would cause DuplicateEntryException or BadPayloadException (caused by missing
+   * operator, cloudName, address or serviceURI) are being skipped. The returned list only contains the elements which was saved in the process.
    *
    * @return List<NeighborCloud>
    */
@@ -209,8 +205,8 @@ public class ConfigurationApi {
   }
 
   /**
-   * Adds an instance of OwnCloud to the database. Deletes any other row in this table, before doing
-   * this save. Missing operator, cloudName or address causes BadPayloadException!
+   * Adds an instance of OwnCloud to the database. Deletes any other row in this table, before doing this save. Missing operator, cloudName or address
+   * causes BadPayloadException!
    *
    * @return OwnCloud
    */
@@ -220,8 +216,7 @@ public class ConfigurationApi {
 
     if (!ownCloud.isPayloadUsable()) {
       log.info("ConfigurationApi:addOwnCloud throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing operator, cloudName "
-                                        + "or address field! (ConfigurationApi:addOwnCloud)");
+      throw new BadPayloadException("Bad payload: missing operator, cloudName " + "or address field! (ConfigurationApi:addOwnCloud)");
     }
 
     List<OwnCloud> ownClouds = new ArrayList<>();
@@ -237,8 +232,7 @@ public class ConfigurationApi {
   }
 
   /**
-   * Updates an existing CoreSystem in the database. Returns 204 (no content) if the specified
-   * CoreSystem was not in the database.
+   * Updates an existing CoreSystem in the database. Returns 204 (no content) if the specified CoreSystem was not in the database.
    */
   @PUT
   @Path("/coresystems")
@@ -246,8 +240,7 @@ public class ConfigurationApi {
 
     if (!cs.isPayloadUsable()) {
       log.info("ConfigurationApi:updateCoreSystem throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing systemName, address or "
-                                        + "serviceURI in the entry payload.");
+      throw new BadPayloadException("Bad payload: missing systemName, address or " + "serviceURI in the entry payload.");
     }
 
     restrictionMap.put("systemName", cs.getSystemName());
@@ -267,8 +260,7 @@ public class ConfigurationApi {
   }
 
   /**
-   * Updates an existing NeighborCloud in the database. Returns 204 (no content) if the specified
-   * NeighborCloud was not in the database.
+   * Updates an existing NeighborCloud in the database. Returns 204 (no content) if the specified NeighborCloud was not in the database.
    */
   @PUT
   @Path("/neighborhood")
@@ -276,8 +268,7 @@ public class ConfigurationApi {
 
     if (!nc.isPayloadUsable()) {
       log.info("ConfigurationApi:updateNeighborCloud throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud"
-                                        + "in the entry payload.");
+      throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud" + "in the entry payload.");
     }
 
     restrictionMap.put("operator", nc.getCloud().getOperator());
@@ -302,8 +293,8 @@ public class ConfigurationApi {
   }
 
   /**
-   * Deletes the CoreSystem from the database specified by the system name. Returns 200 if the
-   * delete is succesful, 204 (no content) if the system was not in the database to begin with.
+   * Deletes the CoreSystem from the database specified by the system name. Returns 200 if the delete is succesful, 204 (no content) if the system was
+   * not in the database to begin with.
    */
   @DELETE
   @Path("/coresystems/{systemName}")
@@ -320,14 +311,12 @@ public class ConfigurationApi {
   }
 
   /**
-   * Deletes the NeighborCloud from the database specified by the operator and cloud name. Returns
-   * 200 if the delete is succesful, 204 (no content) if the system was not in the database to begin
-   * with.
+   * Deletes the NeighborCloud from the database specified by the operator and cloud name. Returns 200 if the delete is succesful, 204 (no content) if
+   * the system was not in the database to begin with.
    */
   @DELETE
   @Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")
-  public Response deleteNeighborCloud(@PathParam("operator") String operator,
-                                      @PathParam("cloudName") String cloudName) {
+  public Response deleteNeighborCloud(@PathParam("operator") String operator, @PathParam("cloudName") String cloudName) {
 
     restrictionMap.put("operator", operator);
     restrictionMap.put("cloudName", cloudName);

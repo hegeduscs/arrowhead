@@ -16,8 +16,7 @@ public class ProvidedService {
 
   }
 
-  public ProvidedService(ArrowheadSystem provider, ArrowheadService offered, String serviceURI,
-                         String serviceInterface) {
+  public ProvidedService(ArrowheadSystem provider, ArrowheadService offered, String serviceURI, String serviceInterface) {
     this.provider = provider;
     this.offered = offered;
     this.serviceURI = serviceURI;

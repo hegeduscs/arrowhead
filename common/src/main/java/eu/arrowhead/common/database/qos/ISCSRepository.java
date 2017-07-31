@@ -68,8 +68,7 @@ public interface ISCSRepository {
    * @param networkDevice network device
    * @return returns the network
    */
-  Network addNetworkDeviceToNetwork(Network network,
-                                    Network_Device networkDevice);
+  Network addNetworkDeviceToNetwork(Network network, Network_Device networkDevice);
 
   /**
    * get all nodes

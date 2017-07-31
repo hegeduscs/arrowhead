@@ -38,9 +38,8 @@ public interface DnsSDRegistrator {
   ServiceName makeServiceName(String name, ServiceType type);
 
   /**
-   * Convenience method for getting the fully qualified name of the local host. The host name is
-   * often used for passing to {@link ServiceData#setHost(String)}. This method seems to work better
-   * than using <code>InetAddress.getLocalHost().getCanonicalHostName()</code>
+   * Convenience method for getting the fully qualified name of the local host. The host name is often used for passing to {@link
+   * ServiceData#setHost(String)}. This method seems to work better than using <code>InetAddress.getLocalHost().getCanonicalHostName()</code>
    *
    * @return the fully qualified host name.
    * @throws UnknownHostException if the host name cannot be found.
@@ -62,19 +61,18 @@ public interface DnsSDRegistrator {
   void setTimeToLive(int ttl);
 
   /**
-   * Set the TSIG key used to authenticate updates sent to the DNS server. Passing null for all
-   * values to disable TSIG authentication.
+   * Set the TSIG key used to authenticate updates sent to the DNS server. Passing null for all values to disable TSIG authentication.
    *
    * @param name the name of the key.
-   * @param algorithm the signature algorithm, one of {@link #TSIG_ALGORITHM_HMAC_MD5}, {@link
-   * #TSIG_ALGORITHM_HMAC_SHA1}, {@link #TSIG_ALGORITHM_HMAC_SHA256}
+   * @param algorithm the signature algorithm, one of {@link #TSIG_ALGORITHM_HMAC_MD5}, {@link #TSIG_ALGORITHM_HMAC_SHA1}, {@link
+   * #TSIG_ALGORITHM_HMAC_SHA256}
    * @param key the base64 encoded key.
    */
   void setTSIGKey(String name, String algorithm, String key);
 
   /**
-   * Add a new service to DNS-SD. If the service name is already taken this method will not update
-   * the service data, but return false to indicate the collision.
+   * Add a new service to DNS-SD. If the service name is already taken this method will not update the service data, but return false to indicate the
+   * collision.
    *
    * @param serviceData the service to register.
    * @return true if the service was registered, false if the service name was already registered.

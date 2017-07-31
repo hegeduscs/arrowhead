@@ -15,13 +15,12 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * @author umlaufz This class maps the intra cloud authorization rights between Arrowhead Systems.
- * The table entry itself is the authorization right. The "arrowhead_service_id",
- * "consumer_system_id" and "provider_system_id" columns must be unique together.
+ * @author umlaufz This class maps the intra cloud authorization rights between Arrowhead Systems. The table entry itself is the authorization right.
+ * The "arrowhead_service_id", "consumer_system_id" and "provider_system_id" columns must be unique together.
  */
 @Entity
-@Table(name = "intra_cloud_authorization", uniqueConstraints = {@UniqueConstraint(columnNames =
-    {"consumer_system_id", "provider_system_id", "arrowhead_service_id"})})
+@Table(name = "intra_cloud_authorization", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"consumer_system_id", "provider_system_id", "arrowhead_service_id"})})
 public class IntraCloudAuthorization {
 
   @Column(name = "id")
@@ -44,8 +43,7 @@ public class IntraCloudAuthorization {
   public IntraCloudAuthorization() {
   }
 
-  public IntraCloudAuthorization(ArrowheadSystem consumer, ArrowheadSystem provider,
-                                 ArrowheadService service) {
+  public IntraCloudAuthorization(ArrowheadSystem consumer, ArrowheadSystem provider, ArrowheadService service) {
     this.consumer = consumer;
     this.provider = provider;
     this.service = service;

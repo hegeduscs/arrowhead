@@ -86,8 +86,7 @@ class BrowserApp extends JFrame {
       private static final long serialVersionUID = 1L;
 
       @Override
-      public Component getListCellRendererComponent(JList list, Object value, int index,
-                                                    boolean isSelected, boolean cellHasFocus) {
+      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         setText(((ServiceName) value).getName());
         return this;
@@ -110,83 +109,35 @@ class BrowserApp extends JFrame {
     JScrollPane propertiesScroll = new JScrollPane(propertiesTabel);
 
     layout.setAutoCreateContainerGaps(true);
-    layout.setHorizontalGroup(layout.createSequentialGroup()
-                                  .addGroup(layout.createParallelGroup()
-                                                .addComponent(computerDomainLabel)
-                                                .addComponent(computerDomainCombo)
-                                                .addComponent(browsingDomainLabel)
-                                                .addComponent(browsingDomainCombo)
-                                                .addComponent(serviceTypeLabel)
-                                                .addComponent(serviceTypeScroll)
-                                                .addComponent(subtypeLabel)
-                                                .addComponent(subtypeField))
-                                  .addPreferredGap(ComponentPlacement.UNRELATED)
-                                  .addGroup(layout.createParallelGroup()
-                                                .addComponent(serviceInstanceLabel)
-                                                .addComponent(serviceInstanceScroll))
-                                  .addPreferredGap(ComponentPlacement.UNRELATED)
-                                  .addGroup(layout.createParallelGroup()
-                                                .addComponent(nameLabel)
-                                                .addComponent(nameField)
-                                                .addGroup(layout.createSequentialGroup()
-                                                              .addGroup(layout.createParallelGroup()
-                                                                            .addComponent(hostLabel)
-                                                                            .addComponent(
-                                                                                hostField))
-                                                              .addPreferredGap(
-                                                                  ComponentPlacement.RELATED)
-                                                              .addGroup(layout.createParallelGroup()
-                                                                            .addComponent(portLabel)
-                                                                            .addComponent(
-                                                                                portField)))
-                                                .addComponent(propertiesLabel)
-                                                .addComponent(propertiesScroll)));
-    layout.setVerticalGroup(layout.createParallelGroup()
-                                .addGroup(layout.createSequentialGroup()
-                                              .addComponent(computerDomainLabel)
-                                              .addPreferredGap(ComponentPlacement.RELATED)
-                                              .addComponent(computerDomainCombo,
-                                                            GroupLayout.DEFAULT_SIZE,
-                                                            GroupLayout.DEFAULT_SIZE,
-                                                            GroupLayout.PREFERRED_SIZE)
-                                              .addPreferredGap(ComponentPlacement.UNRELATED)
-                                              .addComponent(browsingDomainLabel)
-                                              .addPreferredGap(ComponentPlacement.RELATED)
-                                              .addComponent(browsingDomainCombo,
-                                                            GroupLayout.DEFAULT_SIZE,
-                                                            GroupLayout.DEFAULT_SIZE,
-                                                            GroupLayout.PREFERRED_SIZE)
-                                              .addPreferredGap(ComponentPlacement.UNRELATED)
-                                              .addComponent(serviceTypeLabel)
-                                              .addPreferredGap(ComponentPlacement.RELATED)
-                                              .addComponent(serviceTypeScroll)
-                                              .addPreferredGap(ComponentPlacement.UNRELATED)
-                                              .addComponent(subtypeLabel)
-                                              .addPreferredGap(ComponentPlacement.RELATED)
-                                              .addComponent(subtypeField, GroupLayout.DEFAULT_SIZE,
-                                                            GroupLayout.DEFAULT_SIZE,
-                                                            GroupLayout.PREFERRED_SIZE))
-                                .addGroup(layout.createSequentialGroup()
-                                              .addComponent(serviceInstanceLabel)
-                                              .addPreferredGap(ComponentPlacement.RELATED)
-                                              .addComponent(serviceInstanceScroll))
-                                .addGroup(layout.createSequentialGroup()
-                                              .addComponent(nameLabel)
-                                              .addPreferredGap(ComponentPlacement.RELATED)
-                                              .addComponent(nameField, GroupLayout.DEFAULT_SIZE,
-                                                            GroupLayout.DEFAULT_SIZE,
-                                                            GroupLayout.PREFERRED_SIZE)
-                                              .addPreferredGap(ComponentPlacement.UNRELATED)
-                                              .addGroup(layout.createBaselineGroup(false, true)
-                                                            .addComponent(hostLabel)
-                                                            .addComponent(portLabel))
-                                              .addPreferredGap(ComponentPlacement.RELATED)
-                                              .addGroup(layout.createBaselineGroup(false, true)
-                                                            .addComponent(hostField)
-                                                            .addComponent(portField))
-                                              .addPreferredGap(ComponentPlacement.UNRELATED)
-                                              .addComponent(propertiesLabel)
-                                              .addComponent(propertiesScroll)));
+    layout.setHorizontalGroup(layout.createSequentialGroup().addGroup(
+        layout.createParallelGroup().addComponent(computerDomainLabel).addComponent(computerDomainCombo).addComponent(browsingDomainLabel)
+            .addComponent(browsingDomainCombo).addComponent(serviceTypeLabel).addComponent(serviceTypeScroll).addComponent(subtypeLabel)
+            .addComponent(subtypeField)).addPreferredGap(ComponentPlacement.UNRELATED)
+                                  .addGroup(layout.createParallelGroup().addComponent(serviceInstanceLabel).addComponent(serviceInstanceScroll))
+                                  .addPreferredGap(ComponentPlacement.UNRELATED).addGroup(
+            layout.createParallelGroup().addComponent(nameLabel).addComponent(nameField).addGroup(
+                layout.createSequentialGroup().addGroup(layout.createParallelGroup().addComponent(hostLabel).addComponent(hostField))
+                    .addPreferredGap(ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup().addComponent(portLabel).addComponent(portField))).addComponent(propertiesLabel)
+                .addComponent(propertiesScroll)));
+    layout.setVerticalGroup(layout.createParallelGroup().addGroup(
+        layout.createSequentialGroup().addComponent(computerDomainLabel).addPreferredGap(ComponentPlacement.RELATED)
+            .addComponent(computerDomainCombo, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(ComponentPlacement.UNRELATED).addComponent(browsingDomainLabel).addPreferredGap(ComponentPlacement.RELATED)
+            .addComponent(browsingDomainCombo, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(ComponentPlacement.UNRELATED).addComponent(serviceTypeLabel).addPreferredGap(ComponentPlacement.RELATED)
+            .addComponent(serviceTypeScroll).addPreferredGap(ComponentPlacement.UNRELATED).addComponent(subtypeLabel)
+            .addPreferredGap(ComponentPlacement.RELATED)
+            .addComponent(subtypeField, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addGroup(
+        layout.createSequentialGroup().addComponent(serviceInstanceLabel).addPreferredGap(ComponentPlacement.RELATED)
+            .addComponent(serviceInstanceScroll)).addGroup(
+        layout.createSequentialGroup().addComponent(nameLabel).addPreferredGap(ComponentPlacement.RELATED)
+            .addComponent(nameField, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(ComponentPlacement.UNRELATED)
+            .addGroup(layout.createBaselineGroup(false, true).addComponent(hostLabel).addComponent(portLabel))
+            .addPreferredGap(ComponentPlacement.RELATED)
+            .addGroup(layout.createBaselineGroup(false, true).addComponent(hostField).addComponent(portField))
+            .addPreferredGap(ComponentPlacement.UNRELATED).addComponent(propertiesLabel).addComponent(propertiesScroll)));
     pack();
   }
 
@@ -217,8 +168,7 @@ class BrowserApp extends JFrame {
 
       @Override
       protected void done() {
-        computerDomainCombo
-            .setModel(new DefaultComboBoxModel(domains.toArray(new String[domains.size()])));
+        computerDomainCombo.setModel(new DefaultComboBoxModel(domains.toArray(new String[domains.size()])));
         computerDomainCombo.setSelectedIndex(0);
       }
 
@@ -248,8 +198,7 @@ class BrowserApp extends JFrame {
 
       @Override
       protected void done() {
-        browsingDomainCombo
-            .setModel(new DefaultComboBoxModel(domains.toArray(new String[domains.size()])));
+        browsingDomainCombo.setModel(new DefaultComboBoxModel(domains.toArray(new String[domains.size()])));
         if (defDomain != null) {
           browsingDomainCombo.setSelectedItem(defDomain);
         } else if (!domains.isEmpty()) {

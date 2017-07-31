@@ -13,8 +13,7 @@ public class GSDAnswer {
   public GSDAnswer() {
   }
 
-  public GSDAnswer(ArrowheadService requestedService,
-                   ArrowheadCloud providerCloud) {
+  public GSDAnswer(ArrowheadService requestedService, ArrowheadCloud providerCloud) {
     this.requestedService = requestedService;
     this.providerCloud = providerCloud;
   }

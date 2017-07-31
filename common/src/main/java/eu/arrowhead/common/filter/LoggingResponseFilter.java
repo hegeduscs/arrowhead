@@ -13,11 +13,8 @@ public class LoggingResponseFilter implements ContainerResponseFilter {
   private static Logger log = Logger.getLogger("Outgoing");
 
   @Override
-  public void filter(ContainerRequestContext requestContext,
-                     ContainerResponseContext responseContext)
-      throws IOException {
-    log.debug("OUT." + responseContext.getStatus() + ": " + responseContext.getStatusInfo()
-        .getReasonPhrase());
+  public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    log.debug("OUT." + responseContext.getStatus() + ": " + responseContext.getStatusInfo().getReasonPhrase());
 
   }
 

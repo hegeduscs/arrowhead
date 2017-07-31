@@ -18,9 +18,7 @@ public class QoSParamExceptionMapper implements ExceptionMapper<QoSParamExceptio
   @Override
   public Response toResponse(QoSParamException ex) {
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
-    return Response.status(Response.Status.BAD_REQUEST)
-        .entity(errorMessage)
-        .build();
+    return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build();
   }
 
 }

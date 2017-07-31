@@ -111,8 +111,7 @@ public class ServiceRegistry {
     System.setProperty("dnssd.hostname", getProp().getProperty("dns.host"));
   }
 
-  public void register(String serviceGroup, String serviceName, String interf,
-                       ServiceRegistryEntry entry) {
+  public void register(String serviceGroup, String serviceName, String interf, ServiceRegistryEntry entry) {
     if (!parametersIsValid(serviceGroup, serviceName, interf)) {
       throw new InvalidParameterException("Invalid parameters in URL!");
     }
@@ -151,8 +150,7 @@ public class ServiceRegistry {
 
   }
 
-  public void unRegister(String serviceGroup, String serviceName, String interf,
-                         ServiceRegistryEntry entry) {
+  public void unRegister(String serviceGroup, String serviceName, String interf, ServiceRegistryEntry entry) {
     if (!parametersIsValid(serviceGroup, serviceName, interf)) {
       throw new InvalidParameterException("Invalid parameters in URL!");
     }
@@ -178,8 +176,7 @@ public class ServiceRegistry {
 
   }
 
-  public ServiceQueryResult provideServices(String serviceGroup, String serviceName,
-                                            ServiceQueryForm queryForm) {
+  public ServiceQueryResult provideServices(String serviceGroup, String serviceName, ServiceQueryForm queryForm) {
 
     if (queryForm.getServiceInterfaces() != null && !queryForm.getServiceInterfaces().isEmpty()) {
       try {
@@ -205,9 +202,7 @@ public class ServiceRegistry {
             ServiceData service = browser.getServiceData(instance);
             if (service != null) {
               for (String serviceInterface : queryForm.getServiceInterfaces()) {
-                ProvidedService providerService = buildProviderService(service, serviceGroup,
-                                                                       serviceName,
-                                                                       serviceInterface);
+                ProvidedService providerService = buildProviderService(service, serviceGroup, serviceName, serviceInterface);
                 if (providerService != null) {
                   Map<String, String> properties = service.getProperties();
 
@@ -215,44 +210,32 @@ public class ServiceRegistry {
 
                     boolean replied = true;
                     if (queryForm.isPingProviders()) {
-                      replied = pingService(needToRemoveInstances, instance, service, properties,
-                                            replied);
+                      replied = pingService(needToRemoveInstances, instance, service, properties, replied);
                     }
 
-                    if (replied && queryForm.getServiceMetadata() != null && queryForm
-                        .isMetadataSearch()) {
+                    if (replied && queryForm.getServiceMetadata() != null && queryForm.isMetadataSearch()) {
                       boolean found = false;
                       for (ServiceMetadata entry : queryForm.getServiceMetadata()) {
-                        String metaData = (entry != null) ? properties
-                            .get("ahsrvmetad_" + entry.getKey()) : null;
+                        String metaData = (entry != null) ? properties.get("ahsrvmetad_" + entry.getKey()) : null;
 
                         if (!found && metaData != null && metaData.equals(entry.getValue())) {
                           log.info(
                               "Service is found by interface and metadata and added to ServiceQueryResult, interface and name and metadata are : "
-                                  + providerService.getServiceInterface()
-                                  + ", "
-                                  + providerService.getProvider().getSystemName() + ", "
-                                  + metaData);
+                                  + providerService.getServiceInterface() + ", " + providerService.getProvider().getSystemName() + ", " + metaData);
                           list.add(providerService);
                           found = true;
                         }
                       }
-                    } else if (replied && queryForm.getServiceMetadata() != null
-                        && !queryForm.isMetadataSearch()) {
+                    } else if (replied && queryForm.getServiceMetadata() != null && !queryForm.isMetadataSearch()) {
                       log.info(
-                          "Service is found by interface and metadata and added to ServiceQueryResult, interface and name are : "
-                              + providerService.getServiceInterface()
-                              + ", "
-                              + providerService.getProvider().getSystemName());
+                          "Service is found by interface and metadata and added to ServiceQueryResult, interface and name are : " + providerService
+                              .getServiceInterface() + ", " + providerService.getProvider().getSystemName());
                       list.add(providerService);
                     }
 
                   } else {
-                    log.info(
-                        "Service is found by interface and added to ServiceQueryResult, interface and name are : "
-                            + providerService.getServiceInterface()
-                            + ", "
-                            + providerService.getProvider().getSystemName());
+                    log.info("Service is found by interface and added to ServiceQueryResult, interface and name are : " + providerService
+                        .getServiceInterface() + ", " + providerService.getProvider().getSystemName());
                     list.add(providerService);
                   }
                 }
@@ -322,8 +305,7 @@ public class ServiceRegistry {
                 interfaceType = array[3];
               }
             }
-            providerService = createProvidedService(service, interfaceType, serviceGroup,
-                                                    serviceName);
+            providerService = createProvidedService(service, interfaceType, serviceGroup, serviceName);
 
             if (providerService != null) {
               list.add(providerService);
@@ -437,9 +419,7 @@ public class ServiceRegistry {
     return providerService;
   }
 
-  private ProvidedService createProvidedService(ServiceData service, String interfaceType,
-                                                String serviceGroup,
-                                                String serviceName) {
+  private ProvidedService createProvidedService(ServiceData service, String interfaceType, String serviceGroup, String serviceName) {
     try {
 
       ProvidedService providerService = new ProvidedService();
@@ -471,8 +451,7 @@ public class ServiceRegistry {
 
       List<ServiceMetadata> metaData = null;
       for (Map.Entry<String, String> entry : properties.entrySet()) {
-        if (entry.getKey() != null && entry.getValue() != null && entry.getKey()
-            .contains("ahsrvmetad_")) {
+        if (entry.getKey() != null && entry.getValue() != null && entry.getKey().contains("ahsrvmetad_")) {
           if (metaData == null) {
             metaData = new ArrayList<>();
           }
@@ -496,8 +475,7 @@ public class ServiceRegistry {
 
   }
 
-  private boolean pingService(Collection<ServiceName> needToRemoveInstances, ServiceName instance,
-                              ServiceData service,
+  private boolean pingService(Collection<ServiceName> needToRemoveInstances, ServiceName instance, ServiceData service,
                               Map<String, String> properties, boolean replied) {
     String path = properties.get("path");
     String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
@@ -505,8 +483,7 @@ public class ServiceRegistry {
     int port = new Integer(service.getPort()).intValue();
     String host = removeLastChar(service.getHost(), '.');
     if (!pingHost(host, port, timeout)) {
-      log.info("Can't access the service in the following URL" + targetUrl + ", in " + timeout
-                   + "millisec");
+      log.info("Can't access the service in the following URL" + targetUrl + ", in " + timeout + "millisec");
       needToRemoveInstances.add(instance);
       replied = false;
     }
@@ -526,13 +503,10 @@ public class ServiceRegistry {
     }
   }
 
-  private ProvidedService buildProviderService(ServiceData service, String serviceGroup,
-                                               String serviceName,
-                                               String serviceInterface) {
+  private ProvidedService buildProviderService(ServiceData service, String serviceGroup, String serviceName, String serviceInterface) {
     ProvidedService providerService = null;
 
-    if (serviceInterface != null && !serviceInterface.isEmpty() && serviceGroup != null
-        && serviceName != null) {
+    if (serviceInterface != null && !serviceInterface.isEmpty() && serviceGroup != null && serviceName != null) {
       String interfaceType = null;
       String serviceGroupDns = null;
       String serviceNameDns = null;
@@ -549,9 +523,8 @@ public class ServiceRegistry {
         }
       }
 
-      if (interfaceType != null && interfaceType.equals(serviceInterface) && serviceGroupDns != null
-          && serviceGroupDns.equals(serviceGroup) && serviceNameDns != null && serviceNameDns
-          .equals(serviceName)) {
+      if (interfaceType != null && interfaceType.equals(serviceInterface) && serviceGroupDns != null && serviceGroupDns.equals(serviceGroup)
+          && serviceNameDns != null && serviceNameDns.equals(serviceName)) {
         providerService = createProvidedService(service, interfaceType, serviceGroup, serviceName);
       }
     }
@@ -565,15 +538,13 @@ public class ServiceRegistry {
     int dnsPort = new Integer(getProp().getProperty("dns.port", "53"));
 
     InetSocketAddress dnsserverAddress = new InetSocketAddress(dnsIpAddress, dnsPort);
-    DnsSDRegistrator reg = DnsSDFactory.getInstance()
-        .createRegistrator(dnsDomain, dnsserverAddress);
+    DnsSDRegistrator reg = DnsSDFactory.getInstance().createRegistrator(dnsDomain, dnsserverAddress);
     return reg;
   }
 
   private void setTSIGKey(DnsSDRegistrator reg, String tsigKey) {
     String tsigKeyName = getProp().getProperty("tsig.name", "key.evoin.arrowhead.eu.");
-    String tsigAlgorithm = getProp()
-        .getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
+    String tsigAlgorithm = getProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
     reg.setTSIGKey(tsigKeyName, tsigAlgorithm, tsigKey);
   }
 
@@ -590,8 +561,8 @@ public class ServiceRegistry {
 
   private boolean parametersIsValid(String serviceGroup, String serviceName, String interf) {
     boolean result = true;
-    if (serviceGroup == null || serviceName == null || interf == null || serviceGroup.contains("_")
-        || serviceName.contains("_") || interf.contains("_")) {
+    if (serviceGroup == null || serviceName == null || interf == null || serviceGroup.contains("_") || serviceName.contains("_") || interf
+        .contains("_")) {
       result = false;
     }
     return result;

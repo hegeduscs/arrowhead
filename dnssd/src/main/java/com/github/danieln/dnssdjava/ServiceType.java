@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Identifiers for service types. A DNS-SD service type consists of the application protocol name
- * prepended with an underscore and the transport protocol (TCP or UDP).
+ * Identifiers for service types. A DNS-SD service type consists of the application protocol name prepended with an underscore and the transport
+ * protocol (TCP or UDP).
  *
  * @author Daniel Nilsson
  */
@@ -57,8 +57,8 @@ public class ServiceType {
   }
 
   /**
-   * Returns a ServiceType object representing the type specified in the String. The argument is
-   * expected to be in the format returned by {@link #toString()}.
+   * Returns a ServiceType object representing the type specified in the String. The argument is expected to be in the format returned by {@link
+   * #toString()}.
    *
    * @param s the string to be parsed.
    * @return a ServiceType representing the type specified by the argument.
@@ -88,10 +88,9 @@ public class ServiceType {
   }
 
   /**
-   * Create a subtype variant of this ServiceType. Any existing subtypes in this ServiceType is not
-   * passed on to the new ServiceType. A subtype of a ServiceType only provides additional filtering
-   * when browsing, it is still the same service type. In particular the subtype variant still
-   * {@link #equals(Object)} the base ServiceType and has the same {@link #hashCode()}.
+   * Create a subtype variant of this ServiceType. Any existing subtypes in this ServiceType is not passed on to the new ServiceType. A subtype of a
+   * ServiceType only provides additional filtering when browsing, it is still the same service type. In particular the subtype variant still {@link
+   * #equals(Object)} the base ServiceType and has the same {@link #hashCode()}.
    *
    * @param subtype the subtype.
    * @return a new ServiceType based on this ServiceType but with the given subtype.
@@ -101,11 +100,9 @@ public class ServiceType {
   }
 
   /**
-   * Create a variant of this ServiceType with multiple subtypes. Any existing subtypes in this
-   * ServiceType is not passed on to the new ServiceType. A subtype of a ServiceType only provides
-   * additional filtering when browsing, it is still the same service type. In particular the
-   * subtype variant still {@link #equals(Object)} the base ServiceType and has the same {@link
-   * #hashCode()}.
+   * Create a variant of this ServiceType with multiple subtypes. Any existing subtypes in this ServiceType is not passed on to the new ServiceType. A
+   * subtype of a ServiceType only provides additional filtering when browsing, it is still the same service type. In particular the subtype variant
+   * still {@link #equals(Object)} the base ServiceType and has the same {@link #hashCode()}.
    *
    * @param subtypes the subtypes.
    * @return a new ServiceType based on this ServiceType but with the given subtypes.
@@ -115,9 +112,8 @@ public class ServiceType {
   }
 
   /**
-   * Returns a ServiceType representing the base type of this ServiceType. If there are no subtypes
-   * then this ServiceType is returned else a new ServiceType is returned based on this but without
-   * the subtypes.
+   * Returns a ServiceType representing the base type of this ServiceType. If there are no subtypes then this ServiceType is returned else a new
+   * ServiceType is returned based on this but without the subtypes.
    *
    * @return the base ServiceType without subtypes.
    */
@@ -172,8 +168,7 @@ public class ServiceType {
   }
 
   /**
-   * Get the DNS-SD subdomain that represents this type (excluding any subtypes). For internal use
-   * only.
+   * Get the DNS-SD subdomain that represents this type (excluding any subtypes). For internal use only.
    *
    * @return A string of the form "{type}.{transport}".
    */
@@ -182,8 +177,7 @@ public class ServiceType {
   }
 
   /**
-   * Get the DNS-SD subdomains that represent this type, one for each subtype. For internal use
-   * only.
+   * Get the DNS-SD subdomains that represent this type, one for each subtype. For internal use only.
    *
    * @return A list of strings of the form "{subtype}._sub.{type}.{transport}".
    */
@@ -222,8 +216,7 @@ public class ServiceType {
    * The transport protocol.
    */
   public enum Transport {
-    TCP("_tcp"),
-    UDP("_udp");
+    TCP("_tcp"), UDP("_udp");
 
     private final String label;
 

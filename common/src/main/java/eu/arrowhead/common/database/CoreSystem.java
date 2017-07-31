@@ -12,8 +12,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * @author umlaufz
  *
- * Entity class for storing Core System informations in the database. The "system_name" column must
- * be unique.
+ * Entity class for storing Core System informations in the database. The "system_name" column must be unique.
  */
 @Entity
 @Table(name = "core_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_name"})})
@@ -46,8 +45,7 @@ public class CoreSystem {
   public CoreSystem() {
   }
 
-  public CoreSystem(String systemName, String address, String port,
-                    String serviceURI, String authenticationInfo, boolean isSecure) {
+  public CoreSystem(String systemName, String address, String port, String serviceURI, String authenticationInfo, boolean isSecure) {
     this.systemName = systemName;
     this.address = address;
     this.port = port;

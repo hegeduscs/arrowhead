@@ -47,8 +47,7 @@ public class SCSFactory {
     return instance;
   }
 
-  private static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
-      eu.arrowhead.common.model.ArrowheadSystem in) {
+  private static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(eu.arrowhead.common.model.ArrowheadSystem in) {
 
     eu.arrowhead.common.database.qos.ArrowheadSystem_qos out = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
 
@@ -61,8 +60,7 @@ public class SCSFactory {
     return out;
   }
 
-  private static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
-      eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
+  private static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
 
     eu.arrowhead.common.model.ArrowheadSystem out = new eu.arrowhead.common.model.ArrowheadSystem();
 
@@ -75,8 +73,7 @@ public class SCSFactory {
     return out;
   }
 
-  private static List<ArrowheadSystem> convertToDTO_List(
-      List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
+  private static List<ArrowheadSystem> convertToDTO_List(List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
     if (in == null) {
       return null;
     }
@@ -88,8 +85,7 @@ public class SCSFactory {
     return out;
   }
 
-  protected static List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> convertFromDTO_List(
-      List<ArrowheadSystem> in) {
+  protected static List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> convertFromDTO_List(List<ArrowheadSystem> in) {
     if (in == null) {
       return null;
     }
@@ -101,8 +97,7 @@ public class SCSFactory {
     return out;
   }
 
-  protected static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(
-      eu.arrowhead.common.model.ArrowheadService in) {
+  protected static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(eu.arrowhead.common.model.ArrowheadService in) {
 
     eu.arrowhead.common.database.qos.ArrowheadService_qos out = new eu.arrowhead.common.database.qos.ArrowheadService_qos();
 
@@ -113,8 +108,7 @@ public class SCSFactory {
     return out;
   }
 
-  private static eu.arrowhead.common.model.ArrowheadService convertToDTO(
-      eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
+  private static eu.arrowhead.common.model.ArrowheadService convertToDTO(eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
 
     eu.arrowhead.common.model.ArrowheadService out = new eu.arrowhead.common.model.ArrowheadService();
 
@@ -125,8 +119,7 @@ public class SCSFactory {
     return out;
   }
 
-  protected static List<ArrowheadService> convertToDTO_ArrowheadServices(
-      List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
+  protected static List<ArrowheadService> convertToDTO_ArrowheadServices(List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
 
     if (in == null) {
       return null;
@@ -214,8 +207,7 @@ public class SCSFactory {
    * @param networkDevice NetworkDevice.
    * @return Returns the network from where the network device was added.
    */
-  public Network addNetworkDeviceToNetwork(Network network,
-                                           Network_Device networkDevice) {
+  public Network addNetworkDeviceToNetwork(Network network, Network_Device networkDevice) {
     return repo.addNetworkDeviceToNetwork(network, networkDevice);
   }
 
@@ -287,11 +279,9 @@ public class SCSFactory {
   }
 
   /**
-   * ********************************************** ************* Converts From/To DTO ************
-   * ***********************************************
+   * ********************************************** ************* Converts From/To DTO ************ ***********************************************
    */
-  private eu.arrowhead.common.database.qos.ArrowheadSystem_qos converFromDTO(
-      ArrowheadSystem system) {
+  private eu.arrowhead.common.database.qos.ArrowheadSystem_qos converFromDTO(ArrowheadSystem system) {
     if (system == null) {
       return null;
     }

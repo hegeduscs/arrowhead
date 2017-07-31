@@ -15,8 +15,8 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
 /**
- * @author Paulo Barbosa Database Acces Object with CRUD methods on the authorization tables of the
- * database. (These tables are found in the *.qos.database package.)
+ * @author Paulo Barbosa Database Acces Object with CRUD methods on the authorization tables of the database. (These tables are found in the
+ * *.qos.database package.)
  */
 public class QoSRepositoryImpl implements IQoSRepository {
 
@@ -42,8 +42,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
       if (transaction != null) {
         transaction.rollback();
       }
-      throw new DuplicateEntryException(
-          "There is already an entry in the " + "authorization database with these parameters.");
+      throw new DuplicateEntryException("There is already an entry in the " + "authorization database with these parameters.");
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -109,8 +108,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
   }
 
   @SuppressWarnings("unchecked")
-  private <T> List<T> getAll(Class<T> queryClass,
-                             Map<String, Object> restrictionMap) {
+  private <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
     List<T> retrievedList = new ArrayList<>();
 
     Session session = getSessionFactory().openSession();
@@ -152,8 +150,8 @@ public class QoSRepositoryImpl implements IQoSRepository {
         transaction.rollback();
       }
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. "
-              + "Please check the unique fields of the " + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
+              + object.getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -179,8 +177,8 @@ public class QoSRepositoryImpl implements IQoSRepository {
         transaction.rollback();
       }
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. "
-              + "Please check the unique fields of the " + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
+              + object.getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -206,8 +204,8 @@ public class QoSRepositoryImpl implements IQoSRepository {
         transaction.rollback();
       }
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. "
-              + "Please check the unique fields of the " + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
+              + object.getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -233,8 +231,8 @@ public class QoSRepositoryImpl implements IQoSRepository {
         transaction.rollback();
       }
       throw new DuplicateEntryException(
-          "ConstraintViolationException: there is a reference to this object in another table, "
-              + "which prevents the delete operation. (" + object.getClass() + ")");
+          "ConstraintViolationException: there is a reference to this object in another table, " + "which prevents the delete operation. (" + object
+              .getClass() + ")");
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -256,8 +254,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
   }
 
   @Override
-  public List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(
-      ArrowheadSystem_qos system) {
+  public List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(ArrowheadSystem_qos system) {
     List<Message_Stream> list = getAllMessage_Streams();
     List<QoS_Resource_Reservation> output = new ArrayList<>();
     for (Message_Stream mS : list) {
@@ -354,8 +351,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
   }
 
   @Override
-  public List<Message_Stream> getQoS_Resource_ReservationsFromFilter(
-      Map<String, String> filter) {
+  public List<Message_Stream> getQoS_Resource_ReservationsFromFilter(Map<String, String> filter) {
     List<Message_Stream> output = new ArrayList<>();
     List<Message_Stream> list = getAllMessage_Streams();
     if (filter == null || filter.isEmpty()) {

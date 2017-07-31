@@ -22,11 +22,9 @@ public class AccessControlFilter implements ContainerRequestFilter {
   @Context
   Configuration configuration;
   @Inject
-  private
-  javax.inject.Provider<UriInfo> uriInfo;
+  private javax.inject.Provider<UriInfo> uriInfo;
 
-  private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration,
-                                            boolean onlyFromOrchestrator) {
+  private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration, boolean onlyFromOrchestrator) {
     String subjectname = sc.getUserPrincipal().getName();
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
     String serverCN = (String) configuration.getProperty("server_common_name");

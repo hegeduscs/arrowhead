@@ -13,8 +13,7 @@ public class QoSReservationResponse {
     // TODO Auto-generated constructor stub
   }
 
-  public QoSReservationResponse(boolean response,
-                                QoSReservationCommand command) {
+  public QoSReservationResponse(boolean response, QoSReservationCommand command) {
     super();
     this.response = response;
     this.command = command;

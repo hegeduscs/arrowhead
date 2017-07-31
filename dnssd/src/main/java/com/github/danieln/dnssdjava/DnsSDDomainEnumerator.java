@@ -8,8 +8,7 @@ package com.github.danieln.dnssdjava;
 import java.util.Collection;
 
 /**
- * A DnsSDDomainEnumerator object provides methods for finding out which domains to use for
- * registering and browsing for services.
+ * A DnsSDDomainEnumerator object provides methods for finding out which domains to use for registering and browsing for services.
  *
  * @author Daniel Nilsson
  */

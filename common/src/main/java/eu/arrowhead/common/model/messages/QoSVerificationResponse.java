@@ -17,8 +17,7 @@ public class QoSVerificationResponse {
     super();
   }
 
-  public QoSVerificationResponse(Map<ArrowheadSystem, Boolean> response,
-                                 Map<ArrowheadSystem, RejectMotivationTypes> rejectMotivation) {
+  public QoSVerificationResponse(Map<ArrowheadSystem, Boolean> response, Map<ArrowheadSystem, RejectMotivationTypes> rejectMotivation) {
     super();
     this.response = response;
     this.rejectMotivation = rejectMotivation;
@@ -36,8 +35,7 @@ public class QoSVerificationResponse {
     return rejectMotivation;
   }
 
-  public void setRejectMotivation(
-      Map<ArrowheadSystem, QoSVerifierResponse.RejectMotivationTypes> rejectMotivation) {
+  public void setRejectMotivation(Map<ArrowheadSystem, QoSVerifierResponse.RejectMotivationTypes> rejectMotivation) {
     this.rejectMotivation = rejectMotivation;
   }
 
@@ -45,8 +43,7 @@ public class QoSVerificationResponse {
     response.put(system, resp);
   }
 
-  public void addRejectMotivation(ArrowheadSystem system,
-                                  QoSVerifierResponse.RejectMotivationTypes rejectType) {
+  public void addRejectMotivation(ArrowheadSystem system, QoSVerifierResponse.RejectMotivationTypes rejectType) {
     rejectMotivation.put(system, rejectType);
   }
 

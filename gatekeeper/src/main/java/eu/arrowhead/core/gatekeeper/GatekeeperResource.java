@@ -49,13 +49,12 @@ public class GatekeeperResource {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "This is the Gatekeeper Resource. "
-        + "REST methods: init_gsd, gsd_poll, init_icn, icn_proposal.";
+    return "This is the Gatekeeper Resource. " + "REST methods: init_gsd, gsd_poll, init_icn, icn_proposal.";
   }
 
   /**
-   * This function represents the consumer-side of GlobalServiceDiscovery, where the GateKeeper of
-   * the consumer System tries to find a provider Cloud for the requested Service.
+   * This function represents the consumer-side of GlobalServiceDiscovery, where the GateKeeper of the consumer System tries to find a provider Cloud
+   * for the requested Service.
    *
    * @return GSDResult
    */
@@ -66,8 +65,8 @@ public class GatekeeperResource {
 
     if (!requestForm.isPayloadUsable()) {
       log.info("Payload is not usable. (GatekeeperResource:GSDRequest BadPayloadException)");
-      throw new BadPayloadException("Bad payload: missing/incomplete requestedService."
-                                        + "Mandatory fields: serviceGroup, serviceDefinition, interfaces.");
+      throw new BadPayloadException(
+          "Bad payload: missing/incomplete requestedService." + "Mandatory fields: serviceGroup, serviceDefinition, interfaces.");
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
@@ -91,8 +90,7 @@ public class GatekeeperResource {
       String URI = null;
       for (ArrowheadCloud cloud : preferredClouds) {
         try {
-          URI = Utility
-              .getURI(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
+          URI = Utility.getURI(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
         }
         // We skip the clouds with missing information
         catch (NullPointerException ex) {
@@ -118,8 +116,7 @@ public class GatekeeperResource {
       log.info("Sent GSD Poll request to: " + URI);
       GSDAnswer gsdAnswer = response.readEntity(GSDAnswer.class);
       if (gsdAnswer != null) {
-        log.info("A Cloud " + gsdAnswer.getProviderCloud().toString()
-                     + " responded to GSD Poll positively");
+        log.info("A Cloud " + gsdAnswer.getProviderCloud().toString() + " responded to GSD Poll positively");
         gsdAnswerList.add(gsdAnswer);
       }
     }
@@ -130,17 +127,15 @@ public class GatekeeperResource {
   }
 
   /**
-   * This function represents the provider-side of GlobalServiceDiscovery, where the GateKeeper of
-   * the provider Cloud sends back its information if the Authorization and Service Registry polling
-   * yields positive results.
+   * This function represents the provider-side of GlobalServiceDiscovery, where the GateKeeper of the provider Cloud sends back its information if
+   * the Authorization and Service Registry polling yields positive results.
    *
    * @return GSDAnswer
    */
   @PUT
   @Path("gsd_poll")
   public Response GSDPoll(GSDPoll gsdPoll) {
-    log.info("Entered the GSDPoll method. Gatekeeper received a GSD poll from: "
-                 + gsdPoll.getRequesterCloud().toString());
+    log.info("Entered the GSDPoll method. Gatekeeper received a GSD poll from: " + gsdPoll.getRequesterCloud().toString());
 
     // Polling the Authorization System about the consumer Cloud
     ArrowheadCloud cloud = gsdPoll.getRequesterCloud();
@@ -149,8 +144,7 @@ public class GatekeeperResource {
     String authURI = Utility.getAuthorizationURI();
     authURI = UriBuilder.fromPath(authURI).path("intercloud").toString();
     Response authResponse = Utility.sendRequest(authURI, "PUT", authRequest);
-    log.info("Authorization System queried for requester Cloud: " + gsdPoll.getRequesterCloud()
-        .toString());
+    log.info("Authorization System queried for requester Cloud: " + gsdPoll.getRequesterCloud().toString());
 
     // If the consumer Cloud is not authorized null is returned
     if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
@@ -165,13 +159,9 @@ public class GatekeeperResource {
 
       // Compiling the URI and the request payload
       String srURI = Utility.getServiceRegistryURI();
-      srURI = UriBuilder.fromPath(srURI).path(service.getServiceGroup())
-          .path(service.getServiceDefinition())
-          .toString();
+      srURI = UriBuilder.fromPath(srURI).path(service.getServiceGroup()).path(service.getServiceDefinition()).toString();
       String tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
-      ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(),
-                                                        service.getInterfaces(),
-                                                        false, false, tsig_key);
+      ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(), false, false, tsig_key);
 
       // Sending back provider Cloud information if the SR poll has
       // results
@@ -190,8 +180,8 @@ public class GatekeeperResource {
   }
 
   /**
-   * This function represents the consumer-side of InterCloudNegotiations, where the Gatekeeper
-   * sends information about the requester System. (SSL secured)
+   * This function represents the consumer-side of InterCloudNegotiations, where the Gatekeeper sends information about the requester System. (SSL
+   * secured)
    *
    * @return ICNResult
    */
@@ -207,15 +197,11 @@ public class GatekeeperResource {
 
     // Compiling the payload and then getting the URI
     log.info("Compiling ICN proposal");
-    ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(),
-                                              requestForm.getAuthenticationInfo(),
-                                              Utility.getOwnCloud(),
-                                              requestForm.getRequesterSystem(),
-                                              requestForm.getPreferredProviders(),
+    ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), requestForm.getAuthenticationInfo(), Utility.getOwnCloud(),
+                                              requestForm.getRequesterSystem(), requestForm.getPreferredProviders(),
                                               requestForm.getNegotiationFlags());
 
-    String icnURI = Utility.getURI(requestForm.getTargetCloud().getAddress(),
-                                   requestForm.getTargetCloud().getPort(),
+    String icnURI = Utility.getURI(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
                                    requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
 
@@ -229,16 +215,15 @@ public class GatekeeperResource {
   }
 
   /**
-   * This function represents the provider-side of InterCloudNegotiations, where the Gatekeeper
-   * (after an Orchestration process) sends information about the provider System. (SSL secured)
+   * This function represents the provider-side of InterCloudNegotiations, where the Gatekeeper (after an Orchestration process) sends information
+   * about the provider System. (SSL secured)
    *
    * @return ICNEnd
    */
   @PUT
   @Path("icn_proposal")
   public Response ICNProposal(ICNProposal icnProposal) {
-    log.info("Entered the ICNProposal method. Gatekeeper received an ICN proposal from: "
-                 + icnProposal.getRequesterCloud().toString());
+    log.info("Entered the ICNProposal method. Gatekeeper received an ICN proposal from: " + icnProposal.getRequesterCloud().toString());
 
     // Polling the Authorization System about the consumer Cloud
     ArrowheadCloud cloud = icnProposal.getRequesterCloud();
@@ -267,19 +252,15 @@ public class GatekeeperResource {
       orchestrationFlags.put("triggerInterCloud", false);
       orchestrationFlags.put("externalServiceRequest", true);
       orchestrationFlags.put("enableInterCloud", false);
-      orchestrationFlags
-          .put("metadataSearch", icnProposal.getNegotiationFlags().get("metadataSearch"));
-      orchestrationFlags
-          .put("pingProviders", icnProposal.getNegotiationFlags().get("pingProviders"));
+      orchestrationFlags.put("metadataSearch", icnProposal.getNegotiationFlags().get("metadataSearch"));
+      orchestrationFlags.put("pingProviders", icnProposal.getNegotiationFlags().get("pingProviders"));
       orchestrationFlags.put("overrideStore", false);
       orchestrationFlags.put("storeOnlyActive", false);
       orchestrationFlags.put("matchmaking", false);
-      orchestrationFlags
-          .put("onlyPreferred", icnProposal.getNegotiationFlags().get("onlyPreferred"));
+      orchestrationFlags.put("onlyPreferred", icnProposal.getNegotiationFlags().get("onlyPreferred"));
 
-      ServiceRequestForm serviceRequestForm = new ServiceRequestForm(
-          icnProposal.getRequesterSystem(), icnProposal.getRequesterCloud(),
-          service, orchestrationFlags, icnProposal.getPreferredProviders(), null, null, null);
+      ServiceRequestForm serviceRequestForm = new ServiceRequestForm(icnProposal.getRequesterSystem(), icnProposal.getRequesterCloud(), service,
+                                                                     orchestrationFlags, icnProposal.getPreferredProviders(), null, null, null);
       String orchestratorURI = Utility.getOrchestratorURI();
       orchestratorURI = UriBuilder.fromPath(orchestratorURI).path("orchestration").toString();
 

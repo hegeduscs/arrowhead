@@ -23,8 +23,7 @@ import org.hibernate.annotations.LazyCollectionOption;
  * @author Paulo
  */
 @Entity
-@Table(name = "network", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"network_name"})})
+@Table(name = "network", uniqueConstraints = {@UniqueConstraint(columnNames = {"network_name"})})
 @XmlRootElement
 public class Network {
 
@@ -50,8 +49,7 @@ public class Network {
   Network() {
   }
 
-  public Network(String name, String networkIP, String networkType,
-                 Map<String, String> networkConfigurations) {
+  public Network(String name, String networkIP, String networkType, Map<String, String> networkConfigurations) {
     this.name = name;
     this.networkIP = networkIP;
     this.networkType = networkType;
@@ -126,8 +124,7 @@ public class Network {
    *
    * @param networkConfigurations map with the network configurations
    */
-  public void setNetworkConfigurations(
-      Map<String, String> networkConfigurations) {
+  public void setNetworkConfigurations(Map<String, String> networkConfigurations) {
     this.networkConfigurations = networkConfigurations;
   }
 

@@ -12,9 +12,7 @@ public class DuplicateEntryExceptionMapper implements ExceptionMapper<DuplicateE
   public Response toResponse(DuplicateEntryException ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
-    return Response.status(Status.BAD_REQUEST)
-        .entity(errorMessage)
-        .build();
+    return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
   }
 
 }

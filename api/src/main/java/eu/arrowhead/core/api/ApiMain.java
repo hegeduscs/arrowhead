@@ -25,10 +25,8 @@ class ApiMain {
   private static HttpServer secureServer = null;
   private static Logger log = Logger.getLogger(ApiMain.class.getName());
   private static Properties prop;
-  private static final String BASE_URI = getProp()
-      .getProperty("base_uri", "http://0.0.0.0:8450/api/");
-  private static final String BASE_URI_SECURED = getProp()
-      .getProperty("base_uri_secured", "https://0.0.0.0:8451/api/");
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8450/api/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8451/api/");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -106,10 +104,7 @@ class ApiMain {
     URI uri = UriBuilder.fromUri(BASE_URI).build();
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AuthorizationApi.class,
-                           CommonApi.class,
-                           ConfigurationApi.class,
-                           OrchestratorApi.class);
+    config.registerClasses(AuthorizationApi.class, CommonApi.class, ConfigurationApi.class, OrchestratorApi.class);
     config.packages("eu.arrowhead.common");
 
     final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
@@ -124,10 +119,7 @@ class ApiMain {
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AuthorizationApi.class,
-                           CommonApi.class,
-                           ConfigurationApi.class,
-                           OrchestratorApi.class);
+    config.registerClasses(AuthorizationApi.class, CommonApi.class, ConfigurationApi.class, OrchestratorApi.class);
     config.packages("eu.arrowhead.common");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
@@ -156,8 +148,7 @@ class ApiMain {
     config.property("server_common_name", serverCN);
 
     final HttpServer server = GrizzlyHttpServerFactory.
-        createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
-            .setClientMode(false).setNeedClientAuth(true));
+        createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;

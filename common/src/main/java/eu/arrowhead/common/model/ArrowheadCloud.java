@@ -12,12 +12,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * Entity class for storing Arrowhead Clouds in the database. The "operator" and "cloud_name"
- * columns must be unique together.
+ * Entity class for storing Arrowhead Clouds in the database. The "operator" and "cloud_name" columns must be unique together.
  */
 @Entity
-@Table(name = "arrowhead_cloud", uniqueConstraints = {@UniqueConstraint(
-    columnNames = {"operator", "cloud_name"})})
+@Table(name = "arrowhead_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
 @XmlRootElement
 public class ArrowheadCloud {
 
@@ -48,8 +46,7 @@ public class ArrowheadCloud {
   public ArrowheadCloud() {
   }
 
-  public ArrowheadCloud(String operator, String cloudName, String address, String port,
-                        String gatekeeperServiceURI, String authenticationInfo) {
+  public ArrowheadCloud(String operator, String cloudName, String address, String port, String gatekeeperServiceURI, String authenticationInfo) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;
@@ -138,8 +135,7 @@ public class ArrowheadCloud {
     int result = 1;
     result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((cloudName == null) ? 0 : cloudName.hashCode());
-    result =
-        prime * result + ((gatekeeperServiceURI == null) ? 0 : gatekeeperServiceURI.hashCode());
+    result = prime * result + ((gatekeeperServiceURI == null) ? 0 : gatekeeperServiceURI.hashCode());
     result = prime * result + ((operator == null) ? 0 : operator.hashCode());
     result = prime * result + ((port == null) ? 0 : port.hashCode());
     return result;

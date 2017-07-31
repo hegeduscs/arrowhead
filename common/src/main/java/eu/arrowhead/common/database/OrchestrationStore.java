@@ -22,13 +22,12 @@ import org.hibernate.annotations.Type;
 /**
  * @author umlaufz
  *
- * Entity class for storing Orchestration Store entries in the database. The name column must be
- * unique.
+ * Entity class for storing Orchestration Store entries in the database. The name column must be unique.
  */
 @Entity
-@Table(name = "orchestration_store", uniqueConstraints = {@UniqueConstraint(
-    columnNames = {"consumer_system_id", "arrowhead_service_id", "provider_system_id",
-        "provider_cloud_id", "priority", "is_active"})})
+@Table(name = "orchestration_store", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"consumer_system_id", "arrowhead_service_id", "provider_system_id", "provider_cloud_id", "priority",
+        "is_active"})})
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @Column(name = "id")
@@ -79,8 +78,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   public OrchestrationStore() {
   }
 
-  public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service,
-                            ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
+  public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
                             Integer priority) {
     this.consumer = consumer;
     this.service = service;
@@ -89,11 +87,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.priority = priority;
   }
 
-  public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service,
-                            ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            Integer priority,
-                            boolean isActive, String name, Date lastUpdated,
-                            String orchestrationRule) {
+  public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
+                            Integer priority, boolean isActive, String name, Date lastUpdated, String orchestrationRule) {
     this.consumer = consumer;
     this.service = service;
     this.providerSystem = providerSystem;

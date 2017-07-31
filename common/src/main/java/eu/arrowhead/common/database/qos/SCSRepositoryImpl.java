@@ -40,8 +40,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     Map<String, String> capabilities = new HashMap<>();
     ArrowheadSystem_qos sC = new ArrowheadSystem_qos("Cs", "C1", "192.168.1.67", "9997", "noAuth");
     networkCapabilities.put("bandwitdh", "100");
-    Network_Device nD = new Network_Device("intel wifi", "FF:FF:FF:FF:FF:FB", networkCapabilities,
-                                           net);
+    Network_Device nD = new Network_Device("intel wifi", "FF:FF:FF:FF:FF:FB", networkCapabilities, net);
     capabilities.put("processorArchitecture", "x86");
     deployedSystems.add(new DeployedSystem(sC, nD));
 
@@ -62,8 +61,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     ArrowheadSystem_qos sP = new ArrowheadSystem_qos("Ps", "P1", "192.168.1.67", "9997", "noAuth");
     networkCapabilities.put("bandwitdh", "100");
 
-    Network_Device nD = new Network_Device("intel wifi", "FF:FF:FF:FF:FF:FC", networkCapabilities,
-                                           net);
+    Network_Device nD = new Network_Device("intel wifi", "FF:FF:FF:FF:FF:FC", networkCapabilities, net);
     capabilities.put("processorArchitecture", "x86");
     deployedSystems.add(new DeployedSystem(sP, nD));
 
@@ -107,8 +105,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
       if (transaction != null) {
         transaction.rollback();
       }
-      throw new DuplicateEntryException(
-          "There is already an entry in the " + "authorization database with these parameters.");
+      throw new DuplicateEntryException("There is already an entry in the " + "authorization database with these parameters.");
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -174,8 +171,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
   }
 
   @SuppressWarnings("unchecked")
-  private <T> List<T> getAll(Class<T> queryClass,
-                             Map<String, Object> restrictionMap) {
+  private <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
     List<T> retrievedList = new ArrayList<>();
 
     Session session = getSessionFactory().openSession();
@@ -217,8 +213,8 @@ public class SCSRepositoryImpl implements ISCSRepository {
         transaction.rollback();
       }
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. "
-              + "Please check the unique fields of the " + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
+              + object.getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -244,8 +240,8 @@ public class SCSRepositoryImpl implements ISCSRepository {
         transaction.rollback();
       }
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. "
-              + "Please check the unique fields of the " + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
+              + object.getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -271,8 +267,8 @@ public class SCSRepositoryImpl implements ISCSRepository {
         transaction.rollback();
       }
       throw new DuplicateEntryException(
-          "ConstraintViolationException: there is a reference to this object in another table, "
-              + "which prevents the delete operation. (" + object.getClass() + ")");
+          "ConstraintViolationException: there is a reference to this object in another table, " + "which prevents the delete operation. (" + object
+              .getClass() + ")");
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -298,8 +294,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     for (Node n : list) {
       for (DeployedSystem dS : n.getDeployedSystems()) {
         if (dS.getSystem().getSystemGroup().equalsIgnoreCase(system.
-            getSystemGroup())
-            && dS.getSystem().getSystemName().equalsIgnoreCase(system.
+            getSystemGroup()) && dS.getSystem().getSystemName().equalsIgnoreCase(system.
             getSystemName())) {
           return n;
         }
@@ -342,7 +337,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
   @Override
   public Node saveNode(Node node) {
     /*
-		 * Iterator it = node.getDeployedSystems().entrySet().iterator(); while
+     * Iterator it = node.getDeployedSystems().entrySet().iterator(); while
 		 * (it.hasNext()) { Map.Entry pair = (Map.Entry) it.next(); try {
 		 * saveArrowheadSystem((ArrowheadSystem) pair.getKey());
 		 * saveNetworkDevice((Network_Device) pair.getValue()); } catch
@@ -367,8 +362,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
   }
 
   @Override
-  public Network addNetworkDeviceToNetwork(Network network,
-                                           Network_Device networkDevice) {
+  public Network addNetworkDeviceToNetwork(Network network, Network_Device networkDevice) {
     Network net = getNetwork(network);
     if (net == null) {
       return null;

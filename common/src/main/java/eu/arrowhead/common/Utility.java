@@ -17,7 +17,7 @@ import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -61,43 +61,39 @@ public final class Utility {
 
       Client client = null;
       if (isSecure && Utility.sslContext != null) {
-        client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(configuration)
-            .hostnameVerifier(allHostsValid).build();
+        client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
       } else if (isSecure && Utility.sslContext == null) {
         throw new AuthenticationException("SSL Context not set, but secure was invoked.");
       } else {
         client = ClientBuilder.newClient(configuration);
       }
 
-      WebTarget target = client.target(UriBuilder.fromUri(URI).build());
+      Builder request = client.target(UriBuilder.fromUri(URI).build()).request().header("Content-type", "application/json");
       switch (method) {
         case "GET":
-          response = target.request().header("Content-type", "application/json").get();
+          response = request.get();
           break;
         case "POST":
-          response = target.request().header("Content-type", "application/json")
-              .post(Entity.json(payload));
+          response = request.post(Entity.json(payload));
           break;
         case "PUT":
-          response = target.request().header("Content-type", "application/json")
-              .put(Entity.json(payload));
+          response = request.put(Entity.json(payload));
           break;
         case "DELETE":
-          response = target.request().header("Content-type", "application/json").delete();
+          response = request.delete();
           break;
         default:
-          throw new NotAllowedException("Invalid method type was given "
-                                            + "to the Utility.sendRequest() method");
+          throw new NotAllowedException("Invalid method type was given to the Utility.sendRequest() method");
       }
 
-      return response;
-    } catch (Exception e) {
-      e.printStackTrace();
       //Internal Server Error, Not Found
       if (response == null || response.getStatus() == 500 || response.getStatus() == 404) {
         log.info("UnavailableServerException at " + URI);
         throw new UnavailableServerException("Server(s) timed out. Check logs for details.");
       }
+      return response;
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
     return Response.status(Status.NOT_FOUND).build();
@@ -107,6 +103,7 @@ public final class Utility {
    * Some level of flexibility in the URI creation, in order to avoid
    * implementation mistakes.
    */
+  //TODO Niki kódjával lehet ezt szebben is valszeg
   public static String getURI(String address, String port, String serviceURI, boolean isSecure) {
     if (address == null || serviceURI == null) {
       log.info("Address and serviceURI can not be null (Utility:getURI throws NPE)");
@@ -148,8 +145,7 @@ public final class Utility {
       log.info("Utility:getOrchestratorURI DNFException");
       throw new DataNotFoundException("Orchestration Core System not found in the database!");
     }
-    return getURI(orchestrator.getAddress(), orchestrator.getPort(),
-                  orchestrator.getServiceURI(), orchestrator.getIsSecure());
+    return getURI(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
   }
 
   public static String getServiceRegistryURI() {
@@ -160,8 +156,7 @@ public final class Utility {
       log.info("Utility:getServiceRegistryURI DNFException");
       throw new DataNotFoundException("Service Registry Core System not found in the database!");
     }
-    return getURI(serviceRegistry.getAddress(), serviceRegistry.getPort(),
-                  serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
+    return getURI(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
   }
 
   public static String getAuthorizationURI() {
@@ -172,11 +167,11 @@ public final class Utility {
       log.info("Utility:getAuthorizationURI DNFException");
       throw new DataNotFoundException("Authoriaztion Core System not found in the database!");
     }
-    return getURI(authorization.getAddress(), authorization.getPort(),
-                  authorization.getServiceURI(), authorization.getIsSecure());
+    return getURI(authorization.getAddress(), authorization.getPort(), authorization.getServiceURI(), authorization.getIsSecure());
   }
 
   public static String getGatekeeperURI() {
+    System.out.println("sajt");
     restrictionMap.clear();
     restrictionMap.put("systemName", "gatekeeper");
     CoreSystem gatekeeper = dm.get(CoreSystem.class, restrictionMap);
@@ -184,8 +179,7 @@ public final class Utility {
       log.info("Utility:getGatekeeperURI DNFException");
       throw new DataNotFoundException("Gatekeeper Core System not found in the database!");
     }
-    return getURI(gatekeeper.getAddress(), gatekeeper.getPort(),
-                  gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
+    return getURI(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
   }
 
   public static String getQoSURI() {
@@ -195,6 +189,8 @@ public final class Utility {
     if (QoS == null) {
       log.info("Utility:getQoSURI DNFException");
       throw new DataNotFoundException("QoS Core System not found in the database!");
+    } else {
+      System.out.println("sajt");
     }
     return getURI(QoS.getAddress(), QoS.getPort(), QoS.getServiceURI(), QoS.getIsSecure());
   }
@@ -217,9 +213,7 @@ public final class Utility {
 
     List<String> URIList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
-      URIList.add(getURI(cloud.getCloud().getAddress(),
-                         cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(),
-                         false));
+      URIList.add(getURI(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), false));
     }
 
     return URIList;
@@ -231,13 +225,12 @@ public final class Utility {
     cloudList = dm.getAll(OwnCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("Utility:getOwnCloud DNFException");
-      throw new DataNotFoundException("No 'Own Cloud' entry in the configuration database."
-                                          + "Please make sure to enter one in the 'own_cloud' table."
-                                          + "This information is needed for the Gatekeeper System.");
+      throw new DataNotFoundException(
+          "No 'Own Cloud' entry in the configuration database." + "Please make sure to enter one in the 'own_cloud' table."
+              + "This information is needed for the Gatekeeper System.");
     }
 
-    ArrowheadCloud ownCloud = new ArrowheadCloud(cloudList.get(0));
-    return ownCloud;
+    return new ArrowheadCloud(cloudList.get(0));
   }
 
   public static CoreSystem getCoreSystem(String systemName) {
@@ -246,8 +239,7 @@ public final class Utility {
     CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
     if (coreSystem == null) {
       log.info("Utility:getCoreSystem DNFException");
-      throw new DataNotFoundException("Requested Core System "
-                                          + "(" + systemName + ") not found in the database!");
+      throw new DataNotFoundException("Requested Core System " + "(" + systemName + ") not found in the database!");
     }
 
     return coreSystem;

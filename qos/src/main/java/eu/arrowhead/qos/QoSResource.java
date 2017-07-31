@@ -54,9 +54,7 @@ public class QoSResource {
 
   @PUT
   @Path("/QoSReserve")
-  public Response qosReservation(
-      QoSReserve qosReservation)
-      throws ReservationException, DriverNotFoundException, IOException {
+  public Response qosReservation(QoSReserve qosReservation) throws ReservationException, DriverNotFoundException, IOException {
 
     log.info("QoS: Reserving resouces.");
     QoSReservationResponse qosrr = service.qoSReserve(qosReservation);

@@ -110,15 +110,13 @@ class DomainUtil {
   }
 
   /**
-   * Calculate the network address by taking the bitwise AND between the IP-address and the
-   * netmask.
+   * Calculate the network address by taking the bitwise AND between the IP-address and the netmask.
    *
    * @param ifaddr the interface address to calculate the network address of.
    * @return the network address (host part is all zero).
    * @throws UnknownHostException if something went terribly wrong.
    */
-  private static InetAddress calculateNetworkAddress(InterfaceAddress ifaddr)
-      throws UnknownHostException {
+  private static InetAddress calculateNetworkAddress(InterfaceAddress ifaddr) throws UnknownHostException {
     byte[] addr = ifaddr.getAddress().getAddress();
     int n = ifaddr.getNetworkPrefixLength();
     int i = n / 8;

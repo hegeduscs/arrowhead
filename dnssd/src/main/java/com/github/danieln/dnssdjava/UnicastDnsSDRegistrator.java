@@ -54,8 +54,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
   private int timeToLive = 60;
   private String localHostname;
 
-  UnicastDnsSDRegistrator(Name registrationDomain, InetSocketAddress resolverSocaddr)
-      throws UnknownHostException {
+  UnicastDnsSDRegistrator(Name registrationDomain, InetSocketAddress resolverSocaddr) throws UnknownHostException {
     try {
       this.registrationDomain = registrationDomain;
       this.resolver = setDirectResolver(resolverSocaddr);
@@ -216,8 +215,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
       for (Name subtype : subtypes) {
         update.add(new PTRRecord(subtype, DClass.IN, timeToLive, dnsName));
       }
-      update
-          .add(new SRVRecord(dnsName, DClass.IN, timeToLive, 0, 0, serviceData.getPort(), target));
+      update.add(new SRVRecord(dnsName, DClass.IN, timeToLive, 0, 0, serviceData.getPort(), target));
       update.add(new TXTRecord(dnsName, DClass.IN, timeToLive, strings));
       System.out.print("update= ");
       System.out.println(update.toString());
@@ -230,8 +228,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
         case Rcode.YXDOMAIN:  // Prerequisite failed, the service already exists.
           return false;
         default:
-          throw new DnsSDException(
-              "Server returned error code: " + Rcode.string(response.getRcode()));
+          throw new DnsSDException("Server returned error code: " + Rcode.string(response.getRcode()));
       }
     } catch (TextParseException ex) {
       throw new IllegalArgumentException("Invalid service data: " + serviceData, ex);
@@ -263,8 +260,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
         case Rcode.NXDOMAIN:  // Prerequisite failed, the service doesn't exist.
           return false;
         default:
-          throw new DnsSDException(
-              "Server returned error code: " + Rcode.string(response.getRcode()));
+          throw new DnsSDException("Server returned error code: " + Rcode.string(response.getRcode()));
       }
       // Remove the service type if there are no instances left
       update = new Update(registrationDomain);
@@ -277,8 +273,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
           logger.log(Level.FINE, "Removed service type record {0}", typeName);
           break;
         case Rcode.YXDOMAIN:  // Prerequisite failed, service instances exists
-          logger
-              .log(Level.FINE, "Did not remove service type record {0}, instances left.", typeName);
+          logger.log(Level.FINE, "Did not remove service type record {0}, instances left.", typeName);
           break;
         default:
           logger.log(Level.WARNING, "Failed to remove service type {0}, server returned status {1}",

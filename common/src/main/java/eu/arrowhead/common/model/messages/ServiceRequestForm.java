@@ -33,14 +33,9 @@ public class ServiceRequestForm {
     this.orchestrationFlags.put("onlyPreferred", false);
   }
 
-  public ServiceRequestForm(ArrowheadSystem requesterSystem,
-                            ArrowheadCloud requesterCloud,
-                            ArrowheadService requestedService,
-                            Map<String, Boolean> orchestrationFlags,
-                            List<ArrowheadSystem> preferredProviders,
-                            List<ArrowheadCloud> preferredClouds,
-                            Map<String, String> requestedQoS,
-                            Map<String, String> commands) {
+  public ServiceRequestForm(ArrowheadSystem requesterSystem, ArrowheadCloud requesterCloud, ArrowheadService requestedService,
+                            Map<String, Boolean> orchestrationFlags, List<ArrowheadSystem> preferredProviders, List<ArrowheadCloud> preferredClouds,
+                            Map<String, String> requestedQoS, Map<String, String> commands) {
     this.requesterSystem = requesterSystem;
     this.requesterCloud = requesterCloud;
     this.requestedService = requestedService;
@@ -51,12 +46,8 @@ public class ServiceRequestForm {
     this.commands = commands;
   }
 
-  public ServiceRequestForm(ArrowheadSystem requesterSystem,
-                            ArrowheadCloud requesterCloud,
-                            ArrowheadService requestedService,
-                            List<ArrowheadSystem> preferredProviders,
-                            List<ArrowheadCloud> preferredClouds,
-                            Map<String, String> requestedQoS,
+  public ServiceRequestForm(ArrowheadSystem requesterSystem, ArrowheadCloud requesterCloud, ArrowheadService requestedService,
+                            List<ArrowheadSystem> preferredProviders, List<ArrowheadCloud> preferredClouds, Map<String, String> requestedQoS,
                             Map<String, String> commands) {
     this.requesterSystem = requesterSystem;
     this.requesterCloud = requesterCloud;
@@ -144,8 +135,7 @@ public class ServiceRequestForm {
     if (requesterSystem == null || !requesterSystem.isValid()) {
       return false;
     }
-    if (!orchestrationFlags.get("storeOnlyActive")
-        && (requestedService == null || !requestedService.isValidStrict())) {
+    if (!orchestrationFlags.get("storeOnlyActive") && (requestedService == null || !requestedService.isValidStrict())) {
       return false;
     }
     return !orchestrationFlags.get("onlyPreferred") || !preferredProviders.isEmpty();

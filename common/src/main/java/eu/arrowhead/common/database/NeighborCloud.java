@@ -17,8 +17,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * @author umlaufz
  *
- * Entity class for storing nearby Cloud informations in the database. The "operator" and
- * "cloud_name" columns must be unique together.
+ * Entity class for storing nearby Cloud informations in the database. The "operator" and "cloud_name" columns must be unique together.
  */
 @Entity
 @Table(name = "neighborhood", uniqueConstraints = {@UniqueConstraint(columnNames = {"cloud_id"})})

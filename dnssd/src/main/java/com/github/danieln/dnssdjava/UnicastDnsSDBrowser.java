@@ -148,8 +148,8 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
   }
 
   /**
-   * Get all service names of a service type in a single domain. If the specified type has subtypes
-   * then only instances registered under any of those are returned.
+   * Get all service names of a service type in a single domain. If the specified type has subtypes then only instances registered under any of those
+   * are returned.
    *
    * @param type the service type.
    * @param domainName the domain to browse.

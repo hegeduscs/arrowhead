@@ -17,8 +17,7 @@ public final class StoreService {
    */
   public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer) {
     restrictionMap.clear();
-    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(),
-                                                      consumer.getSystemName());
+    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
     if (savedConsumer == null) {
       return null;
     }
@@ -28,16 +27,12 @@ public final class StoreService {
   }
 
   /**
-   * This method returns a list of Orchestration Store entries specified by the consumer system and
-   * the requested service.
+   * This method returns a list of Orchestration Store entries specified by the consumer system and the requested service.
    */
-  public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer,
-                                                         ArrowheadService service) {
+  public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service) {
     restrictionMap.clear();
-    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(),
-                                                      consumer.getSystemName());
-    ArrowheadService savedService = getRequestedService(service.getServiceGroup(),
-                                                        service.getServiceDefinition());
+    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
+    ArrowheadService savedService = getRequestedService(service.getServiceGroup(), service.getServiceDefinition());
     if (savedConsumer == null || savedService == null) {
       return null;
     }
@@ -64,8 +59,7 @@ public final class StoreService {
    */
   public static List<OrchestrationStore> getActiveStoreEntries(ArrowheadSystem consumer) {
     restrictionMap.clear();
-    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(),
-                                                      consumer.getSystemName());
+    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
     if (savedConsumer == null) {
       return null;
     }
@@ -96,8 +90,7 @@ public final class StoreService {
   /**
    * This method returns an ArrowheadService from the database.
    */
-  private static ArrowheadService getRequestedService(String serviceGroup,
-                                                      String serviceDefinition) {
+  private static ArrowheadService getRequestedService(String serviceGroup, String serviceDefinition) {
     HashMap<String, Object> rm = new HashMap<>();
     rm.put("serviceGroup", serviceGroup);
     rm.put("serviceDefinition", serviceDefinition);

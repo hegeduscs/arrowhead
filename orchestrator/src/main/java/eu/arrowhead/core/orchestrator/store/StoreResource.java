@@ -38,8 +38,7 @@ public class StoreResource {
   }
 
   /**
-   * Returns all the entries of the Orchestration Store where the priority (int) field has a value
-   * of bigger than 0.
+   * Returns all the entries of the Orchestration Store where the priority (int) field has a value of bigger than 0.
    *
    * @return OrchestrationStoreQueryResponse
    */
@@ -50,8 +49,7 @@ public class StoreResource {
     List<OrchestrationStore> store = new ArrayList<>();
     store = StoreService.getAllStoreEntries();
     if (store.isEmpty()) {
-      log.info("The Orchestration Store is empty. "
-                   + "(StoreResource:getAllStoreEntries DataNotFoundException)");
+      log.info("The Orchestration Store is empty. " + "(StoreResource:getAllStoreEntries DataNotFoundException)");
       throw new DataNotFoundException("The Orchestration Store is empty.");
     }
 
@@ -61,8 +59,7 @@ public class StoreResource {
   }
 
   /**
-   * Returns the Orchestration Store entries from the database specified by the consumer (and the
-   * service).
+   * Returns the Orchestration Store entries from the database specified by the consumer (and the service).
    *
    * @return OrchestrationStoreQueryResponse
    * @throws DataNotFoundException, BadPayloadException
@@ -77,8 +74,7 @@ public class StoreResource {
 		 */
     if (!query.isPayloadUsable()) {
       log.info("BadPayloadException at the getStoreEntries method.");
-      throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
-                                        + "is/are missing.");
+      throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem " + "is/are missing.");
     }
 
 		/*
@@ -86,40 +82,31 @@ public class StoreResource {
 		 * entries belonging to the requesterSystem.
 		 */
     else if (query.isOnlyActive()) {
-      log.info("Querying the Orchestration Store for active entries of the consumer: "
-                   + query.getRequesterSystem());
-      List<OrchestrationStore> retrievedList =
-          StoreService.getActiveStoreEntries(query.getRequesterSystem());
+      log.info("Querying the Orchestration Store for active entries of the consumer: " + query.getRequesterSystem());
+      List<OrchestrationStore> retrievedList = StoreService.getActiveStoreEntries(query.getRequesterSystem());
       if (retrievedList != null && !retrievedList.isEmpty()) {
         log.info("Returning the active entry list with a size of " + retrievedList.size());
         Collections.sort(retrievedList);
         return new OrchestrationStoreQueryResponse(retrievedList);
       } else {
-        log.info("No active Orchestration Store entries were found "
-                     + "for this consumer: " + query.getRequesterSystem().toString());
-        throw new DataNotFoundException("No active Orchestration Store entries were found "
-                                            + "for this consumer: " + query.getRequesterSystem()
-            .toString());
+        log.info("No active Orchestration Store entries were found " + "for this consumer: " + query.getRequesterSystem().toString());
+        throw new DataNotFoundException(
+            "No active Orchestration Store entries were found " + "for this consumer: " + query.getRequesterSystem().toString());
       }
     }
-		
+
 		/*
-		 * If the payload does not have a requestedService, but the onlyActive boolean is false,
+     * If the payload does not have a requestedService, but the onlyActive boolean is false,
 		 * we return all the Orchestration Store entries belonging to the requesterSystem.
 		 */
     else if (query.getRequestedService() == null) {
-      log.info("Querying the Orchestration Store for entries of the consumer: "
-                   + query.getRequesterSystem());
-      List<OrchestrationStore> retrievedList =
-          StoreService.getStoreEntries(query.getRequesterSystem());
+      log.info("Querying the Orchestration Store for entries of the consumer: " + query.getRequesterSystem());
+      List<OrchestrationStore> retrievedList = StoreService.getStoreEntries(query.getRequesterSystem());
       if (retrievedList != null && !retrievedList.isEmpty()) {
         entryList.addAll(retrievedList);
       } else {
-        log.info("No Orchestration Store entries were found"
-                     + "for this consumer: " + query.getRequesterSystem().toString());
-        throw new DataNotFoundException("No Orchestration Store entries were found "
-                                            + "for this consumer: " + query.getRequesterSystem()
-            .toString());
+        log.info("No Orchestration Store entries were found" + "for this consumer: " + query.getRequesterSystem().toString());
+        throw new DataNotFoundException("No Orchestration Store entries were found " + "for this consumer: " + query.getRequesterSystem().toString());
       }
     }
 		
@@ -129,16 +116,14 @@ public class StoreResource {
 		 */
     else {
       log.info("Querying the Orchestration Store for entries of the consumer/service pair.");
-      List<OrchestrationStore> retrievedList =
-          StoreService.getStoreEntries(query.getRequesterSystem(), query.getRequestedService());
+      List<OrchestrationStore> retrievedList = StoreService.getStoreEntries(query.getRequesterSystem(), query.getRequestedService());
       if (retrievedList != null && !retrievedList.isEmpty()) {
         entryList.addAll(retrievedList);
       } else {
         log.info("No Orchestration Store entries were found for this consumer/service pair.");
-        throw new DataNotFoundException("No Orchestration Store entries were found "
-                                            + "for this consumer/service pair: "
-                                            + query.getRequesterSystem().toString() + "/"
-                                            + query.getRequestedService().toString());
+        throw new DataNotFoundException(
+            "No Orchestration Store entries were found " + "for this consumer/service pair: " + query.getRequesterSystem().toString() + "/" + query
+                .getRequestedService().toString());
       }
     }
 

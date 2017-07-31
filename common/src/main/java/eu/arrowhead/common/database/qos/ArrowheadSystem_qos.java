@@ -11,12 +11,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * Entity class for storing Arrowhead Systems in the database. The "system_group" and "system_name"
- * columns must be unique together.
+ * Entity class for storing Arrowhead Systems in the database. The "system_group" and "system_name" columns must be unique together.
  */
 @Entity
-@Table(name = "arrowhead_system", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"system_group", "system_name"})})
+@Table(name = "arrowhead_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_group", "system_name"})})
 @XmlRootElement
 public class ArrowheadSystem_qos {
 
@@ -43,9 +41,7 @@ public class ArrowheadSystem_qos {
   public ArrowheadSystem_qos() {
   }
 
-  public ArrowheadSystem_qos(String systemGroup, String systemName, String address,
-                             String port,
-                             String authenticationInfo) {
+  public ArrowheadSystem_qos(String systemGroup, String systemName, String address, String port, String authenticationInfo) {
     this.systemGroup = systemGroup;
     this.systemName = systemName;
     this.address = address;

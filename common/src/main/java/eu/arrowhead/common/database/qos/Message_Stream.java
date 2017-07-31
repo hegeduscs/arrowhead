@@ -19,8 +19,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
-@Table(name = "message_stream", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"code"})})
+@Table(name = "message_stream", uniqueConstraints = {@UniqueConstraint(columnNames = {"code"})})
 @XmlRootElement
 public class Message_Stream {
 
@@ -59,10 +58,8 @@ public class Message_Stream {
 
   }
 
-  public Message_Stream(ArrowheadService_qos service, ArrowheadSystem_qos consumer,
-                        ArrowheadSystem_qos provider,
-                        Map<String, String> qualityOfService,
-                        Map<String, String> configuration, String type) {
+  public Message_Stream(ArrowheadService_qos service, ArrowheadSystem_qos consumer, ArrowheadSystem_qos provider,
+                        Map<String, String> qualityOfService, Map<String, String> configuration, String type) {
     this.service = service;
     this.consumer = consumer;
     this.provider = provider;
@@ -190,8 +187,7 @@ public class Message_Stream {
    */
   public String getCode() {
     this.code = provider.getSystemGroup() + "/" + provider.getSystemName() + "," + consumer.
-        getSystemGroup() + "/"
-        + consumer.getSystemName() + "," + service.getServiceGroup() + "/" + service.
+        getSystemGroup() + "/" + consumer.getSystemName() + "," + service.getServiceGroup() + "/" + service.
         getServiceDefinition();
     return code;
   }

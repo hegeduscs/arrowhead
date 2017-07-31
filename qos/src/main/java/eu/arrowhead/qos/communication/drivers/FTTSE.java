@@ -97,9 +97,8 @@ public class FTTSE implements IQoSDriver {
 
     WebTarget target = client.target(uri);
     Response response = target.request().
-        header("Content-type", "application/json")
-        .post(Entity.
-            json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
+        header("Content-type", "application/json").post(Entity.
+        json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
 
     if (response.getStatus() > 199 && response.getStatus() < 300) {
       return new ReservationResponse(true, null, commands);
@@ -117,10 +116,7 @@ public class FTTSE implements IQoSDriver {
    * @param requestedQoS Consumer requested QoS.
    * @return Returns the parameters of the stream to be configured.
    */
-  public Map<String, String> generateCommands(Integer streamID,
-                                              Integer elementaryCycle,
-                                              Integer mtu,
-                                              Map<String, String> requestedQoS) {
+  public Map<String, String> generateCommands(Integer streamID, Integer elementaryCycle, Integer mtu, Map<String, String> requestedQoS) {
     Map<String, String> commands = new HashMap<>();
     Integer period = 5;
     Integer size = calculateSize(mtu);
@@ -172,12 +168,10 @@ public class FTTSE implements IQoSDriver {
   /**
    * This method will see if there are enough parameters to generate the commands.
    */
-  private boolean validateNetworkCOnfiguration(
-      Map<String, String> networkConfiguration) {
+  private boolean validateNetworkCOnfiguration(Map<String, String> networkConfiguration) {
     if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.
-        containsKey(NETWORK_ENTRYPOINT_URL)
-        || !networkConfiguration.containsKey(NETWORK_STREAM_ID)
-        || !networkConfiguration.containsKey(NETWORK_MTU)) {
+        containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration
+        .containsKey(NETWORK_MTU)) {
       return false;
     }
 

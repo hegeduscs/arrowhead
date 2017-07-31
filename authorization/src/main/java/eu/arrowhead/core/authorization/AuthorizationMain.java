@@ -28,8 +28,7 @@ class AuthorizationMain {
   private static Logger log = Logger.getLogger(AuthorizationMain.class.getName());
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8448/");
-  private static final String BASE_URI_SECURED = getProp()
-      .getProperty("base_uri_secured", "https://0.0.0.0:8449/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8449/");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -37,8 +36,7 @@ class AuthorizationMain {
     try {
       String keystorePath = getProp().getProperty("ssl.keystore");
       String keystorePass = getProp().getProperty("ssl.keystorepass");
-      KeyStore keyStore = eu.arrowhead.common.ssl.SecurityUtils
-          .loadKeyStore(keystorePath, keystorePass);
+      KeyStore keyStore = eu.arrowhead.common.ssl.SecurityUtils.loadKeyStore(keystorePath, keystorePass);
       privateKey = eu.arrowhead.common.ssl.SecurityUtils.getPrivateKey(keyStore, keystorePass);
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -157,12 +155,8 @@ class AuthorizationMain {
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
-    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true,
-                                                                        new SSLEngineConfigurator(
-                                                                            sslCon)
-                                                                            .setClientMode(false)
-                                                                            .setNeedClientAuth(
-                                                                                true));
+    final HttpServer server = GrizzlyHttpServerFactory
+        .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;

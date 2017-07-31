@@ -34,8 +34,7 @@ public final class SecurityUtils {
     } catch (FileNotFoundException e) {
       throw new Exception("In Utils::loadKeyStore, FileNotFoundException occured: " + e.toString());
     } catch (NoSuchAlgorithmException e) {
-      throw new Exception(
-          "In Utils::loadKeyStore, NoSuchAlgorithmException occured: " + e.toString());
+      throw new Exception("In Utils::loadKeyStore, NoSuchAlgorithmException occured: " + e.toString());
     } catch (CertificateException e) {
       throw new Exception("In Utils::loadKeyStore, CertificateException occured: " + e.toString());
     } catch (IOException e) {
@@ -127,8 +126,7 @@ public final class SecurityUtils {
     }
 
     if (privatekey == null) {
-      throw new Exception("Error in Utils::getPrivateKey(): no private key "
-                              + "returned for alias: " + elem + " ,pass: " + pass);
+      throw new Exception("Error in Utils::getPrivateKey(): no private key " + "returned for alias: " + elem + " ,pass: " + pass);
     }
 
     return privatekey;

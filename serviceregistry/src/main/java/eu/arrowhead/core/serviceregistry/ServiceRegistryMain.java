@@ -27,10 +27,8 @@ class ServiceRegistryMain {
   private static HttpServer secureServer = null;
   private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
   private static Properties prop;
-  private static final String BASE_URI = getProp()
-      .getProperty("base_uri", "http://0.0.0.0:8080/core/");
-  private static final String BASE_URI_SECURED = getProp()
-      .getProperty("base_uri_secured", "https://0.0.0.0:8443/core/");
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8080/core/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/core/");
 
   /**
    * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
@@ -60,8 +58,7 @@ class ServiceRegistryMain {
     sslCon.setTrustStorePass(truststorePass);
 
     final HttpServer server = GrizzlyHttpServerFactory
-        .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
-            .setClientMode(false).setNeedClientAuth(true));
+        .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;
@@ -82,11 +79,9 @@ class ServiceRegistryMain {
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
     final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
-    log.debug("isAllowPayloadForUndefinedHttpMethods : " + server.getServerConfiguration()
-        .isAllowPayloadForUndefinedHttpMethods());
+    log.debug("isAllowPayloadForUndefinedHttpMethods : " + server.getServerConfiguration().isAllowPayloadForUndefinedHttpMethods());
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-    log.debug("isAllowPayloadForUndefinedHttpMethods : " + server.getServerConfiguration()
-        .isAllowPayloadForUndefinedHttpMethods());
+    log.debug("isAllowPayloadForUndefinedHttpMethods : " + server.getServerConfiguration().isAllowPayloadForUndefinedHttpMethods());
     server.start();
     return server;
   }

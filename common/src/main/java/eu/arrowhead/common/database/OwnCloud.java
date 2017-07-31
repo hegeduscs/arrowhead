@@ -12,15 +12,14 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * @author umlaufz
  *
- * Entity class for storing information about the local Cloud in the database. (Gatekeeper needs
- * this information for negotiations.) The "operator" and "cloud_name" columns must be unique
- * together.
+ * Entity class for storing information about the local Cloud in the database. (Gatekeeper needs this information for negotiations.) The "operator"
+ * and "cloud_name" columns must be unique together.
  */
 @Entity
-@Table(name = "own_cloud", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"operator", "cloud_name"})})
+@Table(name = "own_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
 public class OwnCloud {
 
+  //TODO change it to the way NeighborCloud is working?
   @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,8 +41,7 @@ public class OwnCloud {
   public OwnCloud() {
   }
 
-  public OwnCloud(String operator, String cloudName, String address, String port,
-                  String gatekeeperServiceURI, String authenticationInfo) {
+  public OwnCloud(String operator, String cloudName, String address, String port, String gatekeeperServiceURI, String authenticationInfo) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;

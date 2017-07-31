@@ -25,8 +25,7 @@ class GatekeeperMain {
   private static Logger log = Logger.getLogger(GatekeeperMain.class.getName());
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8446/");
-  private static final String BASE_URI_SECURED = getProp()
-      .getProperty("base_uri_secured", "https://0.0.0.0:8447/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8447/");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -146,8 +145,7 @@ class GatekeeperMain {
     config.property("server_common_name", serverCN);
 
     final HttpServer server = GrizzlyHttpServerFactory.
-        createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon)
-            .setClientMode(false).setNeedClientAuth(true));
+        createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;

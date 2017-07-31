@@ -10,9 +10,8 @@ import java.util.Set;
 
 
 /**
- * Automatically unregister services on JVM shutdown. This class uses a shutdown hook to unregister
- * services when the application exits. Services may not be unregistered on a JMV crash or other
- * abnormal termination.
+ * Automatically unregister services on JVM shutdown. This class uses a shutdown hook to unregister services when the application exits. Services may
+ * not be unregistered on a JMV crash or other abnormal termination.
  *
  * @author Daniel Nilsson
  */
@@ -70,8 +69,7 @@ class AutomaticUnregister {
       try {
         registrator.unregisterService(serviceName);
       } catch (DnsSDException e) {
-        System.err
-            .printf("WARNING: Failed to unregister service %s: %s\n", serviceName, e.getMessage());
+        System.err.printf("WARNING: Failed to unregister service %s: %s\n", serviceName, e.getMessage());
       }
     }
   }

@@ -11,11 +11,8 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
   @Override
   public Response toResponse(Exception ex) {
     ex.printStackTrace();
-    ErrorMessage errorMessage = new ErrorMessage("Class: " + ex.getClass().toString() +
-                                                     " Message: " + ex.getMessage(), 500);
-    return Response.status(Status.INTERNAL_SERVER_ERROR)
-        .entity(errorMessage)
-        .build();
+    ErrorMessage errorMessage = new ErrorMessage("Class: " + ex.getClass().toString() + " Message: " + ex.getMessage(), 500);
+    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(errorMessage).build();
   }
 
 }

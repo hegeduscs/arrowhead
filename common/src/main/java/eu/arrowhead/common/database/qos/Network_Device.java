@@ -20,8 +20,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
-@Table(name = "network_device", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"macAddress"})})
+@Table(name = "network_device", uniqueConstraints = {@UniqueConstraint(columnNames = {"macAddress"})})
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @XmlRootElement
 public class Network_Device {
@@ -49,9 +48,7 @@ public class Network_Device {
     networkCapabilities = new HashMap<>();
   }
 
-  public Network_Device(String name, String macAddress,
-                        Map<String, String> networkCapabilities,
-                        Network network) {
+  public Network_Device(String name, String macAddress, Map<String, String> networkCapabilities, Network network) {
     this.name = name;
     this.macAddress = macAddress;
     this.networkCapabilities = networkCapabilities;

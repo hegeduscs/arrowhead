@@ -106,8 +106,7 @@ public class OrchestratorApi {
   }
 
   /**
-   * Returns the Orchestration Store entries from the database specified by the consumer (and the
-   * service).
+   * Returns the Orchestration Store entries from the database specified by the consumer (and the service).
    *
    * @return List<OrchestrationStore>
    * @throws BadPayloadException, DataNotFoundException
@@ -117,8 +116,7 @@ public class OrchestratorApi {
 
     if (!query.isPayloadUsable()) {
       log.info("OrchestrationApi:getStoreEntries throws BadPayloadException.");
-      throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem "
-                                        + "is/are missing.");
+      throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem " + "is/are missing.");
     }
 
     List<OrchestrationStore> store = new ArrayList<>();
@@ -143,22 +141,19 @@ public class OrchestratorApi {
     store = dm.getAll(OrchestrationStore.class, restrictionMap);
     if (store.isEmpty()) {
       log.info("OrchestrationApi:getStoreEntries throws DataNotFoundException.");
-      throw new DataNotFoundException("Store entries specified by the payload "
-                                          + "were not found in the database.");
+      throw new DataNotFoundException("Store entries specified by the payload " + "were not found in the database.");
     }
 
     Collections.sort(store);
-    GenericEntity<List<OrchestrationStore>> entity =
-        new GenericEntity<List<OrchestrationStore>>(store) {
-        };
+    GenericEntity<List<OrchestrationStore>> entity = new GenericEntity<List<OrchestrationStore>>(store) {
+    };
     log.info("getStoreEntries successfully returns.");
     return Response.ok(entity).build();
   }
 
   /**
-   * Adds a list of Orchestration Store entries to the database. Elements which would throw
-   * BadPayloadException are being skipped. The returned list only contains the elements which was
-   * saved in the process.
+   * Adds a list of Orchestration Store entries to the database. Elements which would throw BadPayloadException are being skipped. The returned list
+   * only contains the elements which was saved in the process.
    *
    * @return List<OrchestrationStore>
    */
@@ -234,8 +229,7 @@ public class OrchestratorApi {
     OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
     if (entry == null) {
       log.info("OrchestrationApi:toggleIsActive throws DataNotFoundException.");
-      throw new DataNotFoundException("Orchestration Store entry with this id "
-                                          + "was not found in the database.");
+      throw new DataNotFoundException("Orchestration Store entry with this id " + "was not found in the database.");
     } else if (entry.getProviderCloud() != null) {
       log.info("OrchestrationApi:toggleIsActive throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be active.");
@@ -248,9 +242,8 @@ public class OrchestratorApi {
   }
 
   /**
-   * Updates the non-entity fields of an Orchestration Store entry specified by the id field of the
-   * payload. Entity fields have their own update method in CommonApi.class. (Or delete and then
-   * post the modified entry again.)
+   * Updates the non-entity fields of an Orchestration Store entry specified by the id field of the payload. Entity fields have their own update
+   * method in CommonApi.class. (Or delete and then post the modified entry again.)
    *
    * @return OrchestrationStore
    * @throws BadPayloadException, DataNotFoundException
@@ -268,8 +261,7 @@ public class OrchestratorApi {
     OrchestrationStore storeEntry = dm.get(OrchestrationStore.class, restrictionMap);
     if (storeEntry == null) {
       log.info("OrchestrationApi:updateEntry throws DataNotFoundException.");
-      throw new DataNotFoundException("Store entry specified by the id("
-                                          + payload.getId() + ") was not found in the database.");
+      throw new DataNotFoundException("Store entry specified by the id(" + payload.getId() + ") was not found in the database.");
     } else if (storeEntry.getProviderCloud() != null && payload.getIsActive()) {
       log.info("OrchestrationApi:toggleIsActive throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be active.");
@@ -287,9 +279,8 @@ public class OrchestratorApi {
   }
 
   /**
-   * Deletes the Orchestration Store entry with the id specified by the path parameter. Returns 200
-   * if the delete is succesful, 204 (no content) if the entry was not in the database to begin
-   * with.
+   * Deletes the Orchestration Store entry with the id specified by the path parameter. Returns 200 if the delete is succesful, 204 (no content) if
+   * the entry was not in the database to begin with.
    */
   @DELETE
   @Path("{id}")
@@ -308,14 +299,12 @@ public class OrchestratorApi {
   }
 
   /**
-   * Deletes the Orchestration Store entries from the database specified by the consumer. Returns
-   * 200 if the delete is succesful, 204 (no content) if no matching entries were in the database to
-   * begin with.
+   * Deletes the Orchestration Store entries from the database specified by the consumer. Returns 200 if the delete is succesful, 204 (no content) if
+   * no matching entries were in the database to begin with.
    */
   @DELETE
   @Path("systemgroup/{systemGroup}/systemname/{systemName}")
-  public Response deleteEntries(@PathParam("systemGroup") String systemGroup,
-                                @PathParam("systemName") String systemName) {
+  public Response deleteEntries(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
     List<OrchestrationStore> store = new ArrayList<>();
 
     restrictionMap.put("systemGroup", systemGroup);

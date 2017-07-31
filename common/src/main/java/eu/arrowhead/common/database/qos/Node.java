@@ -18,8 +18,7 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
-@Table(name = "node", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"device_model_code"})})
+@Table(name = "node", uniqueConstraints = {@UniqueConstraint(columnNames = {"device_model_code"})})
 @XmlRootElement
 public class Node {
 
@@ -46,8 +45,7 @@ public class Node {
     processingCapabilities = new HashMap<>();
   }
 
-  public Node(String device_model_code, List<DeployedSystem> deployedSystems,
-              Map<String, String> processingCapabilities) {
+  public Node(String device_model_code, List<DeployedSystem> deployedSystems, Map<String, String> processingCapabilities) {
     this.device_model_code = device_model_code;
     this.deployedSystems = deployedSystems;
     this.processingCapabilities = processingCapabilities;
@@ -117,8 +115,7 @@ public class Node {
   /**
    * set processing caacilities.
    */
-  public void setProcessingCapabilities(
-      Map<String, String> processingCapabilities) {
+  public void setProcessingCapabilities(Map<String, String> processingCapabilities) {
     this.processingCapabilities = processingCapabilities;
   }
 

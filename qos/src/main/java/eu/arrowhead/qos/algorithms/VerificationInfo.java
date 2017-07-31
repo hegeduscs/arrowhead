@@ -29,12 +29,9 @@ public class VerificationInfo {
   public VerificationInfo() {
   }
 
-  public VerificationInfo(Map<String, String> provierDeviceCapabilities,
-                          Map<String, String> consumerDeviceCapabilities,
-                          List<QoS_Resource_Reservation> providerDeviceQoSReservations,
-                          List<QoS_Resource_Reservation> consumerDeviceQoSReservations,
-                          Map<String, String> requestedQoS,
-                          Map<String, String> commands) {
+  public VerificationInfo(Map<String, String> provierDeviceCapabilities, Map<String, String> consumerDeviceCapabilities,
+                          List<QoS_Resource_Reservation> providerDeviceQoSReservations, List<QoS_Resource_Reservation> consumerDeviceQoSReservations,
+                          Map<String, String> requestedQoS, Map<String, String> commands) {
     this.provierDeviceCapabilities = provierDeviceCapabilities;
     this.consumerDeviceCapabilities = consumerDeviceCapabilities;
     this.providerDeviceQoSReservations = providerDeviceQoSReservations;
@@ -47,8 +44,7 @@ public class VerificationInfo {
     return provierDeviceCapabilities;
   }
 
-  public void setProvierDeviceCapabilities(
-      Map<String, String> provierDeviceCapabilities) {
+  public void setProvierDeviceCapabilities(Map<String, String> provierDeviceCapabilities) {
     this.provierDeviceCapabilities = provierDeviceCapabilities;
   }
 
@@ -56,8 +52,7 @@ public class VerificationInfo {
     return consumerDeviceCapabilities;
   }
 
-  public void setConsumerDeviceCapabilities(
-      Map<String, String> consumerDeviceCapabilities) {
+  public void setConsumerDeviceCapabilities(Map<String, String> consumerDeviceCapabilities) {
     this.consumerDeviceCapabilities = consumerDeviceCapabilities;
   }
 
@@ -65,8 +60,7 @@ public class VerificationInfo {
     return providerDeviceQoSReservations;
   }
 
-  public void setProviderDeviceQoSReservations(
-      List<QoS_Resource_Reservation> providerDeviceQoSReservations) {
+  public void setProviderDeviceQoSReservations(List<QoS_Resource_Reservation> providerDeviceQoSReservations) {
     this.providerDeviceQoSReservations = providerDeviceQoSReservations;
   }
 
@@ -74,8 +68,7 @@ public class VerificationInfo {
     return consumerDeviceQoSReservations;
   }
 
-  public void setConsumerDeviceQoSReservations(
-      List<QoS_Resource_Reservation> consumerDeviceQoSReservations) {
+  public void setConsumerDeviceQoSReservations(List<QoS_Resource_Reservation> consumerDeviceQoSReservations) {
     this.consumerDeviceQoSReservations = consumerDeviceQoSReservations;
   }
 

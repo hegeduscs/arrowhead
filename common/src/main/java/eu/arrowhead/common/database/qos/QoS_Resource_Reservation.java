@@ -38,8 +38,7 @@ public class QoS_Resource_Reservation {
     this.state = state;
   }
 
-  public QoS_Resource_Reservation(String state,
-                                  Map<String, String> qosParameters) {
+  public QoS_Resource_Reservation(String state, Map<String, String> qosParameters) {
     this.state = state;
     this.qosParameters = qosParameters;
   }

@@ -17,8 +17,7 @@ public class IntraCloudAuthRequest {
   public IntraCloudAuthRequest() {
   }
 
-  public IntraCloudAuthRequest(ArrowheadSystem consumer, Collection<ArrowheadSystem> providers,
-                               ArrowheadService service, boolean generateToken) {
+  public IntraCloudAuthRequest(ArrowheadSystem consumer, Collection<ArrowheadSystem> providers, ArrowheadService service, boolean generateToken) {
     this.consumer = consumer;
     this.providers = providers;
     this.service = service;
@@ -58,8 +57,7 @@ public class IntraCloudAuthRequest {
   }
 
   public boolean isPayloadUsable() {
-    if (consumer == null || service == null || providers.isEmpty() ||
-        !consumer.isValidForDatabase() || !service.isValidSoft()) {
+    if (consumer == null || service == null || providers.isEmpty() || !consumer.isValidForDatabase() || !service.isValidSoft()) {
       return false;
     }
     for (ArrowheadSystem provider : providers) {

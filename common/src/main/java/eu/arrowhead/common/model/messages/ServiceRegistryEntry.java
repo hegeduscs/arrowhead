@@ -18,9 +18,7 @@ public class ServiceRegistryEntry {
     super();
   }
 
-  public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI,
-                              List<ServiceMetadata> serviceMetadata, String tsig_key,
-                              String version) {
+  public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI, List<ServiceMetadata> serviceMetadata, String tsig_key, String version) {
     super();
     this.provider = provider;
     this.serviceURI = serviceURI;

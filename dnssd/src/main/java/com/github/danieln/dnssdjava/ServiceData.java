@@ -9,9 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Data about a service instance. A {@link ServiceName} uniquely identifies the service. The host
- * and port specifies the service endpoint. A fully qualified host name must be used, which means
- * that it must end with a period, eg. "host1.example.com.". Key-value properties can provide extra
+ * Data about a service instance. A {@link ServiceName} uniquely identifies the service. The host and port specifies the service endpoint. A fully
+ * qualified host name must be used, which means that it must end with a period, eg. "host1.example.com.". Key-value properties can provide extra
  * information about the service. The property keys to use are defined by the service type.
  *
  * @author Daniel Nilsson
@@ -97,8 +96,7 @@ public class ServiceData {
   }
 
   /**
-   * Get the property map. The returned map can be modified to add, change and remove key-value
-   * pairs.
+   * Get the property map. The returned map can be modified to add, change and remove key-value pairs.
    *
    * @return a key-value mapping.
    */

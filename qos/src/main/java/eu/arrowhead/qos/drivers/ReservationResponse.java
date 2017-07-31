@@ -24,8 +24,7 @@ public class ReservationResponse {
   public ReservationResponse() {
   }
 
-  public ReservationResponse(Boolean sucess, String reason,
-                             Map<String, String> networkConfiguration) {
+  public ReservationResponse(Boolean sucess, String reason, Map<String, String> networkConfiguration) {
     this.sucess = sucess;
     this.reason = reason;
     this.networkConfiguration = networkConfiguration;
@@ -51,8 +50,7 @@ public class ReservationResponse {
     return networkConfiguration;
   }
 
-  public void setNetworkConfiguration(
-      Map<String, String> networkConfiguration) {
+  public void setNetworkConfiguration(Map<String, String> networkConfiguration) {
     this.networkConfiguration = networkConfiguration;
   }
 

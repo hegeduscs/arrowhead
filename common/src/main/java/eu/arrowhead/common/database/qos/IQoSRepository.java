@@ -12,8 +12,7 @@ public interface IQoSRepository {
    * @param system ArrowheadSyste
    * @return returns list of qos reservations.
    */
-  List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(
-      ArrowheadSystem_qos system);
+  List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(ArrowheadSystem_qos system);
 
   /**
    * get all qos reservations.
@@ -28,8 +27,7 @@ public interface IQoSRepository {
    * @param filter map with filter
    * @return returns list of messages streams
    */
-  List<Message_Stream> getQoS_Resource_ReservationsFromFilter(
-      Map<String, String> filter);
+  List<Message_Stream> getQoS_Resource_ReservationsFromFilter(Map<String, String> filter);
 
   /**
    * get all messages streams

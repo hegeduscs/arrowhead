@@ -17,13 +17,11 @@ import javax.ws.rs.ext.Provider;
 public class SecurityFilter implements ContainerRequestFilter {
 
   @Inject
-  private
-  javax.inject.Provider<UriInfo> uriInfo;
+  private javax.inject.Provider<UriInfo> uriInfo;
 
   @Override
   public void filter(ContainerRequestContext context) throws IOException {
-    X509Certificate[] chain =
-        (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
+    X509Certificate[] chain = (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
 
     if (chain != null && chain.length > 0) {
       String subject = chain[0].getSubjectDN().getName();
