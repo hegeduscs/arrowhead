@@ -41,7 +41,7 @@ public class Node {
   @ElementCollection
   private Map<String, String> processingCapabilities;
 
-  protected Node() {
+  Node() {
     deployedSystems = new ArrayList<>();
     processingCapabilities = new HashMap<>();
   }
@@ -100,8 +100,6 @@ public class Node {
 
   /**
    * set deployed systems
-   *
-   * @param list of deployed systems
    */
   public void setDeployedSystems(List<DeployedSystem> deployedSystems) {
     this.deployedSystems = deployedSystems;

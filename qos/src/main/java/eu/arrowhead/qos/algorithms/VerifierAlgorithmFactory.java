@@ -20,9 +20,9 @@ import java.util.Map;
 public class VerifierAlgorithmFactory {
 
   private static VerifierAlgorithmFactory instance;
-  Class[] paramVerificationInfo = new Class[1];
+  private Class[] paramVerificationInfo = new Class[1];
 
-  protected VerifierAlgorithmFactory() {
+  private VerifierAlgorithmFactory() {
     super();
     //VerificationInfo parameter
     paramVerificationInfo[0] = VerificationInfo.class;

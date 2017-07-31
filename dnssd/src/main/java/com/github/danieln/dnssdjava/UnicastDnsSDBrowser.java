@@ -47,7 +47,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
   }
 
   public Collection<ServiceType> getServiceTypes() {
-    Set<ServiceType> results = new HashSet<ServiceType>();
+    Set<ServiceType> results = new HashSet<>();
     for (Name domain : browserDomains) {
       results.addAll(getServiceTypes(domain));
     }
@@ -56,7 +56,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 
   //@Override
   public Collection<ServiceName> getServiceInstances(ServiceType type) {
-    List<ServiceName> results = new ArrayList<ServiceName>();
+    List<ServiceName> results = new ArrayList<>();
     for (Name domain : browserDomains) {
       results.addAll(getServiceInstances(type, domain));
     }
@@ -123,7 +123,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
    */
   private List<ServiceType> getServiceTypes(Name domainName) {
     try {
-      List<ServiceType> results = new ArrayList<ServiceType>();
+      List<ServiceType> results = new ArrayList<>();
       Lookup lookup = new Lookup(Name.concatenate(SERVICES_DNSSD_UDP, domainName), Type.PTR);
       Record[] records = lookup.run();
       if (records != null) {
@@ -157,15 +157,15 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
    */
   private List<ServiceName> getServiceInstances(ServiceType type, Name domainName) {
     if (type.getSubtypes().isEmpty()) {
-      List<ServiceName> results = new ArrayList<ServiceName>();
+      List<ServiceName> results = new ArrayList<>();
       getServiceInstances(type.toDnsString(), domainName, results);
       return results;
     } else {
-      Set<ServiceName> results = new HashSet<ServiceName>();
+      Set<ServiceName> results = new HashSet<>();
       for (String subtype : type.toDnsStringsWithSubtype()) {
         getServiceInstances(subtype, domainName, results);
       }
-      return new ArrayList<ServiceName>(results);
+      return new ArrayList<>(results);
     }
   }
 

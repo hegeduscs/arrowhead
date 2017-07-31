@@ -6,7 +6,7 @@ import java.util.List;
 
 public class OrchestrationStoreQueryResponse {
 
-  private List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
+  private List<OrchestrationStore> entryList = new ArrayList<>();
 
   public OrchestrationStoreQueryResponse() {
   }

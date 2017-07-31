@@ -17,6 +17,7 @@ import javax.ws.rs.ext.Provider;
 public class SecurityFilter implements ContainerRequestFilter {
 
   @Inject
+  private
   javax.inject.Provider<UriInfo> uriInfo;
 
   @Override

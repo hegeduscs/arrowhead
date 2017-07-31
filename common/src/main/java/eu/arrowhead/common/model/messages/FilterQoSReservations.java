@@ -4,7 +4,7 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class FilterQoSReservations {
+class FilterQoSReservations {
 
   private Map<String, String> filters;
 

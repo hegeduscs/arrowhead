@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class IntraCloudAuthRequest {
 
   private ArrowheadSystem consumer;
-  private Collection<ArrowheadSystem> providers = new ArrayList<ArrowheadSystem>();
+  private Collection<ArrowheadSystem> providers = new ArrayList<>();
   private ArrowheadService service;
   private boolean generateToken;
 

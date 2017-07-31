@@ -1,6 +1,6 @@
 package eu.arrowhead.common.exception;
 
-public class QoSParamException extends Exception {
+class QoSParamException extends Exception {
 
   public QoSParamException() {
     super();

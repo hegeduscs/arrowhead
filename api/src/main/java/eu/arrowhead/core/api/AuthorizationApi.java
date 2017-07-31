@@ -39,8 +39,8 @@ import org.apache.log4j.Logger;
 public class AuthorizationApi {
 
   private static Logger log = Logger.getLogger(AuthorizationApi.class.getName());
-  DatabaseManager dm = DatabaseManager.getInstance();
-  HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+  private DatabaseManager dm = DatabaseManager.getInstance();
+  private HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -57,7 +57,7 @@ public class AuthorizationApi {
   @Path("/intracloud")
   public List<IntraCloudAuthorization> getIntraCloudAuthRights() {
 
-    List<IntraCloudAuthorization> authRights = new ArrayList<IntraCloudAuthorization>();
+    List<IntraCloudAuthorization> authRights = new ArrayList<>();
     authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
       log.info("AuthorizationApi:getIntraCloudAuthRights throws DataNotFoundException.");
@@ -72,7 +72,6 @@ public class AuthorizationApi {
   /**
    * Checks whether the consumer System can use a Service from a list of provider Systems.
    *
-   * @param IntraCloudAuthRequest request
    * @return IntraCloudAuthResponse
    * @throws DataNotFoundException, BadPayloadException
    */
@@ -100,7 +99,7 @@ public class AuthorizationApi {
           "Consumer System is not in the database. " + request.getConsumer().toString());
     }
 
-    HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<ArrowheadSystem, Boolean>();
+    HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<>();
     log.info("authorizationState hashmap created");
 
     restrictionMap.clear();
@@ -149,9 +148,7 @@ public class AuthorizationApi {
    * (Not bidirectional.) OneToMany relation between consumer and providers, OneToMany relation
    * between consumer and services.
    *
-   * @param IntraCloudAuthEntry entry
    * @return JAX-RS Response with status code 201 and ArrowheadSystem entity (the consumer system)
-   * @throws DuplicateEntryException, BadPayloadException
    */
   @POST
   @Path("/intracloud")
@@ -176,7 +173,7 @@ public class AuthorizationApi {
     ArrowheadSystem retrievedSystem = null;
     ArrowheadService retrievedService = null;
     IntraCloudAuthorization authRight = new IntraCloudAuthorization();
-    List<IntraCloudAuthorization> savedAuthRights = new ArrayList<IntraCloudAuthorization>();
+    List<IntraCloudAuthorization> savedAuthRights = new ArrayList<>();
 
     for (ArrowheadSystem providerSystem : entry.getProviderList()) {
       restrictionMap.clear();
@@ -216,8 +213,6 @@ public class AuthorizationApi {
    * Deletes the IntraCloudAuthorization entry with the id specified by the path parameter. Returns
    * 200 if the delete is succesful, 204 (no content) if the entry was not in the database to begin
    * with.
-   *
-   * @param Integer id
    */
   @DELETE
   @Path("/intracloud/{id}")
@@ -238,8 +233,6 @@ public class AuthorizationApi {
   /**
    * Deletes all the authorization right relations where the given System is the consumer.
    *
-   * @param String systemGroup
-   * @param String systemName
    * @return JAX-RS Response with status code 200 (if delete is succesfull) or 204 (if nothing
    * happens).
    */
@@ -257,7 +250,7 @@ public class AuthorizationApi {
       return Response.noContent().build();
     }
 
-    List<IntraCloudAuthorization> authRightsList = new ArrayList<IntraCloudAuthorization>();
+    List<IntraCloudAuthorization> authRightsList = new ArrayList<>();
     restrictionMap.clear();
     restrictionMap.put("consumer", consumer);
     authRightsList = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
@@ -277,8 +270,6 @@ public class AuthorizationApi {
   /**
    * Returns the list of consumable Services of a System.
    *
-   * @param String systemGroup
-   * @param String systemName
    * @return List<ArrowheadService>
    */
   @GET
@@ -296,11 +287,11 @@ public class AuthorizationApi {
               ", SN: " + systemName + ")");
     }
 
-    List<IntraCloudAuthorization> authRightsList = new ArrayList<IntraCloudAuthorization>();
+    List<IntraCloudAuthorization> authRightsList = new ArrayList<>();
     restrictionMap.clear();
     restrictionMap.put("consumer", system);
     authRightsList = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
-    Set<ArrowheadService> serviceList = new HashSet<ArrowheadService>();
+    Set<ArrowheadService> serviceList = new HashSet<>();
     for (IntraCloudAuthorization authRight : authRightsList) {
       serviceList.add(authRight.getService());
     }
@@ -318,7 +309,7 @@ public class AuthorizationApi {
   @Path("/intercloud")
   public List<InterCloudAuthorization> getInterCloudAuthRights() {
 
-    List<InterCloudAuthorization> authRights = new ArrayList<InterCloudAuthorization>();
+    List<InterCloudAuthorization> authRights = new ArrayList<>();
     authRights = dm.getAll(InterCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
       log.info("AuthorizationApi:getInterCloudAuthRights throws DataNotFoundException.");
@@ -333,7 +324,6 @@ public class AuthorizationApi {
   /**
    * Checks whether an external Cloud can use a local Service.
    *
-   * @param InterCloudAuthRequest request
    * @return boolean
    * @throws DataNotFoundException, BadPayloadException
    */
@@ -388,9 +378,7 @@ public class AuthorizationApi {
   /**
    * Adds a new Cloud and its consumable Services to the database.
    *
-   * @param InterCloudAuthEntry entry
    * @return JAX-RS Response with status code 201 and ArrowheadCloud entity
-   * @throws DuplicateEntryException, BadPayloadException
    */
   @POST
   @Path("/intercloud")
@@ -414,7 +402,7 @@ public class AuthorizationApi {
 
     ArrowheadService retrievedService = null;
     InterCloudAuthorization authRight = new InterCloudAuthorization();
-    List<InterCloudAuthorization> savedAuthRights = new ArrayList<InterCloudAuthorization>();
+    List<InterCloudAuthorization> savedAuthRights = new ArrayList<>();
 
     for (ArrowheadService service : entry.getServiceList()) {
       restrictionMap.clear();
@@ -442,8 +430,6 @@ public class AuthorizationApi {
    * Deletes the InterCloudAuthorization entry with the id specified by the path parameter. Returns
    * 200 if the delete is succesful, 204 (no content) if the entry was not in the database to begin
    * with.
-   *
-   * @param Integer id
    */
   @DELETE
   @Path("/intercloud/{id}")
@@ -464,8 +450,6 @@ public class AuthorizationApi {
   /**
    * Deletes the authorization rights of the Cloud.
    *
-   * @param String operatorName
-   * @param String cloudName
    * @return JAX-RS Response with status code 200 (if delete is succesfull) or 204 (if nothing
    * happens).
    */
@@ -483,7 +467,7 @@ public class AuthorizationApi {
       return Response.noContent().build();
     }
 
-    List<InterCloudAuthorization> authRightsList = new ArrayList<InterCloudAuthorization>();
+    List<InterCloudAuthorization> authRightsList = new ArrayList<>();
     restrictionMap.clear();
     restrictionMap.put("cloud", cloud);
     authRightsList = dm.getAll(InterCloudAuthorization.class, restrictionMap);
@@ -503,8 +487,6 @@ public class AuthorizationApi {
   /**
    * Returns the list of consumable Services of a Cloud.
    *
-   * @param String operatorName
-   * @param String cloudName
    * @return List<ArrowheadService>
    */
   @GET
@@ -522,11 +504,11 @@ public class AuthorizationApi {
               ", CN: " + cloudName + ")");
     }
 
-    List<InterCloudAuthorization> authRightsList = new ArrayList<InterCloudAuthorization>();
+    List<InterCloudAuthorization> authRightsList = new ArrayList<>();
     restrictionMap.clear();
     restrictionMap.put("cloud", cloud);
     authRightsList = dm.getAll(InterCloudAuthorization.class, restrictionMap);
-    Set<ArrowheadService> serviceList = new HashSet<ArrowheadService>();
+    Set<ArrowheadService> serviceList = new HashSet<>();
     for (InterCloudAuthorization authRight : authRightsList) {
       serviceList.add(authRight.getService());
     }

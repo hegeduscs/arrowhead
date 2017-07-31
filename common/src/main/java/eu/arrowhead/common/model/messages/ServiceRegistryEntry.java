@@ -8,11 +8,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ServiceRegistryEntry {
 
-  ArrowheadSystem provider;
-  String serviceURI;
-  List<ServiceMetadata> serviceMetadata;
-  String tSIG_key;
-  String version;
+  private ArrowheadSystem provider;
+  private String serviceURI;
+  private List<ServiceMetadata> serviceMetadata;
+  private String tSIG_key;
+  private String version;
 
   public ServiceRegistryEntry() {
     super();

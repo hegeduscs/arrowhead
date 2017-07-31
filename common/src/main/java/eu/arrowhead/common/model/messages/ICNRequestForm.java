@@ -16,8 +16,8 @@ public class ICNRequestForm {
   private String authenticationInfo;
   private ArrowheadCloud targetCloud;
   private ArrowheadSystem requesterSystem;
-  private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
-  private Map<String, Boolean> negotiationFlags = new HashMap<String, Boolean>();
+  private List<ArrowheadSystem> preferredProviders = new ArrayList<>();
+  private Map<String, Boolean> negotiationFlags = new HashMap<>();
 
   public ICNRequestForm() {
   }

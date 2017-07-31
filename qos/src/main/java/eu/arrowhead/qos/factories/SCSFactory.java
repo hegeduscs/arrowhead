@@ -32,7 +32,7 @@ public class SCSFactory {
   private static SCSFactory instance;
   private ISCSRepository repo;
 
-  protected SCSFactory() {
+  private SCSFactory() {
     super();
     repo = new SCSRepositoryImpl();
   }
@@ -47,7 +47,7 @@ public class SCSFactory {
     return instance;
   }
 
-  protected static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
+  private static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
       eu.arrowhead.common.model.ArrowheadSystem in) {
 
     eu.arrowhead.common.database.qos.ArrowheadSystem_qos out = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
@@ -61,7 +61,7 @@ public class SCSFactory {
     return out;
   }
 
-  protected static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
+  private static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
       eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
 
     eu.arrowhead.common.model.ArrowheadSystem out = new eu.arrowhead.common.model.ArrowheadSystem();
@@ -75,7 +75,7 @@ public class SCSFactory {
     return out;
   }
 
-  protected static List<ArrowheadSystem> convertToDTO_List(
+  private static List<ArrowheadSystem> convertToDTO_List(
       List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
     if (in == null) {
       return null;
@@ -113,7 +113,7 @@ public class SCSFactory {
     return out;
   }
 
-  protected static eu.arrowhead.common.model.ArrowheadService convertToDTO(
+  private static eu.arrowhead.common.model.ArrowheadService convertToDTO(
       eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
 
     eu.arrowhead.common.model.ArrowheadService out = new eu.arrowhead.common.model.ArrowheadService();
@@ -290,7 +290,7 @@ public class SCSFactory {
    * ********************************************** ************* Converts From/To DTO ************
    * ***********************************************
    */
-  protected eu.arrowhead.common.database.qos.ArrowheadSystem_qos converFromDTO(
+  private eu.arrowhead.common.database.qos.ArrowheadSystem_qos converFromDTO(
       ArrowheadSystem system) {
     if (system == null) {
       return null;

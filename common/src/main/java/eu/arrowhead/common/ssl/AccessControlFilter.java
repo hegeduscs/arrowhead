@@ -22,6 +22,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
   @Context
   Configuration configuration;
   @Inject
+  private
   javax.inject.Provider<UriInfo> uriInfo;
 
   private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration,
@@ -90,7 +91,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
         } else {
           log.info("Unauthorized access! (SSL)");
           /*throw new AuthenticationException
-					("This client is not allowed to use this resource: " + requestTarget);*/
+          ("This client is not allowed to use this resource: " + requestTarget);*/
         }
       }
     }

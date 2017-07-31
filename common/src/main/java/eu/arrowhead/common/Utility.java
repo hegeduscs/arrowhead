@@ -27,7 +27,7 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
-  public static HostnameVerifier allHostsValid = new HostnameVerifier() {
+  private static HostnameVerifier allHostsValid = new HostnameVerifier() {
     public boolean verify(String hostname, SSLSession session) {
       // Decide whether to allow the connection...
       return true;
@@ -36,7 +36,7 @@ public final class Utility {
   private static Logger log = Logger.getLogger(Utility.class.getName());
   private static SSLContext sslContext = null;
   private static DatabaseManager dm = DatabaseManager.getInstance();
-  private static HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+  private static HashMap<String, Object> restrictionMap = new HashMap<>();
 
   private Utility() {
   }
@@ -212,10 +212,10 @@ public final class Utility {
 
   public static List<String> getNeighborCloudURIs() {
     restrictionMap.clear();
-    List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();
+    List<NeighborCloud> cloudList = new ArrayList<>();
     cloudList.addAll(dm.getAll(NeighborCloud.class, restrictionMap));
 
-    List<String> URIList = new ArrayList<String>();
+    List<String> URIList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
       URIList.add(getURI(cloud.getCloud().getAddress(),
                          cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(),
@@ -227,7 +227,7 @@ public final class Utility {
 
   public static ArrowheadCloud getOwnCloud() {
     restrictionMap.clear();
-    List<OwnCloud> cloudList = new ArrayList<OwnCloud>();
+    List<OwnCloud> cloudList = new ArrayList<>();
     cloudList = dm.getAll(OwnCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("Utility:getOwnCloud DNFException");

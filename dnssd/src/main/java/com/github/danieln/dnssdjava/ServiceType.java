@@ -28,7 +28,7 @@ public class ServiceType {
    * @param type the service type (eg. "_http").
    * @param transport the transport protocol.
    */
-  public ServiceType(String type, Transport transport) {
+  private ServiceType(String type, Transport transport) {
     this.type = type;
     this.transport = transport;
     this.subtypes = Collections.emptyList();
@@ -188,7 +188,7 @@ public class ServiceType {
    * @return A list of strings of the form "{subtype}._sub.{type}.{transport}".
    */
   List<String> toDnsStringsWithSubtype() {
-    List<String> list = new ArrayList<String>(subtypes.size());
+    List<String> list = new ArrayList<>(subtypes.size());
     for (String subtype : subtypes) {
       list.add(subtype + "._sub." + type + "." + transport);
     }

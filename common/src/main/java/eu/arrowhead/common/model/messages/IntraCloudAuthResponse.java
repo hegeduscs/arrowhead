@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class IntraCloudAuthResponse {
 
-  private HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<ArrowheadSystem, Boolean>();
+  private HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<>();
 
   public IntraCloudAuthResponse() {
   }

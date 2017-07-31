@@ -20,7 +20,7 @@ public abstract class DnsSDFactory {
 
   private static DnsSDFactory instance;
 
-  protected DnsSDFactory() {
+  DnsSDFactory() {
   }
 
   /**
@@ -56,7 +56,8 @@ public abstract class DnsSDFactory {
    * @param computerDomains the domain names to try.
    * @return a new {@link DnsSDDomainEnumerator}.
    */
-  public abstract DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains);
+  protected abstract DnsSDDomainEnumerator createDomainEnumerator(
+      Collection<String> computerDomains);
 
   /**
    * Create a {@link DnsSDDomainEnumerator} that finds the browsing and registration domains for the
@@ -154,7 +155,7 @@ public abstract class DnsSDFactory {
    * @return a new {@link DnsSDRegistrator}.
    * @throws DnsSDException if the registrator can't be created.
    */
-  public abstract DnsSDRegistrator createRegistrator(String registeringDomain)
+  protected abstract DnsSDRegistrator createRegistrator(String registeringDomain)
       throws DnsSDException;
 
   /**

@@ -10,7 +10,7 @@ import java.util.List;
 public final class StoreService {
 
   private static DatabaseManager dm = DatabaseManager.getInstance();
-  private static HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+  private static HashMap<String, Object> restrictionMap = new HashMap<>();
 
   /**
    * This method returns all the Orchestration Store entries belonging to a consumer.
@@ -87,7 +87,7 @@ public final class StoreService {
    * This method returns an ArrowheadSystem from the database.
    */
   private static ArrowheadSystem getConsumerSystem(String systemGroup, String systemName) {
-    HashMap<String, Object> rm = new HashMap<String, Object>();
+    HashMap<String, Object> rm = new HashMap<>();
     rm.put("systemGroup", systemGroup);
     rm.put("systemName", systemName);
     return dm.get(ArrowheadSystem.class, rm);
@@ -98,7 +98,7 @@ public final class StoreService {
    */
   private static ArrowheadService getRequestedService(String serviceGroup,
                                                       String serviceDefinition) {
-    HashMap<String, Object> rm = new HashMap<String, Object>();
+    HashMap<String, Object> rm = new HashMap<>();
     rm.put("serviceGroup", serviceGroup);
     rm.put("serviceDefinition", serviceDefinition);
     return dm.get(ArrowheadService.class, rm);

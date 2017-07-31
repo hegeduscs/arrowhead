@@ -42,7 +42,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Daniel Nilsson
  */
-public class BrowserApp extends JFrame {
+class BrowserApp extends JFrame {
 
   private static final long serialVersionUID = 1L;
   private JComboBox computerDomainCombo;
@@ -56,7 +56,7 @@ public class BrowserApp extends JFrame {
   private JTable propertiesTabel;
   private DnsSDBrowser serviceBrowser;
 
-  public BrowserApp() {
+  private BrowserApp() {
     super("DNS-SD Browser");
     GroupLayout layout = new GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
@@ -209,7 +209,7 @@ public class BrowserApp extends JFrame {
 
       @Override
       protected Void doInBackground() throws Exception {
-        domains = new ArrayList<String>();
+        domains = new ArrayList<>();
         domains.add("");
         domains.addAll(DnsSDFactory.getInstance().getComputerDomains());
         return null;

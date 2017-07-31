@@ -21,15 +21,15 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 
-public class OrchestratorMain {
+class OrchestratorMain {
 
-  public static HttpServer server = null;
-  public static HttpServer secureServer = null;
+  private static HttpServer server = null;
+  private static HttpServer secureServer = null;
   private static Logger log = Logger.getLogger(OrchestratorMain.class.getName());
   private static Properties prop;
-  public static final String BASE_URI = getProp()
+  private static final String BASE_URI = getProp()
       .getProperty("base_uri", "http://0.0.0.0:8444/orchestrator/");
-  public static final String BASE_URI_SECURED = getProp()
+  private static final String BASE_URI_SECURED = getProp()
       .getProperty("base_uri_secured", "https://0.0.0.0:8445/orchestrator/");
 
   public static void main(String[] args) throws IOException {
@@ -89,7 +89,7 @@ public class OrchestratorMain {
     }
   }
 
-  public static void shutdown() {
+  private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
@@ -101,7 +101,7 @@ public class OrchestratorMain {
     System.out.println("Orchestrator Server(s) stopped");
   }
 
-  public static HttpServer startServer() throws IOException {
+  private static HttpServer startServer() throws IOException {
     log.info("Starting server at: " + BASE_URI);
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -117,7 +117,7 @@ public class OrchestratorMain {
     return server;
   }
 
-  public static HttpServer startSecureServer() throws IOException {
+  private static HttpServer startSecureServer() throws IOException {
     log.info("Starting server at: " + BASE_URI_SECURED);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
@@ -162,7 +162,7 @@ public class OrchestratorMain {
     return server;
   }
 
-  public synchronized static Properties getProp() {
+  private synchronized static Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();

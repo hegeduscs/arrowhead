@@ -8,11 +8,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class QoSReservationCommand {
 
-  public ArrowheadService service;
-  public ArrowheadSystem producer;
-  public ArrowheadSystem consumer;
-  public Map<String, String> commands;
-  public Map<String, String> requestedQoS;
+  private ArrowheadService service;
+  private ArrowheadSystem producer;
+  private ArrowheadSystem consumer;
+  private Map<String, String> commands;
+  private Map<String, String> requestedQoS;
 
   protected QoSReservationCommand() {
 

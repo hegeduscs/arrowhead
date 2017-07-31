@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class GSDResult {
 
-  private List<GSDAnswer> response = new ArrayList<GSDAnswer>();
+  private List<GSDAnswer> response = new ArrayList<>();
 
   public GSDResult() {
   }

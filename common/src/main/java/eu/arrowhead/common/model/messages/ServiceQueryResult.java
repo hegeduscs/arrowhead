@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ServiceQueryResult {
 
-  private List<ProvidedService> serviceQueryData = new ArrayList<ProvidedService>();
+  private List<ProvidedService> serviceQueryData = new ArrayList<>();
 
   public ServiceQueryResult() {
   }

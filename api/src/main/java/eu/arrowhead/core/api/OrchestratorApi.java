@@ -33,8 +33,8 @@ import org.apache.log4j.Logger;
 public class OrchestratorApi {
 
   private static Logger log = Logger.getLogger(OrchestratorApi.class.getName());
-  DatabaseManager dm = DatabaseManager.getInstance();
-  HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+  private DatabaseManager dm = DatabaseManager.getInstance();
+  private HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -45,7 +45,6 @@ public class OrchestratorApi {
   /**
    * Returns an Orchestration Store entry from the database specified by the database generated id.
    *
-   * @param Integer id
    * @return OrchestrationStore
    */
   @GET
@@ -72,7 +71,7 @@ public class OrchestratorApi {
   @Path("all")
   public List<OrchestrationStore> getAllStoreEntries() {
 
-    List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+    List<OrchestrationStore> store = new ArrayList<>();
     store = dm.getAll(OrchestrationStore.class, restrictionMap);
     if (store.isEmpty()) {
       log.info("OrchestrationApi:getAllStoreEntries throws DataNotFoundException.");
@@ -93,7 +92,7 @@ public class OrchestratorApi {
   @Path("all_active")
   public List<OrchestrationStore> getActiveStoreEntries() {
 
-    List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+    List<OrchestrationStore> store = new ArrayList<>();
     restrictionMap.put("isActive", true);
     store = dm.getAll(OrchestrationStore.class, restrictionMap);
     if (store.isEmpty()) {
@@ -110,7 +109,6 @@ public class OrchestratorApi {
    * Returns the Orchestration Store entries from the database specified by the consumer (and the
    * service).
    *
-   * @param OrchestrationStoreQuery query
    * @return List<OrchestrationStore>
    * @throws BadPayloadException, DataNotFoundException
    */
@@ -123,8 +121,8 @@ public class OrchestratorApi {
                                         + "is/are missing.");
     }
 
-    List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
-    HashMap<String, Object> rm = new HashMap<String, Object>();
+    List<OrchestrationStore> store = new ArrayList<>();
+    HashMap<String, Object> rm = new HashMap<>();
 
     rm.put("systemGroup", query.getRequesterSystem().getSystemGroup());
     rm.put("systemName", query.getRequesterSystem().getSystemName());
@@ -162,13 +160,12 @@ public class OrchestratorApi {
    * BadPayloadException are being skipped. The returned list only contains the elements which was
    * saved in the process.
    *
-   * @param List<OrchestrationStore> serviceList
    * @return List<OrchestrationStore>
    */
   @POST
   public List<OrchestrationStore> addStoreEntries(List<OrchestrationStore> storeEntries) {
 
-    List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+    List<OrchestrationStore> store = new ArrayList<>();
     for (OrchestrationStore entry : storeEntries) {
       if (entry.isPayloadUsable()) {
         restrictionMap.clear();
@@ -226,7 +223,6 @@ public class OrchestratorApi {
   /**
    * Toggles the isActive boolean for the Orchestration Store entry specified by the id field.
    *
-   * @param Integer id
    * @return OrchestrationStore
    * @throws DataNotFoundException, BadPayloadException
    */
@@ -256,7 +252,6 @@ public class OrchestratorApi {
    * payload. Entity fields have their own update method in CommonApi.class. (Or delete and then
    * post the modified entry again.)
    *
-   * @param OrchestrationStore payload
    * @return OrchestrationStore
    * @throws BadPayloadException, DataNotFoundException
    */
@@ -295,8 +290,6 @@ public class OrchestratorApi {
    * Deletes the Orchestration Store entry with the id specified by the path parameter. Returns 200
    * if the delete is succesful, 204 (no content) if the entry was not in the database to begin
    * with.
-   *
-   * @param Integer id
    */
   @DELETE
   @Path("{id}")
@@ -318,14 +311,12 @@ public class OrchestratorApi {
    * Deletes the Orchestration Store entries from the database specified by the consumer. Returns
    * 200 if the delete is succesful, 204 (no content) if no matching entries were in the database to
    * begin with.
-   *
-   * @param OrchestrationStoreQuery query
    */
   @DELETE
   @Path("systemgroup/{systemGroup}/systemname/{systemName}")
   public Response deleteEntries(@PathParam("systemGroup") String systemGroup,
                                 @PathParam("systemName") String systemName) {
-    List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+    List<OrchestrationStore> store = new ArrayList<>();
 
     restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);

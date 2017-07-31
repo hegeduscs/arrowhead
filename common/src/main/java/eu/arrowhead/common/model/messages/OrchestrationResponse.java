@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class OrchestrationResponse {
 
-  private List<OrchestrationForm> response = new ArrayList<OrchestrationForm>();
+  private List<OrchestrationForm> response = new ArrayList<>();
 
   public OrchestrationResponse() {
     super();

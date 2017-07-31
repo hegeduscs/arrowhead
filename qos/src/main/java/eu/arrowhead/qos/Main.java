@@ -29,15 +29,15 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-public class Main {
+class Main {
 
   private static Logger log = Logger.getLogger(Main.class.
       getName());
   private static Properties prop;
 
-  public static final String BASE_URI = getProp().
+  private static final String BASE_URI = getProp().
       getProperty("base_uri", "http://0.0.0.0:8441/qos/");
-  public static final String BASE_URI_SECURED = getProp().
+  private static final String BASE_URI_SECURED = getProp().
       getProperty("base_uri_secured", "https://0.0.0.0:8442/qos/");
 
   public static void main(String[] args) throws IOException {
@@ -74,7 +74,7 @@ public class Main {
     System.out.println("QoS Server(s) stopped");
   }
 
-  public static HttpServer startServer() throws IOException {
+  private static HttpServer startServer() throws IOException {
     log.info("Starting server at: " + BASE_URI);
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -92,7 +92,7 @@ public class Main {
     return server;
   }
 
-  public static HttpServer startSecureServer() throws IOException {
+  private static HttpServer startSecureServer() throws IOException {
     log.info("Starting server at: " + BASE_URI_SECURED);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
@@ -140,7 +140,7 @@ public class Main {
     return server;
   }
 
-  public synchronized static Properties getProp() {
+  private synchronized static Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();

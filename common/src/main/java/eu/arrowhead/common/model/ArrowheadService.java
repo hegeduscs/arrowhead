@@ -42,7 +42,7 @@ public class ArrowheadService {
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
   @CollectionTable(name = "arrowheadservice_interfaces")
-  private List<String> interfaces = new ArrayList<String>();
+  private List<String> interfaces = new ArrayList<>();
 
   @Transient
   private List<ServiceMetadata> serviceMetadata;
@@ -87,13 +87,13 @@ public class ArrowheadService {
     return interfaces;
   }
 
+  public void setInterfaces(List<String> interfaces) {
+    this.interfaces = interfaces;
+  }
+
   public void setInterfaces(String oneInterface) {
     this.interfaces.clear();
     this.interfaces.add(oneInterface);
-  }
-
-  public void setInterfaces(List<String> interfaces) {
-    this.interfaces = interfaces;
   }
 
   public List<ServiceMetadata> getServiceMetadata() {

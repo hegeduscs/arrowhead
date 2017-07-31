@@ -15,11 +15,11 @@ public class ServiceRequestForm {
   private ArrowheadSystem requesterSystem;
   private ArrowheadCloud requesterCloud;
   private ArrowheadService requestedService;
-  private Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
-  private List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
-  private List<ArrowheadCloud> preferredClouds = new ArrayList<ArrowheadCloud>();
-  private Map<String, String> requestedQoS = new HashMap<String, String>();
-  private Map<String, String> commands = new HashMap<String, String>();
+  private Map<String, Boolean> orchestrationFlags = new HashMap<>();
+  private List<ArrowheadSystem> preferredProviders = new ArrayList<>();
+  private List<ArrowheadCloud> preferredClouds = new ArrayList<>();
+  private Map<String, String> requestedQoS = new HashMap<>();
+  private Map<String, String> commands = new HashMap<>();
 
   public ServiceRequestForm() {
     this.orchestrationFlags.put("triggerInterCloud", false);

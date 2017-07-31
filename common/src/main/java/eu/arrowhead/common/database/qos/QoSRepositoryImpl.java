@@ -20,7 +20,7 @@ import org.hibernate.exception.ConstraintViolationException;
  */
 public class QoSRepositoryImpl implements IQoSRepository {
 
-  public static final String URL = "hibernateQOS.cfg.xml";
+  private static final String URL = "hibernateQOS.cfg.xml";
   private static SessionFactory sessionFactory;
 
   public QoSRepositoryImpl() {
@@ -111,7 +111,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
   @SuppressWarnings("unchecked")
   private <T> List<T> getAll(Class<T> queryClass,
                              Map<String, Object> restrictionMap) {
-    List<T> retrievedList = new ArrayList<T>();
+    List<T> retrievedList = new ArrayList<>();
 
     Session session = getSessionFactory().openSession();
     Transaction transaction = null;
@@ -220,7 +220,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
     return object;
   }
 
-  public <T> void delete(T object) {
+  private <T> void delete(T object) {
     Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
@@ -245,7 +245,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
     }
   }
 
-  public SessionFactory getSessionFactory() {
+  private SessionFactory getSessionFactory() {
     if (sessionFactory != null) {
       return sessionFactory;
     } else {
@@ -272,38 +272,38 @@ public class QoSRepositoryImpl implements IQoSRepository {
 
   @Override
   public List<QoS_Resource_Reservation> getAllQoS_Resource_Reservations() {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     return getAll(QoS_Resource_Reservation.class, restrictionMap);
   }
 
   @Override
   public List<Message_Stream> getAllMessage_Streams() {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     return getAll(Message_Stream.class, restrictionMap);
   }
 
   @Override
   public List<ArrowheadSystem_qos> getAllArrowheadSystems() {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     return getAll(ArrowheadSystem_qos.class, restrictionMap);
   }
 
   @Override
   public List<ArrowheadService_qos> getAllArrowheadServices() {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     return getAll(ArrowheadService_qos.class, restrictionMap);
   }
 
   @Override
   public Message_Stream getMessage_Stream(Message_Stream messageStream) {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     restrictionMap.put("code", messageStream.getCode());
     return get(Message_Stream.class, restrictionMap);
   }
 
   @Override
   public ArrowheadSystem_qos getArrowheadSystem(ArrowheadSystem_qos system) {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     restrictionMap.put("system_group", system.getSystemGroup());
     restrictionMap.put("system_name", system.getSystemName());
     return get(ArrowheadSystem_qos.class, restrictionMap);
@@ -311,7 +311,7 @@ public class QoSRepositoryImpl implements IQoSRepository {
 
   @Override
   public ArrowheadService_qos getArrowheadService(ArrowheadService_qos service) {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     restrictionMap.put("service_group", service.getServiceGroup());
     restrictionMap.put("service_definition", service.getServiceDefinition());
     return get(ArrowheadService_qos.class, restrictionMap);

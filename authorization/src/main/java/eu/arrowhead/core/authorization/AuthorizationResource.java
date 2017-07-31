@@ -38,8 +38,8 @@ import org.apache.log4j.Logger;
 public class AuthorizationResource {
 
   private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());
-  DatabaseManager dm = DatabaseManager.getInstance();
-  HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+  private DatabaseManager dm = DatabaseManager.getInstance();
+  private HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   public String getIt() {
@@ -50,7 +50,6 @@ public class AuthorizationResource {
   /**
    * Generates token
    *
-   * @param TokenGenerationRequest tokenGenerationRequest
    * @return tokenGenerationResponse
    */
   @PUT
@@ -62,8 +61,8 @@ public class AuthorizationResource {
     List<ArrowheadSystem> providers = tokenGenerationRequest.getProviders();
 
     TokenGenerationResponse tokenGenerationResponse = new TokenGenerationResponse();
-    List<String> token = new ArrayList<String>();
-    List<String> signature = new ArrayList<String>();
+    List<String> token = new ArrayList<>();
+    List<String> signature = new ArrayList<>();
 
     try {
       for (int i = 0; i < providers.size(); i++) {
@@ -94,7 +93,6 @@ public class AuthorizationResource {
   /**
    * Checks whether the consumer System can use a Service from a list of provider Systems.
    *
-   * @param IntraCloudAuthRequest request
    * @return IntraCloudAuthResponse
    * @throws DataNotFoundException, BadPayloadException
    */
@@ -122,7 +120,7 @@ public class AuthorizationResource {
               .toString());
     }
 
-    HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<ArrowheadSystem, Boolean>();
+    HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<>();
     log.info("authorizationState hashmap created");
 
     restrictionMap.clear();
@@ -170,7 +168,6 @@ public class AuthorizationResource {
   /**
    * Checks whether an external Cloud can use a local Service.
    *
-   * @param InterCloudAuthRequest request
    * @return boolean
    * @throws DataNotFoundException, BadPayloadException
    */

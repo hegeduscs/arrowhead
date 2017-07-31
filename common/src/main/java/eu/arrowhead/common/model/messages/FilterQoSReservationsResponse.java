@@ -4,9 +4,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class FilterQoSReservationsResponse {
+class FilterQoSReservationsResponse {
 
-  public List<QoSReservationForm> reservations;
+  private List<QoSReservationForm> reservations;
 
   public FilterQoSReservationsResponse() {
     super();

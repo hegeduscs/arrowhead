@@ -29,8 +29,8 @@ import org.apache.log4j.Logger;
 public class ConfigurationApi {
 
   private static Logger log = Logger.getLogger(ConfigurationApi.class.getName());
-  DatabaseManager dm = DatabaseManager.getInstance();
-  HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+  private DatabaseManager dm = DatabaseManager.getInstance();
+  private HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -47,7 +47,7 @@ public class ConfigurationApi {
   @Path("/coresystems")
   public List<CoreSystem> getAllCoreSystems() {
 
-    List<CoreSystem> systemList = new ArrayList<CoreSystem>();
+    List<CoreSystem> systemList = new ArrayList<>();
     systemList = dm.getAll(CoreSystem.class, restrictionMap);
     if (systemList.isEmpty()) {
       log.info("ConfigurationApi:getAllCoreSystems throws DataNotFoundException");
@@ -66,7 +66,7 @@ public class ConfigurationApi {
   @Path("/neighborhood")
   public List<NeighborCloud> getAllNeighborClouds() {
 
-    List<NeighborCloud> cloudList = new ArrayList<NeighborCloud>();
+    List<NeighborCloud> cloudList = new ArrayList<>();
     cloudList = dm.getAll(NeighborCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("ConfigurationApi:getAllNeighborClouds throws DataNotFoundException");
@@ -85,7 +85,7 @@ public class ConfigurationApi {
   @Path("/owncloud")
   public List<OwnCloud> getAllOwnClouds() {
 
-    List<OwnCloud> cloudList = new ArrayList<OwnCloud>();
+    List<OwnCloud> cloudList = new ArrayList<>();
     cloudList = dm.getAll(OwnCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("ConfigurationApi:getAllOwnClouds throws DataNotFoundException");
@@ -98,7 +98,6 @@ public class ConfigurationApi {
   /**
    * Returns a Core System from the database specified by the system name.
    *
-   * @param String systemName
    * @return CoreSystem
    */
   @GET
@@ -118,8 +117,6 @@ public class ConfigurationApi {
   /**
    * Returns a Neighbor Cloud from the database specified by the operator and cloud name.
    *
-   * @param String operator
-   * @param String cloudName
    * @return NeighborCloud
    */
   @GET
@@ -151,14 +148,13 @@ public class ConfigurationApi {
    * or BadPayloadException (caused by missing systemName, address or serviceURI) are being skipped.
    * The returned list only contains the elements which was saved in the process.
    *
-   * @param List<CoreSystem> coreSystemList
    * @return List<CoreSystem>
    */
   @POST
   @Path("/coresystems")
   public List<CoreSystem> addCoreSystems(List<CoreSystem> coreSystemList) {
 
-    List<CoreSystem> savedCoreSystems = new ArrayList<CoreSystem>();
+    List<CoreSystem> savedCoreSystems = new ArrayList<>();
     for (CoreSystem cs : coreSystemList) {
       if (cs.isPayloadUsable()) {
         restrictionMap.clear();
@@ -180,14 +176,13 @@ public class ConfigurationApi {
    * or serviceURI) are being skipped. The returned list only contains the elements which was saved
    * in the process.
    *
-   * @param List<NeighborCloud> coreSystemList
    * @return List<NeighborCloud>
    */
   @POST
   @Path("/neighborhood")
   public List<NeighborCloud> addNeighborClouds(List<NeighborCloud> neighborCloudList) {
 
-    List<NeighborCloud> savedNeighborClouds = new ArrayList<NeighborCloud>();
+    List<NeighborCloud> savedNeighborClouds = new ArrayList<>();
     for (NeighborCloud nc : neighborCloudList) {
       if (nc.isPayloadUsable()) {
         restrictionMap.clear();
@@ -217,7 +212,6 @@ public class ConfigurationApi {
    * Adds an instance of OwnCloud to the database. Deletes any other row in this table, before doing
    * this save. Missing operator, cloudName or address causes BadPayloadException!
    *
-   * @param OwnCloud ownCloud
    * @return OwnCloud
    */
   @POST
@@ -230,7 +224,7 @@ public class ConfigurationApi {
                                         + "or address field! (ConfigurationApi:addOwnCloud)");
     }
 
-    List<OwnCloud> ownClouds = new ArrayList<OwnCloud>();
+    List<OwnCloud> ownClouds = new ArrayList<>();
     ownClouds = dm.getAll(OwnCloud.class, restrictionMap);
     if (!ownClouds.isEmpty()) {
       for (OwnCloud cloud : ownClouds) {
@@ -245,8 +239,6 @@ public class ConfigurationApi {
   /**
    * Updates an existing CoreSystem in the database. Returns 204 (no content) if the specified
    * CoreSystem was not in the database.
-   *
-   * @param CoreSystem cs
    */
   @PUT
   @Path("/coresystems")
@@ -277,8 +269,6 @@ public class ConfigurationApi {
   /**
    * Updates an existing NeighborCloud in the database. Returns 204 (no content) if the specified
    * NeighborCloud was not in the database.
-   *
-   * @param NeighborCloud nc
    */
   @PUT
   @Path("/neighborhood")
@@ -314,8 +304,6 @@ public class ConfigurationApi {
   /**
    * Deletes the CoreSystem from the database specified by the system name. Returns 200 if the
    * delete is succesful, 204 (no content) if the system was not in the database to begin with.
-   *
-   * @param String systemName
    */
   @DELETE
   @Path("/coresystems/{systemName}")
@@ -335,9 +323,6 @@ public class ConfigurationApi {
    * Deletes the NeighborCloud from the database specified by the operator and cloud name. Returns
    * 200 if the delete is succesful, 204 (no content) if the system was not in the database to begin
    * with.
-   *
-   * @param String operator
-   * @param String cloudName
    */
   @DELETE
   @Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")

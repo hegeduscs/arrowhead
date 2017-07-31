@@ -12,8 +12,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class IntraCloudAuthEntry {
 
   private ArrowheadSystem consumer;
-  private ArrayList<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
-  private ArrayList<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
+  private ArrayList<ArrowheadSystem> providerList = new ArrayList<>();
+  private ArrayList<ArrowheadService> serviceList = new ArrayList<>();
 
   public IntraCloudAuthEntry() {
   }

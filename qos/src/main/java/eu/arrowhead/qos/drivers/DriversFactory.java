@@ -21,9 +21,9 @@ import java.util.Map;
 public class DriversFactory {
 
   private static DriversFactory instance;
-  Class[] paramVerificationInfo = new Class[1];
+  private Class[] paramVerificationInfo = new Class[1];
 
-  protected DriversFactory() {
+  private DriversFactory() {
     //
     super();
     //VerificationInfo parameter
@@ -41,7 +41,6 @@ public class DriversFactory {
   }
 
   /**
-   * @param networkType Network type (ex. fttse)
    * @param networkConfiguration Network configuration parameters on a map.
    * @param provider ArrowheadSystem.
    * @param consumer ArrowheadSystem.

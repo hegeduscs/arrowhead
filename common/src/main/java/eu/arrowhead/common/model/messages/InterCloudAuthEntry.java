@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class InterCloudAuthEntry {
 
   private ArrowheadCloud cloud;
-  private Collection<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
+  private Collection<ArrowheadService> serviceList = new ArrayList<>();
 
   public InterCloudAuthEntry() {
   }

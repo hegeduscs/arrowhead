@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class QoSVerificationResponse {
 
+  //TODO make a new class instead with system, boolean and rejectmotivationtypes
   private Map<ArrowheadSystem, Boolean> response = new HashMap<>();
   private Map<ArrowheadSystem, QoSVerifierResponse.RejectMotivationTypes> rejectMotivation = new HashMap<>();
 

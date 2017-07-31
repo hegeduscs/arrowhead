@@ -16,10 +16,10 @@ import java.util.Set;
  *
  * @author Daniel Nilsson
  */
-public class AutomaticUnregister {
+class AutomaticUnregister {
 
   private final DnsSDRegistrator registrator;
-  private final Set<ServiceName> serviceNames = new HashSet<ServiceName>();
+  private final Set<ServiceName> serviceNames = new HashSet<>();
   private final Thread shutdownHook;
 
   /**

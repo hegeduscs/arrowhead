@@ -5,9 +5,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class QueryResult {
+class QueryResult {
 
-  private List<ProvidedService> providers = new ArrayList<ProvidedService>();
+  private List<ProvidedService> providers = new ArrayList<>();
 
   public QueryResult() {
     super();

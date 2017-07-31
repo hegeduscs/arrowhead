@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Renato Ayres
  */
 @XmlRootElement
-public class RemoveMonitorRule {
+class RemoveMonitorRule {
 
   private ArrowheadSystem provider;
   private ArrowheadSystem consumer;

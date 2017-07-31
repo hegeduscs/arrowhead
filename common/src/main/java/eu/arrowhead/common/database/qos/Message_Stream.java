@@ -55,7 +55,7 @@ public class Message_Stream {
   @Column(name = "code")
   private String code;
 
-  protected Message_Stream() {
+  Message_Stream() {
 
   }
 

@@ -20,16 +20,16 @@ import org.glassfish.jersey.server.ResourceConfig;
 /**
  * Main class.
  */
-public class ServiceRegistryMain {
+class ServiceRegistryMain {
 
-  public static HttpServer server = null;
+  private static HttpServer server = null;
   // Base URI the Grizzly HTTP server will listen on
-  public static HttpServer secureServer = null;
+  private static HttpServer secureServer = null;
   private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
   private static Properties prop;
-  public static final String BASE_URI = getProp()
+  private static final String BASE_URI = getProp()
       .getProperty("base_uri", "http://0.0.0.0:8080/core/");
-  public static final String BASE_URI_SECURED = getProp()
+  private static final String BASE_URI_SECURED = getProp()
       .getProperty("base_uri_secured", "https://0.0.0.0:8443/core/");
 
   /**
@@ -37,7 +37,7 @@ public class ServiceRegistryMain {
    *
    * @return Grizzly HTTP server.
    */
-  public static HttpServer startSecureServer() throws IOException {
+  private static HttpServer startSecureServer() throws IOException {
     // create a resource config that scans for JAX-RS resources and
     // providers
 
@@ -72,7 +72,7 @@ public class ServiceRegistryMain {
    *
    * @return Grizzly HTTP server.
    */
-  public static HttpServer startServer() throws IOException {
+  private static HttpServer startServer() throws IOException {
     // create a resource config that scans for JAX-RS resources and
     // providers
 
@@ -166,7 +166,7 @@ public class ServiceRegistryMain {
 
   }
 
-  public static void shutdown() {
+  private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
@@ -175,10 +175,10 @@ public class ServiceRegistryMain {
       log.info("Stopping server at: " + BASE_URI_SECURED);
       secureServer.shutdownNow();
     }
-    System.out.println("Authorization Server(s) stopped");
+    System.out.println("Service Registry Server(s) stopped");
   }
 
-  public synchronized static Properties getProp() {
+  private synchronized static Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();

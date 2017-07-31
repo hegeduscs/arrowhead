@@ -49,7 +49,7 @@ public class ArrowheadService_qos {
 
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
-  private List<String> interfaces = new ArrayList<String>();
+  private List<String> interfaces = new ArrayList<>();
 
   public ArrowheadService_qos() {
   }
@@ -121,20 +121,20 @@ public class ArrowheadService_qos {
   }
 
   /**
-   * Add one interface.
-   */
-  public void setInterfaces(String oneInterface) {
-    List<String> interfaces = new ArrayList<String>();
-    interfaces.add(oneInterface);
-    this.interfaces = interfaces;
-  }
-
-  /**
    * Set Interfaces.
    *
    * @param interfaces Set list of interfaces.
    */
   public void setInterfaces(List<String> interfaces) {
+    this.interfaces = interfaces;
+  }
+
+  /**
+   * Add one interface.
+   */
+  public void setInterfaces(String oneInterface) {
+    List<String> interfaces = new ArrayList<>();
+    interfaces.add(oneInterface);
     this.interfaces = interfaces;
   }
 

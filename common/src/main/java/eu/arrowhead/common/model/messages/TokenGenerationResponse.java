@@ -5,8 +5,8 @@ import java.util.List;
 
 public class TokenGenerationResponse {
 
-  private List<String> token = new ArrayList<String>();
-  private List<String> signature = new ArrayList<String>();
+  private List<String> token = new ArrayList<>();
+  private List<String> signature = new ArrayList<>();
 
   public TokenGenerationResponse() {
   }

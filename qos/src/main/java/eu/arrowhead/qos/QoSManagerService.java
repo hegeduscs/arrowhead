@@ -43,7 +43,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import org.hibernate.cfg.NotYetImplementedException;
 
-public class QoSManagerService {
+class QoSManagerService {
 
   private static Logger log = Logger.getLogger(QoSManagerService.class.
       getName());
@@ -101,18 +101,17 @@ public class QoSManagerService {
       // Run Algorithm
       QoSVerifierResponse response;
       try {
-        response = algorithmFactory.verify(network.
-                                               getNetworkType(),
-                                           provider_network_device.
-                                               getNetworkCapabilities(), consumer_network_device.
-                getNetworkCapabilities(),
+        response = algorithmFactory.verify(network.getNetworkType(),
+                                           provider_network_device.getNetworkCapabilities(),
+                                           consumer_network_device.getNetworkCapabilities(),
                                            providerDeviceQoSReservations,
-                                           consumerDeviceQoSReservations, message.
-                getRequestedQoS(),
+                                           consumerDeviceQoSReservations,
+                                           message.getRequestedQoS(),
                                            message.getCommands());
 
         updateQoSVerificationResponse(system, response, qosVerificationResponse);
-      } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException ex) {
+      }//TODO fix this catch branch... and others like it
+      catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException ex) {
         Logger.getLogger(QoSManagerService.class.getName()).
             log(Level.SEVERE, null, ex);
       }
@@ -223,9 +222,9 @@ public class QoSManagerService {
    * @param v Was possible.
    * @param qosVerificationResponse Reject Motivation Reason.
    */
-  protected void updateQoSVerificationResponse(ArrowheadSystem system,
-                                               QoSVerifierResponse v,
-                                               QoSVerificationResponse qosVerificationResponse) {
+  private void updateQoSVerificationResponse(ArrowheadSystem system,
+                                             QoSVerifierResponse v,
+                                             QoSVerificationResponse qosVerificationResponse) {
     boolean isPossible = v.getResponse();
     qosVerificationResponse.addResponse(system, v.getResponse());
     if (!isPossible) {
@@ -240,7 +239,7 @@ public class QoSManagerService {
    * @param rule Message to send to the QoSMonitor.
    * @return Returns true if it was successful.
    */
-  protected boolean contactMonitoring(AddMonitorRule rule) throws IOException {
+  private boolean contactMonitoring(AddMonitorRule rule) throws IOException {
     // READ FROM PROPERTIES FILE
     Properties props = new Properties();
     InputStream inputStream = getClass().getClassLoader().

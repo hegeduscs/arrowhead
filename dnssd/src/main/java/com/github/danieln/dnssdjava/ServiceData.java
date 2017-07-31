@@ -21,7 +21,7 @@ public class ServiceData {
   private ServiceName name;
   private String host;
   private int port;
-  private Map<String, String> properties = new HashMap<String, String>();
+  private Map<String, String> properties = new HashMap<>();
 
   /**
    * Create a ServiceData object.

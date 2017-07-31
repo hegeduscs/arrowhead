@@ -9,6 +9,6 @@ package mocks;
 /**
  * @author Paulo
  */
-public class QoSRepositoryMock {
+class QoSRepositoryMock {
 
 }

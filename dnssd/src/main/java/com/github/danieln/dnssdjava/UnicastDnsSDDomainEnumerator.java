@@ -73,7 +73,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    * @return a collection of domain names.
    */
   private Collection<String> getDomains(Name rrName) {
-    List<String> results = new ArrayList<String>();
+    List<String> results = new ArrayList<>();
     for (Name domain : computerDomains) {
       results.addAll(getDomains(rrName, domain));
     }
@@ -105,7 +105,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    */
   private List<String> getDomains(Name rrName, Name domainName) {
     try {
-      List<String> results = new ArrayList<String>();
+      List<String> results = new ArrayList<>();
       Lookup lookup = new Lookup(Name.concatenate(rrName, domainName), Type.PTR);
       Record[] records = lookup.run();
       if (records != null) {

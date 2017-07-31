@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ICNEnd {
 
-  OrchestrationResponse instructions;
+  private OrchestrationResponse instructions;
 
   public ICNEnd() {
   }

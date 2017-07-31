@@ -37,7 +37,6 @@ public class OrchestratorResource {
    * the service request form. The returned response (can) consists a list of endpoints where the
    * requester System can consume the requested Service.
    *
-   * @param ServiceRequestForm srf
    * @return OrchestrationResponse
    */
   @POST

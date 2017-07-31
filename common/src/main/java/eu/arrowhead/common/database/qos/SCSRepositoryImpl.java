@@ -17,7 +17,7 @@ import org.hibernate.exception.ConstraintViolationException;
 
 public class SCSRepositoryImpl implements ISCSRepository {
 
-  public static final String URL = "hibernateSCS.cfg.xml";
+  private static final String URL = "hibernateSCS.cfg.xml";
   private static SessionFactory sessionFactory;
 
   public SCSRepositoryImpl() {
@@ -33,7 +33,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 
   }
 
-  protected void consumer(Network net) {
+  private void consumer(Network net) {
     // CONSUMER*****************************:
     List<DeployedSystem> deployedSystems = new ArrayList<>();
     Map<String, String> networkCapabilities = new HashMap<>();
@@ -50,7 +50,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     saveNode(consumerN);
   }
 
-  protected void producer(Network net) {
+  private void producer(Network net) {
     // PRODUCER******************************:
     List<DeployedSystem> deployedSystems = new ArrayList<>();
     Map<String, String> networkCapabilities = new HashMap<>();
@@ -85,7 +85,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     producer(net);
   }
 
-  public SessionFactory getSessionFactory() {
+  private SessionFactory getSessionFactory() {
     if (sessionFactory != null) {
       return sessionFactory;
     } else {
@@ -176,7 +176,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
   @SuppressWarnings("unchecked")
   private <T> List<T> getAll(Class<T> queryClass,
                              Map<String, Object> restrictionMap) {
-    List<T> retrievedList = new ArrayList<T>();
+    List<T> retrievedList = new ArrayList<>();
 
     Session session = getSessionFactory().openSession();
     Transaction transaction = null;
@@ -231,7 +231,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     return object;
   }
 
-  public <T> T merge(T object) {
+  private <T> T merge(T object) {
     Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
@@ -258,7 +258,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
     return object;
   }
 
-  public <T> void delete(T object) {
+  private <T> void delete(T object) {
     Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
@@ -287,7 +287,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
    * TODO
    */
   public Node getNodeFromSystem(ArrowheadSystem_qos system) {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     // TODO: avoid getAll and use a restrictionMap for a Map<>
     List<Node> list = getAll(Node.class, restrictionMap);
 
@@ -311,7 +311,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 
   @Override
   public Network_Device getNetworkDeviceFromSystem(ArrowheadSystem_qos system) {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     // TODO: avoid getAll and use a restrictionMap for a Map<>
     List<Node> list = getAll(Node.class, restrictionMap);
 
@@ -330,7 +330,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 
   @Override
   public Network getNetworkFromNetworkDevice(Network_Device networkDevice) {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     // TODO avoid getAll and use
     if (networkDevice.getNetwork() == null) {
       return null;
@@ -341,7 +341,7 @@ public class SCSRepositoryImpl implements ISCSRepository {
 
   @Override
   public Node saveNode(Node node) {
-		/*
+    /*
 		 * Iterator it = node.getDeployedSystems().entrySet().iterator(); while
 		 * (it.hasNext()) { Map.Entry pair = (Map.Entry) it.next(); try {
 		 * saveArrowheadSystem((ArrowheadSystem) pair.getKey());
@@ -378,19 +378,19 @@ public class SCSRepositoryImpl implements ISCSRepository {
 
   @Override
   public List<Node> getAllNodes() {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     return getAll(Node.class, restrictionMap);
   }
 
   @Override
   public List<Network> getAllNetworks() {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     return getAll(Network.class, restrictionMap);
   }
 
   @Override
   public List<ArrowheadSystem_qos> getAllArrowheadSystems() {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     return getAll(ArrowheadSystem_qos.class, restrictionMap);
   }
 
@@ -416,14 +416,14 @@ public class SCSRepositoryImpl implements ISCSRepository {
 
   @Override
   public Node getNode(Node n) {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     restrictionMap.put("device_model_code", n.getDevice_model_code());
     return get(Node.class, restrictionMap);
   }
 
   @Override
   public Network getNetwork(Network network) {
-    HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+    HashMap<String, Object> restrictionMap = new HashMap<>();
     restrictionMap.put("network_name", network.getName());
     //restrictionMap.put("network_ip", network.getNetworkIP());
 

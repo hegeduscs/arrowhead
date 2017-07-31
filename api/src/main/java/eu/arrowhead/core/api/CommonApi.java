@@ -28,8 +28,8 @@ import org.apache.log4j.Logger;
 public class CommonApi {
 
   private static Logger log = Logger.getLogger(CommonApi.class.getName());
-  DatabaseManager dm = DatabaseManager.getInstance();
-  HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+  private DatabaseManager dm = DatabaseManager.getInstance();
+  private HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -46,7 +46,7 @@ public class CommonApi {
   @Path("/services")
   public List<ArrowheadService> getAllServices() {
 
-    List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
+    List<ArrowheadService> serviceList = new ArrayList<>();
     serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
     if (serviceList.isEmpty()) {
       log.info("CommonApi:getAllServices throws DataNotFoundException");
@@ -59,14 +59,13 @@ public class CommonApi {
   /**
    * Returns a list of ArrowheadServices from the database specified by the service group.
    *
-   * @param String serviceGroup
    * @return List<ArrowheadService>
    */
   @GET
   @Path("/services/servicegroup/{serviceGroup}")
   public List<ArrowheadService> getServiceGroup(@PathParam("serviceGroup") String serviceGroup) {
 
-    List<ArrowheadService> serviceList = new ArrayList<ArrowheadService>();
+    List<ArrowheadService> serviceList = new ArrayList<>();
     restrictionMap.put("serviceGroup", serviceGroup);
     serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
     if (serviceList.isEmpty()) {
@@ -82,8 +81,6 @@ public class CommonApi {
    * Returns an ArrowheadService from the database specified by the service group and service
    * definition.
    *
-   * @param String serviceGroup
-   * @param String serviceDefinition
    * @return ArrowheadService
    */
   @GET
@@ -109,14 +106,13 @@ public class CommonApi {
    * serviceDefinition) are being skipped. The returned list only contains the elements which was
    * saved in the process.
    *
-   * @param List<ArrowheadService> serviceList
    * @return List<ArrowheadService>
    */
   @POST
   @Path("/services")
   public List<ArrowheadService> addServices(List<ArrowheadService> serviceList) {
 
-    List<ArrowheadService> savedServices = new ArrayList<ArrowheadService>();
+    List<ArrowheadService> savedServices = new ArrayList<>();
     for (ArrowheadService service : serviceList) {
       if (service.isValidSoft()) {
         restrictionMap.clear();
@@ -136,8 +132,6 @@ public class CommonApi {
   /**
    * Updates an existing ArrowheadService in the database. Returns 204 (no content) if the specified
    * ArrowheadService was not in the database.
-   *
-   * @param ArrowheadService service
    */
   @PUT
   @Path("/services")
@@ -166,9 +160,6 @@ public class CommonApi {
    * Deletes the ArrowheadService from the database specified by the service group and service
    * definition. Returns 200 if the delete is succesful, 204 (no content) if the service was not in
    * the database to begin with.
-   *
-   * @param String serviceGroup
-   * @param String serviceDefinition
    */
   @DELETE
   @Path("/services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
@@ -195,7 +186,7 @@ public class CommonApi {
   @Path("/systems")
   public List<ArrowheadSystem> getAllSystems() {
 
-    List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
+    List<ArrowheadSystem> systemList = new ArrayList<>();
     systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
     if (systemList.isEmpty()) {
       log.info("CommonApi:getAllSystems throws DataNotFoundException");
@@ -208,14 +199,13 @@ public class CommonApi {
   /**
    * Returns a list of ArrowheadSystems from the database specified by the system group.
    *
-   * @param String systemGroup
    * @return List<ArrowheadSystem>
    */
   @GET
   @Path("/systems/systemgroup/{systemGroup}")
   public List<ArrowheadSystem> getSystemGroup(@PathParam("systemGroup") String systemGroup) {
 
-    List<ArrowheadSystem> systemList = new ArrayList<ArrowheadSystem>();
+    List<ArrowheadSystem> systemList = new ArrayList<>();
     restrictionMap.put("systemGroup", systemGroup);
     systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
     if (systemList.isEmpty()) {
@@ -230,8 +220,6 @@ public class CommonApi {
   /**
    * Returns an ArrowheadSystem from the database specified by the system group and system name.
    *
-   * @param String systemGroup
-   * @param String systemName
    * @return ArrowheadSystem
    */
   @GET
@@ -257,14 +245,13 @@ public class CommonApi {
    * address) are being skipped. The returned list only contains the elements which was saved in the
    * process.
    *
-   * @param List<ArrowheadSystem> systemList
    * @return List<ArrowheadSystem>
    */
   @POST
   @Path("/systems")
   public List<ArrowheadSystem> addSystems(List<ArrowheadSystem> systemList) {
 
-    List<ArrowheadSystem> savedSystems = new ArrayList<ArrowheadSystem>();
+    List<ArrowheadSystem> savedSystems = new ArrayList<>();
     for (ArrowheadSystem system : systemList) {
       if (system.isValid()) {
         restrictionMap.clear();
@@ -285,8 +272,6 @@ public class CommonApi {
   /**
    * Updates an existing ArrowheadSystem in the database. Returns 204 (no content) if the specified
    * ArrowheadSystem was not in the database.
-   *
-   * @param ArrowheadSystem system
    */
   @PUT
   @Path("/systems")
@@ -317,9 +302,6 @@ public class CommonApi {
    * Deletes the ArrowheadSystem from the database specified by the system group and system name.
    * Returns 200 if the delete is succesful, 204 (no content) if the system was not in the database
    * to begin with.
-   *
-   * @param String systemGroup
-   * @param String systemName
    */
   @DELETE
   @Path("/systems/systemgroup/{systemGroup}/systemname/{systemName}")
@@ -346,7 +328,7 @@ public class CommonApi {
   @Path("/clouds")
   public List<ArrowheadCloud> getAllClouds() {
 
-    List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
+    List<ArrowheadCloud> cloudList = new ArrayList<>();
     cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("CommonApi:getAllClouds throws DataNotFoundException");
@@ -359,14 +341,13 @@ public class CommonApi {
   /**
    * Returns a list of ArrowheadClouds from the database specified by the operator.
    *
-   * @param String operator
    * @return List<ArrowheadCloud>
    */
   @GET
   @Path("/clouds/operator/{operator}")
   public List<ArrowheadCloud> getCloudList(@PathParam("operator") String operator) {
 
-    List<ArrowheadCloud> cloudList = new ArrayList<ArrowheadCloud>();
+    List<ArrowheadCloud> cloudList = new ArrayList<>();
     restrictionMap.put("operator", operator);
     cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
@@ -381,8 +362,6 @@ public class CommonApi {
   /**
    * Returns an ArrowheadCloud from the database specified by the operator and cloud name.
    *
-   * @param String operator
-   * @param String cloudName
    * @return ArrowheadCloud
    */
   @GET
@@ -408,14 +387,13 @@ public class CommonApi {
    * or serviceURI) are being skipped. The returned list only contains the elements which was saved
    * in the process.
    *
-   * @param List<ArrowheadCloud> cloudList
    * @return List<ArrowheadCloud>
    */
   @POST
   @Path("/clouds")
   public List<ArrowheadCloud> addClouds(List<ArrowheadCloud> cloudList) {
 
-    List<ArrowheadCloud> savedClouds = new ArrayList<ArrowheadCloud>();
+    List<ArrowheadCloud> savedClouds = new ArrayList<>();
     for (ArrowheadCloud cloud : cloudList) {
       if (cloud.isValid()) {
         restrictionMap.clear();
@@ -436,8 +414,6 @@ public class CommonApi {
   /**
    * Updates an existing ArrowheadCloud in the database. Returns 204 (no content) if the specified
    * ArrowheadCloud was not in the database.
-   *
-   * @param ArrowheadCloud cloud
    */
   @PUT
   @Path("/clouds")
@@ -469,9 +445,6 @@ public class CommonApi {
    * Deletes the ArrowheadCloud from the database specified by the operator and cloud name. Returns
    * 200 if the delete is succesful, 204 (no content) if the cloud was not in the database to begin
    * with.
-   *
-   * @param String operator
-   * @param String cloudName
    */
   @DELETE
   @Path("/clouds/operator/{operator}/cloudname/{cloudName}")

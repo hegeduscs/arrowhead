@@ -70,6 +70,12 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @Column(name = "orchestration_rule")
   private String orchestrationRule;
 
+/*  @ElementCollection(fetch = FetchType.LAZY)
+  @MapKeyColumn(name="arrowhead_key")
+  @Column(name="arrowhead_value")
+  @CollectionTable(name="hashmap_test", joinColumns=@JoinColumn(name="id"))
+  Map<String, String> attributes = new HashMap<String, String>(); // maps from attribute name to value*/
+
   public OrchestrationStore() {
   }
 
@@ -178,6 +184,14 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   public void setOrchestrationRule(String orchestrationRule) {
     this.orchestrationRule = orchestrationRule;
   }
+
+  /*public Map<String, String> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(Map<String, String> attributes) {
+    this.attributes = attributes;
+  }*/
 
   public boolean isPayloadUsable() {
     if (consumer == null || service == null || !consumer.isValid() || !service.isValidStrict()) {

@@ -12,7 +12,7 @@ public class QoSVerify {
 
   private ArrowheadSystem consumer;
   private ArrowheadService requestedService;
-  private List<ArrowheadSystem> provider = new ArrayList<ArrowheadSystem>();
+  private List<ArrowheadSystem> provider = new ArrayList<>();
   private Map<String, String> requestedQoS;
   private Map<String, String> commands;
 

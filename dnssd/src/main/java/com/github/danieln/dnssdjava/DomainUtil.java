@@ -41,7 +41,7 @@ class DomainUtil {
     if (domain != null) {
       return Collections.singletonList(domain);
     }
-    List<String> results = new ArrayList<String>();
+    List<String> results = new ArrayList<>();
     try {
       Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
       while (interfaces.hasMoreElements()) {
@@ -86,7 +86,7 @@ class DomainUtil {
     if (hostname != null) {
       return Collections.singletonList(hostname);
     }
-    List<String> results = new ArrayList<String>();
+    List<String> results = new ArrayList<>();
     try {
       Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
       while (interfaces.hasMoreElements()) {
@@ -117,7 +117,8 @@ class DomainUtil {
    * @return the network address (host part is all zero).
    * @throws UnknownHostException if something went terribly wrong.
    */
-  static InetAddress calculateNetworkAddress(InterfaceAddress ifaddr) throws UnknownHostException {
+  private static InetAddress calculateNetworkAddress(InterfaceAddress ifaddr)
+      throws UnknownHostException {
     byte[] addr = ifaddr.getAddress().getAddress();
     int n = ifaddr.getNetworkPrefixLength();
     int i = n / 8;

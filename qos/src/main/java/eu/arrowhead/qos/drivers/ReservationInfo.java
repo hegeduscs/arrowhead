@@ -19,12 +19,12 @@ import java.util.Map;
  */
 public class ReservationInfo {
 
-  Map<String, String> networkConfiguration;
-  ArrowheadSystem provider;
-  ArrowheadSystem consumer;
-  ArrowheadService service;
-  Map<String, String> commands;
-  Map<String, String> requestedQoS;
+  private Map<String, String> networkConfiguration;
+  private ArrowheadSystem provider;
+  private ArrowheadSystem consumer;
+  private ArrowheadService service;
+  private Map<String, String> commands;
+  private Map<String, String> requestedQoS;
 
   public ReservationInfo() {
   }

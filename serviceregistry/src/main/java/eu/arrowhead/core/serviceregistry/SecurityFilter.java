@@ -9,10 +9,11 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-public class SecurityFilter implements ContainerRequestFilter {
+class SecurityFilter implements ContainerRequestFilter {
 
   private static final String REALM = "HTTPS Example authentication";
   @Inject
+  private
   javax.inject.Provider<UriInfo> uriInfo;
 
   @Override

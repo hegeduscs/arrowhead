@@ -76,7 +76,7 @@ public class GatekeeperResource {
 
     // If no preferred Clouds were given, send GSD poll requests to the
     // neighbor Clouds
-    List<String> cloudURIs = new ArrayList<String>();
+    List<String> cloudURIs = new ArrayList<>();
     if (requestForm.getSearchPerimeter() == null || requestForm.getSearchPerimeter().isEmpty()) {
       cloudURIs = Utility.getNeighborCloudURIs();
       log.info(cloudURIs.size() + " NeighborCloud URI(s) acquired.");
@@ -104,7 +104,7 @@ public class GatekeeperResource {
     }
 
     // Finalizing the URIs, process the responses
-    List<GSDAnswer> gsdAnswerList = new ArrayList<GSDAnswer>();
+    List<GSDAnswer> gsdAnswerList = new ArrayList<>();
     Response response = null;
     for (String URI : cloudURIs) {
       URI = UriBuilder.fromPath(URI).path("gsd_poll").toString();
@@ -263,7 +263,7 @@ public class GatekeeperResource {
     else {
       log.info("Requester Cloud is AUTHORIZED");
 
-      Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+      Map<String, Boolean> orchestrationFlags = new HashMap<>();
       orchestrationFlags.put("triggerInterCloud", false);
       orchestrationFlags.put("externalServiceRequest", true);
       orchestrationFlags.put("enableInterCloud", false);

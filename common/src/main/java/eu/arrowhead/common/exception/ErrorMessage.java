@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ErrorMessage {
 
-  public final String documentation = "No documentation yet.";
+  private final String documentation = "No documentation yet.";
   private String errorMessage;
   private int errorCode;
 

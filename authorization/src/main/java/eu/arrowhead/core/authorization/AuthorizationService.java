@@ -23,7 +23,7 @@ import java.util.Properties;
 import javax.crypto.Cipher;
 import javax.ws.rs.core.Response;
 
-public class AuthorizationService {
+class AuthorizationService {
 
   private static Properties prop;
 
@@ -31,9 +31,9 @@ public class AuthorizationService {
     try {
       DatabaseManager databaseManager = DatabaseManager.getInstance();
 
-      HashMap<String, Object> restrictionMap = new HashMap<String, Object>();
+      HashMap<String, Object> restrictionMap = new HashMap<>();
 
-      List<PublicKey> keys = new ArrayList<PublicKey>();
+      List<PublicKey> keys = new ArrayList<>();
 
       for (ArrowheadSystem provider : providers) {
         restrictionMap.clear();
@@ -135,7 +135,7 @@ public class AuthorizationService {
     return prop;
   }
 
-  public static PublicKey getPublicKey(String stringKey) {
+  private static PublicKey getPublicKey(String stringKey) {
     try {
       byte[] byteKey = Base64.getDecoder().decode(stringKey);
       X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);

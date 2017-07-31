@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  *
  * @author Daniel Nilsson
  */
-public class TestApp {
+class TestApp {
 
   public static void main(String args[]) {
 

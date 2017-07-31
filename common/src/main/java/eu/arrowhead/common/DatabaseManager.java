@@ -44,7 +44,7 @@ public class DatabaseManager {
     return instance;
   }
 
-  public synchronized static Properties getProp() {
+  private synchronized static Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();
@@ -61,7 +61,7 @@ public class DatabaseManager {
     return prop;
   }
 
-  public SessionFactory getSessionFactory() {
+  private SessionFactory getSessionFactory() {
     if (sessionFactory == null) {
       sessionFactory = new Configuration().configure()
           .setProperty("hibernate.connection.url", dbAddress)
@@ -124,7 +124,7 @@ public class DatabaseManager {
 
   @SuppressWarnings("unchecked")
   public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
-    List<T> retrievedList = new ArrayList<T>();
+    List<T> retrievedList = new ArrayList<>();
 
     Session session = getSessionFactory().openSession();
     Transaction transaction = null;

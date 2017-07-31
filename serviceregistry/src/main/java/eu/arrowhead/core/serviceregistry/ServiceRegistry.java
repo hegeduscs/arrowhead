@@ -48,7 +48,7 @@ public class ServiceRegistry {
     return instance;
   }
 
-  public static boolean pingHost(String host, int port, int timeout) {
+  private static boolean pingHost(String host, int port, int timeout) {
     try (Socket socket = new Socket()) {
       socket.connect(new InetSocketAddress(host, port), timeout);
       return true;
@@ -66,7 +66,7 @@ public class ServiceRegistry {
     return host;
   }
 
-  public synchronized Properties getProp() {
+  private synchronized Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();
@@ -85,7 +85,7 @@ public class ServiceRegistry {
     return prop;
   }
 
-  public synchronized Properties getAppProp() {
+  private synchronized Properties getAppProp() {
     try {
       if (appProp == null) {
         appProp = new Properties();
@@ -197,8 +197,8 @@ public class ServiceRegistry {
         DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
 
         Collection<ServiceType> types = browser.getServiceTypes();
-        List<ProvidedService> list = new ArrayList<ProvidedService>();
-        Collection<ServiceName> needToRemoveInstances = new ArrayList<ServiceName>();
+        List<ProvidedService> list = new ArrayList<>();
+        Collection<ServiceName> needToRemoveInstances = new ArrayList<>();
         for (ServiceType type : types) {
           Collection<ServiceName> instances = browser.getServiceInstances(type);
           for (ServiceName instance : instances) {
@@ -294,7 +294,7 @@ public class ServiceRegistry {
     DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
 
     Collection<ServiceType> types = browser.getServiceTypes();
-    List<ProvidedService> list = new ArrayList<ProvidedService>();
+    List<ProvidedService> list = new ArrayList<>();
 
     if (types != null) {
 
@@ -362,7 +362,7 @@ public class ServiceRegistry {
         DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
 
         Collection<ServiceType> types = browser.getServiceTypes();
-        Collection<ServiceName> needToRemoveInstances = new ArrayList<ServiceName>();
+        Collection<ServiceName> needToRemoveInstances = new ArrayList<>();
 
         if (types != null) {
 
@@ -465,7 +465,7 @@ public class ServiceRegistry {
 
       offered.setServiceDefinition(serviceName);
       offered.setServiceGroup(serviceGroup);
-      List<String> interfaces = new ArrayList<String>();
+      List<String> interfaces = new ArrayList<>();
       interfaces.add(interfaceType);
       offered.setInterfaces(interfaces);
 
@@ -474,7 +474,7 @@ public class ServiceRegistry {
         if (entry.getKey() != null && entry.getValue() != null && entry.getKey()
             .contains("ahsrvmetad_")) {
           if (metaData == null) {
-            metaData = new ArrayList<ServiceMetadata>();
+            metaData = new ArrayList<>();
           }
           String key = entry.getKey().substring("ahsrvmetad_".length());
           metaData.add(new ServiceMetadata(key, entry.getValue()));

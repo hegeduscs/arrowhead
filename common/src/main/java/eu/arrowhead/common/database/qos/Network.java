@@ -47,7 +47,7 @@ public class Network {
   @LazyCollection(LazyCollectionOption.FALSE)
   private Map<String, String> networkConfigurations;
 
-  protected Network() {
+  Network() {
   }
 
   public Network(String name, String networkIP, String networkType,

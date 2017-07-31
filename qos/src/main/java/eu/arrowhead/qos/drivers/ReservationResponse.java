@@ -17,9 +17,9 @@ import java.util.Map;
  */
 public class ReservationResponse {
 
-  public Boolean sucess;
-  public String reason;
-  public Map<String, String> networkConfiguration;
+  private Boolean sucess;
+  private String reason;
+  private Map<String, String> networkConfiguration;
 
   public ReservationResponse() {
   }

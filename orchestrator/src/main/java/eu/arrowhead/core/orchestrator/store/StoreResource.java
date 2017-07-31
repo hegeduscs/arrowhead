@@ -47,7 +47,7 @@ public class StoreResource {
   @Path("/all")
   public OrchestrationStoreQueryResponse getAllStoreEntries() {
     log.info("Querying the Orchestration Store for all entries.");
-    List<OrchestrationStore> store = new ArrayList<OrchestrationStore>();
+    List<OrchestrationStore> store = new ArrayList<>();
     store = StoreService.getAllStoreEntries();
     if (store.isEmpty()) {
       log.info("The Orchestration Store is empty. "
@@ -64,13 +64,12 @@ public class StoreResource {
    * Returns the Orchestration Store entries from the database specified by the consumer (and the
    * service).
    *
-   * @param OrchestrationStoreQuery query
    * @return OrchestrationStoreQueryResponse
    * @throws DataNotFoundException, BadPayloadException
    */
   @PUT
   public OrchestrationStoreQueryResponse getStoreEntries(OrchestrationStoreQuery query) {
-    List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
+    List<OrchestrationStore> entryList = new ArrayList<>();
 
 		/*
      * If the payload does not have an identifiable requesterSystem
@@ -83,7 +82,7 @@ public class StoreResource {
     }
 
 		/*
-		 * If the onlyActive boolean is set to true, we return all the active
+     * If the onlyActive boolean is set to true, we return all the active
 		 * entries belonging to the requesterSystem.
 		 */
     else if (query.isOnlyActive()) {

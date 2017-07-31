@@ -39,7 +39,7 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
 
   @Override
   public DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains) {
-    List<Name> domains = new ArrayList<Name>(computerDomains.size());
+    List<Name> domains = new ArrayList<>(computerDomains.size());
     for (String domain : computerDomains) {
       try {
         domains.add(Name.fromString(domain));
@@ -52,7 +52,7 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
 
   @Override
   public DnsSDBrowser createBrowser(Collection<String> browserDomains) {
-    List<Name> domains = new ArrayList<Name>(browserDomains.size());
+    List<Name> domains = new ArrayList<>(browserDomains.size());
     for (String domain : browserDomains) {
       try {
         domains.add(Name.fromString(domain));

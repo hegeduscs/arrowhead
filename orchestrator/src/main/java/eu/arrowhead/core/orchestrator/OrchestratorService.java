@@ -46,7 +46,7 @@ import org.apache.log4j.Logger;
 /**
  * @author umlaufz
  */
-public final class OrchestratorService {
+final class OrchestratorService {
 
   private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
 
@@ -56,25 +56,24 @@ public final class OrchestratorService {
    * tries to find a provider in the local Cloud. If that fails but the enableInterCloud flag is set
    * to true, the Orchestrator tries to find a provider in other Clouds.
    *
-   * @param ServiceRequestForm srf
    * @return OrchestrationResponse
    * @throws BadPayloadException, DataNotFoundException
    */
   public static OrchestrationResponse dynamicOrchestration(ServiceRequestForm srf) {
     log.info("Entered the regularOrchestration method.");
 
-    Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+    Map<String, Boolean> orchestrationFlags = new HashMap<>();
     orchestrationFlags = srf.getOrchestrationFlags();
 
     try {
       // Querying the Service Registry
-      List<ProvidedService> psList = new ArrayList<ProvidedService>();
+      List<ProvidedService> psList = new ArrayList<>();
       psList = queryServiceRegistry(srf.getRequestedService(),
                                     orchestrationFlags.get("metadataSearch"),
                                     orchestrationFlags.get("pingProviders"));
 
       // Cross-checking the SR response with the Authorization
-      List<ArrowheadSystem> providerSystems = new ArrayList<ArrowheadSystem>();
+      List<ArrowheadSystem> providerSystems = new ArrayList<>();
       for (ProvidedService service : psList) {
         providerSystems.add(service.getProvider());
       }
@@ -86,7 +85,7 @@ public final class OrchestratorService {
 			 * the requester system is authorized to consume the service. We
 			 * filter out the non-authorized systems from the SR response.
 			 */
-      List<ProvidedService> temp = new ArrayList<ProvidedService>();
+      List<ProvidedService> temp = new ArrayList<>();
       for (ProvidedService service : psList) {
         if (!providerSystems.contains(service.getProvider())) {
           temp.add(service);
@@ -198,17 +197,16 @@ public final class OrchestratorService {
    * can be satisfied in this Cloud. (Gatekeeper polled the Service Registry and Authorization
    * Systems.)
    *
-   * @param ServiceRequestForm srf
    * @return OrchestrationResponse
    */
   public static OrchestrationResponse externalServiceRequest(ServiceRequestForm srf) {
     log.info("Entered the externalServiceRequest method.");
 
-    Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+    Map<String, Boolean> orchestrationFlags = new HashMap<>();
     orchestrationFlags = srf.getOrchestrationFlags();
 
     // Querying the Service Registry to get the list of Provider Systems
-    List<ProvidedService> psList = new ArrayList<ProvidedService>();
+    List<ProvidedService> psList = new ArrayList<>();
     psList = queryServiceRegistry(srf.getRequestedService(),
                                   orchestrationFlags.get("metadataSearch"),
                                   orchestrationFlags.get("pingProviders"));
@@ -230,13 +228,12 @@ public final class OrchestratorService {
    * This method represents the orchestration process where the requester System only asked for
    * Inter-Cloud servicing.
    *
-   * @param ServiceRequestForm srf
    * @return OrchestrationResponse
    */
   public static OrchestrationResponse triggerInterCloud(ServiceRequestForm srf) {
     log.info("Entered the triggerInterCloud method.");
 
-    Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+    Map<String, Boolean> orchestrationFlags = new HashMap<>();
     orchestrationFlags = srf.getOrchestrationFlags();
 
     // Telling the Gatekeeper to do a Global Service Discovery
@@ -263,17 +260,16 @@ public final class OrchestratorService {
    * to see if there is a provider for the requester System. The Orchestration Store contains preset
    * orchestration information, which should not change in runtime.
    *
-   * @param ServiceRequestForm srf
    * @return OrchestrationResponse
    */
   public static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf) {
     log.info("Entered the orchestrationFromStore method.");
 
-    Map<String, Boolean> orchestrationFlags = new HashMap<String, Boolean>();
+    Map<String, Boolean> orchestrationFlags = new HashMap<>();
     orchestrationFlags = srf.getOrchestrationFlags();
 
     // Querying the Orchestration Store for matching entries
-    List<OrchestrationStore> entryList = new ArrayList<OrchestrationStore>();
+    List<OrchestrationStore> entryList = new ArrayList<>();
     entryList = queryOrchestrationStore(srf.getRequestedService(), srf.getRequesterSystem(),
                                         orchestrationFlags.get("storeOnlyActive"));
 
@@ -282,7 +278,7 @@ public final class OrchestratorService {
       // If a service is provided in the ServiceRequestForm, we used that
       // to further filter the results.
       if (srf.getRequestedService() != null && srf.getRequestedService().isValidStrict()) {
-        List<OrchestrationStore> tempList = new ArrayList<OrchestrationStore>();
+        List<OrchestrationStore> tempList = new ArrayList<>();
         for (OrchestrationStore entry : entryList) {
           if (!entry.getService().equals(srf.getRequestedService())) {
             tempList.add(entry);
@@ -302,7 +298,7 @@ public final class OrchestratorService {
     }
 
     // Priority list based store orchestration
-    List<OrchestrationStore> intraStoreList = new ArrayList<OrchestrationStore>();
+    List<OrchestrationStore> intraStoreList = new ArrayList<>();
     for (OrchestrationStore entry : entryList) {
       if (entry.getProviderCloud() == null) {
         intraStoreList.add(entry);
@@ -315,10 +311,10 @@ public final class OrchestratorService {
 		 * have these 2 other ArrowheadSystem provider lists to cross-check the
 		 * entry list with.
 		 */
-    List<ProvidedService> psList = new ArrayList<ProvidedService>();
-    List<ArrowheadSystem> serviceProviders = new ArrayList<ArrowheadSystem>();
-    List<ArrowheadSystem> intraProviders = new ArrayList<ArrowheadSystem>();
-    List<ArrowheadSystem> authorizedIntraProviders = new ArrayList<ArrowheadSystem>();
+    List<ProvidedService> psList = new ArrayList<>();
+    List<ArrowheadSystem> serviceProviders = new ArrayList<>();
+    List<ArrowheadSystem> intraProviders = new ArrayList<>();
+    List<ArrowheadSystem> authorizedIntraProviders = new ArrayList<>();
     try {
       // Querying the Service Registry with the intra-cloud Store entries
       psList = queryServiceRegistry(srf.getRequestedService(),
@@ -331,7 +327,7 @@ public final class OrchestratorService {
       }
 
 			/*
-			 * If the Store entry did not had a providerCloud, it must have had
+       * If the Store entry did not had a providerCloud, it must have had
 			 * a providerSystem. We have to query the Authorization System with
 			 * these providers.
 			 */
@@ -344,7 +340,7 @@ public final class OrchestratorService {
                                                     srf.getRequestedService(),
                                                     intraProviders);
     } /*
-			 * If the SR or Authorization query throws DNFException, we have to
+       * If the SR or Authorization query throws DNFException, we have to
 			 * catch it, because the inter-cloud store entries can still be
 			 * viable options.
 			 */ catch (DataNotFoundException ex) {
@@ -414,9 +410,6 @@ public final class OrchestratorService {
    * This method queries the Service Registry core system for a specific ArrowheadService. The
    * returned list consists of possible service providers.
    *
-   * @param ArrowheadService service
-   * @param boolean metadataSearch
-   * @param boolean pingProviders
    * @return List<ProvidedService>
    */
   private static List<ProvidedService> queryServiceRegistry(ArrowheadService service,
@@ -446,9 +439,8 @@ public final class OrchestratorService {
           "ServiceRegistry query came back empty for " + service.toString()
               + " (Interfaces field for service can not be empty)");
     }
-    // If there are non-valid entries in the Service Registry response, we
-    // filter those out
-    List<ProvidedService> temp = new ArrayList<ProvidedService>();
+    // If there are non-valid entries in the Service Registry response, we filter those out
+    List<ProvidedService> temp = new ArrayList<>();
     for (ProvidedService ps : serviceQueryResult.getServiceQueryData()) {
       if (!ps.isPayloadUsable()) {
         temp.add(ps);
@@ -472,9 +464,6 @@ public final class OrchestratorService {
    * This method queries the Authorization core system with a consumer/service/providerList triplet.
    * The returned list only contains the authorized providers.
    *
-   * @param ArrowheadSystem consumer
-   * @param ArrowheadService service
-   * @param List<ArrowheadSystem> providerList
    * @return List<ArrowheadSystem>
    */
   private static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer,
@@ -493,7 +482,8 @@ public final class OrchestratorService {
     // authorized Systems
     Response response = Utility.sendRequest(URI, "PUT", request);
     IntraCloudAuthResponse authResponse = response.readEntity(IntraCloudAuthResponse.class);
-    List<ArrowheadSystem> authorizedSystems = new ArrayList<ArrowheadSystem>();
+    List<ArrowheadSystem> authorizedSystems = new ArrayList<>();
+    //Set ensures there are no duplicates between the systems
     for (Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap()
         .entrySet()) {
       if (entry.getValue()) {
@@ -519,8 +509,6 @@ public final class OrchestratorService {
    * This method filters out all the entries of the given ProvidedService list, which does not have
    * a preferred provider.
    *
-   * @param List<ProvidedService> psList
-   * @param List<ArrowheadSystem> preferredProviders
    * @return List<ProvidedService>
    */
   private static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList,
@@ -533,7 +521,7 @@ public final class OrchestratorService {
                                         + "(OrchestrationService:removeNonPreferred BadPayloadException)");
     }
 
-    List<ProvidedService> preferredList = new ArrayList<ProvidedService>();
+    List<ProvidedService> preferredList = new ArrayList<>();
     for (ArrowheadSystem system : preferredProviders) {
       for (ProvidedService ps : psList) {
         if (system.equals(ps.getProvider())) {
@@ -559,10 +547,6 @@ public final class OrchestratorService {
    * have higher priority. Custom matchmaking algorithm can be implemented, as of now it just
    * returns the first provider from the list.
    *
-   * @param List<ProvidedService> psList
-   * @param boolean onlyPreferred
-   * @param List<ArrowheadSystem> preferredList
-   * @param int notLocalSystems
    * @return ProvidedService
    */
   private static ProvidedService intraCloudMatchmaking(List<ProvidedService> psList,
@@ -632,8 +616,6 @@ public final class OrchestratorService {
   /**
    * This method initiates the GSD process by sending a request to the Gatekeeper core system.
    *
-   * @param ArrowheadService requestedService
-   * @param List<ArrowheadCloud> preferredClouds
    * @return GSDResult
    */
   private static GSDResult startGSD(ArrowheadService requestedService,
@@ -663,9 +645,6 @@ public final class OrchestratorService {
    * preferred by the consumer have higher priority. Custom matchmaking algorithm can be
    * implemented, as of now it just returns the first Cloud from the list.
    *
-   * @param GSDResult result
-   * @param List<ArrowheadCloud> preferredClouds
-   * @param boolean onlyPreferred
    * @return ArrowheadCloud
    */
   private static ArrowheadCloud interCloudMatchmaking(GSDResult result,
@@ -674,7 +653,7 @@ public final class OrchestratorService {
     log.info("Entered the interCloudMatchmaking method.");
 
     // Extracting the valid ArrowheadClouds from the GSDResult
-    List<ArrowheadCloud> partnerClouds = new ArrayList<ArrowheadCloud>();
+    List<ArrowheadCloud> partnerClouds = new ArrayList<>();
     for (GSDAnswer answer : result.getResponse()) {
       if (answer.getProviderCloud().isValid()) {
         partnerClouds.add(answer.getProviderCloud());
@@ -729,15 +708,13 @@ public final class OrchestratorService {
   /**
    * From the given parameteres this method compiles an ICNRequestForm to start the ICN process.
    *
-   * @param ServiceRequestForm srf
-   * @param ArrowheadCloud targetCloud
    * @return ICNRequestForm
    */
   private static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf,
                                                       ArrowheadCloud targetCloud) {
     log.info("Entered the compileICNRequestForm method.");
 
-    List<ArrowheadSystem> preferredProviders = new ArrayList<ArrowheadSystem>();
+    List<ArrowheadSystem> preferredProviders = new ArrayList<>();
     if (srf.getPreferredProviders() == null || srf.getPreferredProviders().size() == 0) {
       log.info("No preferredProviders were given, sending ICNRequestForm without it.");
     } else {
@@ -757,7 +734,7 @@ public final class OrchestratorService {
     }
 
     // Compiling the payload
-    Map<String, Boolean> negotiationFlags = new HashMap<String, Boolean>();
+    Map<String, Boolean> negotiationFlags = new HashMap<>();
     negotiationFlags.put("metadataSearch", srf.getOrchestrationFlags().get("metadataSearch"));
     negotiationFlags.put("pingProviders", srf.getOrchestrationFlags().get("pingProviders"));
     negotiationFlags.put("onlyPreferred", srf.getOrchestrationFlags().get("onlyPreferred"));
@@ -772,7 +749,6 @@ public final class OrchestratorService {
   /**
    * This method initiates the ICN process by sending a request to the Gatekeeper core system.
    *
-   * @param ICNRequestForm requestForm
    * @return ICNResult
    */
   private static ICNResult startICN(ICNRequestForm requestForm) {
@@ -800,7 +776,6 @@ public final class OrchestratorService {
    * consumer have higher priority. Custom matchmaking algorithm can be implemented, as of now it
    * just returns the first provider from the list.
    *
-   * @param ICNResult icnResult
    * @return OrchestrationResponse
    */
   private static OrchestrationResponse icnMatchmaking(ICNResult icnResult,
@@ -811,7 +786,7 @@ public final class OrchestratorService {
 		 * We first try to find a match between preferredProviders and the
 		 * received providers from the ICN result.
 		 */
-    List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+    List<OrchestrationForm> ofList = new ArrayList<>();
     if (preferredProviders != null && !preferredProviders.isEmpty()) {
       for (ArrowheadSystem preferredProvider : preferredProviders) {
         for (OrchestrationForm of : icnResult.getInstructions().getResponse()) {
@@ -840,15 +815,13 @@ public final class OrchestratorService {
    * orchestrationFromStore method. The method searches for the provider (which was given in the
    * Store entry) in the ICN result.
    *
-   * @param ICNResult icnResult
-   * @param OrchestrationStore entry
    * @return OrchestrationResponse
    */
   private static OrchestrationResponse icnMatchmaking(ICNResult icnResult,
                                                       OrchestrationStore entry) {
     log.info("Entered the (second) icnMatchmaking method.");
 
-    List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+    List<OrchestrationForm> ofList = new ArrayList<>();
     for (OrchestrationForm of : icnResult.getInstructions().getResponse()) {
       if (entry.getProviderSystem().equals(of.getProvider())) {
         ofList.add(of);
@@ -868,9 +841,6 @@ public final class OrchestratorService {
    * This method queries the Orchestration Store for entries where the consumer System our requester
    * System from the ServiceRequestForm. The other 2 paramteres can further narrow down this list.
    *
-   * @param ArrowheadService consumer
-   * @param ArrowheadSystem service
-   * @param boolean onlyActive
    * @return List<OrchestrationStore>
    */
   private static List<OrchestrationStore> queryOrchestrationStore(ArrowheadService service,
@@ -959,9 +929,6 @@ public final class OrchestratorService {
    * externalServiceRequest processes use this version of the method. (The triggerInterCloud method
    * gets back the same response from an externalServiceRequest at a remote Cloud.)
    *
-   * @param ArrowheadService service
-   * @param List<ProvidedService> psList
-   * @param boolean generateToken
    * @return OrchestrationResponse
    */
   private static OrchestrationResponse compileOrchestrationResponse(List<ProvidedService> psList,
@@ -969,8 +936,8 @@ public final class OrchestratorService {
                                                                     ServiceRequestForm srf) {
     log.info("Entered the (first) compileOrchestrationResponse method.");
 
-    List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
-    List<ArrowheadSystem> providerList = new ArrayList<ArrowheadSystem>();
+    List<OrchestrationForm> ofList = new ArrayList<>();
+    List<ArrowheadSystem> providerList = new ArrayList<>();
 
     for (ProvidedService ps : psList) {
       providerList.add(ps.getProvider());
@@ -1015,8 +982,6 @@ public final class OrchestratorService {
    * This method compiles the OrchestrationResponse object. Only the orchestrationFromStore method
    * uses this version of the method.
    *
-   * @param List<OrchestrationStore> entryList
-   * @param boolean generateToken
    * @return OrchestrationResponse
    */
   private static OrchestrationResponse compileOrchestrationResponseFromStore(
@@ -1025,7 +990,7 @@ public final class OrchestratorService {
     log.info("Entered the (second) compileOrchestrationResponse method.");
 
     String token = null;
-    List<OrchestrationForm> ofList = new ArrayList<OrchestrationForm>();
+    List<OrchestrationForm> ofList = new ArrayList<>();
     // We create an OrchestrationForm for every Store entry
     for (OrchestrationStore entry : entryList) {
       if (generateToken) {

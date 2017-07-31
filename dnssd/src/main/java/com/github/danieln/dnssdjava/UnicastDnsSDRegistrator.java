@@ -153,7 +153,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 
   public String getLocalHostName() throws UnknownHostException {
     if (localHostname == null) {
-      List<String> names = new ArrayList<String>();
+      List<String> names = new ArrayList<>();
       names.addAll(DomainUtil.getComputerHostNames());
       names.add(InetAddress.getLocalHost().getCanonicalHostName());
       names.add(InetAddress.getLocalHost().getHostName());
@@ -191,12 +191,12 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
       ServiceName serviceName = serviceData.getName();
       Name dnsName = serviceName.toDnsName();
       Name typeName = new Name(serviceName.getType().toDnsString(), registrationDomain);
-      List<Name> subtypes = new ArrayList<Name>(serviceName.getType().getSubtypes().size());
+      List<Name> subtypes = new ArrayList<>(serviceName.getType().getSubtypes().size());
       for (String subtype : serviceName.getType().toDnsStringsWithSubtype()) {
         subtypes.add(new Name(subtype, registrationDomain));
       }
       Name target = new Name(serviceData.getHost());
-      List<String> strings = new ArrayList<String>();
+      List<String> strings = new ArrayList<>();
       for (Map.Entry<String, String> entry : serviceData.getProperties().entrySet()) {
         StringBuilder sb = new StringBuilder();
         sb.append(entry.getKey());
@@ -244,7 +244,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
     try {
       Name dnsName = serviceName.toDnsName();
       Name typeName = new Name(serviceName.getType().toDnsString(), registrationDomain);
-      List<Name> subtypes = new ArrayList<Name>(serviceName.getType().getSubtypes().size());
+      List<Name> subtypes = new ArrayList<>(serviceName.getType().getSubtypes().size());
       for (String subtype : serviceName.getType().toDnsStringsWithSubtype()) {
         subtypes.add(new Name(subtype, registrationDomain));
       }

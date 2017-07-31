@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class GSDRequestForm {
 
   private ArrowheadService requestedService;
-  private List<ArrowheadCloud> searchPerimeter = new ArrayList<ArrowheadCloud>();
+  private List<ArrowheadCloud> searchPerimeter = new ArrayList<>();
 
   public GSDRequestForm() {
   }

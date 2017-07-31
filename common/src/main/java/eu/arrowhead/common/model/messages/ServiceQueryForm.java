@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class ServiceQueryForm {
 
   private List<ServiceMetadata> serviceMetadata;
-  private List<String> serviceInterfaces = new ArrayList<String>();
+  private List<String> serviceInterfaces = new ArrayList<>();
   private boolean pingProviders;
   private boolean metadataSearch;
   private String tsig_key;

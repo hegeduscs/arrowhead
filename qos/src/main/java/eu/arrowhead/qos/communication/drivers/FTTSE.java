@@ -30,15 +30,15 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public class FTTSE implements IQoSDriver {
 
-  protected final String STREAM_PARAMETERS_SIZE = "SIZE";
-  protected final String STREAM_PARAMETERS_PERIOD = "PERIOD";
-  protected final String STREAM_PARAMETERS_SYNCHRONOUS_TYPE = "SYNCHRONOUS";
-  protected final String STREAM_PARAMETERS_STREAM_ID = "ID";
-  protected final String STREAM_PARAMETERS_SYNCHRONOUS = "0";
   protected final String STREAM_PARAMETERS_ASSYNCHRONOUS_HARD_REAL_TIME = "1";
   protected final String STREAM_PARAMETERS_ASSYNCHRONOUS_SOFT_REAL_TIME = "2";
-  protected final String STREAM_PARAMETERS_BEST_EFFORT = "3";
-  protected final Integer MINIMUM_PERIOD = 1;
+  private final String STREAM_PARAMETERS_SIZE = "SIZE";
+  private final String STREAM_PARAMETERS_PERIOD = "PERIOD";
+  private final String STREAM_PARAMETERS_SYNCHRONOUS_TYPE = "SYNCHRONOUS";
+  private final String STREAM_PARAMETERS_STREAM_ID = "ID";
+  private final String STREAM_PARAMETERS_SYNCHRONOUS = "0";
+  private final String STREAM_PARAMETERS_BEST_EFFORT = "3";
+  private final Integer MINIMUM_PERIOD = 1;
   private final String BANDWIDTH = "bandwidth";
   private final String DELAY = "delay";
   private final String NETWORK_EC = "EC";

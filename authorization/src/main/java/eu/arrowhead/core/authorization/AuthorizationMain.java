@@ -19,16 +19,16 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-public class AuthorizationMain {
+class AuthorizationMain {
 
-  public static HttpServer server = null;
-  public static HttpServer secureServer = null;
-  public static X509Certificate serverCert = null;
   public static PrivateKey privateKey = null;
+  private static HttpServer server = null;
+  private static HttpServer secureServer = null;
+  private static X509Certificate serverCert = null;
   private static Logger log = Logger.getLogger(AuthorizationMain.class.getName());
   private static Properties prop;
-  public static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8448/");
-  public static final String BASE_URI_SECURED = getProp()
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8448/");
+  private static final String BASE_URI_SECURED = getProp()
       .getProperty("base_uri_secured", "https://0.0.0.0:8449/");
 
   public static void main(String[] args) throws IOException {
@@ -97,7 +97,7 @@ public class AuthorizationMain {
     }
   }
 
-  public static void shutdown() {
+  private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
@@ -109,7 +109,7 @@ public class AuthorizationMain {
     System.out.println("Authorization Server(s) stopped");
   }
 
-  public static HttpServer startServer() throws IOException {
+  private static HttpServer startServer() throws IOException {
     log.info("Starting server at: " + BASE_URI);
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -124,7 +124,7 @@ public class AuthorizationMain {
     return server;
   }
 
-  public static HttpServer startSecureServer() throws IOException {
+  private static HttpServer startSecureServer() throws IOException {
     log.info("Starting server at: " + BASE_URI_SECURED);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
@@ -168,7 +168,7 @@ public class AuthorizationMain {
     return server;
   }
 
-  public synchronized static Properties getProp() {
+  private synchronized static Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();

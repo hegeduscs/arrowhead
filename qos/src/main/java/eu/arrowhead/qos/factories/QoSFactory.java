@@ -26,7 +26,7 @@ public class QoSFactory {
   private static QoSFactory instance;
   private IQoSRepository repo;
 
-  protected QoSFactory() {
+  private QoSFactory() {
     super();
     repo = new QoSRepositoryImpl();
   }
@@ -41,7 +41,7 @@ public class QoSFactory {
     return instance;
   }
 
-  protected static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
+  private static eu.arrowhead.common.database.qos.ArrowheadSystem_qos convertFromDTO(
       eu.arrowhead.common.model.ArrowheadSystem in) {
 
     eu.arrowhead.common.database.qos.ArrowheadSystem_qos out = new eu.arrowhead.common.database.qos.ArrowheadSystem_qos();
@@ -55,7 +55,7 @@ public class QoSFactory {
     return out;
   }
 
-  protected static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
+  private static eu.arrowhead.common.model.ArrowheadSystem convertToDTO(
       eu.arrowhead.common.database.qos.ArrowheadSystem_qos in) {
 
     eu.arrowhead.common.model.ArrowheadSystem out = new eu.arrowhead.common.model.ArrowheadSystem();
@@ -69,7 +69,7 @@ public class QoSFactory {
     return out;
   }
 
-  protected static List<ArrowheadSystem> convertToDTO_List(
+  private static List<ArrowheadSystem> convertToDTO_List(
       List<eu.arrowhead.common.database.qos.ArrowheadSystem_qos> in) {
     if (in == null) {
       return null;
@@ -95,7 +95,7 @@ public class QoSFactory {
     return out;
   }
 
-  protected static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(
+  private static eu.arrowhead.common.database.qos.ArrowheadService_qos convertFromDTO(
       eu.arrowhead.common.model.ArrowheadService in) {
 
     eu.arrowhead.common.database.qos.ArrowheadService_qos out = new eu.arrowhead.common.database.qos.ArrowheadService_qos();
@@ -107,7 +107,7 @@ public class QoSFactory {
     return out;
   }
 
-  protected static eu.arrowhead.common.model.ArrowheadService convertToDTO(
+  private static eu.arrowhead.common.model.ArrowheadService convertToDTO(
       eu.arrowhead.common.database.qos.ArrowheadService_qos in) {
 
     eu.arrowhead.common.model.ArrowheadService out = new eu.arrowhead.common.model.ArrowheadService();
@@ -119,7 +119,7 @@ public class QoSFactory {
     return out;
   }
 
-  protected static List<ArrowheadService> convertToDTO_ArrowheadServices(
+  private static List<ArrowheadService> convertToDTO_ArrowheadServices(
       List<eu.arrowhead.common.database.qos.ArrowheadService_qos> in) {
 
     if (in == null) {

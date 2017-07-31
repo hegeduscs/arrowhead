@@ -19,12 +19,12 @@ import java.util.Map;
  */
 public class VerificationInfo {
 
-  Map<String, String> provierDeviceCapabilities;
-  Map<String, String> consumerDeviceCapabilities;
-  List<QoS_Resource_Reservation> providerDeviceQoSReservations;
-  List<QoS_Resource_Reservation> consumerDeviceQoSReservations;
-  Map<String, String> requestedQoS;
-  Map<String, String> commands;
+  private Map<String, String> provierDeviceCapabilities;
+  private Map<String, String> consumerDeviceCapabilities;
+  private List<QoS_Resource_Reservation> providerDeviceQoSReservations;
+  private List<QoS_Resource_Reservation> consumerDeviceQoSReservations;
+  private Map<String, String> requestedQoS;
+  private Map<String, String> commands;
 
   public VerificationInfo() {
   }
