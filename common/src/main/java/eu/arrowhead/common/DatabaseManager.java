@@ -27,11 +27,19 @@ public class DatabaseManager {
   private static final String dbUser = getProp().getProperty("db_user", "root");
   private static final String dbPassword = getProp().getProperty("db_password", "root");
 
-  private DatabaseManager() {
-    if (sessionFactory == null) {
-      sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
-          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+  static {
+    try {
+      if (sessionFactory == null) {
+        sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
+            .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+      }
+    } catch (Exception e) {
+      log.error("Database connection failed, check the configuration!");
+      e.printStackTrace();
     }
+  }
+
+  private DatabaseManager() {
   }
 
   public static DatabaseManager getInstance() {
@@ -69,6 +77,7 @@ public class DatabaseManager {
   public <T> T get(Class<T> queryClass, int id) {
     T object = null;
 
+    System.out.println("TESTSAJT");
     Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
@@ -227,5 +236,4 @@ public class DatabaseManager {
       session.close();
     }
   }
-
 }

@@ -27,9 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
-/**
- * @author pardavib, mereszd
- */
+//TODO path min ne legyen uppercase, de akar sima qos is elég lehet
 @Path("QoSManager")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -40,8 +38,8 @@ public class QoSResource {
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  public String home() {
-    return "I am online!";
+  public String getIt() {
+    return "QoS Manager Core System";
   }
 
   @PUT

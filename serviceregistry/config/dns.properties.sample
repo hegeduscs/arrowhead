@@ -1,4 +1,4 @@
-tsig.key=RIuxP+vb5GjLXJo686NvKQ==
+tsig.key=RM/jKKEPYB83peT0DQnYGg==
 tsig.name=key.evoin.arrowhead.eu.
 tsig.algorithm=hmac-md5
 dns.ip=192.168.184.128

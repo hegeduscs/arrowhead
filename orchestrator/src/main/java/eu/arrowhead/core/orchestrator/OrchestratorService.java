@@ -57,15 +57,6 @@ final class OrchestratorService {
    */
   public static OrchestrationResponse dynamicOrchestration(ServiceRequestForm srf) {
     log.info("Entered the regularOrchestration method.");
-
-    try {
-      System.out.println("SAJT");
-      String test = Utility.getGatekeeperURI();
-      System.out.println(test);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     try {
