@@ -24,7 +24,6 @@ class AuthorizationMain {
   public static PrivateKey privateKey = null;
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
-  private static X509Certificate serverCert = null;
   private static Logger log = Logger.getLogger(AuthorizationMain.class.getName());
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8448/");
@@ -145,6 +144,7 @@ class AuthorizationMain {
     sslCon.setTrustStoreFile(truststorePath);
     sslCon.setTrustStorePass(truststorePass);
 
+    X509Certificate serverCert = null;
     try {
       KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
       serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);

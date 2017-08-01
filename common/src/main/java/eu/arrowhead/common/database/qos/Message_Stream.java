@@ -41,7 +41,7 @@ public class Message_Stream {
   private ArrowheadSystem_qos provider;
 
   @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
-  private QoS_Resource_Reservation qualityOfService;
+  private ResourceReservation qualityOfService;
 
   @Column(name = "configuration")
   @ElementCollection
@@ -50,9 +50,6 @@ public class Message_Stream {
 
   @Column(name = "type")
   private String type;
-
-  @Column(name = "code")
-  private String code;
 
   Message_Stream() {
 
@@ -63,7 +60,7 @@ public class Message_Stream {
     this.service = service;
     this.consumer = consumer;
     this.provider = provider;
-    this.qualityOfService = new QoS_Resource_Reservation("UP", qualityOfService);
+    this.qualityOfService = new ResourceReservation("UP", qualityOfService);
     this.configuration = configuration;
     this.type = type;
     getCode();
@@ -145,21 +142,24 @@ public class Message_Stream {
   }
 
   /**
-   * Get QoS Reservation
+   * This method generates the code that also identifies the message stream.
    *
-   * @return Returns QoS_Resource_Reservation
+   * @return Returns String with the code.
    */
-  public QoS_Resource_Reservation getQualityOfService() {
-    return qualityOfService;
+  public String getCode() {
+    String code = provider.getSystemGroup() + "/" + provider.getSystemName() + "," + consumer.
+        getSystemGroup() + "/" + consumer.getSystemName() + "," + service.getServiceGroup() + "/" + service.
+        getServiceDefinition();
+    return code;
   }
 
   /**
-   * Set QoS Reservation
+   * Get QoS Reservation
    *
-   * @param qualityOfService QoS Reservation
+   * @return Returns ResourceReservation
    */
-  public void setQualityOfService(QoS_Resource_Reservation qualityOfService) {
-    this.qualityOfService = qualityOfService;
+  public ResourceReservation getQualityOfService() {
+    return qualityOfService;
   }
 
   /**
@@ -181,15 +181,12 @@ public class Message_Stream {
   }
 
   /**
-   * This method generates the code that also identifies the message stream.
+   * Set QoS Reservation
    *
-   * @return Returns String with the code.
+   * @param qualityOfService QoS Reservation
    */
-  public String getCode() {
-    this.code = provider.getSystemGroup() + "/" + provider.getSystemName() + "," + consumer.
-        getSystemGroup() + "/" + consumer.getSystemName() + "," + service.getServiceGroup() + "/" + service.
-        getServiceDefinition();
-    return code;
+  public void setQualityOfService(ResourceReservation qualityOfService) {
+    this.qualityOfService = qualityOfService;
   }
 
   /**

@@ -2,24 +2,21 @@ package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.ServiceMetadata;
+import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class ServiceRegistryEntry {
 
   private ArrowheadSystem provider;
   private String serviceURI;
-  private List<ServiceMetadata> serviceMetadata;
+  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
   private String tSIG_key;
   private String version;
 
   public ServiceRegistryEntry() {
-    super();
   }
 
   public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI, List<ServiceMetadata> serviceMetadata, String tsig_key, String version) {
-    super();
     this.provider = provider;
     this.serviceURI = serviceURI;
     this.serviceMetadata = serviceMetadata;
@@ -66,4 +63,5 @@ public class ServiceRegistryEntry {
   public void setVersion(String version) {
     this.version = version;
   }
+
 }

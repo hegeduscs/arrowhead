@@ -13,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -23,7 +22,6 @@ import org.hibernate.annotations.LazyCollectionOption;
  */
 @Entity
 @Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_group", "service_definition"})})
-@XmlRootElement
 public class ArrowheadService {
 
   @Column(name = "id")
@@ -43,7 +41,7 @@ public class ArrowheadService {
   private List<String> interfaces = new ArrayList<>();
 
   @Transient
-  private List<ServiceMetadata> serviceMetadata;
+  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
 
   public ArrowheadService() {
   }
@@ -84,13 +82,13 @@ public class ArrowheadService {
     return interfaces;
   }
 
-  public void setInterfaces(List<String> interfaces) {
-    this.interfaces = interfaces;
-  }
-
   public void setInterfaces(String oneInterface) {
     this.interfaces.clear();
     this.interfaces.add(oneInterface);
+  }
+
+  public void setInterfaces(List<String> interfaces) {
+    this.interfaces = interfaces;
   }
 
   public List<ServiceMetadata> getServiceMetadata() {
@@ -107,11 +105,6 @@ public class ArrowheadService {
 
   public boolean isValidSoft() {
     return serviceGroup != null && serviceDefinition != null;
-  }
-
-  @Override
-  public String toString() {
-    return "(" + serviceGroup + ":" + serviceDefinition + ")";
   }
 
   @Override
@@ -152,5 +145,9 @@ public class ArrowheadService {
     return true;
   }
 
+  @Override
+  public String toString() {
+    return "(" + serviceGroup + ":" + serviceDefinition + ")";
+  }
 
 }

@@ -13,7 +13,7 @@ package eu.arrowhead.qos.factories;
 import eu.arrowhead.common.database.qos.IQoSRepository;
 import eu.arrowhead.common.database.qos.Message_Stream;
 import eu.arrowhead.common.database.qos.QoSRepositoryImpl;
-import eu.arrowhead.common.database.qos.QoS_Resource_Reservation;
+import eu.arrowhead.common.database.qos.ResourceReservation;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.QoSReservationForm;
@@ -140,9 +140,8 @@ public class QoSFactory {
    * @param provider ArrowheadSystem_qos.
    * @return Returns all the QoSReservations.
    */
-  public List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(ArrowheadSystem provider) {
-    return repo.
-        getQoSReservationsFromArrowheadSystem(convertFromDTO(provider));
+  public List<ResourceReservation> getReservationsFromSystem(ArrowheadSystem provider) {
+    return repo.getQoSReservationsFromArrowheadSystem(convertFromDTO(provider));
   }
 
   /**
@@ -187,7 +186,7 @@ public class QoSFactory {
    *
    * @return Returns list of qos reservations.
    */
-  public List<QoS_Resource_Reservation> getAllQoS_Resource_Reservations() {
+  public List<ResourceReservation> getAllQoS_Resource_Reservations() {
     return repo.getAllQoS_Resource_Reservations();
   }
 

@@ -3,13 +3,14 @@ package eu.arrowhead.common.model.messages;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TokenGenerationRequest {
 
   private ArrowheadSystem consumer;
   private ArrowheadCloud consumerCloud;
-  private List<ArrowheadSystem> providers;
+  private List<ArrowheadSystem> providers = new ArrayList<>();
   private ArrowheadService service;
   private int duration;
 
@@ -64,4 +65,5 @@ public class TokenGenerationRequest {
   public void setDuration(int duration) {
     this.duration = duration;
   }
+
 }

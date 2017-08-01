@@ -6,25 +6,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class QoSVerify {
 
   private ArrowheadSystem consumer;
   private ArrowheadService requestedService;
-  private List<ArrowheadSystem> provider = new ArrayList<>();
+  private List<ArrowheadSystem> providers = new ArrayList<>();
   private Map<String, String> requestedQoS = new HashMap<>();
   private Map<String, String> commands = new HashMap<>();
 
   public QoSVerify() {
   }
 
-  public QoSVerify(ArrowheadSystem consumer, ArrowheadService requestedService, List<ArrowheadSystem> provider, Map<String, String> specifications,
+  public QoSVerify(ArrowheadSystem consumer, ArrowheadService requestedService, List<ArrowheadSystem> providers, Map<String, String> specifications,
                    Map<String, String> commands) {
     this.consumer = consumer;
     this.requestedService = requestedService;
-    this.provider = provider;
+    this.providers = providers;
     this.requestedQoS = specifications;
     this.commands = commands;
   }
@@ -45,12 +43,12 @@ public class QoSVerify {
     this.requestedService = requestedService;
   }
 
-  public List<ArrowheadSystem> getProvider() {
-    return provider;
+  public List<ArrowheadSystem> getProviders() {
+    return providers;
   }
 
-  public void setProvider(List<ArrowheadSystem> provider) {
-    this.provider = provider;
+  public void setProviders(List<ArrowheadSystem> providers) {
+    this.providers = providers;
   }
 
   public Map<String, String> getRequestedQoS() {

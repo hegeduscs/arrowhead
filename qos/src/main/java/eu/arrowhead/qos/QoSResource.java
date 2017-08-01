@@ -27,14 +27,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
-//TODO path min ne legyen uppercase, de akar sima qos is elég lehet
-@Path("QoSManager")
+@Path("qos")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class QoSResource {
 
   private static Logger log = Logger.getLogger(QoSResource.class.getName());
-  private final QoSManagerService service = new QoSManagerService();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -43,21 +41,19 @@ public class QoSResource {
   }
 
   @PUT
-  @Path("/QoSVerify")
+  @Path("/verify")
   public Response qosVerification(QoSVerify qosVerify) {
 
-    QoSVerificationResponse qvr = service.qoSVerify(qosVerify);
+    QoSVerificationResponse qvr = QoSManagerService.qosVerify(qosVerify);
     return Response.status(Status.OK).entity(qvr).build();
   }
 
   @PUT
-  @Path("/QoSReserve")
+  @Path("/reserve")
   public Response qosReservation(QoSReserve qosReservation) throws ReservationException, DriverNotFoundException, IOException {
 
-    log.info("QoS: Reserving resouces.");
-    QoSReservationResponse qosrr = service.qoSReserve(qosReservation);
+    QoSReservationResponse qosrr = QoSManagerService.qosReserve(qosReservation);
     return Response.status(Status.OK).entity(qosrr).build();
-
   }
 
 }

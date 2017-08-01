@@ -38,6 +38,8 @@ public class OrchestratorResource {
    *
    * @return OrchestrationResponse
    */
+
+  //TODO sanity check: requesterSystem és a cert common name harmóniában vannak
   @POST
   public Response orchestrationProcess(ServiceRequestForm srf) {
     log.info("Entered the orchestrationProcess method.");

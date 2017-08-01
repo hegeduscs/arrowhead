@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class ICNRequestForm {
 
   private ArrowheadService requestedService;
@@ -81,11 +79,8 @@ public class ICNRequestForm {
   }
 
   public boolean isPayloadUsable() {
-    if (requestedService == null || targetCloud == null || requesterSystem == null) {
-      return false;
-    }
-    return requestedService.isValidStrict() && targetCloud.isValid() && requesterSystem.isValid();
+    return requestedService != null && targetCloud != null && requesterSystem != null && requestedService.isValidStrict() && targetCloud.isValid()
+        && requesterSystem.isValid();
   }
-
 
 }

@@ -71,4 +71,5 @@ class RemoveMonitorRule {
   public void setConsumer(ArrowheadSystem consumer) {
     this.consumer = consumer;
   }
+
 }

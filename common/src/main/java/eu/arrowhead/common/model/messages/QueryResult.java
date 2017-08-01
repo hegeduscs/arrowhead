@@ -2,19 +2,15 @@ package eu.arrowhead.common.model.messages;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 class QueryResult {
 
   private List<ProvidedService> providers = new ArrayList<>();
 
   public QueryResult() {
-    super();
   }
 
   public QueryResult(List<ProvidedService> providers) {
-    super();
     this.providers = providers;
   }
 

@@ -26,4 +26,5 @@ public class TokenGenerationResponse {
   public void setSignature(List<String> signature) {
     this.signature = signature;
   }
+
 }

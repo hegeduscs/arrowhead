@@ -140,7 +140,7 @@ class ServiceRegistryMain {
       log.error("Invalid 'ping.interval' value in app.properties!");
     }
 
-    timer.schedule(pingTask, 60000l, (interval * 60l * 1000l));
+    timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
 
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");

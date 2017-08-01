@@ -1,8 +1,5 @@
 package eu.arrowhead.common.model.messages;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class ICNEnd {
 
   private OrchestrationResponse instructions;
@@ -21,6 +18,5 @@ public class ICNEnd {
   public void setInstructions(OrchestrationResponse instructions) {
     this.instructions = instructions;
   }
-
 
 }

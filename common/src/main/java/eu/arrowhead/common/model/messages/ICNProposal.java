@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class ICNProposal {
 
   private ArrowheadService requestedService;
@@ -79,6 +77,5 @@ public class ICNProposal {
   public void setNegotiationFlags(Map<String, Boolean> negotiationFlags) {
     this.negotiationFlags = negotiationFlags;
   }
-
 
 }

@@ -19,7 +19,7 @@ public interface ISCSRepository {
    * @param provider arrowhead system
    * @return returns network device
    */
-  Network_Device getNetworkDeviceFromSystem(ArrowheadSystem_qos provider);
+  NetworkDevice getNetworkDeviceFromSystem(ArrowheadSystem_qos provider);
 
   /**
    * get network where the network device is deployed
@@ -27,7 +27,7 @@ public interface ISCSRepository {
    * @param networkDevice network device
    * @return returns network
    */
-  Network getNetworkFromNetworkDevice(Network_Device networkDevice);
+  Network getNetworkFromNetworkDevice(NetworkDevice networkDevice);
 
   /**
    * save node
@@ -59,7 +59,7 @@ public interface ISCSRepository {
    * @param networkDevice network device
    * @return returns network device
    */
-  Network_Device saveNetworkDevice(Network_Device networkDevice);
+  NetworkDevice saveNetworkDevice(NetworkDevice networkDevice);
 
   /**
    * add network device to network
@@ -68,7 +68,7 @@ public interface ISCSRepository {
    * @param networkDevice network device
    * @return returns the network
    */
-  Network addNetworkDeviceToNetwork(Network network, Network_Device networkDevice);
+  Network addNetworkDeviceToNetwork(Network network, NetworkDevice networkDevice);
 
   /**
    * get all nodes

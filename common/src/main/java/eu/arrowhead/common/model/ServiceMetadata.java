@@ -1,15 +1,11 @@
 package eu.arrowhead.common.model;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class ServiceMetadata {
 
   private String key;
   private String value;
 
   public ServiceMetadata() {
-
   }
 
   public ServiceMetadata(String key, String value) {

@@ -14,6 +14,6 @@
     <mapping class="eu.arrowhead.common.database.qos.ArrowheadSystem_qos"/>
     <mapping class="eu.arrowhead.common.database.qos.ArrowheadService_qos"/>
     <mapping class="eu.arrowhead.common.database.qos.Message_Stream"/>
-    <mapping class="eu.arrowhead.common.database.qos.QoS_Resource_Reservation"/>
+    <mapping class="eu.arrowhead.common.database.qos.ResourceReservation"/>
   </session-factory>
 </hibernate-configuration>

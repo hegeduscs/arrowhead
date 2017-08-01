@@ -1,13 +1,10 @@
 package eu.arrowhead.common.exception;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class ErrorMessage {
 
-  private final String documentation = "No documentation yet.";
   private String errorMessage;
   private int errorCode;
+  private String documentation = "No documentation yet.";
 
   public ErrorMessage() {
   }
@@ -37,5 +34,8 @@ public class ErrorMessage {
     return documentation;
   }
 
+  public void setDocumentation(String documentation) {
+    this.documentation = documentation;
+  }
 
 }

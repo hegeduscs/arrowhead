@@ -2,9 +2,7 @@ package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class OrchestrationForm {
 
   private ArrowheadService service;
@@ -74,6 +72,5 @@ public class OrchestrationForm {
   public void setSignature(String signature) {
     this.signature = signature;
   }
-
 
 }

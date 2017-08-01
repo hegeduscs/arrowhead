@@ -28,4 +28,5 @@ public class ArrowheadToken {
   public void setSignature(String signature) {
     this.signature = signature;
   }
+
 }

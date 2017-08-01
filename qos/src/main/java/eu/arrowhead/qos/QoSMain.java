@@ -29,10 +29,9 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-class Main {
+class QoSMain {
 
-  private static Logger log = Logger.getLogger(Main.class.
-      getName());
+  private static Logger log = Logger.getLogger(QoSMain.class.getName());
   private static Properties prop;
 
   private static final String BASE_URI = getProp().
@@ -41,8 +40,7 @@ class Main {
       getProperty("base_uri_secured", "https://0.0.0.0:8442/qos/");
 
   public static void main(String[] args) throws IOException {
-    PropertyConfigurator.
-        configure("config" + File.separator + "log4j.properties");
+    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
     HttpServer server = null;
     HttpServer secureServer = null;
@@ -72,24 +70,6 @@ class Main {
     }
 
     System.out.println("QoS Server(s) stopped");
-  }
-
-  private static HttpServer startServer() throws IOException {
-    log.info("Starting server at: " + BASE_URI);
-
-    URI uri = UriBuilder.fromUri(BASE_URI).build();
-
-    final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(QoSResource.class);
-    config.packages("eu.arrowhead.common");
-    config.property("isSecure", false);
-
-    final HttpServer server = GrizzlyHttpServerFactory.
-        createHttpServer(uri, config);
-    server.getServerConfiguration().
-        setAllowPayloadForUndefinedHttpMethods(true);
-    server.start();
-    return server;
   }
 
   private static HttpServer startSecureServer() throws IOException {
@@ -126,16 +106,29 @@ class Main {
     } catch (Exception ex) {
       throw new AuthenticationException(ex.getMessage());
     }
-    String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.
-        getSubjectDN().getName());
+    String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
     final HttpServer server = GrizzlyHttpServerFactory.
-        createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).
-            setClientMode(false).setNeedClientAuth(true));
-    server.getServerConfiguration().
-        setAllowPayloadForUndefinedHttpMethods(true);
+        createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
+    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+    server.start();
+    return server;
+  }
+
+  private static HttpServer startServer() throws IOException {
+    log.info("Starting server at: " + BASE_URI);
+
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
+
+    final ResourceConfig config = new ResourceConfig();
+    config.registerClasses(QoSResource.class);
+    config.packages("eu.arrowhead.common");
+    config.property("isSecure", false);
+
+    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;
   }

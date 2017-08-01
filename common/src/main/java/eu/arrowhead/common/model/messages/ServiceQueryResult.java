@@ -2,9 +2,7 @@ package eu.arrowhead.common.model.messages;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class ServiceQueryResult {
 
   private List<ProvidedService> serviceQueryData = new ArrayList<>();
@@ -27,6 +25,5 @@ public class ServiceQueryResult {
   public boolean isPayloadEmpty() {
     return serviceQueryData == null || serviceQueryData.isEmpty();
   }
-
 
 }

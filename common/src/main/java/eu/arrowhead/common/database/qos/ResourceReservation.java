@@ -1,21 +1,22 @@
 package eu.arrowhead.common.database.qos;
 
+import java.util.HashMap;
 import java.util.Map;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
-@Table(name = "QOS_RESOURCE_RESERVATION")
-@XmlRootElement
-public class QoS_Resource_Reservation {
+@Table(name = "resource_reservation")
+public class ResourceReservation {
 
   @Column(name = "id")
   @Id
@@ -25,20 +26,15 @@ public class QoS_Resource_Reservation {
   @Column(name = "state")
   private String state;
 
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
-  private Map<String, String> qosParameters;
+  @CollectionTable(name = "resourcereservation_qosparameters")
+  private Map<String, String> qosParameters = new HashMap<>();
 
-  public QoS_Resource_Reservation() {
-
+  public ResourceReservation() {
   }
 
-  public QoS_Resource_Reservation(String state) {
-    super();
-    this.state = state;
-  }
-
-  public QoS_Resource_Reservation(String state, Map<String, String> qosParameters) {
+  public ResourceReservation(String state, Map<String, String> qosParameters) {
     this.state = state;
     this.qosParameters = qosParameters;
   }

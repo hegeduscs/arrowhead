@@ -4,9 +4,7 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class GSDRequestForm {
 
   private ArrowheadService requestedService;
@@ -37,14 +35,7 @@ public class GSDRequestForm {
   }
 
   public boolean isPayloadUsable() {
-    if (requestedService == null) {
-      return false;
-    }
-    if (!requestedService.isValidStrict()) {
-      return false;
-    }
-    return requestedService.getInterfaces() != null && !requestedService.getInterfaces().isEmpty();
+    return requestedService != null && requestedService.isValidStrict();
   }
-
 
 }

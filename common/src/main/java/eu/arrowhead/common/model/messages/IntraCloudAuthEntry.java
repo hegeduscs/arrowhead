@@ -3,12 +3,7 @@ package eu.arrowhead.common.model.messages;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.ArrayList;
-import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * @author umlaufz
- */
-@XmlRootElement
 public class IntraCloudAuthEntry {
 
   private ArrowheadSystem consumer;

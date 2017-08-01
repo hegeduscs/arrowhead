@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ServiceQueryForm {
 
-  private List<ServiceMetadata> serviceMetadata;
+  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
   private List<String> serviceInterfaces = new ArrayList<>();
   private boolean pingProviders;
   private boolean metadataSearch;

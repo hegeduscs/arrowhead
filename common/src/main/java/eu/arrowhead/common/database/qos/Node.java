@@ -32,7 +32,7 @@ public class Node {
 
   /*
    * @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL) private
-   * Map<ArrowheadSystem, Network_Device> deployedSystems;
+   * Map<ArrowheadSystem, NetworkDevice> deployedSystems;
    */
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private List<DeployedSystem> deployedSystems;

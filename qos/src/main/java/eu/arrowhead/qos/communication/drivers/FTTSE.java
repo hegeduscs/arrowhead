@@ -32,15 +32,6 @@ public class FTTSE implements IQoSDriver {
 
   protected final String STREAM_PARAMETERS_ASSYNCHRONOUS_HARD_REAL_TIME = "1";
   protected final String STREAM_PARAMETERS_ASSYNCHRONOUS_SOFT_REAL_TIME = "2";
-  private final String STREAM_PARAMETERS_SIZE = "SIZE";
-  private final String STREAM_PARAMETERS_PERIOD = "PERIOD";
-  private final String STREAM_PARAMETERS_SYNCHRONOUS_TYPE = "SYNCHRONOUS";
-  private final String STREAM_PARAMETERS_STREAM_ID = "ID";
-  private final String STREAM_PARAMETERS_SYNCHRONOUS = "0";
-  private final String STREAM_PARAMETERS_BEST_EFFORT = "3";
-  private final Integer MINIMUM_PERIOD = 1;
-  private final String BANDWIDTH = "bandwidth";
-  private final String DELAY = "delay";
   private final String NETWORK_EC = "EC";
   private final String NETWORK_STREAM_ID = "stream_id";
   private final String NETWORK_ENTRYPOINT_URL = "ENTRYPOINT_URL";
@@ -121,8 +112,13 @@ public class FTTSE implements IQoSDriver {
     Integer period = 5;
     Integer size = calculateSize(mtu);
 
+    String STREAM_PARAMETERS_STREAM_ID = "ID";
     commands.put(STREAM_PARAMETERS_STREAM_ID, streamID.toString());
+    String STREAM_PARAMETERS_SYNCHRONOUS_TYPE = "SYNCHRONOUS";
+    String STREAM_PARAMETERS_PERIOD = "PERIOD";
+    String STREAM_PARAMETERS_SIZE = "SIZE";
     if (requestedQoS == null || requestedQoS.isEmpty()) {
+      String STREAM_PARAMETERS_BEST_EFFORT = "3";
       commands.
           put(STREAM_PARAMETERS_SYNCHRONOUS_TYPE, STREAM_PARAMETERS_BEST_EFFORT);
       commands.put(STREAM_PARAMETERS_PERIOD, period.toString());
@@ -131,6 +127,7 @@ public class FTTSE implements IQoSDriver {
     }
 
     // CHECK DELAY
+    String DELAY = "delay";
     if (requestedQoS.get(DELAY) != null) {
       Integer delay = Integer.parseInt(requestedQoS.get(DELAY));
       period = (int) ((double) delay / (double) elementaryCycle);
@@ -141,11 +138,13 @@ public class FTTSE implements IQoSDriver {
      * if period less than 1 the stream cannot be possible - this must never
 		 * happen because the verify method must verify this!
 		 */
+    Integer MINIMUM_PERIOD = 1;
     if (period < MINIMUM_PERIOD) {
       throw new IllegalArgumentException("Period < MINIMUM_PERIOD");
     }
 
     // CHECK BANDWIDTH
+    String BANDWIDTH = "bandwidth";
     if (requestedQoS.get(BANDWIDTH) != null) {
       Integer bandwidth = Integer.parseInt(requestedQoS.get(BANDWIDTH));
       size = (((elementaryCycle * period) * bandwidth) / 1000);
@@ -154,6 +153,7 @@ public class FTTSE implements IQoSDriver {
       }
     }
     commands.put(STREAM_PARAMETERS_SIZE, size.toString());
+    String STREAM_PARAMETERS_SYNCHRONOUS = "0";
     commands.
         put(STREAM_PARAMETERS_SYNCHRONOUS_TYPE, STREAM_PARAMETERS_SYNCHRONOUS);
 

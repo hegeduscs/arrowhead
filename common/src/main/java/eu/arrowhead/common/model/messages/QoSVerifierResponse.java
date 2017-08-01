@@ -11,7 +11,6 @@ public class QoSVerifierResponse {
   private RejectMotivationTypes RejectMotivaiton;
 
   public QoSVerifierResponse() {
-
   }
 
   public QoSVerifierResponse(boolean response, RejectMotivationTypes rejectMotivaiton) {

@@ -3,9 +3,11 @@ package eu.arrowhead.common.database.qos;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,41 +16,38 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
-@Table(name = "network_device", uniqueConstraints = {@UniqueConstraint(columnNames = {"macAddress"})})
+@Table(name = "network_device", uniqueConstraints = {@UniqueConstraint(columnNames = {"mac_address"})})
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@XmlRootElement
-public class Network_Device {
+public class NetworkDevice {
 
-  @Column(name = "network_device_id")
+  @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @XmlTransient
   private int id;
 
   @Column(name = "name")
   private String name;
 
-  @Column(name = "macAddress")
+  @Column(name = "mac_address")
   private String macAddress;
 
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
-  private Map<String, String> networkCapabilities;
+  @CollectionTable(name = "networkdevice_capabilities")
+  private Map<String, String> networkCapabilities = new HashMap<>();
 
   @ManyToOne(cascade = CascadeType.ALL)
   private Network network;
 
-  protected Network_Device() {
-    networkCapabilities = new HashMap<>();
+  public NetworkDevice() {
   }
 
-  public Network_Device(String name, String macAddress, Map<String, String> networkCapabilities, Network network) {
+  public NetworkDevice(String name, String macAddress, Map<String, String> networkCapabilities, Network network) {
     this.name = name;
     this.macAddress = macAddress;
     this.networkCapabilities = networkCapabilities;
@@ -60,6 +59,7 @@ public class Network_Device {
    *
    * @return Returns integer woth ID.
    */
+  @XmlTransient
   public int getId() {
     return id;
   }

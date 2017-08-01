@@ -4,9 +4,7 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class IntraCloudAuthRequest {
 
   private ArrowheadSystem consumer;
@@ -67,6 +65,5 @@ public class IntraCloudAuthRequest {
     }
     return true;
   }
-
 
 }

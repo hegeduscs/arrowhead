@@ -10,7 +10,7 @@
 */
 package eu.arrowhead.qos.algorithms;
 
-import eu.arrowhead.common.database.qos.QoS_Resource_Reservation;
+import eu.arrowhead.common.database.qos.ResourceReservation;
 import java.util.List;
 import java.util.Map;
 
@@ -21,8 +21,8 @@ public class VerificationInfo {
 
   private Map<String, String> provierDeviceCapabilities;
   private Map<String, String> consumerDeviceCapabilities;
-  private List<QoS_Resource_Reservation> providerDeviceQoSReservations;
-  private List<QoS_Resource_Reservation> consumerDeviceQoSReservations;
+  private List<ResourceReservation> providerDeviceQoSReservations;
+  private List<ResourceReservation> consumerDeviceQoSReservations;
   private Map<String, String> requestedQoS;
   private Map<String, String> commands;
 
@@ -30,7 +30,7 @@ public class VerificationInfo {
   }
 
   public VerificationInfo(Map<String, String> provierDeviceCapabilities, Map<String, String> consumerDeviceCapabilities,
-                          List<QoS_Resource_Reservation> providerDeviceQoSReservations, List<QoS_Resource_Reservation> consumerDeviceQoSReservations,
+                          List<ResourceReservation> providerDeviceQoSReservations, List<ResourceReservation> consumerDeviceQoSReservations,
                           Map<String, String> requestedQoS, Map<String, String> commands) {
     this.provierDeviceCapabilities = provierDeviceCapabilities;
     this.consumerDeviceCapabilities = consumerDeviceCapabilities;
@@ -56,19 +56,19 @@ public class VerificationInfo {
     this.consumerDeviceCapabilities = consumerDeviceCapabilities;
   }
 
-  public List<QoS_Resource_Reservation> getProviderDeviceQoSReservations() {
+  public List<ResourceReservation> getProviderDeviceQoSReservations() {
     return providerDeviceQoSReservations;
   }
 
-  public void setProviderDeviceQoSReservations(List<QoS_Resource_Reservation> providerDeviceQoSReservations) {
+  public void setProviderDeviceQoSReservations(List<ResourceReservation> providerDeviceQoSReservations) {
     this.providerDeviceQoSReservations = providerDeviceQoSReservations;
   }
 
-  public List<QoS_Resource_Reservation> getConsumerDeviceQoSReservations() {
+  public List<ResourceReservation> getConsumerDeviceQoSReservations() {
     return consumerDeviceQoSReservations;
   }
 
-  public void setConsumerDeviceQoSReservations(List<QoS_Resource_Reservation> consumerDeviceQoSReservations) {
+  public void setConsumerDeviceQoSReservations(List<ResourceReservation> consumerDeviceQoSReservations) {
     this.consumerDeviceQoSReservations = consumerDeviceQoSReservations;
   }
 

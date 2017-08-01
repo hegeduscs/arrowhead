@@ -78,10 +78,9 @@ public class DatabaseManager {
     T object = null;
 
     System.out.println("TESTSAJT");
-    Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
-    try {
+    try (Session session = getSessionFactory().openSession()) {
       transaction = session.beginTransaction();
       object = session.get(queryClass, id);
       transaction.commit();
@@ -90,8 +89,6 @@ public class DatabaseManager {
         transaction.rollback();
       }
       throw e;
-    } finally {
-      session.close();
     }
 
     return object;
@@ -101,10 +98,9 @@ public class DatabaseManager {
   public <T> T get(Class<T> queryClass, Map<String, Object> restrictionMap) {
     T object = null;
 
-    Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
-    try {
+    try (Session session = getSessionFactory().openSession()) {
       transaction = session.beginTransaction();
       Criteria criteria = session.createCriteria(queryClass);
       if (restrictionMap != null && !restrictionMap.isEmpty()) {
@@ -119,8 +115,6 @@ public class DatabaseManager {
         transaction.rollback();
       }
       throw e;
-    } finally {
-      session.close();
     }
 
     return object;
@@ -130,10 +124,9 @@ public class DatabaseManager {
   public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
     List<T> retrievedList = new ArrayList<>();
 
-    Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
-    try {
+    try (Session session = getSessionFactory().openSession()) {
       transaction = session.beginTransaction();
       Criteria criteria = session.createCriteria(queryClass);
       if (restrictionMap != null && !restrictionMap.isEmpty()) {
@@ -148,18 +141,15 @@ public class DatabaseManager {
         transaction.rollback();
       }
       throw e;
-    } finally {
-      session.close();
     }
 
     return retrievedList;
   }
 
   public <T> T save(T object) {
-    Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
-    try {
+    try (Session session = getSessionFactory().openSession()) {
       transaction = session.beginTransaction();
       session.save(object);
       transaction.commit();
@@ -169,25 +159,22 @@ public class DatabaseManager {
       }
       log.info("DatabaseManager:save throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
-              + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. Please check the unique fields of the " + object
+              .getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
       }
       throw e;
-    } finally {
-      session.close();
     }
 
     return object;
   }
 
   public <T> T merge(T object) {
-    Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
-    try {
+    try (Session session = getSessionFactory().openSession()) {
       transaction = session.beginTransaction();
       session.merge(object);
       transaction.commit();
@@ -204,18 +191,15 @@ public class DatabaseManager {
         transaction.rollback();
       }
       throw e;
-    } finally {
-      session.close();
     }
 
     return object;
   }
 
   public <T> void delete(T object) {
-    Session session = getSessionFactory().openSession();
     Transaction transaction = null;
 
-    try {
+    try (Session session = getSessionFactory().openSession()) {
       transaction = session.beginTransaction();
       session.delete(object);
       transaction.commit();
@@ -232,8 +216,6 @@ public class DatabaseManager {
         transaction.rollback();
       }
       throw e;
-    } finally {
-      session.close();
     }
   }
 }

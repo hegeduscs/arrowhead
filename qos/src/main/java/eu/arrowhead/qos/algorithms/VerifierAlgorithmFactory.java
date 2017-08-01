@@ -10,7 +10,7 @@
 */
 package eu.arrowhead.qos.algorithms;
 
-import eu.arrowhead.common.database.qos.QoS_Resource_Reservation;
+import eu.arrowhead.common.database.qos.ResourceReservation;
 import eu.arrowhead.common.model.messages.QoSVerifierResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,8 +36,8 @@ public class VerifierAlgorithmFactory {
   }
 
   public QoSVerifierResponse verify(String communicationProtocol, Map<String, String> provierDeviceCapabilities,
-                                    Map<String, String> consumerDeviceCapabilities, List<QoS_Resource_Reservation> providerDeviceQoSReservations,
-                                    List<QoS_Resource_Reservation> consumerDeviceQoSReservations, Map<String, String> requestedQoS,
+                                    Map<String, String> consumerDeviceCapabilities, List<ResourceReservation> providerDeviceQoSReservations,
+                                    List<ResourceReservation> consumerDeviceQoSReservations, Map<String, String> requestedQoS,
                                     Map<String, String> commands)
       throws InstantiationException, ClassNotFoundException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException,
       InvocationTargetException {

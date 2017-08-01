@@ -33,6 +33,7 @@ class GatekeeperMain {
     boolean daemon = false;
     int mode = 0;
 
+    //TODO legyen egy unsecure case is, és ha defaultig eljut, akkor pedig el se induljon, hanem dobjon egy exception
     for (int i = 0; i < args.length; ++i) {
       if (args[i].equals("-d")) {
         daemon = true;

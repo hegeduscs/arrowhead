@@ -4,12 +4,7 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * @author umlaufz
- */
-@XmlRootElement
 public class InterCloudAuthEntry {
 
   private ArrowheadCloud cloud;

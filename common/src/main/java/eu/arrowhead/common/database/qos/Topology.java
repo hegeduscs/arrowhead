@@ -29,7 +29,7 @@ public class Topology {
   @Column(name = "status")
   private String status;
 
-  public Topology(Network_Device device) {
+  public Topology(NetworkDevice device) {
     super();
   }
 

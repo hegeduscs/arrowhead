@@ -2,9 +2,7 @@ package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class ProvidedService {
 
   private ArrowheadSystem provider;
@@ -13,7 +11,6 @@ public class ProvidedService {
   private String serviceInterface;
 
   public ProvidedService() {
-
   }
 
   public ProvidedService(ArrowheadSystem provider, ArrowheadService offered, String serviceURI, String serviceInterface) {
@@ -58,6 +55,5 @@ public class ProvidedService {
   public boolean isPayloadUsable() {
     return provider != null && provider.isValid() && serviceURI != null;
   }
-
 
 }

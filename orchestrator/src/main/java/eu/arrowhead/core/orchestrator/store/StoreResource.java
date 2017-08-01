@@ -109,7 +109,7 @@ public class StoreResource {
         throw new DataNotFoundException("No Orchestration Store entries were found " + "for this consumer: " + query.getRequesterSystem().toString());
       }
     }
-		
+
 		/*
 		 * If the payload does have a requestedService, we return all the Orchestration Store
 		 * entries specified by the requesterSystem and requestedService.

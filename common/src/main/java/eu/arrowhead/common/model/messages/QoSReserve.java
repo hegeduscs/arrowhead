@@ -4,25 +4,20 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class QoSReserve {
 
   private ArrowheadSystem provider;
   private ArrowheadSystem consumer;
   private ArrowheadService service;
-  private Map<String, String> requestedQoS;
-  private Map<String, String> commands;
+  private Map<String, String> requestedQoS = new HashMap<>();
+  private Map<String, String> commands = new HashMap<>();
 
   public QoSReserve() {
-    super();
-    this.requestedQoS = new HashMap<>();
   }
 
   public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service, Map<String, String> requestedQoS,
                     Map<String, String> commands) {
-    super();
     this.provider = provider;
     this.consumer = consumer;
     this.service = service;

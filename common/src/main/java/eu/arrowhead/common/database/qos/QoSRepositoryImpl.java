@@ -254,9 +254,9 @@ public class QoSRepositoryImpl implements IQoSRepository {
   }
 
   @Override
-  public List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(ArrowheadSystem_qos system) {
+  public List<ResourceReservation> getQoSReservationsFromArrowheadSystem(ArrowheadSystem_qos system) {
     List<Message_Stream> list = getAllMessage_Streams();
-    List<QoS_Resource_Reservation> output = new ArrayList<>();
+    List<ResourceReservation> output = new ArrayList<>();
     for (Message_Stream mS : list) {
       if (mS.getConsumer().equals(system) || mS.getProvider().
           equals(system)) {
@@ -268,9 +268,9 @@ public class QoSRepositoryImpl implements IQoSRepository {
   }
 
   @Override
-  public List<QoS_Resource_Reservation> getAllQoS_Resource_Reservations() {
+  public List<ResourceReservation> getAllQoS_Resource_Reservations() {
     HashMap<String, Object> restrictionMap = new HashMap<>();
-    return getAll(QoS_Resource_Reservation.class, restrictionMap);
+    return getAll(ResourceReservation.class, restrictionMap);
   }
 
   @Override

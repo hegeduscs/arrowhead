@@ -163,11 +163,10 @@ class OrchestratorMain {
     try {
       if (prop == null) {
         prop = new Properties();
+        //todo check behaviour if prop file/attribute missing, add excetpion handling if needed (workspace is important!)
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
-        if (inputStream != null) {
-          prop.load(inputStream);
-        }
+        prop.load(inputStream);
       }
     } catch (Exception ex) {
       ex.printStackTrace();

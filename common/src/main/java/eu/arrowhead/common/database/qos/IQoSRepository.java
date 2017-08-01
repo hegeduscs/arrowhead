@@ -12,14 +12,14 @@ public interface IQoSRepository {
    * @param system ArrowheadSyste
    * @return returns list of qos reservations.
    */
-  List<QoS_Resource_Reservation> getQoSReservationsFromArrowheadSystem(ArrowheadSystem_qos system);
+  List<ResourceReservation> getQoSReservationsFromArrowheadSystem(ArrowheadSystem_qos system);
 
   /**
    * get all qos reservations.
    *
    * @return returns list of qos reservations.
    */
-  List<QoS_Resource_Reservation> getAllQoS_Resource_Reservations();
+  List<ResourceReservation> getAllQoS_Resource_Reservations();
 
   /**
    * get qos reservations from filter

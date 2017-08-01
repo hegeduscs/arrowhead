@@ -27,13 +27,13 @@ public class DeployedSystem {
 
   @ManyToOne
   @JoinColumn(name = "network_device_id")
-  private Network_Device networkDevice;
+  private NetworkDevice networkDevice;
 
   protected DeployedSystem() {
 
   }
 
-  public DeployedSystem(ArrowheadSystem_qos system, Network_Device networkDevice) {
+  public DeployedSystem(ArrowheadSystem_qos system, NetworkDevice networkDevice) {
     super();
     this.system = system;
     this.networkDevice = networkDevice;
@@ -62,7 +62,7 @@ public class DeployedSystem {
    *
    * @return Network Device.
    */
-  public Network_Device getNetworkDevice() {
+  public NetworkDevice getNetworkDevice() {
     return networkDevice;
   }
 
@@ -71,7 +71,7 @@ public class DeployedSystem {
    *
    * @param networkDevice Network Device.
    */
-  public void setNetworkDevice(Network_Device networkDevice) {
+  public void setNetworkDevice(NetworkDevice networkDevice) {
     this.networkDevice = networkDevice;
   }
 

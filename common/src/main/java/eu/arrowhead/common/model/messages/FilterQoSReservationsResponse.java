@@ -1,20 +1,16 @@
 package eu.arrowhead.common.model.messages;
 
+import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
-class FilterQoSReservationsResponse {
+public class FilterQoSReservationsResponse {
 
-  private List<QoSReservationForm> reservations;
+  private List<QoSReservationForm> reservations = new ArrayList<>();
 
   public FilterQoSReservationsResponse() {
-    super();
-    // TODO Auto-generated constructor stub
   }
 
   public FilterQoSReservationsResponse(List<QoSReservationForm> reservations) {
-    super();
     this.reservations = reservations;
   }
 

@@ -7,7 +7,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
@@ -15,7 +14,6 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity
 @Table(name = "arrowhead_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_group", "system_name"})})
-@XmlRootElement
 public class ArrowheadSystem {
 
   @Column(name = "id")
@@ -156,6 +154,5 @@ public class ArrowheadSystem {
   public String toString() {
     return "(" + systemGroup + ":" + systemName + ")";
   }
-
 
 }

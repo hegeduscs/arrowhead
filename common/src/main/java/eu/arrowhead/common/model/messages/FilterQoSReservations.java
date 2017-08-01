@@ -1,20 +1,16 @@
 package eu.arrowhead.common.model.messages;
 
+import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
-class FilterQoSReservations {
+public class FilterQoSReservations {
 
-  private Map<String, String> filters;
+  private Map<String, String> filters = new HashMap<>();
 
   public FilterQoSReservations() {
-    super();
-    // TODO Auto-generated constructor stub
   }
 
   public FilterQoSReservations(Map<String, String> filters) {
-    super();
     this.filters = filters;
   }
 

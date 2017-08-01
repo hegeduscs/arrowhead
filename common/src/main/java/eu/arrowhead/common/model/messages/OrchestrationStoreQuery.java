@@ -47,5 +47,4 @@ public class OrchestrationStoreQuery {
     return requesterSystem != null && requesterSystem.isValidForDatabase();
   }
 
-
 }

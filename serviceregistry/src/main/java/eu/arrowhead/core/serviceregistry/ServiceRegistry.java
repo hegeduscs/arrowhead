@@ -478,9 +478,10 @@ public class ServiceRegistry {
   private boolean pingService(Collection<ServiceName> needToRemoveInstances, ServiceName instance, ServiceData service,
                               Map<String, String> properties, boolean replied) {
     String path = properties.get("path");
+    //TODO ping provider is hardcoded for only simple HTTP
     String targetUrl = "http://" + service.getHost() + ":" + service.getPort() + path;
-    int timeout = new Integer(getAppProp().getProperty("ping.timeout", "10000")).intValue();
-    int port = new Integer(service.getPort()).intValue();
+    int timeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
+    int port = service.getPort();
     String host = removeLastChar(service.getHost(), '.');
     if (!pingHost(host, port, timeout)) {
       log.info("Can't access the service in the following URL" + targetUrl + ", in " + timeout + "millisec");

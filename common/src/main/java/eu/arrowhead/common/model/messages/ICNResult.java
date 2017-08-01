@@ -1,8 +1,5 @@
 package eu.arrowhead.common.model.messages;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class ICNResult {
 
   private OrchestrationResponse instructions;
@@ -27,10 +24,7 @@ public class ICNResult {
   }
 
   public boolean isPayloadUsable() {
-    if (instructions == null) {
-      return false;
-    }
-    return instructions.getResponse() != null && !instructions.getResponse().isEmpty();
+    return instructions != null && instructions.getResponse() != null && !instructions.getResponse().isEmpty();
   }
 
 }

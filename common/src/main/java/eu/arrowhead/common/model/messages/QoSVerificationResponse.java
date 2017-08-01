@@ -4,21 +4,16 @@ import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.QoSVerifierResponse.RejectMotivationTypes;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class QoSVerificationResponse {
 
-  //TODO make a new class instead with system, boolean and rejectmotivationtypes
   private Map<ArrowheadSystem, Boolean> response = new HashMap<>();
   private Map<ArrowheadSystem, QoSVerifierResponse.RejectMotivationTypes> rejectMotivation = new HashMap<>();
 
   public QoSVerificationResponse() {
-    super();
   }
 
   public QoSVerificationResponse(Map<ArrowheadSystem, Boolean> response, Map<ArrowheadSystem, RejectMotivationTypes> rejectMotivation) {
-    super();
     this.response = response;
     this.rejectMotivation = rejectMotivation;
   }

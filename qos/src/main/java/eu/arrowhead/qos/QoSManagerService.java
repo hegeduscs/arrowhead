@@ -10,10 +10,9 @@
 */
 package eu.arrowhead.qos;
 
-import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.qos.Network;
-import eu.arrowhead.common.database.qos.Network_Device;
-import eu.arrowhead.common.database.qos.QoS_Resource_Reservation;
+import eu.arrowhead.common.database.qos.NetworkDevice;
+import eu.arrowhead.common.database.qos.ResourceReservation;
 import eu.arrowhead.common.exception.DriverNotFoundException;
 import eu.arrowhead.common.exception.ReservationException;
 import eu.arrowhead.common.model.ArrowheadSystem;
@@ -28,37 +27,23 @@ import eu.arrowhead.qos.algorithms.VerifierAlgorithmFactory;
 import eu.arrowhead.qos.drivers.DriversFactory;
 import eu.arrowhead.qos.factories.QoSFactory;
 import eu.arrowhead.qos.factories.SCSFactory;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
+import org.apache.log4j.Logger;
 import org.hibernate.cfg.NotYetImplementedException;
+//import org.hibernate.cfg.NotYetImplementedException;
 
-class QoSManagerService {
+final class QoSManagerService {
 
-  private static Logger log = Logger.getLogger(QoSManagerService.class.
-      getName());
-  private VerifierAlgorithmFactory algorithmFactory;
+  private static Logger log = Logger.getLogger(QoSManagerService.class.getName());
+  private static VerifierAlgorithmFactory algorithmFactory = VerifierAlgorithmFactory.getInstance();
+  private static SCSFactory scsFactory = SCSFactory.getInstance();
+  private static QoSFactory qosFactory = QoSFactory.getInstance();
 
-  private SCSFactory scsfactory;
-  private QoSFactory qosfactory;
-
-  private Client client;
-
-  public QoSManagerService() {
-    algorithmFactory = VerifierAlgorithmFactory.getInstance();
-    qosfactory = QoSFactory.getInstance();
-    scsfactory = SCSFactory.getInstance();
-    client = ClientBuilder.newClient();
+  private QoSManagerService() throws AssertionError {
+    throw new AssertionError("QoSManagerService is a non-instantiable class");
   }
 
   /**
@@ -67,50 +52,44 @@ class QoSManagerService {
    * @param message QoSVerify parameters.
    * @return Returns if is possible or not and why.
    */
-  public QoSVerificationResponse qoSVerify(QoSVerify message) {
-    QoSVerificationResponse qosVerificationResponse = new QoSVerificationResponse();
+  static QoSVerificationResponse qosVerify(QoSVerify message) {
     log.info("QoS: Verifying QoS paramteres.");
 
     // Get The Consumer Device to get all of its capabilites
-    Network_Device consumer_network_device = scsfactory.
-        getNetworkDeviceFromSystem(message.getConsumer());
+    NetworkDevice consumerNetworkDevice = scsFactory.getNetworkDeviceFromSystem(message.getConsumer());
     // Get The Consumer QoSReservations
-    List<QoS_Resource_Reservation> consumerDeviceQoSReservations = qosfactory.
-        getQoSReservationsFromArrowheadSystem(message.getConsumer());
+    List<ResourceReservation> consumerReservations = qosFactory.getReservationsFromSystem(message.getConsumer());
 
-    for (ArrowheadSystem system : message.getProvider()) {
+    QoSVerificationResponse qosVerificationResponse = new QoSVerificationResponse();
+    for (ArrowheadSystem provider : message.getProviders()) {
       // Get Provider Network - TO GET CAPABILITIES
-      Network_Device provider_network_device = scsfactory.
-          getNetworkDeviceFromSystem(system);
-      if (provider_network_device == null) {
+      NetworkDevice providerNetworkDevice = scsFactory.getNetworkDeviceFromSystem(provider);
+      if (providerNetworkDevice == null) {
         continue;
       }
-
       // Get Provider Arrowhead System - TO GET QOSRESERVATIONS
-      List<QoS_Resource_Reservation> providerDeviceQoSReservations = qosfactory.
-          getQoSReservationsFromArrowheadSystem(system);
+      List<ResourceReservation> providerReservations = qosFactory.getReservationsFromSystem(provider);
 
       // GET NETWORK TO GET ITS TYPE: ex:FTTSE
-      // Network network =
-      // scsfactory.getNetworkFromNetworkDevice(provider_network_device);
-      Network network = provider_network_device.getNetwork();
+      Network network = providerNetworkDevice.getNetwork();
       if (network == null) {
         continue;
       }
 
       // Run Algorithm
-      QoSVerifierResponse response;
       try {
-        response = algorithmFactory
-            .verify(network.getNetworkType(), provider_network_device.getNetworkCapabilities(), consumer_network_device.getNetworkCapabilities(),
-                    providerDeviceQoSReservations, consumerDeviceQoSReservations, message.getRequestedQoS(), message.getCommands());
+        QoSVerifierResponse response = algorithmFactory
+            .verify(network.getNetworkType(), providerNetworkDevice.getNetworkCapabilities(), consumerNetworkDevice.getNetworkCapabilities(),
+                    providerReservations, consumerReservations, message.getRequestedQoS(), message.getCommands());
 
-        updateQoSVerificationResponse(system, response, qosVerificationResponse);
-      }//TODO fix this catch branch... and others like it
-      catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException |
-          InvocationTargetException ex) {
-        Logger.getLogger(QoSManagerService.class.getName()).
-            log(Level.SEVERE, null, ex);
+        //TODO this hashmap solution is not elegant at all, rethinking of the verification response is needed at a later time
+        qosVerificationResponse.addResponse(provider, response.getResponse());
+        if (!response.getResponse()) {
+          qosVerificationResponse.addRejectMotivation(provider, response.getRejectMotivation());
+        }
+      } catch (Exception ex) {
+        log.error(ex.getClass() + " in QosManagerService:qosVerify");
+        ex.printStackTrace();
       }
     }
 
@@ -126,7 +105,7 @@ class QoSManagerService {
    * @throws ReservationException The reservation on the devices was not possible.
    * @throws DriverNotFoundException The network type doesnt have a driver assigned.
    */
-  public QoSReservationResponse qoSReserve(QoSReserve message) throws ReservationException, DriverNotFoundException, IOException {
+  static QoSReservationResponse qosReserve(QoSReserve message) throws ReservationException, DriverNotFoundException, IOException {
     QoSReservationResponse qosreservationResponse;
 
     // Go To System Configuration Store get NetworkDevice
@@ -134,10 +113,10 @@ class QoSManagerService {
     ArrowheadSystem provider = message.getProvider();
 
     // Get The Consumer Device to get all of its capabilites
-    Network_Device consumer_network_device = scsfactory.
+    NetworkDevice consumer_network_device = scsFactory.
         getNetworkDeviceFromSystem(consumer);
     // Get The Producer Device to get all of its capabilites
-    Network_Device provider_network_device = scsfactory.
+    NetworkDevice provider_network_device = scsFactory.
         getNetworkDeviceFromSystem(provider);
     if (provider_network_device == null) {
       throw new ReservationException("");
@@ -166,10 +145,10 @@ class QoSManagerService {
        * DataBase *
        */
       /* Create Message Stream */
-      wasSucessful = qosfactory.
+      wasSucessful = qosFactory.
           saveMessageStream(provider, consumer, message.getService(), message.getRequestedQoS(), responseS, network.getNetworkType());
 
-      scsfactory.updateNetwork(network);
+      scsFactory.updateNetwork(network);
 
       if (wasSucessful) {
         /**
@@ -204,30 +183,14 @@ class QoSManagerService {
   }
 
   /**
-   * Fills the parameters of a qosVerify message.
-   *
-   * @param system ArrowheadSystem
-   * @param v Was possible.
-   * @param qosVerificationResponse Reject Motivation Reason.
-   */
-  private void updateQoSVerificationResponse(ArrowheadSystem system, QoSVerifierResponse v, QoSVerificationResponse qosVerificationResponse) {
-    boolean isPossible = v.getResponse();
-    qosVerificationResponse.addResponse(system, v.getResponse());
-    if (!isPossible) {
-      qosVerificationResponse.addRejectMotivation(system, v.
-          getRejectMotivation());
-    }
-  }
-
-  /**
    * Contacts the QoSMonitoring
    *
    * @param rule Message to send to the QoSMonitor.
    * @return Returns true if it was successful.
    */
-  private boolean contactMonitoring(AddMonitorRule rule) throws IOException {
-    // READ FROM PROPERTIES FILE
-    Properties props = new Properties();
+  private static boolean contactMonitoring(AddMonitorRule rule) throws IOException {
+    //TODO app properties használata többi példájára
+    /*Properties props = new Properties();
     InputStream inputStream = getClass().getClassLoader().
         getResourceAsStream("monitor.properties");
     if (inputStream != null) {
@@ -241,7 +204,9 @@ class QoSManagerService {
     final String URL = props.getProperty("monitor.url");
     Response response = Utility.sendRequest(URL, "POST", rule);
 
-    return response.getStatus() > 199 && response.getStatus() < 300;
+    return response.getStatus() > 199 && response.getStatus() < 300;*/
+
+    return true;
   }
 
   /**

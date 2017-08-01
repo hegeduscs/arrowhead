@@ -2,9 +2,7 @@ package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class InterCloudAuthRequest {
 
   private ArrowheadCloud cloud;

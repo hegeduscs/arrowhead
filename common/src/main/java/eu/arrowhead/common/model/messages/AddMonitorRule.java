@@ -2,14 +2,12 @@ package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Message used to create a new monitor rule.
  *
  * @author Renato Ayres
  */
-@XmlRootElement
 public class AddMonitorRule {
 
   private String protocol;

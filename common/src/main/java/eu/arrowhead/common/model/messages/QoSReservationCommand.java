@@ -2,25 +2,22 @@ package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
+import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class QoSReservationCommand {
 
   private ArrowheadService service;
   private ArrowheadSystem producer;
   private ArrowheadSystem consumer;
-  private Map<String, String> commands;
-  private Map<String, String> requestedQoS;
+  private Map<String, String> commands = new HashMap<>();
+  private Map<String, String> requestedQoS = new HashMap<>();
 
-  protected QoSReservationCommand() {
-
+  public QoSReservationCommand() {
   }
 
   public QoSReservationCommand(ArrowheadService service, ArrowheadSystem producer, ArrowheadSystem consumer, Map<String, String> commands,
                                Map<String, String> requestedQoS) {
-    super();
     this.service = service;
     this.producer = producer;
     this.consumer = consumer;
