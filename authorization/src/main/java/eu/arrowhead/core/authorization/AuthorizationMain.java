@@ -168,9 +168,7 @@ class AuthorizationMain {
         prop = new Properties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
-        if (inputStream != null) {
-          prop.load(inputStream);
-        }
+        prop.load(inputStream);
       }
     } catch (Exception ex) {
       ex.printStackTrace();

@@ -2,19 +2,19 @@ package eu.arrowhead.common.model.messages;
 
 public class QoSReservationResponse {
 
-  private boolean response;
+  private boolean successfulReservation;
   private QoSReservationCommand command;
 
   public QoSReservationResponse() {
   }
 
-  public QoSReservationResponse(boolean response, QoSReservationCommand command) {
-    this.response = response;
+  public QoSReservationResponse(boolean successfulReservation, QoSReservationCommand command) {
+    this.successfulReservation = successfulReservation;
     this.command = command;
   }
 
-  public QoSReservationResponse(boolean response) {
-    this.response = response;
+  public QoSReservationResponse(boolean successfulReservation) {
+    this.successfulReservation = successfulReservation;
   }
 
   public QoSReservationCommand getCommand() {
@@ -25,12 +25,12 @@ public class QoSReservationResponse {
     this.command = command;
   }
 
-  public boolean isResponse() {
-    return response;
+  public boolean isSuccessfulReservation() {
+    return successfulReservation;
   }
 
-  public void setResponse(boolean response) {
-    this.response = response;
+  public void setSuccessfulReservation(boolean successfulReservation) {
+    this.successfulReservation = successfulReservation;
   }
 
 }

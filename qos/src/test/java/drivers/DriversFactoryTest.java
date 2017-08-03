@@ -13,9 +13,9 @@ package drivers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import eu.arrowhead.qos.communication.drivers.FTTSE;
 import eu.arrowhead.qos.drivers.DriversFactory;
 import eu.arrowhead.qos.drivers.ReservationInfo;
+import eu.arrowhead.qos.drivers.implementations.FTTSE;
 import java.lang.reflect.Method;
 import org.junit.After;
 import org.junit.AfterClass;

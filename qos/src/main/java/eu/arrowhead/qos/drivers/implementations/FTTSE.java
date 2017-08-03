@@ -8,7 +8,7 @@
 * JU grant nr. 332987.
 * ISEP, Polytechnic Institute of Porto.
 */
-package eu.arrowhead.qos.communication.drivers;
+package eu.arrowhead.qos.drivers.implementations;
 
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
@@ -28,6 +28,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 
+//TODO needs complete overhaul basically or implement a totally different one
 public class FTTSE implements IQoSDriver {
 
   protected final String STREAM_PARAMETERS_ASSYNCHRONOUS_HARD_REAL_TIME = "1";
@@ -38,13 +39,12 @@ public class FTTSE implements IQoSDriver {
   private final String NETWORK_MTU = "MTU";
 
   public FTTSE() {
-    super();
   }
 
+  //TODO I dont see this method used anywhere... except in a Test class
   @Override
   public ReservationResponse reserveQoS(ReservationInfo info) {
-    Map<String, String> networkConfiguration = info.
-        getNetworkConfiguration();
+    Map<String, String> networkConfiguration = info.getNetworkConfiguration();
     ArrowheadSystem provider = info.getProvider();
     ArrowheadSystem consumer = info.getConsumer();
     ArrowheadService service = info.getService();
@@ -57,14 +57,14 @@ public class FTTSE implements IQoSDriver {
 
     String url = networkConfiguration.get(NETWORK_ENTRYPOINT_URL);
     Integer ec = Integer.parseInt(networkConfiguration.get(NETWORK_EC));
-    Integer streamID = Integer.parseInt(networkConfiguration.
-        get(NETWORK_STREAM_ID));
+    Integer streamID = Integer.parseInt(networkConfiguration.get(NETWORK_STREAM_ID));
     streamID++;
     Integer mtu = Integer.parseInt(networkConfiguration.get(NETWORK_MTU));
     // Update Network Configurations
     networkConfiguration.put(NETWORK_STREAM_ID, streamID.toString());
     // IF COMMANDS ARE NULL - THE DRIVER WILL GENERATE THE COMMANDS BASED ON
     // IF THE REQUESTED QOS
+    //TODO this if/else is pfffffffffffffffffffffffff
     if (commands == null && (requestedQoS != null || requestedQoS.size() == 0)) {
       commands = generateCommands(streamID, ec, mtu, requestedQoS);
       if (commands == null) {
@@ -80,6 +80,7 @@ public class FTTSE implements IQoSDriver {
     }
 
     // CONTACT THE ENTRYPOINT
+    //TODO USE THE UTILITY CLASS FOR THIS
     ClientConfig configuration = new ClientConfig();
     configuration.property(ClientProperties.CONNECT_TIMEOUT, 30000);
     configuration.property(ClientProperties.READ_TIMEOUT, 30000);
@@ -87,14 +88,15 @@ public class FTTSE implements IQoSDriver {
     URI uri = UriBuilder.fromPath(url + "/configure").build();
 
     WebTarget target = client.target(uri);
-    Response response = target.request().
-        header("Content-type", "application/json").post(Entity.
-        json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
+    Response response = target.request().header("Content-type", "application/json")
+        .post(Entity.json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
 
+    //TODO see QoSManagerService for a better solution
     if (response.getStatus() > 199 && response.getStatus() < 300) {
       return new ReservationResponse(true, null, commands);
     }
 
+    //everything is possible!
     return new ReservationResponse(false, "Not Possible", null);
   }
 
@@ -170,8 +172,7 @@ public class FTTSE implements IQoSDriver {
    */
   private boolean validateNetworkCOnfiguration(Map<String, String> networkConfiguration) {
     if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.
-        containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration
-        .containsKey(NETWORK_MTU)) {
+        containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration.containsKey(NETWORK_MTU)) {
       return false;
     }
 

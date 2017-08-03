@@ -106,41 +106,41 @@ final class OrchestratorService {
         psList.add(ps);
       }
 
-      /*
-       * TODO: QoS review
-       */
       providerSystems.clear();
       for (ProvidedService service : psList) {
         providerSystems.add(service.getProvider());
       }
 
-      if (srf.getRequestedQoS().isEmpty()) {
+      //TODO outsource this to a private method
+      if (!srf.getRequestedQoS().isEmpty()) {
         QoSVerificationResponse qosVerificationResponse = queryQoSVerification(
             new QoSVerify(srf.getRequesterSystem(), srf.getRequestedService(), providerSystems, srf.getRequestedQoS(), srf.getCommands()));
 
-        if (qosVerificationResponse != null) {  // Removing the bad QoS
-          for (ArrowheadSystem rejectedSystem : qosVerificationResponse.getResponse().keySet()) {
-            if (qosVerificationResponse.getResponse().get(rejectedSystem) == false) {
-              providerSystems.remove(rejectedSystem);
+        if (qosVerificationResponse != null) {  // Removing systems with inadequate QoS
+          for (ArrowheadSystem providers : qosVerificationResponse.getResponse().keySet()) {
+            if (!qosVerificationResponse.getResponse().get(providers)) {
+              providerSystems.remove(providers);
             }
           }
+        } else {
+          //TODO throw exception + do we use the RejectMovivation field for something or drop it?
         }
 
-        QoSReserve qosReservation;
         QoSReservationResponse qosReservationResponse;
-        for (ArrowheadSystem system : providerSystems) {
-          qosReservation = new QoSReserve(system, srf.getRequesterSystem(), srf.getRequestedService(), srf.getRequestedQoS(), srf.getCommands());
-          qosReservationResponse = doQosReservation(qosReservation);
+        //TODO change the QoS Reservation to accept a list of providers!
+        for (ArrowheadSystem provider : providerSystems) {
+          qosReservationResponse = doQosReservation(
+              new QoSReserve(provider, srf.getRequesterSystem(), srf.getRequestedService(), srf.getRequestedQoS(), srf.getCommands()));
+          if (!qosReservationResponse.isSuccessfulReservation()) {
+            providerSystems.remove(provider);
+          }
         }
-        for (ProvidedService pS : psList) {
-          if (!providerSystems.contains(pS.getProvider())) {
-            psList.remove(pS);
+        for (ProvidedService service : psList) {
+          if (!providerSystems.contains(service.getProvider())) {
+            psList.remove(service);
           }
         }
       }
-       /*
-       * TODO: QoS review
-       */
 
       // All the filtering is done, need to compile the response
       return compileOrchestrationResponse(psList, true, srf);
@@ -220,8 +220,8 @@ final class OrchestratorService {
       throw new BadPayloadException(
           "Bad request sent to the Intra-Cloud matchmaking." + "(onlyPreferred flag is true, but no local preferredProviders)");
     } else {
-			/*
-			 * If there are no preferences we return with the first possible
+      /*
+       * If there are no preferences we return with the first possible
 			 * choice by default. Custom matchmaking algorithm can be
 			 * implemented here.
 			 */
@@ -897,7 +897,7 @@ final class OrchestratorService {
    */
   private static QoSVerificationResponse queryQoSVerification(QoSVerify qosVerify) {
     log.info("orchestrator: inside the getQoSVerificationResponse function");
-    String URI = UriBuilder.fromPath(Utility.getQoSURI()).path("QoSVerify").toString();
+    String URI = UriBuilder.fromPath(Utility.getQoSURI()).path("verify").toString();
     Response response = Utility.sendRequest(URI, "PUT", Entity.json(qosVerify));
     return response.readEntity(QoSVerificationResponse.class);
   }
@@ -909,12 +909,9 @@ final class OrchestratorService {
    */
   private static QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
     log.info("orchestrator: inside the doQoSReservation function");
-    String URI = Utility.getQoSURI() + "/QoSReserve";
-    log.info("orchestrator: sending QoSReserve to this address: " + URI);
+    String URI = UriBuilder.fromPath(Utility.getQoSURI()).path("reserve").toString();
     Response response = Utility.sendRequest(URI, "PUT", qosReserve);
-    QoSReservationResponse reservation = response.readEntity(QoSReservationResponse.class);
-    return reservation;
-
+    return response.readEntity(QoSReservationResponse.class);
   }
 
 }

@@ -6,9 +6,8 @@
   <session-factory>
     <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-    <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/arrowhead</property>
     <property name="show_sql">true</property>
-    <property name="hibernate.hbm2ddl.auto">update</property>
+    <property name="hibernate.hbm2ddl.auto">create</property>
     <mapping class="eu.arrowhead.common.model.ArrowheadCloud"/>
     <mapping class="eu.arrowhead.common.model.ArrowheadSystem"/>
     <mapping class="eu.arrowhead.common.model.ArrowheadService"/>
@@ -18,5 +17,12 @@
     <mapping class="eu.arrowhead.common.database.NeighborCloud"/>
     <mapping class="eu.arrowhead.common.database.OwnCloud"/>
     <mapping class="eu.arrowhead.common.database.OrchestrationStore"/>
+    <mapping class="eu.arrowhead.common.database.qos.DeployedSystem"/>
+    <mapping class="eu.arrowhead.common.database.qos.MessageStream"/>
+    <mapping class="eu.arrowhead.common.database.qos.Network"/>
+    <mapping class="eu.arrowhead.common.database.qos.NetworkDevice"/>
+    <mapping class="eu.arrowhead.common.database.qos.Node"/>
+    <mapping class="eu.arrowhead.common.database.qos.ResourceReservation"/>
+    <mapping class="eu.arrowhead.common.database.qos.Topology"/>
   </session-factory>
 </hibernate-configuration>

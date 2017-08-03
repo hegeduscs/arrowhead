@@ -10,9 +10,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name = "resource_reservation")
@@ -27,8 +28,9 @@ public class ResourceReservation {
   private String state;
 
   @ElementCollection(fetch = FetchType.LAZY)
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @CollectionTable(name = "resourcereservation_qosparameters")
+  @MapKeyColumn(name = "qos_key")
+  @Column(name = "qos_value")
+  @CollectionTable(name = "resource_reservation_qos_parameters", joinColumns = @JoinColumn(name = "id"))
   private Map<String, String> qosParameters = new HashMap<>();
 
   public ResourceReservation() {
@@ -44,6 +46,7 @@ public class ResourceReservation {
    *
    * @return returns integer with ID
    */
+  @XmlTransient
   public int getId() {
     return id;
   }

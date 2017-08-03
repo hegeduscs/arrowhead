@@ -57,8 +57,7 @@ public class AuthorizationApi {
   @Path("/intracloud")
   public List<IntraCloudAuthorization> getIntraCloudAuthRights() {
 
-    List<IntraCloudAuthorization> authRights = new ArrayList<>();
-    authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
+    List<IntraCloudAuthorization> authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
       log.info("AuthorizationApi:getIntraCloudAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("IntraCloud authorization rights " + "were not found in the database.");
@@ -75,7 +74,6 @@ public class AuthorizationApi {
    * @throws DataNotFoundException, BadPayloadException
    */
   //TODO token generation if flag set true
-  //TODO token generator function
   @PUT
   @Path("/intracloud")
   public Response isSystemAuthorized(IntraCloudAuthRequest request) {
@@ -111,7 +109,7 @@ public class AuthorizationApi {
       return Response.status(Status.OK).entity(response).build();
     }
 
-    IntraCloudAuthorization authRight = null;
+    IntraCloudAuthorization authRight;
     for (ArrowheadSystem provider : request.getProviders()) {
       restrictionMap.clear();
       restrictionMap.put("systemGroup", provider.getSystemGroup());

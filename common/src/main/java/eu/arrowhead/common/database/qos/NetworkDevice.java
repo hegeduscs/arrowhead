@@ -11,18 +11,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
 @Table(name = "network_device", uniqueConstraints = {@UniqueConstraint(columnNames = {"mac_address"})})
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class NetworkDevice {
 
   @Column(name = "id")
@@ -37,11 +34,13 @@ public class NetworkDevice {
   private String macAddress;
 
   @ElementCollection(fetch = FetchType.LAZY)
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @CollectionTable(name = "networkdevice_capabilities")
+  @MapKeyColumn(name = "capability_key")
+  @Column(name = "capability_value")
+  @CollectionTable(name = "network_device_network_capabilities", joinColumns = @JoinColumn(name = "id"))
   private Map<String, String> networkCapabilities = new HashMap<>();
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "network_id")
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
   private Network network;
 
   public NetworkDevice() {

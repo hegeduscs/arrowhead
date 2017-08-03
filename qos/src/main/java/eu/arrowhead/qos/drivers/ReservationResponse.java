@@ -10,6 +10,7 @@
 */
 package eu.arrowhead.qos.drivers;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -17,25 +18,25 @@ import java.util.Map;
  */
 public class ReservationResponse {
 
-  private Boolean sucess;
+  private boolean success;
   private String reason;
-  private Map<String, String> networkConfiguration;
+  private Map<String, String> networkConfiguration = new HashMap<>();
 
   public ReservationResponse() {
   }
 
-  public ReservationResponse(Boolean sucess, String reason, Map<String, String> networkConfiguration) {
-    this.sucess = sucess;
+  public ReservationResponse(boolean success, String reason, Map<String, String> networkConfiguration) {
+    this.success = success;
     this.reason = reason;
     this.networkConfiguration = networkConfiguration;
   }
 
-  public Boolean getSucess() {
-    return sucess;
+  public boolean getSuccess() {
+    return success;
   }
 
-  public void setSucess(Boolean sucess) {
-    this.sucess = sucess;
+  public void setSuccess(boolean success) {
+    this.success = success;
   }
 
   public String getReason() {

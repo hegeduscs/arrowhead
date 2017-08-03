@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+//TODO make this a static final class, no need for factory pattern
 public class DriversFactory {
 
   private static DriversFactory instance;
@@ -40,6 +41,8 @@ public class DriversFactory {
     return instance;
   }
 
+  //TODO same notes as in VerifierAlgorithmFactory
+
   /**
    * @param networkConfiguration Network configuration parameters on a map.
    * @param provider ArrowheadSystem.
@@ -52,10 +55,9 @@ public class DriversFactory {
    * @throws DriverNotFoundException The selected type doesnt have an assigned driver.
    */
   public Map<String, String> generateCommands(String communicationProtocol, Map<String, String> networkConfiguration, ArrowheadSystem provider,
-                                              ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands,
-                                              Map<String, String> requestedQoS)
-      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+                                              ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands, Map<String, String>
+                                                  requestedQoS)
+      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
     // Class Invoking
     Class cls = findClass(communicationProtocol);
@@ -77,15 +79,12 @@ public class DriversFactory {
   public Class findClass(String communicationProtocol) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     // Class Invoking
     Class cls;
-    cls = Class.forName("eu.arrowhead.qos.communication.drivers." + communicationProtocol.
-        toUpperCase());
+    cls = Class.forName("eu.arrowhead.qos.communication.drivers." + communicationProtocol.toUpperCase());
     return cls;
   }
 
   public Method findMethod(Class cls) throws NoSuchMethodException {
-    Method method = cls.
-        getDeclaredMethod("reserveQoS", paramVerificationInfo);
-    return method;
+    return cls.getDeclaredMethod("reserveQoS", paramVerificationInfo);
   }
 
 }

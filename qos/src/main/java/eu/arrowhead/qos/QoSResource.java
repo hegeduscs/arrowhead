@@ -25,14 +25,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.apache.log4j.Logger;
 
 @Path("qos")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class QoSResource {
-
-  private static Logger log = Logger.getLogger(QoSResource.class.getName());
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)

@@ -1,6 +1,7 @@
 package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadSystem;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -8,18 +9,18 @@ import java.util.Map;
  *
  * @author Renato Ayres
  */
-public class AddMonitorRule {
+public class MonitorRule {
 
   private String protocol;
   private ArrowheadSystem provider;
   private ArrowheadSystem consumer;
-  private Map<String, String> parameters;
+  private Map<String, String> parameters = new HashMap<>();
   private boolean softRealTime;
 
   /**
    * Creates a new instance with no parameters initialized.
    */
-  public AddMonitorRule() {
+  public MonitorRule() {
   }
 
   /**
@@ -31,11 +32,12 @@ public class AddMonitorRule {
    * @param parameters the monitor parameters. It works by getting the value of the parameter (key) e.g. key=bandwidth, value=100
    * @param softRealTime the soft real time clause
    */
-  public AddMonitorRule(String protocol, ArrowheadSystem provider, ArrowheadSystem consumer, Map<String, String> parameters, boolean softRealTime) {
+  public MonitorRule(String protocol, ArrowheadSystem provider, ArrowheadSystem consumer, Map<String, String> parameters, boolean softRealTime) {
     this.protocol = protocol;
     this.provider = provider;
     this.consumer = consumer;
     this.parameters = parameters;
+    this.softRealTime = softRealTime;
   }
 
   /**
@@ -110,21 +112,12 @@ public class AddMonitorRule {
     this.parameters = parameters;
   }
 
-  /**
-   * Gets the soft real time clause.
-   *
-   * @return the soft real time clause
-   */
   public boolean isSoftRealTime() {
     return softRealTime;
   }
 
-  /**
-   * Sets the soft real time clause.
-   *
-   * @param softRealTime the soft real time clause
-   */
   public void setSoftRealTime(boolean softRealTime) {
     this.softRealTime = softRealTime;
   }
+
 }

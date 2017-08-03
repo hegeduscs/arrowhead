@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -12,14 +13,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name = "node", uniqueConstraints = {@UniqueConstraint(columnNames = {"device_model_code"})})
-@XmlRootElement
 public class Node {
 
   @Column(name = "id")
@@ -30,19 +32,17 @@ public class Node {
   @Column(name = "device_model_code")
   private String device_model_code;
 
-  /*
-   * @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL) private
-   * Map<ArrowheadSystem, NetworkDevice> deployedSystems;
-   */
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-  private List<DeployedSystem> deployedSystems;
+  @JoinColumn(name = "deployed_system_id")
+  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  private List<DeployedSystem> deployedSystems = new ArrayList<>();
 
-  @ElementCollection
-  private Map<String, String> processingCapabilities;
+  @ElementCollection(fetch = FetchType.LAZY)
+  @MapKeyColumn(name = "capability_key")
+  @Column(name = "capability_value")
+  @CollectionTable(name = "node_processing_capabilities", joinColumns = @JoinColumn(name = "id"))
+  private Map<String, String> processingCapabilities = new HashMap<>();
 
-  Node() {
-    deployedSystems = new ArrayList<>();
-    processingCapabilities = new HashMap<>();
+  public Node() {
   }
 
   public Node(String device_model_code, List<DeployedSystem> deployedSystems, Map<String, String> processingCapabilities) {
@@ -51,70 +51,35 @@ public class Node {
     this.processingCapabilities = processingCapabilities;
   }
 
-  /**
-   * get device model code
-   *
-   * @return returns device model code
-   */
-  public String getDevice_model_code() {
-    return device_model_code;
-  }
-
-  /**
-   * set device model code
-   *
-   * @param device_model_code device model code
-   */
-  public void setDevice_model_code(String device_model_code) {
-    this.device_model_code = device_model_code;
-  }
-
-  /**
-   * get ID
-   *
-   * @return returns ID
-   */
+  @XmlTransient
   public int getId() {
     return id;
   }
 
-  /**
-   * set iD
-   *
-   * @param id ID
-   */
   public void setId(int id) {
     this.id = id;
   }
 
-  /**
-   * get deployed systems
-   *
-   * @return returns list of deployed systems
-   */
+  public String getDevice_model_code() {
+    return device_model_code;
+  }
+
+  public void setDevice_model_code(String device_model_code) {
+    this.device_model_code = device_model_code;
+  }
+
   public List<DeployedSystem> getDeployedSystems() {
     return deployedSystems;
   }
 
-  /**
-   * set deployed systems
-   */
   public void setDeployedSystems(List<DeployedSystem> deployedSystems) {
     this.deployedSystems = deployedSystems;
   }
 
-  /**
-   * get processing capabilities
-   *
-   * @return returns map with all the processing capabilities
-   */
   public Map<String, String> getProcessingCapabilities() {
     return processingCapabilities;
   }
 
-  /**
-   * set processing caacilities.
-   */
   public void setProcessingCapabilities(Map<String, String> processingCapabilities) {
     this.processingCapabilities = processingCapabilities;
   }

@@ -8,6 +8,7 @@ import java.util.Map;
 public class QoSVerificationResponse {
 
   private Map<ArrowheadSystem, Boolean> response = new HashMap<>();
+  //TODO might be not useful
   private Map<ArrowheadSystem, QoSVerifierResponse.RejectMotivationTypes> rejectMotivation = new HashMap<>();
 
   public QoSVerificationResponse() {

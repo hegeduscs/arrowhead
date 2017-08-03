@@ -1,20 +1,21 @@
 package eu.arrowhead.common.database.qos;
 
 import java.util.Map;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
-@Table(name = "Topology")
-@XmlRootElement
+@Table(name = "topology")
 public class Topology {
 
   @Column(name = "id")
@@ -22,67 +23,44 @@ public class Topology {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private String id;
 
-  @ElementCollection
-  @LazyCollection(LazyCollectionOption.FALSE)
+  @ElementCollection(fetch = FetchType.LAZY)
+  @MapKeyColumn(name = "config_key")
+  @Column(name = "config_value")
+  @CollectionTable(name = "topology_config_map", joinColumns = @JoinColumn(name = "id"))
   private Map<String, String> configurations;
 
   @Column(name = "status")
   private String status;
 
-  public Topology(NetworkDevice device) {
-    super();
+  public Topology() {
   }
 
-  /**
-   * get configuration
-   *
-   * @return returns map with configuration
-   */
-  public Map<String, String> getConfigurations() {
-    return configurations;
-  }
-
-  /**
-   * set configuration
-   *
-   * @param configurations map with configuration
-   */
-  public void setConfigurations(Map<String, String> configurations) {
+  public Topology(Map<String, String> configurations, String status) {
     this.configurations = configurations;
+    this.status = status;
   }
 
-  /**
-   * get ID
-   *
-   * @return returns ID
-   */
+  @XmlTransient
   public String getId() {
     return id;
   }
 
-  /**
-   * set ID
-   *
-   * @param id ID
-   */
   public void setId(String id) {
     this.id = id;
   }
 
-  /**
-   * get status
-   *
-   * @return returns status
-   */
+  public Map<String, String> getConfigurations() {
+    return configurations;
+  }
+
+  public void setConfigurations(Map<String, String> configurations) {
+    this.configurations = configurations;
+  }
+
   public String getStatus() {
     return status;
   }
 
-  /**
-   * set status
-   *
-   * @param status status
-   */
   public void setStatus(String status) {
     this.status = status;
   }

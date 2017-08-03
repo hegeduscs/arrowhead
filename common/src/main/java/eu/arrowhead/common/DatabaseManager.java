@@ -3,7 +3,6 @@ package eu.arrowhead.common;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +13,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
@@ -76,8 +76,6 @@ public class DatabaseManager {
 
   public <T> T get(Class<T> queryClass, int id) {
     T object = null;
-
-    System.out.println("TESTSAJT");
     Transaction transaction = null;
 
     try (Session session = getSessionFactory().openSession()) {
@@ -97,7 +95,6 @@ public class DatabaseManager {
   @SuppressWarnings("unchecked")
   public <T> T get(Class<T> queryClass, Map<String, Object> restrictionMap) {
     T object = null;
-
     Transaction transaction = null;
 
     try (Session session = getSessionFactory().openSession()) {
@@ -120,10 +117,11 @@ public class DatabaseManager {
     return object;
   }
 
+  //TODO get method Object paraméterrel, és switch case azokra az osztályokra, ahol van uniqeConstraint nem összetett mezőkkel
+
   @SuppressWarnings("unchecked")
   public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
-    List<T> retrievedList = new ArrayList<>();
-
+    List<T> retrievedList;
     Transaction transaction = null;
 
     try (Session session = getSessionFactory().openSession()) {
@@ -133,6 +131,33 @@ public class DatabaseManager {
         for (Entry<String, Object> entry : restrictionMap.entrySet()) {
           criteria.add(Restrictions.eq(entry.getKey(), entry.getValue()));
         }
+      }
+      retrievedList = (List<T>) criteria.list();
+      transaction.commit();
+    } catch (Exception e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      throw e;
+    }
+
+    return retrievedList;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> List<T> getAllOfEither(Class<T> queryClass, Map<String, Object> restrictionMap) {
+    List<T> retrievedList;
+    Transaction transaction = null;
+
+    try (Session session = getSessionFactory().openSession()) {
+      transaction = session.beginTransaction();
+      Criteria criteria = session.createCriteria(queryClass);
+      if (restrictionMap != null && !restrictionMap.isEmpty()) {
+        Disjunction disjunction = Restrictions.disjunction();
+        for (Entry<String, Object> entry : restrictionMap.entrySet()) {
+          disjunction.add(Restrictions.eq(entry.getKey(), entry.getValue()));
+        }
+        criteria.add(disjunction);
       }
       retrievedList = (List<T>) criteria.list();
       transaction.commit();
@@ -184,7 +209,7 @@ public class DatabaseManager {
       }
       log.info("DatabaseManager:merge throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. " + "Please check the unique fields of the "
+          "DuplicateEntryException: there is already an entry in the database with these parameters. Please check the unique fields of the "
               + object.getClass());
     } catch (Exception e) {
       if (transaction != null) {
@@ -209,7 +234,7 @@ public class DatabaseManager {
       }
       log.info("DatabaseManager:delete throws ConstraintViolationException");
       throw new DuplicateEntryException(
-          "ConstraintViolationException: there is a reference to this object in another table, " + "which prevents the delete operation. (" + object
+          "ConstraintViolationException: there is a reference to this object in another table, which prevents the delete operation. (" + object
               .getClass() + ")");
     } catch (Exception e) {
       if (transaction != null) {

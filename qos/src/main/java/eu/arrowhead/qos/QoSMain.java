@@ -1,13 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
 package eu.arrowhead.qos;
 
 import eu.arrowhead.common.exception.AuthenticationException;
@@ -34,10 +24,9 @@ class QoSMain {
   private static Logger log = Logger.getLogger(QoSMain.class.getName());
   private static Properties prop;
 
-  private static final String BASE_URI = getProp().
-      getProperty("base_uri", "http://0.0.0.0:8441/qos/");
-  private static final String BASE_URI_SECURED = getProp().
-      getProperty("base_uri_secured", "https://0.0.0.0:8442/qos/");
+  public static final String MONITOR_URL = getProp().getProperty("monitor_url", "");
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8448/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8449/");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -139,9 +128,7 @@ class QoSMain {
         prop = new Properties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
-        if (inputStream != null) {
-          prop.load(inputStream);
-        }
+        prop.load(inputStream);
       }
     } catch (Exception ex) {
       ex.printStackTrace();

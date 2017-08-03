@@ -12,7 +12,7 @@ package qosmanager.drivers;
 
 import static org.junit.Assert.assertEquals;
 
-import eu.arrowhead.qos.communication.drivers.FTTSE;
+import eu.arrowhead.qos.drivers.implementations.FTTSE;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;

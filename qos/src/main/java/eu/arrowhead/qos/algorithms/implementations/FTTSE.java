@@ -8,9 +8,8 @@
 * JU grant nr. 332987.
 * ISEP, Polytechnic Institute of Porto.
 */
-package eu.arrowhead.qos.communication.algorithms;
+package eu.arrowhead.qos.algorithms.implementations;
 
-import eu.arrowhead.common.model.messages.QoSVerifierResponse;
 import eu.arrowhead.qos.algorithms.IVerifierAlgorithm;
 import eu.arrowhead.qos.algorithms.VerificationInfo;
 import eu.arrowhead.qos.algorithms.VerificationResponse;
@@ -21,14 +20,12 @@ public class FTTSE implements IVerifierAlgorithm {
   private final String DELAY = "delay";
 
   public FTTSE() {
-    super();
   }
 
   @Override
   public VerificationResponse verifyQoS(VerificationInfo info) {
-    QoSVerifierResponse response = new QoSVerifierResponse();
-    response.setResponse(true);
-
+    //TODO QoSVerifierResponse and VerificationResponse seems redundant together, drop verificationresponse
+    //TODO implement actual verification?
     return new VerificationResponse(true, null);
   }
 

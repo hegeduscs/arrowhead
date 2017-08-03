@@ -11,6 +11,8 @@
 package eu.arrowhead.qos.algorithms;
 
 import eu.arrowhead.common.database.qos.ResourceReservation;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,20 +21,20 @@ import java.util.Map;
  */
 public class VerificationInfo {
 
-  private Map<String, String> provierDeviceCapabilities;
-  private Map<String, String> consumerDeviceCapabilities;
-  private List<ResourceReservation> providerDeviceQoSReservations;
-  private List<ResourceReservation> consumerDeviceQoSReservations;
-  private Map<String, String> requestedQoS;
-  private Map<String, String> commands;
+  private Map<String, String> providerDeviceCapabilities = new HashMap<>();
+  private Map<String, String> consumerDeviceCapabilities = new HashMap<>();
+  private List<ResourceReservation> providerDeviceQoSReservations = new ArrayList<>();
+  private List<ResourceReservation> consumerDeviceQoSReservations = new ArrayList<>();
+  private Map<String, String> requestedQoS = new HashMap<>();
+  private Map<String, String> commands = new HashMap<>();
 
   public VerificationInfo() {
   }
 
-  public VerificationInfo(Map<String, String> provierDeviceCapabilities, Map<String, String> consumerDeviceCapabilities,
+  public VerificationInfo(Map<String, String> providerDeviceCapabilities, Map<String, String> consumerDeviceCapabilities,
                           List<ResourceReservation> providerDeviceQoSReservations, List<ResourceReservation> consumerDeviceQoSReservations,
                           Map<String, String> requestedQoS, Map<String, String> commands) {
-    this.provierDeviceCapabilities = provierDeviceCapabilities;
+    this.providerDeviceCapabilities = providerDeviceCapabilities;
     this.consumerDeviceCapabilities = consumerDeviceCapabilities;
     this.providerDeviceQoSReservations = providerDeviceQoSReservations;
     this.consumerDeviceQoSReservations = consumerDeviceQoSReservations;
@@ -40,12 +42,12 @@ public class VerificationInfo {
     this.commands = commands;
   }
 
-  public Map<String, String> getProvierDeviceCapabilities() {
-    return provierDeviceCapabilities;
+  public Map<String, String> getProviderDeviceCapabilities() {
+    return providerDeviceCapabilities;
   }
 
-  public void setProvierDeviceCapabilities(Map<String, String> provierDeviceCapabilities) {
-    this.provierDeviceCapabilities = provierDeviceCapabilities;
+  public void setProviderDeviceCapabilities(Map<String, String> providerDeviceCapabilities) {
+    this.providerDeviceCapabilities = providerDeviceCapabilities;
   }
 
   public Map<String, String> getConsumerDeviceCapabilities() {

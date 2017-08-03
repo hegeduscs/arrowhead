@@ -69,11 +69,11 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @Column(name = "orchestration_rule")
   private String orchestrationRule;
 
-/*  @ElementCollection(fetch = FetchType.LAZY)
-  @MapKeyColumn(name="arrowhead_key")
-  @Column(name="arrowhead_value")
-  @CollectionTable(name="hashmap_test", joinColumns=@JoinColumn(name="id"))
-  Map<String, String> attributes = new HashMap<String, String>(); // maps from attribute name to value*/
+  /*@ElementCollection(fetch = FetchType.LAZY)
+  @MapKeyColumn(name = "arrowhead_key")
+  @Column(name = "arrowhead_value")
+  @CollectionTable(name = "hashmap_test", joinColumns = @JoinColumn(name = "id"))
+  Map<String, String> attributes = new HashMap<>();*/
 
   public OrchestrationStore() {
   }

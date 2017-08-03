@@ -37,7 +37,7 @@ public class ArrowheadService {
 
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
-  @CollectionTable(name = "arrowheadservice_interfaces")
+  @CollectionTable(name = "arrowhead_service_interface_list")
   private List<String> interfaces = new ArrayList<>();
 
   @Transient
