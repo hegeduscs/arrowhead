@@ -99,11 +99,11 @@ public class ArrowheadService {
     this.serviceMetadata = metaData;
   }
 
-  public boolean isValidStrict() {
+  public boolean isValid() {
     return serviceGroup != null && serviceDefinition != null && !interfaces.isEmpty();
   }
 
-  public boolean isValidSoft() {
+  public boolean isValidForDatabase() {
     return serviceGroup != null && serviceDefinition != null;
   }
 

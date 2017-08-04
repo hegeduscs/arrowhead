@@ -39,7 +39,7 @@ public class InterCloudAuthEntry {
       return false;
     }
     for (ArrowheadService service : serviceList) {
-      if (!service.isValidSoft()) {
+      if (!service.isValidForDatabase()) {
         return false;
       }
     }

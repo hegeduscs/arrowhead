@@ -1,110 +1,54 @@
 package eu.arrowhead.common.database;
 
-import javax.persistence.Column;
+import eu.arrowhead.common.model.ArrowheadCloud;
+import java.io.Serializable;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * @author umlaufz
+ * JPA entity class for storing <tt>OwnCloud</tt> information in the database. The <i>cloud_id</i> column must be unique.
+ * <p>
+ * The database table belonging to this class stores the information about the Local Cloud, meaning this table should only have 1 entry at all times.
+ * The information in this table is used during Global Service Discovery, Inter-Cloud Negotiations (by the Gatekeeper) and token generation (by the
+ * Authorization).
  *
- * Entity class for storing information about the local Cloud in the database. (Gatekeeper needs this information for negotiations.) The "operator"
- * and "cloud_name" columns must be unique together.
+ * @author Umlauf Zoltán
+ * @see eu.arrowhead.common.model.ArrowheadCloud
+ * @see eu.arrowhead.common.model.messages.GSDPoll
+ * @see eu.arrowhead.common.model.messages.ICNProposal
  */
 @Entity
-@Table(name = "own_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
-public class OwnCloud {
+@Table(name = "own_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"cloud_id"})})
+public class OwnCloud implements Serializable {
 
-  //TODO change it to the way NeighborCloud is working?
-  @Column(name = "id")
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  @XmlTransient
-  private int id;
-  @Column(name = "operator")
-  private String operator;
-  @Column(name = "cloud_name")
-  private String cloudName;
-  @Column(name = "address")
-  private String address;
-  @Column(name = "port")
-  private String port;
-  @Column(name = "authentication_info")
-  private String authenticationInfo;
-  @Column(name = "gatekeeper_service_uri")
-  private String gatekeeperServiceURI;
+  @JoinColumn(name = "cloud_id")
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  private ArrowheadCloud cloud;
 
   public OwnCloud() {
   }
 
-  public OwnCloud(String operator, String cloudName, String address, String port, String gatekeeperServiceURI, String authenticationInfo) {
-    this.operator = operator;
-    this.cloudName = cloudName;
-    this.address = address;
-    this.port = port;
-    this.gatekeeperServiceURI = gatekeeperServiceURI;
-    this.authenticationInfo = authenticationInfo;
+  public OwnCloud(ArrowheadCloud cloud) {
+    this.cloud = cloud;
   }
 
-  public int getId() {
-    return id;
+  public ArrowheadCloud getCloud() {
+    return cloud;
   }
 
-  public String getOperator() {
-    return operator;
+  public void setCloud(ArrowheadCloud cloud) {
+    this.cloud = cloud;
   }
 
-  public void setOperator(String operator) {
-    this.operator = operator;
+  public boolean isValid() {
+    return cloud != null && cloud.isValid();
   }
-
-  public String getCloudName() {
-    return cloudName;
-  }
-
-  public void setCloudName(String cloudName) {
-    this.cloudName = cloudName;
-  }
-
-  public String getAddress() {
-    return address;
-  }
-
-  public void setAddress(String address) {
-    this.address = address;
-  }
-
-  public String getPort() {
-    return port;
-  }
-
-  public void setPort(String port) {
-    this.port = port;
-  }
-
-  public String getGatekeeperServiceURI() {
-    return gatekeeperServiceURI;
-  }
-
-  public void setGatekeeperServiceURI(String gatekeeperServiceURI) {
-    this.gatekeeperServiceURI = gatekeeperServiceURI;
-  }
-
-  public String getAuthenticationInfo() {
-    return authenticationInfo;
-  }
-
-  public void setAuthenticationInfo(String authenticationInfo) {
-    this.authenticationInfo = authenticationInfo;
-  }
-
-  public boolean isPayloadUsable() {
-    return operator != null && cloudName != null && address != null;
-  }
-
 
 }

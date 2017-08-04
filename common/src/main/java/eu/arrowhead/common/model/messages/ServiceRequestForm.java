@@ -133,7 +133,7 @@ public class ServiceRequestForm {
     if (requesterSystem == null || !requesterSystem.isValid()) {
       return false;
     }
-    if (!orchestrationFlags.get("storeOnlyActive") && (requestedService == null || !requestedService.isValidStrict())) {
+    if (!orchestrationFlags.get("storeOnlyActive") && (requestedService == null || !requestedService.isValid())) {
       return false;
     }
     return !orchestrationFlags.get("onlyPreferred") || !preferredProviders.isEmpty();

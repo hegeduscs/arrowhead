@@ -53,7 +53,7 @@ public class IntraCloudAuthEntry {
       }
     }
     for (ArrowheadService service : serviceList) {
-      if (!service.isValidSoft()) {
+      if (!service.isValidForDatabase()) {
         return false;
       }
     }

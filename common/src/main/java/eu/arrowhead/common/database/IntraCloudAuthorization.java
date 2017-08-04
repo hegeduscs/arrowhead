@@ -13,10 +13,18 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * @author umlaufz This class maps the intra cloud authorization rights between Arrowhead Systems. The table entry itself is the authorization right.
- * The "arrowhead_service_id", "consumer_system_id" and "provider_system_id" columns must be unique together.
+ * JPA entity class for storing intra-cloud (within the cloud) authorization rights in the database. The <i>consumer_system_id</i>,
+ * <i>provider_system_id</i> and <i>arrowhead_service_id</i> columns must be unique together.
+ * <p>
+ * The table contains foreign keys to {@link eu.arrowhead.common.model.ArrowheadSystem} and {@link eu.arrowhead.common.model.ArrowheadService}. A
+ * particular Consumer System/Provider System/Arrowhead Service trio is authorized if there is a database entry for it in this table. The existence of
+ * the database entry means the given Consumer System is authorized to consume the given Arrowhead Serice from the given Provider System inside the
+ * Local Cloud. The reverse of it is not authorized.
+ *
+ * @author Umlauf Zoltán
  */
 @Entity
 @Table(name = "intra_cloud_authorization", uniqueConstraints = {
@@ -49,6 +57,7 @@ public class IntraCloudAuthorization {
     this.service = service;
   }
 
+  @XmlTransient
   public int getId() {
     return id;
   }
@@ -80,6 +89,5 @@ public class IntraCloudAuthorization {
   public void setService(ArrowheadService service) {
     this.service = service;
   }
-
 
 }

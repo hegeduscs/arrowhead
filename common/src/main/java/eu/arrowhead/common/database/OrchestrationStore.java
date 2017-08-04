@@ -4,8 +4,12 @@ import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -13,51 +17,50 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
+import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Type;
 
 /**
- * @author umlaufz
+ * Entity class for storing Orchestration Store entries in the database. The name column must be unique. TODO do proper javadoc when this class is
+ * finalized
  *
- * Entity class for storing Orchestration Store entries in the database. The name column must be unique.
+ * @author Umlauf Zoltán
  */
 @Entity
 @Table(name = "orchestration_store", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"consumer_system_id", "arrowhead_service_id", "provider_system_id", "provider_cloud_id", "priority",
-        "is_active"})})
+    @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "provider_system_id", "provider_cloud_id", "priority",
+        "is_default"})})
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private Integer id;
-
-  @JoinColumn(name = "consumer_system_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  private ArrowheadSystem consumer;
+  private int id;
 
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
   private ArrowheadService service;
 
+  @JoinColumn(name = "consumer_system_id")
+  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  private ArrowheadSystem consumer;
+
   @JoinColumn(name = "provider_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  @NotFound(action = NotFoundAction.IGNORE)
   private ArrowheadSystem providerSystem;
 
   @JoinColumn(name = "provider_cloud_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  @NotFound(action = NotFoundAction.IGNORE)
   private ArrowheadCloud providerCloud;
 
   @Column(name = "priority")
-  private Integer priority;
+  private int priority;
 
-  @Column(name = "is_active")
-  private boolean isActive;
+  @Column(name = "is_default")
+  private boolean isDefault;
 
   @Column(name = "name")
   private String name;
@@ -69,37 +72,40 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @Column(name = "orchestration_rule")
   private String orchestrationRule;
 
-  /*@ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.LAZY)
   @MapKeyColumn(name = "arrowhead_key")
   @Column(name = "arrowhead_value")
   @CollectionTable(name = "hashmap_test", joinColumns = @JoinColumn(name = "id"))
-  Map<String, String> attributes = new HashMap<>();*/
+  private Map<String, String> attributes = new HashMap<>();
 
   public OrchestrationStore() {
   }
 
-  public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            Integer priority) {
-    this.consumer = consumer;
+  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
+                            int priority) {
     this.service = service;
+    this.consumer = consumer;
     this.providerSystem = providerSystem;
     this.providerCloud = providerCloud;
     this.priority = priority;
   }
 
-  public OrchestrationStore(ArrowheadSystem consumer, ArrowheadService service, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            Integer priority, boolean isActive, String name, Date lastUpdated, String orchestrationRule) {
-    this.consumer = consumer;
+  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
+                            int priority, boolean isDefault, String name, Date lastUpdated, String orchestrationRule,
+                            Map<String, String> attributes) {
     this.service = service;
+    this.consumer = consumer;
     this.providerSystem = providerSystem;
     this.providerCloud = providerCloud;
     this.priority = priority;
-    this.isActive = isActive;
+    this.isDefault = isDefault;
     this.name = name;
     this.lastUpdated = lastUpdated;
     this.orchestrationRule = orchestrationRule;
+    this.attributes = attributes;
   }
 
+  @XmlTransient
   public Integer getId() {
     return id;
   }
@@ -108,20 +114,20 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.id = id;
   }
 
-  public ArrowheadSystem getConsumer() {
-    return consumer;
-  }
-
-  public void setConsumer(ArrowheadSystem consumer) {
-    this.consumer = consumer;
-  }
-
   public ArrowheadService getService() {
     return service;
   }
 
   public void setService(ArrowheadService service) {
     this.service = service;
+  }
+
+  public ArrowheadSystem getConsumer() {
+    return consumer;
+  }
+
+  public void setConsumer(ArrowheadSystem consumer) {
+    this.consumer = consumer;
   }
 
   public ArrowheadSystem getProviderSystem() {
@@ -140,20 +146,20 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.providerCloud = providerCloud;
   }
 
-  public Integer getPriority() {
+  public int getPriority() {
     return priority;
   }
 
-  public void setPriority(Integer priority) {
+  public void setPriority(int priority) {
     this.priority = priority;
   }
 
-  public boolean getIsActive() {
-    return isActive;
+  public boolean isDefault() {
+    return isDefault;
   }
 
-  public void setIsActive(boolean isActive) {
-    this.isActive = isActive;
+  public void setDefault(boolean aDefault) {
+    isDefault = aDefault;
   }
 
   public String getName() {
@@ -180,25 +186,17 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.orchestrationRule = orchestrationRule;
   }
 
-  /*public Map<String, String> getAttributes() {
+  public Map<String, String> getAttributes() {
     return attributes;
   }
 
   public void setAttributes(Map<String, String> attributes) {
     this.attributes = attributes;
-  }*/
+  }
 
-  public boolean isPayloadUsable() {
-    if (consumer == null || service == null || !consumer.isValid() || !service.isValidStrict()) {
-      return false;
-    }
-    if (priority == null || priority < 0) {
-      return false;
-    }
-    if (isActive && providerCloud != null) {
-      return false;
-    }
-    return (providerSystem != null && providerSystem.isValid());
+  public boolean isValid() {
+    return service != null && consumer != null && providerSystem != null && service.isValid() && consumer.isValid() && providerSystem.isValid()
+        && priority >= 1 && (!isDefault || providerCloud == null);
   }
 
   @Override

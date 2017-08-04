@@ -7,12 +7,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * @author umlaufz
+ * JPA entity class for storing <tt>CoreSystem</tt> information in the database. The <i>system_name</i> column must be unique.
+ * <p>
+ * The information is used by the Core Systems to contact each other. Arrowhead Core Systems include but not limited to the Orchestrator, Service
+ * Registry, Authorization and the Gatekeeper.
  *
- * Entity class for storing Core System informations in the database. The "system_name" column must be unique.
+ * @author Umlauf Zoltán
  */
 @Entity
 @Table(name = "core_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_name"})})
@@ -25,35 +29,47 @@ public class CoreSystem {
   private int id;
 
   @Column(name = "system_name")
+  @NotNull
   private String systemName;
 
   @Column(name = "address")
+  @NotNull
   private String address;
 
   @Column(name = "port")
-  private String port;
+  private int port;
 
   @Column(name = "service_uri")
-  private String serviceURI;
-
-  @Column(name = "authentication_info")
-  private String authenticationInfo;
+  @NotNull
+  private String serviceUri;
 
   @Column(name = "is_secure")
   private boolean isSecure;
 
+  @Column(name = "authentication_info")
+  private String authenticationInfo;
+
   public CoreSystem() {
   }
 
-  public CoreSystem(String systemName, String address, String port, String serviceURI, String authenticationInfo, boolean isSecure) {
+  /**
+   * @param systemName Name of the Core System
+   * @param address IP address or hostname for the Core System (e.g. "127.0.0.1" or "arrowhead.tmit.bme.hu")
+   * @param port The port number where the Core System offers its services (optional)
+   * @param serviceUri The path where the REST resource(s) is/are available
+   * @param isSecure Indicates weather the server uses HTTP or HTTPS protocol
+   * @param authenticationInfo In case <tt>isSecure</tt> is true, this field holds the Base64 coded public key of the Core System certificate
+   */
+  public CoreSystem(String systemName, String address, int port, String serviceUri, boolean isSecure, String authenticationInfo) {
     this.systemName = systemName;
     this.address = address;
     this.port = port;
-    this.serviceURI = serviceURI;
-    this.authenticationInfo = authenticationInfo;
+    this.serviceUri = serviceUri;
     this.isSecure = isSecure;
+    this.authenticationInfo = authenticationInfo;
   }
 
+  @XmlTransient
   public int getId() {
     return id;
   }
@@ -74,28 +90,20 @@ public class CoreSystem {
     this.address = address;
   }
 
-  public String getPort() {
+  public int getPort() {
     return port;
   }
 
-  public void setPort(String port) {
+  public void setPort(int port) {
     this.port = port;
   }
 
-  public String getServiceURI() {
-    return serviceURI;
+  public String getServiceUri() {
+    return serviceUri;
   }
 
-  public void setServiceURI(String serviceURI) {
-    this.serviceURI = serviceURI;
-  }
-
-  public String getAuthenticationInfo() {
-    return authenticationInfo;
-  }
-
-  public void setAuthenticationInfo(String authenticationInfo) {
-    this.authenticationInfo = authenticationInfo;
+  public void setServiceUri(String serviceUri) {
+    this.serviceUri = serviceUri;
   }
 
   public boolean getIsSecure() {
@@ -106,9 +114,21 @@ public class CoreSystem {
     this.isSecure = isSecure;
   }
 
-  public boolean isPayloadUsable() {
-    return systemName != null && address != null && serviceURI != null;
+  public String getAuthenticationInfo() {
+    return authenticationInfo;
   }
 
+  public void setAuthenticationInfo(String authenticationInfo) {
+    this.authenticationInfo = authenticationInfo;
+  }
+
+  /**
+   * Simple inspector method to check weather a CoreSystem instance is valid to be stored in the database.
+   *
+   * @return False if <tt>systemName</tt>, <tt>address</tt> or <tt>serviceUri</tt> is null, true otherwise
+   */
+  public boolean isValid() {
+    return systemName != null && address != null && serviceUri != null;
+  }
 
 }

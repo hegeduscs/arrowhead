@@ -42,7 +42,7 @@ public class ResourceReservation {
   }
 
   /**
-   * Get ID
+   * Get ID.
    *
    * @return returns integer with ID
    */
@@ -52,7 +52,7 @@ public class ResourceReservation {
   }
 
   /**
-   * set ID
+   * set ID.
    *
    * @param id integer ID
    */
@@ -61,7 +61,7 @@ public class ResourceReservation {
   }
 
   /**
-   * get state of qos reservation
+   * get state of qos reservation.
    *
    * @return returns state
    */
@@ -70,7 +70,7 @@ public class ResourceReservation {
   }
 
   /**
-   * set qos reservation state
+   * set qos reservation state.
    *
    * @param state qos reservation state
    */
@@ -79,7 +79,7 @@ public class ResourceReservation {
   }
 
   /**
-   * get qos parameters
+   * get qos parameters.
    *
    * @return returns map with qos parameters
    */
@@ -88,7 +88,7 @@ public class ResourceReservation {
   }
 
   /**
-   * set qos parameters
+   * set qos parameters.
    *
    * @param qosParameter map with the qos parameters
    */

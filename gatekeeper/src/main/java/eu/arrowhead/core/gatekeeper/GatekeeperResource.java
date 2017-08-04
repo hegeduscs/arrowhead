@@ -90,7 +90,7 @@ public class GatekeeperResource {
       String URI = null;
       for (ArrowheadCloud cloud : preferredClouds) {
         try {
-          URI = Utility.getURI(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
+          URI = Utility.getURI(cloud.getAddress(), Integer.valueOf(cloud.getPort()), cloud.getGatekeeperServiceURI(), false);
         }
         // We skip the clouds with missing information
         catch (NullPointerException ex) {
@@ -201,7 +201,7 @@ public class GatekeeperResource {
                                               requestForm.getRequesterSystem(), requestForm.getPreferredProviders(),
                                               requestForm.getNegotiationFlags());
 
-    String icnURI = Utility.getURI(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
+    String icnURI = Utility.getURI(requestForm.getTargetCloud().getAddress(), Integer.valueOf(requestForm.getTargetCloud().getPort()),
                                    requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
 

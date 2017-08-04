@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.arrowhead.common.database.qos;
 
 import java.util.HashMap;
@@ -21,9 +16,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- * @author Paulo
- */
 @Entity
 @Table(name = "network", uniqueConstraints = {@UniqueConstraint(columnNames = {"network_name"})})
 public class Network {
@@ -37,7 +29,7 @@ public class Network {
   private String name;
 
   @Column(name = "network_ip")
-  private String networkIP;
+  private String networkIp;
 
   @Column(name = "network_type")
   private String networkType;
@@ -51,9 +43,9 @@ public class Network {
   public Network() {
   }
 
-  public Network(String name, String networkIP, String networkType, Map<String, String> networkConfigurations) {
+  public Network(String name, String networkIp, String networkType, Map<String, String> networkConfigurations) {
     this.name = name;
-    this.networkIP = networkIP;
+    this.networkIp = networkIp;
     this.networkType = networkType;
     this.networkConfigurations = networkConfigurations;
   }
@@ -75,12 +67,12 @@ public class Network {
     this.name = name;
   }
 
-  public String getNetworkIP() {
-    return networkIP;
+  public String getNetworkIp() {
+    return networkIp;
   }
 
-  public void setNetworkIP(String networkIP) {
-    this.networkIP = networkIP;
+  public void setNetworkIp(String networkIp) {
+    this.networkIp = networkIp;
   }
 
   public String getNetworkType() {

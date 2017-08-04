@@ -35,7 +35,7 @@ public class GSDRequestForm {
   }
 
   public boolean isPayloadUsable() {
-    return requestedService != null && requestedService.isValidStrict();
+    return requestedService != null && requestedService.isValid();
   }
 
 }

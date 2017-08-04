@@ -421,7 +421,7 @@ final class OrchestratorService {
     if (orchestrationFlags.get("storeOnlyActive")) {
       // If a service is provided in the ServiceRequestForm, we used that
       // to further filter the results.
-      if (srf.getRequestedService() != null && srf.getRequestedService().isValidStrict()) {
+      if (srf.getRequestedService() != null && srf.getRequestedService().isValid()) {
         List<OrchestrationStore> tempList = new ArrayList<>();
         for (OrchestrationStore entry : entryList) {
           if (!entry.getService().equals(srf.getRequestedService())) {

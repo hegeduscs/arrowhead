@@ -43,7 +43,7 @@ public class InterCloudAuthRequest {
   }
 
   public boolean isPayloadUsable() {
-    return cloud != null && service != null && cloud.isValidForDatabase() && service.isValidSoft();
+    return cloud != null && service != null && cloud.isValidForDatabase() && service.isValidForDatabase();
   }
 
 }

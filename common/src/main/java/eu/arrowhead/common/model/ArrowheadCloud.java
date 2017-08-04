@@ -1,6 +1,5 @@
 package eu.arrowhead.common.model;
 
-import eu.arrowhead.common.database.OwnCloud;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -50,15 +49,6 @@ public class ArrowheadCloud {
     this.port = port;
     this.gatekeeperServiceURI = gatekeeperServiceURI;
     this.authenticationInfo = authenticationInfo;
-  }
-
-  public ArrowheadCloud(OwnCloud cloud) {
-    this.operator = cloud.getOperator();
-    this.cloudName = cloud.getCloudName();
-    this.address = cloud.getAddress();
-    this.port = cloud.getPort();
-    this.gatekeeperServiceURI = cloud.getGatekeeperServiceURI();
-    this.authenticationInfo = cloud.getAuthenticationInfo();
   }
 
   @XmlTransient

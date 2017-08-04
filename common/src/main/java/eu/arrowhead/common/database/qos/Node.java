@@ -30,7 +30,7 @@ public class Node {
   private int id;
 
   @Column(name = "device_model_code")
-  private String device_model_code;
+  private String deviceModelCode;
 
   @JoinColumn(name = "deployed_system_id")
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
@@ -45,8 +45,8 @@ public class Node {
   public Node() {
   }
 
-  public Node(String device_model_code, List<DeployedSystem> deployedSystems, Map<String, String> processingCapabilities) {
-    this.device_model_code = device_model_code;
+  public Node(String deviceModelCode, List<DeployedSystem> deployedSystems, Map<String, String> processingCapabilities) {
+    this.deviceModelCode = deviceModelCode;
     this.deployedSystems = deployedSystems;
     this.processingCapabilities = processingCapabilities;
   }
@@ -60,12 +60,12 @@ public class Node {
     this.id = id;
   }
 
-  public String getDevice_model_code() {
-    return device_model_code;
+  public String getDeviceModelCode() {
+    return deviceModelCode;
   }
 
-  public void setDevice_model_code(String device_model_code) {
-    this.device_model_code = device_model_code;
+  public void setDeviceModelCode(String deviceModelCode) {
+    this.deviceModelCode = deviceModelCode;
   }
 
   public List<DeployedSystem> getDeployedSystems() {

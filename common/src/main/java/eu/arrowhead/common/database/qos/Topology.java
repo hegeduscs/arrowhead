@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.qos;
 
+import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -27,7 +28,7 @@ public class Topology {
   @MapKeyColumn(name = "config_key")
   @Column(name = "config_value")
   @CollectionTable(name = "topology_config_map", joinColumns = @JoinColumn(name = "id"))
-  private Map<String, String> configurations;
+  private Map<String, String> configurations = new HashMap<>();
 
   @Column(name = "status")
   private String status;

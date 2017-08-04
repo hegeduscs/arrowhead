@@ -56,7 +56,7 @@ public class NetworkDevice {
   /**
    * Get ID.
    *
-   * @return Returns integer woth ID.
+   * @return Returns integer with ID.
    */
   @XmlTransient
   public int getId() {

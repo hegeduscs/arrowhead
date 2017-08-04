@@ -154,7 +154,7 @@ public class ConfigurationApi {
 
     List<CoreSystem> savedCoreSystems = new ArrayList<>();
     for (CoreSystem cs : coreSystemList) {
-      if (cs.isPayloadUsable()) {
+      if (cs.isValid()) {
         restrictionMap.clear();
         restrictionMap.put("systemName", cs.getSystemName());
         CoreSystem retrievedCoreSystem = dm.get(CoreSystem.class, restrictionMap);
@@ -180,7 +180,7 @@ public class ConfigurationApi {
 
     List<NeighborCloud> savedNeighborClouds = new ArrayList<>();
     for (NeighborCloud nc : neighborCloudList) {
-      if (nc.isPayloadUsable()) {
+      if (nc.isValid()) {
         restrictionMap.clear();
         restrictionMap.put("operator", nc.getCloud().getOperator());
         restrictionMap.put("cloudName", nc.getCloud().getCloudName());
@@ -214,7 +214,7 @@ public class ConfigurationApi {
   @Path("/owncloud")
   public OwnCloud addOwnCloud(OwnCloud ownCloud) {
 
-    if (!ownCloud.isPayloadUsable()) {
+    if (!ownCloud.isValid()) {
       log.info("ConfigurationApi:addOwnCloud throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing operator, cloudName " + "or address field! (ConfigurationApi:addOwnCloud)");
     }
@@ -238,7 +238,7 @@ public class ConfigurationApi {
   @Path("/coresystems")
   public Response updateCoreSystem(CoreSystem cs) {
 
-    if (!cs.isPayloadUsable()) {
+    if (!cs.isValid()) {
       log.info("ConfigurationApi:updateCoreSystem throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing systemName, address or " + "serviceURI in the entry payload.");
     }
@@ -249,7 +249,7 @@ public class ConfigurationApi {
       coreSystem.setAddress(cs.getAddress());
       coreSystem.setPort(cs.getPort());
       coreSystem.setAuthenticationInfo(cs.getAuthenticationInfo());
-      coreSystem.setServiceURI(cs.getServiceURI());
+      coreSystem.setServiceUri(cs.getServiceUri());
 
       coreSystem = dm.merge(coreSystem);
       return Response.status(Status.ACCEPTED).entity(coreSystem).build();
@@ -266,7 +266,7 @@ public class ConfigurationApi {
   @Path("/neighborhood")
   public Response updateNeighborCloud(NeighborCloud nc) {
 
-    if (!nc.isPayloadUsable()) {
+    if (!nc.isValid()) {
       log.info("ConfigurationApi:updateNeighborCloud throws BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud" + "in the entry payload.");
     }

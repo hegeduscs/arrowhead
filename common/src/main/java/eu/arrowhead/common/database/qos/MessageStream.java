@@ -123,9 +123,8 @@ public class MessageStream {
    */
   //TODO ask them where they used this and how?
   public String getCode() {
-    return provider.getSystemGroup() + "/" + provider.getSystemName() + "," + consumer.
-        getSystemGroup() + "/" + consumer.getSystemName() + "," + service.getServiceGroup() + "/" + service.
-        getServiceDefinition();
+    return provider.getSystemGroup() + "/" + provider.getSystemName() + "," + consumer.getSystemGroup() + "/" + consumer.getSystemName() + ","
+        + service.getServiceGroup() + "/" + service.getServiceDefinition();
   }
 
 }

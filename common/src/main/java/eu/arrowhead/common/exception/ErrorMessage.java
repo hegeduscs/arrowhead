@@ -4,6 +4,7 @@ public class ErrorMessage {
 
   private String errorMessage;
   private int errorCode;
+  //TODO modify this once javadocs are published, it could even go to the exception doc
   private String documentation = "No documentation yet.";
 
   public ErrorMessage() {

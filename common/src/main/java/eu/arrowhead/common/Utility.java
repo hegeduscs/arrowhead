@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -27,11 +26,9 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
-  private static HostnameVerifier allHostsValid = new HostnameVerifier() {
-    public boolean verify(String hostname, SSLSession session) {
-      // Decide whether to allow the connection...
-      return true;
-    }
+  private static HostnameVerifier allHostsValid = (hostname, session) -> {
+    // Decide whether to allow the connection...
+    return true;
   };
   private static Logger log = Logger.getLogger(Utility.class.getName());
   private static SSLContext sslContext = null;
@@ -104,7 +101,7 @@ public final class Utility {
    * implementation mistakes.
    */
   //TODO Niki kódjával lehet ezt szebben is valszeg
-  public static String getURI(String address, String port, String serviceURI, boolean isSecure) {
+  public static String getURI(String address, int port, String serviceURI, boolean isSecure) {
     if (address == null || serviceURI == null) {
       log.info("Address and serviceURI can not be null (Utility:getURI throws NPE)");
       throw new NullPointerException("Address and serviceURI can not be null.");
@@ -119,13 +116,13 @@ public final class Utility {
 
     UriBuilder ub = null;
     if (address.startsWith(baseURI)) {
-      if (port != null) {
+      if (port != 0) {
         ub = UriBuilder.fromPath(address + ":" + port);
       } else {
         ub = UriBuilder.fromPath(address);
       }
     } else {
-      if (port != null) {
+      if (port != 0) {
         ub = UriBuilder.fromPath(baseURI).path(address + ":" + port);
       } else {
         ub = UriBuilder.fromPath(baseURI).path(address);
@@ -145,7 +142,7 @@ public final class Utility {
       log.info("Utility:getOrchestratorURI DNFException");
       throw new DataNotFoundException("Orchestration Core System not found in the database!");
     }
-    return getURI(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
+    return getURI(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceUri(), orchestrator.getIsSecure());
   }
 
   public static String getServiceRegistryURI() {
@@ -156,7 +153,7 @@ public final class Utility {
       log.info("Utility:getServiceRegistryURI DNFException");
       throw new DataNotFoundException("Service Registry Core System not found in the database!");
     }
-    return getURI(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
+    return getURI(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceUri(), serviceRegistry.getIsSecure());
   }
 
   public static String getAuthorizationURI() {
@@ -167,7 +164,7 @@ public final class Utility {
       log.info("Utility:getAuthorizationURI DNFException");
       throw new DataNotFoundException("Authoriaztion Core System not found in the database!");
     }
-    return getURI(authorization.getAddress(), authorization.getPort(), authorization.getServiceURI(), authorization.getIsSecure());
+    return getURI(authorization.getAddress(), authorization.getPort(), authorization.getServiceUri(), authorization.getIsSecure());
   }
 
   public static String getGatekeeperURI() {
@@ -179,7 +176,7 @@ public final class Utility {
       log.info("Utility:getGatekeeperURI DNFException");
       throw new DataNotFoundException("Gatekeeper Core System not found in the database!");
     }
-    return getURI(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
+    return getURI(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceUri(), gatekeeper.getIsSecure());
   }
 
   public static String getQoSURI() {
@@ -189,10 +186,8 @@ public final class Utility {
     if (QoS == null) {
       log.info("Utility:getQoSURI DNFException");
       throw new DataNotFoundException("QoS Core System not found in the database!");
-    } else {
-      System.out.println("sajt");
     }
-    return getURI(QoS.getAddress(), QoS.getPort(), QoS.getServiceURI(), QoS.getIsSecure());
+    return getURI(QoS.getAddress(), QoS.getPort(), QoS.getServiceUri(), QoS.getIsSecure());
   }
 
   public static String getApiURI() {
@@ -203,7 +198,7 @@ public final class Utility {
       log.info("Utility:getApiURI DNFException");
       throw new DataNotFoundException("API Core System not found in the database!");
     }
-    return getURI(api.getAddress(), api.getPort(), api.getServiceURI(), api.getIsSecure());
+    return getURI(api.getAddress(), api.getPort(), api.getServiceUri(), api.getIsSecure());
   }
 
   public static List<String> getNeighborCloudURIs() {
@@ -213,7 +208,9 @@ public final class Utility {
 
     List<String> URIList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
-      URIList.add(getURI(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), false));
+      URIList
+          .add(getURI(cloud.getCloud().getAddress(), Integer.valueOf(cloud.getCloud().getPort()), cloud.getCloud().getGatekeeperServiceURI(),
+                      false));
     }
 
     return URIList;
@@ -230,7 +227,8 @@ public final class Utility {
               + "This information is needed for the Gatekeeper System.");
     }
 
-    return new ArrowheadCloud(cloudList.get(0));
+    //TODO cloudlist size sanity check + at configurationApi too
+    return cloudList.get(0).getCloud();
   }
 
   public static CoreSystem getCoreSystem(String systemName) {

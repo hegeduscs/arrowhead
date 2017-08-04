@@ -130,7 +130,7 @@ public class OrchestratorApi {
     if (query.isOnlyActive()) {
       restrictionMap.put("isActive", true);
     }
-    if (query.getRequestedService() != null && query.getRequestedService().isValidSoft()) {
+    if (query.getRequestedService() != null && query.getRequestedService().isValidForDatabase()) {
       rm.clear();
       rm.put("serviceGroup", query.getRequestedService().getServiceGroup());
       rm.put("serviceDefinition", query.getRequestedService().getServiceDefinition());
@@ -162,7 +162,7 @@ public class OrchestratorApi {
 
     List<OrchestrationStore> store = new ArrayList<>();
     for (OrchestrationStore entry : storeEntries) {
-      if (entry.isPayloadUsable()) {
+      if (entry.isValid()) {
         restrictionMap.clear();
         restrictionMap.put("systemGroup", entry.getConsumer().getSystemGroup());
         restrictionMap.put("systemName", entry.getConsumer().getSystemName());
