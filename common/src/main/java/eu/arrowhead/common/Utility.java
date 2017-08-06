@@ -26,14 +26,14 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
-  private static HostnameVerifier allHostsValid = (hostname, session) -> {
-    // Decide whether to allow the connection...
-    return true;
-  };
   private static Logger log = Logger.getLogger(Utility.class.getName());
   private static SSLContext sslContext = null;
   private static DatabaseManager dm = DatabaseManager.getInstance();
   private static HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static HostnameVerifier allHostsValid = (hostname, session) -> {
+    // Decide whether to allow the connection...
+    return true;
+  };
 
   private Utility() {
   }
@@ -151,6 +151,7 @@ public final class Utility {
     CoreSystem serviceRegistry = dm.get(CoreSystem.class, restrictionMap);
     if (serviceRegistry == null) {
       log.info("Utility:getServiceRegistryURI DNFException");
+      //TODO a 404-es status code nem igazán jó ide
       throw new DataNotFoundException("Service Registry Core System not found in the database!");
     }
     return getURI(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceUri(), serviceRegistry.getIsSecure());
@@ -162,13 +163,12 @@ public final class Utility {
     CoreSystem authorization = dm.get(CoreSystem.class, restrictionMap);
     if (authorization == null) {
       log.info("Utility:getAuthorizationURI DNFException");
-      throw new DataNotFoundException("Authoriaztion Core System not found in the database!");
+      throw new DataNotFoundException("Authorization Core System not found in the database!");
     }
     return getURI(authorization.getAddress(), authorization.getPort(), authorization.getServiceUri(), authorization.getIsSecure());
   }
 
   public static String getGatekeeperURI() {
-    System.out.println("sajt");
     restrictionMap.clear();
     restrictionMap.put("systemName", "gatekeeper");
     CoreSystem gatekeeper = dm.get(CoreSystem.class, restrictionMap);
@@ -208,9 +208,7 @@ public final class Utility {
 
     List<String> URIList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
-      URIList
-          .add(getURI(cloud.getCloud().getAddress(), Integer.valueOf(cloud.getCloud().getPort()), cloud.getCloud().getGatekeeperServiceURI(),
-                      false));
+      URIList.add(getURI(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), false));
     }
 
     return URIList;
@@ -223,7 +221,7 @@ public final class Utility {
     if (cloudList.isEmpty()) {
       log.info("Utility:getOwnCloud DNFException");
       throw new DataNotFoundException(
-          "No 'Own Cloud' entry in the configuration database." + "Please make sure to enter one in the 'own_cloud' table."
+          "No 'Own Cloud' entry in the configuration database. Please make sure to enter one in the 'own_cloud' table. "
               + "This information is needed for the Gatekeeper System.");
     }
 

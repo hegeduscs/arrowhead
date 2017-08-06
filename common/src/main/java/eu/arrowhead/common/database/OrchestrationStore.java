@@ -73,10 +73,13 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   private String orchestrationRule;
 
   @ElementCollection(fetch = FetchType.LAZY)
-  @MapKeyColumn(name = "arrowhead_key")
-  @Column(name = "arrowhead_value")
-  @CollectionTable(name = "hashmap_test", joinColumns = @JoinColumn(name = "id"))
+  @MapKeyColumn(name = "attribute_key")
+  @Column(name = "attribute_value")
+  @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "id"))
   private Map<String, String> attributes = new HashMap<>();
+
+  @Column(name = "service_uri")
+  private String serviceUri;
 
   public OrchestrationStore() {
   }
@@ -92,7 +95,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
                             int priority, boolean isDefault, String name, Date lastUpdated, String orchestrationRule,
-                            Map<String, String> attributes) {
+                            Map<String, String> attributes, String serviceUri) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;
@@ -103,6 +106,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.lastUpdated = lastUpdated;
     this.orchestrationRule = orchestrationRule;
     this.attributes = attributes;
+    this.serviceUri = serviceUri;
   }
 
   @XmlTransient
@@ -192,6 +196,14 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   public void setAttributes(Map<String, String> attributes) {
     this.attributes = attributes;
+  }
+
+  public String getServiceUri() {
+    return serviceUri;
+  }
+
+  public void setServiceUri(String serviceUri) {
+    this.serviceUri = serviceUri;
   }
 
   public boolean isValid() {

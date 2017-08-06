@@ -31,7 +31,7 @@ public class ArrowheadSystem {
   private String address;
 
   @Column(name = "port")
-  private String port;
+  private int port;
 
   @Column(name = "authentication_info")
   private String authenticationInfo;
@@ -39,7 +39,7 @@ public class ArrowheadSystem {
   public ArrowheadSystem() {
   }
 
-  public ArrowheadSystem(String systemGroup, String systemName, String address, String port, String authenticationInfo) {
+  public ArrowheadSystem(String systemGroup, String systemName, String address, int port, String authenticationInfo) {
     this.systemGroup = systemGroup;
     this.systemName = systemName;
     this.address = address;
@@ -80,11 +80,11 @@ public class ArrowheadSystem {
     this.address = address;
   }
 
-  public String getPort() {
+  public int getPort() {
     return port;
   }
 
-  public void setPort(String port) {
+  public void setPort(int port) {
     this.port = port;
   }
 

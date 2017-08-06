@@ -31,7 +31,7 @@ public class ArrowheadCloud {
   private String address;
 
   @Column(name = "port")
-  private String port;
+  private int port;
 
   @Column(name = "gatekeeper_service_uri")
   private String gatekeeperServiceURI;
@@ -42,7 +42,7 @@ public class ArrowheadCloud {
   public ArrowheadCloud() {
   }
 
-  public ArrowheadCloud(String operator, String cloudName, String address, String port, String gatekeeperServiceURI, String authenticationInfo) {
+  public ArrowheadCloud(String operator, String cloudName, String address, int port, String gatekeeperServiceURI, String authenticationInfo) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;
@@ -84,11 +84,11 @@ public class ArrowheadCloud {
     this.address = address;
   }
 
-  public String getPort() {
+  public int getPort() {
     return port;
   }
 
-  public void setPort(String port) {
+  public void setPort(int port) {
     this.port = port;
   }
 
@@ -117,65 +117,39 @@ public class ArrowheadCloud {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((address == null) ? 0 : address.hashCode());
-    result = prime * result + ((cloudName == null) ? 0 : cloudName.hashCode());
-    result = prime * result + ((gatekeeperServiceURI == null) ? 0 : gatekeeperServiceURI.hashCode());
-    result = prime * result + ((operator == null) ? 0 : operator.hashCode());
-    result = prime * result + ((port == null) ? 0 : port.hashCode());
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    ArrowheadCloud that = (ArrowheadCloud) o;
+
+    if (port != that.port) {
+      return false;
+    }
+    if (operator != null ? !operator.equals(that.operator) : that.operator != null) {
+      return false;
+    }
+    if (cloudName != null ? !cloudName.equals(that.cloudName) : that.cloudName != null) {
+      return false;
+    }
+    if (address != null ? !address.equals(that.address) : that.address != null) {
+      return false;
+    }
+    return gatekeeperServiceURI != null ? gatekeeperServiceURI.equals(that.gatekeeperServiceURI) : that.gatekeeperServiceURI == null;
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ArrowheadCloud other = (ArrowheadCloud) obj;
-    if (address == null) {
-      if (other.address != null) {
-        return false;
-      }
-    } else if (!address.equals(other.address)) {
-      return false;
-    }
-    if (cloudName == null) {
-      if (other.cloudName != null) {
-        return false;
-      }
-    } else if (!cloudName.equals(other.cloudName)) {
-      return false;
-    }
-    if (gatekeeperServiceURI == null) {
-      if (other.gatekeeperServiceURI != null) {
-        return false;
-      }
-    } else if (!gatekeeperServiceURI.equals(other.gatekeeperServiceURI)) {
-      return false;
-    }
-    if (operator == null) {
-      if (other.operator != null) {
-        return false;
-      }
-    } else if (!operator.equals(other.operator)) {
-      return false;
-    }
-    if (port == null) {
-      if (other.port != null) {
-        return false;
-      }
-    } else if (!port.equals(other.port)) {
-      return false;
-    }
-    return true;
+  public int hashCode() {
+    int result = operator != null ? operator.hashCode() : 0;
+    result = 31 * result + (cloudName != null ? cloudName.hashCode() : 0);
+    result = 31 * result + (address != null ? address.hashCode() : 0);
+    result = 31 * result + port;
+    result = 31 * result + (gatekeeperServiceURI != null ? gatekeeperServiceURI.hashCode() : 0);
+    return result;
   }
 
   @Override

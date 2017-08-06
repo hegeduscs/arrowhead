@@ -7,7 +7,7 @@
     <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
     <property name="show_sql">true</property>
-    <property name="hibernate.hbm2ddl.auto">create</property>
+    <property name="hibernate.hbm2ddl.auto">update</property>
     <mapping class="eu.arrowhead.common.model.ArrowheadCloud"/>
     <mapping class="eu.arrowhead.common.model.ArrowheadSystem"/>
     <mapping class="eu.arrowhead.common.model.ArrowheadService"/>

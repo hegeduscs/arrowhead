@@ -44,7 +44,7 @@ public class OrchestratorResource {
   public Response orchestrationProcess(ServiceRequestForm srf) {
     log.info("Entered the orchestrationProcess method.");
 
-    if (!srf.isPayloadUsable()) {
+    if (!srf.isValid()) {
       log.info("OrchestratorResource:orchestrationProcess throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete " + "mandatory fields.");
     }

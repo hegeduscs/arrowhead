@@ -249,18 +249,13 @@ public class GatekeeperResource {
       log.info("Requester Cloud is AUTHORIZED");
 
       Map<String, Boolean> orchestrationFlags = new HashMap<>();
-      orchestrationFlags.put("triggerInterCloud", false);
       orchestrationFlags.put("externalServiceRequest", true);
-      orchestrationFlags.put("enableInterCloud", false);
       orchestrationFlags.put("metadataSearch", icnProposal.getNegotiationFlags().get("metadataSearch"));
       orchestrationFlags.put("pingProviders", icnProposal.getNegotiationFlags().get("pingProviders"));
-      orchestrationFlags.put("overrideStore", false);
-      orchestrationFlags.put("storeOnlyActive", false);
-      orchestrationFlags.put("matchmaking", false);
       orchestrationFlags.put("onlyPreferred", icnProposal.getNegotiationFlags().get("onlyPreferred"));
-
-      ServiceRequestForm serviceRequestForm = new ServiceRequestForm(icnProposal.getRequesterSystem(), icnProposal.getRequesterCloud(), service,
-                                                                     orchestrationFlags, icnProposal.getPreferredProviders(), null, null, null);
+      ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
+          .requesterCloud(icnProposal.getRequesterCloud()).requestedService(service).orchestrationFlags(orchestrationFlags)
+          .preferredProviders(icnProposal.getPreferredProviders()).build();
       String orchestratorURI = Utility.getOrchestratorURI();
       orchestratorURI = UriBuilder.fromPath(orchestratorURI).path("orchestration").toString();
 
