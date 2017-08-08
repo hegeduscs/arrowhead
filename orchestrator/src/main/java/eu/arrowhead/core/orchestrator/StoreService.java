@@ -1,4 +1,4 @@
-package eu.arrowhead.core.orchestrator.store;
+package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.OrchestrationStore;

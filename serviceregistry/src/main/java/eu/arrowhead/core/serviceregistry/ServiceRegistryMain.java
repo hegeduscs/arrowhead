@@ -40,7 +40,7 @@ class ServiceRegistryMain {
     // providers
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(SecureServiceRegistryResource.class, SecurityFilter.class);
+    config.registerClasses(SecureServiceRegistryResource.class);
     config.packages("eu.arrowhead.common");
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();

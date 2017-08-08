@@ -14,9 +14,9 @@ import javax.persistence.UniqueConstraint;
 /**
  * JPA entity class for storing <tt>NeighborCloud</tt> information in the database. The <i>cloud_id</i> column must be unique.
  * <p>
- * The database table belonging to this class is called <i>neighborhood</i>, which is a subset of the {@link eu.arrowhead.common.model.ArrowheadCloud}
- * table. If an <tt>ArrowheadCloud</tt> can also be found in the <tt>neighborhood</tt> table, that means it is a trusted <tt>ArrowheadCloud</tt>,
- * which can be queried during a Global Service Discovery, Inter-Cloud Negotiations (by the Gatekeeper) and token generation (by the Authorization).
+ * The database table belonging to this class is a subset of the {@link eu.arrowhead.common.model.ArrowheadCloud} table. If an <tt>ArrowheadCloud</tt>
+ * can also be found in the <tt>NeighborCloud</tt> table, that means it is a trusted <tt>ArrowheadCloud</tt>, which can be queried during a Global
+ * Service Discovery, Inter-Cloud Negotiations (by the Gatekeeper) and token generation (by the Authorization).
  *
  * @author Umlauf Zoltán
  * @see eu.arrowhead.common.model.ArrowheadCloud
@@ -24,7 +24,7 @@ import javax.persistence.UniqueConstraint;
  * @see eu.arrowhead.common.model.messages.ICNProposal
  */
 @Entity
-@Table(name = "neighborhood", uniqueConstraints = {@UniqueConstraint(columnNames = {"cloud_id"})})
+@Table(name = "neighbor_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"cloud_id"})})
 public class NeighborCloud implements Serializable {
 
   @Id

@@ -27,12 +27,13 @@ class ApiMain {
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8450/api/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8451/api/");
+  private enum ServerMode {INSECURE, SECURE, BOTH}
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
     boolean daemon = false;
-    int mode = 0;
+    ServerMode serverMode = null;
 
     for (int i = 0; i < args.length; ++i) {
       if (args[i].equals("-d")) {
@@ -41,28 +42,32 @@ class ApiMain {
       } else if (args[i].equals("-m")) {
         ++i;
         switch (args[i]) {
+          case "insecure":
+            serverMode = ServerMode.INSECURE;
+            break;
           case "secure":
-            mode = 1;
+            serverMode = ServerMode.SECURE;
             break;
           case "both":
-            mode = 2;
+            serverMode = ServerMode.BOTH;
             break;
           default:
-            log.error("Unkown mode: " + args[i]);
+            log.fatal("Unknown server mode: " + args[i]);
+            throw new AssertionError("Unknown server mode: " + args[i]);
         }
 
       }
     }
 
-    switch (mode) {
-      case 0:
+    switch (serverMode) {
+      case INSECURE:
         server = startServer();
         break;
-      case 1:
+      case SECURE:
         System.out.println("Starting secure server...");
         secureServer = startSecureServer();
         break;
-      case 2:
+      case BOTH:
         System.out.println("Starting secure and unsecure servers...");
         server = startServer();
         secureServer = startSecureServer();
@@ -168,6 +173,5 @@ class ApiMain {
 
     return prop;
   }
-
 
 }

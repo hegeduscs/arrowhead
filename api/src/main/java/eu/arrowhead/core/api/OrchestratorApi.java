@@ -24,7 +24,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
 @Path("orchestrator/store")
@@ -225,7 +224,7 @@ public class OrchestratorApi {
   @Path("active/{id}")
   public Response toggleIsActive(@PathParam("id") int id) {
 
-    restrictionMap.put("id", id);
+    /*restrictionMap.put("id", id);
     OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
     if (entry == null) {
       log.info("OrchestrationApi:toggleIsActive throws DataNotFoundException.");
@@ -234,11 +233,12 @@ public class OrchestratorApi {
       log.info("OrchestrationApi:toggleIsActive throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be active.");
     } else {
-      entry.setIsActive(!entry.getIsActive());
+      entry.setDefault(!entry.getIs());
       dm.merge(entry);
       log.info("toggleIsActive succesfully returns.");
       return Response.ok(entry).build();
-    }
+    }*/
+    return null;
   }
 
   /**
@@ -252,7 +252,7 @@ public class OrchestratorApi {
   @Path("update")
   public Response updateEntry(OrchestrationStore payload) {
 
-    if (payload.getId() == null) {
+    /*if (payload.getId() == null) {
       log.info("OrchestrationApi:updateEntry throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: id field is missing from the payload.");
     }
@@ -275,7 +275,8 @@ public class OrchestratorApi {
 
       log.info("updateEntry successfully returns.");
       return Response.status(Status.ACCEPTED).entity(storeEntry).build();
-    }
+    }*/
+    return null;
   }
 
   /**

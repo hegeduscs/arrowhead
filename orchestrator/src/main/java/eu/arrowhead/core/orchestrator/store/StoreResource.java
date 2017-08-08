@@ -6,6 +6,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
 import eu.arrowhead.common.model.messages.OrchestrationStoreQueryResponse;
+import eu.arrowhead.core.orchestrator.StoreService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

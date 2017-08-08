@@ -404,7 +404,7 @@ public class ServiceRegistry {
     String ipAddress = service.getHost();
     ipAddress = removeLastChar(ipAddress, '.');
 
-    String port = new Integer(service.getPort()).toString();
+    int port = service.getPort();
 
     arrowheadSystem.setAuthenticationInfo(authInfo);
     arrowheadSystem.setAddress(ipAddress);
@@ -435,7 +435,7 @@ public class ServiceRegistry {
       String ipAddress = service.getHost();
       ipAddress = removeLastChar(ipAddress, '.');
 
-      String port = new Integer(service.getPort()).toString();
+      int port = service.getPort();
 
       arrowheadSystem.setAuthenticationInfo(authInfo);
       arrowheadSystem.setAddress(ipAddress);
@@ -539,8 +539,7 @@ public class ServiceRegistry {
     int dnsPort = new Integer(getProp().getProperty("dns.port", "53"));
 
     InetSocketAddress dnsserverAddress = new InetSocketAddress(dnsIpAddress, dnsPort);
-    DnsSDRegistrator reg = DnsSDFactory.getInstance().createRegistrator(dnsDomain, dnsserverAddress);
-    return reg;
+    return DnsSDFactory.getInstance().createRegistrator(dnsDomain, dnsserverAddress);
   }
 
   private void setTSIGKey(DnsSDRegistrator reg, String tsigKey) {

@@ -26,7 +26,6 @@ import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import eu.arrowhead.common.model.messages.TokenGenerationRequest;
 import eu.arrowhead.common.model.messages.TokenGenerationResponse;
-import eu.arrowhead.core.orchestrator.store.StoreService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -298,7 +297,7 @@ final class OrchestratorService {
     log.info("Entered the queryServiceRegistry method.");
 
     // Compiling the URI and the request payload
-    String srURI = UriBuilder.fromPath(Utility.getServiceRegistryURI()).path(service.getServiceGroup()).path(service.getServiceDefinition())
+    String srURI = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path(service.getServiceGroup()).path(service.getServiceDefinition())
         .toString();
     String tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
     ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(), pingProviders, metadataSearch, tsig_key);
@@ -341,7 +340,7 @@ final class OrchestratorService {
     log.info("Entered the queryAuthorization method.");
 
     // Compiling the URI and the request payload
-    String URI = UriBuilder.fromPath(Utility.getAuthorizationURI()).path("intracloud").toString();
+    String URI = UriBuilder.fromPath(Utility.getAuthorizationUri()).path("intracloud").toString();
     IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, service, false);
     log.info("Intra-Cloud authorization request ready to send to: " + URI);
 
@@ -547,7 +546,7 @@ final class OrchestratorService {
     log.info("Entered the startGSD method.");
 
     // Compiling the URI and the request payload
-    String URI = Utility.getGatekeeperURI();
+    String URI = Utility.getGatekeeperUri();
     URI = UriBuilder.fromPath(URI).path("init_gsd").toString();
     GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds);
 
@@ -668,7 +667,7 @@ final class OrchestratorService {
 
     // Compiling the URI, sending the request, do sanity check on the
     // returned result
-    String URI = Utility.getGatekeeperURI();
+    String URI = Utility.getGatekeeperUri();
     URI = UriBuilder.fromPath(URI).path("init_icn").toString();
     Response response = Utility.sendRequest(URI, "PUT", requestForm);
     ICNResult result = response.readEntity(ICNResult.class);
@@ -749,27 +748,6 @@ final class OrchestratorService {
   private static List<OrchestrationStore> queryOrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, boolean onlyActive) {
     log.info("Entered the queryOrchestrationStore method.");
 
-    // Replacing this method with a more direct solution, without HTTP call
-		/*
-		 * //Compiling the URI and the request payload String URI =
-		 * Utility.getOrchestratorURI(); URI =
-		 * UriBuilder.fromPath(URI).path("store").toString();
-		 * OrchestrationStoreQuery query = new OrchestrationStoreQuery(service,
-		 * consumer, onlyActive);
-		 * 
-		 * //Sending the request, do sanity check on the returned result
-		 * Response response = Utility.sendRequest(URI, "PUT", query);
-		 * if(response.getStatus() == 404){ ErrorMessage error =
-		 * response.readEntity(ErrorMessage.class); throw new
-		 * DataNotFoundException(error.getErrorMessage()); }
-		 * OrchestrationStoreQueryResponse storeResponse =
-		 * response.readEntity(OrchestrationStoreQueryResponse.class);
-		 * 
-		 * log.info(
-		 * "Successfull Orchestration Store query, returning a list of " +
-		 * storeResponse.getEntryList().size()); return
-		 * storeResponse.getEntryList();
-		 */
 		/*
 		 * If the onlyActive boolean is set to true, we return all the active
 		 * entries belonging to the requesterSystem.
@@ -812,7 +790,7 @@ final class OrchestratorService {
       } else {
         log.info("No Orchestration Store entries were found for this consumer/service pair.");
         throw new DataNotFoundException(
-            "No Orchestration Store entries were found " + "for this consumer/service pair: " + consumer.toString() + "/" + service.toString());
+            "No Orchestration Store entries were found for this consumer/service pair: " + consumer.toString() + "/" + service.toString());
       }
     }
   }
@@ -835,7 +813,7 @@ final class OrchestratorService {
 
     TokenGenerationResponse tokenResponse = null;
     if (generateToken) {
-      String authURI = Utility.getAuthorizationURI();
+      String authURI = Utility.getAuthorizationUri();
       authURI = UriBuilder.fromPath(authURI).path("token").toString();
       TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
                                                                        srf.getRequestedService(), 0);
@@ -897,7 +875,7 @@ final class OrchestratorService {
    */
   private static QoSVerificationResponse queryQoSVerification(QoSVerify qosVerify) {
     log.info("orchestrator: inside the getQoSVerificationResponse function");
-    String URI = UriBuilder.fromPath(Utility.getQoSURI()).path("verify").toString();
+    String URI = UriBuilder.fromPath(Utility.getQosUri()).path("verify").toString();
     Response response = Utility.sendRequest(URI, "PUT", Entity.json(qosVerify));
     return response.readEntity(QoSVerificationResponse.class);
   }
@@ -909,7 +887,7 @@ final class OrchestratorService {
    */
   private static QoSReservationResponse doQosReservation(QoSReserve qosReserve) {
     log.info("orchestrator: inside the doQoSReservation function");
-    String URI = UriBuilder.fromPath(Utility.getQoSURI()).path("reserve").toString();
+    String URI = UriBuilder.fromPath(Utility.getQosUri()).path("reserve").toString();
     Response response = Utility.sendRequest(URI, "PUT", qosReserve);
     return response.readEntity(QoSReservationResponse.class);
   }

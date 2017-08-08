@@ -12,7 +12,7 @@ public class DataNotFoundExceptionMapper implements ExceptionMapper<DataNotFound
   public Response toResponse(DataNotFoundException ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 404);
-    return Response.status(Status.NOT_FOUND).entity(errorMessage).build();
+    return Response.status(Status.NOT_FOUND).entity(errorMessage).header("Content-type", "application/json").build();
   }
 
 }

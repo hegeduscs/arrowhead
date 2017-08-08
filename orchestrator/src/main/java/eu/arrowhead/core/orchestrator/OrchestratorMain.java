@@ -2,7 +2,6 @@ package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.ssl.SecurityUtils;
-import eu.arrowhead.core.orchestrator.store.StoreResource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -73,13 +72,10 @@ class OrchestratorMain {
 
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        @Override
-        public void run() {
-          System.out.println("Received TERM signal, shutting down...");
-          shutdown();
-        }
-      });
+      Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        System.out.println("Received TERM signal, shutting down...");
+        shutdown();
+      }));
     } else {
       System.out.println("Press enter to shutdown Orchestrator Server(s)...");
       System.in.read();
@@ -105,7 +101,7 @@ class OrchestratorMain {
     URI uri = UriBuilder.fromUri(BASE_URI).build();
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class, StoreResource.class);
+    config.registerClasses(OrchestratorResource.class);
     config.packages("eu.arrowhead.common");
     config.property("isSecure", false);
 
@@ -121,7 +117,7 @@ class OrchestratorMain {
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class, StoreResource.class);
+    config.registerClasses(OrchestratorResource.class);
     config.packages("eu.arrowhead.common");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();

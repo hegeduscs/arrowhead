@@ -12,7 +12,7 @@ public class InvalidParameterExceptionMapper implements ExceptionMapper<InvalidP
   public Response toResponse(InvalidParameterException ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
-    return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+    return Response.status(Status.BAD_REQUEST).entity(errorMessage).header("Content-type", "application/json").build();
   }
 
 }

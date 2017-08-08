@@ -17,6 +17,6 @@ public class BadMethodExceptionMapper implements ExceptionMapper<NotAllowedExcep
       errorMessage = new ErrorMessage("Bad request: requested method is not allowed.", 405);
     }
 
-    return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity(errorMessage).build();
+    return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity(errorMessage).header("Content-type", "application/json").build();
   }
 }
