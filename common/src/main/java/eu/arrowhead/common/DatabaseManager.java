@@ -16,6 +16,8 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DatabaseManager {
 
@@ -92,6 +94,7 @@ public class DatabaseManager {
     return object;
   }
 
+  @Nullable
   @SuppressWarnings("unchecked")
   public <T> T get(Class<T> queryClass, Map<String, Object> restrictionMap) {
     T object = null;
@@ -119,6 +122,7 @@ public class DatabaseManager {
 
   //TODO get method Object paraméterrel, és switch case azokra az osztályokra, ahol van uniqeConstraint nem összetett mezőkkel
 
+  @NotNull
   @SuppressWarnings("unchecked")
   public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
     List<T> retrievedList;

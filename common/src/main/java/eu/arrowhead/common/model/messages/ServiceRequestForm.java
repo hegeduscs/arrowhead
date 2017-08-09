@@ -20,8 +20,8 @@ public class ServiceRequestForm {
   private Map<String, String> requestedQoS = new HashMap<>();
   private Map<String, String> commands = new HashMap<>();
   private static List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
-                                                                       "metadataSearch", "pingProviders", "overrideStore", "storeOnlyDefault",
-                                                                       "matchmaking", "onlyPreferred"));
+                                                                       "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
+                                                                       "onlyPreferred", "enableQoS"));
 
   public ServiceRequestForm() {
     for (String key : flagKeys) {
@@ -173,9 +173,13 @@ public class ServiceRequestForm {
     this.commands = commands;
   }
 
+  /**
+   * TODO detailed javadoc comment
+   */
   public boolean isValid() {
-    return requesterSystem != null && requesterSystem.isValid() && (orchestrationFlags.get("storeOnlyDefault") || (requestedService != null
-        && requestedService.isValid())) && !(orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty());
+    return requesterSystem != null && requesterSystem.isValid() && (requestedService == null || requestedService.isValid()) &&
+        !(orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) && !(orchestrationFlags.get("enableQoS") &&
+        (requestedQoS.isEmpty() || commands.isEmpty()));
   }
 
 }

@@ -30,9 +30,7 @@ import org.hibernate.annotations.Type;
  * @author Umlauf Zoltán
  */
 @Entity
-@Table(name = "orchestration_store", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "provider_system_id", "provider_cloud_id", "priority",
-        "is_default"})})
+@Table(name = "orchestration_store", uniqueConstraints = {@UniqueConstraint(columnNames = {"consumer_system_id", "priority", "is_default"})})
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @Column(name = "id")
@@ -75,7 +73,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @ElementCollection(fetch = FetchType.LAZY)
   @MapKeyColumn(name = "attribute_key")
   @Column(name = "attribute_value")
-  @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "id"))
+  @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "store_entry_id"))
   private Map<String, String> attributes = new HashMap<>();
 
   @Column(name = "service_uri")
@@ -94,8 +92,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            int priority, boolean isDefault, String name, Date lastUpdated, String orchestrationRule,
-                            Map<String, String> attributes, String serviceUri) {
+                            int priority, boolean isDefault, String name, Date lastUpdated, String orchestrationRule, Map<String, String> attributes,
+                            String serviceUri) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;

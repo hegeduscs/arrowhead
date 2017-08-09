@@ -7,7 +7,6 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.OrchestrationStoreQuery;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -21,7 +20,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
@@ -110,7 +108,8 @@ public class OrchestratorApi {
    * @return List<OrchestrationStore>
    * @throws BadPayloadException, DataNotFoundException
    */
-  @PUT
+  //TODO store pojok hasznosságáról dönteni refactor után
+  /*@PUT
   public Response getStoreEntries(OrchestrationStoreQuery query) {
 
     if (!query.isPayloadUsable()) {
@@ -148,7 +147,7 @@ public class OrchestratorApi {
     };
     log.info("getStoreEntries successfully returns.");
     return Response.ok(entity).build();
-  }
+  }*/
 
   /**
    * Adds a list of Orchestration Store entries to the database. Elements which would throw BadPayloadException are being skipped. The returned list

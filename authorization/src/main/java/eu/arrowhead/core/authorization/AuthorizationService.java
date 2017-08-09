@@ -27,10 +27,9 @@ class AuthorizationService {
 
   private static Properties prop;
 
-  public static List<PublicKey> getProviderPublicKeys(List<ArrowheadSystem> providers) {
+  static List<PublicKey> getProviderPublicKeys(List<ArrowheadSystem> providers) {
     try {
       DatabaseManager databaseManager = DatabaseManager.getInstance();
-
       HashMap<String, Object> restrictionMap = new HashMap<>();
 
       List<PublicKey> keys = new ArrayList<>();
@@ -57,8 +56,8 @@ class AuthorizationService {
     return null;
   }
 
-  public static ArrowheadToken generateSingleToken(ArrowheadSystem provider, PublicKey providerKey, ArrowheadSystem consumer,
-                                                   ArrowheadCloud consumerCloud, ArrowheadService service, int duration) throws Exception {
+  static ArrowheadToken generateSingleToken(PublicKey providerKey, ArrowheadSystem consumer, ArrowheadCloud consumerCloud,
+                                            ArrowheadService service, int duration) throws Exception {
 
     RawTokenInfo rawTokenInfo = new RawTokenInfo();
 

@@ -52,6 +52,7 @@ public class AuthorizationResource {
    *
    * @return tokenGenerationResponse
    */
+  //TODO review
   @PUT
   @Path("/token")
   public Response resource(TokenGenerationRequest tokenGenerationRequest) {
@@ -69,7 +70,7 @@ public class AuthorizationResource {
         ArrowheadSystem provider = providers.get(i);
 
         ArrowheadToken arrowheadToken = AuthorizationService
-            .generateSingleToken(provider, providerPublicKey, tokenGenerationRequest.getConsumer(), tokenGenerationRequest.getConsumerCloud(),
+            .generateSingleToken(providerPublicKey, tokenGenerationRequest.getConsumer(), tokenGenerationRequest.getConsumerCloud(),
                                  tokenGenerationRequest.getService(), tokenGenerationRequest.getDuration());
 
         token.add(arrowheadToken.getToken());

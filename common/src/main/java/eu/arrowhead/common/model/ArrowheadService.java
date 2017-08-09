@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -30,9 +31,12 @@ public class ArrowheadService {
   private int id;
 
   @Column(name = "service_group")
+  @NotNull
   private String serviceGroup;
 
   @Column(name = "service_definition")
+  @NotNull
+  //TODO look over entity classes and put NotNull annotation everywhere it should be there + use @Nullable too?!
   private String serviceDefinition;
 
   @ElementCollection(fetch = FetchType.LAZY)

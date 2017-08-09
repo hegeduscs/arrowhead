@@ -1,5 +1,6 @@
 package eu.arrowhead.core.orchestrator;
 
+import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.ssl.SecurityUtils;
 import java.io.File;
@@ -26,48 +27,40 @@ class OrchestratorMain {
   private static HttpServer secureServer = null;
   private static Logger log = Logger.getLogger(OrchestratorMain.class.getName());
   private static Properties prop;
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8444/orchestrator/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8445/orchestrator/");
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8440/orchestrator/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8441/orchestrator/");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
     boolean daemon = false;
-    int mode = 0;
-
+    boolean serverModeSet = false;
     for (int i = 0; i < args.length; ++i) {
       if (args[i].equals("-d")) {
         daemon = true;
         System.out.println("Starting server as daemon!");
       } else if (args[i].equals("-m")) {
+        serverModeSet = true;
         ++i;
         switch (args[i]) {
+          case "insecure":
+            server = startServer();
+            break;
           case "secure":
-            mode = 1;
+            secureServer = startSecureServer();
             break;
           case "both":
-            mode = 2;
+            server = startServer();
+            secureServer = startSecureServer();
             break;
           default:
-            //TODO there should be an argument for normal http or something, error log is not pretty here, rethink a bit this else if
-            log.error("Unkown mode: " + args[i]);
+            log.fatal("Unknown server mode: " + args[i]);
+            throw new AssertionError("Unknown server mode: " + args[i]);
         }
       }
     }
-
-    switch (mode) {
-      case 0:
-        server = startServer();
-        break;
-      case 1:
-        System.out.println("Starting secure server...");
-        secureServer = startSecureServer();
-        break;
-      case 2:
-        System.out.println("Starting secure and unsecure servers...");
-        server = startServer();
-        secureServer = startSecureServer();
-        break;
+    if (!serverModeSet) {
+      server = startServer();
     }
 
     if (daemon) {
@@ -83,6 +76,65 @@ class OrchestratorMain {
     }
   }
 
+  private static HttpServer startServer() throws IOException {
+    log.info("Starting server at: " + BASE_URI);
+    System.out.println("Starting insecure server at: " + BASE_URI);
+
+    final ResourceConfig config = new ResourceConfig();
+    config.registerClasses(OrchestratorResource.class);
+    config.packages("eu.arrowhead.common");
+
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
+    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+    server.start();
+    return server;
+  }
+
+  private static HttpServer startSecureServer() throws IOException {
+    log.info("Starting server at: " + BASE_URI_SECURED);
+    System.out.println("Starting secure server at: " + BASE_URI_SECURED);
+
+    final ResourceConfig config = new ResourceConfig();
+    config.registerClasses(OrchestratorResource.class);
+    config.packages("eu.arrowhead.common");
+
+    String keystorePath = getProp().getProperty("ssl.keystore");
+    String keystorePass = getProp().getProperty("ssl.keystorepass");
+    String keyPass = getProp().getProperty("ssl.keypass");
+    String truststorePath = getProp().getProperty("ssl.truststore");
+    String truststorePass = getProp().getProperty("ssl.truststorepass");
+
+    SSLContextConfigurator sslCon = new SSLContextConfigurator();
+    sslCon.setKeyStoreFile(keystorePath);
+    sslCon.setKeyStorePass(keystorePass);
+    sslCon.setKeyPass(keyPass);
+    sslCon.setTrustStoreFile(truststorePath);
+    sslCon.setTrustStorePass(truststorePass);
+
+    SSLContext sslContext = sslCon.createSSLContext();
+    Utility.setSSLContext(sslContext);
+
+    X509Certificate serverCert;
+    try {
+      KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+      serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
+    } catch (Exception ex) {
+      throw new AuthenticationException(ex.getMessage());
+    }
+    String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+    log.info("Certificate of the secure server: " + serverCN);
+    //TODO public globális változónak kéne ennek lennie, hogy elérhető legyen valahonnan ahol kell?
+    config.property("server_common_name", serverCN);
+
+    URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+    final HttpServer server = GrizzlyHttpServerFactory
+        .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
+    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+    server.start();
+    return server;
+  }
+
   private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
@@ -95,71 +147,11 @@ class OrchestratorMain {
     System.out.println("Orchestrator Server(s) stopped");
   }
 
-  private static HttpServer startServer() throws IOException {
-    log.info("Starting server at: " + BASE_URI);
-
-    URI uri = UriBuilder.fromUri(BASE_URI).build();
-
-    final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class);
-    config.packages("eu.arrowhead.common");
-    config.property("isSecure", false);
-
-    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
-    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-    server.start();
-    return server;
-  }
-
-  private static HttpServer startSecureServer() throws IOException {
-    log.info("Starting server at: " + BASE_URI_SECURED);
-
-    URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-
-    final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class);
-    config.packages("eu.arrowhead.common");
-
-    SSLContextConfigurator sslCon = new SSLContextConfigurator();
-
-    String keystorePath = getProp().getProperty("ssl.keystore");
-    String keystorePass = getProp().getProperty("ssl.keystorepass");
-    String keyPass = getProp().getProperty("ssl.keypass");
-    String truststorePath = getProp().getProperty("ssl.truststore");
-    String truststorePass = getProp().getProperty("ssl.truststorepass");
-
-    sslCon.setKeyStoreFile(keystorePath);
-    sslCon.setKeyStorePass(keystorePass);
-    sslCon.setKeyPass(keyPass);
-    sslCon.setTrustStoreFile(truststorePath);
-    sslCon.setTrustStorePass(truststorePass);
-
-    SSLContext sslContext = sslCon.createSSLContext();
-    eu.arrowhead.common.Utility.setSSLContext(sslContext);
-
-    X509Certificate serverCert = null;
-    try {
-      KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-      serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    } catch (Exception ex) {
-      throw new AuthenticationException(ex.getMessage());
-    }
-    String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
-    log.info("Certificate of the secure server: " + serverCN);
-    config.property("server_common_name", serverCN);
-
-    final HttpServer server = GrizzlyHttpServerFactory.
-        createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
-    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-    server.start();
-    return server;
-  }
-
-  private synchronized static Properties getProp() {
+  private static synchronized Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();
-        //todo check behaviour if prop file/attribute missing, add excetpion handling if needed (workspace is important!)
+        //TODO check behaviour if prop file/attribute missing, add excetpion handling if needed (workspace is important!)
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);
@@ -170,4 +162,5 @@ class OrchestratorMain {
 
     return prop;
   }
+
 }

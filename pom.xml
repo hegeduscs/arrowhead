@@ -29,6 +29,7 @@
     <mysql.connector.version>5.1.6</mysql.connector.version>
     <javax.servlet.version>3.1.0</javax.servlet.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -79,6 +80,12 @@
         <version>${jersey.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jetbrains</groupId>
+        <artifactId>annotations</artifactId>
+        <version>${jetbrains.annotations.version}</version>
       </dependency>
 
     </dependencies>
