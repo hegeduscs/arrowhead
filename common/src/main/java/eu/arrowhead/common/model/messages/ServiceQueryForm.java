@@ -4,9 +4,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.model.ServiceMetadata;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class ServiceQueryForm {
 
   private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
@@ -16,7 +14,6 @@ public class ServiceQueryForm {
   private String tsig_key;
 
   public ServiceQueryForm() {
-    super();
   }
 
   public ServiceQueryForm(List<ServiceMetadata> serviceMetadata, List<String> serviceInterfaces, boolean pingProviders, boolean metadataSearch,

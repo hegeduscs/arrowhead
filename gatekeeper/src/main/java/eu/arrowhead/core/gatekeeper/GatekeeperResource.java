@@ -168,7 +168,7 @@ public class GatekeeperResource {
       Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
       log.info("ServiceRegistry queried for requested Service: " + service.toString());
       ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
-      if (result.isPayloadEmpty()) {
+      if (result.isValid()) {
         log.info("ServiceRegistry query came back empty for " + service.toString());
         return Response.noContent().entity(null).build();
       }

@@ -79,7 +79,7 @@ public class AuthorizationApi {
   public Response isSystemAuthorized(IntraCloudAuthRequest request) {
     log.info("Entered the isSystemAuthorized function");
 
-    if (!request.isPayloadUsable()) {
+    if (!request.isValid()) {
       log.info("AuthorizationApi:isSystemAuthorized throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: Missing/incomplete consumer, service" + " or providerList in the request payload.");
     }

@@ -8,16 +8,14 @@ public class ProvidedService {
   private ArrowheadSystem provider;
   private ArrowheadService offered;
   private String serviceURI;
-  private String serviceInterface;
 
   public ProvidedService() {
   }
 
-  public ProvidedService(ArrowheadSystem provider, ArrowheadService offered, String serviceURI, String serviceInterface) {
+  public ProvidedService(ArrowheadSystem provider, ArrowheadService offered, String serviceURI) {
     this.provider = provider;
     this.offered = offered;
     this.serviceURI = serviceURI;
-    this.serviceInterface = serviceInterface;
   }
 
   public ArrowheadSystem getProvider() {
@@ -28,22 +26,6 @@ public class ProvidedService {
     this.provider = provider;
   }
 
-  public String getServiceURI() {
-    return serviceURI;
-  }
-
-  public void setServiceURI(String serviceURI) {
-    this.serviceURI = serviceURI;
-  }
-
-  public String getServiceInterface() {
-    return serviceInterface;
-  }
-
-  public void setServiceInterface(String serviceInterface) {
-    this.serviceInterface = serviceInterface;
-  }
-
   public ArrowheadService getOffered() {
     return offered;
   }
@@ -52,8 +34,16 @@ public class ProvidedService {
     this.offered = offered;
   }
 
-  public boolean isPayloadUsable() {
-    return provider != null && provider.isValid() && serviceURI != null;
+  public String getServiceURI() {
+    return serviceURI;
+  }
+
+  public void setServiceURI(String serviceURI) {
+    this.serviceURI = serviceURI;
+  }
+
+  public boolean isValid() {
+    return provider != null && provider.isValid() && offered != null && offered.isValid() && serviceURI != null;
   }
 
 }

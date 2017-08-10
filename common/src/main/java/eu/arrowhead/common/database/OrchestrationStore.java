@@ -22,10 +22,10 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Type;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Entity class for storing Orchestration Store entries in the database. The name column must be unique. TODO do proper javadoc when this class is
- * finalized
+ * Entity class for storing Orchestration Store entries in the database. //TODO proper javadoc
  *
  * @author Umlauf Zoltán
  */
@@ -209,8 +209,11 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
         && priority >= 1 && (!isDefault || providerCloud == null);
   }
 
+  /**
+   * Note: This class has a natural ordering that is inconsistent with equals()
+   */
   @Override
-  public int compareTo(OrchestrationStore other) {
+  public int compareTo(@NotNull OrchestrationStore other) {
     return this.priority - other.priority;
   }
 

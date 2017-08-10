@@ -12,8 +12,6 @@ import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
 import eu.arrowhead.common.model.messages.ICNRequestForm;
 import eu.arrowhead.common.model.messages.ICNResult;
-import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
-import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ProvidedService;
@@ -21,8 +19,6 @@ import eu.arrowhead.common.model.messages.QoSReservationResponse;
 import eu.arrowhead.common.model.messages.QoSReserve;
 import eu.arrowhead.common.model.messages.QoSVerificationResponse;
 import eu.arrowhead.common.model.messages.QoSVerify;
-import eu.arrowhead.common.model.messages.ServiceQueryForm;
-import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import eu.arrowhead.common.model.messages.TokenGenerationRequest;
 import eu.arrowhead.common.model.messages.TokenGenerationResponse;
@@ -63,20 +59,20 @@ final class OrchestratorService {
    * @throws BadPayloadException, DataNotFoundException
    */
   static OrchestrationResponse dynamicOrchestration(ServiceRequestForm srf) {
-    log.info("Entered the regularOrchestration method.");
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     try {
       // Querying the Service Registry
       List<ProvidedService> psList = new ArrayList<>();
-      psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+      psList = OrchestratorDriver.queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get
+          ("pingProviders"));
 
       // Cross-checking the SR response with the Authorization
       List<ArrowheadSystem> providerSystems = new ArrayList<>();
       for (ProvidedService service : psList) {
         providerSystems.add(service.getProvider());
       }
-      providerSystems = queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), providerSystems);
+      providerSystems = OrchestratorDriver.queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), providerSystems);
 
 			/*
        * The Authorization check only returns the provider systems where
@@ -127,7 +123,7 @@ final class OrchestratorService {
         log.info("Intra-Cloud orchestration failed with DNFException, but Inter-Cloud is not allowed.");
         throw new DataNotFoundException(ex.getMessage());
       }
-    } catch (BadPayloadException ex) { //TODO why is this branch needed???? check it in what case we wanna go on if this is thrown somewhere
+    } catch (BadPayloadException ex) {
       if (!orchestrationFlags.get("enableInterCloud")) {
         log.info("Intra-Cloud orchestration failed with BPException, but Inter-Cloud is not allowed.");
         throw new BadPayloadException(ex.getMessage());
@@ -174,7 +170,8 @@ final class OrchestratorService {
     List<ArrowheadSystem> authorizedIntraProviders = new ArrayList<>();
     try {
       // Querying the Service Registry with the intra-cloud Store entries
-      psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+      psList = OrchestratorDriver.queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get
+          ("pingProviders"));
 
       // Compile the list of providers which are in the Service Registry
       for (ProvidedService ps : psList) {
@@ -191,7 +188,7 @@ final class OrchestratorService {
       }
 
       // Querying the Authorization System
-      authorizedIntraProviders = queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), intraProviders);
+      authorizedIntraProviders = OrchestratorDriver.queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), intraProviders);
 
       //TODO do qosVerification here
     } /*
@@ -300,7 +297,9 @@ final class OrchestratorService {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     // Querying the Service Registry to get the list of Provider Systems
-    List<ProvidedService> psList = queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+    List<ProvidedService> psList = OrchestratorDriver.queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"),
+                                                                           orchestrationFlags
+        .get("pingProviders"));
 
 		/*
      * If needed, removing the non-preferred providers from the SR response.
@@ -313,85 +312,6 @@ final class OrchestratorService {
 
     // Compiling the orchestration response
     return compileOrchestrationResponse(psList, true, srf);
-  }
-
-  /**
-   * This method queries the Service Registry core system for a specific ArrowheadService. The returned list consists of possible service providers.
-   *
-   * @return List<ProvidedService>
-   */
-  private static List<ProvidedService> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
-    log.info("Entered the queryServiceRegistry method.");
-
-    // Compiling the URI and the request payload
-    String srURI = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path(service.getServiceGroup()).path(service.getServiceDefinition())
-        .toString();
-    String tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
-    ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(), pingProviders, metadataSearch, tsig_key);
-
-    // Sending the request, parsing the returned result
-    log.info("Querying ServiceRegistry for requested Service: " + service.toString());
-    // TODO if SR secured, send SSLContext
-    Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
-    ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
-    if (serviceQueryResult == null) {
-      log.info("ServiceRegistry query came back empty. " + "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
-      throw new DataNotFoundException(
-          "ServiceRegistry query came back empty for " + service.toString() + " (Interfaces field for service can not be empty)");
-    }
-    // If there are non-valid entries in the Service Registry response, we filter those out
-    List<ProvidedService> temp = new ArrayList<>();
-    for (ProvidedService ps : serviceQueryResult.getServiceQueryData()) {
-      if (!ps.isPayloadUsable()) {
-        temp.add(ps);
-      }
-    }
-    serviceQueryResult.getServiceQueryData().removeAll(temp);
-
-    if (serviceQueryResult.isPayloadEmpty()) {
-      log.info("ServiceRegistry query came back empty. " + "(OrchestratorService:queryServiceRegistry DataNotFoundException)");
-      throw new DataNotFoundException("ServiceRegistry query came back empty for service " + service.toString());
-    }
-    log.info("ServiceRegistry query successful. Number of providers: " + serviceQueryResult.getServiceQueryData().size());
-
-    return serviceQueryResult.getServiceQueryData();
-  }
-
-  /**
-   * This method queries the Authorization core system with a consumer/service/providerList triplet. The returned list only contains the authorized
-   * providers.
-   *
-   * @return List<ArrowheadSystem>
-   */
-  private static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, List<ArrowheadSystem> providerList) {
-    log.info("Entered the queryAuthorization method.");
-
-    // Compiling the URI and the request payload
-    String URI = UriBuilder.fromPath(Utility.getAuthorizationUri()).path("intracloud").toString();
-    IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, service, false);
-    log.info("Intra-Cloud authorization request ready to send to: " + URI);
-
-    // Extracting the useful payload from the response, sending back the
-    // authorized Systems
-    Response response = Utility.sendRequest(URI, "PUT", request);
-    IntraCloudAuthResponse authResponse = response.readEntity(IntraCloudAuthResponse.class);
-    List<ArrowheadSystem> authorizedSystems = new ArrayList<>();
-    //Set view of HashMap ensures there are no duplicates between the keys (systems)
-    for (Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap().entrySet()) {
-      if (entry.getValue()) {
-        authorizedSystems.add(entry.getKey());
-      }
-    }
-
-    // Throwing exception if none of the providers are authorized for this
-    // consumer/service pair.
-    if (authorizedSystems.isEmpty()) {
-      log.info("OrchestratorService:queryAuthorization throws DataNotFoundException");
-      throw new DataNotFoundException("The consumer system is not authorized to receive servicing " + "from any of the provider systems.");
-    }
-
-    log.info("Authorization query is done, sending back the authorized Systems. " + authorizedSystems.size());
-    return authorizedSystems;
   }
 
   /**
