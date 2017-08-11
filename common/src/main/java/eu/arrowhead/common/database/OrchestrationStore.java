@@ -25,7 +25,7 @@ import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Entity class for storing Orchestration Store entries in the database. //TODO proper javadoc
+ * Entity class for storing Orchestration Store entries in the database. //TODO proper javadoc, valamint enforce priority > 0!
  *
  * @author Umlauf Zoltán
  */

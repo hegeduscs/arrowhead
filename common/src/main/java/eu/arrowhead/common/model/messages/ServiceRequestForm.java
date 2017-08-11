@@ -177,9 +177,9 @@ public class ServiceRequestForm {
    * TODO detailed javadoc comment
    */
   public boolean isValid() {
-    return requesterSystem != null && requesterSystem.isValid() && (requestedService == null || requestedService.isValid()) &&
-        !(orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) && !(orchestrationFlags.get("enableQoS") &&
-        (requestedQoS.isEmpty() || commands.isEmpty()));
+    return requesterSystem != null && requesterSystem.isValid() && (requestedService == null || requestedService.isValid()) && !(
+        orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) && !(orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty()
+        || commands.isEmpty()));
   }
 
 }
