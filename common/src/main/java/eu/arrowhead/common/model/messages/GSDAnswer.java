@@ -32,4 +32,8 @@ public class GSDAnswer {
     this.providerCloud = providerCloud;
   }
 
+  public boolean isValid(){
+    return requestedService.isValidForDatabase() && providerCloud.isValid();
+  }
+
 }

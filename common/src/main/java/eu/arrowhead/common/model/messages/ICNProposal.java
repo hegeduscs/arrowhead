@@ -14,19 +14,19 @@ public class ICNProposal {
   private String authenticationInfo;
   private ArrowheadCloud requesterCloud;
   private ArrowheadSystem requesterSystem;
-  private List<ArrowheadSystem> preferredProviders = new ArrayList<>();
+  private List<ArrowheadSystem> preferredSystems = new ArrayList<>();
   private Map<String, Boolean> negotiationFlags = new HashMap<>();
 
   public ICNProposal() {
   }
 
   public ICNProposal(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud requesterCloud, ArrowheadSystem requesterSystem,
-                     List<ArrowheadSystem> preferredProviders, Map<String, Boolean> negotiationFlags) {
+                     List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags) {
     this.requestedService = requestedService;
     this.authenticationInfo = authenticationInfo;
     this.requesterCloud = requesterCloud;
     this.requesterSystem = requesterSystem;
-    this.preferredProviders = preferredProviders;
+    this.preferredSystems = preferredSystems;
     this.negotiationFlags = negotiationFlags;
   }
 
@@ -62,12 +62,12 @@ public class ICNProposal {
     this.requesterSystem = requesterSystem;
   }
 
-  public List<ArrowheadSystem> getPreferredProviders() {
-    return preferredProviders;
+  public List<ArrowheadSystem> getPreferredSystems() {
+    return preferredSystems;
   }
 
-  public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
-    this.preferredProviders = preferredProviders;
+  public void setPreferredSystems(List<ArrowheadSystem> preferredSystems) {
+    this.preferredSystems = preferredSystems;
   }
 
   public Map<String, Boolean> getNegotiationFlags() {
