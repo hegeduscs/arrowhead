@@ -342,7 +342,7 @@ final class OrchestratorService {
     // If there are non-valid entries in the Service Registry response, we filter those out
     List<ProvidedService> temp = new ArrayList<>();
     for (ProvidedService ps : serviceQueryResult.getServiceQueryData()) {
-      if (!ps.isPayloadUsable()) {
+      if (!ps.isValid()) {
         temp.add(ps);
       }
     }

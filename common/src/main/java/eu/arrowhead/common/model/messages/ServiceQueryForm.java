@@ -1,6 +1,7 @@
 package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ServiceMetadata;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ServiceQueryForm {
 
-  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
-  private List<String> serviceInterfaces = new ArrayList<>();
+  private ArrowheadService service;
   private boolean pingProviders;
   private boolean metadataSearch;
   private String tsig_key;
@@ -19,29 +19,27 @@ public class ServiceQueryForm {
     super();
   }
 
-  public ServiceQueryForm(List<ServiceMetadata> serviceMetadata, List<String> serviceInterfaces, boolean pingProviders, boolean metadataSearch,
+  public ServiceQueryForm(ArrowheadService service, boolean pingProviders, boolean metadataSearch,
                           String tsig_key) {
-    this.serviceMetadata = serviceMetadata;
-    this.serviceInterfaces = serviceInterfaces;
-    this.pingProviders = pingProviders;
-    this.metadataSearch = metadataSearch;
-    this.tsig_key = tsig_key;
+      this.service = service;
+      this.pingProviders = pingProviders;
+      this.metadataSearch = metadataSearch;
+      this.tsig_key = tsig_key;
   }
 
   public ServiceQueryForm(ServiceRequestForm srf) {
-    this.serviceMetadata = srf.getRequestedService().getServiceMetadata();
-    this.serviceInterfaces = srf.getRequestedService().getInterfaces();
+    this.service = srf.getRequestedService();
     this.pingProviders = srf.getOrchestrationFlags().get("pingProvider");
     this.metadataSearch = srf.getOrchestrationFlags().get("metadataSearch");
     this.tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
   }
 
-  public List<ServiceMetadata> getServiceMetadata() {
-    return serviceMetadata;
+  public ArrowheadService getService() {
+      return service;
   }
 
-  public void setServiceMetadata(List<ServiceMetadata> serviceMetadata) {
-    this.serviceMetadata = serviceMetadata;
+  public void setService(ArrowheadService service) {
+      this.service = service;
   }
 
   public boolean isPingProviders() {
@@ -50,14 +48,6 @@ public class ServiceQueryForm {
 
   public void setPingProviders(boolean pingProviders) {
     this.pingProviders = pingProviders;
-  }
-
-  public List<String> getServiceInterfaces() {
-    return serviceInterfaces;
-  }
-
-  public void setServiceInterfaces(List<String> serviceInterfaces) {
-    this.serviceInterfaces = serviceInterfaces;
   }
 
   public boolean isMetadataSearch() {
@@ -74,6 +64,10 @@ public class ServiceQueryForm {
 
   public void setTsig_key(String tsig_key) {
     this.tsig_key = tsig_key;
+  }
+
+  public boolean isValid() {
+    return service != null && !service.isValid();
   }
 
 }

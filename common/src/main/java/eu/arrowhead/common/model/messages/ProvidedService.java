@@ -8,16 +8,17 @@ public class ProvidedService {
   private ArrowheadSystem provider;
   private ArrowheadService offered;
   private String serviceURI;
-  private String serviceInterface;
+  private String version = "1.0";
 
   public ProvidedService() {
   }
 
-  public ProvidedService(ArrowheadSystem provider, ArrowheadService offered, String serviceURI, String serviceInterface) {
+  public ProvidedService(ArrowheadSystem provider, ArrowheadService offered,
+                         String serviceURI, String serviceInterface, String version) {
     this.provider = provider;
     this.offered = offered;
     this.serviceURI = serviceURI;
-    this.serviceInterface = serviceInterface;
+    this.version = version;
   }
 
   public ArrowheadSystem getProvider() {
@@ -36,14 +37,6 @@ public class ProvidedService {
     this.serviceURI = serviceURI;
   }
 
-  public String getServiceInterface() {
-    return serviceInterface;
-  }
-
-  public void setServiceInterface(String serviceInterface) {
-    this.serviceInterface = serviceInterface;
-  }
-
   public ArrowheadService getOffered() {
     return offered;
   }
@@ -52,8 +45,15 @@ public class ProvidedService {
     this.offered = offered;
   }
 
-  public boolean isPayloadUsable() {
-    return provider != null && provider.isValid() && serviceURI != null;
+  public String getVersion() {
+    return version;
   }
 
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
+  public boolean isValid() {
+    return provider != null && provider.isValid() && serviceURI != null;
+  }
 }
