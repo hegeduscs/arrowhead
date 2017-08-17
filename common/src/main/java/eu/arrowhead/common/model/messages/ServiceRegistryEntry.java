@@ -1,27 +1,36 @@
 package eu.arrowhead.common.model.messages;
 
+import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.ServiceMetadata;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceRegistryEntry {
-
+  private ArrowheadService providedService;
   private ArrowheadSystem provider;
   private String serviceURI;
-  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
-  private String tSIG_key;
+  private String TSIG_key;
   private String version;
+
+  //backwards compat
+  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
+
+
+  //backwards compatibility towards G3.2 M1
+  private List<String> interfaces;
 
   public ServiceRegistryEntry() {
   }
 
-  public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI, List<ServiceMetadata> serviceMetadata, String tsig_key, String version) {
+  public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI, List<ServiceMetadata> serviceMetadata,
+                              String tsig_key, String version, List<String> interfaces) {
+    this.interfaces = interfaces;
     this.provider = provider;
     this.serviceURI = serviceURI;
     this.serviceMetadata = serviceMetadata;
-    this.tSIG_key = tsig_key;
-    this.version = version;
+    this.TSIG_key = tsig_key;
+    if (version != null) this.version = version; else this.version = "1.0";
   }
 
   public ArrowheadSystem getProvider() {
@@ -48,12 +57,12 @@ public class ServiceRegistryEntry {
     this.serviceMetadata = serviceMetadata;
   }
 
-  public String gettSIG_key() {
-    return tSIG_key;
+  public String getTSIG_key() {
+    return TSIG_key;
   }
 
-  public void settSIG_key(String tSIG_key) {
-    this.tSIG_key = tSIG_key;
+  public void setTSIG_key(String TSIG_key) {
+    this.TSIG_key = TSIG_key;
   }
 
   public String getVersion() {
@@ -62,6 +71,26 @@ public class ServiceRegistryEntry {
 
   public void setVersion(String version) {
     this.version = version;
+  }
+
+  public List<String> getInterfaces() {
+    return interfaces;
+  }
+
+  public void setInterfaces(List<String> interfaces) {
+    this.interfaces = interfaces;
+  }
+
+  public ArrowheadService getProvidedService() {
+    return providedService;
+  }
+
+  public void setProvidedService(ArrowheadService providedService) {
+    this.providedService = providedService;
+  }
+
+  public boolean isValid() {
+    return provider != null && provider.isValid() && serviceURI != null && TSIG_key != null;
   }
 
 }
