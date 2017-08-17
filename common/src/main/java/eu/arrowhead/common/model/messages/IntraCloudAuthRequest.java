@@ -2,19 +2,19 @@ package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class IntraCloudAuthRequest {
 
   private ArrowheadSystem consumer;
-  private List<ArrowheadSystem> providers = new ArrayList<>();
+  private Set<ArrowheadSystem> providers = new HashSet<>();
   private ArrowheadService service;
 
   public IntraCloudAuthRequest() {
   }
 
-  public IntraCloudAuthRequest(ArrowheadSystem consumer, List<ArrowheadSystem> providers, ArrowheadService service, boolean generateToken) {
+  public IntraCloudAuthRequest(ArrowheadSystem consumer, Set<ArrowheadSystem> providers, ArrowheadService service) {
     this.consumer = consumer;
     this.providers = providers;
     this.service = service;
@@ -28,11 +28,11 @@ public class IntraCloudAuthRequest {
     this.consumer = consumer;
   }
 
-  public List<ArrowheadSystem> getProviders() {
+  public Set<ArrowheadSystem> getProviders() {
     return providers;
   }
 
-  public void setProviders(List<ArrowheadSystem> providers) {
+  public void setProviders(Set<ArrowheadSystem> providers) {
     this.providers = providers;
   }
 

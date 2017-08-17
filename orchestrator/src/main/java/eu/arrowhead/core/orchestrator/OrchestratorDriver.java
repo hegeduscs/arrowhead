@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
@@ -58,14 +59,16 @@ final class OrchestratorDriver {
    */
   static List<ProvidedService> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
     // Compiling the URI and the request payload
+    //TODO probably changed
     String srUri = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path(service.getServiceGroup()).path(service.getServiceDefinition())
         .toString();
     String tsigKey = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
-    ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(), pingProviders, metadataSearch, tsigKey);
+    ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch, tsigKey);
 
     // Sending the request, parsing the returned result
     Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);
     ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
+    //TODO probably cant be null anymore?
     if (serviceQueryResult == null || serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");
       throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString());
@@ -90,16 +93,16 @@ final class OrchestratorDriver {
    *
    * @param consumer The <tt>ArrowheadSystem</tt> object representing the consumer system
    * @param service The <tt>ArrowheadService</tt> object representing the service to be consumed
-   * @param providerList The list of <tt>ArrowheadSystem</tt> objects representing the potential provider systems
+   * @param providerSet The set of <tt>ArrowheadSystem</tt> objects representing the potential provider systems
    *
    * @return list of the authorized provider <tt>ArrowheadSystem</tt>s
    *
    * @throws DataNotFoundException if none of the provider <tt>ArrowheadSystem</tt>s are authorized for this servicing
    */
-  static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, List<ArrowheadSystem> providerList) {
+  static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, Set<ArrowheadSystem> providerSet) {
     // Compiling the URI and the request payload
     String uri = UriBuilder.fromPath(Utility.getAuthorizationUri()).path("intracloud").toString();
-    IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, service, false);
+    IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerSet, service);
 
     // Sending the request, parsing the returned result
     Response response = Utility.sendRequest(uri, "PUT", request);

@@ -160,7 +160,6 @@ public class ServiceRequestForm {
 
   /**
    * TODO detailed javadoc comment
-   * TODO olyan is kéne, hogy onlyPreferred és enableInterCloud mellett ne lehessen 0 globalProvider
    */
   public boolean isValid() {
     return requesterSystem != null && requesterSystem.isValid() && (requestedService == null || requestedService.isValid()) && !(

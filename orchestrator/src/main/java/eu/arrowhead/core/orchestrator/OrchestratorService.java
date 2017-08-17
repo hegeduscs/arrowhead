@@ -18,9 +18,11 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import eu.arrowhead.common.model.messages.TokenGenerationRequest;
 import eu.arrowhead.common.model.messages.TokenGenerationResponse;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
@@ -39,7 +41,7 @@ final class OrchestratorService {
   }
 
   /**
-   * This method represents the regular orchestration process where the requester <tt>ArrowheadSystem</tt> is in the local Cloud. In this process the
+   * Represents the regular orchestration process where the requester <tt>ArrowheadSystem</tt> is in the local Cloud. In this process the
    * <i>Orchestration Store</i> is ignored, and the Orchestrator first tries to find a provider in the local Cloud. If that fails but the
    * <i>enableInterCloud</i> flag is set to true, the Orchestrator tries to find a provider in other Clouds.
    *
@@ -123,121 +125,101 @@ final class OrchestratorService {
   }
 
   /**
-   * This method represents the orchestration process where the Orchestration Store database is used to see if there is a provider for the requester
-   * System. The Orchestration Store contains preset orchestration information, which should not change in runtime.
+   * Represents the orchestration process where the <i>Orchestration Store</i> database is used to see if there is a provider for the requester
+   * <tt>ArrowheadSystem</tt>. The <i>Orchestration Store</i> contains preset orchestration information, which should not change in runtime.
    *
    * @return OrchestrationResponse
    */
   static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf) {
-    log.info("Entered the orchestrationFromStore method.");
-    Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
     // Querying the Orchestration Store for matching entries
     List<OrchestrationStore> entryList = OrchestratorDriver.queryOrchestrationStore(srf.getRequesterSystem(), srf.getRequestedService());
 
-    // Priority list based store orchestration
-    List<OrchestrationStore> intraStoreList = new ArrayList<>();
-    for (OrchestrationStore entry : entryList) {
-      if (entry.getProviderCloud() == null) {
-        intraStoreList.add(entry);
-      }
-    }
-
 		/*
-     * Before we iterate through the entry list to pick out a provider, we
-		 * have to poll the Service Registry and Authorization Systems, so we
-		 * have these 2 other ArrowheadSystem provider lists to cross-check the
-		 * entry list with.
+     * Before we iterate through the entry list to pick out a provider, we have to poll the Service Registry and Authorization Systems, so we have
+     * these 2 other ArrowheadSystem provider lists to cross-check the entry list with. The try/catch block is needed, since inter-cloud
+     * orchestration can still be a possibility, even if the local SR or Auth query comes back empty.
 		 */
-    List<ProvidedService> psList;
-    List<ArrowheadSystem> serviceProviders = new ArrayList<>();
-    List<ArrowheadSystem> intraProviders = new ArrayList<>();
-    List<ArrowheadSystem> authorizedIntraProviders = new ArrayList<>();
+    Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
+    Set<ArrowheadSystem> providerSystemsFromSR = new HashSet<>();
+    List<ArrowheadSystem> providerSystemsFromAuth = new ArrayList<>();
     try {
-      // Querying the Service Registry with the intra-cloud Store entries
-      psList = OrchestratorDriver
+      // Querying the Service Registry for the intra-cloud Store entries
+      List<ProvidedService> psList = OrchestratorDriver
           .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
 
-      // Compile the list of providers which are in the Service Registry
+      // Compile the list of provider systems which are in the Service Registry
+
       for (ProvidedService ps : psList) {
-        serviceProviders.add(ps.getProvider());
+        providerSystemsFromSR.add(ps.getProvider());
       }
 
 			/*
-       * If the Store entry did not had a providerCloud, it must have had
-			 * a providerSystem. We have to query the Authorization System with
-			 * these providers.
+       * If the Store entry did not had a providerCloud, it must have had a providerSystem. We have to query the Authorization System with these
+       * local providers systems.
 			 */
-      for (OrchestrationStore entry : intraStoreList) {
-        intraProviders.add(entry.getProviderSystem());
+      Set<ArrowheadSystem> localProviderSystems = new HashSet<>();
+      for (OrchestrationStore entry : entryList) {
+        if (entry.getProviderCloud() == null) {
+          localProviderSystems.add(entry.getProviderSystem());
+        }
       }
 
       // Querying the Authorization System
-      authorizedIntraProviders = OrchestratorDriver.queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), intraProviders);
+      providerSystemsFromAuth = OrchestratorDriver.queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), localProviderSystems);
 
       //TODO do qosVerification here
-    } /*
-       * If the SR or Authorization query throws DNFException, we have to
-			 * catch it, because the inter-cloud store entries can still be
-			 * viable options.
-			 */ catch (DataNotFoundException ex) {
+    }
+    /*
+     * If the SR or Authorization query throws DataNotFoundException, we have to catch it, because the inter-cloud store entries can still be
+     * viable options.
+     */
+    catch (DataNotFoundException ex) {
+      log.info("orchestrationFromStore catches DataNotFoundException at local SR/Auth query");
     }
 
     // Checking for viable providers in the Store entry list
     for (OrchestrationStore entry : entryList) {
-      // If the entry does not have a provider Cloud then it is an
-      // intra-cloud entry.
+      // If the entry does not have a provider Cloud then it is an intra-cloud entry.
       if (entry.getProviderCloud() == null) {
         /*
-         * Both of the provider lists (from SR and Auth query) need to
-				 * contain the provider of the Store entry. We return with a
-				 * provider if it fills this requirement. (Store orchestration
-				 * will always only return 1 provider.)
+         * Both of the provider lists (from SR and Auth query) need to contain the provider of the Store entry. We return with a provider if it
+         * fills this requirement. (Store orchestration will always only return 1 provider.)
 				 */
-        if (serviceProviders.contains(entry.getProviderSystem()) && authorizedIntraProviders.contains(entry.getProviderSystem())) {
-          //TODO ez mé
-          List<OrchestrationStore> tempList = new ArrayList<>(Arrays.asList(entry));
-          //TODO qosReserve itten
-          return compileOrchestrationResponseFromStore(tempList, orchestrationFlags.get("generateToken"));
+        if (providerSystemsFromSR.contains(entry.getProviderSystem()) && providerSystemsFromAuth.contains(entry.getProviderSystem())) {
+          //TODO do qosReserve here
+          log.info("orchestrationFromStore returns with a local Store entry");
+          return compileOrchestrationResponse(entry);
         }
-      } /*
-         * Inter-Cloud store entries must be handlend inside the for
-				 * loop, since every provider Cloud means a different ICN
-				 * process.
-				 */ else {
+      }
+      // Inter-Cloud store entries must be handled inside the for loop, since every provider Cloud means a different ICN process.
+      else {
         try {
           /*
-           * Setting up the SRF for the compileICNRequestForm method.
-					 * In case of orchestrationFromStore the preferences are the
-					 * stored Cloud (and System), and not what is inside the SRF
-					 * payload. (Should be null when requesting Store
-					 * orchestration)
+           * Setting up the SRF for the compileICNRequestForm method. In case of Store orchestration the preferences are the stored Cloud (and
+           * System), and not what is inside the SRF payload (which should be null anyways when requesting Store orchestration).
+           *
+           * WARNING: Collections.singletonList creates an immutable List, any change to it will result in UnsupportedOperationException
 					 */
-          List<ArrowheadCloud> providerCloud = new ArrayList<>(Arrays.asList(entry.getProviderCloud()));
-          srf.setPreferredClouds(providerCloud);
-          if (entry.getProviderSystem() != null) {
-            List<ArrowheadSystem> providerSystem = new ArrayList<>(Arrays.asList(entry.getProviderSystem()));
-            srf.setPreferredProviders(providerSystem);
-          } else {
-            srf.setPreferredProviders(null);
-          }
-
+          srf.setPreferredProviders(Collections.singletonList(new PreferredProvider(entry.getProviderSystem(), entry.getProviderCloud())));
           ICNRequestForm icnRequestForm = OrchestratorDriver.compileICNRequestForm(srf, entry.getProviderCloud());
+
+          // Starting the ICN process
           ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(icnRequestForm);
-          // Use matchmaking on the ICN result. (Store orchestration
-          // will always only return 1 provider.)
+
+          // Use matchmaking on the ICN result. (Store orchestration will always only return 1 provider.)
+          log.info("orchestrationFromStore returns with an inter-cloud Store entry");
           return icnMatchmaking(icnResult, entry);
-        } /*
-           * If the ICN process failed on this store entry, we catch
-					 * the exception and go to the next Store entry in the foor
-					 * loop.
-					 */ catch (DataNotFoundException ex) {
+        }
+        // If the ICN process failed on this store entry, we catch the exception and go to the next Store entry in the for-loop.
+        catch (DataNotFoundException ex) {
+          log.info("orchestrationFromStore catches DataNotFoundException at ICN process, going to the next Store entry");
         }
       }
     }
 
-    // If the foor loop finished but we still could not return a result, we
-    // throw a DNFException.
-    throw new DataNotFoundException("OrchestrationFromStore failed.");
+    // If the for-loop finished but we still could not return a result, we throw a DataNotFoundException.
+    log.error("orchestrationFromStore throws final DataNotFoundException");
+    throw new DataNotFoundException("OrchestrationFromStore failed with all " + entryList.size() + " queried Store entries.");
   }
 
   /**
@@ -388,6 +370,8 @@ final class OrchestratorService {
     }
 
     TokenGenerationResponse tokenResponse = null;
+    List<String> tokens = new ArrayList<>();
+    List<String> signatures = new ArrayList<>();
     List<ServiceMetadata> metadata = requestedService.getServiceMetadata();
     if (metadata.contains(new ServiceMetadata("security", "token"))) {
       String authURI = Utility.getAuthorizationUri();
@@ -396,10 +380,9 @@ final class OrchestratorService {
 
       Response authResponse = Utility.sendRequest(authURI, "PUT", tokenRequest);
       tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
+      tokens = tokenResponse.getToken();
+      signatures = tokenResponse.getSignature();
     }
-
-    List<String> tokens = tokenResponse.getToken();
-    List<String> signatures = tokenResponse.getSignature();
 
     // We create an OrchestrationForm for every provider
     for (int i = 0; i < psList.size(); i++) {
@@ -419,7 +402,7 @@ final class OrchestratorService {
    *
    * @return OrchestrationResponse
    */
-  private static OrchestrationResponse compileOrchestrationResponseFromStore(List<OrchestrationStore> entryList, boolean generateToken) {
+  private static OrchestrationResponse compileOrchestrationResponse(OrchestrationStore entry) {
     log.info("Entered the (second) compileOrchestrationResponse method.");
 
     String token = null;

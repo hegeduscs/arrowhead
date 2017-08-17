@@ -2,9 +2,6 @@ package eu.arrowhead.common.model.messages;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.ServiceMetadata;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ServiceQueryForm {
 
