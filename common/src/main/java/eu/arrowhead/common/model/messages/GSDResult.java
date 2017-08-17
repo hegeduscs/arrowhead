@@ -22,7 +22,7 @@ public class GSDResult {
     this.response = response;
   }
 
-  public boolean isPayloadUsable() {
+  public boolean isValid() {
     return response != null && !response.isEmpty();
   }
 

@@ -42,34 +42,29 @@ public class OrchestratorResource {
   //TODO sanity check: requesterSystem és a cert common name harmóniában vannak
   @POST
   public Response orchestrationProcess(ServiceRequestForm srf) {
-    log.info("Entered the orchestrationProcess method.");
-
     if (!srf.isValid()) {
-      log.info("OrchestratorResource:orchestrationProcess throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service request form has missing/incomplete " + "mandatory fields.");
+      log.error("orchestrationProcess BadPayloadException");
+      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields. Some fields are only mandatory when"
+                                        + " certain orchestration flags are set to true.");
     }
 
-    OrchestrationResponse orchResponse = new OrchestrationResponse();
+    OrchestrationResponse orchResponse;
     if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
       log.info("Received an externalServiceRequest.");
       orchResponse = OrchestratorService.externalServiceRequest(srf);
-      log.info("externalServiceRequest orchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     } else if (srf.getOrchestrationFlags().get("triggerInterCloud")) {
       log.info("Received a triggerInterCloud request.");
       orchResponse = OrchestratorService.triggerInterCloud(srf);
-      log.info("triggerInterCloud orchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     } else if (!srf.getOrchestrationFlags().get("overrideStore")) { //overrideStore == false
       log.info("Received an orchestrationFromStore request.");
       orchResponse = OrchestratorService.orchestrationFromStore(srf);
-      log.info("orchestrationFromStore returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     } else {
-      log.info("Received a regularOrchestration request.");
+      log.info("Received a dynamicOrchestration request.");
       orchResponse = OrchestratorService.dynamicOrchestration(srf);
-      log.info("regularOrchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     }
 
+    log.info("The orchestration process returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     return Response.status(Status.OK).entity(orchResponse).build();
   }
-
 
 }

@@ -98,7 +98,7 @@ public class AuthorizationResource {
   public Response isSystemAuthorized(IntraCloudAuthRequest request) {
     log.info("Entered the AuthorizationResource:isSystemAuthorized function");
 
-    if (!request.isPayloadUsable()) {
+    if (!request.isValid()) {
       log.info("AuthorizationResource:isSystemAuthorized BadPayloadException");
       throw new BadPayloadException("Bad payload: Missing/incomplete consumer, service" + " or providerList in the request payload.");
     }

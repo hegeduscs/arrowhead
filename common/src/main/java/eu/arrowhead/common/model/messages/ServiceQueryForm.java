@@ -5,9 +5,7 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ServiceMetadata;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class ServiceQueryForm {
 
   private ArrowheadService service;
@@ -16,7 +14,6 @@ public class ServiceQueryForm {
   private String tsig_key;
 
   public ServiceQueryForm() {
-    super();
   }
 
   public ServiceQueryForm(ArrowheadService service, boolean pingProviders, boolean metadataSearch,

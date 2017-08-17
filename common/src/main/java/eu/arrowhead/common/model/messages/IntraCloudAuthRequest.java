@@ -3,23 +3,21 @@ package eu.arrowhead.common.model.messages;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 public class IntraCloudAuthRequest {
 
   private ArrowheadSystem consumer;
-  private Collection<ArrowheadSystem> providers = new ArrayList<>();
+  private List<ArrowheadSystem> providers = new ArrayList<>();
   private ArrowheadService service;
-  private boolean generateToken;
 
   public IntraCloudAuthRequest() {
   }
 
-  public IntraCloudAuthRequest(ArrowheadSystem consumer, Collection<ArrowheadSystem> providers, ArrowheadService service, boolean generateToken) {
+  public IntraCloudAuthRequest(ArrowheadSystem consumer, List<ArrowheadSystem> providers, ArrowheadService service, boolean generateToken) {
     this.consumer = consumer;
     this.providers = providers;
     this.service = service;
-    this.generateToken = generateToken;
   }
 
   public ArrowheadSystem getConsumer() {
@@ -30,11 +28,11 @@ public class IntraCloudAuthRequest {
     this.consumer = consumer;
   }
 
-  public Collection<ArrowheadSystem> getProviders() {
+  public List<ArrowheadSystem> getProviders() {
     return providers;
   }
 
-  public void setProviders(Collection<ArrowheadSystem> providers) {
+  public void setProviders(List<ArrowheadSystem> providers) {
     this.providers = providers;
   }
 
@@ -46,15 +44,7 @@ public class IntraCloudAuthRequest {
     this.service = service;
   }
 
-  public boolean isGenerateToken() {
-    return generateToken;
-  }
-
-  public void setGenerateToken(boolean generateToken) {
-    this.generateToken = generateToken;
-  }
-
-  public boolean isPayloadUsable() {
+  public boolean isValid() {
     if (consumer == null || service == null || providers.isEmpty() || !consumer.isValidForDatabase() || !service.isValidForDatabase()) {
       return false;
     }

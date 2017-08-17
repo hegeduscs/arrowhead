@@ -112,7 +112,7 @@ public class OrchestratorApi {
   /*@PUT
   public Response getStoreEntries(OrchestrationStoreQuery query) {
 
-    if (!query.isPayloadUsable()) {
+    if (!query.isValid()) {
       log.info("OrchestrationApi:getStoreEntries throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem " + "is/are missing.");
     }

@@ -66,31 +66,27 @@ public class GatekeeperResource {
     if (!requestForm.isPayloadUsable()) {
       log.info("Payload is not usable. (GatekeeperResource:GSDRequest BadPayloadException)");
       throw new BadPayloadException(
-          "Bad payload: missing/incomplete requestedService." + "Mandatory fields: serviceGroup, serviceDefinition, interfaces.");
+          "Bad payload: missing/incomplete requestedService. Mandatory fields: serviceGroup, serviceDefinition, interfaces.");
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
     log.info("Own cloud info acquired");
     GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
 
-    // If no preferred Clouds were given, send GSD poll requests to the
-    // neighbor Clouds
+    // If no preferred Clouds were given, send GSD poll requests to the neighbor Clouds
     List<String> cloudURIs = new ArrayList<>();
-    if (requestForm.getSearchPerimeter() == null || requestForm.getSearchPerimeter().isEmpty()) {
+    if (requestForm.getSearchPerimeter().isEmpty()) {
       cloudURIs = Utility.getNeighborCloudURIs();
       log.info(cloudURIs.size() + " NeighborCloud URI(s) acquired.");
     }
     // If there are preferred Clouds given, send GSD poll requests there
     else {
-      /*
-       * Using a Set removes duplicate entries (which are needed for the
-			 * Orchestrator) from the Cloud list.
-			 */
+      //Using a Set removes duplicate entries (which are needed for the Orchestrator) from the Cloud list.
       Set<ArrowheadCloud> preferredClouds = new LinkedHashSet<>(requestForm.getSearchPerimeter());
       String URI = null;
       for (ArrowheadCloud cloud : preferredClouds) {
         try {
-          URI = Utility.getUri(cloud.getAddress(), Integer.valueOf(cloud.getPort()), cloud.getGatekeeperServiceURI(), false);
+          URI = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
         }
         // We skip the clouds with missing information
         catch (NullPointerException ex) {
@@ -168,7 +164,7 @@ public class GatekeeperResource {
       Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
       log.info("ServiceRegistry queried for requested Service: " + service.toString());
       ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
-      if (result.isPayloadEmpty()) {
+      if (result.isValid()) {
         log.info("ServiceRegistry query came back empty for " + service.toString());
         return Response.noContent().entity(null).build();
       }

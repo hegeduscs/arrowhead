@@ -22,7 +22,7 @@ public class ServiceQueryResult {
     this.serviceQueryData = serviceQueryData;
   }
 
-  public boolean isPayloadEmpty() {
+  public boolean isValid() {
     return serviceQueryData == null || serviceQueryData.isEmpty();
   }
 
