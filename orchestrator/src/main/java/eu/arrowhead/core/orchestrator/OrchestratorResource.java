@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
 /**
+ * TODO javadoc for the class
  * This is the REST resource for the Orchestrator Core System.
  */
 @Path("orchestration")
@@ -44,8 +45,8 @@ public class OrchestratorResource {
   public Response orchestrationProcess(ServiceRequestForm srf) {
     if (!srf.isValid()) {
       log.error("orchestrationProcess BadPayloadException");
-      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields. Some fields are only mandatory when"
-                                        + " certain orchestration flags are set to true.");
+      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields. See the documentation of "
+                                        + "ServiceRequestForm for more details.");
     }
 
     OrchestrationResponse orchResponse;

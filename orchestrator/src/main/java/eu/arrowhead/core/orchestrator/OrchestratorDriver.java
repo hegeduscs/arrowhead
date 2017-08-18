@@ -6,23 +6,36 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
+import eu.arrowhead.common.model.messages.GSDAnswer;
 import eu.arrowhead.common.model.messages.GSDRequestForm;
 import eu.arrowhead.common.model.messages.GSDResult;
+import eu.arrowhead.common.model.messages.ICNRequestForm;
+import eu.arrowhead.common.model.messages.ICNResult;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
+import eu.arrowhead.common.model.messages.PreferredProvider;
 import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
+import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Contains miscellaneous helper functions for the Orchestration process. The main functions of the Orchestration process used by the REST resource
+ * are in {@link eu.arrowhead.core.orchestrator.OrchestratorService}.
+ *
+ * @author Umlauf Zoltán
+ */
 final class OrchestratorDriver {
 
   private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
@@ -46,14 +59,16 @@ final class OrchestratorDriver {
    */
   static List<ProvidedService> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
     // Compiling the URI and the request payload
+    //TODO probably changed
     String srUri = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path(service.getServiceGroup()).path(service.getServiceDefinition())
         .toString();
     String tsigKey = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
-    ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(), pingProviders, metadataSearch, tsigKey);
+    ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch, tsigKey);
 
     // Sending the request, parsing the returned result
     Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);
     ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
+    //TODO probably cant be null anymore?
     if (serviceQueryResult == null || serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");
       throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString());
@@ -78,16 +93,16 @@ final class OrchestratorDriver {
    *
    * @param consumer The <tt>ArrowheadSystem</tt> object representing the consumer system
    * @param service The <tt>ArrowheadService</tt> object representing the service to be consumed
-   * @param providerList The list of <tt>ArrowheadSystem</tt> objects representing the potential provider systems
+   * @param providerSet The set of <tt>ArrowheadSystem</tt> objects representing the potential provider systems
    *
    * @return list of the authorized provider <tt>ArrowheadSystem</tt>s
    *
    * @throws DataNotFoundException if none of the provider <tt>ArrowheadSystem</tt>s are authorized for this servicing
    */
-  static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, List<ArrowheadSystem> providerList) {
+  static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, Set<ArrowheadSystem> providerSet) {
     // Compiling the URI and the request payload
     String uri = UriBuilder.fromPath(Utility.getAuthorizationUri()).path("intracloud").toString();
-    IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerList, service, false);
+    IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerSet, service);
 
     // Sending the request, parsing the returned result
     Response response = Utility.sendRequest(uri, "PUT", request);
@@ -111,8 +126,8 @@ final class OrchestratorDriver {
   }
 
   /**
-   * Filters out all the entries of the given ProvidedService list, which does not contain a preferred provider. This method is called when the
-   * <i>onlyPreferred</i> orchestration flag is set to true.
+   * Filters out all the entries of the given ProvidedService list, which does not contain a preferred local <tt>ArrowheadSystem</tt>. This method is
+   * called when the <i>onlyPreferred</i> orchestration flag is set to true.
    *
    * @param psList The list of <tt>ProvidedService</tt>s still being considered (after SR query and possibly Auth query)
    * @param preferredLocalProviders A list of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a
@@ -121,7 +136,7 @@ final class OrchestratorDriver {
    *
    * @return a list of <tt>ProvidedService</tt>s which have preferred provider <tt>ArrowheadSystem</tt>s
    *
-   * @throws DataNotFoundException if none of the <tt>ProvidedService</tt>s from the given list contain a preferred provider
+   * @throws DataNotFoundException if none of the <tt>ProvidedService</tt>s from the given list contain a preferred <tt>ArrowheadSystem</tt>
    */
   static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, List<ArrowheadSystem> preferredLocalProviders) {
     // Using a simple nested for-loop for the filtering
@@ -197,6 +212,8 @@ final class OrchestratorDriver {
    * @param service The <tt>ArrowheadService</tt> object representing the service to be consumed (optional)
    *
    * @return a list of <tt>OrchestrationStore</tt> objects matching the query criteria
+   *
+   * @throws DataNotFoundException if the Store query yielded no results
    */
   static List<OrchestrationStore> queryOrchestrationStore(@NotNull ArrowheadSystem consumer, @Nullable ArrowheadService service) {
     List<OrchestrationStore> retrievedList;
@@ -224,9 +241,10 @@ final class OrchestratorDriver {
   /**
    * Initiates the Global Service Discovery process by sending a request to the Gatekeeper Core System.
    *
-   * @param requestedService The <tt>ArrowheadService</tt> object representing the service for which the Gatekeeper will try to find a provider system
-   * @param preferredClouds A list of <tt>ArrowheadCloud</tt>s which are preferred by the requester system for service consumption. If this list is
-   * empty, the Gatekeeper will send GSD poll requests to the <tt>NeighborCloud</tt>s instead.
+   * @param requestedService The <tt>ArrowheadService</tt> object representing the service for which the Gatekeeper will try to find a provider
+   *     system
+   * @param preferredClouds A list of <tt>ArrowheadCloud</tt>s which are preferred by the requester system for service consumption. If this list
+   *     is empty, the Gatekeeper will send GSD poll requests to the <tt>NeighborCloud</tt>s instead.
    *
    * @return the GSD result from the Gatekeeper Core System
    *
@@ -247,6 +265,103 @@ final class OrchestratorDriver {
     }
 
     log.info("doGlobalServiceDiscovery returns with " + result.getResponse().size() + " GSDAnswers");
+    return result;
+  }
+
+  /**
+   * Inter-Cloud matchmaking is mandatory for picking out a target Cloud to do ICN with. Clouds preferred by the consumer have higher priority. Custom
+   * matchmaking algorithm can be implemented, as of now it just returns the first Cloud from the list.
+   *
+   * @param result The <tt>GSDResult</tt> object contains the <tt>ArrowheadCloud</tt>s which responded positively to the GSD polling.
+   * @param preferredClouds The <tt>ArrowheadCloud</tt>s preferred by the requester <tt>ArrowheadSystem</tt>.
+   * @param onlyPreferred An orchestration flags, indicating whether or not the requester <tt>ArrowheadSystem</tt> only wants to consume the
+   *     <tt>ArrowheadService</tt> from a preferred provider.
+   *
+   * @return the target <tt>ArrowheadCloud</tt> for the ICN process
+   *
+   * @throws DataNotFoundException if there is no preferred provider Cloud available while <i>onlyPreferred</i> is set to true
+   */
+  static ArrowheadCloud interCloudMatchmaking(GSDResult result, List<ArrowheadCloud> preferredClouds, boolean onlyPreferred) {
+    // Extracting the valid ArrowheadClouds from the GSDResult
+    List<ArrowheadCloud> partnerClouds = new ArrayList<>();
+    for (GSDAnswer answer : result.getResponse()) {
+      if (answer.getProviderCloud().isValid()) {
+        partnerClouds.add(answer.getProviderCloud());
+      }
+    }
+
+    // partnerClouds.isEmpty() can only be true here if the other Gatekeepers returned not valid ArrowheadCloud objects
+    if (!partnerClouds.isEmpty() && !preferredClouds.isEmpty()) {
+      // We iterate through both ArrowheadCloud list, and return with 1 if we find a match.
+      for (ArrowheadCloud preferredCloud : preferredClouds) {
+        for (ArrowheadCloud partnerCloud : partnerClouds) {
+          if (preferredCloud.equals(partnerCloud)) {
+            log.info("Preferred Cloud found in the GSDResult. interCloudMatchmaking() finished.");
+            return partnerCloud;
+          }
+        }
+      }
+    }
+
+    // No match was found, return the first ArrowheadCloud from the GSDResult if it is allowed by the orchestration flag.
+    if (onlyPreferred) {
+      log.error("interCloudMatchmaking() DataNotFoundException, preferredClouds size: " + preferredClouds.size());
+      throw new DataNotFoundException(
+          "No preferred Cloud found in the GSD response. Inter-Cloud matchmaking failed, since only preferred providers are allowed.");
+    }
+
+    log.info("No usable preferred Clouds were given, interCloudMatchmaking() returns the first partner Cloud entry.");
+    return partnerClouds.get(0);
+  }
+
+  /**
+   * Compiles an ICNRequestForm from the given parameters to start the ICN process.
+   * TODO javadoc when finalized
+   *
+   * @return ICNRequestForm
+   */
+  static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf, ArrowheadCloud targetCloud) {
+    // Getting the list of valid preferred systems, which belong to the target cloud
+    List<ArrowheadSystem> preferredSystems = new ArrayList<>();
+    for (PreferredProvider provider : srf.getPreferredProviders()) {
+      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
+          .getProviderSystem().isValid()) {
+        preferredSystems.add(provider.getProviderSystem());
+      }
+    }
+
+    // Passing through the relevant orchestration flags
+    Map<String, Boolean> negotiationFlags = new HashMap<>();
+    negotiationFlags.put("metadataSearch", srf.getOrchestrationFlags().get("metadataSearch"));
+    negotiationFlags.put("pingProviders", srf.getOrchestrationFlags().get("pingProviders"));
+    negotiationFlags.put("onlyPreferred", srf.getOrchestrationFlags().get("onlyPreferred"));
+    negotiationFlags.put("externalServiceRequest", true);
+
+    log.info("compileICNRequestForm() returns with " + preferredSystems.size() + " preferred systems");
+    return new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems, negotiationFlags, null);
+  }
+
+  /**
+   * Initiates the Inter Cloud Negotiations process by sending a request to the Gatekeeper Core System.
+   *
+   * @param requestForm Complex object containing all the necessary information to create a <tt>ServiceRequestForm</tt> at the remote cloud.
+   *
+   * @return a boxed {@link eu.arrowhead.common.model.messages.OrchestrationResponse} object
+   *
+   * @throws DataNotFoundException if the ICN failed with the remote cloud for some reason
+   */
+  static ICNResult doInterCloudNegotiations(ICNRequestForm requestForm) {
+    // Compiling the URI, sending the request, doing sanity check on the returned result
+    String uri = Utility.getGatekeeperUri();
+    uri = UriBuilder.fromPath(uri).path("init_icn").toString();
+    Response response = Utility.sendRequest(uri, "PUT", requestForm);
+    ICNResult result = response.readEntity(ICNResult.class);
+    if (!result.isValid()) {
+      log.error("doInterCloudNegotiations() DataNotFoundException");
+      throw new DataNotFoundException("ICN failed with the remote cloud.");
+    }
+
+    log.info("doInterCloudNegotiations() returns with " + result.getInstructions().getResponse().size() + " possible providers");
     return result;
   }
 

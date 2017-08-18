@@ -23,7 +23,7 @@ public class ICNResult {
     this.instructions = instructions;
   }
 
-  public boolean isPayloadUsable() {
+  public boolean isValid() {
     return instructions != null && instructions.getResponse() != null && !instructions.getResponse().isEmpty();
   }
 

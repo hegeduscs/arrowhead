@@ -5,6 +5,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.model.ArrowheadCloud;
 import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.GSDAnswer;
 import eu.arrowhead.common.model.messages.GSDPoll;
 import eu.arrowhead.common.model.messages.GSDRequestForm;
@@ -16,11 +17,11 @@ import eu.arrowhead.common.model.messages.ICNResult;
 import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.InterCloudAuthResponse;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
+import eu.arrowhead.common.model.messages.PreferredProvider;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -186,7 +187,7 @@ public class GatekeeperResource {
   public Response ICNRequest(ICNRequestForm requestForm) {
     log.info("Entered the ICNRequest method.");
 
-    if (!requestForm.isPayloadUsable()) {
+    if (!requestForm.isValid()) {
       log.info("GatekeeperResource:ICNRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.");
     }
@@ -197,7 +198,7 @@ public class GatekeeperResource {
                                               requestForm.getRequesterSystem(), requestForm.getPreferredProviders(),
                                               requestForm.getNegotiationFlags());
 
-    String icnURI = Utility.getUri(requestForm.getTargetCloud().getAddress(), Integer.valueOf(requestForm.getTargetCloud().getPort()),
+    String icnURI = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
                                    requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     icnURI = UriBuilder.fromPath(icnURI).path("icn_proposal").toString();
 
@@ -244,14 +245,16 @@ public class GatekeeperResource {
     else {
       log.info("Requester Cloud is AUTHORIZED");
 
-      Map<String, Boolean> orchestrationFlags = new HashMap<>();
+      Map<String, Boolean> orchestrationFlags = icnProposal.getNegotiationFlags();
       orchestrationFlags.put("externalServiceRequest", true);
-      orchestrationFlags.put("metadataSearch", icnProposal.getNegotiationFlags().get("metadataSearch"));
-      orchestrationFlags.put("pingProviders", icnProposal.getNegotiationFlags().get("pingProviders"));
-      orchestrationFlags.put("onlyPreferred", icnProposal.getNegotiationFlags().get("onlyPreferred"));
+      List<PreferredProvider> preferredProviders = new ArrayList<>();
+      for (ArrowheadSystem preferredSystem : icnProposal.getPreferredSystems()) {
+        preferredProviders.add(new PreferredProvider(preferredSystem, null));
+      }
+
       ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
           .requesterCloud(icnProposal.getRequesterCloud()).requestedService(service).orchestrationFlags(orchestrationFlags)
-          .preferredProviders(icnProposal.getPreferredProviders()).build();
+          .preferredProviders(preferredProviders).build();
       String orchestratorURI = Utility.getOrchestratorUri();
       orchestratorURI = UriBuilder.fromPath(orchestratorURI).path("orchestration").toString();
 

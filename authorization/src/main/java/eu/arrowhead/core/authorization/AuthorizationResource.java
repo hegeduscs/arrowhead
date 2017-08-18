@@ -128,7 +128,7 @@ public class AuthorizationResource {
       return Response.status(Status.OK).entity(response).build();
     }
 
-    IntraCloudAuthorization authRight = new IntraCloudAuthorization();
+    IntraCloudAuthorization authRight;
     for (ArrowheadSystem provider : request.getProviders()) {
       restrictionMap.clear();
       restrictionMap.put("systemGroup", provider.getSystemGroup());
@@ -180,23 +180,23 @@ public class AuthorizationResource {
       throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString());
     }
 
-    boolean isAuthorized = false;
     restrictionMap.clear();
     restrictionMap.put("serviceGroup", request.getService().getServiceGroup());
     restrictionMap.put("serviceDefinition", request.getService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
       log.info("Service is not in the database. Returning NOT AUTHORIZED state." + request.getService().toString());
-      return Response.status(Status.OK).entity(new InterCloudAuthResponse(isAuthorized)).build();
+      return Response.status(Status.OK).entity(new InterCloudAuthResponse(false)).build();
     }
 
-    InterCloudAuthorization authRight = new InterCloudAuthorization();
+    InterCloudAuthorization authRight;
     restrictionMap.clear();
     restrictionMap.put("cloud", cloud);
     restrictionMap.put("service", service);
     authRight = dm.get(InterCloudAuthorization.class, restrictionMap);
     log.info("Authorization rights requested for Cloud: " + request.getCloud().toString());
 
+    boolean isAuthorized = false;
     if (authRight != null) {
       log.info("This (cloud/service) request is AUTHORIZED.");
       isAuthorized = true;

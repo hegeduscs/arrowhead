@@ -15,10 +15,10 @@ public class ServiceRequestForm {
   private ArrowheadCloud requesterCloud;
   private ArrowheadService requestedService;
   private Map<String, Boolean> orchestrationFlags = new HashMap<>();
-  private List<ArrowheadSystem> preferredProviders = new ArrayList<>();
-  private List<ArrowheadCloud> preferredClouds = new ArrayList<>();
+  private List<PreferredProvider> preferredProviders = new ArrayList<>();
   private Map<String, String> requestedQoS = new HashMap<>();
   private Map<String, String> commands = new HashMap<>();
+
   private static List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
                                                                        "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
                                                                        "onlyPreferred", "enableQoS"));
@@ -39,8 +39,7 @@ public class ServiceRequestForm {
     private ArrowheadCloud requesterCloud;
     private ArrowheadService requestedService;
     private Map<String, Boolean> orchestrationFlags = new HashMap<>();
-    private List<ArrowheadSystem> preferredProviders = new ArrayList<>();
-    private List<ArrowheadCloud> preferredClouds = new ArrayList<>();
+    private List<PreferredProvider> preferredProviders = new ArrayList<>();
     private Map<String, String> requestedQoS = new HashMap<>();
     private Map<String, String> commands = new HashMap<>();
 
@@ -68,13 +67,8 @@ public class ServiceRequestForm {
       return this;
     }
 
-    public Builder preferredProviders(List<ArrowheadSystem> providers) {
+    public Builder preferredProviders(List<PreferredProvider> providers) {
       preferredProviders = providers;
-      return this;
-    }
-
-    public Builder preferredClouds(List<ArrowheadCloud> clouds) {
-      preferredClouds = clouds;
       return this;
     }
 
@@ -99,7 +93,6 @@ public class ServiceRequestForm {
     requestedService = builder.requestedService;
     orchestrationFlags = builder.orchestrationFlags;
     preferredProviders = builder.preferredProviders;
-    preferredClouds = builder.preferredClouds;
     requestedQoS = builder.requestedQoS;
     commands = builder.commands;
   }
@@ -141,20 +134,12 @@ public class ServiceRequestForm {
     this.orchestrationFlags = orchestrationFlags;
   }
 
-  public List<ArrowheadSystem> getPreferredProviders() {
+  public List<PreferredProvider> getPreferredProviders() {
     return preferredProviders;
   }
 
-  public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
+  public void setPreferredProviders(List<PreferredProvider> preferredProviders) {
     this.preferredProviders = preferredProviders;
-  }
-
-  public List<ArrowheadCloud> getPreferredClouds() {
-    return preferredClouds;
-  }
-
-  public void setPreferredClouds(List<ArrowheadCloud> preferredClouds) {
-    this.preferredClouds = preferredClouds;
   }
 
   public Map<String, String> getRequestedQoS() {

@@ -10,32 +10,25 @@ import java.util.Map;
 
 public class ICNRequestForm {
 
+  //TODO QoS support?
   private ArrowheadService requestedService;
-  private String authenticationInfo;
   private ArrowheadCloud targetCloud;
   private ArrowheadSystem requesterSystem;
   private List<ArrowheadSystem> preferredProviders = new ArrayList<>();
   private Map<String, Boolean> negotiationFlags = new HashMap<>();
+  private String authenticationInfo;
 
   public ICNRequestForm() {
   }
 
-  public ICNRequestForm(ArrowheadService requestedService, String authenticationInfo, ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem,
-                        List<ArrowheadSystem> preferredProviders, Map<String, Boolean> negotiationFlags) {
+  public ICNRequestForm(ArrowheadService requestedService, ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem,
+                        List<ArrowheadSystem> preferredProviders, Map<String, Boolean> negotiationFlags, String authenticationInfo) {
     this.requestedService = requestedService;
-    this.authenticationInfo = authenticationInfo;
     this.targetCloud = targetCloud;
     this.requesterSystem = requesterSystem;
     this.preferredProviders = preferredProviders;
     this.negotiationFlags = negotiationFlags;
-  }
-
-  public ArrowheadSystem getRequesterSystem() {
-    return requesterSystem;
-  }
-
-  public void setRequesterSystem(ArrowheadSystem requesterSystem) {
-    this.requesterSystem = requesterSystem;
+    this.authenticationInfo = authenticationInfo;
   }
 
   public ArrowheadService getRequestedService() {
@@ -46,20 +39,20 @@ public class ICNRequestForm {
     this.requestedService = requestedService;
   }
 
-  public String getAuthenticationInfo() {
-    return authenticationInfo;
-  }
-
-  public void setAuthenticationInfo(String authenticationInfo) {
-    this.authenticationInfo = authenticationInfo;
-  }
-
   public ArrowheadCloud getTargetCloud() {
     return targetCloud;
   }
 
   public void setTargetCloud(ArrowheadCloud targetCloud) {
     this.targetCloud = targetCloud;
+  }
+
+  public ArrowheadSystem getRequesterSystem() {
+    return requesterSystem;
+  }
+
+  public void setRequesterSystem(ArrowheadSystem requesterSystem) {
+    this.requesterSystem = requesterSystem;
   }
 
   public List<ArrowheadSystem> getPreferredProviders() {
@@ -78,7 +71,15 @@ public class ICNRequestForm {
     this.negotiationFlags = negotiationFlags;
   }
 
-  public boolean isPayloadUsable() {
+  public String getAuthenticationInfo() {
+    return authenticationInfo;
+  }
+
+  public void setAuthenticationInfo(String authenticationInfo) {
+    this.authenticationInfo = authenticationInfo;
+  }
+
+  public boolean isValid() {
     return requestedService != null && targetCloud != null && requesterSystem != null && requestedService.isValid() && targetCloud.isValid()
         && requesterSystem.isValid();
   }
