@@ -105,6 +105,7 @@ public class ServiceRegistryResource {
     }
 
     /**
+     * Public function for checking all entries
      * @return All registered service
      */
     @GET
@@ -124,6 +125,7 @@ public class ServiceRegistryResource {
     }
 
     /**
+     * Public function for removing all entries in the DNS.
      * @return Removes all registered service
      */
     @DELETE

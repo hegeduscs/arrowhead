@@ -7,30 +7,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceRegistryEntry {
-  private ArrowheadService providedService = new ArrowheadService();
-  private ArrowheadSystem provider = new ArrowheadSystem();
+  private ArrowheadService providedService;
+  private ArrowheadSystem provider;
   private String serviceURI;
-  private String TSIG_key;
-  private String version;
+  private int version = 1;
+  private boolean isUDP = false;
 
-  //backwards compat
-  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
-
-
-  //backwards compatibility towards G3.2 M1
+  //only for backwards compatibility
+  private List<ServiceMetadata> serviceMetadata;
   private List<String> interfaces;
+  private String TSIG_key;
 
   public ServiceRegistryEntry() {
   }
 
-  public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI, List<ServiceMetadata> serviceMetadata,
-                              String tsig_key, String version, List<String> interfaces) {
+  public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI,
+      List<ServiceMetadata> serviceMetadata, int version, List<String> interfaces) {
     this.interfaces = interfaces;
     this.provider = provider;
     this.serviceURI = serviceURI;
     this.serviceMetadata = serviceMetadata;
-    this.TSIG_key = tsig_key;
-    if (version != null) this.version = version; else this.version = "1.0";
+    this.version = version;
   }
 
   public ArrowheadSystem getProvider() {
@@ -57,19 +54,11 @@ public class ServiceRegistryEntry {
     this.serviceMetadata = serviceMetadata;
   }
 
-  public String getTSIG_key() {
-    return TSIG_key;
-  }
-
-  public void setTSIG_key(String TSIG_key) {
-    this.TSIG_key = TSIG_key;
-  }
-
-  public String getVersion() {
+  public int getVersion() {
     return version;
   }
 
-  public void setVersion(String version) {
+  public void setVersion(int version) {
     this.version = version;
   }
 
@@ -89,8 +78,24 @@ public class ServiceRegistryEntry {
     this.providedService = providedService;
   }
 
+  public boolean isUDP() {
+    return isUDP;
+  }
+
+  public void setUDP(boolean UDP) {
+    isUDP = UDP;
+  }
+
+  public String getTSIG_key() {
+    return TSIG_key;
+  }
+
+  public void setTSIG_key(String TSIG_key) {
+    this.TSIG_key = TSIG_key;
+  }
+
   public boolean isValid() {
-    return provider != null && provider.isValid() && serviceURI != null && TSIG_key != null;
+    return provider != null && provider.isValid() && serviceURI != null;
   }
 
 }

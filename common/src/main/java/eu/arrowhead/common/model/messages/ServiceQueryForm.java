@@ -1,5 +1,6 @@
 package eu.arrowhead.common.model.messages;
 
+import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.model.ArrowheadService;
 
 public class ServiceQueryForm {
@@ -7,7 +8,6 @@ public class ServiceQueryForm {
   private ArrowheadService service;
   private boolean pingProviders;
   private boolean metadataSearch;
-  //TODO?
   private int version = 1;
 
   public ServiceQueryForm() {
@@ -17,6 +17,12 @@ public class ServiceQueryForm {
       this.service = service;
       this.pingProviders = pingProviders;
       this.metadataSearch = metadataSearch;
+  }
+
+  public ServiceQueryForm(ServiceRequestForm srf) {
+    this.service = srf.getRequestedService();
+    this.pingProviders = srf.getOrchestrationFlags().get("pingProvider");
+    this.metadataSearch = srf.getOrchestrationFlags().get("metadataSearch");
   }
 
   public ArrowheadService getService() {
