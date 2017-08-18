@@ -9,6 +9,8 @@ public class ServiceQueryForm {
   private boolean pingProviders;
   private boolean metadataSearch;
   private String tsig_key;
+  //TODO?
+  private int version = 1;
 
   public ServiceQueryForm() {
   }
@@ -58,6 +60,14 @@ public class ServiceQueryForm {
 
   public void setTsig_key(String tsig_key) {
     this.tsig_key = tsig_key;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
   }
 
   public boolean isValid() {

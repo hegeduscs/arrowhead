@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceRegistryEntry {
-  private ArrowheadService providedService;
-  private ArrowheadSystem provider;
+  private ArrowheadService providedService = new ArrowheadService();
+  private ArrowheadSystem provider = new ArrowheadSystem();
   private String serviceURI;
   private String TSIG_key;
   private String version;
