@@ -8,20 +8,26 @@ public class OrchestrationForm {
   private ArrowheadService service;
   private ArrowheadSystem provider;
   private String serviceURI;
-  private String authorizationToken;
   private String instruction;
+  private String authorizationToken;
   private String signature;
 
   public OrchestrationForm() {
   }
 
-  public OrchestrationForm(ArrowheadService service, ArrowheadSystem provider, String serviceURI, String authorizationToken, String instruction,
+  public OrchestrationForm(ArrowheadService service, ArrowheadSystem provider, String serviceURI) {
+    this.service = service;
+    this.provider = provider;
+    this.serviceURI = serviceURI;
+  }
+
+  public OrchestrationForm(ArrowheadService service, ArrowheadSystem provider, String serviceURI, String instruction, String authorizationToken,
                            String signature) {
     this.service = service;
     this.provider = provider;
     this.serviceURI = serviceURI;
-    this.authorizationToken = authorizationToken;
     this.instruction = instruction;
+    this.authorizationToken = authorizationToken;
     this.signature = signature;
   }
 
@@ -49,20 +55,20 @@ public class OrchestrationForm {
     this.serviceURI = serviceURI;
   }
 
-  public String getAuthorizationToken() {
-    return authorizationToken;
-  }
-
-  public void setAuthorizationToken(String authorizationToken) {
-    this.authorizationToken = authorizationToken;
-  }
-
   public String getInstruction() {
     return instruction;
   }
 
   public void setInstruction(String instruction) {
     this.instruction = instruction;
+  }
+
+  public String getAuthorizationToken() {
+    return authorizationToken;
+  }
+
+  public void setAuthorizationToken(String authorizationToken) {
+    this.authorizationToken = authorizationToken;
   }
 
   public String getSignature() {

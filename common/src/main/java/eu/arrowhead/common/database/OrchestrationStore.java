@@ -30,7 +30,8 @@ import org.jetbrains.annotations.NotNull;
  * @author Umlauf Zoltán
  */
 @Entity
-@Table(name = "orchestration_store", uniqueConstraints = {@UniqueConstraint(columnNames = {"consumer_system_id", "priority", "is_default"})})
+@Table(name = "orchestration_store", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @Column(name = "id")
@@ -67,8 +68,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @Type(type = "timestamp")
   private Date lastUpdated;
 
-  @Column(name = "orchestration_rule")
-  private String orchestrationRule;
+  @Column(name = "instructions")
+  private String instructions;
 
   @ElementCollection(fetch = FetchType.LAZY)
   @MapKeyColumn(name = "attribute_key")
@@ -92,7 +93,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            int priority, boolean isDefault, String name, Date lastUpdated, String orchestrationRule, Map<String, String> attributes,
+                            int priority, boolean isDefault, String name, Date lastUpdated, String instructions, Map<String, String> attributes,
                             String serviceUri) {
     this.service = service;
     this.consumer = consumer;
@@ -102,7 +103,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.isDefault = isDefault;
     this.name = name;
     this.lastUpdated = lastUpdated;
-    this.orchestrationRule = orchestrationRule;
+    this.instructions = instructions;
     this.attributes = attributes;
     this.serviceUri = serviceUri;
   }
@@ -180,12 +181,12 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.lastUpdated = lastUpdated;
   }
 
-  public String getOrchestrationRule() {
-    return orchestrationRule;
+  public String getInstructions() {
+    return instructions;
   }
 
-  public void setOrchestrationRule(String orchestrationRule) {
-    this.orchestrationRule = orchestrationRule;
+  public void setInstructions(String instructions) {
+    this.instructions = instructions;
   }
 
   public Map<String, String> getAttributes() {

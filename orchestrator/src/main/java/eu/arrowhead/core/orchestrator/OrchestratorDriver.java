@@ -293,7 +293,7 @@ final class OrchestratorDriver {
       for (ArrowheadCloud preferredCloud : preferredClouds) {
         for (ArrowheadCloud partnerCloud : partnerClouds) {
           if (preferredCloud.equals(partnerCloud)) {
-            log.info("Preferred Cloud found in the GSDResult. interCloudMatchmaking() finished.");
+            log.info("interCloudMatchmaking: preferred Cloud found in the GSDResult");
             return partnerCloud;
           }
         }
@@ -302,12 +302,12 @@ final class OrchestratorDriver {
 
     // No match was found, return the first ArrowheadCloud from the GSDResult if it is allowed by the orchestration flag.
     if (onlyPreferred) {
-      log.error("interCloudMatchmaking() DataNotFoundException, preferredClouds size: " + preferredClouds.size());
+      log.error("interCloudMatchmaking DataNotFoundException, preferredClouds size: " + preferredClouds.size());
       throw new DataNotFoundException(
           "No preferred Cloud found in the GSD response. Inter-Cloud matchmaking failed, since only preferred providers are allowed.");
     }
 
-    log.info("No usable preferred Clouds were given, interCloudMatchmaking() returns the first partner Cloud entry.");
+    log.info("interCloudMatchmaking returns the first not preferred Cloud entry");
     return partnerClouds.get(0);
   }
 
@@ -350,11 +350,11 @@ final class OrchestratorDriver {
     Response response = Utility.sendRequest(uri, "PUT", requestForm);
     ICNResult result = response.readEntity(ICNResult.class);
     if (!result.isValid()) {
-      log.error("doInterCloudNegotiations() DataNotFoundException");
+      log.error("doInterCloudNegotiations DataNotFoundException");
       throw new DataNotFoundException("ICN failed with the remote cloud.");
     }
 
-    log.info("doInterCloudNegotiations() returns with " + result.getInstructions().getResponse().size() + " possible providers");
+    log.info("doInterCloudNegotiations returns with " + result.getInstructions().getResponse().size() + " possible providers");
     return result;
   }
 

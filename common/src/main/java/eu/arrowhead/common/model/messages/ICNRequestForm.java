@@ -14,7 +14,7 @@ public class ICNRequestForm {
   private ArrowheadService requestedService;
   private ArrowheadCloud targetCloud;
   private ArrowheadSystem requesterSystem;
-  private List<ArrowheadSystem> preferredProviders = new ArrayList<>();
+  private List<ArrowheadSystem> preferredSystems = new ArrayList<>();
   private Map<String, Boolean> negotiationFlags = new HashMap<>();
   private String authenticationInfo;
 
@@ -22,11 +22,11 @@ public class ICNRequestForm {
   }
 
   public ICNRequestForm(ArrowheadService requestedService, ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem,
-                        List<ArrowheadSystem> preferredProviders, Map<String, Boolean> negotiationFlags, String authenticationInfo) {
+                        List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo) {
     this.requestedService = requestedService;
     this.targetCloud = targetCloud;
     this.requesterSystem = requesterSystem;
-    this.preferredProviders = preferredProviders;
+    this.preferredSystems = preferredSystems;
     this.negotiationFlags = negotiationFlags;
     this.authenticationInfo = authenticationInfo;
   }
@@ -55,12 +55,12 @@ public class ICNRequestForm {
     this.requesterSystem = requesterSystem;
   }
 
-  public List<ArrowheadSystem> getPreferredProviders() {
-    return preferredProviders;
+  public List<ArrowheadSystem> getPreferredSystems() {
+    return preferredSystems;
   }
 
-  public void setPreferredProviders(List<ArrowheadSystem> preferredProviders) {
-    this.preferredProviders = preferredProviders;
+  public void setPreferredSystems(List<ArrowheadSystem> preferredSystems) {
+    this.preferredSystems = preferredSystems;
   }
 
   public Map<String, Boolean> getNegotiationFlags() {

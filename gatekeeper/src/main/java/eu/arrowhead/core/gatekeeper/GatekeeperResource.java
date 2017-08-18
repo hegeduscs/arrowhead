@@ -195,7 +195,7 @@ public class GatekeeperResource {
     // Compiling the payload and then getting the URI
     log.info("Compiling ICN proposal");
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), requestForm.getAuthenticationInfo(), Utility.getOwnCloud(),
-                                              requestForm.getRequesterSystem(), requestForm.getPreferredProviders(),
+                                              requestForm.getRequesterSystem(), requestForm.getPreferredSystems(),
                                               requestForm.getNegotiationFlags());
 
     String icnURI = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
