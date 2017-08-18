@@ -58,7 +58,7 @@ final class OrchestratorService {
               orchestrationFlags.get("pingProviders"));
 
       // Cross-checking the SR response with the Authorization
-      List<ArrowheadSystem> providerSystems = new ArrayList<>();
+      Set<ArrowheadSystem> providerSystems = new HashSet<>();
       for (ProvidedService service : psList) {
         providerSystems.add(service.getProvider());
       }
@@ -78,7 +78,7 @@ final class OrchestratorService {
       psList.removeAll(temp);
 
       // If needed, remove the non-preferred providers from the remaining list
-      providerSystems.clear(); //providerSystems list is reused
+      providerSystems.clear(); //providerSystems set is reused
       for (PreferredProvider provider : srf.getPreferredProviders()) {
         if (provider.isLocal()) {
           providerSystems.add(provider.getProviderSystem());
@@ -265,8 +265,7 @@ final class OrchestratorService {
         .interCloudMatchmaking(result, preferredClouds, orchestrationFlags.get("onlyPreferred"));
 
     // Telling the Gatekeeper to start the Inter-Cloud Negotiations process
-    ICNRequestForm icnRequestForm = OrchestratorDriver.compileICNRequestForm(srf, targetCloud);
-    ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(icnRequestForm);
+    ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(srf, targetCloud);
 
     // If matchmaking is requested, we pick one provider from the ICN result
     if (orchestrationFlags.get("matchmaking")) {

@@ -20,6 +20,7 @@ import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,16 +59,12 @@ final class OrchestratorDriver {
    */
   static List<ProvidedService> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
     // Compiling the URI and the request payload
-    //TODO probably changed
-    String srUri = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path(service.getServiceGroup()).path(service.getServiceDefinition())
-        .toString();
-    String tsigKey = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
-    ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch, tsigKey);
+    String srUri = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path("query").toString();
+    ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch);
 
     // Sending the request, parsing the returned result
     Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);
     ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
-    //TODO probably cant be null anymore?
     if (serviceQueryResult == null || serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");
       throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString());
@@ -98,7 +95,7 @@ final class OrchestratorDriver {
    *
    * @throws DataNotFoundException if none of the provider <tt>ArrowheadSystem</tt>s are authorized for this servicing
    */
-  static List<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, Set<ArrowheadSystem> providerSet) {
+  static Set<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, Set<ArrowheadSystem> providerSet) {
     // Compiling the URI and the request payload
     String uri = UriBuilder.fromPath(Utility.getAuthorizationUri()).path("intracloud").toString();
     IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerSet, service);
@@ -106,7 +103,7 @@ final class OrchestratorDriver {
     // Sending the request, parsing the returned result
     Response response = Utility.sendRequest(uri, "PUT", request);
     IntraCloudAuthResponse authResponse = response.readEntity(IntraCloudAuthResponse.class);
-    List<ArrowheadSystem> authorizedSystems = new ArrayList<>();
+    Set<ArrowheadSystem> authorizedSystems = new HashSet<>();
     // Set view of HashMap ensures there are no duplicates between the keys (systems)
     for (Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap().entrySet()) {
       if (entry.getValue()) {
@@ -129,15 +126,15 @@ final class OrchestratorDriver {
    * called when the <i>onlyPreferred</i> orchestration flag is set to true.
    *
    * @param psList The list of <tt>ProvidedService</tt>s still being considered (after SR query and possibly Auth query)
-   * @param preferredLocalProviders A list of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a
-   *     sublist of the <i>preferredProviders</i> list from the {@link eu.arrowhead.common.model.messages.ServiceRequestForm}, which can also contain
+   * @param preferredLocalProviders A set of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a
+   *     subset of the <i>preferredProviders</i> list from the {@link eu.arrowhead.common.model.messages.ServiceRequestForm}, which can also contain
    *     not local <tt>ArrowheadSystem</tt>s.
    *
    * @return a list of <tt>ProvidedService</tt>s which have preferred provider <tt>ArrowheadSystem</tt>s
    *
    * @throws DataNotFoundException if none of the <tt>ProvidedService</tt>s from the given list contain a preferred <tt>ArrowheadSystem</tt>
    */
-  static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, List<ArrowheadSystem> preferredLocalProviders) {
+  static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, Set<ArrowheadSystem> preferredLocalProviders) {
     // Using a simple nested for-loop for the filtering
     List<ProvidedService> preferredList = new ArrayList<>();
     for (ArrowheadSystem system : preferredLocalProviders) {
@@ -168,16 +165,16 @@ final class OrchestratorDriver {
    * returns the first (preferred) provider from the list.
    * <p>
    * If the <i>onlyPreferred</i> orchestration flag is set to true, then it is guaranteed there will be at least 1 preferred provider to choose from,
-   * since this method is called after {@link #removeNonPreferred(List, List)}, where a {@link eu.arrowhead.common.exception.DataNotFoundException} is
+   * since this method is called after {@link #removeNonPreferred(List, Set)}, where a {@link eu.arrowhead.common.exception.DataNotFoundException} is
    * thrown if no preferred provider was found.
    *
    * @param psList The list of <tt>ProvidedService</tt>s still being considered
-   * @param preferredLocalProviders The list of <tt>ArrowheadSystem</tt>s in this Local Cloud preferred by the requester system
+   * @param preferredLocalProviders The set of <tt>ArrowheadSystem</tt>s in this Local Cloud preferred by the requester system
    *
    * @return the chosen ProvidedService object, containing the necessary <tt>ArrowheadSystem</tt> and <tt>String</tt> serviceUri information to
    *     contact the provider
    */
-  static ProvidedService intraCloudMatchmaking(List<ProvidedService> psList, List<ArrowheadSystem> preferredLocalProviders) {
+  static ProvidedService intraCloudMatchmaking(List<ProvidedService> psList, Set<ArrowheadSystem> preferredLocalProviders) {
     // If there are no preferred providers, just return the first ProvidedService
     if (preferredLocalProviders.isEmpty()) {
       log.info("intraCloudMatchmaking: no preferred local providers given, returning first ProvidedService");
@@ -314,13 +311,19 @@ final class OrchestratorDriver {
   }
 
   /**
-   * Compiles an ICNRequestForm from the given parameters to start the ICN process.
-   * TODO javadoc when finalized
+   * Compiles an <tt>ICNRequestForm</tt> from the given parameters and initiates the Inter Cloud Negotiations process by sending a request to the
+   * Gatekeeper Core System. The <tt>ICNRequestForm</tt> is a complex object containing all the necessary information to create a
+   * <tt>ServiceRequestForm</tt> at the remote cloud.
    *
-   * @return ICNRequestForm
+   * @param srf The <tt>ServiceRequestForm</tt> sent in by the requester <tt>ArrowheadSystem</tt>. 4 different fields of it is used in this method.
+   * @param targetCloud The <tt>ArrowheadCloud</tt> entity this local cloud chose to do ICN with.
+   *
+   * @return a boxed {@link eu.arrowhead.common.model.messages.OrchestrationResponse} object from the remote cloud
+   *
+   * @throws DataNotFoundException if the ICN failed with the remote cloud for some reason
    */
-  static ICNRequestForm compileICNRequestForm(ServiceRequestForm srf, ArrowheadCloud targetCloud) {
-    // Getting the list of valid preferred systems, which belong to the target cloud
+  static ICNResult doInterCloudNegotiations(ServiceRequestForm srf, ArrowheadCloud targetCloud) {
+    // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
     List<ArrowheadSystem> preferredSystems = new ArrayList<>();
     for (PreferredProvider provider : srf.getPreferredProviders()) {
       if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
@@ -329,27 +332,17 @@ final class OrchestratorDriver {
       }
     }
 
-    // Passing through the relevant orchestration flags
+    // Passing through the relevant orchestration flags to the ICNRequestForm
     Map<String, Boolean> negotiationFlags = new HashMap<>();
     negotiationFlags.put("metadataSearch", srf.getOrchestrationFlags().get("metadataSearch"));
     negotiationFlags.put("pingProviders", srf.getOrchestrationFlags().get("pingProviders"));
     negotiationFlags.put("onlyPreferred", srf.getOrchestrationFlags().get("onlyPreferred"));
     negotiationFlags.put("externalServiceRequest", true);
 
-    log.info("compileICNRequestForm() returns with " + preferredSystems.size() + " preferred systems");
-    return new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems, negotiationFlags, null);
-  }
+    // Creating the ICNRequestForm object, which is the payload of the request sent to the Gatekeeper
+    ICNRequestForm requestForm =  new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems,
+                                                 negotiationFlags, null);
 
-  /**
-   * Initiates the Inter Cloud Negotiations process by sending a request to the Gatekeeper Core System.
-   *
-   * @param requestForm Complex object containing all the necessary information to create a <tt>ServiceRequestForm</tt> at the remote cloud.
-   *
-   * @return a boxed {@link eu.arrowhead.common.model.messages.OrchestrationResponse} object
-   *
-   * @throws DataNotFoundException if the ICN failed with the remote cloud for some reason
-   */
-  static ICNResult doInterCloudNegotiations(ICNRequestForm requestForm) {
     // Compiling the URI, sending the request, doing sanity check on the returned result
     String uri = Utility.getGatekeeperUri();
     uri = UriBuilder.fromPath(uri).path("init_icn").toString();
