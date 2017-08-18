@@ -5,8 +5,6 @@ import com.github.danieln.dnssdjava.ServiceName;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.ServiceMetadata;
-import eu.arrowhead.common.model.messages.ProvidedService;
-import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import org.apache.log4j.Logger;
 
@@ -43,12 +41,11 @@ public class RegistryUtils {
         for (ServiceMetadata entry : registryEntry.getServiceMetadata()) {
             properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());
         }
-        //As per the DNS-SD standard on service metadata
-        if (registryEntry.getVersion()!=null)
-            properties.put("txtvers",registryEntry.getVersion());
+        //As per the DNS-SD standard on service versioning
+        properties.put("txtvers",Integer.toString(registryEntry.getVersion()));
     }
 
-    public static ProvidedService buildProvidedService(ServiceData service) throws IllegalArgumentException {
+    public static ServiceRegistryEntry buildRegistryEntry(ServiceData service) throws IllegalArgumentException {
 
         //extracting fields from DNS record
         String providerName = service.getName().getName();
@@ -118,8 +115,8 @@ public class RegistryUtils {
             throw new IllegalArgumentException("Cannot parse DNS entry into ArrowheadSystem");
 
         //setting up response
-        ProvidedService providerService = new ProvidedService();
-        providerService.setOffered(arrowheadService);
+        ServiceRegistryEntry providerService = new ServiceRegistryEntry();
+        providerService.setProvidedService(arrowheadService);
         providerService.setProvider(arrowheadSystem);
 
         if (isUDP) {
@@ -132,9 +129,9 @@ public class RegistryUtils {
             throw new IllegalArgumentException("ServiceURI was empty in DNS record.");
 
         if (properties.containsKey("txtvers"))
-            providerService.setVersion(properties.get("txtvers"));
+            providerService.setVersion(new Integer(properties.get("txtvers")));
         else
-            providerService.setVersion("NA");
+            providerService.setVersion(1);
 
         return providerService;
     }
@@ -165,12 +162,12 @@ public class RegistryUtils {
    /*
         TODO This method filters on Service metadata.
     */
-    public static void filterOnMeta(List<ProvidedService> queryForm, List<ServiceMetadata> metadata) {
+    public static void filterOnMeta(List<ServiceRegistryEntry> queryForm, List<ServiceMetadata> metadata) {
     }
 
     /*
         This method filters the ProvidedService list based on Service Provider availability
      */
-    public static void filterOnPing(List<ProvidedService> fetchedList) {
+    public static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
     }
 }

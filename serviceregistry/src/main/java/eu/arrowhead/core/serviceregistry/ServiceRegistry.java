@@ -8,7 +8,6 @@ import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import com.github.danieln.dnssdjava.ServiceType;
 import eu.arrowhead.common.exception.DnsException;
-import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
@@ -31,18 +30,24 @@ class ServiceRegistry {
       String serviceDefinition = entry.getProvidedService().getServiceDefinition();
 
       //ArrowheadSystem is the instance name with underscores
-      String providerInstance = entry.getProvider().getSystemName(); // + "_" + entry.getProvider().getSystemGroup();
+      String providerInstance = entry.getProvider().getSystemName() + "_" + entry.getProvider().getSystemGroup();
       String address = entry.getProvider().getAddress() + ".";
       int port = entry.getProvider().getPort();
 
       boolean allRegistered = true;
       //One System may offer out the same service on multiple interface implementations/IDD-s
       for (String interf : entry.getProvidedService().getInterfaces()) {
+
           //ArrowheadService is encoded in the service type field, interface (IDD) as the protocol
-          String serviceType = "_" + serviceDefinition + "_" + serviceGroup + "_" + interf + "._tcp";
-          try {
+          String serviceType = "_" + serviceDefinition + "_" + serviceGroup + "_" + interf;
+          if (entry.isUDP())
+            serviceType.concat("._udp");
+          else
+            serviceType.concat("._tcp");
+
+        try {
               ServiceName name = ServiceRegistryMain.registrator.makeServiceName(providerInstance,
-                      ServiceType.valueOf(serviceType));
+                       ServiceType.valueOf(serviceType));
 
               //create  service data object
               ServiceData data = new ServiceData(name, address, port);
@@ -83,7 +88,12 @@ class ServiceRegistry {
 
       boolean allRemoved = true;
       for (String interf : entry.getProvidedService().getInterfaces()) {
-          String serviceType = "_" + serviceDefinition + "_" + serviceGroup + "_" + interf + "._tcp";
+          String serviceType = "_" + serviceDefinition + "_" + serviceGroup + "_" + interf;
+
+          if (entry.isUDP())
+            serviceType.concat("._udp");
+          else
+            serviceType.concat("._tcp");
 
           try {
               ServiceName name = ServiceRegistryMain.registrator.makeServiceName(providerInstance,
@@ -114,21 +124,24 @@ class ServiceRegistry {
         DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
 
         //this list will contain all instances corresponding to the given interfaces
-        List<ProvidedService> fetchedList = new ArrayList<>();
+        List<ServiceRegistryEntry> fetchedList = new ArrayList<>();
         fetchedList.clear();
 
         //building look-up service types for query
         for (String interf : queryForm.getService().getInterfaces()) {
 
-          //getting the instances for each interface
-          Collection<ServiceName> instances = browser.getServiceInstances(
-                  ServiceType.valueOf("_" + queryForm.getService().getServiceDefinition() +
-                          "_" + queryForm.getService().getServiceGroup() + "_" + interf + "._tcp"));
+          String serviceType = "_" + queryForm.getService().getServiceDefinition() +
+              "_" + queryForm.getService().getServiceGroup() + "_" + interf;
+
+          //getting the instances for each interface on each transport layer
+          Collection<ServiceName> instances = new ArrayList<>();
+          instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._tcp")));
+          instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._udp")));
 
           for (ServiceName instance : instances) {
             ServiceData serviceInstance = browser.getServiceData(instance);
             try {
-                ProvidedService provService = RegistryUtils.buildProvidedService(serviceInstance);
+                ServiceRegistryEntry provService = RegistryUtils.buildRegistryEntry(serviceInstance);
                 fetchedList.add(provService);
             } catch (IllegalArgumentException e) {
                 log.info("There is a non-Arrowhead compliant DNS record in the Registry: " +
@@ -156,7 +169,7 @@ class ServiceRegistry {
     DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
     Collection<ServiceType> types = browser.getServiceTypes();
 
-    List<ProvidedService> list = new ArrayList<>();
+    List<ServiceRegistryEntry> list = new ArrayList<>();
 
     if (types != null) {
 
@@ -168,7 +181,7 @@ class ServiceRegistry {
 
             ServiceData serviceInstanceData = browser.getServiceData(instance);
             try {
-                list.add(RegistryUtils.buildProvidedService(serviceInstanceData));
+                list.add(RegistryUtils.buildRegistryEntry(serviceInstanceData));
             } catch (IllegalArgumentException e) {
                 log.info("There is a non-Arrowhead compliant DNS record: " +
                         instance.getName() + "." + instance.getType().toString());

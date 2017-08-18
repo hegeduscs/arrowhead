@@ -14,7 +14,6 @@ import eu.arrowhead.common.model.messages.ICNResult;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.model.messages.PreferredProvider;
-import eu.arrowhead.common.model.messages.ProvidedService;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;

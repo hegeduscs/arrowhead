@@ -2,8 +2,6 @@ package eu.arrowhead.core.serviceregistry;
 
 
 import com.github.danieln.dnssdjava.*;
-import eu.arrowhead.common.exception.DnsException;
-import eu.arrowhead.common.model.messages.ProvidedService;
 import org.apache.log4j.Logger;
 
 import java.util.*;

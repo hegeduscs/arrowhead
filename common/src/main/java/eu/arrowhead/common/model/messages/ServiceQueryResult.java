@@ -2,23 +2,24 @@ package eu.arrowhead.common.model.messages;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.ws.Service;
 
 public class ServiceQueryResult {
 
-  private List<ProvidedService> serviceQueryData = new ArrayList<>();
+  private List<ServiceRegistryEntry> serviceQueryData = new ArrayList<>();
 
   public ServiceQueryResult() {
   }
 
-  public ServiceQueryResult(List<ProvidedService> serviceQueryData) {
+  public ServiceQueryResult(List<ServiceRegistryEntry> serviceQueryData) {
     this.serviceQueryData = serviceQueryData;
   }
 
-  public List<ProvidedService> getServiceQueryData() {
+  public List<ServiceRegistryEntry> getServiceQueryData() {
     return serviceQueryData;
   }
 
-  public void setServiceQueryData(List<ProvidedService> serviceQueryData) {
+  public void setServiceQueryData(List<ServiceRegistryEntry> serviceQueryData) {
     this.serviceQueryData = serviceQueryData;
   }
 
