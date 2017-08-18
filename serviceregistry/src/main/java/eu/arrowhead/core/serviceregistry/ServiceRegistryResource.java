@@ -88,23 +88,20 @@ public class ServiceRegistryResource {
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    @Path(value = "/{serviceGroup}/{service}")
-    public Response getServiceQueryForm(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-                                        ServiceQueryForm queryForm) {
+    @Path(value = "query")
+    public Response getServiceQueryForm(ServiceQueryForm queryForm) {
+
         if (!queryForm.isValid()) {
             log.info("ServiceRegistry:Query throws BadPayloadException");
             throw new BadPayloadException("Bad payload: the request form has missing/incomplete " + "mandatory fields.");
         }
-
-        queryForm.getService().setServiceGroup(serviceGroup);
-        queryForm.getService().setServiceDefinition(service);
 
         ServiceQueryResult sqr = ServiceRegistry.provideServices(queryForm);
 
         if (!sqr.getServiceQueryData().isEmpty())
             return Response.status(Response.Status.OK).entity(sqr).build();
         else
-            return Response.status(Response.Status.NO_CONTENT).build();
+            return Response.status(Response.Status.NO_CONTENT).entity(sqr).build();
     }
 
     /**
