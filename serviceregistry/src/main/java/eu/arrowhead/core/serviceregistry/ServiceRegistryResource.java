@@ -1,64 +1,142 @@
 package eu.arrowhead.core.serviceregistry;
 
+import com.github.danieln.dnssdjava.DnsSDException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DnsException;
+import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import org.apache.log4j.Logger;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 @Path("serviceregistry")
 public class ServiceRegistryResource {
 
-  @GET
-  @Produces(MediaType.TEXT_PLAIN)
-  public String getIt() {
-    return "This is the Service Registry.";
-  }
+    private static Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
 
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("/{serviceGroup}/{service}/{interf}")
-  public void publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-                                   @PathParam("interf") String interf, ServiceRegistryEntry entry) {
-    ServiceRegistry.getInstance().register(serviceGroup, service, interf, entry);
-  }
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getIt() {
+        return "This is the Service Registry.";
+    }
 
-  @PUT
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("/{serviceGroup}/{service}/{interf}")
-  public void removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-                                   @PathParam("interf") String interf, ServiceRegistryEntry entry) {
-    ServiceRegistry.getInstance().unRegister(serviceGroup, service, interf, entry);
-  }
+    /*
+        Backwards compatibility
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/{serviceGroup}/{service}/{interf}")
+    public Response publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
+                                         @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 
-  /**
-   * Query paramaters are the fields from Service
-   *
-   * Query Form GET-be query parameternek egy string lista kell IDD-k
-   *
-   * @return Providers: List of (ArrowheadSystem, ServiceURI:String)
-   */
-  @PUT
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path(value = "/{serviceGroup}/{service}")
-  public ServiceQueryResult getServiceQueryForm(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-                                                ServiceQueryForm queryForm) {
-    return ServiceRegistry.getInstance().provideServices(serviceGroup, service, queryForm);
-  }
+        if (serviceGroup == null || service == null || interf == null || entry == null) {
+            log.info("ServiceRegistry: Registration throws BadPayloadException");
+            throw new BadPayloadException("Bad payload: service request form has missing/incomplete " + "mandatory fields.");
+        }
 
-  /**
-   * @return All registered service
-   */
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path(value = "/all")
-  public ServiceQueryResult getAllServices() {
-    return ServiceRegistry.getInstance().provideAllServices();
-  }
+        //putting the service data into ArrowheadService
+        entry.getProvidedService().setServiceGroup(serviceGroup);
+        entry.getProvidedService().setServiceDefinition(service);
+        List<String> interfaces = new ArrayList<>();
+        interfaces.add(interf);
+        entry.getProvidedService().setInterfaces(interfaces);
+
+        try {
+            if (ServiceRegistry.register(entry))
+                return Response.status(Response.Status.OK).build();
+            else
+                return Response.status(Response.Status.RESET_CONTENT).build();
+        } catch (DnsSDException e) {
+            log.error("SR Registration failed:" + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
+        }
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/{serviceGroup}/{service}/{interf}")
+    public Response removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
+                                         @PathParam("interf") String interf, ServiceRegistryEntry entry) {
+        //TODO
+        if (serviceGroup == null || service == null || interf == null || !entry.isValid()) {
+            log.info("ServiceRegistry:Query throws BadPayloadException");
+            throw new BadPayloadException("Bad payload: service request form has missing/incomplete " + "mandatory fields.");
+        }
+
+        boolean result;
+        try {
+            result = ServiceRegistry.unRegister(entry);
+        } catch (DnsException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        if (result)
+            return Response.status(Response.Status.OK).build();
+        else
+            return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    /*
+        Interface towards the Orchestrator
+     */
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path(value = "/{serviceGroup}/{service}")
+    public Response getServiceQueryForm(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
+                                        ServiceQueryForm queryForm) {
+        if (!queryForm.isValid()) {
+            log.info("ServiceRegistry:Query throws BadPayloadException");
+            throw new BadPayloadException("Bad payload: the request form has missing/incomplete " + "mandatory fields.");
+        }
+
+        queryForm.getService().setServiceGroup(serviceGroup);
+        queryForm.getService().setServiceDefinition(service);
+
+        ServiceQueryResult sqr = ServiceRegistry.provideServices(queryForm);
+
+        if (!sqr.getServiceQueryData().isEmpty())
+            return Response.status(Response.Status.OK).entity(sqr).build();
+        else
+            return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    /**
+     * @return All registered service
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path(value = "/all")
+    public Response getAllServices() {
+
+        ServiceQueryResult result;
+
+        try {
+            result = ServiceRegistry.provideAllServices();
+            return Response.status(Response.Status.OK).entity(result).build();
+
+        } catch (DnsSDException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * @return Removes all registered service
+     */
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path(value = "/all")
+    public Response removeAllServices() {
+
+        if (ServiceRegistry.removeAllServices())
+            return Response.status(Response.Status.OK).build();
+        else
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
 }

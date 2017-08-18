@@ -9,6 +9,7 @@ public class ProvidedService {
   private ArrowheadService offered;
   private String serviceURI;
   private String version = "1.0";
+  private boolean isUDP = false;
 
   public ProvidedService() {
   }
@@ -52,6 +53,14 @@ public class ProvidedService {
   public void setVersion(String version) {
     this.version = version;
   }
+
+  public boolean isUDP() {
+        return isUDP;
+  }
+
+    public void setUDP(boolean UDP) {
+        isUDP = UDP;
+    }
 
   public boolean isValid() {
     return provider != null && provider.isValid() && serviceURI != null;

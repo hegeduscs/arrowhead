@@ -1,11 +1,18 @@
 package eu.arrowhead.core.serviceregistry;
 
+import com.github.danieln.dnssdjava.DnsSDException;
+import com.github.danieln.dnssdjava.DnsSDFactory;
+import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.model.ArrowheadService;
+import eu.arrowhead.common.model.ArrowheadSystem;
+import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import eu.arrowhead.common.ssl.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -31,22 +38,44 @@ class ServiceRegistryMain {
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
   private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
-  private static Properties prop;
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8442/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
+  private static Properties appProp, dnsProp;
+  private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
+  private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
 
+  public static String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.evoin.arrowhead.eu.");
+  public static String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
+  public static String tsigKeyValue = getDnsProp().getProperty("tsig.key", "RIuxP+vb5GjLXJo686NvKQ==");
+  public static String computerDomain;
+  public static DnsSDRegistrator registrator;
+
+  public static int pingTimeout=new Integer(getAppProp().getProperty("ping.timeout", "10000"));
   /**
    * Main method.
    */
   public static void main(String[] args) throws IOException {
-    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+
+      PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+
+    //Setting up DNS
+    System.setProperty("dns.server", getDnsProp().getProperty("dns.ip"));
+    System.setProperty("dnssd.domain", getDnsProp().getProperty("dns.domain"));
+    computerDomain = getDnsProp().getProperty("dns.domain");
+    System.setProperty("dnssd.hostname", getDnsProp().getProperty("dns.host"));
+
+    try {
+      registrator = createRegistrator();
+    }  catch (DnsSDException e) {
+      System.out.println("Connection to DNS-SD was unsuccessful.");
+      log.error("Connection to DNS-SD was unsuccessful.");
+    }
+    registrator.setTSIGKey(tsigKeyName,tsigAlgorithm,tsigKeyValue);
 
     boolean daemon = false;
     boolean serverModeSet = false;
     for (int i = 0; i < args.length; ++i) {
       if (args[i].equals("-d")) {
         daemon = true;
-        System.out.println("Starting server as daemon!");
+        System.out.println("Starting SR bridge as daemon!");
       } else if (args[i].equals("-m")) {
         serverModeSet = true;
         ++i;
@@ -67,18 +96,21 @@ class ServiceRegistryMain {
         }
       }
     }
+
+
     if (!serverModeSet) {
       server = startServer();
     }
 
-    TimerTask pingTask = new PingTask();
+    TimerTask pingTask = new PingProvidersTask();
     final Timer timer = new Timer();
     int interval = 10;
     try {
-      interval = Integer.parseInt(getProp().getProperty("ping.interval", "10"));
+      interval = Integer.parseInt(getAppProp().getProperty("ping.interval", "10"));
     } catch (Exception e) {
       log.error("Invalid 'ping.interval' value in app.properties!");
     }
+
     timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
 
     if (daemon) {
@@ -129,13 +161,12 @@ class ServiceRegistryMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(SecureServiceRegistryResource.class);
     config.packages("eu.arrowhead.common");
 
-    String keystorePath = getProp().getProperty("ssl.keystore", "/home/arrowhead_test.jks");
-    String keystorePass = getProp().getProperty("ssl.keystorepass", "arrowhead");
-    String truststorePath = getProp().getProperty("ssl.truststore", "/home/arrowhead_test.jks");
-    String truststorePass = getProp().getProperty("ssl.truststorepass", "arrowhead");
+    String keystorePath = getAppProp().getProperty("ssl.keystore", "/home/arrowhead_test.jks");
+    String keystorePass = getAppProp().getProperty("ssl.keystorepass", "arrowhead");
+    String truststorePath = getAppProp().getProperty("ssl.truststore", "/home/arrowhead_test.jks");
+    String truststorePass = getAppProp().getProperty("ssl.truststorepass", "arrowhead");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);
@@ -176,27 +207,48 @@ class ServiceRegistryMain {
     }
     System.out.println("Service Registry Server(s) stopped");
   }
+    private static synchronized Properties getDnsProp() {
+        try {
+            if (dnsProp == null) {
+                dnsProp = new Properties();
 
-  private static synchronized Properties getProp() {
-    try {
-      if (prop == null) {
-        prop = new Properties();
-        File file = new File("config" + File.separator + "app.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        prop.load(inputStream);
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
+                File file = new File("config" + File.separator + "dns.properties");
+                FileInputStream inputStream = new FileInputStream(file);
+
+                if (inputStream != null) {
+                    dnsProp.load(inputStream);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return dnsProp;
     }
-    return prop;
-  }
 
-  static class PingTask extends TimerTask {
+    private static synchronized Properties getAppProp() {
+        try {
+            if (appProp == null) {
+                appProp = new Properties();
 
-    @Override
-    public void run() {
-      log.debug("Ping and remove inactive services TimerTask at " + new Date().toString());
-      ServiceRegistry.getInstance().pingAndRemoveServices();
+                File file = new File("config" + File.separator + "app.properties");
+                FileInputStream inputStream = new FileInputStream(file);
+
+                if (inputStream != null) {
+                    appProp.load(inputStream);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return appProp;
     }
-  }
+    private static DnsSDRegistrator createRegistrator() throws DnsSDException {
+        // Get the DNS specific settings
+        String dnsIpAddress = getDnsProp().getProperty("dns.ip", "192.168.184.128");
+        String dnsDomain = getDnsProp().getProperty("dns.registerDomain", "srv.evoin.arrowhead.eu") + ".";
+        int dnsPort = new Integer(getDnsProp().getProperty("dns.port", "53"));
+
+        InetSocketAddress dnsserverAddress = new InetSocketAddress(dnsIpAddress, dnsPort);
+        return DnsSDFactory.getInstance().createRegistrator(dnsDomain, dnsserverAddress);
+    }
 }
