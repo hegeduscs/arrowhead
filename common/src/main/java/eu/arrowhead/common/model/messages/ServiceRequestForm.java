@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This is what the Orchestrator Core System receives from Arrowhead Systems trying to request services.
+ */
 public class ServiceRequestForm {
 
   private static List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
@@ -102,7 +105,13 @@ public class ServiceRequestForm {
   }
 
   /**
-   * TODO detailed javadoc comment
+   * Simple inspector method to check weather a ServiceRequestForm instance is valid to be processed by the Orchestrator.
+   * <p>
+   * The mandatory requesterSystem field can not be null and has to be valid. If the requestedService is not null, it has to be valid.
+   * PreferredProviders list can not be empty, if the onlyPreferred flag is true. RequestedQoS and commands lists can not be empty, if the enableQoS
+   * flag is true.
+   *
+   * @return true if the instance is in compliance with all the restrictions, false otherwise
    */
   public boolean isValid() {
     return requesterSystem != null && requesterSystem.isValid() && (requestedService == null || requestedService.isValid()) && !(
