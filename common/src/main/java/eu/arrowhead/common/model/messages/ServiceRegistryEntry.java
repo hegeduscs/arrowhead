@@ -6,6 +6,7 @@ import eu.arrowhead.common.model.ServiceMetadata;
 import java.util.List;
 
 public class ServiceRegistryEntry {
+
   //mandatory fields
   private ArrowheadService providedService;
   private ArrowheadSystem provider;
@@ -23,7 +24,7 @@ public class ServiceRegistryEntry {
   public ServiceRegistryEntry() {
   }
 
-  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, String serviceURI){
+  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, String serviceURI) {
     this.providedService = providedService;
     this.provider = provider;
     this.serviceURI = serviceURI;

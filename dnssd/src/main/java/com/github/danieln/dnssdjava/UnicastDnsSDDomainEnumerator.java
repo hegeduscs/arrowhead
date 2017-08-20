@@ -52,10 +52,6 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
     return getDomain(DB_DNSSD_UDP);
   }
 
-  public Collection<String> getRegisteringDomains() {
-    return getDomains(R_DNSSD_UDP);
-  }
-
   public String getDefaultRegisteringDomain() {
     return getDomain(DR_DNSSD_UDP);
   }
@@ -64,24 +60,15 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
     return getDomains(LB_DNSSD_UDP);
   }
 
-  /**
-   * Get all domains pointed to by the given resource record name, searching all computer domains.
-   *
-   * @param rrName the DNS resource record name.
-   * @return a collection of domain names.
-   */
-  private Collection<String> getDomains(Name rrName) {
-    List<String> results = new ArrayList<>();
-    for (Name domain : computerDomains) {
-      results.addAll(getDomains(rrName, domain));
-    }
-    return results;
+  public Collection<String> getRegisteringDomains() {
+    return getDomains(R_DNSSD_UDP);
   }
 
   /**
    * Get one domain pointed to by the given resource record name, searching all computer domains.
    *
    * @param rrName the DNS resource record name.
+   *
    * @return a domain name, the first one found.
    */
   private String getDomain(Name rrName) {
@@ -95,9 +82,25 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
   }
 
   /**
+   * Get all domains pointed to by the given resource record name, searching all computer domains.
+   *
+   * @param rrName the DNS resource record name.
+   *
+   * @return a collection of domain names.
+   */
+  private Collection<String> getDomains(Name rrName) {
+    List<String> results = new ArrayList<>();
+    for (Name domain : computerDomains) {
+      results.addAll(getDomains(rrName, domain));
+    }
+    return results;
+  }
+
+  /**
    * Get all domains pointed to by the given resource record name, looking in a single computer domain.
    *
    * @param rrName the DNS resource record name.
+   *
    * @return a collection of domain names.
    */
   private List<String> getDomains(Name rrName, Name domainName) {

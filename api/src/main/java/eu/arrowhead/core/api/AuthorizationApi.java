@@ -71,6 +71,7 @@ public class AuthorizationApi {
    * Checks whether the consumer System can use a Service from a list of provider Systems.
    *
    * @return IntraCloudAuthResponse
+   *
    * @throws DataNotFoundException, BadPayloadException
    */
   //TODO token generation if flag set true
@@ -307,6 +308,7 @@ public class AuthorizationApi {
    * Checks whether an external Cloud can use a local Service.
    *
    * @return boolean
+   *
    * @throws DataNotFoundException, BadPayloadException
    */
   @PUT

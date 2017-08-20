@@ -108,6 +108,17 @@ public final class Utility {
     return response;
   }
 
+  public static String getOrchestratorUri() {
+    restrictionMap.clear();
+    restrictionMap.put("systemName", "orchestrator");
+    CoreSystem orchestrator = dm.get(CoreSystem.class, restrictionMap);
+    if (orchestrator == null) {
+      log.error("Utility:getOrchestratorUri System not found in the database!");
+      throw new RuntimeException("Orchestrator Core System not found in the database!");
+    }
+    return getUri(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
+  }
+
   public static String getUri(String address, int port, String serviceUri, boolean isSecure) {
     if (address == null || serviceUri == null) {
       log.error("Address and serviceUri can not be null (Utility:getUri throws NPE)");
@@ -126,17 +137,6 @@ public final class Utility {
 
     log.info("Utility:getUri returning this: " + ub.toString());
     return ub.toString();
-  }
-
-  public static String getOrchestratorUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "orchestrator");
-    CoreSystem orchestrator = dm.get(CoreSystem.class, restrictionMap);
-    if (orchestrator == null) {
-      log.error("Utility:getOrchestratorUri System not found in the database!");
-      throw new RuntimeException("Orchestrator Core System not found in the database!");
-    }
-    return getUri(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
   }
 
   public static String getServiceRegistryUri() {

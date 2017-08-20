@@ -23,6 +23,16 @@ public class ServiceType {
   private final List<String> subtypes;
 
   /**
+   * Create a new ServiceType. For internal use only.
+   *
+   * @param type the service type.
+   * @param transport the transport DNS label.
+   */
+  ServiceType(String type, String transport) {
+    this(type, Transport.fromLabel(transport));
+  }
+
+  /**
    * Create a new ServiceType.
    *
    * @param type the service type (eg. "_http").
@@ -32,16 +42,6 @@ public class ServiceType {
     this.type = type;
     this.transport = transport;
     this.subtypes = Collections.emptyList();
-  }
-
-  /**
-   * Create a new ServiceType. For internal use only.
-   *
-   * @param type the service type.
-   * @param transport the transport DNS label.
-   */
-  ServiceType(String type, String transport) {
-    this(type, Transport.fromLabel(transport));
   }
 
   /**
@@ -61,7 +61,9 @@ public class ServiceType {
    * #toString()}.
    *
    * @param s the string to be parsed.
+   *
    * @return a ServiceType representing the type specified by the argument.
+   *
    * @throws IllegalArgumentException if the string cannot be parsed as a ServiceType.
    */
   public static ServiceType valueOf(String s) {
@@ -88,27 +90,29 @@ public class ServiceType {
   }
 
   /**
-   * Create a subtype variant of this ServiceType. Any existing subtypes in this ServiceType is not passed on to the new ServiceType. A subtype of a
-   * ServiceType only provides additional filtering when browsing, it is still the same service type. In particular the subtype variant still {@link
-   * #equals(Object)} the base ServiceType and has the same {@link #hashCode()}.
-   *
-   * @param subtype the subtype.
-   * @return a new ServiceType based on this ServiceType but with the given subtype.
-   */
-  public ServiceType withSubtype(String subtype) {
-    return new ServiceType(this, subtype);
-  }
-
-  /**
    * Create a variant of this ServiceType with multiple subtypes. Any existing subtypes in this ServiceType is not passed on to the new ServiceType. A
    * subtype of a ServiceType only provides additional filtering when browsing, it is still the same service type. In particular the subtype variant
    * still {@link #equals(Object)} the base ServiceType and has the same {@link #hashCode()}.
    *
    * @param subtypes the subtypes.
+   *
    * @return a new ServiceType based on this ServiceType but with the given subtypes.
    */
   public ServiceType withSubtypes(String... subtypes) {
     return new ServiceType(this, subtypes);
+  }
+
+  /**
+   * Create a subtype variant of this ServiceType. Any existing subtypes in this ServiceType is not passed on to the new ServiceType. A subtype of a
+   * ServiceType only provides additional filtering when browsing, it is still the same service type. In particular the subtype variant still {@link
+   * #equals(Object)} the base ServiceType and has the same {@link #hashCode()}.
+   *
+   * @param subtype the subtype.
+   *
+   * @return a new ServiceType based on this ServiceType but with the given subtype.
+   */
+  public ServiceType withSubtype(String subtype) {
+    return new ServiceType(this, subtype);
   }
 
   /**
@@ -153,21 +157,6 @@ public class ServiceType {
   }
 
   /**
-   * Returns a string representation of the ServiceType. Examples: "_http._tcp", "_ftp._tcp,_anon".
-   *
-   * @return a string of the format "{type}.{transport}[,{subtype}][,{subtype}][...]".
-   */
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(type).append('.').append(transport);
-    for (String subtype : subtypes) {
-      sb.append(',').append(subtype);
-    }
-    return sb.toString();
-  }
-
-  /**
    * Get the DNS-SD subdomain that represents this type (excluding any subtypes). For internal use only.
    *
    * @return A string of the form "{type}.{transport}".
@@ -190,6 +179,14 @@ public class ServiceType {
   }
 
   @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 29 * hash + (this.type != null ? this.type.hashCode() : 0);
+    hash = 29 * hash + (this.transport != null ? this.transport.hashCode() : 0);
+    return hash;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (obj == null) {
       return false;
@@ -204,12 +201,19 @@ public class ServiceType {
     return this.transport == other.transport;
   }
 
+  /**
+   * Returns a string representation of the ServiceType. Examples: "_http._tcp", "_ftp._tcp,_anon".
+   *
+   * @return a string of the format "{type}.{transport}[,{subtype}][,{subtype}][...]".
+   */
   @Override
-  public int hashCode() {
-    int hash = 7;
-    hash = 29 * hash + (this.type != null ? this.type.hashCode() : 0);
-    hash = 29 * hash + (this.transport != null ? this.transport.hashCode() : 0);
-    return hash;
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(type).append('.').append(transport);
+    for (String subtype : subtypes) {
+      sb.append(',').append(subtype);
+    }
+    return sb.toString();
   }
 
   /**
@@ -228,6 +232,7 @@ public class ServiceType {
      * Get the Transport corresponding to a DNS label.
      *
      * @param label the DNS label.
+     *
      * @return the corresponding Transport constant.
      */
     static Transport fromLabel(String label) {

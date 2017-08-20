@@ -217,6 +217,7 @@ public class OrchestratorApi {
    * Toggles the isActive boolean for the Orchestration Store entry specified by the id field.
    *
    * @return OrchestrationStore
+   *
    * @throws DataNotFoundException, BadPayloadException
    */
   @GET
@@ -245,6 +246,7 @@ public class OrchestratorApi {
    * method in CommonApi.class. (Or delete and then post the modified entry again.)
    *
    * @return OrchestrationStore
+   *
    * @throws BadPayloadException, DataNotFoundException
    */
   @PUT

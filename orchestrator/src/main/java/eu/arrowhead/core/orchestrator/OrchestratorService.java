@@ -125,6 +125,137 @@ final class OrchestratorService {
   }
 
   /**
+   * Compiles the OrchestrationResponse object. Potentially includes authorization token generation.
+   *
+   * @return OrchestrationResponse
+   */
+  private static OrchestrationResponse compileOrchestrationResponse(@NotNull List<ServiceRegistryEntry> srList, @NotNull ServiceRequestForm srf,
+                                                                    @Nullable List<String> instructions) {
+    List<String> tokens = new ArrayList<>();
+    List<String> signatures = new ArrayList<>();
+    // Arrange token generation for every provider, if it was requested in the service metadata
+    List<ServiceMetadata> metadata = srf.getRequestedService().getServiceMetadata();
+    if (metadata.contains(new ServiceMetadata("security", "token"))) {
+      // Getting all the provider Systems from the Service Registry entries
+      List<ArrowheadSystem> providerList = new ArrayList<>();
+      for (ServiceRegistryEntry entry : srList) {
+        providerList.add(entry.getProvider());
+      }
+
+      // Getting the Authorization token generation resource URI, compiling the request payload
+      String authUri = Utility.getAuthorizationUri();
+      authUri = UriBuilder.fromPath(authUri).path("token").toString();
+      TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
+                                                                       srf.getRequestedService(), 0);
+      //Sending request, parsing response
+      Response authResponse = Utility.sendRequest(authUri, "PUT", tokenRequest);
+      TokenGenerationResponse tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
+      tokens = tokenResponse.getToken();
+      signatures = tokenResponse.getSignature();
+    }
+
+    // Create an OrchestrationForm for every provider
+    List<OrchestrationForm> ofList = new ArrayList<>();
+    for (ServiceRegistryEntry entry : srList) {
+      OrchestrationForm of = new OrchestrationForm(entry.getProvidedService(), entry.getProvider(), entry.getServiceURI());
+      ofList.add(of);
+    }
+
+    // Adding the Orchestration Store instructions (only in the case of Store orchestrations)
+    if (instructions != null && instructions.size() == ofList.size()) {
+      for (int i = 0; i < instructions.size(); i++) {
+        ofList.get(i).setInstruction(instructions.get(i));
+      }
+    }
+    // Adding the tokens and signatures, if token generation happened
+    if (ofList.size() == tokens.size() && ofList.size() == signatures.size()) {
+      for (int i = 0; i < tokens.size(); i++) {
+        ofList.get(i).setAuthorizationToken(tokens.get(i));
+        ofList.get(i).setSignature(signatures.get(i));
+      }
+    }
+
+    log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");
+    return new OrchestrationResponse(ofList);
+  }
+
+  /**
+   * Represents the orchestration process where the requester System only asked for Inter-Cloud servicing.
+   *
+   * @return OrchestrationResponse
+   */
+  static OrchestrationResponse triggerInterCloud(ServiceRequestForm srf) {
+    Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
+
+    // Extracting the valid and unique ArrowheadClouds from the preferred providers
+    List<ArrowheadCloud> preferredClouds = new ArrayList<>();
+    for (PreferredProvider provider : srf.getPreferredProviders()) {
+      if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
+        preferredClouds.add(provider.getProviderCloud());
+      }
+    }
+
+    // Telling the Gatekeeper to do a Global Service Discovery
+    GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(srf.getRequestedService(), preferredClouds);
+
+    // Picking a target Cloud from the ones that responded to the GSD poll
+    ArrowheadCloud targetCloud = OrchestratorDriver.interCloudMatchmaking(result, preferredClouds, orchestrationFlags.get("onlyPreferred"));
+
+    // Telling the Gatekeeper to start the Inter-Cloud Negotiations process
+    ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(srf, targetCloud);
+
+    // If matchmaking is requested, we pick one provider from the ICN result
+    if (orchestrationFlags.get("matchmaking")) {
+      // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
+      List<ArrowheadSystem> preferredSystems = new ArrayList<>();
+      for (PreferredProvider provider : srf.getPreferredProviders()) {
+        if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
+            .getProviderSystem().isValid()) {
+          preferredSystems.add(provider.getProviderSystem());
+        }
+      }
+
+      log.info("triggerInterCloud returns with 1 OrchestrationForm due to icnMatchmaking");
+      return icnMatchmaking(icnResult, preferredSystems, false);
+    } else {
+      log.info("triggerInterCloud returns " + icnResult.getInstructions().getResponse().size() + " forms without icnMatchmaking");
+      return icnResult.getInstructions();
+    }
+  }
+
+  /**
+   * Matchmaking method for ICN results. As the last step of the inter-cloud orchestration process (if requested) we pick out 1 provider from the ICN
+   * result list. Providers preferred by the consumer have higher priority. Custom matchmaking algorithm can be implemented, as of now it just returns
+   * the first provider from the list.
+   *
+   * @return OrchestrationResponse
+   */
+  private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, List<ArrowheadSystem> preferredSystems, boolean storeOrchestration) {
+    // We first try to find a match between the preferred systems and the received providers from the ICN result.
+    if (preferredSystems != null && !preferredSystems.isEmpty()) {
+      for (ArrowheadSystem preferredProvider : preferredSystems) {
+        for (OrchestrationForm of : icnResult.getInstructions().getResponse()) {
+          if (preferredProvider.equals(of.getProvider())) {
+            log.info("icnMatchmaking returns with a preferred System");
+            return new OrchestrationResponse(Collections.singletonList(of));
+          }
+        }
+      }
+    }
+
+    // Store based orchestration is "hard-wired", meaning only the stored provider System is acceptable
+    if (storeOrchestration) {
+      log.error("icnMatchmaking DataNotFoundException");
+      throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.");
+    }
+    // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
+    else {
+      log.info("icnMatchmaking returns with a not preferred System");
+      return new OrchestrationResponse(Collections.singletonList(icnResult.getInstructions().getResponse().get(0)));
+    }
+  }
+
+  /**
    * Represents the orchestration process where the <i>Orchestration Store</i> database is used to see if there is a provider for the requester
    * <tt>ArrowheadSystem</tt>. The <i>Orchestration Store</i> contains preset orchestration information, which should not change in runtime.
    *
@@ -220,50 +351,6 @@ final class OrchestratorService {
   }
 
   /**
-   * Represents the orchestration process where the requester System only asked for Inter-Cloud servicing.
-   *
-   * @return OrchestrationResponse
-   */
-  static OrchestrationResponse triggerInterCloud(ServiceRequestForm srf) {
-    Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
-
-    // Extracting the valid and unique ArrowheadClouds from the preferred providers
-    List<ArrowheadCloud> preferredClouds = new ArrayList<>();
-    for (PreferredProvider provider : srf.getPreferredProviders()) {
-      if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
-        preferredClouds.add(provider.getProviderCloud());
-      }
-    }
-
-    // Telling the Gatekeeper to do a Global Service Discovery
-    GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(srf.getRequestedService(), preferredClouds);
-
-    // Picking a target Cloud from the ones that responded to the GSD poll
-    ArrowheadCloud targetCloud = OrchestratorDriver.interCloudMatchmaking(result, preferredClouds, orchestrationFlags.get("onlyPreferred"));
-
-    // Telling the Gatekeeper to start the Inter-Cloud Negotiations process
-    ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(srf, targetCloud);
-
-    // If matchmaking is requested, we pick one provider from the ICN result
-    if (orchestrationFlags.get("matchmaking")) {
-      // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
-      List<ArrowheadSystem> preferredSystems = new ArrayList<>();
-      for (PreferredProvider provider : srf.getPreferredProviders()) {
-        if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
-            .getProviderSystem().isValid()) {
-          preferredSystems.add(provider.getProviderSystem());
-        }
-      }
-
-      log.info("triggerInterCloud returns with 1 OrchestrationForm due to icnMatchmaking");
-      return icnMatchmaking(icnResult, preferredSystems, false);
-    } else {
-      log.info("triggerInterCloud returns " + icnResult.getInstructions().getResponse().size() + " forms without icnMatchmaking");
-      return icnResult.getInstructions();
-    }
-  }
-
-  /**
    * This method represents the orchestration process where the requester System is NOT in the local Cloud. This means that the Gatekeeper made sure
    * that this request from the remote Orchestrator can be satisfied in this Cloud. (Gatekeeper polled the Service Registry and Authorization
    * Systems.)
@@ -292,93 +379,6 @@ final class OrchestratorService {
     // Compiling the orchestration response
     log.info("externalServiceRequest finished with " + srList.size() + " service providers");
     return compileOrchestrationResponse(srList, srf, null);
-  }
-
-  /**
-   * Matchmaking method for ICN results. As the last step of the inter-cloud orchestration process (if requested) we pick out 1 provider from the ICN
-   * result list. Providers preferred by the consumer have higher priority. Custom matchmaking algorithm can be implemented, as of now it just returns
-   * the first provider from the list.
-   *
-   * @return OrchestrationResponse
-   */
-  private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, List<ArrowheadSystem> preferredSystems, boolean storeOrchestration) {
-    // We first try to find a match between the preferred systems and the received providers from the ICN result.
-    if (preferredSystems != null && !preferredSystems.isEmpty()) {
-      for (ArrowheadSystem preferredProvider : preferredSystems) {
-        for (OrchestrationForm of : icnResult.getInstructions().getResponse()) {
-          if (preferredProvider.equals(of.getProvider())) {
-            log.info("icnMatchmaking returns with a preferred System");
-            return new OrchestrationResponse(Collections.singletonList(of));
-          }
-        }
-      }
-    }
-
-    // Store based orchestration is "hard-wired", meaning only the stored provider System is acceptable
-    if (storeOrchestration) {
-      log.error("icnMatchmaking DataNotFoundException");
-      throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.");
-    }
-    // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
-    else {
-      log.info("icnMatchmaking returns with a not preferred System");
-      return new OrchestrationResponse(Collections.singletonList(icnResult.getInstructions().getResponse().get(0)));
-    }
-  }
-
-  /**
-   * Compiles the OrchestrationResponse object. Potentially includes authorization token generation.
-   *
-   * @return OrchestrationResponse
-   */
-  private static OrchestrationResponse compileOrchestrationResponse(@NotNull List<ServiceRegistryEntry> srList, @NotNull ServiceRequestForm srf,
-                                                                    @Nullable List<String> instructions) {
-    List<String> tokens = new ArrayList<>();
-    List<String> signatures = new ArrayList<>();
-    // Arrange token generation for every provider, if it was requested in the service metadata
-    List<ServiceMetadata> metadata = srf.getRequestedService().getServiceMetadata();
-    if (metadata.contains(new ServiceMetadata("security", "token"))) {
-      // Getting all the provider Systems from the Service Registry entries
-      List<ArrowheadSystem> providerList = new ArrayList<>();
-      for (ServiceRegistryEntry entry : srList) {
-        providerList.add(entry.getProvider());
-      }
-
-      // Getting the Authorization token generation resource URI, compiling the request payload
-      String authUri = Utility.getAuthorizationUri();
-      authUri = UriBuilder.fromPath(authUri).path("token").toString();
-      TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
-                                                                       srf.getRequestedService(), 0) ;
-      //Sending request, parsing response
-      Response authResponse = Utility.sendRequest(authUri, "PUT", tokenRequest);
-      TokenGenerationResponse tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
-      tokens = tokenResponse.getToken();
-      signatures = tokenResponse.getSignature();
-    }
-
-    // Create an OrchestrationForm for every provider
-    List<OrchestrationForm> ofList = new ArrayList<>();
-    for (ServiceRegistryEntry entry : srList) {
-      OrchestrationForm of = new OrchestrationForm(entry.getProvidedService(), entry.getProvider(), entry.getServiceURI());
-      ofList.add(of);
-    }
-
-    // Adding the Orchestration Store instructions (only in the case of Store orchestrations)
-    if(instructions != null && instructions.size() == ofList.size()){
-      for(int i = 0; i < instructions.size(); i++){
-        ofList.get(i).setInstruction(instructions.get(i));
-      }
-    }
-    // Adding the tokens and signatures, if token generation happened
-    if(ofList.size() == tokens.size() && ofList.size() == signatures.size()) {
-      for(int i = 0; i < tokens.size(); i++){
-        ofList.get(i).setAuthorizationToken(tokens.get(i));
-        ofList.get(i).setSignature(signatures.get(i));
-      }
-    }
-
-    log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");
-    return new OrchestrationResponse(ofList);
   }
 
 }

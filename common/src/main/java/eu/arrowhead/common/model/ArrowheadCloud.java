@@ -117,6 +117,16 @@ public class ArrowheadCloud {
   }
 
   @Override
+  public int hashCode() {
+    int result = operator != null ? operator.hashCode() : 0;
+    result = 31 * result + (cloudName != null ? cloudName.hashCode() : 0);
+    result = 31 * result + (address != null ? address.hashCode() : 0);
+    result = 31 * result + port;
+    result = 31 * result + (gatekeeperServiceURI != null ? gatekeeperServiceURI.hashCode() : 0);
+    return result;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -140,16 +150,6 @@ public class ArrowheadCloud {
       return false;
     }
     return gatekeeperServiceURI != null ? gatekeeperServiceURI.equals(that.gatekeeperServiceURI) : that.gatekeeperServiceURI == null;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = operator != null ? operator.hashCode() : 0;
-    result = 31 * result + (cloudName != null ? cloudName.hashCode() : 0);
-    result = 31 * result + (address != null ? address.hashCode() : 0);
-    result = 31 * result + port;
-    result = 31 * result + (gatekeeperServiceURI != null ? gatekeeperServiceURI.hashCode() : 0);
-    return result;
   }
 
   @Override

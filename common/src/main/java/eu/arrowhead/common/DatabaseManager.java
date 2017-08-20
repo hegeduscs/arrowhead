@@ -68,14 +68,6 @@ public class DatabaseManager {
     return prop;
   }
 
-  private SessionFactory getSessionFactory() {
-    if (sessionFactory == null) {
-      sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
-          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
-    }
-    return sessionFactory;
-  }
-
   public <T> T get(Class<T> queryClass, int id) {
     T object = null;
     Transaction transaction = null;
@@ -92,6 +84,14 @@ public class DatabaseManager {
     }
 
     return object;
+  }
+
+  private SessionFactory getSessionFactory() {
+    if (sessionFactory == null) {
+      sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
+          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+    }
+    return sessionFactory;
   }
 
   @Nullable
@@ -213,8 +213,8 @@ public class DatabaseManager {
       }
       log.info("DatabaseManager:merge throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. Please check the unique fields of the "
-              + object.getClass());
+          "DuplicateEntryException: there is already an entry in the database with these parameters. Please check the unique fields of the " + object
+              .getClass());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
