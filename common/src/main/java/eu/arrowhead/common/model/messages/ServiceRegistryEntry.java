@@ -3,7 +3,6 @@ package eu.arrowhead.common.model.messages;
 import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.ServiceMetadata;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceRegistryEntry {
@@ -24,13 +23,18 @@ public class ServiceRegistryEntry {
   public ServiceRegistryEntry() {
   }
 
-  public ServiceRegistryEntry(ArrowheadSystem provider, String serviceURI,
-      List<ServiceMetadata> serviceMetadata, int version, List<String> interfaces) {
-    this.interfaces = interfaces;
+  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, String serviceURI){
+    this.providedService = providedService;
     this.provider = provider;
     this.serviceURI = serviceURI;
-    this.serviceMetadata = serviceMetadata;
-    this.version = version;
+  }
+
+  public ArrowheadService getProvidedService() {
+    return providedService;
+  }
+
+  public void setProvidedService(ArrowheadService providedService) {
+    this.providedService = providedService;
   }
 
   public ArrowheadSystem getProvider() {
@@ -71,14 +75,6 @@ public class ServiceRegistryEntry {
 
   public void setInterfaces(List<String> interfaces) {
     this.interfaces = interfaces;
-  }
-
-  public ArrowheadService getProvidedService() {
-    return providedService;
-  }
-
-  public void setProvidedService(ArrowheadService providedService) {
-    this.providedService = providedService;
   }
 
   public boolean isUDP() {

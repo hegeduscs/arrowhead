@@ -249,7 +249,7 @@ public class ConfigurationApi {
       coreSystem.setAddress(cs.getAddress());
       coreSystem.setPort(cs.getPort());
       coreSystem.setAuthenticationInfo(cs.getAuthenticationInfo());
-      coreSystem.setServiceUri(cs.getServiceUri());
+      coreSystem.setServiceURI(cs.getServiceURI());
 
       coreSystem = dm.merge(coreSystem);
       return Response.status(Status.ACCEPTED).entity(coreSystem).build();

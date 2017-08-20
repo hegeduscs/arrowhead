@@ -46,8 +46,7 @@ public class CommonApi {
   @Path("/services")
   public List<ArrowheadService> getAllServices() {
 
-    List<ArrowheadService> serviceList = new ArrayList<>();
-    serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
+    List<ArrowheadService> serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
     if (serviceList.isEmpty()) {
       log.info("CommonApi:getAllServices throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadServices not found in the database.");
@@ -65,9 +64,8 @@ public class CommonApi {
   @Path("/services/servicegroup/{serviceGroup}")
   public List<ArrowheadService> getServiceGroup(@PathParam("serviceGroup") String serviceGroup) {
 
-    List<ArrowheadService> serviceList = new ArrayList<>();
     restrictionMap.put("serviceGroup", serviceGroup);
-    serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
+    List<ArrowheadService> serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
     if (serviceList.isEmpty()) {
       log.info("CommonApi:getServiceGroup throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadServices not found in the database from this service group.");
@@ -85,10 +83,9 @@ public class CommonApi {
   @Path("/services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
   public ArrowheadService getService(@PathParam("serviceGroup") String serviceGroup, @PathParam("serviceDefinition") String serviceDefinition) {
 
-    ArrowheadService service = new ArrowheadService();
     restrictionMap.put("serviceGroup", serviceGroup);
     restrictionMap.put("serviceDefinition", serviceDefinition);
-    service = dm.get(ArrowheadService.class, restrictionMap);
+    ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
       log.info("CommonApi:getService throws DataNotFoundException");
       throw new DataNotFoundException("Requested ArrowheadService not found in the database.");
@@ -177,8 +174,7 @@ public class CommonApi {
   @Path("/systems")
   public List<ArrowheadSystem> getAllSystems() {
 
-    List<ArrowheadSystem> systemList = new ArrayList<>();
-    systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
+    List<ArrowheadSystem> systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
     if (systemList.isEmpty()) {
       log.info("CommonApi:getAllSystems throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadSystems not found in the database.");
@@ -196,9 +192,8 @@ public class CommonApi {
   @Path("/systems/systemgroup/{systemGroup}")
   public List<ArrowheadSystem> getSystemGroup(@PathParam("systemGroup") String systemGroup) {
 
-    List<ArrowheadSystem> systemList = new ArrayList<>();
     restrictionMap.put("systemGroup", systemGroup);
-    systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
+    List<ArrowheadSystem> systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
     if (systemList.isEmpty()) {
       log.info("CommonApi:getSystemGroup throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadSystems not found in the " + "database from this system group.");
@@ -216,10 +211,9 @@ public class CommonApi {
   @Path("/systems/systemgroup/{systemGroup}/systemname/{systemName}")
   public ArrowheadSystem getSystem(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
 
-    ArrowheadSystem system = new ArrowheadSystem();
     restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
-    system = dm.get(ArrowheadSystem.class, restrictionMap);
+    ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
     if (system == null) {
       log.info("CommonApi:getSystem throws DataNotFoundException");
       throw new DataNotFoundException("Requested ArrowheadSystem not found in the database.");
@@ -311,8 +305,7 @@ public class CommonApi {
   @Path("/clouds")
   public List<ArrowheadCloud> getAllClouds() {
 
-    List<ArrowheadCloud> cloudList = new ArrayList<>();
-    cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
+    List<ArrowheadCloud> cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("CommonApi:getAllClouds throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadClouds not found in the database.");
@@ -330,9 +323,8 @@ public class CommonApi {
   @Path("/clouds/operator/{operator}")
   public List<ArrowheadCloud> getCloudList(@PathParam("operator") String operator) {
 
-    List<ArrowheadCloud> cloudList = new ArrayList<>();
     restrictionMap.put("operator", operator);
-    cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
+    List<ArrowheadCloud> cloudList = dm.getAll(ArrowheadCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("CommonApi:getCloudList throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadClouds not found in the database " + "from this operator.");
@@ -350,10 +342,9 @@ public class CommonApi {
   @Path("/clouds/operator/{operator}/cloudname/{cloudName}")
   public ArrowheadCloud getCloud(@PathParam("operator") String operator, @PathParam("cloudname") String cloudname) {
 
-    ArrowheadCloud cloud = new ArrowheadCloud();
     restrictionMap.put("operator", operator);
     restrictionMap.put("cloudname", cloudname);
-    cloud = dm.get(ArrowheadCloud.class, restrictionMap);
+    ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
       log.info("CommonApi:getCloud throws DataNotFoundException");
       throw new DataNotFoundException("Requested ArrowheadCloud not found in the database.");

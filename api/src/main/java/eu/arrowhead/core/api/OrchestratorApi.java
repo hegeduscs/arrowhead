@@ -269,7 +269,7 @@ public class OrchestratorApi {
       storeEntry.setIsActive(payload.getIsActive());
       storeEntry.setName(payload.getName());
       storeEntry.setLastUpdated(new Date());
-      storeEntry.setInstructions(payload.getInstructions());
+      storeEntry.setInstruction(payload.getInstruction());
       storeEntry = dm.merge(storeEntry);
 
       log.info("updateEntry successfully returns.");

@@ -11,7 +11,7 @@ import eu.arrowhead.common.model.messages.ICNResult;
 import eu.arrowhead.common.model.messages.OrchestrationForm;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.PreferredProvider;
-import eu.arrowhead.common.model.messages.ProvidedService;
+import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import eu.arrowhead.common.model.messages.TokenGenerationRequest;
 import eu.arrowhead.common.model.messages.TokenGenerationResponse;
@@ -52,27 +52,27 @@ final class OrchestratorService {
 
     try {
       // Querying the Service Registry
-      List<ProvidedService> psList = OrchestratorDriver
+      List<ServiceRegistryEntry> srList = OrchestratorDriver
           .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
 
       // Cross-checking the SR response with the Authorization
       Set<ArrowheadSystem> providerSystems = new HashSet<>();
-      for (ProvidedService service : psList) {
-        providerSystems.add(service.getProvider());
+      for (ServiceRegistryEntry entry : srList) {
+        providerSystems.add(entry.getProvider());
       }
       providerSystems = OrchestratorDriver.queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), providerSystems);
 
       /*
        * The Authorization cross-check only returns the provider systems where the requester system is authorized to consume the service. We filter
-       * out the non-authorized systems from the SR response (ProvidedService list).
+       * out the non-authorized systems from the SR response (ServiceRegistryEntry list).
        */
-      List<ProvidedService> temp = new ArrayList<>();
-      for (ProvidedService service : psList) {
-        if (!providerSystems.contains(service.getProvider())) {
-          temp.add(service);
+      List<ServiceRegistryEntry> temp = new ArrayList<>();
+      for (ServiceRegistryEntry entry : srList) {
+        if (!providerSystems.contains(entry.getProvider())) {
+          temp.add(entry);
         }
       }
-      psList.removeAll(temp);
+      srList.removeAll(temp);
 
       // If needed, remove the non-preferred providers from the remaining list
       providerSystems.clear(); //providerSystems set is reused
@@ -82,29 +82,29 @@ final class OrchestratorService {
         }
       }
       if (orchestrationFlags.get("onlyPreferred")) {
-        psList = OrchestratorDriver.removeNonPreferred(psList, providerSystems);
+        srList = OrchestratorDriver.removeNonPreferred(srList, providerSystems);
       }
 
       //placeholder step
       if (orchestrationFlags.get("enableQoS")) {
-        psList = OrchestratorDriver.doQoSVerification(psList);
+        srList = OrchestratorDriver.doQoSVerification(srList);
       }
 
-      // If matchmaking is requested, we pick out 1 ProvidedService entity from the list. Preferred Systems (2nd arg) have higher priority
+      // If matchmaking is requested, we pick out 1 ServiceRegistryEntry entity from the list. Preferred Systems (2nd arg) have higher priority
       if (orchestrationFlags.get("matchmaking")) {
-        ProvidedService ps = OrchestratorDriver.intraCloudMatchmaking(psList, providerSystems);
-        psList.clear();
-        psList.add(ps);
+        ServiceRegistryEntry entry = OrchestratorDriver.intraCloudMatchmaking(srList, providerSystems);
+        srList.clear();
+        srList.add(entry);
       }
 
       //placeholder step
       if (orchestrationFlags.get("enableQoS")) {
-        psList = OrchestratorDriver.doQosReservation(psList);
+        srList = OrchestratorDriver.doQosReservation(srList);
       }
 
       // All the filtering is done, need to compile the response
-      log.info("dynamicOrchestration finished with " + psList.size() + " service providers");
-      return compileOrchestrationResponse(psList, srf, null);
+      log.info("dynamicOrchestration finished with " + srList.size() + " service providers");
+      return compileOrchestrationResponse(srList, srf, null);
     }
     /*
      * If the Intra-Cloud orchestration fails somewhere (SR, Auth, filtering, matchmaking) we catch the exception, because Inter-Cloud
@@ -130,8 +130,6 @@ final class OrchestratorService {
    *
    * @return OrchestrationResponse
    */
-  //TODO ha nem volt SRF-ben service, akkor getAllDefault mode-ban vagyunk, és minden SR-auth queryt túlélőt visszakéne adni
-  //TODO meggyőződni compile hivasakor, hogy instructions.size = pslist.size, üres instructionök "" helyettesitésével
   static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf) {
     // Querying the Orchestration Store for matching entries
     List<OrchestrationStore> entryList = OrchestratorDriver.queryOrchestrationStore(srf.getRequesterSystem(), srf.getRequestedService());
@@ -146,13 +144,12 @@ final class OrchestratorService {
     Set<ArrowheadSystem> providerSystemsFromAuth = new HashSet<>();
     try {
       // Querying the Service Registry for the intra-cloud Store entries
-      List<ProvidedService> psList = OrchestratorDriver
+      List<ServiceRegistryEntry> srList = OrchestratorDriver
           .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
 
-      // Compile the list of provider systems which are in the Service Registry
-
-      for (ProvidedService ps : psList) {
-        providerSystemsFromSR.add(ps.getProvider());
+      // Compile the set of provider systems which are in the Service Registry
+      for (ServiceRegistryEntry entry : srList) {
+        providerSystemsFromSR.add(entry.getProvider());
       }
 
 			/*
@@ -165,8 +162,6 @@ final class OrchestratorService {
           localProviderSystems.add(entry.getProviderSystem());
         }
       }
-
-      // Querying the Authorization System
       providerSystemsFromAuth = OrchestratorDriver.queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), localProviderSystems);
 
       //TODO do qosVerification here
@@ -188,8 +183,11 @@ final class OrchestratorService {
 				 */
         if (providerSystemsFromSR.contains(entry.getProviderSystem()) && providerSystemsFromAuth.contains(entry.getProviderSystem())) {
           //TODO do qosReserve here
+
+          // Provide the necessary arguments for the compileOrchResponse method
+          ServiceRegistryEntry service = new ServiceRegistryEntry(entry.getService(), entry.getProviderSystem(), entry.getServiceURI());
           log.info("orchestrationFromStore returns with a local Store entry");
-          return compileOrchestrationResponse(entry);
+          return compileOrchestrationResponse(Collections.singletonList(service), srf, Collections.singletonList(entry.getInstruction()));
         }
       }
       // Inter-Cloud store entries must be handled inside the for loop, since every provider Cloud means a different ICN process.
@@ -276,7 +274,7 @@ final class OrchestratorService {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     // Querying the Service Registry to get the list of Provider Systems
-    List<ProvidedService> psList = OrchestratorDriver
+    List<ServiceRegistryEntry> srList = OrchestratorDriver
         .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
 
     // If needed, removing the non-preferred providers from the SR response. (If needed, matchmaking is done after this at the request sender Cloud.)
@@ -288,12 +286,12 @@ final class OrchestratorService {
           localPreferredSystems.add(provider.getProviderSystem());
         }
       }
-      psList = OrchestratorDriver.removeNonPreferred(psList, localPreferredSystems);
+      srList = OrchestratorDriver.removeNonPreferred(srList, localPreferredSystems);
     }
 
     // Compiling the orchestration response
-    log.info("externalServiceRequest finished with " + psList.size() + " service providers");
-    return compileOrchestrationResponse(psList, srf, null);
+    log.info("externalServiceRequest finished with " + srList.size() + " service providers");
+    return compileOrchestrationResponse(srList, srf, null);
   }
 
   /**
@@ -333,7 +331,7 @@ final class OrchestratorService {
    *
    * @return OrchestrationResponse
    */
-  private static OrchestrationResponse compileOrchestrationResponse(@NotNull List<ProvidedService> psList, @NotNull ServiceRequestForm srf,
+  private static OrchestrationResponse compileOrchestrationResponse(@NotNull List<ServiceRegistryEntry> srList, @NotNull ServiceRequestForm srf,
                                                                     @Nullable List<String> instructions) {
     List<String> tokens = new ArrayList<>();
     List<String> signatures = new ArrayList<>();
@@ -342,8 +340,8 @@ final class OrchestratorService {
     if (metadata.contains(new ServiceMetadata("security", "token"))) {
       // Getting all the provider Systems from the Service Registry entries
       List<ArrowheadSystem> providerList = new ArrayList<>();
-      for (ProvidedService ps : psList) {
-        providerList.add(ps.getProvider());
+      for (ServiceRegistryEntry entry : srList) {
+        providerList.add(entry.getProvider());
       }
 
       // Getting the Authorization token generation resource URI, compiling the request payload
@@ -360,8 +358,8 @@ final class OrchestratorService {
 
     // Create an OrchestrationForm for every provider
     List<OrchestrationForm> ofList = new ArrayList<>();
-    for (ProvidedService ps : psList) {
-      OrchestrationForm of = new OrchestrationForm(ps.getOffered(), ps.getProvider(), ps.getServiceURI());
+    for (ServiceRegistryEntry entry : srList) {
+      OrchestrationForm of = new OrchestrationForm(entry.getProvidedService(), entry.getProvider(), entry.getServiceURI());
       ofList.add(of);
     }
 

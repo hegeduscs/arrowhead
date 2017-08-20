@@ -2,7 +2,6 @@ package eu.arrowhead.common.model.messages;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.ws.Service;
 
 public class ServiceQueryResult {
 
@@ -24,7 +23,7 @@ public class ServiceQueryResult {
   }
 
   public boolean isValid() {
-    return serviceQueryData == null || serviceQueryData.isEmpty();
+    return serviceQueryData != null && !serviceQueryData.isEmpty();
   }
 
 }

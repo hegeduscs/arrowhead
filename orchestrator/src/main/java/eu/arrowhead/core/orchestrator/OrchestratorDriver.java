@@ -16,6 +16,7 @@ import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
 import eu.arrowhead.common.model.messages.PreferredProvider;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
+import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,14 +51,14 @@ final class OrchestratorDriver {
    * @param service The <tt>ArrowheadService</tt> object for which the list of potential <tt>ArrowheadSystem</tt> providers are needed
    * @param metadataSearch If true, the stored <tt>ArrowheadService</tt>s have to have the same metadata to be returned in the response.
    * @param pingProviders If true, the Service Registry is asked to ping the service provider <tt>ArrowheadSystem</tt> (where the service is
-   *     offered) to check if a TCP connection can be established or not. Normally providers have to remove their offered services from the Service
+   *     offered) to check if a connection can be established or not. Normally providers have to remove their offered services from the Service
    *     Registry before going offline, but this feature can be used to ensure offline providers are filtered out.
    *
    * @return list of potential service providers with their offered services (interfaces, metadata, service URI)
    *
    * @throws DataNotFoundException if the Service Registry response list is empty
    */
-  static List<ProvidedService> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
+  static List<ServiceRegistryEntry> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
     // Compiling the URI and the request payload
     String srUri = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path("query").toString();
     ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch);
@@ -71,10 +72,10 @@ final class OrchestratorDriver {
     }
 
     // If there are non-valid entries in the Service Registry response, we filter those out
-    List<ProvidedService> temp = new ArrayList<>();
-    for (ProvidedService ps : serviceQueryResult.getServiceQueryData()) {
-      if (!ps.isValid()) {
-        temp.add(ps);
+    List<ServiceRegistryEntry> temp = new ArrayList<>();
+    for (ServiceRegistryEntry entry : serviceQueryResult.getServiceQueryData()) {
+      if (!entry.isValid()) {
+        temp.add(entry);
       }
     }
     serviceQueryResult.getServiceQueryData().removeAll(temp);
@@ -122,25 +123,25 @@ final class OrchestratorDriver {
   }
 
   /**
-   * Filters out all the entries of the given ProvidedService list, which does not contain a preferred local <tt>ArrowheadSystem</tt>. This method is
-   * called when the <i>onlyPreferred</i> orchestration flag is set to true.
+   * Filters out all the entries of the given <tt>ServiceRegistryEntry</tt> list, which does not contain a preferred local <tt>ArrowheadSystem</tt>.
+   * This method is called when the <i>onlyPreferred</i> orchestration flag is set to true.
    *
-   * @param psList The list of <tt>ProvidedService</tt>s still being considered (after SR query and possibly Auth query)
-   * @param preferredLocalProviders A set of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a
-   *     subset of the <i>preferredProviders</i> list from the {@link eu.arrowhead.common.model.messages.ServiceRequestForm}, which can also contain
-   *     not local <tt>ArrowheadSystem</tt>s.
+   * @param srList The list of <tt>ServiceRegistryEntry</tt>s still being considered (after SR query and possibly Auth query)
+   * @param preferredLocalProviders A set of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a subset
+   *     of the <i>preferredProviders</i> list from the {@link eu.arrowhead.common.model.messages.ServiceRequestForm}, which can also contain not
+   *     local <tt>ArrowheadSystem</tt>s.
    *
-   * @return a list of <tt>ProvidedService</tt>s which have preferred provider <tt>ArrowheadSystem</tt>s
+   * @return a list of <tt>ServiceRegistryEntry</tt>s which have preferred provider <tt>ArrowheadSystem</tt>s
    *
-   * @throws DataNotFoundException if none of the <tt>ProvidedService</tt>s from the given list contain a preferred <tt>ArrowheadSystem</tt>
+   * @throws DataNotFoundException if none of the <tt>ServiceRegistryEntry</tt>s from the given list contain a preferred <tt>ArrowheadSystem</tt>
    */
-  static List<ProvidedService> removeNonPreferred(List<ProvidedService> psList, Set<ArrowheadSystem> preferredLocalProviders) {
+  static List<ServiceRegistryEntry> removeNonPreferred(List<ServiceRegistryEntry> srList, Set<ArrowheadSystem> preferredLocalProviders) {
     // Using a simple nested for-loop for the filtering
-    List<ProvidedService> preferredList = new ArrayList<>();
+    List<ServiceRegistryEntry> preferredList = new ArrayList<>();
     for (ArrowheadSystem system : preferredLocalProviders) {
-      for (ProvidedService ps : psList) {
-        if (system.equals(ps.getProvider())) {
-          preferredList.add(ps);
+      for (ServiceRegistryEntry entry : srList) {
+        if (system.equals(entry.getProvider())) {
+          preferredList.add(entry);
         }
       }
     }
@@ -150,13 +151,13 @@ final class OrchestratorDriver {
       throw new DataNotFoundException("No preferred local System was found in the the list of potential provider Systems.");
     }
 
-    log.info("removeNonPreferred returns with " + preferredList.size() + " ProvidedServices.");
+    log.info("removeNonPreferred returns with " + preferredList.size() + " ServiceRegistryEntries.");
     return preferredList;
   }
 
-  static List<ProvidedService> doQoSVerification(List<ProvidedService> psList) {
+  static List<ServiceRegistryEntry> doQoSVerification(List<ServiceRegistryEntry> srList) {
     //placeholder for actual implementation
-    return psList;
+    return srList;
   }
 
   /**
@@ -168,35 +169,35 @@ final class OrchestratorDriver {
    * since this method is called after {@link #removeNonPreferred(List, Set)}, where a {@link eu.arrowhead.common.exception.DataNotFoundException} is
    * thrown if no preferred provider was found.
    *
-   * @param psList The list of <tt>ProvidedService</tt>s still being considered
+   * @param srList The list of <tt>ServiceRegistryEntry</tt>s still being considered
    * @param preferredLocalProviders The set of <tt>ArrowheadSystem</tt>s in this Local Cloud preferred by the requester system
    *
-   * @return the chosen ProvidedService object, containing the necessary <tt>ArrowheadSystem</tt> and <tt>String</tt> serviceUri information to
+   * @return the chosen ServiceRegistryEntry object, containing the necessary <tt>ArrowheadSystem</tt> and <tt>String</tt> serviceUri information to
    *     contact the provider
    */
-  static ProvidedService intraCloudMatchmaking(List<ProvidedService> psList, Set<ArrowheadSystem> preferredLocalProviders) {
-    // If there are no preferred providers, just return the first ProvidedService
+  static ServiceRegistryEntry intraCloudMatchmaking(List<ServiceRegistryEntry> srList, Set<ArrowheadSystem> preferredLocalProviders) {
+    // If there are no preferred providers, just return the first ServiceRegistryEntry
     if (preferredLocalProviders.isEmpty()) {
-      log.info("intraCloudMatchmaking: no preferred local providers given, returning first ProvidedService");
-      return psList.get(0);
+      log.info("intraCloudMatchmaking: no preferred local providers given, returning first ServiceRegistryEntry");
+      return srList.get(0);
     } else { // Otherwise try to find a preferred provider first
       for (ArrowheadSystem system : preferredLocalProviders) {
-        for (ProvidedService ps : psList) {
-          if (system.equals(ps.getProvider())) {
-            log.info("intraCloudMatchmaking: returning the first ProvidedService found with preferred provider");
-            return ps;
+        for (ServiceRegistryEntry entry : srList) {
+          if (system.equals(entry.getProvider())) {
+            log.info("intraCloudMatchmaking: returning the first ServiceRegistryEntry found with preferred provider");
+            return entry;
           }
         }
       }
-      log.info("intraCloudMatchmaking: no match was found between preferred providers, returning the first ProvidedService");
-      // And only return the first ProvidedService, when no preferred provider was found
-      return psList.get(0);
+      log.info("intraCloudMatchmaking: no match was found between preferred providers, returning the first ServiceRegistryEntry");
+      // And only return the first ServiceRegistryEntry, when no preferred provider was found
+      return srList.get(0);
     }
   }
 
-  static List<ProvidedService> doQosReservation(List<ProvidedService> psList) {
+  static List<ServiceRegistryEntry> doQosReservation(List<ServiceRegistryEntry> srList) {
     //placeholder for actual implementation
-    return psList;
+    return srList;
   }
 
   /**
@@ -315,7 +316,8 @@ final class OrchestratorDriver {
    * Gatekeeper Core System. The <tt>ICNRequestForm</tt> is a complex object containing all the necessary information to create a
    * <tt>ServiceRequestForm</tt> at the remote cloud.
    *
-   * @param srf The <tt>ServiceRequestForm</tt> sent in by the requester <tt>ArrowheadSystem</tt>. 4 different fields of it is used in this method.
+   * @param srf The <tt>ServiceRequestForm</tt> sent in by the requester <tt>ArrowheadSystem</tt>. 4 different fields of it is used in this
+   *     method.
    * @param targetCloud The <tt>ArrowheadCloud</tt> entity this local cloud chose to do ICN with.
    *
    * @return a boxed {@link eu.arrowhead.common.model.messages.OrchestrationResponse} object from the remote cloud
@@ -340,8 +342,8 @@ final class OrchestratorDriver {
     negotiationFlags.put("externalServiceRequest", true);
 
     // Creating the ICNRequestForm object, which is the payload of the request sent to the Gatekeeper
-    ICNRequestForm requestForm =  new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems,
-                                                 negotiationFlags, null);
+    ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems,
+                                                    negotiationFlags, null);
 
     // Compiling the URI, sending the request, doing sanity check on the returned result
     String uri = Utility.getGatekeeperUri();

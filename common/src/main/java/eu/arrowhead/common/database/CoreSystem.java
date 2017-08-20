@@ -41,7 +41,7 @@ public class CoreSystem {
 
   @Column(name = "service_uri")
   @NotNull
-  private String serviceUri;
+  private String serviceURI;
 
   @Column(name = "is_secure")
   private boolean isSecure;
@@ -56,15 +56,15 @@ public class CoreSystem {
    * @param systemName Name of the Core System
    * @param address IP address or hostname for the Core System (e.g. "127.0.0.1" or "arrowhead.tmit.bme.hu")
    * @param port The port number where the Core System offers its services (optional)
-   * @param serviceUri The path where the REST resource(s) is/are available
+   * @param serviceURI The path where the REST resource(s) is/are available
    * @param isSecure Indicates weather the server uses HTTP or HTTPS protocol
    * @param authenticationInfo In case <tt>isSecure</tt> is true, this field holds the Base64 coded public key of the Core System certificate
    */
-  public CoreSystem(String systemName, String address, int port, String serviceUri, boolean isSecure, String authenticationInfo) {
+  public CoreSystem(String systemName, String address, int port, String serviceURI, boolean isSecure, String authenticationInfo) {
     this.systemName = systemName;
     this.address = address;
     this.port = port;
-    this.serviceUri = serviceUri;
+    this.serviceURI = serviceURI;
     this.isSecure = isSecure;
     this.authenticationInfo = authenticationInfo;
   }
@@ -98,12 +98,12 @@ public class CoreSystem {
     this.port = port;
   }
 
-  public String getServiceUri() {
-    return serviceUri;
+  public String getServiceURI() {
+    return serviceURI;
   }
 
-  public void setServiceUri(String serviceUri) {
-    this.serviceUri = serviceUri;
+  public void setServiceURI(String serviceURI) {
+    this.serviceURI = serviceURI;
   }
 
   public boolean getIsSecure() {
@@ -125,10 +125,10 @@ public class CoreSystem {
   /**
    * Simple inspector method to check weather a CoreSystem instance is valid to be stored in the database.
    *
-   * @return False if <tt>systemName</tt>, <tt>address</tt> or <tt>serviceUri</tt> is null, true otherwise
+   * @return False if <tt>systemName</tt>, <tt>address</tt> or <tt>serviceURI</tt> is null, true otherwise
    */
   public boolean isValid() {
-    return systemName != null && address != null && serviceUri != null;
+    return systemName != null && address != null && serviceURI != null;
   }
 
 }

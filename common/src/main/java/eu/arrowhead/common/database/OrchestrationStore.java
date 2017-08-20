@@ -68,8 +68,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @Type(type = "timestamp")
   private Date lastUpdated;
 
-  @Column(name = "instructions")
-  private String instructions;
+  @Column(name = "instruction")
+  private String instruction;
 
   @ElementCollection(fetch = FetchType.LAZY)
   @MapKeyColumn(name = "attribute_key")
@@ -78,7 +78,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   private Map<String, String> attributes = new HashMap<>();
 
   @Column(name = "service_uri")
-  private String serviceUri;
+  private String serviceURI;
 
   public OrchestrationStore() {
   }
@@ -93,8 +93,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            int priority, boolean isDefault, String name, Date lastUpdated, String instructions, Map<String, String> attributes,
-                            String serviceUri) {
+                            int priority, boolean isDefault, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
+                            String serviceURI) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;
@@ -103,9 +103,9 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.isDefault = isDefault;
     this.name = name;
     this.lastUpdated = lastUpdated;
-    this.instructions = instructions;
+    this.instruction = instruction;
     this.attributes = attributes;
-    this.serviceUri = serviceUri;
+    this.serviceURI = serviceURI;
   }
 
   @XmlTransient
@@ -181,12 +181,12 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.lastUpdated = lastUpdated;
   }
 
-  public String getInstructions() {
-    return instructions;
+  public String getInstruction() {
+    return instruction;
   }
 
-  public void setInstructions(String instructions) {
-    this.instructions = instructions;
+  public void setInstruction(String instruction) {
+    this.instruction = instruction;
   }
 
   public Map<String, String> getAttributes() {
@@ -197,12 +197,12 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.attributes = attributes;
   }
 
-  public String getServiceUri() {
-    return serviceUri;
+  public String getServiceURI() {
+    return serviceURI;
   }
 
-  public void setServiceUri(String serviceUri) {
-    this.serviceUri = serviceUri;
+  public void setServiceURI(String serviceURI) {
+    this.serviceURI = serviceURI;
   }
 
   public boolean isValid() {

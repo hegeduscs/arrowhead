@@ -136,7 +136,7 @@ public final class Utility {
       log.error("Utility:getOrchestratorUri System not found in the database!");
       throw new RuntimeException("Orchestrator Core System not found in the database!");
     }
-    return getUri(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceUri(), orchestrator.getIsSecure());
+    return getUri(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
   }
 
   public static String getServiceRegistryUri() {
@@ -147,7 +147,7 @@ public final class Utility {
       log.error("Utility:getServiceRegistryUri System not found in the database!");
       throw new RuntimeException("Service Registry Core System not found in the database!");
     }
-    return getUri(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceUri(), serviceRegistry.getIsSecure());
+    return getUri(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
   }
 
   public static String getAuthorizationUri() {
@@ -158,7 +158,7 @@ public final class Utility {
       log.error("Utility:getAuthorizationUri System not found in the database!");
       throw new RuntimeException("Authorization Core System not found in the database!");
     }
-    return getUri(authorization.getAddress(), authorization.getPort(), authorization.getServiceUri(), authorization.getIsSecure());
+    return getUri(authorization.getAddress(), authorization.getPort(), authorization.getServiceURI(), authorization.getIsSecure());
   }
 
   public static String getGatekeeperUri() {
@@ -169,7 +169,7 @@ public final class Utility {
       log.error("Utility:getGatekeeperUri System not found in the database!");
       throw new RuntimeException("Gatekeeper Core System not found in the database!");
     }
-    return getUri(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceUri(), gatekeeper.getIsSecure());
+    return getUri(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
   }
 
   public static String getQosUri() {
@@ -180,7 +180,7 @@ public final class Utility {
       log.error("Utility:getQosUri System not found in the database!");
       throw new RuntimeException("QoS Core System not found in the database!");
     }
-    return getUri(qos.getAddress(), qos.getPort(), qos.getServiceUri(), qos.getIsSecure());
+    return getUri(qos.getAddress(), qos.getPort(), qos.getServiceURI(), qos.getIsSecure());
   }
 
   public static String getApiUri() {
@@ -191,7 +191,7 @@ public final class Utility {
       log.error("Utility:getApiUri System not found in the database!");
       throw new RuntimeException("API Core System not found in the database!");
     }
-    return getUri(api.getAddress(), api.getPort(), api.getServiceUri(), api.getIsSecure());
+    return getUri(api.getAddress(), api.getPort(), api.getServiceURI(), api.getIsSecure());
   }
 
   public static List<String> getNeighborCloudURIs() {
