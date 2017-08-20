@@ -7,13 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceRegistryEntry {
+  //mandatory fields
   private ArrowheadService providedService;
   private ArrowheadSystem provider;
-  private String serviceURI;
+  private String serviceURI; //can be empty
+
+  //non-mandatory fields
   private int version = 1;
   private boolean isUDP = false;
 
-  //only for backwards compatibility
+  //only for backwards compatibility, non-mandatory fields
   private List<ServiceMetadata> serviceMetadata;
   private List<String> interfaces;
   private String TSIG_key;
@@ -95,7 +98,7 @@ public class ServiceRegistryEntry {
   }
 
   public boolean isValid() {
-    return provider != null && provider.isValid() && serviceURI != null;
+    return provider != null && provider.isValid();
   }
 
 }
