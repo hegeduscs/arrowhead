@@ -115,8 +115,12 @@ public class ArrowheadService {
       }
     }
 
-    return serviceGroup != null && serviceDefinition != null && !interfaces.isEmpty() && !serviceGroup.contains("_") && !serviceDefinition
-        .contains("_") && areInterfacesClean;
+    return (serviceGroup != null &&
+        serviceDefinition != null &&
+        interfaces.isEmpty() != true &&
+        serviceGroup.contains("_") != true &&
+        serviceDefinition.contains("_") != true &&
+        areInterfacesClean);
   }
 
   public boolean isValidForDatabase() {

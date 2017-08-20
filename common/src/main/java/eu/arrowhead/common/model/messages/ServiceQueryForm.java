@@ -58,7 +58,7 @@ public class ServiceQueryForm {
   }
 
   public boolean isValid() {
-    return service != null && !service.isValid();
+    return service != null && service.isValid();
   }
 
 }

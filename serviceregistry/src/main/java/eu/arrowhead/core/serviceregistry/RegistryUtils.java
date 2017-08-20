@@ -1,5 +1,8 @@
 package eu.arrowhead.core.serviceregistry;
 
+import com.github.danieln.dnssdjava.DnsSDException;
+import com.github.danieln.dnssdjava.DnsSDFactory;
+import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import eu.arrowhead.common.model.ArrowheadService;
@@ -18,6 +21,16 @@ import java.util.Map;
 public class RegistryUtils {
     private static Logger log = Logger.getLogger(RegistryUtils.class.getName());
 
+  static DnsSDRegistrator createRegistrator() throws DnsSDException {
+    // Get the DNS specific settings from global static variables (from prop files)
+    // and then set up Registrator
+    InetSocketAddress dnsServerAddress = new InetSocketAddress(ServiceRegistryMain.dnsIpAddress, ServiceRegistryMain.dnsPort);
+    DnsSDRegistrator registrator = DnsSDFactory
+        .getInstance().createRegistrator(ServiceRegistryMain.dnsDomain, dnsServerAddress);
+    if (!ServiceRegistryMain.tsigKeyName.isEmpty())
+        registrator.setTSIGKey(ServiceRegistryMain.tsigKeyName,ServiceRegistryMain.tsigAlgorithm,ServiceRegistryMain.tsigKeyValue);
+    return registrator;
+  }
 
     public static boolean removeLastChar(String host, char charachter) {
         if (host != null && host.length() > 0 && host.charAt(host.length() - 1) == charachter) {
@@ -34,7 +47,7 @@ public class RegistryUtils {
         //Arrowhead core-related metadata
         properties.put("ahsysgrp", registryEntry.getProvider().getSystemGroup());
         properties.put("ahsysname", registryEntry.getProvider().getSystemName());
-        properties.put("ahsysauthinfo", registryEntry.getProvider().getAuthenticationInfo());
+        properties.put("ahsysauth", registryEntry.getProvider().getAuthenticationInfo());
         properties.put("path", registryEntry.getServiceURI());
 
         //additional user metadata
@@ -73,10 +86,11 @@ public class RegistryUtils {
                 throw new IllegalArgumentException("Entry has unknown transport layer set.");
         }
 
+        //parsing ArrowheadService
         if (serviceNameLength > 3) { //arrowhead service data should not be empty
             serviceName = serviceName.substring(0, serviceNameLength);
             String[] array = serviceName.split("_");
-            if (array.length == 4) {
+            if (serviceName.startsWith("_") && array.length == 4) {
                 List<String> intf = new ArrayList<>();
                 intf.add(array[3]);
                 arrowheadService.setServiceGroup(array[2]);
@@ -89,7 +103,7 @@ public class RegistryUtils {
 
         for (String key: properties.keySet()) {
             if (key.contains("ahsrvmetad_")) {
-                String metaKey = key.substring(key.indexOf("_")+1,key.length()-1);
+                String metaKey = key.substring(key.indexOf("_")+1,key.length());
                 arrowheadService.getServiceMetadata().add(new ServiceMetadata(metaKey,properties.get(key)));
             }
         }
@@ -97,36 +111,60 @@ public class RegistryUtils {
         //building ArrowheadSystem
         ArrowheadSystem arrowheadSystem = new ArrowheadSystem();
 
-        if (removeLastChar(providerName,'.')) {
-            String[] array = serviceName.split("_");
-            if (array.length == 3) {
-               arrowheadSystem.setSystemGroup(array[2]);
-               arrowheadSystem.setSystemName(array[1]);
-               arrowheadSystem.setAddress(address);
-               arrowheadSystem.setPort(port);
-               arrowheadSystem.setAuthenticationInfo(properties.get("ahsysauthinfo"));
-            } else {
-                if (array.length == 1 ) {
+        removeLastChar(providerName,'.');
+        removeLastChar(address,'.');
+        arrowheadSystem.setAddress(address);
+        arrowheadSystem.setPort(port);
 
-                }
-                throw new IllegalArgumentException("Cannot parse DNS entry into ArrowheadSystem");
+        if (properties.containsKey("ahsysauth"))
+            arrowheadSystem.setAuthenticationInfo(properties.get("ahsysauth"));
+        else if ((properties.containsKey("ahsysauthinfo")))
+            arrowheadSystem.setAuthenticationInfo(properties.get("ahsysauthinfo"));
+
+          //if sysName and sysGrp is present in TXT record
+        if (properties.containsKey("ahsysname") || properties.containsKey("ahsysgrp")) {
+
+            arrowheadSystem.setSystemName(properties.get("ahsysname"));
+            arrowheadSystem.setSystemGroup(properties.get("ahsysgrp"));
+
+            //sanity checking if instance equals TXT fields
+            if (providerName.contains("_")) {
+              String[] array = providerName.split("_");
+              if (array.length == 2) {
+                if (!properties.get("ahsysname").equals(array[0]) ||
+                    !properties.get("ahsysgrp").equals(array[1]))
+                  log.info(
+                      "Malformed instance name in DNS record:" + providerName + "." + serviceName);
+              } else
+                log.info(
+                    "Malformed instance name in DNS record:" + providerName + "." + serviceName);
             }
-        } else
-            throw new IllegalArgumentException("Cannot parse DNS entry into ArrowheadSystem");
+
+        } else {
+            //SysGrp and SysName is not present in TXT record
+            if (providerName.contains("_")) {
+              String[] array = providerName.split("_");
+              if (array.length == 2) {
+                arrowheadSystem.setSystemName(array[0]);
+                arrowheadSystem.setSystemGroup(array[1]);
+              } else
+                throw new IllegalArgumentException("Entry cannot be parsed into ArrowheadSystem.");
+            } else
+              throw new IllegalArgumentException("Entry cannot be parsed into ArrowheadSystem.");
+        }
 
         //setting up response
         ServiceRegistryEntry providerService = new ServiceRegistryEntry();
         providerService.setProvidedService(arrowheadService);
         providerService.setProvider(arrowheadSystem);
 
-        if (isUDP) {
+        if (isUDP)
             providerService.setUDP(true);
-        }
 
         if (properties.containsKey("path"))
             providerService.setServiceURI(properties.get("path"));
-        else
-            throw new IllegalArgumentException("ServiceURI was empty in DNS record.");
+        //else
+        //    throw new IllegalArgumentException("ServiceURI was empty in DNS record.");
 
         if (properties.containsKey("txtvers"))
             providerService.setVersion(new Integer(properties.get("txtvers")));

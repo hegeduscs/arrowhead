@@ -5,24 +5,24 @@ import java.util.List;
 
 class QueryResult {
 
-  private List<ProvidedService> providers = new ArrayList<>();
+  private List<ServiceRegistryEntry> providers = new ArrayList<>();
 
   public QueryResult() {
   }
 
-  public QueryResult(List<ProvidedService> providers) {
+  public QueryResult(List<ServiceRegistryEntry> providers) {
     this.providers = providers;
   }
 
-  public List<ProvidedService> getProviders() {
+  public List<ServiceRegistryEntry> getProviders() {
     return providers;
   }
 
-  public void setProviders(List<ProvidedService> providers) {
+  public void setProviders(List<ServiceRegistryEntry> providers) {
     this.providers = providers;
   }
 
-  public void addProvider(ProvidedService provider) {
+  public void addProvider(ServiceRegistryEntry provider) {
     this.providers.add(provider);
   }
 

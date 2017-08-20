@@ -4,6 +4,7 @@ import com.github.danieln.dnssdjava.DnsSDBrowser;
 import com.github.danieln.dnssdjava.DnsSDDomainEnumerator;
 import com.github.danieln.dnssdjava.DnsSDException;
 import com.github.danieln.dnssdjava.DnsSDFactory;
+import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import com.github.danieln.dnssdjava.ServiceType;
@@ -41,30 +42,28 @@ class ServiceRegistry {
           //ArrowheadService is encoded in the service type field, interface (IDD) as the protocol
           String serviceType = "_" + serviceDefinition + "_" + serviceGroup + "_" + interf;
           if (entry.isUDP())
-            serviceType.concat("._udp");
+            serviceType +=("._udp");
           else
-            serviceType.concat("._tcp");
+            serviceType +=("._tcp");
 
         try {
-              ServiceName name = ServiceRegistryMain.registrator.makeServiceName(providerInstance,
+          DnsSDRegistrator registrator = RegistryUtils.createRegistrator();
+          ServiceName name = registrator.makeServiceName(providerInstance,
                        ServiceType.valueOf(serviceType));
 
-              //create  service data object
-              ServiceData data = new ServiceData(name, address, port);
-              RegistryUtils.setServiceDataProperties(entry, data);
+          //create  service data object
+          ServiceData data = new ServiceData(name, address, port);
+          RegistryUtils.setServiceDataProperties(entry, data);
 
-              if (ServiceRegistryMain.registrator.registerService(data)) {
-                  log.info("Service registered in DNS-SD: " + entry.getProvidedService().toString() +"," +
-                          interf + entry.getProvider().toString());
-              } else {
-                  //need to delete the record first
-                  ServiceRegistryMain.registrator.unregisterService(name);
-                  //second try
-                  ServiceRegistryMain.registrator.registerService(data);
-
-                  log.info("Service record updated in DNS-SD: " + entry.getProvidedService().toString() +"," +
-                          interf + entry.getProvider().toString());
-                  //allRegistered = false;
+          if (registrator.registerService(data)) {
+              log.info("Service registered in DNS-SD: " + providerInstance + "." + serviceType);
+          } else {
+              //need to delete the record first
+              registrator.unregisterService(name);
+              //second try
+              registrator.registerService(data);
+              log.info("Service record updated in DNS-SD: " + providerInstance + "." + serviceType);
+              //allRegistered = false;
               }
           } catch (DnsSDException ex) {
               log.error(ex);
@@ -91,15 +90,16 @@ class ServiceRegistry {
           String serviceType = "_" + serviceDefinition + "_" + serviceGroup + "_" + interf;
 
           if (entry.isUDP())
-            serviceType.concat("._udp");
+            serviceType +=("._udp");
           else
-            serviceType.concat("._tcp");
+            serviceType +=("._tcp");
 
           try {
-              ServiceName name = ServiceRegistryMain.registrator.makeServiceName(providerInstance,
+              DnsSDRegistrator registrator = RegistryUtils.createRegistrator();
+              ServiceName name = registrator.makeServiceName(providerInstance,
                       ServiceType.valueOf(serviceType));
 
-              if (ServiceRegistryMain.registrator.unregisterService(name)) {
+              if (registrator.unregisterService(name)) {
                   log.info("Service unregistered: " + entry.getProvidedService().toString() +"," +
                           interf + entry.getProvider().toString());
               } else {
@@ -170,6 +170,7 @@ class ServiceRegistry {
     Collection<ServiceType> types = browser.getServiceTypes();
 
     List<ServiceRegistryEntry> list = new ArrayList<>();
+    list.clear();
 
     if (types != null) {
 
@@ -202,17 +203,19 @@ class ServiceRegistry {
       DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
       Collection<ServiceType> types = browser.getServiceTypes();
 
-      for (ServiceType type : types) {
+      try {
+        DnsSDRegistrator registrator = RegistryUtils.createRegistrator();
+
+        for (ServiceType type : types) {
           Collection<ServiceName> instances = browser.getServiceInstances(type);
           for (ServiceName instance : instances) {
-              try {
-                  ServiceRegistryMain.registrator.unregisterService(instance);
-              } catch (DnsSDException e) {
-                  log.error("DNS error while deleting all entries:" +e.getMessage());
-                  e.printStackTrace();
-                  return false;
-              }
+            registrator.unregisterService(instance);
           }
+        }
+      } catch (DnsSDException e) {
+        log.error("There was a DNS-SD error in removing all services." + e.getMessage());
+        e.printStackTrace();
+        return false;
       }
 
       log.info("Deleted all services from DNS-SD!");
