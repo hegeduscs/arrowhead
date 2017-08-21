@@ -24,17 +24,6 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
   }
 
   @Override
-  public DnsSDRegistrator createRegistrator(String registeringDomain, InetSocketAddress resolverSocaddr) throws DnsSDException {
-    try {
-      return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain), resolverSocaddr);
-    } catch (UnknownHostException ex) {
-      throw new DnsSDException("Failed to find DNS update server for domain: " + registeringDomain, ex);
-    } catch (TextParseException ex) {
-      throw new IllegalArgumentException("Invalid domain name: " + registeringDomain, ex);
-    }
-  }
-
-  @Override
   public DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains) {
     List<Name> domains = new ArrayList<>(computerDomains.size());
     for (String domain : computerDomains) {
@@ -64,6 +53,17 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
   public DnsSDRegistrator createRegistrator(String registeringDomain) throws DnsSDException {
     try {
       return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain));
+    } catch (UnknownHostException ex) {
+      throw new DnsSDException("Failed to find DNS update server for domain: " + registeringDomain, ex);
+    } catch (TextParseException ex) {
+      throw new IllegalArgumentException("Invalid domain name: " + registeringDomain, ex);
+    }
+  }
+
+  @Override
+  public DnsSDRegistrator createRegistrator(String registeringDomain, InetSocketAddress resolverSocaddr) throws DnsSDException {
+    try {
+      return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain), resolverSocaddr);
     } catch (UnknownHostException ex) {
       throw new DnsSDException("Failed to find DNS update server for domain: " + registeringDomain, ex);
     } catch (TextParseException ex) {

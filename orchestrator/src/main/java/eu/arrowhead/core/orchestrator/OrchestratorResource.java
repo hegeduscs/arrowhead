@@ -14,8 +14,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
 /**
- * TODO javadoc for the class
- * This is the REST resource for the Orchestrator Core System.
+ * REST resource for the Orchestrator Core System.
  */
 @Path("orchestration")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -24,7 +23,7 @@ public class OrchestratorResource {
 
   private static Logger log = Logger.getLogger(OrchestratorResource.class.getName());
 
-  /*
+  /**
    * Simple test method to see if the http server where this resource is registered works or not.
    */
   @GET
@@ -34,8 +33,8 @@ public class OrchestratorResource {
   }
 
   /**
-   * This method initiates the correct orchestration process determined by orchestration flags in the service request form. The returned response
-   * (can) consists a list of endpoints where the requester System can consume the requested Service.
+   * This method initiates the correct orchestration process determined by orchestration flags in the <tt>ServiceRequestForm</tt>. The returned
+   * response (can) consists a list of endpoints where the requester System can consume the requested Service.
    *
    * @return OrchestrationResponse
    */

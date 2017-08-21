@@ -55,6 +55,7 @@ final class QoSManagerService {
    * Verifies if the requestedQoS is possible on the selected providers.
    *
    * @param message QoSVerify parameters.
+   *
    * @return Returns if is possible or not and why.
    */
   static QoSVerificationResponse qosVerify(QoSVerify message) {
@@ -137,7 +138,9 @@ final class QoSManagerService {
    * Reserves a QoS on the consumer and provider stream.
    *
    * @param message QoSReservation parameters.
+   *
    * @return Returns if the reservation was possible.
+   *
    * @throws ReservationException The reservation on the devices was not possible.
    * @throws DriverNotFoundException The network type doesnt have a driver assigned.
    */

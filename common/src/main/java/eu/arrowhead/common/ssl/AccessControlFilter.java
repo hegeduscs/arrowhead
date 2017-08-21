@@ -24,6 +24,35 @@ public class AccessControlFilter implements ContainerRequestFilter {
   @Inject
   private javax.inject.Provider<UriInfo> uriInfo;
 
+  @Override
+  public void filter(ContainerRequestContext requestContext) throws IOException {
+
+    SecurityContext sc = requestContext.getSecurityContext();
+    if (sc.isSecure()) {
+      log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
+      String requestTarget = uriInfo.get().getAbsolutePath().getPath();
+      if (requestTarget.contains("authorization") || requestTarget.contains("init")) {
+        if (isClientAuthorized(sc, configuration, true)) {
+          log.info("Identification is successful! (SSL)");
+          return;
+        } else {
+          log.info("Unauthorized access! (SSL)");
+          /*throw new AuthenticationException
+          ("This client is not allowed to use this resource: " + requestTarget);*/
+        }
+      } else {
+        if (isClientAuthorized(sc, configuration, false)) {
+          log.info("Identification is successful! (SSL)");
+          return;
+        } else {
+          log.info("Unauthorized access! (SSL)");
+          /*throw new AuthenticationException
+          ("This client is not allowed to use this resource: " + requestTarget);*/
+        }
+      }
+    }
+  }
+
   private static boolean isClientAuthorized(SecurityContext sc, Configuration configuration, boolean onlyFromOrchestrator) {
     String subjectname = sc.getUserPrincipal().getName();
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectname);
@@ -64,35 +93,6 @@ public class AccessControlFilter implements ContainerRequestFilter {
     }
 
     return true;
-  }
-
-  @Override
-  public void filter(ContainerRequestContext requestContext) throws IOException {
-
-    SecurityContext sc = requestContext.getSecurityContext();
-    if (sc.isSecure()) {
-      log.info("Got a request from a secure channel. Cert: " + sc.getUserPrincipal().getName());
-      String requestTarget = uriInfo.get().getAbsolutePath().getPath();
-      if (requestTarget.contains("authorization") || requestTarget.contains("init")) {
-        if (isClientAuthorized(sc, configuration, true)) {
-          log.info("Identification is successful! (SSL)");
-          return;
-        } else {
-          log.info("Unauthorized access! (SSL)");
-          /*throw new AuthenticationException
-          ("This client is not allowed to use this resource: " + requestTarget);*/
-        }
-      } else {
-        if (isClientAuthorized(sc, configuration, false)) {
-          log.info("Identification is successful! (SSL)");
-          return;
-        } else {
-          log.info("Unauthorized access! (SSL)");
-          /*throw new AuthenticationException
-          ("This client is not allowed to use this resource: " + requestTarget);*/
-        }
-      }
-    }
   }
 
 }

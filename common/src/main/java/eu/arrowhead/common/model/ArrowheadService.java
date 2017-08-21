@@ -86,13 +86,13 @@ public class ArrowheadService {
     return interfaces;
   }
 
+  public void setInterfaces(List<String> interfaces) {
+    this.interfaces = interfaces;
+  }
+
   public void setInterfaces(String oneInterface) {
     this.interfaces.clear();
     this.interfaces.add(oneInterface);
-  }
-
-  public void setInterfaces(List<String> interfaces) {
-    this.interfaces = interfaces;
   }
 
   public List<ServiceMetadata> getServiceMetadata() {

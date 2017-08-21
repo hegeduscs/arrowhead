@@ -49,17 +49,10 @@ public abstract class DnsSDFactory {
   }
 
   /**
-   * Create a {@link DnsSDDomainEnumerator} that finds the browsing and registration domains for the given computer domains.
-   *
-   * @param computerDomains the domain names to try.
-   * @return a new {@link DnsSDDomainEnumerator}.
-   */
-  protected abstract DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains);
-
-  /**
    * Create a {@link DnsSDDomainEnumerator} that finds the browsing and registration domains for the given computer domain.
    *
    * @param computerDomain the domain name.
+   *
    * @return a new {@link DnsSDDomainEnumerator}.
    */
   public DnsSDDomainEnumerator createDomainEnumerator(String computerDomain) {
@@ -67,22 +60,13 @@ public abstract class DnsSDFactory {
   }
 
   /**
-   * Create a {@link DnsSDDomainEnumerator} that finds the browsing and registration domains for this computer.
+   * Create a {@link DnsSDDomainEnumerator} that finds the browsing and registration domains for the given computer domains.
+   *
+   * @param computerDomains the domain names to try.
    *
    * @return a new {@link DnsSDDomainEnumerator}.
    */
-  public DnsSDDomainEnumerator createDomainEnumerator() {
-    return createDomainEnumerator(getComputerDomains());
-  }
-
-  /**
-   * Try to figure out the domain name(s) for the computer. This includes reverse subnet addresses, as described in RFC 6763 chapter 11.
-   *
-   * @return a list of potential domain names.
-   */
-  public List<String> getComputerDomains() {
-    return DomainUtil.getComputerDomains();
-  }
+  protected abstract DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains);
 
   /**
    * Create a {@link DnsSDBrowser} that finds services in the default browsing domains.
@@ -94,27 +78,10 @@ public abstract class DnsSDFactory {
   }
 
   /**
-   * Create a {@link DnsSDBrowser} that finds services in the specified browsing domain.
-   *
-   * @param browserDomain the name of the domain to browse.
-   * @return a new {@link DnsSDBrowser}.
-   */
-  public DnsSDBrowser createBrowser(String browserDomain) {
-    return createBrowser(Collections.singletonList(browserDomain));
-  }
-
-  /**
-   * Create a {@link DnsSDBrowser} that finds services in the specified browsing domains.
-   *
-   * @param browserDomains collection of domain names to browse.
-   * @return a new {@link DnsSDBrowser}.
-   */
-  public abstract DnsSDBrowser createBrowser(Collection<String> browserDomains);
-
-  /**
    * Create a {@link DnsSDBrowser} that finds services in the browsing domains found by the specified {@link DnsSDDomainEnumerator}.
    *
    * @param domainEnumerator the domain enumerator to query for browser domains.
+   *
    * @return a new {@link DnsSDBrowser}.
    */
   public DnsSDBrowser createBrowser(DnsSDDomainEnumerator domainEnumerator) {
@@ -131,9 +98,48 @@ public abstract class DnsSDFactory {
   }
 
   /**
+   * Create a {@link DnsSDDomainEnumerator} that finds the browsing and registration domains for this computer.
+   *
+   * @return a new {@link DnsSDDomainEnumerator}.
+   */
+  public DnsSDDomainEnumerator createDomainEnumerator() {
+    return createDomainEnumerator(getComputerDomains());
+  }
+
+  /**
+   * Create a {@link DnsSDBrowser} that finds services in the specified browsing domains.
+   *
+   * @param browserDomains collection of domain names to browse.
+   *
+   * @return a new {@link DnsSDBrowser}.
+   */
+  public abstract DnsSDBrowser createBrowser(Collection<String> browserDomains);
+
+  /**
+   * Try to figure out the domain name(s) for the computer. This includes reverse subnet addresses, as described in RFC 6763 chapter 11.
+   *
+   * @return a list of potential domain names.
+   */
+  public List<String> getComputerDomains() {
+    return DomainUtil.getComputerDomains();
+  }
+
+  /**
+   * Create a {@link DnsSDBrowser} that finds services in the specified browsing domain.
+   *
+   * @param browserDomain the name of the domain to browse.
+   *
+   * @return a new {@link DnsSDBrowser}.
+   */
+  public DnsSDBrowser createBrowser(String browserDomain) {
+    return createBrowser(Collections.singletonList(browserDomain));
+  }
+
+  /**
    * Create a {@link DnsSDRegistrator} that registers services in the default registration domain.
    *
    * @return a new {@link DnsSDRegistrator}.
+   *
    * @throws DnsSDException if the registrator can't be created.
    */
   public DnsSDRegistrator createRegistrator() throws DnsSDException {
@@ -141,19 +147,12 @@ public abstract class DnsSDFactory {
   }
 
   /**
-   * Create a {@link DnsSDRegistrator} that registers services in the specified registration domain.
-   *
-   * @param registeringDomain the domain name to register services.
-   * @return a new {@link DnsSDRegistrator}.
-   * @throws DnsSDException if the registrator can't be created.
-   */
-  protected abstract DnsSDRegistrator createRegistrator(String registeringDomain) throws DnsSDException;
-
-  /**
    * Create a {@link DnsSDRegistrator} that registers services in the registration domain found by the specified {@link DnsSDDomainEnumerator}.
    *
    * @param domainEnumerator the domain enumerator to query for registration domains.
+   *
    * @return a new {@link DnsSDRegistrator}.
+   *
    * @throws DnsSDException if the registrator can't be created.
    */
   public DnsSDRegistrator createRegistrator(DnsSDDomainEnumerator domainEnumerator) throws DnsSDException {
@@ -168,6 +167,17 @@ public abstract class DnsSDFactory {
     }
     return createRegistrator(registeringDomain);
   }
+
+  /**
+   * Create a {@link DnsSDRegistrator} that registers services in the specified registration domain.
+   *
+   * @param registeringDomain the domain name to register services.
+   *
+   * @return a new {@link DnsSDRegistrator}.
+   *
+   * @throws DnsSDException if the registrator can't be created.
+   */
+  protected abstract DnsSDRegistrator createRegistrator(String registeringDomain) throws DnsSDException;
 
   public abstract DnsSDRegistrator createRegistrator(String registeringDomain, InetSocketAddress resolverSocaddr) throws DnsSDException;
 

@@ -1,22 +1,15 @@
 package eu.arrowhead.core.serviceregistry;
 
-import com.github.danieln.dnssdjava.DnsSDException;
-import com.github.danieln.dnssdjava.DnsSDFactory;
 import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import eu.arrowhead.common.ssl.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,25 +28,23 @@ import org.glassfish.jersey.server.ResourceConfig;
  */
 class ServiceRegistryMain {
 
-  //property files
-  private static Properties appProp, dnsProp;
-  public static int pingTimeout=new Integer(getAppProp().getProperty("ping.timeout", "10000"));
   public static Timer timer = null;
-
-  private static HttpServer server = null;
-  private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
-  private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
-  private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
-
   //DNS-SD global settings
   public static String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
   public static String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
   public static String tsigKeyValue = getDnsProp().getProperty("tsig.key", "RM/jKKEPYB83peT0DQnYGg==");
   public static String dnsIpAddress = getDnsProp().getProperty("dns.ip", "152.66.246.237");
   public static String dnsDomain = getDnsProp().getProperty("dns.registerDomain", "srv.arrowhead.tmit.bme.hu.");
-  public static String computerDomain = getDnsProp().getProperty("dns.domain","arrowhead.tmit.bme.hu");
+  public static String computerDomain = getDnsProp().getProperty("dns.domain", "arrowhead.tmit.bme.hu");
   public static int dnsPort = new Integer(getDnsProp().getProperty("dns.port", "53"));
+  //property files
+  private static Properties appProp, dnsProp;
+  public static int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
+  private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
+  private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
+  private static HttpServer server = null;
+  private static HttpServer secureServer = null;
+  private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
 
   /**
    * Main method.
@@ -67,8 +58,6 @@ class ServiceRegistryMain {
     System.setProperty("dns.server", getDnsProp().getProperty("dns.ip"));
     System.setProperty("dnssd.domain", getDnsProp().getProperty("dns.domain"));
     System.setProperty("dnssd.hostname", getDnsProp().getProperty("dns.host"));
-
-
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -123,16 +112,38 @@ class ServiceRegistryMain {
         @Override
         public void run() {
           System.out.println("Received TERM signal, shutting down...");
-          if (timer != null) timer.cancel();
+          if (timer != null) {
+            timer.cancel();
+          }
           shutdown();
         }
       });
     } else {
       System.out.println("Press enter to shutdown ServiceRegistry Server(s)...");
       System.in.read();
-      if (timer != null) timer.cancel();
+      if (timer != null) {
+        timer.cancel();
+      }
       shutdown();
     }
+  }
+
+  private static synchronized Properties getDnsProp() {
+    try {
+      if (dnsProp == null) {
+        dnsProp = new Properties();
+
+        File file = new File("config" + File.separator + "dns.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+
+        if (inputStream != null) {
+          dnsProp.load(inputStream);
+        }
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return dnsProp;
   }
 
   /**
@@ -197,6 +208,24 @@ class ServiceRegistryMain {
     return server;
   }
 
+  private static synchronized Properties getAppProp() {
+    try {
+      if (appProp == null) {
+        appProp = new Properties();
+
+        File file = new File("config" + File.separator + "app.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+
+        if (inputStream != null) {
+          appProp.load(inputStream);
+        }
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return appProp;
+  }
+
   private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
@@ -208,39 +237,4 @@ class ServiceRegistryMain {
     }
     System.out.println("Service Registry Server(s) stopped");
   }
-  private static synchronized Properties getDnsProp() {
-        try {
-            if (dnsProp == null) {
-                dnsProp = new Properties();
-
-                File file = new File("config" + File.separator + "dns.properties");
-                FileInputStream inputStream = new FileInputStream(file);
-
-                if (inputStream != null) {
-                    dnsProp.load(inputStream);
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return dnsProp;
-    }
-
-  private static synchronized Properties getAppProp() {
-        try {
-            if (appProp == null) {
-                appProp = new Properties();
-
-                File file = new File("config" + File.separator + "app.properties");
-                FileInputStream inputStream = new FileInputStream(file);
-
-                if (inputStream != null) {
-                    appProp.load(inputStream);
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return appProp;
-    }
 }

@@ -77,6 +77,28 @@ class DomainUtil {
   }
 
   /**
+   * Calculate the network address by taking the bitwise AND between the IP-address and the netmask.
+   *
+   * @param ifaddr the interface address to calculate the network address of.
+   *
+   * @return the network address (host part is all zero).
+   *
+   * @throws UnknownHostException if something went terribly wrong.
+   */
+  private static InetAddress calculateNetworkAddress(InterfaceAddress ifaddr) throws UnknownHostException {
+    byte[] addr = ifaddr.getAddress().getAddress();
+    int n = ifaddr.getNetworkPrefixLength();
+    int i = n / 8;
+    int j = n % 8;
+    if (i < addr.length) {
+      byte mask = (byte) (0xFF00 >> j);
+      addr[i] &= mask;
+      Arrays.fill(addr, i + 1, addr.length, (byte) 0);
+    }
+    return InetAddress.getByAddress(addr);
+  }
+
+  /**
    * Try to figure out the host name for the computer.
    *
    * @return a list of potential host names.
@@ -107,26 +129,6 @@ class DomainUtil {
       logger.log(Level.WARNING, "Failed to enumerate network interfaces", ex);
     }
     return results;
-  }
-
-  /**
-   * Calculate the network address by taking the bitwise AND between the IP-address and the netmask.
-   *
-   * @param ifaddr the interface address to calculate the network address of.
-   * @return the network address (host part is all zero).
-   * @throws UnknownHostException if something went terribly wrong.
-   */
-  private static InetAddress calculateNetworkAddress(InterfaceAddress ifaddr) throws UnknownHostException {
-    byte[] addr = ifaddr.getAddress().getAddress();
-    int n = ifaddr.getNetworkPrefixLength();
-    int i = n / 8;
-    int j = n % 8;
-    if (i < addr.length) {
-      byte mask = (byte) (0xFF00 >> j);
-      addr[i] &= mask;
-      Arrays.fill(addr, i + 1, addr.length, (byte) 0);
-    }
-    return InetAddress.getByAddress(addr);
   }
 
 }

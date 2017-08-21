@@ -105,6 +105,29 @@ public final class SecurityUtils {
     return null;
   }
 
+  public static String getCertCNFromSubject(String subjectname) {
+    String cn = null;
+    try {
+      // Subject is in LDAP format, we can use the LdapName object for parsing
+      LdapName ldapname = new LdapName(subjectname);
+      for (Rdn rdn : ldapname.getRdns()) {
+        // Find the data after the CN field
+        if (rdn.getType().equalsIgnoreCase("CN")) {
+          cn = (String) rdn.getValue();
+        }
+      }
+    } catch (InvalidNameException e) {
+      System.out.println("Exception in getCertCN: " + e.toString());
+      return "";
+    }
+
+    if (cn == null) {
+      return "";
+    }
+
+    return cn;
+  }
+
   public static PrivateKey getPrivateKey(KeyStore keystore, String pass) throws Exception {
     Enumeration<String> enumeration = null;
     PrivateKey privatekey = null;
@@ -130,29 +153,6 @@ public final class SecurityUtils {
     }
 
     return privatekey;
-  }
-
-  public static String getCertCNFromSubject(String subjectname) {
-    String cn = null;
-    try {
-      // Subject is in LDAP format, we can use the LdapName object for parsing
-      LdapName ldapname = new LdapName(subjectname);
-      for (Rdn rdn : ldapname.getRdns()) {
-        // Find the data after the CN field
-        if (rdn.getType().equalsIgnoreCase("CN")) {
-          cn = (String) rdn.getValue();
-        }
-      }
-    } catch (InvalidNameException e) {
-      System.out.println("Exception in getCertCN: " + e.toString());
-      return "";
-    }
-
-    if (cn == null) {
-      return "";
-    }
-
-    return cn;
   }
 
   public static String getKeyEncoded(Key key) {

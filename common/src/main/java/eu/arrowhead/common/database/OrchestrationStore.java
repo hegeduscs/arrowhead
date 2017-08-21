@@ -21,17 +21,22 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Entity class for storing Orchestration Store entries in the database. //TODO proper javadoc, valamint enforce priority > 0!
+ * JPA entity class for storing <tt>OrchestrationStore</tt> information in the database. The <i>arrowhead_service_id</i>, <i>consumer_system_id</i>,
+ * <i>priority</i> and <i>is_default</i> columns must be unique together. The <i>priority</i> integer can not be negative.
+ * <p>
+ * The class implements the <tt>Comparable</tt> interface based on the priority field (but does not override the equals() method).
  *
  * @author Umlauf Zoltán
  */
 @Entity
 @Table(name = "orchestration_store", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
+@Check(constraints = "priority >= 0")
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @Column(name = "id")
@@ -205,13 +210,22 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.serviceURI = serviceURI;
   }
 
+  /**
+   * Simple inspector method to check weather a OrchestrationStore instance is valid to be stored in the database.
+   *
+   * @return true if the instance is in compliance with all the restrictions, false otherwise
+   */
   public boolean isValid() {
     return service != null && consumer != null && providerSystem != null && service.isValid() && consumer.isValid() && providerSystem.isValid()
         && priority >= 1 && (!isDefault || providerCloud == null);
   }
 
   /**
-   * Note: This class has a natural ordering that is inconsistent with equals()
+   * Note: This class has a natural ordering that is inconsistent with equals().
+   *
+   * The field <i>priority</i> is used to sort instances of this class in a collection. Priority is non-negative. If this.priority < other.priority
+   * that means <i>this</i> is more ahead in a collection than <i>other</i> and therefore has a higher priority. This means priority = 0 is the
+   * highest priority for a Store entry.
    */
   @Override
   public int compareTo(@NotNull OrchestrationStore other) {

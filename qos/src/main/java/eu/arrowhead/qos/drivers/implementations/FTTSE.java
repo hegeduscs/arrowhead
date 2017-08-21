@@ -101,12 +101,34 @@ public class FTTSE implements IQoSDriver {
   }
 
   /**
+   * This method will see if there are enough parameters to generate the commands.
+   */
+  private boolean validateNetworkCOnfiguration(Map<String, String> networkConfiguration) {
+    if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.
+        containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration
+        .containsKey(NETWORK_MTU)) {
+      return false;
+    }
+
+    try {
+      Integer.parseInt(networkConfiguration.get(NETWORK_EC));
+      Integer.parseInt(networkConfiguration.get(NETWORK_STREAM_ID));
+      Integer.parseInt(networkConfiguration.get(NETWORK_MTU));
+    } catch (NumberFormatException e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * This function will generate the stream commands.
    *
    * @param streamID Stream ID.
    * @param elementaryCycle Master paramter.
    * @param mtu Maximum Transmission Unit of the switch.
    * @param requestedQoS Consumer requested QoS.
+   *
    * @return Returns the parameters of the stream to be configured.
    */
   public Map<String, String> generateCommands(Integer streamID, Integer elementaryCycle, Integer mtu, Map<String, String> requestedQoS) {
@@ -165,26 +187,6 @@ public class FTTSE implements IQoSDriver {
   public int calculateSize(Integer mtu) {
     final Integer MAXIMUM_SIZE = (mtu * 50) / 10;
     return MAXIMUM_SIZE;
-  }
-
-  /**
-   * This method will see if there are enough parameters to generate the commands.
-   */
-  private boolean validateNetworkCOnfiguration(Map<String, String> networkConfiguration) {
-    if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.
-        containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration.containsKey(NETWORK_MTU)) {
-      return false;
-    }
-
-    try {
-      Integer.parseInt(networkConfiguration.get(NETWORK_EC));
-      Integer.parseInt(networkConfiguration.get(NETWORK_STREAM_ID));
-      Integer.parseInt(networkConfiguration.get(NETWORK_MTU));
-    } catch (NumberFormatException e) {
-      return false;
-    }
-
-    return true;
   }
 
 }

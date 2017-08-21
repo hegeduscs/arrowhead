@@ -1,6 +1,5 @@
 package eu.arrowhead.common.model.messages;
 
-import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.model.ArrowheadService;
 
 public class ServiceQueryForm {
@@ -14,9 +13,9 @@ public class ServiceQueryForm {
   }
 
   public ServiceQueryForm(ArrowheadService service, boolean pingProviders, boolean metadataSearch) {
-      this.service = service;
-      this.pingProviders = pingProviders;
-      this.metadataSearch = metadataSearch;
+    this.service = service;
+    this.pingProviders = pingProviders;
+    this.metadataSearch = metadataSearch;
   }
 
   public ServiceQueryForm(ServiceRequestForm srf) {
@@ -26,11 +25,11 @@ public class ServiceQueryForm {
   }
 
   public ArrowheadService getService() {
-      return service;
+    return service;
   }
 
   public void setService(ArrowheadService service) {
-      this.service = service;
+    this.service = service;
   }
 
   public boolean isPingProviders() {

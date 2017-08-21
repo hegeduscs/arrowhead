@@ -24,7 +24,7 @@ public final class StoreService {
       return new ArrayList<>();
     }
 
-    if(!savedService.getInterfaces().isEmpty()){
+    if (!savedService.getInterfaces().isEmpty()) {
       if (!hasMatchingInterfaces(savedService, service)) {
         return new ArrayList<>();
       }
@@ -32,29 +32,6 @@ public final class StoreService {
 
     restrictionMap.put("consumer", savedConsumer);
     restrictionMap.put("service", savedService);
-    return dm.getAll(OrchestrationStore.class, restrictionMap);
-  }
-
-  /**
-   * This method returns the active Orchestration Store entries for a consumer.
-   */
-  static List<OrchestrationStore> getDefaultStoreEntries(ArrowheadSystem consumer) {
-    restrictionMap.clear();
-    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
-    if (savedConsumer == null) {
-      return new ArrayList<>();
-    }
-
-    restrictionMap.put("consumer", savedConsumer);
-    restrictionMap.put("isDefault", true);
-    return dm.getAll(OrchestrationStore.class, restrictionMap);
-  }
-
-  /**
-   * This method returns all the entries of the Orchestration Store.
-   */
-  public static List<OrchestrationStore> getAllStoreEntries() {
-    restrictionMap.clear();
     return dm.getAll(OrchestrationStore.class, restrictionMap);
   }
 
@@ -78,7 +55,7 @@ public final class StoreService {
     return dm.get(ArrowheadService.class, rm);
   }
 
-  private static boolean hasMatchingInterfaces(ArrowheadService savedService, ArrowheadService givenService){
+  private static boolean hasMatchingInterfaces(ArrowheadService savedService, ArrowheadService givenService) {
     for (String givenInterface : givenService.getInterfaces()) {
       for (String savedInterface : savedService.getInterfaces()) {
         if (givenInterface.equals(savedInterface)) {
@@ -87,6 +64,29 @@ public final class StoreService {
       }
     }
     return false;
+  }
+
+  /**
+   * This method returns the active Orchestration Store entries for a consumer.
+   */
+  static List<OrchestrationStore> getDefaultStoreEntries(ArrowheadSystem consumer) {
+    restrictionMap.clear();
+    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
+    if (savedConsumer == null) {
+      return new ArrayList<>();
+    }
+
+    restrictionMap.put("consumer", savedConsumer);
+    restrictionMap.put("isDefault", true);
+    return dm.getAll(OrchestrationStore.class, restrictionMap);
+  }
+
+  /**
+   * This method returns all the entries of the Orchestration Store.
+   */
+  public static List<OrchestrationStore> getAllStoreEntries() {
+    restrictionMap.clear();
+    return dm.getAll(OrchestrationStore.class, restrictionMap);
   }
 
 }

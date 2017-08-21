@@ -46,23 +46,6 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
     logger.log(Level.INFO, "Created DNS-SD Browser for domains: {0}", browserDomains);
   }
 
-  public Collection<ServiceType> getServiceTypes() {
-    Set<ServiceType> results = new HashSet<>();
-    for (Name domain : browserDomains) {
-      results.addAll(getServiceTypes(domain));
-    }
-    return results;
-  }
-
-  //@Override
-  public Collection<ServiceName> getServiceInstances(ServiceType type) {
-    List<ServiceName> results = new ArrayList<>();
-    for (Name domain : browserDomains) {
-      results.addAll(getServiceInstances(type, domain));
-    }
-    return results;
-  }
-
   //@Override
   public ServiceData getServiceData(ServiceName service) {
     Name serviceName = service.toDnsName();
@@ -115,10 +98,28 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
     return data;
   }
 
+  //@Override
+  public Collection<ServiceName> getServiceInstances(ServiceType type) {
+    List<ServiceName> results = new ArrayList<>();
+    for (Name domain : browserDomains) {
+      results.addAll(getServiceInstances(type, domain));
+    }
+    return results;
+  }
+
+  public Collection<ServiceType> getServiceTypes() {
+    Set<ServiceType> results = new HashSet<>();
+    for (Name domain : browserDomains) {
+      results.addAll(getServiceTypes(domain));
+    }
+    return results;
+  }
+
   /**
    * Get the service types from a single domain.
    *
    * @param domainName the domain to browse.
+   *
    * @return a list of service types.
    */
   private List<ServiceType> getServiceTypes(Name domainName) {
@@ -153,6 +154,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
    *
    * @param type the service type.
    * @param domainName the domain to browse.
+   *
    * @return a list of service names.
    */
   private List<ServiceName> getServiceInstances(ServiceType type, Name domainName) {

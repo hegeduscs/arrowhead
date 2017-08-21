@@ -66,10 +66,26 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 
   }
 
+  private Resolver setDirectResolver(InetSocketAddress socaddr) {
+    SimpleResolver simpleResolver;
+
+    try {
+      simpleResolver = new SimpleResolver();
+      simpleResolver.setAddress(socaddr);
+      return simpleResolver;
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+
+  }
+
   /**
    * Create a UnicastDnsSDRegistrator.
    *
    * @param registrationDomain the registration domain.
+   *
    * @throws UnknownHostException if the DNS server name for the domain failed to resolve.
    */
   UnicastDnsSDRegistrator(Name registrationDomain) throws UnknownHostException {
@@ -84,24 +100,12 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
   }
 
   /**
-   * Flush all records related to the update from the default cache.
-   *
-   * @param update the update to flush.
-   */
-  private static void flushCache(Update update) {
-    Cache cache = Lookup.getDefaultCache(DClass.IN);
-    Record[] records = update.getSectionArray(Section.UPDATE);
-    for (Record rec : records) {
-      logger.log(Level.FINE, "Flush name {0} due to update: {1}", new Object[]{rec.getName(), rec});
-      cache.flushName(rec.getName());
-    }
-  }
-
-  /**
    * Create a DNS {@link Resolver} to handle updates to the given domain.
    *
    * @param domain the domain for which updates will be generated.
+   *
    * @return a Resolver configured with the DNS server that handles zone for that domain.
+   *
    * @throws UnknownHostException if the DNS server name for the domain failed to resolve.
    */
   private Resolver findUpdateResolver(Name domain) throws UnknownHostException {
@@ -129,21 +133,6 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
       simpleResolver = new SimpleResolver();
     }
     return simpleResolver;
-  }
-
-  private Resolver setDirectResolver(InetSocketAddress socaddr) {
-    SimpleResolver simpleResolver;
-
-    try {
-      simpleResolver = new SimpleResolver();
-      simpleResolver.setAddress(socaddr);
-      return simpleResolver;
-    } catch (UnknownHostException e) {
-      e.printStackTrace();
-    }
-
-    return null;
-
   }
 
   public ServiceName makeServiceName(String name, ServiceType type) {
@@ -234,6 +223,20 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
       throw new IllegalArgumentException("Invalid service data: " + serviceData, ex);
     } catch (IOException ex) {
       throw new DnsSDException("Failed to send DNS update to server", ex);
+    }
+  }
+
+  /**
+   * Flush all records related to the update from the default cache.
+   *
+   * @param update the update to flush.
+   */
+  private static void flushCache(Update update) {
+    Cache cache = Lookup.getDefaultCache(DClass.IN);
+    Record[] records = update.getSectionArray(Section.UPDATE);
+    for (Record rec : records) {
+      logger.log(Level.FINE, "Flush name {0} due to update: {1}", new Object[]{rec.getName(), rec});
+      cache.flushName(rec.getName());
     }
   }
 

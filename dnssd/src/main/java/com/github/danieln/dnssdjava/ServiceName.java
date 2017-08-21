@@ -43,7 +43,9 @@ public class ServiceName {
    * #toString()}.
    *
    * @param s the string to be parsed.
+   *
    * @return a ServiceName representing the service specified by the argument.
+   *
    * @throws IllegalArgumentException if the string cannot be parsed as a ServiceName.
    */
   public static ServiceName valueOf(String s) {
@@ -77,9 +79,45 @@ public class ServiceName {
   }
 
   /**
+   * Find the first non-escaped occurrence of a character in a string.
+   *
+   * @param string the string to look through.
+   * @param ch the character to find.
+   *
+   * @return the index of the first occurrence, or -1 if it can't be found.
+   *
+   * @see String#indexOf(int)
+   */
+  private static int indexOfNonEscaped(String string, char ch) {
+    for (int i = 0; i < string.length(); i++) {
+      int c = string.charAt(i);
+      if (c == '\\') {
+        i++;
+      } else if (c == ch) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Undo escaping of a service name.
+   *
+   * @param name the escaped name.
+   *
+   * @return the name with escapes removed.
+   *
+   * @see #escape(String)
+   */
+  private static String unescape(String name) {
+    return name.replaceAll("\\\\(.)", "$1");    // Replace "\x" with "x" for any x
+  }
+
+  /**
    * Make a new ServiceName from a dnsjava {@link Name}.
    *
    * @param dnsname the Name to convert.
+   *
    * @return the Name as a ServiceName.
    */
   static ServiceName fromDnsName(Name dnsname) {
@@ -97,52 +135,12 @@ public class ServiceName {
    * Decode a raw DNS label into a string. The methods in dnsjava don't understand UTF-8 and escapes some characters, we don't want that here.
    *
    * @param label the raw label data.
+   *
    * @return the decoded string.
    */
   private static String decodeName(byte[] label) {
     // First byte is length
     return new String(label, 1, label.length - 1, NET_UNICODE);
-  }
-
-  /**
-   * Escape a service name according to RFC6763 chapter 4.3.
-   *
-   * @param name the name to escape.
-   * @return the name with '.' and '\' escaped.
-   */
-  private static String escape(String name) {
-    return name.replaceAll("\\\\|\\.", "\\\\$0");    // Replace "\" with "\\" and "." with "\."
-  }
-
-  /**
-   * Undo escaping of a service name.
-   *
-   * @param name the escaped name.
-   * @return the name with escapes removed.
-   * @see #escape(String)
-   */
-  private static String unescape(String name) {
-    return name.replaceAll("\\\\(.)", "$1");    // Replace "\x" with "x" for any x
-  }
-
-  /**
-   * Find the first non-escaped occurrence of a character in a string.
-   *
-   * @param string the string to look through.
-   * @param ch the character to find.
-   * @return the index of the first occurrence, or -1 if it can't be found.
-   * @see String#indexOf(int)
-   */
-  private static int indexOfNonEscaped(String string, char ch) {
-    for (int i = 0; i < string.length(); i++) {
-      int c = string.charAt(i);
-      if (c == '\\') {
-        i++;
-      } else if (c == ch) {
-        return i;
-      }
-    }
-    return -1;
   }
 
   /**
@@ -173,13 +171,12 @@ public class ServiceName {
   }
 
   @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(escape(name)).append('.').append(type.toDnsString()).append('.').append(domain);
-    for (String subtype : type.getSubtypes()) {
-      sb.append(',').append(subtype);
-    }
-    return sb.toString();
+  public int hashCode() {
+    int hash = 7;
+    hash = 89 * hash + (this.name != null ? this.name.hashCode() : 0);
+    hash = 89 * hash + (this.type != null ? this.type.hashCode() : 0);
+    hash = 89 * hash + (this.domain != null ? this.domain.hashCode() : 0);
+    return hash;
   }
 
   @Override
@@ -201,12 +198,24 @@ public class ServiceName {
   }
 
   @Override
-  public int hashCode() {
-    int hash = 7;
-    hash = 89 * hash + (this.name != null ? this.name.hashCode() : 0);
-    hash = 89 * hash + (this.type != null ? this.type.hashCode() : 0);
-    hash = 89 * hash + (this.domain != null ? this.domain.hashCode() : 0);
-    return hash;
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(escape(name)).append('.').append(type.toDnsString()).append('.').append(domain);
+    for (String subtype : type.getSubtypes()) {
+      sb.append(',').append(subtype);
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Escape a service name according to RFC6763 chapter 4.3.
+   *
+   * @param name the name to escape.
+   *
+   * @return the name with '.' and '\' escaped.
+   */
+  private static String escape(String name) {
+    return name.replaceAll("\\\\|\\.", "\\\\$0");    // Replace "\" with "\\" and "." with "\."
   }
 
   /**
@@ -230,6 +239,7 @@ public class ServiceName {
    * Encode a string into a raw DNS label. The methods in dnsjava don't understand UTF-8 and escapes some characters, we don't want that here.
    *
    * @param s the string to encode.
+   *
    * @return the raw DNS label.
    */
   private byte[] encodeName(String s) {

@@ -8,7 +8,7 @@ public class PreferredProvider {
   private ArrowheadSystem providerSystem;
   private ArrowheadCloud providerCloud;
 
-  public PreferredProvider(){
+  public PreferredProvider() {
   }
 
   public PreferredProvider(ArrowheadSystem providerSystem, ArrowheadCloud providerCloud) {
@@ -32,16 +32,16 @@ public class PreferredProvider {
     this.providerCloud = providerCloud;
   }
 
-  public boolean isLocal(){
+  public boolean isValid() {
+    return isLocal() || isGlobal();
+  }
+
+  public boolean isLocal() {
     return providerSystem != null && providerSystem.isValid() && providerCloud == null;
   }
 
-  public boolean isGlobal(){
+  public boolean isGlobal() {
     return providerCloud != null && providerCloud.isValid();
-  }
-
-  public boolean isValid(){
-    return isLocal() || isGlobal();
   }
 
 }

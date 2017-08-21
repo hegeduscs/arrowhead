@@ -28,7 +28,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * TODO
+ * The package-private methods of this class represent the 4 different types of the orchestration process, while the 2 private methods are compiling
+ * (or forwarding) the <tt>OrchestrationResponse</tt> which is sent back to the requester <tt>ArrowheadSystem</tt>.
  *
  * @author Umlauf Zoltán
  */
@@ -42,10 +43,10 @@ final class OrchestratorService {
 
   /**
    * Represents the regular orchestration process where the requester <tt>ArrowheadSystem</tt> is in the local Cloud. In this process the
-   * <i>Orchestration Store</i> is ignored, and the Orchestrator first tries to find a provider in the local Cloud. If that fails but the
-   * <i>enableInterCloud</i> flag is set to true, the Orchestrator tries to find a provider in other Clouds.
+   * <i>Orchestration Store</i> is ignored, and the Orchestrator first tries to find a provider for the requested service in the local Cloud. If that
+   * fails but the <i>enableInterCloud</i> flag is set to true, the Orchestrator tries to find a provider in other Clouds.
    *
-   * @return OrchestrationResponse
+   * @throws DataNotFoundException if no local provider <tt>ArrowheadSystem</tt> is found and <i>enableInterCloud</i> is false
    */
   static OrchestrationResponse dynamicOrchestration(ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
@@ -128,7 +129,7 @@ final class OrchestratorService {
    * Represents the orchestration process where the <i>Orchestration Store</i> database is used to see if there is a provider for the requester
    * <tt>ArrowheadSystem</tt>. The <i>Orchestration Store</i> contains preset orchestration information, which should not change in runtime.
    *
-   * @return OrchestrationResponse
+   * @throws DataNotFoundException if all the queried Orchestration Store entry options were exhausted and none were found operational
    */
   static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf) {
     // Querying the Orchestration Store for matching entries
@@ -221,8 +222,6 @@ final class OrchestratorService {
 
   /**
    * Represents the orchestration process where the requester System only asked for Inter-Cloud servicing.
-   *
-   * @return OrchestrationResponse
    */
   static OrchestrationResponse triggerInterCloud(ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
@@ -267,8 +266,6 @@ final class OrchestratorService {
    * This method represents the orchestration process where the requester System is NOT in the local Cloud. This means that the Gatekeeper made sure
    * that this request from the remote Orchestrator can be satisfied in this Cloud. (Gatekeeper polled the Service Registry and Authorization
    * Systems.)
-   *
-   * @return OrchestrationResponse
    */
   static OrchestrationResponse externalServiceRequest(ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
@@ -299,7 +296,8 @@ final class OrchestratorService {
    * result list. Providers preferred by the consumer have higher priority. Custom matchmaking algorithm can be implemented, as of now it just returns
    * the first provider from the list.
    *
-   * @return OrchestrationResponse
+   * @throws DataNotFoundException in case of Store orchestration, and the provider system from the database is not a match according to the
+   *     remote cloud
    */
   private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, List<ArrowheadSystem> preferredSystems, boolean storeOrchestration) {
     // We first try to find a match between the preferred systems and the received providers from the ICN result.
@@ -327,9 +325,11 @@ final class OrchestratorService {
   }
 
   /**
-   * Compiles the OrchestrationResponse object. Potentially includes authorization token generation.
+   * Compiles the OrchestrationResponse object and returns it. Potentially includes token generation for authorization purposes.
    *
-   * @return OrchestrationResponse
+   * @param srList Service Registry entries, each containing a suitable provider <tt>ArrowheadSystem</tt>.
+   * @param srf The <tt>ServiceRequestForm</tt> from the requester <tt>ArrowheadSystem</tt>, which is needed in case of token generation is requested.
+   * @param instructions Optional additional information, which can be passed back to the requester <tt>ArrowheadSystem</tt>
    */
   private static OrchestrationResponse compileOrchestrationResponse(@NotNull List<ServiceRegistryEntry> srList, @NotNull ServiceRequestForm srf,
                                                                     @Nullable List<String> instructions) {
@@ -348,7 +348,7 @@ final class OrchestratorService {
       String authUri = Utility.getAuthorizationUri();
       authUri = UriBuilder.fromPath(authUri).path("token").toString();
       TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
-                                                                       srf.getRequestedService(), 0) ;
+                                                                       srf.getRequestedService(), 0);
       //Sending request, parsing response
       Response authResponse = Utility.sendRequest(authUri, "PUT", tokenRequest);
       TokenGenerationResponse tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
@@ -364,14 +364,14 @@ final class OrchestratorService {
     }
 
     // Adding the Orchestration Store instructions (only in the case of Store orchestrations)
-    if(instructions != null && instructions.size() == ofList.size()){
-      for(int i = 0; i < instructions.size(); i++){
+    if (instructions != null && instructions.size() == ofList.size()) {
+      for (int i = 0; i < instructions.size(); i++) {
         ofList.get(i).setInstruction(instructions.get(i));
       }
     }
     // Adding the tokens and signatures, if token generation happened
-    if(ofList.size() == tokens.size() && ofList.size() == signatures.size()) {
-      for(int i = 0; i < tokens.size(); i++){
+    if (ofList.size() == tokens.size() && ofList.size() == signatures.size()) {
+      for (int i = 0; i < tokens.size(); i++) {
         ofList.get(i).setAuthorizationToken(tokens.get(i));
         ofList.get(i).setSignature(signatures.get(i));
       }
