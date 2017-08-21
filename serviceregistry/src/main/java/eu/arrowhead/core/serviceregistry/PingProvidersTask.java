@@ -24,12 +24,31 @@ public class PingProvidersTask extends TimerTask {
         Collection<ServiceType> types = browser.getServiceTypes();
 
         if (types != null) {
+           //for every type,
            for (ServiceType type : types) {
              Collection<ServiceName> instances = browser.getServiceInstances(type);
+
+             //per every instance we shall ping
              for (ServiceName instance : instances) {
-               //TODO ping services and remove if necessary
+               ServiceData serviceInstanceData = browser.getServiceData(instance);
+               String hostName = serviceInstanceData.getHost();
+               int port = serviceInstanceData.getPort();
+               RegistryUtils.removeLastChar(hostName,'.');
+               boolean toBeRemoved = false;
+               if (hostName == "127.0.0.1" || hostName == "localhost")
+                 toBeRemoved = true;
+               else if (!RegistryUtils.pingHost(hostName,port,ServiceRegistryMain.pingTimeout))
+                 toBeRemoved = true;
+
+               if (toBeRemoved)
+                 try {
+                   DnsSDRegistrator registrator = RegistryUtils.createRegistrator();
+                   registrator.unregisterService(instance);
+                 } catch (DnsSDException e) {
+                   log.error("DNS error occured in deleting an entry." + e.getMessage());
+                 }
+               }
              }
            }
        }
-    }
 }

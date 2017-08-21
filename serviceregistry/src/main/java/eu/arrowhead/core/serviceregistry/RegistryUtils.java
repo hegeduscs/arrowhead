@@ -9,6 +9,7 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.ServiceMetadata;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -94,8 +95,11 @@ public class RegistryUtils {
                 List<String> intf = new ArrayList<>();
                 intf.add(array[3]);
                 arrowheadService.setServiceGroup(array[2]);
-                arrowheadService.setServiceDefinition(array[1]);
-                arrowheadService.setInterfaces(intf);
+                if (array[1].contains("ahf-"))
+                  arrowheadService.setServiceDefinition(array[1].substring(4));
+                else
+                  arrowheadService.setServiceDefinition(array[1]);
+              arrowheadService.setInterfaces(intf);
             } else
                 throw new IllegalArgumentException("Cannot parse DNS entry into ArrowheadService");
         } else
@@ -163,8 +167,6 @@ public class RegistryUtils {
 
         if (properties.containsKey("path"))
             providerService.setServiceURI(properties.get("path"));
-        //else
-        //    throw new IllegalArgumentException("ServiceURI was empty in DNS record.");
 
         if (properties.containsKey("txtvers"))
             providerService.setVersion(new Integer(properties.get("txtvers")));
@@ -174,38 +176,57 @@ public class RegistryUtils {
         return providerService;
     }
 
-    public static boolean pingService(ServiceName instance, ServiceData service) {
-
-        boolean replied = true;
-        int port = service.getPort();
-        RegistryUtils.removeLastChar(service.getHost(), '.');
-        if (RegistryUtils.pingHost(service.getHost(), port, ServiceRegistryMain.pingTimeout)==false) {
-            log.info("Can't access host at:"+service.getHost()+":"+port);
-            replied = false;
-        }
-        return replied;
-    }
-
-    private static boolean pingHost(String host, int port, int timeout) {
+    public static boolean pingHost(String host, int port, int timeout) {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), timeout);
             return true;
         } catch (IOException e) {
-            //log.error(e);
-            //e.printStackTrace();
             return false; // Either timeout or unreachable or failed DNS lookup.
         }
     }
 
-   /*
-        TODO This method filters on Service metadata.
-    */
-    public static void filterOnMeta(List<ServiceRegistryEntry> queryForm, List<ServiceMetadata> metadata) {
-    }
+  public static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
 
-    /*
-        This method filters the ProvidedService list based on Service Provider availability
-     */
-    public static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
+    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
+
+    while (iterator.hasNext()) {
+      ServiceRegistryEntry current = iterator.next();
+      if (current.getProvider().getAddress().equals("localhost") ||
+          current.getProvider().getAddress().equals("127.0.0.1"))
+        iterator.remove();
+
+      else if (!pingHost(current.getProvider().getAddress(),
+                        current.getProvider().getPort(),
+                        ServiceRegistryMain.pingTimeout))
+        iterator.remove();
     }
+  }
+
+  /*
+      TODO This method filters on Service metadata.
+  */
+  public static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, List<ServiceMetadata> metadata) {
+    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
+    while (iterator.hasNext()) {
+      ServiceRegistryEntry current = iterator.next();
+      boolean allMatch = true;
+      for (ServiceMetadata currentMeta : current.getProvidedService().getServiceMetadata()) {
+        if (!metadata.contains(currentMeta)) allMatch = false;
+      }
+      if (!allMatch) iterator.remove();
+    }
+  }
+
+  /*
+     TODO This method filters on Service version.
+ */
+  public static void filteronVersion(List<ServiceRegistryEntry> fetchedList, int targetVersion) {
+    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
+    while (iterator.hasNext()) {
+      ServiceRegistryEntry current = iterator.next();
+      if (current.getVersion() != targetVersion) {
+        iterator.remove();
+      }
+    }
+  }
 }

@@ -33,6 +33,26 @@ public class ServiceRegistryResource {
         return "This is the Service Registry.";
     }
 
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("registration")
+    public Response publishEntriesToRegistry (ServiceRegistryEntry entry) {
+        if (entry == null || !entry.isValidFully()) {
+            log.info("ServiceRegistry:Query throws BadPayloadException");
+            throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
+        }
+
+        try {
+            if (ServiceRegistry.register(entry))
+                return Response.status(Response.Status.OK).build();
+            else
+                return Response.status(Response.Status.RESET_CONTENT).build();
+        } catch (DnsSDException e) {
+            log.error("SR Registration failed:" + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
     /*
         Backwards compatibility
      */
@@ -66,6 +86,29 @@ public class ServiceRegistryResource {
           log.error("SR Registration failed:" + e.getMessage());
           return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
       }
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("registration")
+    public Response removeEntryFromRegistry (ServiceRegistryEntry entry) {
+        if (entry == null || !entry.isValidFully()) {
+            log.info("ServiceRegistry:Query throws BadPayloadException");
+            throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
+        }
+
+        boolean result;
+        try {
+            result = ServiceRegistry.unRegister(entry);
+        } catch (DnsException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        if (result)
+            return Response.status(Response.Status.OK).build();
+        else
+            return Response.status(Response.Status.NO_CONTENT).build();
+
     }
 
     @PUT

@@ -40,7 +40,7 @@ class ServiceRegistry {
       for (String interf : entry.getProvidedService().getInterfaces()) {
 
           //ArrowheadService is encoded in the service type field, interface (IDD) as the protocol
-          String serviceType = "_" + serviceDefinition + "_" + serviceGroup + "_" + interf;
+          String serviceType = "_ahf-" + serviceDefinition + "_" + serviceGroup + "_" + interf;
           if (entry.isUDP())
             serviceType +=("._udp");
           else
@@ -87,7 +87,7 @@ class ServiceRegistry {
 
       boolean allRemoved = true;
       for (String interf : entry.getProvidedService().getInterfaces()) {
-          String serviceType = "_" + serviceDefinition + "_" + serviceGroup + "_" + interf;
+          String serviceType = "_ahf-" + serviceDefinition + "_" + serviceGroup + "_" + interf;
 
           if (entry.isUDP())
             serviceType +=("._udp");
@@ -130,7 +130,7 @@ class ServiceRegistry {
         //building look-up service types for query
         for (String interf : queryForm.getService().getInterfaces()) {
 
-          String serviceType = "_" + queryForm.getService().getServiceDefinition() +
+          String serviceType = "_ahf-" + queryForm.getService().getServiceDefinition() +
               "_" + queryForm.getService().getServiceGroup() + "_" + interf;
 
           //getting the instances for each interface on each transport layer
@@ -150,6 +150,11 @@ class ServiceRegistry {
           }
         }
 
+        //filtering on service version
+        if (queryForm.getVersion() != 1)
+          RegistryUtils.filteronVersion(fetchedList,queryForm.getVersion());
+
+
         //filtering on metadata
         if (queryForm.isMetadataSearch())
             RegistryUtils.filterOnMeta(fetchedList,queryForm.getService().getServiceMetadata());
@@ -158,6 +163,7 @@ class ServiceRegistry {
         if (queryForm.isPingProviders())
             RegistryUtils.filterOnPing(fetchedList);
 
+        //compiling result
         ServiceQueryResult sqr = new ServiceQueryResult();
         sqr.setServiceQueryData(fetchedList);
         return sqr;
