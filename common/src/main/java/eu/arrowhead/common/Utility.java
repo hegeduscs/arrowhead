@@ -56,7 +56,7 @@ public final class Utility {
     configuration.property(ClientProperties.CONNECT_TIMEOUT, 30000);
     configuration.property(ClientProperties.READ_TIMEOUT, 30000);
 
-    Client client = null;
+    Client client;
     if (isSecure && Utility.sslContext != null) {
       client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
     } else if (isSecure && Utility.sslContext == null) {
@@ -91,7 +91,7 @@ public final class Utility {
       throw new UnavailableServerException("Could not get any response from: " + uri);
     }
 
-    //If the status code does not start with 2
+    //If the response status code does not start with 2 the request was not successful
     if (!(response.getStatusInfo().getFamily() == Family.SUCCESSFUL)) {
       ErrorMessage errorMessage;
       try {
@@ -106,17 +106,6 @@ public final class Utility {
     }
 
     return response;
-  }
-
-  public static String getOrchestratorUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "orchestrator");
-    CoreSystem orchestrator = dm.get(CoreSystem.class, restrictionMap);
-    if (orchestrator == null) {
-      log.error("Utility:getOrchestratorUri System not found in the database!");
-      throw new RuntimeException("Orchestrator Core System not found in the database!");
-    }
-    return getUri(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
   }
 
   public static String getUri(String address, int port, String serviceUri, boolean isSecure) {
@@ -137,6 +126,17 @@ public final class Utility {
 
     log.info("Utility:getUri returning this: " + ub.toString());
     return ub.toString();
+  }
+
+  public static String getOrchestratorUri() {
+    restrictionMap.clear();
+    restrictionMap.put("systemName", "orchestrator");
+    CoreSystem orchestrator = dm.get(CoreSystem.class, restrictionMap);
+    if (orchestrator == null) {
+      log.error("Utility:getOrchestratorUri System not found in the database!");
+      throw new RuntimeException("Orchestrator Core System not found in the database!");
+    }
+    return getUri(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
   }
 
   public static String getServiceRegistryUri() {
