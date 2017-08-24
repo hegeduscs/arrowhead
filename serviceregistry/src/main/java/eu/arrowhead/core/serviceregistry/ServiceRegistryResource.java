@@ -90,7 +90,7 @@ public class ServiceRegistryResource {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("registration")
+    @Path("removing")
     public Response removeEntryFromRegistry (ServiceRegistryEntry entry) {
         if (entry == null || !entry.isValidFully()) {
             log.info("ServiceRegistry:Query throws BadPayloadException");
@@ -148,7 +148,7 @@ public class ServiceRegistryResource {
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    @Path(value = "query")
+    @Path("query")
     public Response getServiceQueryForm(ServiceQueryForm queryForm) {
 
         if (queryForm == null || !queryForm.isValid()) {
@@ -170,7 +170,7 @@ public class ServiceRegistryResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path(value = "/all")
+    @Path("all")
     public Response getAllServices() {
 
         ServiceQueryResult result;
@@ -192,7 +192,7 @@ public class ServiceRegistryResource {
      */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    @Path(value = "/all")
+    @Path("all")
     public Response removeAllServices() {
 
         if (ServiceRegistry.removeAllServices())
