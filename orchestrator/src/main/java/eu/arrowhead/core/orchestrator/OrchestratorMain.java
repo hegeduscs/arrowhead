@@ -111,6 +111,10 @@ class OrchestratorMain {
     sslCon.setKeyPass(keyPass);
     sslCon.setTrustStoreFile(truststorePath);
     sslCon.setTrustStorePass(truststorePass);
+    if (!sslCon.validateConfiguration(true)) {
+      log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
+      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
+    }
 
     SSLContext sslContext = sslCon.createSSLContext();
     Utility.setSSLContext(sslContext);
@@ -151,7 +155,6 @@ class OrchestratorMain {
     try {
       if (prop == null) {
         prop = new Properties();
-        //TODO check behaviour if prop file/attribute missing, add excetpion handling if needed (workspace is important!)
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);

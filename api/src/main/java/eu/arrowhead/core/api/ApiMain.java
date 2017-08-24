@@ -111,6 +111,10 @@ class ApiMain {
     sslCon.setKeyPass(keyPass);
     sslCon.setTrustStoreFile(truststorePath);
     sslCon.setTrustStorePass(truststorePass);
+    if (!sslCon.validateConfiguration(true)) {
+      log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
+      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
+    }
 
     SSLContext sslContext = sslCon.createSSLContext();
     Utility.setSSLContext(sslContext);
