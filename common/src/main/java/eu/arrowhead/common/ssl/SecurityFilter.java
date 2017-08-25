@@ -35,7 +35,7 @@ public class SecurityFilter implements ContainerRequestFilter {
     private String user;
     private Principal principal;
 
-    public Authorizer(final String user) {
+    Authorizer(final String user) {
       this.user = user;
       this.principal = new Principal() {
 

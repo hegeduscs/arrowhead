@@ -84,7 +84,7 @@ public class GatekeeperResource {
     else {
       //Using a Set removes duplicate entries (which are needed for the Orchestrator) from the Cloud list.
       Set<ArrowheadCloud> preferredClouds = new LinkedHashSet<>(requestForm.getSearchPerimeter());
-      String URI = null;
+      String URI;
       for (ArrowheadCloud cloud : preferredClouds) {
         try {
           URI = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
@@ -149,19 +149,16 @@ public class GatekeeperResource {
       return Response.status(Status.UNAUTHORIZED).entity(null).build();
     }
 
-    // If it is authorized, poll the Service Registry for the requested
-    // Service
+    // If it is authorized, poll the Service Registry for the requested Service
     else {
       log.info("Requester Cloud is AUTHORIZED");
 
       // Compiling the URI and the request payload
       String srURI = Utility.getServiceRegistryUri();
-      srURI = UriBuilder.fromPath(srURI).path(service.getServiceGroup()).path(service.getServiceDefinition()).toString();
-      String tsig_key = Utility.getCoreSystem("serviceregistry").getAuthenticationInfo();
-      ServiceQueryForm queryForm = new ServiceQueryForm(service.getServiceMetadata(), service.getInterfaces(), false, false, tsig_key);
+      srURI = UriBuilder.fromPath(srURI).path("query").toString();
+      ServiceQueryForm queryForm = new ServiceQueryForm(service, false, false);
 
-      // Sending back provider Cloud information if the SR poll has
-      // results
+      // Sending back provider Cloud information if the SR poll has results
       Response srResponse = Utility.sendRequest(srURI, "PUT", queryForm);
       log.info("ServiceRegistry queried for requested Service: " + service.toString());
       ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);

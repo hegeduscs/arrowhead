@@ -132,13 +132,9 @@ class ServiceRegistryMain {
     try {
       if (dnsProp == null) {
         dnsProp = new Properties();
-
         File file = new File("config" + File.separator + "dns.properties");
         FileInputStream inputStream = new FileInputStream(file);
-
-        if (inputStream != null) {
-          dnsProp.load(inputStream);
-        }
+        dnsProp.load(inputStream);
       }
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -185,6 +181,10 @@ class ServiceRegistryMain {
     sslCon.setKeyStorePass(keystorePass);
     sslCon.setTrustStoreFile(truststorePath);
     sslCon.setTrustStorePass(truststorePass);
+    if (!sslCon.validateConfiguration(true)) {
+      log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
+      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
+    }
 
     SSLContext sslContext = sslCon.createSSLContext();
     Utility.setSSLContext(sslContext);
@@ -212,13 +212,9 @@ class ServiceRegistryMain {
     try {
       if (appProp == null) {
         appProp = new Properties();
-
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
-
-        if (inputStream != null) {
-          appProp.load(inputStream);
-        }
+        appProp.load(inputStream);
       }
     } catch (Exception ex) {
       ex.printStackTrace();

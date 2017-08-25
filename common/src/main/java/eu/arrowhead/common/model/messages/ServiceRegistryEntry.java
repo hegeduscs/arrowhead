@@ -10,9 +10,9 @@ public class ServiceRegistryEntry {
   //mandatory fields
   private ArrowheadService providedService;
   private ArrowheadSystem provider;
-  private String serviceURI; //can be empty
 
   //non-mandatory fields
+  private String serviceURI;
   private int version = 1;
   private boolean isUDP = false;
 
@@ -99,7 +99,7 @@ public class ServiceRegistryEntry {
   }
 
   public boolean isValidFully () {
-    return provider != null && provider.isValid() && providedService != null & providedService.isValid();
+    return provider != null && provider.isValid() && providedService != null && providedService.isValid();
   }
 
 }

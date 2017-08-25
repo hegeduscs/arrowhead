@@ -34,7 +34,6 @@ public class AccessControlFilter implements ContainerRequestFilter {
       if (requestTarget.contains("authorization") || requestTarget.contains("init")) {
         if (isClientAuthorized(sc, configuration, true)) {
           log.info("Identification is successful! (SSL)");
-          return;
         } else {
           log.info("Unauthorized access! (SSL)");
           /*throw new AuthenticationException
@@ -43,7 +42,6 @@ public class AccessControlFilter implements ContainerRequestFilter {
       } else {
         if (isClientAuthorized(sc, configuration, false)) {
           log.info("Identification is successful! (SSL)");
-          return;
         } else {
           log.info("Unauthorized access! (SSL)");
           /*throw new AuthenticationException
