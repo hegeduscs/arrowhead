@@ -25,7 +25,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 /**
  * Main class.
  */
-class ServiceRegistryMain {
+class ServiceRegistrySQLiteMain {
 
   public static Timer timer = null;
 
@@ -36,7 +36,7 @@ class ServiceRegistryMain {
   private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
+  private static Logger log = Logger.getLogger(ServiceRegistrySQLiteMain.class.getName());
 
   /**
    * Main method.

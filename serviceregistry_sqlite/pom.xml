@@ -86,7 +86,7 @@
             </manifestEntries>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>eu.arrowhead.core.serviceregistry_sqlite.ServiceRegistryMain</mainClass>
+              <mainClass>eu.arrowhead.core.serviceregistry_sqlite.ServiceRegistrySQLiteMain</mainClass>
               <classpathPrefix>lib/</classpathPrefix>
             </manifest>
           </archive>

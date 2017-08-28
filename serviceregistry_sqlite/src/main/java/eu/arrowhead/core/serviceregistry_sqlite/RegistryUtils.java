@@ -1,8 +1,6 @@
 package eu.arrowhead.core.serviceregistry_sqlite;
 
 
-import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.ServiceMetadata;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import java.util.Iterator;
@@ -11,9 +9,7 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class RegistryUtils {
     private static Logger log = Logger.getLogger(RegistryUtils.class.getName());
@@ -41,7 +37,7 @@ public class RegistryUtils {
 
       else if (!pingHost(current.getProvider().getAddress(),
                         current.getProvider().getPort(),
-                        ServiceRegistryMain.pingTimeout))
+                        ServiceRegistrySQLiteMain.pingTimeout))
         iterator.remove();
     }
   }
