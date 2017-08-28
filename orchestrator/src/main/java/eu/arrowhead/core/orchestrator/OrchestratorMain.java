@@ -35,6 +35,7 @@ class OrchestratorMain {
 
     boolean daemon = false;
     boolean serverModeSet = false;
+    argLoop:
     for (int i = 0; i < args.length; ++i) {
       if (args[i].equals("-d")) {
         daemon = true;
@@ -45,14 +46,14 @@ class OrchestratorMain {
         switch (args[i]) {
           case "insecure":
             server = startServer();
-            break;
+            break argLoop;
           case "secure":
             secureServer = startSecureServer();
-            break;
+            break argLoop;
           case "both":
             server = startServer();
             secureServer = startSecureServer();
-            break;
+            break argLoop;
           default:
             log.fatal("Unknown server mode: " + args[i]);
             throw new AssertionError("Unknown server mode: " + args[i]);
@@ -71,6 +72,7 @@ class OrchestratorMain {
       }));
     } else {
       System.out.println("Press enter to shutdown Orchestrator Server(s)...");
+      //noinspection ResultOfMethodCallIgnored
       System.in.read();
       shutdown();
     }

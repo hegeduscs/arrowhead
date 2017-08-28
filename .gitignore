@@ -161,4 +161,6 @@ gatekeeper/gatekeeper.iml
 orchestrator/orchestrator.iml
 qos/qos.iml
 serviceregistry/serviceregistry.iml
+serviceregistry_sqlite/serviceregistry_sqlite.iml
 /classes/
+
