@@ -14,9 +14,9 @@ import java.util.Map;
  */
 public class ServiceRequestForm {
 
-  private static List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
-                                                                       "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
-                                                                       "onlyPreferred", "enableQoS"));
+  private static final List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
+                                                                             "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
+                                                                             "onlyPreferred", "enableQoS"));
   private ArrowheadSystem requesterSystem;
   private ArrowheadCloud requesterCloud;
   private ArrowheadService requestedService;

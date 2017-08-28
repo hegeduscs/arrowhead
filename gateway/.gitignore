@@ -1,0 +1,3 @@
+/target/
+/config/log4j.properties
+/config/app.properties

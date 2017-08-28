@@ -1,4 +1,4 @@
-ssl.keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\gatekeeper.testcloud1.jks
+ssl.keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\gateway.testcloud1.jks
 ssl.keystorepass=12345
 ssl.keypass=12345
 ssl.truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
