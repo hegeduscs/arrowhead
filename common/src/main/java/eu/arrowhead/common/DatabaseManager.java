@@ -57,9 +57,7 @@ public class DatabaseManager {
         prop = new Properties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
-        if (inputStream != null) {
-          prop.load(inputStream);
-        }
+        prop.load(inputStream);
       }
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -69,7 +67,7 @@ public class DatabaseManager {
   }
 
   public <T> T get(Class<T> queryClass, int id) {
-    T object = null;
+    T object;
     Transaction transaction = null;
 
     try (Session session = getSessionFactory().openSession()) {
@@ -97,7 +95,7 @@ public class DatabaseManager {
   @Nullable
   @SuppressWarnings("unchecked")
   public <T> T get(Class<T> queryClass, Map<String, Object> restrictionMap) {
-    T object = null;
+    T object;
     Transaction transaction = null;
 
     try (Session session = getSessionFactory().openSession()) {

@@ -147,7 +147,7 @@ public class ServiceRequestForm {
 
     public Builder orchestrationFlags(Map<String, Boolean> flags) {
       for (String key : flagKeys) {
-        if (!orchestrationFlags.containsKey(key)) {
+        if (!flags.containsKey(key)) {
           flags.put(key, false);
         }
       }
