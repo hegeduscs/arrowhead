@@ -228,11 +228,95 @@ final class OrchestratorDriver {
       log.error("queryOrchestrationStore DataNotFoundException");
       throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.toString());
     } else {
+      // Removing non-valid Store entries from the results
+      for (OrchestrationStore entry : retrievedList) {
+        if (!entry.isValid()) {
+          retrievedList.remove(entry);
+        }
+      }
       // Sorting the store entries based on their int priority field
       Collections.sort(retrievedList);
-      log.info("queryOrchestrationStore: returning " + retrievedList.size() + " orchestration store entries matching the criteria");
+      log.info("queryOrchestrationStore returns " + retrievedList.size() + " orchestration store entries matching the criteria");
       return retrievedList;
     }
+  }
+
+  /**
+   * Cross-checks the query results from the <i>Orchestration Store</i> with the <i>Service Registry</i> and <i>Authorization</i>. A provider
+   * <tt>ArrowheadSystem</tt> has to be registered into the <i>Service Registry</i> at the time of the servicing request while being authorized too.
+   *
+   * @param srf The <tt>ServiceRequestForm</tt> from the requester <tt>ArrowheadSystem</tt>
+   * @param entryList Result of the <i>Orchestration Store</i> query. All the entries matching the criteria provided by the
+   *     <tt>ServiceRequestForm</tt>
+   *
+   * @return the list of <tt>OrchestrationStore</tt> objects which remained from the query after the cross-check
+   */
+  static List<OrchestrationStore> crossCheckStoreEntries(ServiceRequestForm srf, List<OrchestrationStore> entryList) {
+    Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
+    Set<ArrowheadSystem> providerSystemsFromSR = new HashSet<>();
+    Set<ArrowheadSystem> providerSystemsFromAuth;
+
+    // If true, the Orchestration Store was queried for default entries, meaning the service is different for each store entry
+    if (srf.getRequestedService() == null) {
+      for (OrchestrationStore entry : entryList) {
+        // Querying the Service Registry for the current service
+        List<ServiceRegistryEntry> srList = OrchestratorDriver
+            .queryServiceRegistry(entry.getService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+        // Compiling the systems that provide the current service
+        for (ServiceRegistryEntry srEntry : srList) {
+          providerSystemsFromSR.add(srEntry.getProvider());
+        }
+
+        // Querying the Authorization to see if the provider system is authorized for this servicing or not
+        providerSystemsFromAuth = OrchestratorDriver
+            .queryAuthorization(entry.getConsumer(), entry.getService(), Collections.singleton(entry.getProviderSystem()));
+
+        // Remove the Store entry from the list, if the SR or Auth crosscheck fails
+        if (!providerSystemsFromSR.contains(entry.getProviderSystem()) || !providerSystemsFromAuth.contains(entry.getProviderSystem())) {
+          entryList.remove(entry);
+        }
+      }
+    }
+    // Otherwise the service is fixed and we only need 1 SR and Auth query
+    else {
+      try {
+        // Querying the Service Registry for the service
+        List<ServiceRegistryEntry> srList = OrchestratorDriver
+            .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+        // Compiling the systems that provide the service
+        for (ServiceRegistryEntry srEntry : srList) {
+          providerSystemsFromSR.add(srEntry.getProvider());
+        }
+
+        //Compiling the list of intra-cloud provider systems from the store list for the auth query
+        Set<ArrowheadSystem> localProviderSystems = new HashSet<>();
+        for (OrchestrationStore entry : entryList) {
+          if (entry.getProviderCloud() == null) {
+            localProviderSystems.add(entry.getProviderSystem());
+          }
+        }
+        // Querying the Authorization
+        providerSystemsFromAuth = OrchestratorDriver.queryAuthorization(srf.getRequesterSystem(), srf.getRequestedService(), localProviderSystems);
+
+        // Loop over the store entries and remove an entry, if the SR or Auth crosscheck fails
+        for (OrchestrationStore entry : entryList) {
+          if (entry.getProviderCloud() == null && (!providerSystemsFromSR.contains(entry.getProviderSystem()) || !providerSystemsFromAuth
+              .contains(entry.getProviderSystem()))) {
+            entryList.remove(entry);
+          }
+        }
+      }
+      /*
+       * The SR or Auth query can throw DataNotFoundException, which has to be caught, in case there are inter-cloud store entries from the Store
+       * query to check. Default store entries can only be intra-cloud, so the try/catch is only needed on the else branch.
+       */ catch (DataNotFoundException e) {
+        log.info("crossCheckStoreEntries catches DataNotFoundException from SR/Auth query");
+        return new ArrayList<>();
+      }
+    }
+
+    log.info("crossCheckStoreEntries returns " + entryList.size() + " orchestration store entries");
+    return entryList;
   }
 
   /**
