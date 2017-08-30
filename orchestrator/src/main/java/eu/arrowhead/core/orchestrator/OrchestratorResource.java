@@ -1,13 +1,17 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -64,6 +68,23 @@ public class OrchestratorResource {
     }
 
     log.info("The orchestration process returned with " + orchResponse.getResponse().size() + " orchestration forms.");
+    return Response.status(Status.OK).entity(orchResponse).build();
+  }
+
+  /**
+   * Default Store orchestration process offered on a GET request, where the requester only has to send 2 String path parameters.
+   */
+  @GET
+  @Path("{systemGroup}/{systemName}")
+  public Response storeOrchestrationProcess(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
+                                            @Context HttpServletRequest request) {
+    ArrowheadSystem requesterSystem = new ArrowheadSystem(systemGroup, systemName, request.getRemoteAddr(), 0, null);
+    log.info("Received a GET Store orchestration from: " + request.getRemoteAddr() + requesterSystem.toString());
+
+    ServiceRequestForm srf = new ServiceRequestForm.Builder(requesterSystem).build();
+    OrchestrationResponse orchResponse = OrchestratorService.orchestrationFromStore(srf);
+
+    log.info("Default store orchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     return Response.status(Status.OK).entity(orchResponse).build();
   }
 
