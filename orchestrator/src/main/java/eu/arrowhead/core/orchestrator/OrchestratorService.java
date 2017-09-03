@@ -222,8 +222,8 @@ final class OrchestratorService {
       log.info("triggerInterCloud returns with 1 OrchestrationForm due to icnMatchmaking");
       return icnMatchmaking(icnResult, preferredSystems, false);
     } else {
-      log.info("triggerInterCloud returns " + icnResult.getInstructions().getResponse().size() + " forms without icnMatchmaking");
-      return icnResult.getInstructions();
+      log.info("triggerInterCloud returns " + icnResult.getOrchResponse().getResponse().size() + " forms without icnMatchmaking");
+      return icnResult.getOrchResponse();
     }
   }
 
@@ -268,7 +268,7 @@ final class OrchestratorService {
     // We first try to find a match between the preferred systems and the received providers from the ICN result.
     if (preferredSystems != null && !preferredSystems.isEmpty()) {
       for (ArrowheadSystem preferredProvider : preferredSystems) {
-        for (OrchestrationForm of : icnResult.getInstructions().getResponse()) {
+        for (OrchestrationForm of : icnResult.getOrchResponse().getResponse()) {
           if (preferredProvider.equals(of.getProvider())) {
             log.info("icnMatchmaking returns with a preferred System");
             return new OrchestrationResponse(Collections.singletonList(of));
@@ -285,7 +285,7 @@ final class OrchestratorService {
     // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
     else {
       log.info("icnMatchmaking returns with a not preferred System");
-      return new OrchestrationResponse(Collections.singletonList(icnResult.getInstructions().getResponse().get(0)));
+      return new OrchestrationResponse(Collections.singletonList(icnResult.getOrchResponse().getResponse().get(0)));
     }
   }
 

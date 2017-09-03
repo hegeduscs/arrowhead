@@ -17,7 +17,7 @@ public class DriverNotFoundExceptionMapper implements ExceptionMapper<DriverNotF
 
   @Override
   public Response toResponse(DriverNotFoundException ex) {
-    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400, DriverNotFoundException.class);
     return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).header("Content-type", "application/json").build();
   }
 

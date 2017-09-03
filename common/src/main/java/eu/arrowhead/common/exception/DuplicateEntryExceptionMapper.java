@@ -11,7 +11,7 @@ public class DuplicateEntryExceptionMapper implements ExceptionMapper<DuplicateE
   @Override
   public Response toResponse(DuplicateEntryException ex) {
     ex.printStackTrace();
-    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400, DuplicateEntryException.class);
     return Response.status(Status.BAD_REQUEST).entity(errorMessage).header("Content-type", "application/json").build();
   }
 

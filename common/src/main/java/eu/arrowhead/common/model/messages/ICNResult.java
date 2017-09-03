@@ -2,29 +2,25 @@ package eu.arrowhead.common.model.messages;
 
 public class ICNResult {
 
-  private OrchestrationResponse instructions;
+  private OrchestrationResponse orchResponse;
 
   public ICNResult() {
   }
 
-  public ICNResult(OrchestrationResponse instructions) {
-    this.instructions = instructions;
+  public ICNResult(OrchestrationResponse orchResponse) {
+    this.orchResponse = orchResponse;
   }
 
-  public ICNResult(ICNEnd icnEnd) {
-    this.instructions = icnEnd.getInstructions();
+  public OrchestrationResponse getOrchResponse() {
+    return orchResponse;
   }
 
-  public OrchestrationResponse getInstructions() {
-    return instructions;
-  }
-
-  public void setInstructions(OrchestrationResponse instructions) {
-    this.instructions = instructions;
+  public void setOrchResponse(OrchestrationResponse orchResponse) {
+    this.orchResponse = orchResponse;
   }
 
   public boolean isValid() {
-    return instructions != null && instructions.getResponse() != null && !instructions.getResponse().isEmpty();
+    return orchResponse != null && orchResponse.getResponse() != null && !orchResponse.getResponse().isEmpty();
   }
 
 }

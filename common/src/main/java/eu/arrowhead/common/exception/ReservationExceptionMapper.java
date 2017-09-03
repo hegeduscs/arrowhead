@@ -17,7 +17,7 @@ public class ReservationExceptionMapper implements ExceptionMapper<ReservationEx
 
   @Override
   public Response toResponse(ReservationException ex) {
-    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400);
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400, ReservationException.class);
     return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).header("Content-type", "application/json").build();
   }
 

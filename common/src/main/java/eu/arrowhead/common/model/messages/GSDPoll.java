@@ -32,4 +32,8 @@ public class GSDPoll {
     this.requesterCloud = requesterCloud;
   }
 
+  public boolean isValid() {
+    return requestedService != null && requestedService.isValid() && requesterCloud != null && requesterCloud.isValidForDatabase();
+  }
+
 }

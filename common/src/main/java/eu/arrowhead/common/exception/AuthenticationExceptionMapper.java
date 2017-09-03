@@ -11,7 +11,7 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
   @Override
   public Response toResponse(AuthenticationException ex) {
     ex.printStackTrace();
-    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 401);
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 401, AuthenticationException.class);
     return Response.status(Status.UNAUTHORIZED).entity(errorMessage).header("Content-type", "application/json").build();
   }
 

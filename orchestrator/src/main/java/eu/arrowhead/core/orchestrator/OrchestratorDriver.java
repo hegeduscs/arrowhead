@@ -439,7 +439,7 @@ final class OrchestratorDriver {
       throw new DataNotFoundException("ICN failed with the remote cloud.");
     }
 
-    log.info("doInterCloudNegotiations returns with " + result.getInstructions().getResponse().size() + " possible providers");
+    log.info("doInterCloudNegotiations returns with " + result.getOrchResponse().getResponse().size() + " possible providers");
     return result;
   }
 

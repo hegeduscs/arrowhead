@@ -9,8 +9,6 @@ import eu.arrowhead.common.model.ArrowheadService;
 import eu.arrowhead.common.model.ArrowheadSystem;
 import eu.arrowhead.common.model.ArrowheadToken;
 import eu.arrowhead.common.model.messages.RawTokenInfo;
-import java.io.File;
-import java.io.FileInputStream;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -19,13 +17,10 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 import javax.crypto.Cipher;
 import javax.ws.rs.core.Response;
 
 class AuthorizationService {
-
-  private static Properties prop;
 
   static List<PublicKey> getProviderPublicKeys(List<ArrowheadSystem> providers) {
     try {
@@ -110,23 +105,6 @@ class AuthorizationService {
       ex.printStackTrace();
       return null;
     }
-  }
-
-  public synchronized static Properties getProp() {
-    try {
-      if (prop == null) {
-        prop = new Properties();
-        File file = new File("config" + File.separator + "app.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        if (inputStream != null) {
-          prop.load(inputStream);
-        }
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
-    return prop;
   }
 
   private static PublicKey getPublicKey(String stringKey) {

@@ -34,7 +34,7 @@ public class GSDRequestForm {
     this.searchPerimeter = searchPerimeter;
   }
 
-  public boolean isPayloadUsable() {
+  public boolean isValid() {
     return requestedService != null && requestedService.isValid();
   }
 

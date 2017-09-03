@@ -48,46 +48,6 @@ public class AuthorizationResource {
 
 
   /**
-   * Generates token
-   *
-   * @return tokenGenerationResponse
-   */
-  //TODO review
-  @PUT
-  @Path("/token")
-  public Response resource(TokenGenerationRequest tokenGenerationRequest) {
-    List<PublicKey> providerPublicKeys = AuthorizationService.getProviderPublicKeys(tokenGenerationRequest.getProviders());
-
-    List<ArrowheadSystem> providers = tokenGenerationRequest.getProviders();
-
-    TokenGenerationResponse tokenGenerationResponse = new TokenGenerationResponse();
-    List<String> token = new ArrayList<>();
-    List<String> signature = new ArrayList<>();
-
-    try {
-      for (int i = 0; i < providers.size(); i++) {
-        PublicKey providerPublicKey = providerPublicKeys.get(i);
-        ArrowheadSystem provider = providers.get(i);
-
-        ArrowheadToken arrowheadToken = AuthorizationService
-            .generateSingleToken(providerPublicKey, tokenGenerationRequest.getConsumer(), tokenGenerationRequest.getConsumerCloud(),
-                                 tokenGenerationRequest.getService(), tokenGenerationRequest.getDuration());
-
-        token.add(arrowheadToken.getToken());
-        tokenGenerationResponse.setToken(token);
-
-        signature.add(arrowheadToken.getSignature());
-        tokenGenerationResponse.setSignature(signature);
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      return Response.status(500).build();
-    }
-
-    return Response.status(200).entity(tokenGenerationResponse).build();
-  }
-
-  /**
    * Checks whether the consumer System can use a Service from a list of provider Systems.
    *
    * @return IntraCloudAuthResponse
@@ -205,6 +165,46 @@ public class AuthorizationResource {
     }
 
     return Response.status(Status.OK).entity(new InterCloudAuthResponse(isAuthorized)).build();
+  }
+
+  /**
+   * Generates token
+   *
+   * @return tokenGenerationResponse
+   */
+  //TODO review
+  @PUT
+  @Path("token")
+  public Response resource(TokenGenerationRequest tokenGenerationRequest) {
+    List<PublicKey> providerPublicKeys = AuthorizationService.getProviderPublicKeys(tokenGenerationRequest.getProviders());
+
+    List<ArrowheadSystem> providers = tokenGenerationRequest.getProviders();
+
+    TokenGenerationResponse tokenGenerationResponse = new TokenGenerationResponse();
+    List<String> token = new ArrayList<>();
+    List<String> signature = new ArrayList<>();
+
+    try {
+      for (int i = 0; i < providers.size(); i++) {
+        PublicKey providerPublicKey = providerPublicKeys.get(i);
+        ArrowheadSystem provider = providers.get(i);
+
+        ArrowheadToken arrowheadToken = AuthorizationService
+            .generateSingleToken(providerPublicKey, tokenGenerationRequest.getConsumer(), tokenGenerationRequest.getConsumerCloud(),
+                                 tokenGenerationRequest.getService(), tokenGenerationRequest.getDuration());
+
+        token.add(arrowheadToken.getToken());
+        tokenGenerationResponse.setToken(token);
+
+        signature.add(arrowheadToken.getSignature());
+        tokenGenerationResponse.setSignature(signature);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      return Response.status(500).build();
+    }
+
+    return Response.status(200).entity(tokenGenerationResponse).build();
   }
 
 }

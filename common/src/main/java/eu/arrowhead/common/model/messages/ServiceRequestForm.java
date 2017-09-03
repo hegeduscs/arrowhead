@@ -113,8 +113,9 @@ public class ServiceRequestForm {
    *
    * @return true if the instance is in compliance with all the restrictions, false otherwise
    */
+  //TODO? add constaint: requesterCloud != null és valid, ha service metadata miatt kell token generation
   public boolean isValid() {
-    return requesterSystem != null && requesterSystem.isValid() && (requestedService == null || requestedService.isValid()) && !(
+    return requesterSystem != null && requesterSystem.isValid() && requestedService != null && requestedService.isValid() && !(
         orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) && !(orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty()
         || commands.isEmpty()));
   }
