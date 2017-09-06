@@ -74,7 +74,6 @@ public class AuthorizationApi {
    *
    * @throws DataNotFoundException, BadPayloadException
    */
-  //TODO token generation if flag set true
   @PUT
   @Path("/intracloud")
   public Response isSystemAuthorized(IntraCloudAuthRequest request) {

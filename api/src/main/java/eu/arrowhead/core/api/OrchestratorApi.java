@@ -108,7 +108,6 @@ public class OrchestratorApi {
    * @return List<OrchestrationStore>
    * @throws BadPayloadException, DataNotFoundException
    */
-  //TODO store pojok hasznosságáról dönteni refactor után
   /*@PUT
   public Response getStoreEntries(OrchestrationStoreQuery query) {
 

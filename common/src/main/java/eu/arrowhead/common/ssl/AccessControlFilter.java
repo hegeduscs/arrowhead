@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 @Provider
 @Priority(Priorities.AUTHORIZATION)
+//TODO commonból kiszedni, és legyen minden modulnak saját accescontrolfilterje
 //2nd highest priority constant, this filter gets executed after the SecurityFilter
 public class AccessControlFilter implements ContainerRequestFilter {
 

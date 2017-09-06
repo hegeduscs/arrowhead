@@ -12,6 +12,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
+//TODO csabi nézd át
 @Provider
 @Priority(Priorities.AUTHENTICATION) //Highest priority constant, this filter gets executed first
 public class SecurityFilter implements ContainerRequestFilter {

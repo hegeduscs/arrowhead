@@ -173,10 +173,8 @@ public class ServiceRegistryResource {
     @Path("all")
     public Response getAllServices() {
 
-        ServiceQueryResult result;
-
         try {
-            result = ServiceRegistry.provideAllServices();
+          ServiceQueryResult result = ServiceRegistry.provideAllServices();
             if (result == null || result.getServiceQueryData().isEmpty())
                 return Response.status(Status.NO_CONTENT).entity(result).build();
             else

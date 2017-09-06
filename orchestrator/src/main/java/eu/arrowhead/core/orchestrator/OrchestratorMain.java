@@ -130,7 +130,7 @@ class OrchestratorMain {
     }
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     log.info("Certificate of the secure server: " + serverCN);
-    //TODO public globális változónak kéne ennek lennie, hogy elérhető legyen valahonnan ahol kell?
+    //TODO megnézni a ResourceConfighoz hogyan tud hozzáférni a resource classok, és
     config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();

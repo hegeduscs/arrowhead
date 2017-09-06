@@ -341,6 +341,7 @@ final class OrchestratorService {
         ofList.get(i).setSignature(signatures.get(i));
       }
     }
+    //TODO do an else branch, tokengeneration might have failed for some providers
 
     log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");
     return new OrchestrationResponse(ofList);

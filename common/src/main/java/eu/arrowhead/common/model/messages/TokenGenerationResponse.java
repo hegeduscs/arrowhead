@@ -5,26 +5,21 @@ import java.util.List;
 
 public class TokenGenerationResponse {
 
-  private List<String> token = new ArrayList<>();
-  private List<String> signature = new ArrayList<>();
+  private List<TokenData> tokenData = new ArrayList<>();
 
   public TokenGenerationResponse() {
   }
 
-  public List<String> getToken() {
-    return token;
+  public TokenGenerationResponse(List<TokenData> tokenData) {
+    this.tokenData = tokenData;
   }
 
-  public void setToken(List<String> token) {
-    this.token = token;
+  public List<TokenData> getTokenData() {
+    return tokenData;
   }
 
-  public List<String> getSignature() {
-    return signature;
-  }
-
-  public void setSignature(List<String> signature) {
-    this.signature = signature;
+  public void setTokenData(List<TokenData> tokenData) {
+    this.tokenData = tokenData;
   }
 
 }

@@ -12,11 +12,9 @@ import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.model.messages.ServiceQueryForm;
 import eu.arrowhead.common.model.messages.ServiceQueryResult;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.log4j.Logger;
 
 class ServiceRegistry {
@@ -201,7 +199,7 @@ class ServiceRegistry {
       log.info("All Services are provided!");
       return result;
     }
-    return null;
+     return new ServiceQueryResult();
   }
 
    static boolean removeAllServices () {

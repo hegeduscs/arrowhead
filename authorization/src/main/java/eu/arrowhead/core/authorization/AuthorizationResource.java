@@ -13,9 +13,9 @@ import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.model.messages.InterCloudAuthResponse;
 import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
+import eu.arrowhead.common.model.messages.TokenData;
 import eu.arrowhead.common.model.messages.TokenGenerationRequest;
 import eu.arrowhead.common.model.messages.TokenGenerationResponse;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +38,8 @@ import org.apache.log4j.Logger;
 public class AuthorizationResource {
 
   private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());
-  private DatabaseManager dm = DatabaseManager.getInstance();
   private HashMap<String, Object> restrictionMap = new HashMap<>();
+  static DatabaseManager dm = DatabaseManager.getInstance();
 
   @GET
   public String getIt() {
@@ -51,36 +51,33 @@ public class AuthorizationResource {
    * Checks whether the consumer System can use a Service from a list of provider Systems.
    *
    * @return IntraCloudAuthResponse
+   *
    * @throws DataNotFoundException, BadPayloadException
    */
   @PUT
-  @Path("/intracloud")
+  @Path("intracloud")
   public Response isSystemAuthorized(IntraCloudAuthRequest request) {
-    log.info("Entered the AuthorizationResource:isSystemAuthorized function");
-
     if (!request.isValid()) {
-      log.info("AuthorizationResource:isSystemAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: Missing/incomplete consumer, service" + " or providerList in the request payload.");
+      log.error("isSystemAuthorized BadPayloadException");
+      throw new BadPayloadException("IntraCloudAuthRequest bad payload: missing/incomplete consumer, service or providerList in the request.");
     }
 
-    IntraCloudAuthResponse response = new IntraCloudAuthResponse();
     restrictionMap.put("systemGroup", request.getConsumer().getSystemGroup());
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
-      log.info("Consumer is not in the database. " + "(AuthorizationResource:isSystemAuthorized DataNotFoundException)");
+      log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
       throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().toString());
     }
 
+    IntraCloudAuthResponse response = new IntraCloudAuthResponse();
     HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<>();
-    log.info("authorizationState hashmap created");
-
     restrictionMap.clear();
     restrictionMap.put("serviceGroup", request.getService().getServiceGroup());
     restrictionMap.put("serviceDefinition", request.getService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
-      log.info("Service is not in the database. Returning NOT AUTHORIZED state. " + request.getService().toString());
+      log.info("Service " + request.getService().toString() + " is not in the database. Returning NOT AUTHORIZED state for the consumer.");
       for (ArrowheadSystem provider : request.getProviders()) {
         authorizationState.put(provider, false);
       }
@@ -89,6 +86,7 @@ public class AuthorizationResource {
     }
 
     IntraCloudAuthorization authRight;
+    int authorizedCount = 0;
     for (ArrowheadSystem provider : request.getProviders()) {
       restrictionMap.clear();
       restrictionMap.put("systemGroup", provider.getSystemGroup());
@@ -100,18 +98,16 @@ public class AuthorizationResource {
       restrictionMap.put("provider", retrievedSystem);
       restrictionMap.put("service", service);
       authRight = dm.get(IntraCloudAuthorization.class, restrictionMap);
-      log.info("Authorization rights requested for System: " + request.getConsumer().toString());
 
       if (authRight == null) {
         authorizationState.put(provider, false);
-        log.info("This (consumer/provider/service) request is NOT AUTHORIZED.");
       } else {
         authorizationState.put(provider, true);
-        log.info("This (consumer/provider/service) request is AUTHORIZED.");
+        authorizedCount++;
       }
     }
 
-    log.info("Sending authorization response with " + authorizationState.size() + " entries.");
+    log.info("IntraCloud auth check for consumer " + request.getConsumer().toString() + " returns with " + authorizedCount + " possible provider");
     response.setAuthorizationMap(authorizationState);
     return Response.status(Status.OK).entity(response).build();
   }
@@ -120,23 +116,22 @@ public class AuthorizationResource {
    * Checks whether an external Cloud can use a local Service.
    *
    * @return boolean
+   *
    * @throws DataNotFoundException, BadPayloadException
    */
   @PUT
   @Path("/intercloud")
   public Response isCloudAuthorized(InterCloudAuthRequest request) {
-    log.info("Entered the AuthorizationResource:isCloudAuthorized function");
-
     if (!request.isPayloadUsable()) {
-      log.info("AuthorizationResource:isCloudAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: Missing/incomplete cloud or service in the request payload.");
+      log.error("isCloudAuthorized BadPayloadException");
+      throw new BadPayloadException("InterCloudAuthRequest bad payload: missing/incomplete cloud or service in the request payload.");
     }
 
     restrictionMap.put("operator", request.getCloud().getOperator());
     restrictionMap.put("cloudName", request.getCloud().getCloudName());
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
-      log.info("Consumer is not in the database. " + "(AuthorizationResource:isCloudAuthorized DataNotFoundException)");
+      log.error("Requester cloud is not in the database. (isCloudAuthorized DataNotFoundException)");
       throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString());
     }
 
@@ -145,7 +140,7 @@ public class AuthorizationResource {
     restrictionMap.put("serviceDefinition", request.getService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
-      log.info("Service is not in the database. Returning NOT AUTHORIZED state." + request.getService().toString());
+      log.info("Service " + request.getService().toString() + " is not in the database. Returning NOT AUTHORIZED state for the consumer.");
       return Response.status(Status.OK).entity(new InterCloudAuthResponse(false)).build();
     }
 
@@ -154,57 +149,35 @@ public class AuthorizationResource {
     restrictionMap.put("cloud", cloud);
     restrictionMap.put("service", service);
     authRight = dm.get(InterCloudAuthorization.class, restrictionMap);
-    log.info("Authorization rights requested for Cloud: " + request.getCloud().toString());
 
     boolean isAuthorized = false;
     if (authRight != null) {
-      log.info("This (cloud/service) request is AUTHORIZED.");
       isAuthorized = true;
-    } else {
-      log.info("This (cloud/service) request is NOT AUTHORIZED.");
     }
 
+    log.info("Consumer Cloud is authorized: " + isAuthorized);
     return Response.status(Status.OK).entity(new InterCloudAuthResponse(isAuthorized)).build();
   }
 
   /**
-   * Generates token
+   * Generates ArrowheadTokens for each consumer/service/provider trio
    *
-   * @return tokenGenerationResponse
+   * @return TokenGenerationResponse
    */
-  //TODO review
   @PUT
   @Path("token")
-  public Response resource(TokenGenerationRequest tokenGenerationRequest) {
-    List<PublicKey> providerPublicKeys = AuthorizationService.getProviderPublicKeys(tokenGenerationRequest.getProviders());
+  public Response resource(TokenGenerationRequest request) {
+    List<ArrowheadToken> tokens = TokenGenerationService.generateTokens(request);
+    List<TokenData> tokenDataList = new ArrayList<>();
 
-    List<ArrowheadSystem> providers = tokenGenerationRequest.getProviders();
-
-    TokenGenerationResponse tokenGenerationResponse = new TokenGenerationResponse();
-    List<String> token = new ArrayList<>();
-    List<String> signature = new ArrayList<>();
-
-    try {
-      for (int i = 0; i < providers.size(); i++) {
-        PublicKey providerPublicKey = providerPublicKeys.get(i);
-        ArrowheadSystem provider = providers.get(i);
-
-        ArrowheadToken arrowheadToken = AuthorizationService
-            .generateSingleToken(providerPublicKey, tokenGenerationRequest.getConsumer(), tokenGenerationRequest.getConsumerCloud(),
-                                 tokenGenerationRequest.getService(), tokenGenerationRequest.getDuration());
-
-        token.add(arrowheadToken.getToken());
-        tokenGenerationResponse.setToken(token);
-
-        signature.add(arrowheadToken.getSignature());
-        tokenGenerationResponse.setSignature(signature);
+    for (int i = 0; i < tokens.size(); i++) {
+      if (tokens.get(i) != null) {
+        TokenData tokenData = new TokenData(request.getProviders().get(i), tokens.get(i).getToken(), tokens.get(i).getSignature());
+        tokenDataList.add(tokenData);
       }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      return Response.status(500).build();
     }
 
-    return Response.status(200).entity(tokenGenerationResponse).build();
+    return Response.status(Status.OK).entity(new TokenGenerationResponse(tokenDataList)).build();
   }
 
 }

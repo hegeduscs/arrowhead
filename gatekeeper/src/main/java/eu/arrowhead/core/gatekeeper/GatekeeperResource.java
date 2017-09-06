@@ -77,7 +77,7 @@ public class GatekeeperResource {
       String uri;
       for (ArrowheadCloud cloud : requestForm.getSearchPerimeter()) {
         try {
-          //TODO generalize/think about gatekeeper protocol usage? based on how the gatekeeper was launched
+          //TODO gatekeeper szétszedése lásd arrowhead_todo doksi/új ötletek része
           uri = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
         }
         // We skip the clouds with missing information
@@ -168,8 +168,8 @@ public class GatekeeperResource {
   @Path("init_icn")
   public Response ICNRequest(ICNRequestForm requestForm) {
     if (!requestForm.isValid()) {
-      log.info("ICNRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.");
+      log.error("ICNRequest BadPayloadException");
+      throw new BadPayloadException("init_icn received bad payload: missing/incomplete ICNRequestForm.");
     }
 
     // Compiling the payload and then getting the URI
@@ -199,8 +199,8 @@ public class GatekeeperResource {
   @Path("icn_proposal")
   public Response ICNProposal(ICNProposal icnProposal) {
     if (!icnProposal.isValid()) {
-      log.info("ICNProposal BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNProposal.");
+      log.error("ICNProposal BadPayloadException");
+      throw new BadPayloadException("icn_proposal received bad payload: missing/incomplete ICNProposal.");
     }
 
     // Polling the Authorization System about the consumer Cloud

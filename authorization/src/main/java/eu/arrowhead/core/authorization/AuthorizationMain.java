@@ -35,11 +35,12 @@ class AuthorizationMain {
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
+    //TODO should this be allowed even in insecure mode? + refactor with securityutils
     try {
       String keystorePath = getProp().getProperty("ssl.keystore");
       String keystorePass = getProp().getProperty("ssl.keystorepass");
-      KeyStore keyStore = eu.arrowhead.common.ssl.SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-      privateKey = eu.arrowhead.common.ssl.SecurityUtils.getPrivateKey(keyStore, keystorePass);
+      KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+      privateKey = SecurityUtils.getPrivateKey(keyStore, keystorePass);
     } catch (Exception ex) {
       ex.printStackTrace();
       throw new ServiceConfigurationError("Loading the keystore failed...", ex);
