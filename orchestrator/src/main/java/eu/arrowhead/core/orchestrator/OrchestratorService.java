@@ -13,6 +13,7 @@ import eu.arrowhead.common.model.messages.OrchestrationResponse;
 import eu.arrowhead.common.model.messages.PreferredProvider;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
 import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import eu.arrowhead.common.model.messages.TokenData;
 import eu.arrowhead.common.model.messages.TokenGenerationRequest;
 import eu.arrowhead.common.model.messages.TokenGenerationResponse;
 import java.util.ArrayList;
@@ -293,15 +294,15 @@ final class OrchestratorService {
    * Compiles the OrchestrationResponse object and returns it. Potentially includes token generation for authorization purposes.
    *
    * @param srList Service Registry entries, each containing a suitable provider <tt>ArrowheadSystem</tt>.
-   * @param srf The <tt>ServiceRequestForm</tt> from the requester <tt>ArrowheadSystem</tt>, which is needed in case of token generation is requested.
+   * @param srf The <tt>ServiceRequestForm</tt> from the requester <tt>ArrowheadSystem</tt>, which is needed in case of token generation is
+   *     requested.
    * @param instructions Optional additional information, which can be passed back to the requester <tt>ArrowheadSystem</tt>
    */
   private static OrchestrationResponse compileOrchestrationResponse(@NotNull List<ServiceRegistryEntry> srList, @NotNull ServiceRequestForm srf,
                                                                     @Nullable List<String> instructions) {
-    List<String> tokens = new ArrayList<>();
-    List<String> signatures = new ArrayList<>();
     // Arrange token generation for every provider, if it was requested in the service metadata
     List<ServiceMetadata> metadata = srf.getRequestedService().getServiceMetadata();
+    TokenGenerationResponse tokenResponse = null;
     if (metadata.contains(new ServiceMetadata("security", "token"))) {
       // Getting all the provider Systems from the Service Registry entries
       List<ArrowheadSystem> providerList = new ArrayList<>();
@@ -316,9 +317,7 @@ final class OrchestratorService {
                                                                        srf.getRequestedService(), 0);
       //Sending request, parsing response
       Response authResponse = Utility.sendRequest(authUri, "PUT", tokenRequest);
-      TokenGenerationResponse tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
-      tokens = tokenResponse.getToken();
-      signatures = tokenResponse.getSignature();
+      tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
     }
 
     // Create an OrchestrationForm for every provider
@@ -335,13 +334,16 @@ final class OrchestratorService {
       }
     }
     // Adding the tokens and signatures, if token generation happened
-    if (ofList.size() == tokens.size() && ofList.size() == signatures.size()) {
-      for (int i = 0; i < tokens.size(); i++) {
-        ofList.get(i).setAuthorizationToken(tokens.get(i));
-        ofList.get(i).setSignature(signatures.get(i));
+    if (tokenResponse != null) {
+      for (TokenData data : tokenResponse.getTokenData()) {
+        for (OrchestrationForm of : ofList) {
+          if (data.getSystem().equals(of.getProvider())) {
+            of.setAuthorizationToken(data.getToken());
+            of.setSignature(data.getSignature());
+          }
+        }
       }
     }
-    //TODO do an else branch, tokengeneration might have failed for some providers
 
     log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");
     return new OrchestrationResponse(ofList);

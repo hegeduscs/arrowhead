@@ -36,7 +36,7 @@ public class DatabaseManager {
             .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
       }
     } catch (Exception e) {
-      log.error("Database connection failed, check the configuration!");
+      log.fatal("Database connection failed, check the configuration!");
       e.printStackTrace();
     }
   }

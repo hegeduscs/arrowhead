@@ -166,10 +166,12 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("token")
-  public Response resource(TokenGenerationRequest request) {
+  public Response tokenGeneration(TokenGenerationRequest request) {
+    // Get the tokens from the service class (can throw run time exceptions)
     List<ArrowheadToken> tokens = TokenGenerationService.generateTokens(request);
     List<TokenData> tokenDataList = new ArrayList<>();
 
+    // Only add the successfully created tokens to the response, with the matching provider System
     for (int i = 0; i < tokens.size(); i++) {
       if (tokens.get(i) != null) {
         TokenData tokenData = new TokenData(request.getProviders().get(i), tokens.get(i).getToken(), tokens.get(i).getSignature());

@@ -1,4 +1,4 @@
-package eu.arrowhead.common.ssl;
+package eu.arrowhead.common.security;
 
 import java.io.IOException;
 import javax.annotation.Priority;
