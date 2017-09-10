@@ -34,6 +34,7 @@ public class ServiceRegistryResource {
     }
 
 
+    //TODO List<ServiceRegistryEntry>
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("registration")
@@ -53,6 +54,31 @@ public class ServiceRegistryResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("remove")
+    public Response removeEntriesFromRegistry (ServiceRegistryEntry entry) {
+        if (entry == null || !entry.isValidFully()) {
+            log.info("ServiceRegistry:Query throws BadPayloadException");
+            throw new BadPayloadException("Bad payload: service de-registration form has missing/incomplete mandatory fields.");
+        }
+
+      boolean result;
+
+      try {
+        result = ServiceRegistry.unRegister(entry);
+      } catch (DnsException e) {
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+      }
+
+      if (result)
+        return Response.status(Response.Status.OK).build();
+      else
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+
     /*
         Backwards compatibility
      */
@@ -126,7 +152,7 @@ public class ServiceRegistryResource {
         entry.setProvidedService(new ArrowheadService());
         entry.getProvidedService().setServiceDefinition(service);
         entry.getProvidedService().setServiceGroup(serviceGroup);
-        entry.getProvidedService().setInterfaces(new ArrayList<String>());
+        entry.getProvidedService().setInterfaces(new ArrayList<>());
         entry.getProvidedService().getInterfaces().add(interf);
 
         boolean result;

@@ -45,16 +45,25 @@ public class RegistryUtils {
         //setting up everything for the TXT record
         Map<String, String> properties = data.getProperties();
 
+        if (registryEntry.getProvider() == null)
+          return;
+
         //Arrowhead core-related metadata
-        properties.put("ahsysgrp", registryEntry.getProvider().getSystemGroup());
-        properties.put("ahsysname", registryEntry.getProvider().getSystemName());
-        properties.put("ahsysauth", registryEntry.getProvider().getAuthenticationInfo());
-        properties.put("path", registryEntry.getServiceURI());
+        if (registryEntry.getProvider().getSystemGroup()!=null)
+          properties.put("ahsysgrp", registryEntry.getProvider().getSystemGroup());
+        if (registryEntry.getProvider().getSystemName() != null)
+          properties.put("ahsysname", registryEntry.getProvider().getSystemName());
+        if (registryEntry.getProvider().getAuthenticationInfo() != null)
+          properties.put("ahsysauth", registryEntry.getProvider().getAuthenticationInfo());
+        if (registryEntry.getServiceURI() != null)
+          properties.put("path", registryEntry.getServiceURI());
 
         //additional user metadata
-        for (ServiceMetadata entry : registryEntry.getServiceMetadata()) {
-            properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());
-        }
+        if (registryEntry.getServiceMetadata() != null)
+          for (ServiceMetadata entry : registryEntry.getServiceMetadata()) {
+              properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());
+          }
+
         //As per the DNS-SD standard on service versioning
         properties.put("txtvers",Integer.toString(registryEntry.getVersion()));
     }
