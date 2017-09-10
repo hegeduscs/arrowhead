@@ -3,7 +3,7 @@ package eu.arrowhead.core.serviceregistry;
 import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.ssl.SecurityUtils;
+import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -191,13 +191,8 @@ class ServiceRegistryMain {
     SSLContext sslContext = sslCon.createSSLContext();
     Utility.setSSLContext(sslContext);
 
-    X509Certificate serverCert;
-    try {
-      KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-      serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    } catch (Exception ex) {
-      throw new AuthenticationException(ex.getMessage());
-    }
+    KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+    X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);

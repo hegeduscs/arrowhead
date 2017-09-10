@@ -2,7 +2,7 @@ package eu.arrowhead.core.gateway;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.ssl.SecurityUtils;
+import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -97,7 +97,7 @@ class GatewayMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(GatewayResource.class, eu.arrowhead.common.ssl.SecurityFilter.class);
+    config.registerClasses(GatewayResource.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");
@@ -120,13 +120,8 @@ class GatewayMain {
     SSLContext sslContext = sslCon.createSSLContext();
     Utility.setSSLContext(sslContext);
 
-    X509Certificate serverCert;
-    try {
-      KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-      serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    } catch (Exception ex) {
-      throw new AuthenticationException(ex.getMessage());
-    }
+    KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+    X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);

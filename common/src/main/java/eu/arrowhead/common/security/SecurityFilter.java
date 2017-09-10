@@ -1,10 +1,9 @@
-package eu.arrowhead.common.ssl;
+package eu.arrowhead.common.security;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import javax.annotation.Priority;
-import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -12,18 +11,18 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-//TODO csabi nézd át
+//TODO debugban tesztelni/logolni mit csinál
 @Provider
 @Priority(Priorities.AUTHENTICATION) //Highest priority constant, this filter gets executed first
 public class SecurityFilter implements ContainerRequestFilter {
 
-  @Inject
-  private javax.inject.Provider<UriInfo> uriInfo;
+  private UriInfo uriInfo;
 
   @Override
   public void filter(ContainerRequestContext context) throws IOException {
-    X509Certificate[] chain = (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
+    uriInfo = context.getUriInfo();
 
+    X509Certificate[] chain = (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
     if (chain != null && chain.length > 0) {
       String subject = chain[0].getSubjectDN().getName();
       Authorizer securityContext = new Authorizer(subject);
@@ -38,12 +37,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 
     Authorizer(final String user) {
       this.user = user;
-      this.principal = new Principal() {
-
-        public String getName() {
-          return user;
-        }
-      };
+      this.principal = () -> user;
     }
 
     public Principal getUserPrincipal() {
@@ -55,7 +49,7 @@ public class SecurityFilter implements ContainerRequestFilter {
     }
 
     public boolean isSecure() {
-      return "https".equals(uriInfo.get().getRequestUri().getScheme());
+      return uriInfo.getRequestUri().getScheme().equals("https");
     }
 
     public String getAuthenticationScheme() {

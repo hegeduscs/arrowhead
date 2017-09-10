@@ -108,6 +108,7 @@ class TokenGenerationService {
       }
     }
 
+    // Throw an exception if none of the token generation was successful
     boolean nonNullTokenExists = false;
     for (ArrowheadToken token : tokens) {
       if (token != null) {
@@ -128,6 +129,7 @@ class TokenGenerationService {
     List<PublicKey> keys = new ArrayList<>();
 
     for (ArrowheadSystem provider : providers) {
+      // Get the provider from the database
       restrictionMap.clear();
       restrictionMap.put("systemGroup", provider.getSystemGroup());
       restrictionMap.put("systemName", provider.getSystemName());
@@ -148,6 +150,7 @@ class TokenGenerationService {
       }
     }
 
+    // Throw an exception if none of the public kezs could be acquired from the specs
     boolean nonNullKeyExists = false;
     for (PublicKey key : keys) {
       if (key != null) {

@@ -2,7 +2,7 @@ package eu.arrowhead.core.authorization;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.ssl.SecurityUtils;
+import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,7 +11,6 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.ServiceConfigurationError;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
@@ -34,17 +33,8 @@ class AuthorizationMain {
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
-
-    //TODO should this be allowed even in insecure mode? + refactor with securityutils
-    try {
-      String keystorePath = getProp().getProperty("ssl.keystore");
-      String keystorePass = getProp().getProperty("ssl.keystorepass");
-      KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-      privateKey = SecurityUtils.getPrivateKey(keyStore, keystorePass);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      throw new ServiceConfigurationError("Loading the keystore failed...", ex);
-    }
+    KeyStore keyStore = SecurityUtils.loadKeyStore(getProp().getProperty("ssl.keystore"), getProp().getProperty("ssl.keystorepass"));
+    privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("ssl.keystorepass"));
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -134,13 +124,8 @@ class AuthorizationMain {
     SSLContext sslContext = sslCon.createSSLContext();
     Utility.setSSLContext(sslContext);
 
-    X509Certificate serverCert;
-    try {
-      KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-      serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    } catch (Exception ex) {
-      throw new AuthenticationException(ex.getMessage());
-    }
+    KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+    X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);

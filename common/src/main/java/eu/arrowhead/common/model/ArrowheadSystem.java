@@ -33,7 +33,7 @@ public class ArrowheadSystem {
   @Column(name = "port")
   private int port;
 
-  @Column(name = "authentication_info")
+  @Column(name = "authentication_info", length = 2047)
   private String authenticationInfo;
 
   public ArrowheadSystem() {
