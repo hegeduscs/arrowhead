@@ -33,8 +33,8 @@ import org.apache.log4j.Logger;
  * This is the REST resource for the Authorization Core System.
  */
 @Path("authorization")
-@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class AuthorizationResource {
 
   private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());

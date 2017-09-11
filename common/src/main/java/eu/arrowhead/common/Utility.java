@@ -100,12 +100,15 @@ public final class Utility {
         log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
         throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
       }
-      if (errorMessage.getExceptionType() != null) {
-        log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
-        throw new RuntimeException(errorMessage.getErrorMessage() + " (This " + errorMessage.getExceptionType() + " was passed from another module)");
-      } else {
+      if (errorMessage == null) {
+        log.error("Unknown reason for RuntimeException at the sendRequest() method.");
+        throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+      } else if (errorMessage.getExceptionType() == null) {
         log.error("Request returned with exception: " + errorMessage.getErrorMessage());
         throw new RuntimeException(errorMessage.getErrorMessage() + " (This exception was passed from another module)");
+      } else {
+        log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
+        throw new RuntimeException(errorMessage.getErrorMessage() + " (This " + errorMessage.getExceptionType() + " was passed from another module)");
       }
     }
 

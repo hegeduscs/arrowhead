@@ -23,6 +23,8 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
 @Path("serviceregistry")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class ServiceRegistryResource {
 
   private static Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
@@ -36,7 +38,6 @@ public class ServiceRegistryResource {
 
   //TODO List<ServiceRegistryEntry> parameter option
   @POST
-  @Consumes(MediaType.APPLICATION_JSON)
   @Path("registration")
   public Response publishEntriesToRegistry(ServiceRegistryEntry entry) {
     if (entry == null || !entry.isValidFully()) {
@@ -57,7 +58,6 @@ public class ServiceRegistryResource {
   }
 
   @POST
-  @Consumes(MediaType.APPLICATION_JSON)
   @Path("remove")
   public Response removeEntriesFromRegistry(ServiceRegistryEntry entry) {
     if (entry == null || !entry.isValidFully()) {
@@ -85,7 +85,6 @@ public class ServiceRegistryResource {
       Backwards compatibility
    */
   @POST
-  @Consumes(MediaType.APPLICATION_JSON)
   @Path("/{serviceGroup}/{service}/{interf}")
   public Response publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
                                        @PathParam("interf") String interf, ServiceRegistryEntry entry) {
@@ -118,7 +117,6 @@ public class ServiceRegistryResource {
   }
 
   @PUT
-  @Consumes(MediaType.APPLICATION_JSON)
   @Path("removing")
   public Response removeEntryFromRegistry(ServiceRegistryEntry entry) {
     if (entry == null || !entry.isValidFully()) {
@@ -142,7 +140,6 @@ public class ServiceRegistryResource {
   }
 
   @PUT
-  @Consumes(MediaType.APPLICATION_JSON)
   @Path("/{serviceGroup}/{service}/{interf}")
   public Response removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
                                        @PathParam("interf") String interf, ServiceRegistryEntry entry) {
@@ -178,7 +175,6 @@ public class ServiceRegistryResource {
       Interface towards the Orchestrator
    */
   @PUT
-  @Produces(MediaType.APPLICATION_JSON)
   @Path("query")
   public Response getServiceQueryForm(ServiceQueryForm queryForm) {
     if (queryForm == null || !queryForm.isValid()) {
@@ -201,7 +197,6 @@ public class ServiceRegistryResource {
    * @return All registered service
    */
   @GET
-  @Produces(MediaType.APPLICATION_JSON)
   @Path("all")
   public Response getAllServices() {
 
@@ -223,7 +218,6 @@ public class ServiceRegistryResource {
    * @return Removes all registered service
    */
   @DELETE
-  @Produces(MediaType.APPLICATION_JSON)
   @Path("all")
   public Response removeAllServices() {
 
