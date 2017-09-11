@@ -9,12 +9,12 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>serviceregistry_sqlite</artifactId>
+  <artifactId>serviceregistry_sql</artifactId>
   <version>M2</version>
   <packaging>jar</packaging>
   <properties>
-    <maven.compiler.target>1.7</maven.compiler.target>
-    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
   </properties>
   <dependencies>
     <dependency>
@@ -42,11 +42,6 @@
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-grizzly2-http</artifactId>
     </dependency>
-    <dependency>
-      <groupId>eu.arrowhead</groupId>
-      <artifactId>common</artifactId>
-    </dependency>
-
 
   </dependencies>
 
@@ -86,7 +81,7 @@
             </manifestEntries>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>eu.arrowhead.core.serviceregistry_sqlite.ServiceRegistrySQLiteMain</mainClass>
+              <mainClass>eu.arrowhead.core.serviceregistry_sql.ServiceRegistryMain</mainClass>
               <classpathPrefix>lib/</classpathPrefix>
             </manifest>
           </archive>

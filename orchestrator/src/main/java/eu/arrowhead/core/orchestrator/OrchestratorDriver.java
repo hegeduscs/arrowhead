@@ -66,7 +66,7 @@ final class OrchestratorDriver {
     // Sending the request, parsing the returned result
     Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);
     ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
-    if (serviceQueryResult == null || serviceQueryResult.isValid()) {
+    if (serviceQueryResult == null || !serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");
       throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString());
     }

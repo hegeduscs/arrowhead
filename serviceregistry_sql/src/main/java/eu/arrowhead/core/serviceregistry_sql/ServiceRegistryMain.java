@@ -1,4 +1,4 @@
-package eu.arrowhead.core.serviceregistry_sqlite;
+package eu.arrowhead.core.serviceregistry_sql;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.security.SecurityUtils;
@@ -24,7 +24,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 /**
  * Main class.
  */
-class ServiceRegistrySQLiteMain {
+class ServiceRegistryMain {
 
   public static Timer timer = null;
 
@@ -35,7 +35,7 @@ class ServiceRegistrySQLiteMain {
   private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(ServiceRegistrySQLiteMain.class.getName());
+  private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
 
   /**
    * Main method.

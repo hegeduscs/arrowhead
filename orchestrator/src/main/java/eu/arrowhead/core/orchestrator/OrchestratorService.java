@@ -304,6 +304,7 @@ final class OrchestratorService {
     List<ServiceMetadata> metadata = srf.getRequestedService().getServiceMetadata();
     TokenGenerationResponse tokenResponse = null;
     if (metadata.contains(new ServiceMetadata("security", "token"))) {
+      log.info("token generation requested!");
       // Getting all the provider Systems from the Service Registry entries
       List<ArrowheadSystem> providerList = new ArrayList<>();
       for (ServiceRegistryEntry entry : srList) {

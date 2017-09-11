@@ -1,29 +1,27 @@
-package eu.arrowhead.core.serviceregistry_sqlite;
+package eu.arrowhead.core.serviceregistry_sql;
 
 
 import eu.arrowhead.common.model.ServiceMetadata;
 import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
-import java.util.Iterator;
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.List;
+import org.apache.log4j.Logger;
 
 public class RegistryUtils {
-    private static Logger log = Logger.getLogger(RegistryUtils.class.getName());
 
+  private static Logger log = Logger.getLogger(RegistryUtils.class.getName());
 
-
-    public static boolean pingHost(String host, int port, int timeout) {
-        try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(host, port), timeout);
-            return true;
-        } catch (IOException e) {
-            return false; // Either timeout or unreachable or failed DNS lookup.
-        }
+  public static boolean pingHost(String host, int port, int timeout) {
+    try (Socket socket = new Socket()) {
+      socket.connect(new InetSocketAddress(host, port), timeout);
+      return true;
+    } catch (IOException e) {
+      return false; // Either timeout or unreachable or failed DNS lookup.
     }
+  }
 
   public static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
 
@@ -31,14 +29,11 @@ public class RegistryUtils {
 
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();
-      if (current.getProvider().getAddress().equals("localhost") ||
-          current.getProvider().getAddress().equals("127.0.0.1"))
+      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("127.0.0.1")) {
         iterator.remove();
-
-      else if (!pingHost(current.getProvider().getAddress(),
-                        current.getProvider().getPort(),
-                        ServiceRegistrySQLiteMain.pingTimeout))
+      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
         iterator.remove();
+      }
     }
   }
 
@@ -51,9 +46,13 @@ public class RegistryUtils {
       ServiceRegistryEntry current = iterator.next();
       boolean allMatch = true;
       for (ServiceMetadata currentMeta : current.getProvidedService().getServiceMetadata()) {
-        if (!metadata.contains(currentMeta)) allMatch = false;
+        if (!metadata.contains(currentMeta)) {
+          allMatch = false;
+        }
       }
-      if (!allMatch) iterator.remove();
+      if (!allMatch) {
+        iterator.remove();
+      }
     }
   }
 

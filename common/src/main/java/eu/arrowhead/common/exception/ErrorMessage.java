@@ -6,20 +6,15 @@ public class ErrorMessage {
   private int errorCode;
   //TODO modify this once javadocs are published, it could even go to the specific exception doc
   private String documentation = "No documentation yet.";
-  // does not have a setter on purpose, only use it with RuntimeExceptions with public String constructor
-  private Class exceptionType;
+  private String exceptionType;
 
   public ErrorMessage() {
   }
 
-  public ErrorMessage(String errorMessage, int errorCode, Class exceptionType) {
+  public ErrorMessage(String errorMessage, int errorCode, String exceptionType) {
     this.errorMessage = errorMessage;
     this.errorCode = errorCode;
-    if (RuntimeException.class == exceptionType || RuntimeException.class.isAssignableFrom(exceptionType)) {
-      this.exceptionType = exceptionType;
-    } else {
-      this.exceptionType = RuntimeException.class;
-    }
+    this.exceptionType = exceptionType;
   }
 
   public String getErrorMessage() {
@@ -46,8 +41,12 @@ public class ErrorMessage {
     this.documentation = documentation;
   }
 
-  public Class getExceptionType() {
+  public String getExceptionType() {
     return exceptionType;
+  }
+
+  public void setExceptionType(String exceptionType) {
+    this.exceptionType = exceptionType;
   }
 
 }

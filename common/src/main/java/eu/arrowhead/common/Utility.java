@@ -7,7 +7,6 @@ import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.model.ArrowheadCloud;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,9 +100,13 @@ public final class Utility {
         log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
         throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
       }
-      log.error("Request returned with " + errorMessage.getExceptionType().toString() + ": " + errorMessage.getErrorMessage());
-      //noinspection unchecked
-      throwExceptionAgain(errorMessage.getExceptionType(), errorMessage.getErrorMessage() + "(This exception was passed from another module)");
+      if (errorMessage.getExceptionType() != null) {
+        log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
+        throw new RuntimeException(errorMessage.getErrorMessage() + " (This " + errorMessage.getExceptionType() + " was passed from another module)");
+      } else {
+        log.error("Request returned with exception: " + errorMessage.getErrorMessage());
+        throw new RuntimeException(errorMessage.getErrorMessage() + " (This exception was passed from another module)");
+      }
     }
 
     return response;
@@ -233,7 +236,7 @@ public final class Utility {
   }
 
   // IMPORTANT: only use this function with RuntimeExceptions that have a public String constructor
-  private static <T extends RuntimeException> void throwExceptionAgain(Class<T> exceptionType, String message) {
+  /*private static <T extends RuntimeException> void throwExceptionAgain(Class<T> exceptionType, String message) {
     try {
       throw exceptionType.getConstructor(String.class).newInstance(message);
     }
@@ -242,6 +245,6 @@ public final class Utility {
         SecurityException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
 }

@@ -179,6 +179,7 @@ public class AuthorizationResource {
       }
     }
 
+    log.info("Token generation returns with " + tokenDataList.size() + " arrowhead tokens.");
     return Response.status(Status.OK).entity(new TokenGenerationResponse(tokenDataList)).build();
   }
 
