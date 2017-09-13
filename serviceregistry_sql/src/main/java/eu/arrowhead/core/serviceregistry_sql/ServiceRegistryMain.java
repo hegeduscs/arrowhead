@@ -21,28 +21,18 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-/**
- * Main class.
- */
 class ServiceRegistryMain {
 
-  public static Timer timer = null;
-
-  //property files
-  private static Properties appProp;
-  public static int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
-  private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
-  private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
+  private static Timer timer = null;
+  private static Properties prop;
   private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8442/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
+  static int pingTimeout = new Integer(getProp().getProperty("ping.timeout", "10000"));
 
-  /**
-   * Main method.
-   */
   public static void main(String[] args) throws IOException {
-
-    //setting up log4j logging based on prop file
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
     boolean daemon = false;
@@ -72,27 +62,25 @@ class ServiceRegistryMain {
         }
       }
     }
-
-    //if no mode was selected in args, insecure it is
     if (!serverModeSet) {
       server = startServer();
     }
 
-    //if scheduled ping is set
-    if (getAppProp().getProperty("ping.scheduled").equals("true")) {
+    //if scheduled ping is set, start the TimerTask that provides it
+    if (getProp().getProperty("ping.scheduled").equals("true")) {
       TimerTask pingTask = new PingProvidersTask();
       timer = new Timer();
       int interval = 10;
       try {
-        interval = Integer.parseInt(getAppProp().getProperty("ping.interval", "10"));
+        interval = Integer.parseInt(getProp().getProperty("ping.interval", "10"));
       } catch (Exception e) {
         log.error("Invalid 'ping.interval' value in app.properties!");
+        e.printStackTrace();
       }
 
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 
-    //if daemon mode
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -117,9 +105,6 @@ class ServiceRegistryMain {
   }
 
 
-  /**
-   * @return Grizzly HTTP server.
-   */
   private static HttpServer startServer() throws IOException {
     log.info("Starting server at: " + BASE_URI);
     System.out.println("Starting insecure server at: " + BASE_URI);
@@ -135,9 +120,6 @@ class ServiceRegistryMain {
     return server;
   }
 
-  /**
-   * @return Grizzly HTTPS server.
-   */
   private static HttpServer startSecureServer() throws IOException {
     log.info("Starting server at: " + BASE_URI_SECURED);
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
@@ -146,10 +128,10 @@ class ServiceRegistryMain {
     config.registerClasses(ServiceRegistryResource.class);
     config.packages("eu.arrowhead.common");
 
-    String keystorePath = getAppProp().getProperty("ssl.keystore", "/home/arrowhead_test.jks");
-    String keystorePass = getAppProp().getProperty("ssl.keystorepass", "arrowhead");
-    String truststorePath = getAppProp().getProperty("ssl.truststore", "/home/arrowhead_test.jks");
-    String truststorePass = getAppProp().getProperty("ssl.truststorepass", "arrowhead");
+    String keystorePath = getProp().getProperty("ssl.keystore");
+    String keystorePass = getProp().getProperty("ssl.keystorepass");
+    String truststorePath = getProp().getProperty("ssl.truststore");
+    String truststorePass = getProp().getProperty("ssl.truststorepass");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);
@@ -174,20 +156,6 @@ class ServiceRegistryMain {
     return server;
   }
 
-  private static synchronized Properties getAppProp() {
-    try {
-      if (appProp == null) {
-        appProp = new Properties();
-        File file = new File("config" + File.separator + "app.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        appProp.load(inputStream);
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    return appProp;
-  }
-
   private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
@@ -199,4 +167,19 @@ class ServiceRegistryMain {
     }
     System.out.println("Service Registry Server(s) stopped");
   }
+
+  private static synchronized Properties getProp() {
+    try {
+      if (prop == null) {
+        prop = new Properties();
+        File file = new File("config" + File.separator + "app.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+        prop.load(inputStream);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return prop;
+  }
+
 }

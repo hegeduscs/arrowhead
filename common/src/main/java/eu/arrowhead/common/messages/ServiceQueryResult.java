@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import java.util.ArrayList;
 import java.util.List;
 

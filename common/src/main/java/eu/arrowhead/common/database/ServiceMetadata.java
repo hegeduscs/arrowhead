@@ -1,7 +1,19 @@
-package eu.arrowhead.common.messages;
+package eu.arrowhead.common.database;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
+
+@Entity
+@Table(name = "arrowhead_service_metadata")
 public class ServiceMetadata {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private int id;
   private String key;
   private String value;
 
@@ -11,6 +23,15 @@ public class ServiceMetadata {
   public ServiceMetadata(String key, String value) {
     this.key = key;
     this.value = value;
+  }
+
+  @XmlTransient
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 
   public String getKey() {

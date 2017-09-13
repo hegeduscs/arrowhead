@@ -1,9 +1,7 @@
 package eu.arrowhead.common.database;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -12,8 +10,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -33,13 +29,13 @@ public class ArrowheadService {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
 
+  //TODO look over entity classes and put NotNull annotation everywhere it should be there + use @Nullable too?!
   @Column(name = "service_group")
   @NotNull
   private String serviceGroup;
 
   @Column(name = "service_definition")
   @NotNull
-  //TODO look over entity classes and put NotNull annotation everywhere it should be there + use @Nullable too?!
   private String serviceDefinition;
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -48,15 +44,14 @@ public class ArrowheadService {
   private List<String> interfaces = new ArrayList<>();
 
   @ElementCollection(fetch = FetchType.LAZY)
-  @MapKeyColumn(name = "metadata_key")
-  @Column(name = "metadata_value")
-  @CollectionTable(name = "arrowhead_service_metadata", joinColumns = @JoinColumn(name = "service_id"))
-  private Map<String, String> serviceMetadata = new HashMap<>();
+  @LazyCollection(LazyCollectionOption.FALSE)
+  @CollectionTable(name = "arrowhead_service_metadata_list")
+  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
 
   public ArrowheadService() {
   }
 
-  public ArrowheadService(String serviceGroup, String serviceDefinition, List<String> interfaces, Map<String, String> serviceMetadata) {
+  public ArrowheadService(String serviceGroup, String serviceDefinition, List<String> interfaces, List<ServiceMetadata> serviceMetadata) {
     this.serviceGroup = serviceGroup;
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;
@@ -101,18 +96,17 @@ public class ArrowheadService {
     this.interfaces.add(oneInterface);
   }
 
-  public Map<String, String> getServiceMetadata() {
+  public List<ServiceMetadata> getServiceMetadata() {
     return serviceMetadata;
   }
 
-  public void setServiceMetadata(Map<String, String> metaData) {
+  public void setServiceMetadata(List<ServiceMetadata> metaData) {
     this.serviceMetadata = metaData;
   }
 
   /*
    * @note  ArrowheadServices cannot contain the character "_" in any fields.
    */
-  //TODO ask csabi if we can drop this
   public boolean isValid() {
 
     boolean areInterfacesClean = true;

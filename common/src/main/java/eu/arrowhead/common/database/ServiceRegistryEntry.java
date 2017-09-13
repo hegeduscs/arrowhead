@@ -1,23 +1,45 @@
-package eu.arrowhead.common.messages;
+package eu.arrowhead.common.database;
 
-import eu.arrowhead.common.database.ArrowheadService;
-import eu.arrowhead.common.database.ArrowheadSystem;
 import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlTransient;
 
+@Entity
+@Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"provided_service", "provider"})})
 public class ServiceRegistryEntry {
 
+  @Column(name = "id")
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private int id;
+
   //mandatory fields
+  @Column(name = "provided_service")
   private ArrowheadService providedService;
+  @Column(name = "provider")
   private ArrowheadSystem provider;
 
   //non-mandatory fields
+  @Column(name = "service_uri")
   private String serviceURI;
+  @Transient
   private int version = 1;
+  @Transient
   private boolean isUDP = false;
 
   //only for backwards compatibility, non-mandatory fields
+  @Transient
   private List<ServiceMetadata> serviceMetadata;
+  @Transient
   private List<String> interfaces;
+  @Transient
   private String TSIG_key;
 
   public ServiceRegistryEntry() {
@@ -27,6 +49,15 @@ public class ServiceRegistryEntry {
     this.providedService = providedService;
     this.provider = provider;
     this.serviceURI = serviceURI;
+  }
+
+  @XmlTransient
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 
   public ArrowheadService getProvidedService() {

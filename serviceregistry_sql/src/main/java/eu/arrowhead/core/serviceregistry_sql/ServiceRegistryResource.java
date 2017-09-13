@@ -1,170 +1,97 @@
 package eu.arrowhead.core.serviceregistry_sql;
 
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
-import eu.arrowhead.common.messages.ServiceRegistryEntry;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
 @Path("serviceregistry")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class ServiceRegistryResource {
 
   private static Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
+  private HashMap<String, Object> restrictionMap = new HashMap<>();
+  static DatabaseManager dm = DatabaseManager.getInstance();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "This is the Service Registry.";
+    return "This is the Service Registry Arrowhead Core System.";
   }
 
 
   @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("registration")
-  public Response publishEntriesToRegistry(ServiceRegistryEntry entry) {
-    if (entry == null || !entry.isValidFully()) {
-      log.info("ServiceRegistry:Query throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
+  @Path("register")
+  public Response registerService(ServiceRegistryEntry entry) {
+    if (!entry.isValidFully()) {
+      log.error("registerService throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }
 
-    //TODO register
-    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-
-  }
-
-  /*
-      Backwards compatibility
-   */
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("/{serviceGroup}/{service}/{interf}")
-  public Response publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-                                       @PathParam("interf") String interf, ServiceRegistryEntry entry) {
-
-    if (serviceGroup == null || service == null || interf == null || entry == null) {
-      log.info("ServiceRegistry: Registration throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.");
-    }
-
-    //putting the service data into ArrowheadService
-    entry.setProvidedService(new ArrowheadService());
-
-    entry.getProvidedService().setServiceGroup(serviceGroup);
-    entry.getProvidedService().setServiceDefinition(service);
-
-    List<String> interfaces = new ArrayList<>();
-    interfaces.add(interf);
-    entry.getProvidedService().setInterfaces(interfaces);
-
-    //TODO unregister
-    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    ServiceRegistryEntry savedEntry = dm.save(entry);
+    return Response.status(Status.CREATED).entity(savedEntry).build();
 
   }
 
   @PUT
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("registration")
-  public Response removeEntryFromRegistry(ServiceRegistryEntry entry) {
-    if (entry == null || !entry.isValidFully()) {
-      log.info("ServiceRegistry:Query throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
+  @Path("query")
+  public Response queryRegistry(ServiceQueryForm queryForm) {
+    if (!queryForm.isValid()) {
+      log.error("queryRegistry throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: ServiceQueryForm has missing/incomplete mandatory field(s).");
     }
 
-    boolean result = false;
-
-    if (result) {
-      return Response.status(Response.Status.OK).build();
-    } else {
-      return Response.status(Response.Status.NO_CONTENT).build();
+    restrictionMap.put("serviceGroup", queryForm.getService().getServiceGroup());
+    restrictionMap.put("serviceDefinition", queryForm.getService().getServiceDefinition());
+    ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
+    if (service == null) {
+      log.info("Service " + queryForm.getService().toString() + " is not in the registry.");
+      return Response.status(Status.NO_CONTENT).entity(new ServiceQueryResult()).build();
     }
 
+    restrictionMap.clear();
+    restrictionMap.put("providedService", service);
+    List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, restrictionMap);
+
+    //TODO version filter (?)
+
+    if (queryForm.isMetadataSearch()) {
+      RegistryUtils.filterOnMeta(providedServices, queryForm.getService().getServiceMetadata());
+    }
+    if (queryForm.isPingProviders()) {
+      RegistryUtils.filterOnPing(providedServices);
+    }
+
+    return Response.status(Status.OK).entity(providedServices).build();
   }
 
   @PUT
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("/{serviceGroup}/{service}/{interf}")
-  public Response removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-                                       @PathParam("interf") String interf, ServiceRegistryEntry entry) {
-
-    if (serviceGroup == null || service == null || interf == null || !entry.isValid()) {
-      log.info("ServiceRegistry:Query throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.");
+  @Path("remove")
+  public Response removeService(ServiceRegistryEntry entry) {
+    if (!entry.isValidFully()) {
+      log.error("removeService throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }
 
-    //ArrowheadService will be empty in this case
-    entry.setProvidedService(new ArrowheadService());
-    entry.getProvidedService().setServiceDefinition(service);
-    entry.getProvidedService().setServiceGroup(serviceGroup);
-    entry.getProvidedService().setInterfaces(new ArrayList<String>());
-    entry.getProvidedService().getInterfaces().add(interf);
-
-    boolean result = false;
-
-    if (result) {
-      return Response.status(Response.Status.OK).build();
-    } else {
-      return Response.status(Response.Status.NO_CONTENT).build();
-    }
+    dm.delete(entry);
+    return Response.status(Status.OK).entity(entry).build();
   }
 
-  /*
-      Interface towards the Orchestrator
-   */
-  @PUT
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path(value = "query")
-  public Response getServiceQueryForm(ServiceQueryForm queryForm) {
+  //TODO do more variations (list args, delete all for a provider, etc)
 
-    if (queryForm == null || !queryForm.isValid()) {
-      log.info("ServiceRegistry:Query throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: the request form has missing/incomplete mandatory fields.");
-    }
-
-    ServiceQueryResult sqr = ServiceRegistry.provideServices(queryForm);
-
-    if (!sqr.getServiceQueryData().isEmpty()) {
-      return Response.status(Response.Status.OK).entity(sqr).build();
-    } else {
-      return Response.status(Response.Status.NO_CONTENT).entity(sqr).build();
-    }
-  }
-
-  /**
-   * Public function for checking all entries
-   *
-   * @return All registered service
-   */
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path(value = "/all")
-  public Response getAllServices() {
-
-    ServiceQueryResult result;
-    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-  }
-
-  /**
-   * Public function for removing all entries in the DNS.
-   *
-   * @return Removes all registered service
-   */
-  @DELETE
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path(value = "/all")
-  public Response removeAllServices() {
-    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-  }
 }

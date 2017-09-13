@@ -2,11 +2,11 @@ package eu.arrowhead.core.serviceregistry;
 
 import com.github.danieln.dnssdjava.DnsSDException;
 import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
-import eu.arrowhead.common.messages.ServiceRegistryEntry;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -38,7 +38,7 @@ public class ServiceRegistryResource {
 
   //TODO List<ServiceRegistryEntry> parameter option
   @POST
-  @Path("registration")
+  @Path("register")
   public Response publishEntriesToRegistry(ServiceRegistryEntry entry) {
     if (entry == null || !entry.isValidFully()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
@@ -57,7 +57,7 @@ public class ServiceRegistryResource {
     }
   }
 
-  @POST
+  @PUT
   @Path("remove")
   public Response removeEntriesFromRegistry(ServiceRegistryEntry entry) {
     if (entry == null || !entry.isValidFully()) {
@@ -66,7 +66,6 @@ public class ServiceRegistryResource {
     }
 
     boolean result;
-
     try {
       result = ServiceRegistry.unRegister(entry);
     } catch (DnsException e) {
@@ -79,7 +78,6 @@ public class ServiceRegistryResource {
       return Response.status(Response.Status.NO_CONTENT).build();
     }
   }
-
 
   /*
       Backwards compatibility
@@ -114,29 +112,6 @@ public class ServiceRegistryResource {
       log.error("SR Registration failed:" + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
-  }
-
-  @PUT
-  @Path("removing")
-  public Response removeEntryFromRegistry(ServiceRegistryEntry entry) {
-    if (entry == null || !entry.isValidFully()) {
-      log.info("ServiceRegistry:Query throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
-    }
-
-    boolean result;
-    try {
-      result = ServiceRegistry.unRegister(entry);
-    } catch (DnsException e) {
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    }
-
-    if (result) {
-      return Response.status(Response.Status.OK).build();
-    } else {
-      return Response.status(Response.Status.NO_CONTENT).build();
-    }
-
   }
 
   @PUT

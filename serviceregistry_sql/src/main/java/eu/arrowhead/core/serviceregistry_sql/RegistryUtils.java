@@ -1,20 +1,16 @@
 package eu.arrowhead.core.serviceregistry_sql;
 
-
-import eu.arrowhead.common.messages.ServiceMetadata;
-import eu.arrowhead.common.messages.ServiceRegistryEntry;
+import eu.arrowhead.common.database.ServiceMetadata;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.log4j.Logger;
 
-public class RegistryUtils {
+class RegistryUtils {
 
-  private static Logger log = Logger.getLogger(RegistryUtils.class.getName());
-
-  public static boolean pingHost(String host, int port, int timeout) {
+  static boolean pingHost(String host, int port, int timeout) {
     try (Socket socket = new Socket()) {
       socket.connect(new InetSocketAddress(host, port), timeout);
       return true;
@@ -23,24 +19,11 @@ public class RegistryUtils {
     }
   }
 
-  public static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
-
-    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
-
-    while (iterator.hasNext()) {
-      ServiceRegistryEntry current = iterator.next();
-      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("127.0.0.1")) {
-        iterator.remove();
-      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
-        iterator.remove();
-      }
-    }
+  static void filterOnVersion(List<ServiceRegistryEntry> fetchedList, int targetVersion) {
+    fetchedList.removeIf(current -> current.getVersion() != targetVersion);
   }
 
-  /*
-      TODO This method filters on Service metadata.
-  */
-  public static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, List<ServiceMetadata> metadata) {
+  static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, List<ServiceMetadata> metadata) {
     Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();
@@ -56,16 +39,16 @@ public class RegistryUtils {
     }
   }
 
-  /*
-     TODO This method filters on Service version.
- */
-  public static void filteronVersion(List<ServiceRegistryEntry> fetchedList, int targetVersion) {
+  static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
     Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();
-      if (current.getVersion() != targetVersion) {
+      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("127.0.0.1")) {
+        iterator.remove();
+      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
         iterator.remove();
       }
     }
   }
+
 }
