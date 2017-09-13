@@ -10,9 +10,9 @@
 */
 package eu.arrowhead.qos.drivers.implementations;
 
-import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.QoSReservationCommand;
+import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.messages.QoSReservationCommand;
 import eu.arrowhead.qos.drivers.IQoSDriver;
 import eu.arrowhead.qos.drivers.ReservationInfo;
 import eu.arrowhead.qos.drivers.ReservationResponse;

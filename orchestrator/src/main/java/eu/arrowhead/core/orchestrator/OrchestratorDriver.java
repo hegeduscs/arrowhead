@@ -1,23 +1,24 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ArrowheadCloud;
+import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.model.ArrowheadCloud;
-import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.GSDAnswer;
-import eu.arrowhead.common.model.messages.GSDRequestForm;
-import eu.arrowhead.common.model.messages.GSDResult;
-import eu.arrowhead.common.model.messages.ICNRequestForm;
-import eu.arrowhead.common.model.messages.ICNResult;
-import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
-import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
-import eu.arrowhead.common.model.messages.PreferredProvider;
-import eu.arrowhead.common.model.messages.ServiceQueryForm;
-import eu.arrowhead.common.model.messages.ServiceQueryResult;
-import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
-import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import eu.arrowhead.common.messages.GSDAnswer;
+import eu.arrowhead.common.messages.GSDRequestForm;
+import eu.arrowhead.common.messages.GSDResult;
+import eu.arrowhead.common.messages.ICNRequestForm;
+import eu.arrowhead.common.messages.ICNResult;
+import eu.arrowhead.common.messages.IntraCloudAuthRequest;
+import eu.arrowhead.common.messages.IntraCloudAuthResponse;
+import eu.arrowhead.common.messages.OrchestrationResponse;
+import eu.arrowhead.common.messages.PreferredProvider;
+import eu.arrowhead.common.messages.ServiceQueryForm;
+import eu.arrowhead.common.messages.ServiceQueryResult;
+import eu.arrowhead.common.messages.ServiceRegistryEntry;
+import eu.arrowhead.common.messages.ServiceRequestForm;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,7 +67,7 @@ final class OrchestratorDriver {
     // Sending the request, parsing the returned result
     Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);
     ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
-    if (serviceQueryResult == null || serviceQueryResult.isValid()) {
+    if (serviceQueryResult == null || !serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");
       throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString());
     }
@@ -128,7 +129,7 @@ final class OrchestratorDriver {
    *
    * @param srList The list of <tt>ServiceRegistryEntry</tt>s still being considered (after SR query and possibly Auth query)
    * @param preferredLocalProviders A set of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a subset
-   *     of the <i>preferredProviders</i> list from the {@link eu.arrowhead.common.model.messages.ServiceRequestForm}, which can also contain not
+   *     of the <i>preferredProviders</i> list from the {@link ServiceRequestForm}, which can also contain not
    *     local <tt>ArrowheadSystem</tt>s.
    *
    * @return a list of <tt>ServiceRegistryEntry</tt>s which have preferred provider <tt>ArrowheadSystem</tt>s
@@ -404,7 +405,7 @@ final class OrchestratorDriver {
    *     method.
    * @param targetCloud The <tt>ArrowheadCloud</tt> entity this local cloud chose to do ICN with.
    *
-   * @return a boxed {@link eu.arrowhead.common.model.messages.OrchestrationResponse} object from the remote cloud
+   * @return a boxed {@link OrchestrationResponse} object from the remote cloud
    *
    * @throws DataNotFoundException if the ICN failed with the remote cloud for some reason
    */

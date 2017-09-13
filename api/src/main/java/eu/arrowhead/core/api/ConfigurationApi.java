@@ -1,12 +1,12 @@
 package eu.arrowhead.core.api;
 
 import eu.arrowhead.common.DatabaseManager;
+import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.CoreSystem;
 import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.database.OwnCloud;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.model.ArrowheadCloud;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

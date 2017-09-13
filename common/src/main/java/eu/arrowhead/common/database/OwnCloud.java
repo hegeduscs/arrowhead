@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database;
 
-import eu.arrowhead.common.model.ArrowheadCloud;
+import eu.arrowhead.common.messages.GSDPoll;
+import eu.arrowhead.common.messages.ICNProposal;
 import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -19,9 +20,9 @@ import javax.persistence.UniqueConstraint;
  * Authorization).
  *
  * @author Umlauf Zoltán
- * @see eu.arrowhead.common.model.ArrowheadCloud
- * @see eu.arrowhead.common.model.messages.GSDPoll
- * @see eu.arrowhead.common.model.messages.ICNProposal
+ * @see ArrowheadCloud
+ * @see GSDPoll
+ * @see ICNProposal
  */
 @Entity
 @Table(name = "own_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"cloud_id"})})

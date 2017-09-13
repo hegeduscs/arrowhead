@@ -8,9 +8,9 @@
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
     <property name="show_sql">true</property>
     <property name="hibernate.hbm2ddl.auto">update</property>
-    <mapping class="eu.arrowhead.common.model.ArrowheadCloud"/>
-    <mapping class="eu.arrowhead.common.model.ArrowheadSystem"/>
-    <mapping class="eu.arrowhead.common.model.ArrowheadService"/>
+    <mapping class="eu.arrowhead.common.database.ArrowheadCloud"/>
+    <mapping class="eu.arrowhead.common.database.ArrowheadSystem"/>
+    <mapping class="eu.arrowhead.common.database.ArrowheadService"/>
     <mapping class="eu.arrowhead.common.database.CoreSystem"/>
     <mapping class="eu.arrowhead.common.database.InterCloudAuthorization"/>
     <mapping class="eu.arrowhead.common.database.IntraCloudAuthorization"/>

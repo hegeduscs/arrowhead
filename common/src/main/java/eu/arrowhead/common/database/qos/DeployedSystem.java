@@ -1,6 +1,6 @@
 package eu.arrowhead.common.database.qos;
 
-import eu.arrowhead.common.model.ArrowheadSystem;
+import eu.arrowhead.common.database.ArrowheadSystem;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;

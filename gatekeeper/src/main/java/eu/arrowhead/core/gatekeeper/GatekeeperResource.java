@@ -1,25 +1,26 @@
 package eu.arrowhead.core.gatekeeper;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ArrowheadCloud;
+import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.ErrorMessage;
-import eu.arrowhead.common.model.ArrowheadCloud;
-import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.GSDAnswer;
-import eu.arrowhead.common.model.messages.GSDPoll;
-import eu.arrowhead.common.model.messages.GSDRequestForm;
-import eu.arrowhead.common.model.messages.GSDResult;
-import eu.arrowhead.common.model.messages.ICNProposal;
-import eu.arrowhead.common.model.messages.ICNRequestForm;
-import eu.arrowhead.common.model.messages.ICNResult;
-import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
-import eu.arrowhead.common.model.messages.InterCloudAuthResponse;
-import eu.arrowhead.common.model.messages.OrchestrationResponse;
-import eu.arrowhead.common.model.messages.PreferredProvider;
-import eu.arrowhead.common.model.messages.ServiceQueryForm;
-import eu.arrowhead.common.model.messages.ServiceQueryResult;
-import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import eu.arrowhead.common.messages.GSDAnswer;
+import eu.arrowhead.common.messages.GSDPoll;
+import eu.arrowhead.common.messages.GSDRequestForm;
+import eu.arrowhead.common.messages.GSDResult;
+import eu.arrowhead.common.messages.ICNProposal;
+import eu.arrowhead.common.messages.ICNRequestForm;
+import eu.arrowhead.common.messages.ICNResult;
+import eu.arrowhead.common.messages.InterCloudAuthRequest;
+import eu.arrowhead.common.messages.InterCloudAuthResponse;
+import eu.arrowhead.common.messages.OrchestrationResponse;
+import eu.arrowhead.common.messages.PreferredProvider;
+import eu.arrowhead.common.messages.ServiceQueryForm;
+import eu.arrowhead.common.messages.ServiceQueryResult;
+import eu.arrowhead.common.messages.ServiceRequestForm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +134,8 @@ public class GatekeeperResource {
     // If the consumer Cloud is not authorized an error is returned
     if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
       log.info("GSD poll: Requester Cloud is UNAUTHORIZED, sending back error");
-      ErrorMessage errorMessage = new ErrorMessage("Requester Cloud is UNAUTHORIZED to consume this service, GSD poll failed.", 401, null);
+      ErrorMessage errorMessage = new ErrorMessage("Requester Cloud is UNAUTHORIZED to consume this service, GSD poll failed.", 401,
+                                                   AuthenticationException.class.toString());
       return Response.status(Status.UNAUTHORIZED).entity(errorMessage).build();
     }
     // If it is authorized, poll the Service Registry for the requested Service
@@ -148,7 +150,8 @@ public class GatekeeperResource {
       ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
       if (!result.isValid()) {
         log.info("GSD poll: SR query came back empty, sending back error");
-        ErrorMessage errorMessage = new ErrorMessage("Service not found in the Service Registry, GSD poll failed.", 404, DataNotFoundException.class);
+        ErrorMessage errorMessage = new ErrorMessage("Service not found in the Service Registry, GSD poll failed.", 404,
+                                                     DataNotFoundException.class.toString());
         return Response.status(Status.NOT_FOUND).entity(errorMessage).build();
       }
 
@@ -212,7 +215,8 @@ public class GatekeeperResource {
     // If the consumer Cloud is not authorized an error is returned
     if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
       log.info("ICNProposal: Requester Cloud is UNAUTHORIZED, sending back error");
-      ErrorMessage errorMessage = new ErrorMessage("Requester Cloud is UNAUTHORIZED to consume this service, ICNProposal failed.", 401, null);
+      ErrorMessage errorMessage = new ErrorMessage("Requester Cloud is UNAUTHORIZED to consume this service, ICNProposal failed.", 401,
+                                                   AuthenticationException.class.toString());
       return Response.status(Status.UNAUTHORIZED).entity(errorMessage).build();
     }
     // If it is authorized, send a ServiceRequestForm to the Orchestrator and return the OrchestrationResponse

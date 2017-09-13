@@ -2,11 +2,11 @@ package eu.arrowhead.core.authorization;
 
 import com.google.gson.Gson;
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.model.ArrowheadCloud;
-import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.ArrowheadToken;
-import eu.arrowhead.common.model.messages.RawTokenInfo;
-import eu.arrowhead.common.model.messages.TokenGenerationRequest;
+import eu.arrowhead.common.database.ArrowheadCloud;
+import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.messages.ArrowheadToken;
+import eu.arrowhead.common.messages.RawTokenInfo;
+import eu.arrowhead.common.messages.TokenGenerationRequest;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;

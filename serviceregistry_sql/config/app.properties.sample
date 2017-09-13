@@ -1,0 +1,15 @@
+ssl.keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\serviceregistry.testcloud1.jks
+ssl.keystorepass=12345
+ssl.keypass=12345
+ssl.truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
+ssl.truststorepass=12345
+base_uri=http://0.0.0.0:8442/
+base_uri_secured=https://0.0.0.0:8443/
+db_user=root
+db_password=root
+db_address=jdbc:mysql://localhost:3306/arrowhead
+#scheduled ping for remove unaccessible services
+ping.timeout=10000
+ping.scheduled=false
+#interval in minutes
+ping.interval=60

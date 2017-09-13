@@ -1,21 +1,21 @@
 package eu.arrowhead.core.authorization;
 
 import eu.arrowhead.common.DatabaseManager;
+import eu.arrowhead.common.database.ArrowheadCloud;
+import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.InterCloudAuthorization;
 import eu.arrowhead.common.database.IntraCloudAuthorization;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.model.ArrowheadCloud;
-import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.ArrowheadToken;
-import eu.arrowhead.common.model.messages.InterCloudAuthRequest;
-import eu.arrowhead.common.model.messages.InterCloudAuthResponse;
-import eu.arrowhead.common.model.messages.IntraCloudAuthRequest;
-import eu.arrowhead.common.model.messages.IntraCloudAuthResponse;
-import eu.arrowhead.common.model.messages.TokenData;
-import eu.arrowhead.common.model.messages.TokenGenerationRequest;
-import eu.arrowhead.common.model.messages.TokenGenerationResponse;
+import eu.arrowhead.common.messages.ArrowheadToken;
+import eu.arrowhead.common.messages.InterCloudAuthRequest;
+import eu.arrowhead.common.messages.InterCloudAuthResponse;
+import eu.arrowhead.common.messages.IntraCloudAuthRequest;
+import eu.arrowhead.common.messages.IntraCloudAuthResponse;
+import eu.arrowhead.common.messages.TokenData;
+import eu.arrowhead.common.messages.TokenGenerationRequest;
+import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +33,8 @@ import org.apache.log4j.Logger;
  * This is the REST resource for the Authorization Core System.
  */
 @Path("authorization")
-@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class AuthorizationResource {
 
   private static Logger log = Logger.getLogger(AuthorizationResource.class.getName());
@@ -179,6 +179,7 @@ public class AuthorizationResource {
       }
     }
 
+    log.info("Token generation returns with " + tokenDataList.size() + " arrowhead tokens.");
     return Response.status(Status.OK).entity(new TokenGenerationResponse(tokenDataList)).build();
   }
 
