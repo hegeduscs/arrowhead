@@ -12,10 +12,10 @@ package eu.arrowhead.qos;
 
 import eu.arrowhead.common.exception.DriverNotFoundException;
 import eu.arrowhead.common.exception.ReservationException;
-import eu.arrowhead.common.model.messages.QoSReservationResponse;
-import eu.arrowhead.common.model.messages.QoSReserve;
-import eu.arrowhead.common.model.messages.QoSVerificationResponse;
-import eu.arrowhead.common.model.messages.QoSVerify;
+import eu.arrowhead.common.messages.QoSReservationResponse;
+import eu.arrowhead.common.messages.QoSReserve;
+import eu.arrowhead.common.messages.QoSVerificationResponse;
+import eu.arrowhead.common.messages.QoSVerify;
 import java.io.IOException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

@@ -1,10 +1,10 @@
 package eu.arrowhead.core.serviceregistry_sql;
 
+import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.messages.ServiceQueryForm;
-import eu.arrowhead.common.model.messages.ServiceQueryResult;
-import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
+import eu.arrowhead.common.messages.ServiceQueryForm;
+import eu.arrowhead.common.messages.ServiceQueryResult;
+import eu.arrowhead.common.messages.ServiceRegistryEntry;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;

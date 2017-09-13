@@ -1,8 +1,8 @@
 package eu.arrowhead.core.serviceregistry_sql;
 
 
-import eu.arrowhead.common.model.ServiceMetadata;
-import eu.arrowhead.common.model.messages.ServiceRegistryEntry;
+import eu.arrowhead.common.messages.ServiceMetadata;
+import eu.arrowhead.common.messages.ServiceRegistryEntry;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;

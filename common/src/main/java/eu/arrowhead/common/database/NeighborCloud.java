@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database;
 
-import eu.arrowhead.common.model.ArrowheadCloud;
+import eu.arrowhead.common.messages.GSDPoll;
+import eu.arrowhead.common.messages.ICNProposal;
 import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -14,14 +15,14 @@ import javax.persistence.UniqueConstraint;
 /**
  * JPA entity class for storing <tt>NeighborCloud</tt> information in the database. The <i>cloud_id</i> column must be unique.
  * <p>
- * The database table belonging to this class is a subset of the {@link eu.arrowhead.common.model.ArrowheadCloud} table. If an <tt>ArrowheadCloud</tt>
+ * The database table belonging to this class is a subset of the {@link ArrowheadCloud} table. If an <tt>ArrowheadCloud</tt>
  * can also be found in the <tt>NeighborCloud</tt> table, that means it is a trusted <tt>ArrowheadCloud</tt>, which can be queried during a Global
  * Service Discovery, Inter-Cloud Negotiations (by the Gatekeeper) and token generation (by the Authorization).
  *
  * @author Umlauf Zoltán
- * @see eu.arrowhead.common.model.ArrowheadCloud
- * @see eu.arrowhead.common.model.messages.GSDPoll
- * @see eu.arrowhead.common.model.messages.ICNProposal
+ * @see ArrowheadCloud
+ * @see GSDPoll
+ * @see ICNProposal
  */
 @Entity
 @Table(name = "neighbor_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"cloud_id"})})

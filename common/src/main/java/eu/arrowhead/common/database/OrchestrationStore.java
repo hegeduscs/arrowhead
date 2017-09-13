@@ -1,8 +1,5 @@
 package eu.arrowhead.common.database;
 
-import eu.arrowhead.common.model.ArrowheadCloud;
-import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.ArrowheadSystem;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

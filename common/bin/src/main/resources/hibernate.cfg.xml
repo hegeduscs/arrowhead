@@ -11,9 +11,9 @@
     <property name="hibernate.connection.password">root</property>
     <property name="show_sql">true</property>
     <property name="hibernate.hbm2ddl.auto">update</property>
-    <mapping class="eu.arrowhead.common.model.ArrowheadCloud"/>
-    <mapping class="eu.arrowhead.common.model.ArrowheadSystem"/>
-    <mapping class="eu.arrowhead.common.model.ArrowheadService"/>
+    <mapping class="eu.arrowhead.common.database.ArrowheadCloud"/>
+    <mapping class="eu.arrowhead.common.database.ArrowheadSystem"/>
+    <mapping class="eu.arrowhead.common.database.ArrowheadService"/>
     <mapping class="eu.arrowhead.core.authorization.database.InterCloudAuthorization"/>
     <mapping class="eu.arrowhead.core.authorization.database.IntraCloudAuthorization"/>
     <mapping class="eu.arrowhead.common.configuration.CoreSystem"/>

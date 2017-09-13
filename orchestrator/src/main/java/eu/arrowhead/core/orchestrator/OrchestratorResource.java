@@ -1,9 +1,9 @@
 package eu.arrowhead.core.orchestrator;
 
+import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.model.ArrowheadSystem;
-import eu.arrowhead.common.model.messages.OrchestrationResponse;
-import eu.arrowhead.common.model.messages.ServiceRequestForm;
+import eu.arrowhead.common.messages.OrchestrationResponse;
+import eu.arrowhead.common.messages.ServiceRequestForm;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

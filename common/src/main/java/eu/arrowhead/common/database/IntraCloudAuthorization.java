@@ -1,7 +1,5 @@
 package eu.arrowhead.common.database;
 
-import eu.arrowhead.common.model.ArrowheadService;
-import eu.arrowhead.common.model.ArrowheadSystem;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +17,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * JPA entity class for storing intra-cloud (within the cloud) authorization rights in the database. The <i>consumer_system_id</i>,
  * <i>provider_system_id</i> and <i>arrowhead_service_id</i> columns must be unique together.
  * <p>
- * The table contains foreign keys to {@link eu.arrowhead.common.model.ArrowheadSystem} and {@link eu.arrowhead.common.model.ArrowheadService}. A
+ * The table contains foreign keys to {@link ArrowheadSystem} and {@link ArrowheadService}. A
  * particular Consumer System/Provider System/Arrowhead Service trio is authorized if there is a database entry for it in this table. The existence of
  * the database entry means the given Consumer System is authorized to consume the given Arrowhead Serice from the given Provider System inside the
  * Local Cloud. The reverse of it is not authorized.

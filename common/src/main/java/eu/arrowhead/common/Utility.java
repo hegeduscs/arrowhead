@@ -1,12 +1,12 @@
 package eu.arrowhead.common;
 
+import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.CoreSystem;
 import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.database.OwnCloud;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
-import eu.arrowhead.common.model.ArrowheadCloud;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
