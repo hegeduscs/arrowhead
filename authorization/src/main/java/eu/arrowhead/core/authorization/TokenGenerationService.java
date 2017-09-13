@@ -86,7 +86,7 @@ class TokenGenerationService {
 
       // There is an upper limit for the size of the token info, skip providers which exceeds this limit
       String json = gson.toJson(rawTokenInfo);
-      if (json.length() > 200) {
+      if (json.length() > 244) {
         tokens.add(null);
         continue;
       }
