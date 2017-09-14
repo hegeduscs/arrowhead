@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
+//TODO review if this class is needed for backwards compatibility or not
 @Entity
 @Table(name = "arrowhead_service_metadata")
 public class ServiceMetadata {

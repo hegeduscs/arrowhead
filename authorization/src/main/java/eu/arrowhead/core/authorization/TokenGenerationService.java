@@ -88,6 +88,7 @@ class TokenGenerationService {
       String json = gson.toJson(rawTokenInfo);
       if (json.length() > 244) {
         tokens.add(null);
+        log.error("ArrowheadToken exceeded the size limit. Skipped provider.");
         continue;
       }
 

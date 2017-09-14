@@ -1,7 +1,9 @@
 package eu.arrowhead.common.database;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -10,6 +12,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -40,18 +44,25 @@ public class ArrowheadService {
 
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
-  @CollectionTable(name = "arrowhead_service_interface_list")
+  @CollectionTable(name = "arrowhead_service_interface_list", joinColumns = @JoinColumn(name="arrowhead_service_id"))
   private List<String> interfaces = new ArrayList<>();
 
+  /* Old version
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
   @CollectionTable(name = "arrowhead_service_metadata_list")
   private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
+  */
+  @ElementCollection(fetch = FetchType.LAZY)
+  @MapKeyColumn(name = "metadata_key")
+  @Column(name = "metadata_value")
+  @CollectionTable(name = "arrowhead_service_metadata_map", joinColumns = @JoinColumn(name = "service_id"))
+  private Map<String, String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {
   }
 
-  public ArrowheadService(String serviceGroup, String serviceDefinition, List<String> interfaces, List<ServiceMetadata> serviceMetadata) {
+  public ArrowheadService(String serviceGroup, String serviceDefinition, List<String> interfaces, Map<String, String> serviceMetadata) {
     this.serviceGroup = serviceGroup;
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;
@@ -96,11 +107,11 @@ public class ArrowheadService {
     this.interfaces.add(oneInterface);
   }
 
-  public List<ServiceMetadata> getServiceMetadata() {
+  public Map<String, String> getServiceMetadata() {
     return serviceMetadata;
   }
 
-  public void setServiceMetadata(List<ServiceMetadata> metaData) {
+  public void setServiceMetadata(Map<String, String> metaData) {
     this.serviceMetadata = metaData;
   }
 

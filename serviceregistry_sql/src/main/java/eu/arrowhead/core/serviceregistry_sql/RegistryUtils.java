@@ -1,12 +1,12 @@
 package eu.arrowhead.core.serviceregistry_sql;
 
-import eu.arrowhead.common.database.ServiceMetadata;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 class RegistryUtils {
 
@@ -23,20 +23,8 @@ class RegistryUtils {
     fetchedList.removeIf(current -> current.getVersion() != targetVersion);
   }
 
-  static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, List<ServiceMetadata> metadata) {
-    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
-    while (iterator.hasNext()) {
-      ServiceRegistryEntry current = iterator.next();
-      boolean allMatch = true;
-      for (ServiceMetadata currentMeta : current.getProvidedService().getServiceMetadata()) {
-        if (!metadata.contains(currentMeta)) {
-          allMatch = false;
-        }
-      }
-      if (!allMatch) {
-        iterator.remove();
-      }
-    }
+  static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, Map<String, String> metadata) {
+    fetchedList.removeIf(current -> !metadata.equals(current.getProvidedService().getServiceMetadata()));
   }
 
   static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {

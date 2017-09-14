@@ -62,8 +62,13 @@ public class RegistryUtils {
     }
 
     //additional user metadata
-    if (registryEntry.getServiceMetadata() != null) {
+    if (registryEntry.getServiceMetadata() != null && !registryEntry.getServiceMetadata().isEmpty()) {
       for (ServiceMetadata entry : registryEntry.getServiceMetadata()) {
+        properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());
+      }
+    }
+    if (!registryEntry.getProvidedService().getServiceMetadata().isEmpty()) {
+      for (Map.Entry<String, String> entry : registryEntry.getProvidedService().getServiceMetadata().entrySet()) {
         properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());
       }
     }
@@ -126,7 +131,7 @@ public class RegistryUtils {
     for (String key : properties.keySet()) {
       if (key.contains("ahsrvmetad_")) {
         String metaKey = key.substring(key.indexOf("_") + 1, key.length());
-        arrowheadService.getServiceMetadata().add(new ServiceMetadata(metaKey, properties.get(key)));
+        arrowheadService.getServiceMetadata().put(metaKey, properties.get(key));
       }
     }
 
@@ -222,28 +227,10 @@ public class RegistryUtils {
     }
   }
 
-  /*
-      TODO This method filters on Service metadata.
-  */
-  public static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, List<ServiceMetadata> metadata) {
-    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
-    while (iterator.hasNext()) {
-      ServiceRegistryEntry current = iterator.next();
-      boolean allMatch = true;
-      for (ServiceMetadata currentMeta : current.getProvidedService().getServiceMetadata()) {
-        if (!metadata.contains(currentMeta)) {
-          allMatch = false;
-        }
-      }
-      if (!allMatch) {
-        iterator.remove();
-      }
-    }
+  public static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, Map<String, String> metadata) {
+    fetchedList.removeIf(current -> !metadata.equals(current.getProvidedService().getServiceMetadata()));
   }
 
-  /*
-     TODO This method filters on Service version.
- */
   public static void filteronVersion(List<ServiceRegistryEntry> fetchedList, int targetVersion) {
     Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
     while (iterator.hasNext()) {
@@ -253,4 +240,6 @@ public class RegistryUtils {
       }
     }
   }
+
 }
+   

@@ -4,7 +4,6 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.OrchestrationStore;
-import eu.arrowhead.common.database.ServiceMetadata;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.GSDResult;
@@ -301,9 +300,9 @@ final class OrchestratorService {
   private static OrchestrationResponse compileOrchestrationResponse(@NotNull List<ServiceRegistryEntry> srList, @NotNull ServiceRequestForm srf,
                                                                     @Nullable List<String> instructions) {
     // Arrange token generation for every provider, if it was requested in the service metadata
-    List<ServiceMetadata> metadata = srf.getRequestedService().getServiceMetadata();
+    Map<String, String> metadata = srf.getRequestedService().getServiceMetadata();
     TokenGenerationResponse tokenResponse = null;
-    if (metadata.contains(new ServiceMetadata("security", "token"))) {
+    if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
       // Getting all the provider Systems from the Service Registry entries
       List<ArrowheadSystem> providerList = new ArrayList<>();
       for (ServiceRegistryEntry entry : srList) {

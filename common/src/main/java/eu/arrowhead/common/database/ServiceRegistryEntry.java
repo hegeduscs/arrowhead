@@ -1,18 +1,22 @@
 package eu.arrowhead.common.database;
 
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
-@Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"provided_service", "provider"})})
+@Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
 public class ServiceRegistryEntry {
 
   @Column(name = "id")
@@ -21,9 +25,11 @@ public class ServiceRegistryEntry {
   private int id;
 
   //mandatory fields
-  @Column(name = "provided_service")
+  @JoinColumn(name = "arrowhead_service_id")
+  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
   private ArrowheadService providedService;
-  @Column(name = "provider")
+  @JoinColumn(name = "provider_system_id")
+  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
   private ArrowheadSystem provider;
 
   //non-mandatory fields
