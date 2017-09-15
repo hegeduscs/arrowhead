@@ -138,4 +138,8 @@ public class ServiceRegistryEntry {
     return provider != null && provider.isValid() && providedService != null && providedService.isValid();
   }
 
+  @Override
+  public String toString() {
+    return providedService.toString() + ":" + provider.toString();
+  }
 }

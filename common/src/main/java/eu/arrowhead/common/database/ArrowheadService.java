@@ -54,6 +54,7 @@ public class ArrowheadService {
   private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
   */
   @ElementCollection(fetch = FetchType.LAZY)
+  @LazyCollection(LazyCollectionOption.FALSE)
   @MapKeyColumn(name = "metadata_key")
   @Column(name = "metadata_value")
   @CollectionTable(name = "arrowhead_service_metadata_map", joinColumns = @JoinColumn(name = "service_id"))

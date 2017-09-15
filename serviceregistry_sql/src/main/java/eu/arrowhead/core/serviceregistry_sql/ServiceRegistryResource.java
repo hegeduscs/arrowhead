@@ -2,6 +2,7 @@ package eu.arrowhead.core.serviceregistry_sql;
 
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
@@ -34,6 +35,7 @@ public class ServiceRegistryResource {
     return "This is the Service Registry Arrowhead Core System.";
   }
 
+  //TODO returnok előtt logolás
 
   @POST
   @Path("register")
@@ -43,9 +45,26 @@ public class ServiceRegistryResource {
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }
 
-    ServiceRegistryEntry savedEntry = dm.save(entry);
-    return Response.status(Status.CREATED).entity(savedEntry).build();
+    restrictionMap.put("serviceGroup", entry.getProvidedService().getServiceGroup());
+    restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
+    ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
+    if (service == null) {
+      service = dm.save(entry.getProvidedService());
+    }
+    entry.setProvidedService(service);
 
+    restrictionMap.clear();
+    restrictionMap.put("systemGroup", entry.getProvider().getSystemGroup());
+    restrictionMap.put("systemName", entry.getProvider().getSystemName());
+    ArrowheadSystem provider = dm.get(ArrowheadSystem.class, restrictionMap);
+    if (provider == null) {
+      provider = dm.save(entry.getProvider());
+    }
+    entry.setProvider(provider);
+
+    ServiceRegistryEntry savedEntry = dm.save(entry);
+    log.info("New ServiceRegistryEntry " + entry.toString() + " is saved.");
+    return Response.status(Status.CREATED).entity(savedEntry).build();
   }
 
   @PUT
@@ -68,7 +87,7 @@ public class ServiceRegistryResource {
     restrictionMap.put("providedService", service);
     List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, restrictionMap);
 
-    //TODO version filter (?)
+    //TODO add version filter too later, if deemed needed
 
     if (queryForm.isMetadataSearch()) {
       RegistryUtils.filterOnMeta(providedServices, queryForm.getService().getServiceMetadata());
@@ -77,7 +96,9 @@ public class ServiceRegistryResource {
       RegistryUtils.filterOnPing(providedServices);
     }
 
-    return Response.status(Status.OK).entity(providedServices).build();
+    log.info("Service " + queryForm.getService().toString() + " queried successfully.");
+    ServiceQueryResult result = new ServiceQueryResult(providedServices);
+    return Response.status(Status.OK).entity(result).build();
   }
 
   @PUT
@@ -88,8 +109,39 @@ public class ServiceRegistryResource {
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }
 
-    dm.delete(entry);
-    return Response.status(Status.OK).entity(entry).build();
+    restrictionMap.put("serviceGroup", entry.getProvidedService().getServiceGroup());
+    restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
+    ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
+
+    restrictionMap.clear();
+    restrictionMap.put("systemGroup", entry.getProvider().getSystemGroup());
+    restrictionMap.put("systemName", entry.getProvider().getSystemName());
+    ArrowheadSystem provider = dm.get(ArrowheadSystem.class, restrictionMap);
+
+    restrictionMap.clear();
+    restrictionMap.put("providedService", service);
+    restrictionMap.put("provider", provider);
+    ServiceRegistryEntry retrievedEntry = dm.get(ServiceRegistryEntry.class, restrictionMap);
+    if (retrievedEntry != null) {
+      dm.delete(retrievedEntry);
+      log.info("ServiceRegistryEntry " + retrievedEntry.toString() + " deleted.");
+      return Response.status(Status.OK).entity(retrievedEntry).build();
+    } else {
+      log.info("ServiceRegistryEntry " + entry.toString() + " was not found in the SR to delete.");
+      return Response.status(Status.NO_CONTENT).entity(entry).build();
+    }
+  }
+
+  @GET
+  @Path("all")
+  public Response getAllServices() {
+    List<ServiceRegistryEntry> serviceRegistry = dm.getAll(ServiceRegistryEntry.class, null);
+    ServiceQueryResult result = new ServiceQueryResult(serviceRegistry);
+    if (result.getServiceQueryData().isEmpty()) {
+      return Response.status(Status.NO_CONTENT).entity(result).build();
+    } else {
+      return Response.status(Response.Status.OK).entity(result).build();
+    }
   }
 
   //TODO do more variations (list args, delete all for a provider, etc)

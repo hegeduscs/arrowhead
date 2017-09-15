@@ -19,6 +19,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Check;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,6 +76,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   private String instruction;
 
   @ElementCollection(fetch = FetchType.LAZY)
+  @LazyCollection(LazyCollectionOption.FALSE)
   @MapKeyColumn(name = "attribute_key")
   @Column(name = "attribute_value")
   @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "store_entry_id"))

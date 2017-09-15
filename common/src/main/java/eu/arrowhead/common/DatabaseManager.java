@@ -109,6 +109,8 @@ public class DatabaseManager {
       object = (T) criteria.uniqueResult();
       transaction.commit();
     } catch (Exception e) {
+      e.printStackTrace();
+      log.error("get throws exception: " + e.getMessage());
       if (transaction != null) {
         transaction.rollback();
       }
@@ -137,6 +139,8 @@ public class DatabaseManager {
       retrievedList = (List<T>) criteria.list();
       transaction.commit();
     } catch (Exception e) {
+      e.printStackTrace();
+      log.error("getAll throws exception: " + e.getMessage());
       if (transaction != null) {
         transaction.rollback();
       }
