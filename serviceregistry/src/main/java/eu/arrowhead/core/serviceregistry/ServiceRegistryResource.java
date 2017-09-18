@@ -3,10 +3,12 @@ package eu.arrowhead.core.serviceregistry;
 import com.github.danieln.dnssdjava.DnsSDException;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
+import eu.arrowhead.common.security.SecurityUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -17,6 +19,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -35,11 +39,20 @@ public class ServiceRegistryResource {
     return "This is the Service Registry.";
   }
 
-
-  //TODO List<ServiceRegistryEntry> parameter option
   @POST
   @Path("register")
-  public Response publishEntriesToRegistry(ServiceRegistryEntry entry) {
+  public Response publishEntriesToRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
+    log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
+    if (requestContext.getSecurityContext().isSecure()) {
+      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
+      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
+      String[] clientFields = clientCN.split("\\.", 3);
+      if (!entry.getProvider().getSystemName().equals(clientFields[0]) || !entry.getProvider().getSystemGroup().equals(clientFields[1])) {
+        log.error("Provider system fields and cert common name do not match! Service registering denied.");
+        throw new AuthenticationException(
+            "Requester system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+      }
+    }
     if (entry == null || !entry.isValidFully()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
@@ -59,7 +72,18 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("remove")
-  public Response removeEntriesFromRegistry(ServiceRegistryEntry entry) {
+  public Response removeEntriesFromRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
+    log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
+    if (requestContext.getSecurityContext().isSecure()) {
+      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
+      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
+      String[] clientFields = clientCN.split("\\.", 3);
+      if (!entry.getProvider().getSystemName().equals(clientFields[0]) || !entry.getProvider().getSystemGroup().equals(clientFields[1])) {
+        log.error("Provider system fields and cert common name do not match! Service removing denied.");
+        throw new AuthenticationException(
+            "Requester system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+      }
+    }
     if (entry == null || !entry.isValidFully()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service de-registration form has missing/incomplete mandatory fields.");

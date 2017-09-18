@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -248,5 +249,12 @@ public class DatabaseManager {
       }
       throw e;
     }
+  }
+
+  public void deleteAll(String tableName) {
+    Session session = getSessionFactory().openSession();
+    String stringQuery = "DELETE FROM " + tableName;
+    Query query = session.createQuery(stringQuery);
+    query.executeUpdate();
   }
 }

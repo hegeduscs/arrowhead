@@ -222,7 +222,6 @@ public class GatekeeperResource {
     // If it is authorized, send a ServiceRequestForm to the Orchestrator and return the OrchestrationResponse
     else {
       Map<String, Boolean> orchestrationFlags = icnProposal.getNegotiationFlags();
-      orchestrationFlags.put("externalServiceRequest", true);
       List<PreferredProvider> preferredProviders = new ArrayList<>();
       for (ArrowheadSystem preferredSystem : icnProposal.getPreferredSystems()) {
         preferredProviders.add(new PreferredProvider(preferredSystem, null));

@@ -4,17 +4,22 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
+import eu.arrowhead.common.security.SecurityUtils;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -35,11 +40,20 @@ public class ServiceRegistryResource {
     return "This is the Service Registry Arrowhead Core System.";
   }
 
-  //TODO returnok előtt logolás
-
   @POST
   @Path("register")
-  public Response registerService(ServiceRegistryEntry entry) {
+  public Response registerService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
+    log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
+    if (requestContext.getSecurityContext().isSecure()) {
+      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
+      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
+      String[] clientFields = clientCN.split("\\.", 3);
+      if (!entry.getProvider().getSystemName().equals(clientFields[0]) || !entry.getProvider().getSystemGroup().equals(clientFields[1])) {
+        log.error("Provider system fields and cert common name do not match! Service registering denied.");
+        throw new AuthenticationException(
+            "Requester system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+      }
+    }
     if (!entry.isValidFully()) {
       log.error("registerService throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
@@ -103,7 +117,18 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("remove")
-  public Response removeService(ServiceRegistryEntry entry) {
+  public Response removeService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
+    log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
+    if (requestContext.getSecurityContext().isSecure()) {
+      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
+      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
+      String[] clientFields = clientCN.split("\\.", 3);
+      if (!entry.getProvider().getSystemName().equals(clientFields[0]) || !entry.getProvider().getSystemGroup().equals(clientFields[1])) {
+        log.error("Provider system fields and cert common name do not match! Service removing denied.");
+        throw new AuthenticationException(
+            "Requester system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+      }
+    }
     if (!entry.isValidFully()) {
       log.error("removeService throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
@@ -137,6 +162,7 @@ public class ServiceRegistryResource {
   public Response getAllServices() {
     List<ServiceRegistryEntry> serviceRegistry = dm.getAll(ServiceRegistryEntry.class, null);
     ServiceQueryResult result = new ServiceQueryResult(serviceRegistry);
+    log.info("getAllServices returns " + result.getServiceQueryData().size() + " entries");
     if (result.getServiceQueryData().isEmpty()) {
       return Response.status(Status.NO_CONTENT).entity(result).build();
     } else {
@@ -144,6 +170,14 @@ public class ServiceRegistryResource {
     }
   }
 
-  //TODO do more variations (list args, delete all for a provider, etc)
+  //TODO M2 test if this works or not
+  @DELETE
+  @Path("all")
+  public Response removeAllServices() {
+    dm.deleteAll("service_registry");
+    log.info("removeAllServices returns successfully");
+    return Response.status(Status.OK).build();
+  }
 
+  //TODO listás arugmentumó verziók a register/query/deletehez, hogy egyszerre többet lehessen
 }

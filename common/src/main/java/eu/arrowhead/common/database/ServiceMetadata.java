@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
-//TODO review if this class is needed for backwards compatibility or not
+//TODO M2 DNSSD-s SR tesztelése, hogy működik-e enélkül, ha igen, törölhető
 @Entity
 @Table(name = "arrowhead_service_metadata")
 public class ServiceMetadata {

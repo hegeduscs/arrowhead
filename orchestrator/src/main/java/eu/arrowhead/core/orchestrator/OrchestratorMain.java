@@ -98,7 +98,7 @@ class OrchestratorMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class);
+    config.registerClasses(AccessControlFilter.class, OrchestratorResource.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");
@@ -124,8 +124,12 @@ class OrchestratorMain {
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+    if (!SecurityUtils.isCommonNameArrowheadValid(serverCN)) {
+      log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+    }
     log.info("Certificate of the secure server: " + serverCN);
-    //TODO megnézni a ResourceConfighoz hogyan tud hozzáférni a resource classok, és felhasználni sanity checkre a serverCN-t
     config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();

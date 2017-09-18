@@ -1,9 +1,11 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.common.messages.ServiceRequestForm;
+import eu.arrowhead.common.security.SecurityUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -11,6 +13,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -42,10 +45,18 @@ public class OrchestratorResource {
    *
    * @return OrchestrationResponse
    */
-
-  //TODO sanity check: requesterSystem és a cert common name harmóniában vannak
   @POST
-  public Response orchestrationProcess(ServiceRequestForm srf) {
+  public Response orchestrationProcess(ServiceRequestForm srf, @Context ContainerRequestContext requestContext) {
+    if (requestContext.getSecurityContext().isSecure()) {
+      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
+      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
+      String[] clientFields = clientCN.split("\\.", 3);
+      if (!srf.getRequesterSystem().getSystemName().equals(clientFields[0]) || !srf.getRequesterSystem().getSystemGroup().equals(clientFields[1])) {
+        log.error("Requester system fields and cert common name do not match!");
+        throw new AuthenticationException(
+            "Requester system " + srf.getRequesterSystem().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+      }
+    }
     if (!srf.isValid()) {
       log.error("orchestrationProcess BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields. See the documentation of "

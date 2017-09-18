@@ -238,6 +238,13 @@ public final class Utility {
     return coreSystem;
   }
 
+  public static String stripEndSlash(String uri) {
+    if (uri != null && uri.endsWith("/")) {
+      return uri.substring(0, uri.length() - 1);
+    }
+    return uri;
+  }
+
   // IMPORTANT: only use this function with RuntimeExceptions that have a public String constructor
   /*private static <T extends RuntimeException> void throwExceptionAgain(Class<T> exceptionType, String message) {
     try {

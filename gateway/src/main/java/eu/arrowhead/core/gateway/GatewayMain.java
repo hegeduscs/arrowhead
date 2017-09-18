@@ -97,7 +97,7 @@ class GatewayMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(GatewayResource.class);
+    config.registerClasses(AccessControlFilter.class, GatewayResource.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");
@@ -123,6 +123,11 @@ class GatewayMain {
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+    if (!SecurityUtils.isCommonNameArrowheadValid(serverCN)) {
+      log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+    }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 

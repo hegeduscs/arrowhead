@@ -1,6 +1,7 @@
 package eu.arrowhead.core.serviceregistry_sql;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
@@ -125,7 +126,7 @@ class ServiceRegistryMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(ServiceRegistryResource.class);
+    config.registerClasses(AccessControlFilter.class, ServiceRegistryResource.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");
@@ -138,6 +139,10 @@ class ServiceRegistryMain {
     sslCon.setKeyStorePass(keystorePass);
     sslCon.setTrustStoreFile(truststorePath);
     sslCon.setTrustStorePass(truststorePass);
+    if (!sslCon.validateConfiguration(true)) {
+      log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
+      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
+    }
 
     SSLContext sslContext = sslCon.createSSLContext();
     Utility.setSSLContext(sslContext);
@@ -145,6 +150,11 @@ class ServiceRegistryMain {
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+    if (!SecurityUtils.isCommonNameArrowheadValid(serverCN)) {
+      log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+    }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 

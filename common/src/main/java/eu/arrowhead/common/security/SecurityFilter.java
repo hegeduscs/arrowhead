@@ -11,7 +11,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-//TODO debugban tesztelni/logolni mit csinál
+//TODO M2 debugban tesztelni/logolni mit csinál ez és az accesscontrolfilter
 @Provider
 @Priority(Priorities.AUTHENTICATION) //Highest priority constant, this filter gets executed first
 public class SecurityFilter implements ContainerRequestFilter {

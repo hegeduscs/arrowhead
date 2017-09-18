@@ -100,6 +100,12 @@ public final class SecurityUtils {
     return privatekey;
   }
 
+  //TODO dont forget to modify this, if we migrate to a version without systemgroup
+  public static boolean isCommonNameArrowheadValid(String commonName) {
+    String[] cnFields = commonName.split("\\.", 0);
+    return cnFields.length == 6;
+  }
+
   public static X509Certificate getCertFromKeyStore(KeyStore keystore, String name) {
     Enumeration<String> enumeration;
     try {
