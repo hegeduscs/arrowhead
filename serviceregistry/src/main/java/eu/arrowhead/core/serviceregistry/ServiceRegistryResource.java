@@ -47,10 +47,11 @@ public class ServiceRegistryResource {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
       String[] clientFields = clientCN.split("\\.", 3);
-      if (!entry.getProvider().getSystemName().equals(clientFields[0]) || !entry.getProvider().getSystemGroup().equals(clientFields[1])) {
+      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0]) || !entry.getProvider().getSystemGroup()
+          .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service registering denied.");
         throw new AuthenticationException(
-            "Requester system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
       }
     }
     if (entry == null || !entry.isValidFully()) {
@@ -78,10 +79,11 @@ public class ServiceRegistryResource {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
       String[] clientFields = clientCN.split("\\.", 3);
-      if (!entry.getProvider().getSystemName().equals(clientFields[0]) || !entry.getProvider().getSystemGroup().equals(clientFields[1])) {
+      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0]) || !entry.getProvider().getSystemGroup()
+          .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service removing denied.");
         throw new AuthenticationException(
-            "Requester system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
       }
     }
     if (entry == null || !entry.isValidFully()) {

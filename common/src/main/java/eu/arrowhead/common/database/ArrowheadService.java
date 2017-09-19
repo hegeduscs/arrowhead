@@ -47,12 +47,6 @@ public class ArrowheadService {
   @CollectionTable(name = "arrowhead_service_interface_list", joinColumns = @JoinColumn(name="arrowhead_service_id"))
   private List<String> interfaces = new ArrayList<>();
 
-  /* Old version
-  @ElementCollection(fetch = FetchType.LAZY)
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @CollectionTable(name = "arrowhead_service_metadata_list")
-  private List<ServiceMetadata> serviceMetadata = new ArrayList<>();
-  */
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
   @MapKeyColumn(name = "metadata_key")

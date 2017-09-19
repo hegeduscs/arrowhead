@@ -251,6 +251,7 @@ public class DatabaseManager {
     }
   }
 
+  //TODO find out why it does not work
   public void deleteAll(String tableName) {
     Session session = getSessionFactory().openSession();
     String stringQuery = "DELETE FROM " + tableName;

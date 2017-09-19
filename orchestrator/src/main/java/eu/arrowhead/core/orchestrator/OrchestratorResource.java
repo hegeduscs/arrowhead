@@ -51,7 +51,8 @@ public class OrchestratorResource {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
       String[] clientFields = clientCN.split("\\.", 3);
-      if (!srf.getRequesterSystem().getSystemName().equals(clientFields[0]) || !srf.getRequesterSystem().getSystemGroup().equals(clientFields[1])) {
+      if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0]) || !srf.getRequesterSystem().getSystemGroup()
+          .equalsIgnoreCase(clientFields[1])) {
         log.error("Requester system fields and cert common name do not match!");
         throw new AuthenticationException(
             "Requester system " + srf.getRequesterSystem().toString() + " fields and cert common name (" + clientCN + ") do not match!");

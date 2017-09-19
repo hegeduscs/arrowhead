@@ -42,8 +42,6 @@ public class ServiceRegistryEntry {
 
   //only for backwards compatibility, non-mandatory fields
   @Transient
-  private List<ServiceMetadata> serviceMetadata;
-  @Transient
   private List<String> interfaces;
   @Transient
   private String TSIG_key;
@@ -88,14 +86,6 @@ public class ServiceRegistryEntry {
 
   public void setServiceURI(String serviceURI) {
     this.serviceURI = serviceURI;
-  }
-
-  public List<ServiceMetadata> getServiceMetadata() {
-    return serviceMetadata;
-  }
-
-  public void setServiceMetadata(List<ServiceMetadata> serviceMetadata) {
-    this.serviceMetadata = serviceMetadata;
   }
 
   public int getVersion() {

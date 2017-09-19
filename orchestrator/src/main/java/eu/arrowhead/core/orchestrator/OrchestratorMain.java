@@ -98,9 +98,7 @@ class OrchestratorMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    //TODO M2
     config.registerClasses(AccessControlFilter.class, OrchestratorResource.class);
-    //config.registerClasses(OrchestratorResource.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");

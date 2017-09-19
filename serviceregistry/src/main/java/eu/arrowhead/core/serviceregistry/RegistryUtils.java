@@ -6,7 +6,6 @@ import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import com.github.danieln.dnssdjava.ServiceData;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.database.ServiceMetadata;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -62,11 +61,6 @@ public class RegistryUtils {
     }
 
     //additional user metadata
-    if (registryEntry.getServiceMetadata() != null && !registryEntry.getServiceMetadata().isEmpty()) {
-      for (ServiceMetadata entry : registryEntry.getServiceMetadata()) {
-        properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());
-      }
-    }
     if (!registryEntry.getProvidedService().getServiceMetadata().isEmpty()) {
       for (Map.Entry<String, String> entry : registryEntry.getProvidedService().getServiceMetadata().entrySet()) {
         properties.put("ahsrvmetad_" + entry.getKey(), entry.getValue());

@@ -13,7 +13,6 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 import org.apache.log4j.Logger;
 
-//TODO M2 debug it with client consumer to check variable values
 @Provider
 @Priority(Priorities.AUTHORIZATION) //2nd highest priority constant, this filter gets executed after the SecurityFilter
 public class AccessControlFilter implements ContainerRequestFilter {
