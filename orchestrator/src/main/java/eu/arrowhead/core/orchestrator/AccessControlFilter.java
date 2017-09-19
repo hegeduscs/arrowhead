@@ -20,7 +20,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
 
   private static Logger log = Logger.getLogger(AccessControlFilter.class.getName());
   @Context
-  private static Configuration configuration;
+  private Configuration configuration;
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
@@ -38,7 +38,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     }
   }
 
-  private static boolean isClientAuthorized(String subjectName) {
+  private boolean isClientAuthorized(String subjectName) {
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
     String serverCN = (String) configuration.getProperty("server_common_name");
 
