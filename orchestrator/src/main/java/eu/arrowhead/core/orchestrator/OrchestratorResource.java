@@ -47,6 +47,11 @@ public class OrchestratorResource {
    */
   @POST
   public Response orchestrationProcess(ServiceRequestForm srf, @Context ContainerRequestContext requestContext) {
+    if (!srf.isValid()) {
+      log.error("orchestrationProcess BadPayloadException");
+      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields. See the documentation of "
+                                        + "ServiceRequestForm for more details.");
+    }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
@@ -57,11 +62,6 @@ public class OrchestratorResource {
         throw new AuthenticationException(
             "Requester system " + srf.getRequesterSystem().toString() + " fields and cert common name (" + clientCN + ") do not match!");
       }
-    }
-    if (!srf.isValid()) {
-      log.error("orchestrationProcess BadPayloadException");
-      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields. See the documentation of "
-                                        + "ServiceRequestForm for more details.");
     }
 
     OrchestrationResponse orchResponse;

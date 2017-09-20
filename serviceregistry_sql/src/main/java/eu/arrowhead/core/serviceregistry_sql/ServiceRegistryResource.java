@@ -43,6 +43,10 @@ public class ServiceRegistryResource {
   @Path("register")
   public Response registerService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
+    if (!entry.isValidFully()) {
+      log.error("registerService throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
+    }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
@@ -53,10 +57,6 @@ public class ServiceRegistryResource {
         /*throw new AuthenticationException(
             "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");*/
       }
-    }
-    if (!entry.isValidFully()) {
-      log.error("registerService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }
 
     restrictionMap.put("serviceGroup", entry.getProvidedService().getServiceGroup());
@@ -119,6 +119,10 @@ public class ServiceRegistryResource {
   @Path("remove")
   public Response removeService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
+    if (!entry.isValidFully()) {
+      log.error("removeService throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
+    }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
@@ -129,10 +133,6 @@ public class ServiceRegistryResource {
         /*throw new AuthenticationException(
             "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");*/
       }
-    }
-    if (!entry.isValidFully()) {
-      log.error("removeService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }
 
     restrictionMap.put("serviceGroup", entry.getProvidedService().getServiceGroup());

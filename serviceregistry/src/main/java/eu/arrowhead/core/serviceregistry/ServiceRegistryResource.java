@@ -43,6 +43,10 @@ public class ServiceRegistryResource {
   @Path("register")
   public Response publishEntriesToRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
+    if (entry == null || !entry.isValidFully()) {
+      log.info("ServiceRegistry:Query throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
+    }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
@@ -53,10 +57,6 @@ public class ServiceRegistryResource {
         throw new AuthenticationException(
             "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
       }
-    }
-    if (entry == null || !entry.isValidFully()) {
-      log.info("ServiceRegistry:Query throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
     }
 
     try {
@@ -75,6 +75,10 @@ public class ServiceRegistryResource {
   @Path("remove")
   public Response removeEntriesFromRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
+    if (entry == null || !entry.isValidFully()) {
+      log.info("ServiceRegistry:Query throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: service de-registration form has missing/incomplete mandatory fields.");
+    }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
@@ -85,10 +89,6 @@ public class ServiceRegistryResource {
         throw new AuthenticationException(
             "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
       }
-    }
-    if (entry == null || !entry.isValidFully()) {
-      log.info("ServiceRegistry:Query throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service de-registration form has missing/incomplete mandatory fields.");
     }
 
     boolean result;
