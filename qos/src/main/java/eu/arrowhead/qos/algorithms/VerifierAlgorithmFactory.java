@@ -34,11 +34,9 @@ public class VerifierAlgorithmFactory {
     return instance;
   }
 
-  //TODO rethink this whole reflection pattern approach they went with, is it really necessary?
   // Cause I think using interfaces and enums would be more clean and faster at runtime
   // Or if we keep this reflection pattern, than catch and handle the exceptions here in this method!
   //note: communicationProtocol == network.getNetworkType :/
-  //TODO Strinc communicationProtocol should be changed to a Class<T> parameter to avoid hardcoding assumptions at Class.forName()
   public QoSVerifierResponse verify(String communicationProtocol, Map<String, String> providerDeviceCapabilities,
                                     Map<String, String> consumerDeviceCapabilities, List<ResourceReservation> providerDeviceQoSReservations,
                                     List<ResourceReservation> consumerDeviceQoSReservations, Map<String, String> requestedQoS,
@@ -51,9 +49,7 @@ public class VerifierAlgorithmFactory {
     cls = Class.forName("eu.arrowhead.qos.algorithms.implementations." + communicationProtocol.toUpperCase());
     Object obj = cls.newInstance();
     // Method Invoking
-    //TODO maybe the method name could be a parameter too?
     Method method = cls.getDeclaredMethod("verifyQoS", paramVerificationInfo);
-    //TODO this casting should throw an exception, proposal: drop verificationresponse all together from implementations
     return (QoSVerifierResponse) method.
         invoke(obj, new VerificationInfo(providerDeviceCapabilities, consumerDeviceCapabilities, providerDeviceQoSReservations,
                                          consumerDeviceQoSReservations, requestedQoS, commands));

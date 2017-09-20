@@ -24,8 +24,6 @@ public class FTTSE implements IVerifierAlgorithm {
 
   @Override
   public VerificationResponse verifyQoS(VerificationInfo info) {
-    //TODO QoSVerifierResponse and VerificationResponse seems redundant together, drop verificationresponse
-    //TODO implement actual verification?
     return new VerificationResponse(true, null);
   }
 

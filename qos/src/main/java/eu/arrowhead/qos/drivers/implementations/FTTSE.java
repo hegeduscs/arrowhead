@@ -28,7 +28,6 @@ import javax.ws.rs.core.UriBuilder;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 
-//TODO needs complete overhaul basically or implement a totally different one
 public class FTTSE implements IQoSDriver {
 
   protected final String STREAM_PARAMETERS_ASSYNCHRONOUS_HARD_REAL_TIME = "1";
@@ -41,7 +40,6 @@ public class FTTSE implements IQoSDriver {
   public FTTSE() {
   }
 
-  //TODO I dont see this method used anywhere... except in a Test class
   @Override
   public ReservationResponse reserveQoS(ReservationInfo info) {
     Map<String, String> networkConfiguration = info.getNetworkConfiguration();
@@ -64,7 +62,6 @@ public class FTTSE implements IQoSDriver {
     networkConfiguration.put(NETWORK_STREAM_ID, streamID.toString());
     // IF COMMANDS ARE NULL - THE DRIVER WILL GENERATE THE COMMANDS BASED ON
     // IF THE REQUESTED QOS
-    //TODO this if/else is pfffffffffffffffffffffffff
     if (commands == null && (requestedQoS != null || requestedQoS.size() == 0)) {
       commands = generateCommands(streamID, ec, mtu, requestedQoS);
       if (commands == null) {
@@ -80,7 +77,6 @@ public class FTTSE implements IQoSDriver {
     }
 
     // CONTACT THE ENTRYPOINT
-    //TODO USE THE UTILITY CLASS FOR THIS
     ClientConfig configuration = new ClientConfig();
     configuration.property(ClientProperties.CONNECT_TIMEOUT, 30000);
     configuration.property(ClientProperties.READ_TIMEOUT, 30000);
@@ -91,7 +87,6 @@ public class FTTSE implements IQoSDriver {
     Response response = target.request().header("Content-type", "application/json")
         .post(Entity.json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
 
-    //TODO see QoSManagerService for a better solution
     if (response.getStatus() > 199 && response.getStatus() < 300) {
       return new ReservationResponse(true, null, commands);
     }

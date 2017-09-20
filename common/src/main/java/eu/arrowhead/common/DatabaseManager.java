@@ -121,7 +121,7 @@ public class DatabaseManager {
     return object;
   }
 
-  //TODO get method Object paraméterrel, és switch case azokra az osztályokra, ahol van uniqeConstraint nem összetett mezőkkel
+  //TODO get method with Object parameter maybe? could be possible with a big switch case
 
   @NotNull
   @SuppressWarnings("unchecked")

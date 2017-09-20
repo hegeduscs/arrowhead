@@ -18,7 +18,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-//TODO make this a static final class, no need for factory pattern
 public class DriversFactory {
 
   private static DriversFactory instance;
@@ -41,7 +40,6 @@ public class DriversFactory {
     return instance;
   }
 
-  //TODO same notes as in VerifierAlgorithmFactory
 
   /**
    * @param networkConfiguration Network configuration parameters on a map.

@@ -16,7 +16,6 @@ package eu.arrowhead.common.exception;
  *
  * @author CISTER/INESC-TEC
  */
-//TODO review the QoS exceptions when the rework of the qos module is done, should they extend Exception or RuntimeException
 public class DriverNotFoundException extends Exception {
 
   public DriverNotFoundException(String message) {

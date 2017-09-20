@@ -179,5 +179,5 @@ public class ServiceRegistryResource {
     return Response.status(Status.OK).build();
   }
 
-  //TODO listás arugmentumó verziók a register/query/deletehez, hogy egyszerre többet lehessen
+  //TODO add more convenience methods here
 }

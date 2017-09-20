@@ -78,7 +78,6 @@ public class GatekeeperResource {
       String uri;
       for (ArrowheadCloud cloud : requestForm.getSearchPerimeter()) {
         try {
-          //TODO gatekeeper szétszedése lásd arrowhead_todo doksi/új ötletek része
           uri = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
         }
         // We skip the clouds with missing information

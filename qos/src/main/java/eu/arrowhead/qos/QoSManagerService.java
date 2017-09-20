@@ -38,7 +38,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import org.apache.log4j.Logger;
 
-//TODO the cleaning I did was mostly syntax based, generally the logic of the methods (and the fields of the POJOs) need to be revised too
 final class QoSManagerService {
 
   private static Logger log = Logger.getLogger(QoSManagerService.class.getName());
@@ -82,7 +81,6 @@ final class QoSManagerService {
             .verify(network.getNetworkType(), providerNetworkDevice.getNetworkCapabilities(), consumerNetworkDevice.getNetworkCapabilities(),
                     providerReservations, consumerReservations, message.getRequestedQoS(), message.getCommands());
 
-        //TODO this hashmap solution is not elegant at all, rethinking of the verification response is needed at a later time
         qosVerificationResponse.addResponse(provider, response.getResponse());
         if (!response.getResponse()) {
           qosVerificationResponse.addRejectMotivation(provider, response.getRejectMotivation());
@@ -96,9 +94,6 @@ final class QoSManagerService {
     log.info("QoS: QoS paramteres verified.");
     return qosVerificationResponse;
   }
-
-  //TODO exception handling
-  //TODO rewrite the reserve similar to verification, this needs to handle a list of providers, so the orch does not have to send multiple HTTP
   // request in a blocking for loop
 
   private static NetworkDevice getNetworkDeviceFromSystem(ArrowheadSystem system) {
@@ -120,7 +115,6 @@ final class QoSManagerService {
     restrictionMap.put("systemName", system.getSystemName());
     ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
 
-    //TODO this will get all the QoS reservations where the system is either consumer or provider.
     //limiting the filtering to just consumers/providers might be desired (need an extra boolean for argument for that)
     restrictionMap.clear();
     restrictionMap.put("consumer", retrievedSystem);
@@ -148,7 +142,6 @@ final class QoSManagerService {
     ArrowheadSystem consumer = message.getConsumer();
     ArrowheadSystem provider = message.getProvider();
 
-    //TODO consider to delete these 2 variables, since they are not really used
     NetworkDevice consumerNetworkDevice = getNetworkDeviceFromSystem(consumer);
     NetworkDevice providerNetworkDevice = getNetworkDeviceFromSystem(provider);
     if (providerNetworkDevice == null) {
@@ -170,7 +163,6 @@ final class QoSManagerService {
       e.printStackTrace();
     }
 
-    //TODO this "UP" state was hardcoded in their MessageStream constructor
     ResourceReservation reservation = new ResourceReservation("UP", message.getRequestedQoS());
     MessageStream stream = new MessageStream(message.getService(), consumer, provider, reservation, commands, network.getNetworkType());
     dm.save(stream);
@@ -180,7 +172,6 @@ final class QoSManagerService {
     parameters.putAll(network.getNetworkConfigurations());
     MonitorRule rule = new MonitorRule(network.getNetworkType().toUpperCase(), provider, consumer, parameters, false);
     Response response = Utility.sendRequest(QoSMain.MONITOR_URL, "POST", rule);
-    //TODO it is uncertain what's the response from the QoSMonitor if something goes wrong, hopefully it sets the status code properly
     boolean ruleApplied = response.getStatusInfo().getFamily() == Family.SUCCESSFUL;
 
     return new QoSReservationResponse(ruleApplied,

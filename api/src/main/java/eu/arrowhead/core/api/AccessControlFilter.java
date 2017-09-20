@@ -23,7 +23,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
   @Override
   public void filter(ContainerRequestContext requestContext) {
     SecurityContext sc = requestContext.getSecurityContext();
-    //TODO special getit casek kihagyása
+    //TODO add 4 condition for the if, for the 4 getit resource in the auth/common/config/orch api
     if (sc.isSecure()) {
       String subjectName = sc.getUserPrincipal().getName();
       if (isClientAuthorized(subjectName)) {
