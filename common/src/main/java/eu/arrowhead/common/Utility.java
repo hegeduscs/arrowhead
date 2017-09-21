@@ -178,6 +178,17 @@ public final class Utility {
     }
     return getUri(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
   }
+  
+  public static String getGatewayUri() {
+	    restrictionMap.clear();
+	    restrictionMap.put("systemName", "gateway");
+	    CoreSystem gateway = dm.get(CoreSystem.class, restrictionMap);
+	    if (gateway == null) {
+	      log.error("Utility:getGatewayUri System not found in the database!");
+	      throw new RuntimeException("Gateway Core System not found in the database!");
+	    }
+	    return getUri(gateway.getAddress(), gateway.getPort(), gateway.getServiceURI(), gateway.getIsSecure());
+	  }
 
   public static String getQosUri() {
     restrictionMap.clear();
