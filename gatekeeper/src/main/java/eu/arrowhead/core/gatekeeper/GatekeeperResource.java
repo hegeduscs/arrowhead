@@ -125,7 +125,7 @@ public class GatekeeperResource {
     }
 
     // Polling the Authorization System about the consumer Cloud
-    InterCloudAuthRequest authRequest = new InterCloudAuthRequest(gsdPoll.getRequesterCloud(), gsdPoll.getRequestedService(), false);
+    InterCloudAuthRequest authRequest = new InterCloudAuthRequest(gsdPoll.getRequesterCloud(), gsdPoll.getRequestedService());
     String authUri = Utility.getAuthorizationUri();
     authUri = UriBuilder.fromPath(authUri).path("intercloud").toString();
     Response authResponse = Utility.sendRequest(authUri, "PUT", authRequest);
@@ -206,7 +206,7 @@ public class GatekeeperResource {
     }
 
     // Polling the Authorization System about the consumer Cloud
-    InterCloudAuthRequest authRequest = new InterCloudAuthRequest(icnProposal.getRequesterCloud(), icnProposal.getRequestedService(), false);
+    InterCloudAuthRequest authRequest = new InterCloudAuthRequest(icnProposal.getRequesterCloud(), icnProposal.getRequestedService());
     String authUri = Utility.getAuthorizationUri();
     authUri = UriBuilder.fromPath(authUri).path("intercloud").toString();
     Response authResponse = Utility.sendRequest(authUri, "PUT", authRequest);
