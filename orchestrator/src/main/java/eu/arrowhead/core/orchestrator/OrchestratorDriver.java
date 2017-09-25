@@ -230,11 +230,14 @@ final class OrchestratorDriver {
       throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.toString());
     } else {
       // Removing non-valid Store entries from the results
+      List<OrchestrationStore> temp = new ArrayList<>();
       for (OrchestrationStore entry : retrievedList) {
         if (!entry.isValid()) {
-          retrievedList.remove(entry);
+          temp.add(entry);
         }
       }
+      retrievedList.removeAll(temp);
+
       // Sorting the store entries based on their int priority field
       Collections.sort(retrievedList);
       log.info("queryOrchestrationStore returns " + retrievedList.size() + " orchestration store entries matching the criteria");
@@ -256,6 +259,7 @@ final class OrchestratorDriver {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
     Set<ArrowheadSystem> providerSystemsFromSR = new HashSet<>();
     Set<ArrowheadSystem> providerSystemsFromAuth;
+    List<OrchestrationStore> toRemove = new ArrayList<>();
 
     // If true, the Orchestration Store was queried for default entries, meaning the service is different for each store entry
     if (srf.getRequestedService() == null) {
@@ -274,9 +278,10 @@ final class OrchestratorDriver {
 
         // Remove the Store entry from the list, if the SR or Auth crosscheck fails
         if (!providerSystemsFromSR.contains(entry.getProviderSystem()) || !providerSystemsFromAuth.contains(entry.getProviderSystem())) {
-          entryList.remove(entry);
+          toRemove.add(entry);
         }
       }
+      entryList.removeAll(toRemove);
     }
     // Otherwise the service is fixed and we only need 1 SR and Auth query
     else {
@@ -303,16 +308,23 @@ final class OrchestratorDriver {
         for (OrchestrationStore entry : entryList) {
           if (entry.getProviderCloud() == null && (!providerSystemsFromSR.contains(entry.getProviderSystem()) || !providerSystemsFromAuth
               .contains(entry.getProviderSystem()))) {
-            entryList.remove(entry);
+            toRemove.add(entry);
           }
         }
+        entryList.removeAll(toRemove);
       }
       /*
        * The SR or Auth query can throw DataNotFoundException, which has to be caught, in case there are inter-cloud store entries from the Store
        * query to check. Default store entries can only be intra-cloud, so the try/catch is only needed on the else branch.
        */ catch (DataNotFoundException e) {
         log.info("crossCheckStoreEntries catches DataNotFoundException from SR/Auth query");
-        return new ArrayList<>();
+        for (OrchestrationStore entry : entryList) {
+          if (entry.getProviderCloud() == null) {
+            toRemove.add(entry);
+          }
+        }
+        entryList.removeAll(toRemove);
+        return entryList;
       }
     }
 
