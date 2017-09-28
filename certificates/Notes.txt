@@ -29,6 +29,8 @@ How to create Arrowhead-compliant certificates
 
 8. Save the keystore again (File --> Save or CTRL+S)
 
++1. Don't forget to delete the new certificate from the old one's keystore!
+
 ---------------
 How to extract crt and key files from jks files:
 
