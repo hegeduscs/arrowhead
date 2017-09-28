@@ -1,4 +1,36 @@
-How to extract crt and key files from jks:
+How to create Arrowhead-compliant certificates
+
+0. Take the certificate keystore that is wished to be used as the signer
+
+1. Open it in KeyStore Explorer (http://keystore-explorer.org/downloads.html)
+  - default KeyStore and Key pwd-s for all test certificates: '12345'
+
+2. Right click on the certificate itself --> Sign / Sign New Key Pair
+
+3. Edit settings for the new certificate:
+  - validity period: e.g. set to 10 years
+  - Name --> There is a book icon with '@': set CN fields
+    CN: <systemName>.<systemGroup>.<cloudName>.<operator>.arrowhead.eu format
+    Other fields can be filled out arbitrarily.
+
+4. Move the newly created certificate to a new tab within the app
+  - drag & drop works
+  - it creates a new jks file for it
+  - 'Save as' this new keystore as a '.jks' file
+
+5. Tools --> Set Keystore Password
+
+6. Right click on the certificate --> Set Password
+  - the 'old' password is empty
+  - give a new password to the certificate itself
+
+7. Tools --> Set Keystore Type --> JKS
+  - this changes from 'p12' filetype to Java Keystore format
+
+8. Save the keystore again (File --> Save or CTRL+S)
+
+---------------
+How to extract crt and key files from jks files:
 
 1. Export the .der file
 keytool -export -alias sample -file sample.der -keystore my.jks
@@ -12,10 +44,17 @@ keytool -importkeystore -srckeystore my.jks -destkeystore keystore.p12 -deststor
 4.Convert the .p12 file to unencrypted PEM (key file)
 openssl pkcs12 -in keystore.p12 -nodes -nocerts -out server.key
 
+--------------
+How to export certificate public key in Base64 with ConsumerClient skeleton:
+1. Edit the app.properties with the proper client and trust store keystores
+2. Start the skeleton with "-m secure" command line arguments.
+3. The skeleton will print out the Base64 encoded string on the console during start.
 
-How to export public key in Base64: 
+---------------
+How to export certificate public key in Base64 for the database manually:
 1. Open the jks in Keystore Explorer
 2. Right click on certificate
 3. Export -> Export Public Key
 4. Remove --BEGIN-- and --END-- from .openssl file
 5. Insert into Auth_info field in Arrowhead database
+-------------
