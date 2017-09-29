@@ -36,7 +36,7 @@ public class OrchestratorResource {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "Got it!";
+    return "Orchestrator got it!";
   }
 
   /**

@@ -230,7 +230,7 @@ public class GatekeeperResource {
           .requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService()).orchestrationFlags(orchestrationFlags)
           .preferredProviders(preferredProviders).build();
       String orchestratorUri = Utility.getOrchestratorUri();
-      orchestratorUri = UriBuilder.fromPath(orchestratorUri).path("orchestration").toString();
+      orchestratorUri = UriBuilder.fromPath(orchestratorUri).toString();
 
       Response response = Utility.sendRequest(orchestratorUri, "POST", serviceRequestForm);
       OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);

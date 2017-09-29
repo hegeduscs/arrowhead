@@ -42,6 +42,7 @@ public class AuthorizationResource {
   static DatabaseManager dm = DatabaseManager.getInstance();
 
   @GET
+  @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
     return "This is the Authorization Resource.";
   }
