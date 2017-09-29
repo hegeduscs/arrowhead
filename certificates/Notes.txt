@@ -47,10 +47,10 @@ keytool -importkeystore -srckeystore my.jks -destkeystore keystore.p12 -deststor
 openssl pkcs12 -in keystore.p12 -nodes -nocerts -out server.key
 
 --------------
-How to export certificate public key in Base64 with ConsumerClient skeleton:
+How to export certificate public key in Base64 with the ArrowheadProvider client skeleton:
 1. Edit the app.properties with the proper client and trust store keystores
 2. Start the skeleton with "-m secure" command line arguments.
-3. The skeleton will print out the Base64 encoded string on the console during start.
+3. The skeleton will print out the Base64 encoded string on the console during start. (This is the 2nd print, which starts as: "Server PublicKey Base64: ")
 
 ---------------
 How to export certificate public key in Base64 for the database manually:
