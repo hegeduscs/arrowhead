@@ -45,12 +45,20 @@ public class AccessControlFilter implements ContainerRequestFilter {
       log.info("Client cert does not have 6 parts, so the access will be denied.");
       return false;
     }
-    // Only requests from the Orchestrator and Gatekeeper are allowed
-    String[] serverFields = serverCN.split("\\.", 2);
-    // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
 
-    // If this is true, then the certificate is from the local Orchestrator or Gatekeeper
-    return clientCN.equalsIgnoreCase("orchestrator" + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper" + serverFields[1]);
+    // If this property is true, then every system from the local cloud can use the auth services
+    if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud"))) {
+      String[] serverFields = serverCN.split("\\.", 3);
+      String[] clientFields = clientCN.split("\\.", 3);
+      // serverFields contains: systemName, systemGroup, cloudName.operator.arrowhead.eu
+      return serverFields[2].equalsIgnoreCase(clientFields[2]);
+    }
+    // If it is not true, only the Orchestrator and Gatekeeper can use it
+    else {
+      String[] serverFields = serverCN.split("\\.", 2);
+      // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
+      return clientCN.equalsIgnoreCase("orchestrator" + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper" + serverFields[1]);
+    }
   }
 
 }

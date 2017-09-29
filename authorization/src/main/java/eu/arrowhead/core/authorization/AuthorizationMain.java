@@ -1,6 +1,10 @@
 package eu.arrowhead.core.authorization;
 
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
@@ -11,6 +15,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Properties;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
@@ -50,13 +55,17 @@ class AuthorizationMain {
         switch (args[i]) {
           case "insecure":
             server = startServer();
+            useSRService(false, true);
             break argLoop;
           case "secure":
             secureServer = startSecureServer();
+            useSRService(true, true);
             break argLoop;
           case "both":
             server = startServer();
             secureServer = startSecureServer();
+            useSRService(false, true);
+            useSRService(true, true);
             break argLoop;
           default:
             log.fatal("Unknown server mode: " + args[i]);
@@ -66,8 +75,11 @@ class AuthorizationMain {
     }
     if (!serverModeSet) {
       server = startServer();
+      useSRService(false, true);
     }
 
+    //This is here to initialize the database connection before the REST resources are initiated
+    DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -145,19 +157,50 @@ class AuthorizationMain {
     return server;
   }
 
+  private static void useSRService(boolean isSecure, boolean registering) {
+    URI uri;
+    ArrowheadService authControlService;
+    ArrowheadService tokenGenerationService;
+    if (isSecure) {
+      uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+      authControlService = new ArrowheadService("coreservices", "SecureAuthorizationControl", Collections.singletonList("JSON"), null);
+      tokenGenerationService = new ArrowheadService("coreservices", "SecureTokenGeneration", Collections.singletonList("JSON"), null);
+    } else {
+      uri = UriBuilder.fromUri(BASE_URI).build();
+      authControlService = new ArrowheadService("coreservices", "InsecureAuthorizationControl", Collections.singletonList("JSON"), null);
+      tokenGenerationService = new ArrowheadService("coreservices", "InsecureTokenGeneration", Collections.singletonList("JSON"), null);
+    }
+
+    //Preparing the payloads
+    ArrowheadSystem authSystem = new ArrowheadSystem("coresystems", "authorization", uri.getHost(), uri.getPort(), null);
+    ServiceRegistryEntry authControlEntry = new ServiceRegistryEntry(authControlService, authSystem, "authorization");
+    ServiceRegistryEntry tokenGenEntry = new ServiceRegistryEntry(tokenGenerationService, authSystem, "authorization/token");
+
+    String baseUri = Utility.getServiceRegistryUri();
+    if (registering) {
+      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
+      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
+    } else {
+      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
+      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", tokenGenEntry);
+    }
+  }
+
   private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
+      useSRService(false, false);
     }
     if (secureServer != null) {
       log.info("Stopping server at: " + BASE_URI_SECURED);
       secureServer.shutdownNow();
+      useSRService(true, false);
     }
     System.out.println("Authorization Server(s) stopped");
   }
 
-  private static synchronized Properties getProp() {
+  static synchronized Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();

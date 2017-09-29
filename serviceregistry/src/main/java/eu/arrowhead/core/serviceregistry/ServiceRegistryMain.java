@@ -1,6 +1,7 @@
 package eu.arrowhead.core.serviceregistry;
 
 import com.github.danieln.dnssdjava.DnsSDRegistrator;
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
@@ -106,7 +107,8 @@ class ServiceRegistryMain {
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 
-    //if daemon mode
+    //This is here to initialize the database connection before the REST resources are initiated
+    DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -159,6 +161,8 @@ class ServiceRegistryMain {
     final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
+
+    //TODO register the SR service into the DNS-SD
     return server;
   }
 
@@ -207,6 +211,8 @@ class ServiceRegistryMain {
         .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
+
+    //TODO register the SR service into the DNS-SD
     return server;
   }
 

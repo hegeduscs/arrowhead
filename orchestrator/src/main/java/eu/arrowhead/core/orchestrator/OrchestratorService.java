@@ -207,6 +207,9 @@ final class OrchestratorService {
 
     // Telling the Gatekeeper to start the Inter-Cloud Negotiations process
     ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(srf, targetCloud);
+    for (OrchestrationForm of : icnResult.getOrchResponse().getResponse()) {
+      of.setInstruction("This provider is from another cloud!");
+    }
 
     // If matchmaking is requested, we pick one provider from the ICN result
     if (orchestrationFlags.get("matchmaking")) {

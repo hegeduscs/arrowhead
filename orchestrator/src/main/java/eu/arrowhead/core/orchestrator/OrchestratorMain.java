@@ -1,6 +1,9 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
@@ -9,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Properties;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
@@ -46,13 +50,17 @@ class OrchestratorMain {
         switch (args[i]) {
           case "insecure":
             server = startServer();
+            useSRService(false, true);
             break argLoop;
           case "secure":
             secureServer = startSecureServer();
+            useSRService(true, true);
             break argLoop;
           case "both":
             server = startServer();
             secureServer = startSecureServer();
+            useSRService(false, true);
+            useSRService(true, true);
             break argLoop;
           default:
             log.fatal("Unknown server mode: " + args[i]);
@@ -62,6 +70,7 @@ class OrchestratorMain {
     }
     if (!serverModeSet) {
       server = startServer();
+      useSRService(false, true);
     }
 
     if (daemon) {
@@ -140,14 +149,39 @@ class OrchestratorMain {
     return server;
   }
 
+  private static void useSRService(boolean isSecure, boolean registering) {
+    URI uri;
+    ArrowheadService orchService;
+    if (isSecure) {
+      uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+      orchService = new ArrowheadService("coreservices", "SecureOrchestrationService", Collections.singletonList("JSON"), null);
+    } else {
+      uri = UriBuilder.fromUri(BASE_URI).build();
+      orchService = new ArrowheadService("coreservices", "InsecureOrchestrationService", Collections.singletonList("JSON"), null);
+    }
+
+    //Preparing the payload
+    ArrowheadSystem orchSystem = new ArrowheadSystem("coresystems", "orchestrator", uri.getHost(), uri.getPort(), null);
+    ServiceRegistryEntry orchEntry = new ServiceRegistryEntry(orchService, orchSystem, "orchestrator/orchestration");
+
+    String baseUri = Utility.getServiceRegistryUri();
+    if (registering) {
+      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", orchEntry);
+    } else {
+      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", orchEntry);
+    }
+  }
+
   private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
+      useSRService(false, false);
     }
     if (secureServer != null) {
       log.info("Stopping server at: " + BASE_URI_SECURED);
       secureServer.shutdownNow();
+      useSRService(true, false);
     }
     System.out.println("Orchestrator Server(s) stopped");
   }
