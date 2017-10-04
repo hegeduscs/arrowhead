@@ -7,7 +7,6 @@ import com.github.danieln.dnssdjava.ServiceData;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -202,7 +201,7 @@ public class RegistryUtils {
     try (Socket socket = new Socket()) {
       socket.connect(new InetSocketAddress(host, port), timeout);
       return true;
-    } catch (IOException e) {
+    } catch (Exception e) {
       return false; // Either timeout or unreachable or failed DNS lookup.
     }
   }
@@ -213,7 +212,8 @@ public class RegistryUtils {
 
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();
-      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("127.0.0.1")) {
+      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("127.0.0.1") || current.getProvider()
+          .getAddress().equals("0.0.0.0")) {
         iterator.remove();
       } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
         iterator.remove();
