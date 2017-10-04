@@ -64,6 +64,10 @@ public class ServiceRegistryResource {
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
       service = dm.save(entry.getProvidedService());
+    } else {
+      service.setInterfaces(entry.getProvidedService().getInterfaces());
+      service.setServiceMetadata(entry.getProvidedService().getServiceMetadata());
+      dm.merge(service);
     }
     entry.setProvidedService(service);
 
@@ -73,6 +77,10 @@ public class ServiceRegistryResource {
     ArrowheadSystem provider = dm.get(ArrowheadSystem.class, restrictionMap);
     if (provider == null) {
       provider = dm.save(entry.getProvider());
+    } else {
+      provider.setAddress(entry.getProvider().getAddress());
+      provider.setPort(entry.getProvider().getPort());
+      dm.merge(provider);
     }
     entry.setProvider(provider);
 
