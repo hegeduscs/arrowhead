@@ -6,7 +6,6 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
@@ -183,15 +182,23 @@ class AuthorizationMain {
     if (registering) {
       try {
         Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
-      } catch (DuplicateEntryException e) {
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
+      } catch (RuntimeException e) {
+        if (e.getMessage().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
+        } else {
+          System.out.println("Authorization control service registration failed.");
+        }
       }
       try {
         Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
-      } catch (DuplicateEntryException e) {
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", tokenGenEntry);
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
+      } catch (RuntimeException e) {
+        if (e.getMessage().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", tokenGenEntry);
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
+        } else {
+          System.out.println("Token generation service registration failed.");
+        }
       }
     } else {
       Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
