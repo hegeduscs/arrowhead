@@ -6,6 +6,7 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
@@ -181,26 +182,16 @@ class AuthorizationMain {
     String baseUri = Utility.getServiceRegistryUri();
     if (registering) {
       try {
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
-            authControlEntry);
-      } catch (Exception e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "PUT",
-              authControlEntry);
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
-              authControlEntry);
-        }
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
+      } catch (DuplicateEntryException e) {
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
       }
       try {
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
-            tokenGenEntry);
-      } catch (Exception e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "PUT",
-              tokenGenEntry);
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
-              tokenGenEntry);
-        }
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
+      } catch (DuplicateEntryException e) {
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", tokenGenEntry);
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
       }
     } else {
       Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);

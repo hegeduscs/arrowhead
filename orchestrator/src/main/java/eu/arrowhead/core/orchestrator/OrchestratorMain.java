@@ -5,6 +5,7 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.File;
 import java.io.FileInputStream;
@@ -169,15 +170,10 @@ class OrchestratorMain {
     String baseUri = Utility.getServiceRegistryUri();
     if (registering) {
       try {
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
-            orchEntry);
-      } catch (Exception e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "PUT",
-              orchEntry);
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
-              orchEntry);
-        }
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", orchEntry);
+      } catch (DuplicateEntryException e) {
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", orchEntry);
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", orchEntry);
       }
     } else {
       Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", orchEntry);
