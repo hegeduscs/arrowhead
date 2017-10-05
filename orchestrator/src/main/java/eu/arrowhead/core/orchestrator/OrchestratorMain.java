@@ -35,6 +35,8 @@ class OrchestratorMain {
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8441/orchestrator/");
 
   public static void main(String[] args) throws IOException {
+
+    System.out.println("Working directory: " + System.getProperty("user.dir"));
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
     boolean daemon = false;
@@ -166,7 +168,17 @@ class OrchestratorMain {
 
     String baseUri = Utility.getServiceRegistryUri();
     if (registering) {
-      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", orchEntry);
+      try {
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
+            orchEntry);
+      } catch (Exception e) {
+        if (e.getMessage().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "PUT",
+              orchEntry);
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
+              orchEntry);
+        }
+      }
     } else {
       Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", orchEntry);
     }

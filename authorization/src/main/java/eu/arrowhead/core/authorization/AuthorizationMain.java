@@ -38,6 +38,8 @@ class AuthorizationMain {
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8445/");
 
   public static void main(String[] args) throws IOException {
+    System.out.println("Working directory: " + System.getProperty("user.dir"));
+
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     KeyStore keyStore = SecurityUtils.loadKeyStore(getProp().getProperty("ssl.keystore"), getProp().getProperty("ssl.keystorepass"));
     privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("ssl.keystorepass"));
@@ -178,8 +180,28 @@ class AuthorizationMain {
 
     String baseUri = Utility.getServiceRegistryUri();
     if (registering) {
-      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
-      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
+      try {
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
+            authControlEntry);
+      } catch (Exception e) {
+        if (e.getMessage().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "PUT",
+              authControlEntry);
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
+              authControlEntry);
+        }
+      }
+      try {
+        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
+            tokenGenEntry);
+      } catch (Exception e) {
+        if (e.getMessage().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "PUT",
+              tokenGenEntry);
+          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST",
+              tokenGenEntry);
+        }
+      }
     } else {
       Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
       Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", tokenGenEntry);

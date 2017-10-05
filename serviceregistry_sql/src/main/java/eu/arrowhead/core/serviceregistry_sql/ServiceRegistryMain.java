@@ -35,6 +35,7 @@ class ServiceRegistryMain {
   static int pingTimeout = new Integer(getProp().getProperty("ping.timeout", "10000"));
 
   public static void main(String[] args) throws IOException {
+    System.out.println("Working directory: " + System.getProperty("user.dir"));
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
     boolean daemon = false;
@@ -87,16 +88,13 @@ class ServiceRegistryMain {
     DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        @Override
-        public void run() {
-          System.out.println("Received TERM signal, shutting down...");
-          if (timer != null) {
-            timer.cancel();
-          }
-          shutdown();
+      Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        System.out.println("Received TERM signal, shutting down...");
+        if (timer != null) {
+          timer.cancel();
         }
-      });
+        shutdown();
+      }));
     } else {
       System.out.println("Press enter to shutdown ServiceRegistry Server(s)...");
       //noinspection ResultOfMethodCallIgnored
