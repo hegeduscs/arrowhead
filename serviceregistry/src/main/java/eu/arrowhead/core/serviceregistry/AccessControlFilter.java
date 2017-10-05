@@ -60,7 +60,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
       // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
 
       // If this is true, then the certificate is from the local Orchestrator or Gatekeeper
-      return clientCN.equalsIgnoreCase("orchestrator" + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper" + serverFields[1]);
+      return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
     } else if (methodType.equals("POST") || methodType.equals("PUT")) { //maps legacy register and remove functions, if-else order is important
       // All requests from the local cloud are allowed, so omit the first 2 parts of the common names (systemName.systemGroup)
       String[] serverFields = serverCN.split("\\.", 3);

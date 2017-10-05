@@ -60,7 +60,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
       // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
 
       // If this is true, then the certificate is from the local Orchestrator or Gatekeeper
-      return clientCN.equalsIgnoreCase("orchestrator" + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper" + serverFields[1]);
+      return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
     }
 
     return false;

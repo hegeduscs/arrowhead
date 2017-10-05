@@ -57,7 +57,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     else {
       String[] serverFields = serverCN.split("\\.", 2);
       // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
-      return clientCN.equalsIgnoreCase("orchestrator" + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper" + serverFields[1]);
+      return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
     }
   }
 
