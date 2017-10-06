@@ -140,7 +140,7 @@ class TokenGenerationService {
         try {
           PublicKey key = getPublicKey(retrievedProvider.getAuthenticationInfo());
           keys.add(key);
-        } catch (InvalidKeySpecException e) {
+        } catch (InvalidKeySpecException | NullPointerException e) {
           log.error("The stored auth info for the ArrowheadSystem " + provider.toString()
                         + " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
           keys.add(null);
