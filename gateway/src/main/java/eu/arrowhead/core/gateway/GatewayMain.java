@@ -31,7 +31,7 @@ class GatewayMain {
 
 	private static final int minPort = Integer.parseInt(getProp().getProperty("min_port"));
 	private static final int maxPort = Integer.parseInt(getProp().getProperty("max_port"));
-	private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
+	protected static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
 			.initPortAllocationMap(new ConcurrentHashMap<Integer, Boolean>(), minPort, maxPort);
 
 	private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8452/");
@@ -174,13 +174,6 @@ class GatewayMain {
 		return prop;
 	}
 
-	public static ConcurrentHashMap<Integer, Boolean> getPortAllocationMap() {
-		return portAllocationMap;
-	}
-
-	public static void setPortAllocationMap(ConcurrentHashMap<Integer, Boolean> portAllocationMap) {
-		GatewayMain.portAllocationMap = portAllocationMap;
-	}
 
 	
 

@@ -1,19 +1,23 @@
 package eu.arrowhead.core.gateway;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.ServiceConfigurationError;
 import java.util.Map.Entry;
+import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.log4j.Logger;
@@ -21,14 +25,15 @@ import org.apache.log4j.Logger;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.GetResponse;
 
-import eu.arrowhead.common.messages.GatewayAtConsumerResponse;
+import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.common.security.SecurityUtils;
 
 /**
  * Contains miscellaneous helper functions for the Gateway.
  */
-// TODO channel close issue in all function, maybe static variable in GWMain?
+
 public class GatewayService {
 
 	private static Logger log = Logger.getLogger(GatewayService.class.getName());
@@ -46,23 +51,29 @@ public class GatewayService {
 	 *            The port of the AMQP broker to use for connections
 	 * @param queueName
 	 *            The name of the queue, should be unique
+	 * @param controlQueueName
+	 *            The name of the queue for control messages, should be unique
 	 *
-	 * @return channel
+	 * @return GatewaySession
 	 */
-	static Channel createChannel(String brokerName, int brokerPort, String queueName) {
-		Channel channel = null;
+	static GatewaySession createChannel(String brokerName, int brokerPort, String queueName, String controlQueueName) {
+		GatewaySession gatewaySession = new GatewaySession();
 		try {
 			ConnectionFactory factory = new ConnectionFactory();
 			factory.setHost(brokerName);
 			factory.setPort(brokerPort);
 			Connection connection = factory.newConnection();
-			channel = connection.createChannel();
+			Channel channel = connection.createChannel();
 			channel.queueDeclare(queueName, false, false, false, null);
+			channel.queueDeclare(controlQueueName, false, false, false, null);
+			gatewaySession.setConnection(connection);
+			gatewaySession.setChannel(channel);
+
 		} catch (IOException e) {
 			e.printStackTrace();
-			log.info("GatewayService: Creating the insecure channel failed");
+			log.error("GatewayService: Creating the insecure channel failed");
 		}
-		return channel;
+		return gatewaySession;
 	}
 
 	/**
@@ -74,29 +85,35 @@ public class GatewayService {
 	 *            The port of the AMQP broker to use for connections
 	 * @param queueName
 	 *            The name of the queue, should be unique
+	 * @param controlQueueName
+	 *            The name of the queue for control messages, should be unique
 	 *
 	 * @return channel
 	 */
-	static Channel createSecureChannel(String brokerName, int brokerPort, String queueName) {
-		String keyPass = "12345";
-		String trustPass = "12345";
-		String keyFilePath = "C:\\Users\\sga\\Downloads\\arrowhead\\certificates\\testcloud1\\client1\\client1.testcloud1.jks";
-		String trustFilePath = "C:\\Users\\sga\\Downloads\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks";
-		KeyStore ks = SecurityUtils.loadKeyStore(keyFilePath, keyPass);
-		KeyStore tks = SecurityUtils.loadKeyStore(trustFilePath, trustPass);
+	static GatewaySession createSecureChannel(String brokerName, int brokerPort, String queueName,
+			String controlQueueName) {
+		// Get password and path from app.properties
+		String keystorePass = GatewayMain.getProp().getProperty("ssl.keystorepass");
+		String keystorePath = GatewayMain.getProp().getProperty("ssl.keystore");
+
+		String truststorePass = GatewayMain.getProp().getProperty("ssl.truststorepass");
+		String truststorePath = GatewayMain.getProp().getProperty("ssl.truststore");
+
+		KeyStore ks = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+		KeyStore tks = SecurityUtils.loadKeyStore(truststorePath, truststorePass);
 
 		KeyManagerFactory kmf = null;
 		TrustManagerFactory tmf = null;
 		try {
 			kmf = KeyManagerFactory.getInstance("SunX509");
-			kmf.init(ks, keyPass.toCharArray());
+			kmf.init(ks, keystorePass.toCharArray());
 			tmf = TrustManagerFactory.getInstance("SunX509");
 			tmf.init(tks);
 		} catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
 			e.printStackTrace();
-			log.fatal("GatewayService: Initializing the keyManagerFactory/trusManagerFactory failed: " + e.toString()
+			log.error("GatewayService: Initializing the keyManagerFactory/trusManagerFactory failed: " + e.toString()
 					+ " " + e.getMessage());
-			throw new ServiceConfigurationError("Initializing the keyManagerFactory/trusManagerFactory failed...", e);
+			throw new ServiceConfigurationError("Initializing the keyManagerFactory/trusManagerFactory failed", e);
 		}
 
 		SSLContext c = null;
@@ -105,7 +122,7 @@ public class GatewayService {
 			c.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 		} catch (NoSuchAlgorithmException | KeyManagementException e) {
 			e.printStackTrace();
-			log.info("GatewayService: Initializing the sslcontext failed");
+			log.error("GatewayService: Initializing the sslcontext failed");
 		}
 
 		ConnectionFactory factory = new ConnectionFactory();
@@ -113,20 +130,22 @@ public class GatewayService {
 		factory.setPort(brokerPort); // secure port: 5671
 		factory.useSslProtocol(c);
 
-		Channel channel = null;
+		GatewaySession gatewaySession = new GatewaySession();
 		try {
-			Connection conn = factory.newConnection();
-			channel = conn.createChannel();
+			Connection connection = factory.newConnection();
+			Channel channel = connection.createChannel();
 			channel.queueDeclare(queueName, false, true, true, null);
+			channel.queueDeclare(controlQueueName, false, false, false, null);
+			gatewaySession.setConnection(connection);
+			gatewaySession.setChannel(channel);
 		} catch (IOException e) {
 			e.printStackTrace();
-			log.info("GatewayService: Creating the secure channel failed");
+			log.error("GatewayService: Creating the secure channel failed");
 		}
 
-		return channel;
+		return gatewaySession;
 	}
 
-	
 	static SSLContext createSSLContext() {
 		String keystorePath = GatewayMain.getProp().getProperty("ssl.keystore");
 		String keystorePass = GatewayMain.getProp().getProperty("ssl.keystorepass");
@@ -143,10 +162,94 @@ public class GatewayService {
 			sslContext.init(kmf.getKeyManagers(), SecurityUtils.createTrustManagers(), null);
 		} catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | KeyManagementException e) {
 			e.printStackTrace();
-			log.fatal("GatewayService: Initializing the keyManagerFactory/trusManagerFactory failed");
+			log.error("GatewayService: Initializing the keyManagerFactory/trusManagerFactory failed");
 		}
 		return sslContext;
 	}
+
+	static void communicateWithProviderSecure(GatewaySession gatewaySession, String queueName, String controlQueueName,
+			ConnectToProviderRequest connectionRequest) throws IOException {
+		Channel channel = gatewaySession.getChannel();
+		SSLSocket sslProviderSocket = null;
+		GetResponse controlMessage = channel.basicGet(controlQueueName, false);
+		while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
+			GetResponse message = channel.basicGet(queueName, false);
+			if (message == null) {
+				System.out.println("No message retrieved");
+			} else {
+				SSLContext sslContext = GatewayService.createSSLContext();
+				SSLSocketFactory clientFactory = sslContext.getSocketFactory();
+				sslProviderSocket = (SSLSocket) clientFactory.createSocket(connectionRequest.getProvider().getAddress(),
+						connectionRequest.getProvider().getPort());
+				InputStream inProvider = sslProviderSocket.getInputStream();
+				OutputStream outProvider = sslProviderSocket.getOutputStream();
+				outProvider.write(message.getBody());
+
+				// get the answer from Provider
+				byte[] inputFromProvider = new byte[1024];
+				byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
+				for (int i = 0; i < inputFromProviderFinal.length; i++) {
+					inputFromProviderFinal[i] = inputFromProvider[i];
+				}
+				channel.basicPublish("", queueName, null, inputFromProviderFinal);
+			}
+			controlMessage = channel.basicGet(controlQueueName, false);
+		}
+		// Close sockets and the connection
+		channel.close();
+		gatewaySession.getConnection().close();
+		sslProviderSocket.close();
+
+	}
+
+	static void communicateWithProviderInsecure(GatewaySession gatewaySession, String queueName,
+			String controlQueueName, ConnectToProviderRequest connectionRequest) throws IOException {
+		Channel channel = gatewaySession.getChannel();
+		Socket providerSocket = null;
+		GetResponse controlMessage = channel.basicGet(controlQueueName, false);
+		while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
+			GetResponse message = channel.basicGet(queueName, false);
+			if (message == null) {
+				System.out.println("No message retrieved");
+			} else {
+				providerSocket = new Socket(connectionRequest.getProvider().getAddress(),
+						connectionRequest.getProvider().getPort());
+				InputStream inProvider = providerSocket.getInputStream();
+				OutputStream outProvider = providerSocket.getOutputStream();
+				outProvider.write(message.getBody());
+
+				// get the answer from Provider
+				byte[] inputFromProvider = new byte[1024];
+				byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
+				for (int i = 0; i < inputFromProviderFinal.length; i++) {
+					inputFromProviderFinal[i] = inputFromProvider[i];
+				}
+				channel.basicPublish("", queueName, null, inputFromProviderFinal);
+			}
+			controlMessage = channel.basicGet(controlQueueName, false);
+		}
+		// Close sockets and the connection
+		channel.close();
+		gatewaySession.getConnection().close();
+		providerSocket.close();
+	}
+
+	/*
+	 * static Boolean checkRequester(SSLSession consumerSession,
+	 * GatewayAtConsumerRequest connectionRequest) { String consumerCN =
+	 * connectionRequest.getConsumer().getSystemName(); String consumerIP =
+	 * connectionRequest.getConsumer().getAddress(); String consumerIPFromCert =
+	 * consumerSession.getPeerHost();
+	 * 
+	 * Certificate[] servercerts = null; try { servercerts =
+	 * consumerSession.getPeerCertificates(); } catch (SSLPeerUnverifiedException e)
+	 * { e.printStackTrace(); } X509Certificate cert = (X509Certificate)
+	 * servercerts[0]; String subjectname = cert.getSubjectDN().getName(); String
+	 * consumerCNFromCert = SecurityUtils.getCertCNFromSubject(subjectname);
+	 * 
+	 * return (!consumerCN.equals(consumerCNFromCert) |
+	 * !consumerIP.equals(consumerIPFromCert)); }
+	 */
 
 	/**
 	 * Fill the ConcurrentHashMap with initial keys and values
@@ -181,14 +284,14 @@ public class GatewayService {
 		Integer serverSocketPort = null;
 		// Check the port range for
 		ArrayList<Integer> freePorts = new ArrayList<Integer>();
-		for (Entry<Integer, Boolean> entry : GatewayMain.getPortAllocationMap().entrySet()) {
+		for (Entry<Integer, Boolean> entry : GatewayMain.portAllocationMap.entrySet()) {
 			if (entry.getValue().equals(true)) {
 				freePorts.add(entry.getKey());
 			}
 		}
 
 		if (freePorts.isEmpty()) {
-			log.fatal("No available port found in port range");
+			log.error("No available port found in port range");
 			throw new RuntimeException("No available port found in port range");
 		} else {
 			serverSocketPort = freePorts.get(0);

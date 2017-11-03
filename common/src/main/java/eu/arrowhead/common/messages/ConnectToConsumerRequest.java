@@ -1,24 +1,30 @@
 package eu.arrowhead.common.messages;
 
+import java.security.PublicKey;
+
 import eu.arrowhead.common.database.ArrowheadSystem;
 
-public class GatewayAtConsumerRequest {
+public class ConnectToConsumerRequest {
 
 	private String brokerName;
 	private int brokerPort;
 	private String queueName;
+	private String controlQueueName;
 	private ArrowheadSystem consumer;
 	private Boolean isSecure;
-	private String payloadEcryption;
+	private int timeout;
+	private PublicKey gatewayPublicKey;
 
-	public GatewayAtConsumerRequest(String brokerName, Integer brokerPort, String queueName, ArrowheadSystem consumer,
-			Boolean isSecure, String payloadEcryption) {
+	public ConnectToConsumerRequest(String brokerName, Integer brokerPort, String queueName, String controlQueueName,
+			ArrowheadSystem consumer, Boolean isSecure, int timeout, PublicKey gatewayPublicKey) {
 		this.brokerName = brokerName;
 		this.brokerPort = brokerPort;
 		this.queueName = queueName;
+		this.controlQueueName = controlQueueName;
 		this.consumer = consumer;
 		this.isSecure = isSecure;
-		this.payloadEcryption = payloadEcryption;
+		this.gatewayPublicKey = gatewayPublicKey;
+		this.timeout = timeout;
 	}
 
 	public String getBrokerName() {
@@ -45,6 +51,14 @@ public class GatewayAtConsumerRequest {
 		this.queueName = queueName;
 	}
 
+	public String getControlQueueName() {
+		return controlQueueName;
+	}
+
+	public void setControlQueueName(String controlQueueName) {
+		this.controlQueueName = controlQueueName;
+	}
+
 	public ArrowheadSystem getConsumer() {
 		return consumer;
 	}
@@ -61,12 +75,20 @@ public class GatewayAtConsumerRequest {
 		this.isSecure = isSecure;
 	}
 
-	public String getPayloadEcryption() {
-		return payloadEcryption;
+	public int getTimeout() {
+		return timeout;
 	}
 
-	public void setPayloadEcryption(String payloadEcryption) {
-		this.payloadEcryption = payloadEcryption;
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+
+	public PublicKey getGatewayPublicKey() {
+		return gatewayPublicKey;
+	}
+
+	public void setGatewayPublicKey(PublicKey gatewayPublicKey) {
+		this.gatewayPublicKey = gatewayPublicKey;
 	}
 
 }

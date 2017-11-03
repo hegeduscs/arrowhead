@@ -6,21 +6,18 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.GetResponse;
 
-import eu.arrowhead.common.messages.GatewayAtConsumerRequest;
+import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 
 public class InsecureServerSocketThread extends Thread {
 
 	private int port;
-	private ServerSocket serverSocket = null;
-	private GatewayAtConsumerRequest connectionRequest;
+	private ServerSocket serverSocket;
+	private ConnectToConsumerRequest connectionRequest;
 
-	public InsecureServerSocketThread(int port, GatewayAtConsumerRequest connectionRequest) {
+	public InsecureServerSocketThread(int port, ConnectToConsumerRequest connectionRequest) {
 		this.port = port;
 		this.connectionRequest = connectionRequest;
 	}
@@ -32,42 +29,53 @@ public class InsecureServerSocketThread extends Thread {
 			System.out.println("Insecure serverSocket is now running at port: " + port);
 		} catch (IOException e) {
 			e.printStackTrace();
-			GatewayResource.log.fatal("Creating insecure ServerSocket failed");
+			GatewayResource.log.error("Creating insecure ServerSocket failed");
 		}
 
 		try {
+			// Create socket for Consumer
 			Socket consumerSocket = serverSocket.accept();
-			//String consumerCN = consumerSocket.get
 			InputStream inConsumer = consumerSocket.getInputStream();
 			OutputStream outConsumer = consumerSocket.getOutputStream();
-			
-			//Get the request from the Consumer
+
+			// Get the request from the Consumer
 			byte[] inputFromConsumer = new byte[1024];
 			byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
 			for (int i = 0; i < inputFromConsumerFinal.length; i++) {
 				inputFromConsumerFinal[i] = inputFromConsumer[i];
-				
-			Channel channel = GatewayService.createChannel(connectionRequest.getBrokerName(),
-						connectionRequest.getBrokerPort(), connectionRequest.getQueueName());
-			channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
-			
-			Consumer consumer = new DefaultConsumer(channel) {
-			      @Override
-					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-			          throws IOException {
-			        outConsumer.write(body);			        
-			      }
-			    };
-			    channel.basicConsume(connectionRequest.getQueueName(), true, consumer);
-			    channel.close();
 			}
+
+			// Create a channel
+			GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),
+					connectionRequest.getBrokerPort(), connectionRequest.getQueueName(),
+					connectionRequest.getControlQueueName());
+			Channel channel = gatewaySession.getChannel();
+
+			channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
+
+			// Get the response and the control messages
+			GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
+			while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
+				GetResponse message = channel.basicGet(connectionRequest.getQueueName(), false);
+				if (message == null) {
+					System.out.println("No message retrieved");
+				} else {
+					outConsumer.write(message.getBody());
+				}
+				controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
+			}
+
+			// Close sockets and the connection
+			channel.close();
+			gatewaySession.getConnection().close();
+			consumerSocket.close();
+			serverSocket.close();
+
 		} catch (IOException e) {
 			e.printStackTrace();
-			GatewayResource.log.fatal("Creating insecure clientSocket failed");
+			GatewayResource.log.error("Creating insecure clientSocket failed");
 		}
 
-		
-		
 	}
 
 }

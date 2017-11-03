@@ -4,16 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.util.ArrayList;
-import java.util.Map.Entry;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -31,10 +22,10 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.GetResponse;
 
-import eu.arrowhead.common.messages.GatewayAtConsumerRequest;
-import eu.arrowhead.common.messages.GatewayAtConsumerResponse;
-import eu.arrowhead.common.messages.GatewayAtProviderRequest;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.messages.ConnectToConsumerRequest;
+import eu.arrowhead.common.messages.ConnectToConsumerResponse;
+import eu.arrowhead.common.messages.ConnectToProviderRequest;
+import eu.arrowhead.common.messages.ConnectToProviderResponse;
 
 /**
  * This is the REST resource for the Gateway Core System.
@@ -49,65 +40,50 @@ public class GatewayResource {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getIt() {
-		return "This is the Gateway Resource. " + "REST methods: connect.";
+		return "This is the Gateway Resource. " + "REST methods: connectToProvider, connectToConsumer.";
 	}
 
 	@PUT
-	@Path("connectAtProvider")
-	public Response connectionResource(GatewayAtProviderRequest connectionRequest) {
-		// TODO: mi legyen a queueName
-		String queueName = "";
-		String providerAddress = connectionRequest.getProvider().getAddress();
-		int providerPort = connectionRequest.getProvider().getPort();
+	@Path("connectToProvider")
+	public Response providerConnecionResource(ConnectToProviderRequest connectionRequest) {
+		String queueName = String.valueOf(System.currentTimeMillis()).concat(String.valueOf(Math.random())).replace(".",
+				"");
+
+		String controlQueueName = queueName.concat("_control");
+
 		if (connectionRequest.getIsSecure() == false) {
-			Channel channel = GatewayService.createChannel(connectionRequest.getBrokerName(),
-					connectionRequest.getBrokerPort(), queueName);
+			GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),
+					connectionRequest.getBrokerPort(), queueName, controlQueueName);
 			try {
-				Consumer consumer = new DefaultConsumer(channel) {
-					@Override
-					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-							byte[] body) throws IOException {
-						// send the request to Provider
-						Socket providerSocket = new Socket(providerAddress, providerPort);
-						InputStream inProvider = providerSocket.getInputStream();
-						OutputStream outProvider = providerSocket.getOutputStream();
-						outProvider.write(body);
-
-						// get the answer from Provider
-						byte[] inputFromProvider = new byte[1024];
-						byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
-						for (int i = 0; i < inputFromProviderFinal.length; i++) {
-							inputFromProviderFinal[i] = inputFromProvider[i];
-						}
-
-						channel.basicPublish("", queueName, null, inputFromProviderFinal);
-						inProvider.close();
-						outProvider.close();
-						providerSocket.close();
-					}
-				};
-				channel.basicConsume(queueName, true, consumer);
-
+				GatewayService.communicateWithProviderInsecure(gatewaySession, queueName, controlQueueName,
+						connectionRequest);
 			} catch (IOException e) {
-
+				log.error("ConnectToProvider(insecure): I/O exception occured");
 			}
-
 		} else {
-			Channel channel = GatewayService.createSecureChannel(connectionRequest.getBrokerName(),
-					connectionRequest.getBrokerPort(), queueName);
+			GatewaySession gatewaySession = GatewayService.createSecureChannel(connectionRequest.getBrokerName(),
+					connectionRequest.getBrokerPort(), queueName, controlQueueName);
+			try {
+				GatewayService.communicateWithProviderSecure(gatewaySession, queueName, controlQueueName,
+						connectionRequest);
+			} catch (IOException e) {
+				log.error("ConnectToProvider(secure): I/O exception occured");
+			}
 
 		}
 
-		return Response.status(200).build();
+		// TODO: PayloadEncryption instead of null
+		ConnectToProviderResponse response = new ConnectToProviderResponse(queueName, controlQueueName, null);
+		return Response.status(200).entity(response).build();
 	}
 
 	@PUT
-	@Path("connectAtConsumer")
-	public Response connectionResource(GatewayAtConsumerRequest connectionRequest) {
+	@Path("connectToConsumer")
+	public Response consumerConnectionResource(ConnectToConsumerRequest connectionRequest) {
 		Integer serverSocketPort = GatewayService.getAvailablePort();
 
 		if (connectionRequest.getIsSecure() == true) {
-			// TODO: test data; insert the real consumerCN and consumerIP to constr.
+
 			SecureServerSocketThread secureThread = new SecureServerSocketThread(serverSocketPort, connectionRequest);
 			secureThread.start();
 
@@ -117,8 +93,8 @@ public class GatewayResource {
 			insecureThread.start();
 		}
 
-		log.info("GatewayResource: returning the GatewayAtConsumerResponse to the Gatekeeper");
-		GatewayAtConsumerResponse response = new GatewayAtConsumerResponse(serverSocketPort);
+		log.info("GatewayResource: returning the ConnectToConsumerResponse to the Gatekeeper");
+		ConnectToConsumerResponse response = new ConnectToConsumerResponse(serverSocketPort);
 		return Response.status(200).entity(response).build();
 	}
 
