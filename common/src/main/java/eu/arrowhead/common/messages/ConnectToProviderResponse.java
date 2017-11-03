@@ -1,12 +1,14 @@
 package eu.arrowhead.common.messages;
 
-public class GatewayAtProviderResponse {
+public class ConnectToProviderResponse {
 
 	private String queueName;
+	private String controlQueueName;
 	private String payloadEncrytion;
 
-	public GatewayAtProviderResponse(String queueName, String payloadEncrytion) {
+	public ConnectToProviderResponse(String queueName, String controlQueueName, String payloadEncrytion) {
 		this.queueName = queueName;
+		this.controlQueueName = controlQueueName;
 		this.payloadEncrytion = payloadEncrytion;
 	}
 
@@ -16,6 +18,14 @@ public class GatewayAtProviderResponse {
 
 	public void setQueueName(String queueName) {
 		this.queueName = queueName;
+	}
+
+	public String getControlQueueName() {
+		return controlQueueName;
+	}
+
+	public void setControlQueueName(String controlQueueName) {
+		this.controlQueueName = controlQueueName;
 	}
 
 	public String getPayloadEncrytion() {

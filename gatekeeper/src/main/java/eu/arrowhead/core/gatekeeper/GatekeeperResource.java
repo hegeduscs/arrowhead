@@ -9,27 +9,32 @@ import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.ErrorMessage;
+import eu.arrowhead.common.messages.ConnectToConsumerRequest;
+import eu.arrowhead.common.messages.ConnectToConsumerResponse;
+import eu.arrowhead.common.messages.ConnectToProviderRequest;
+import eu.arrowhead.common.messages.ConnectToProviderResponse;
 import eu.arrowhead.common.messages.GSDAnswer;
 import eu.arrowhead.common.messages.GSDPoll;
 import eu.arrowhead.common.messages.GSDRequestForm;
 import eu.arrowhead.common.messages.GSDResult;
-import eu.arrowhead.common.messages.GatewayAtConsumerRequest;
-import eu.arrowhead.common.messages.GatewayAtConsumerResponse;
-import eu.arrowhead.common.messages.GatewayAtProviderRequest;
-import eu.arrowhead.common.messages.GatewayAtProviderResponse;
-import eu.arrowhead.common.messages.GatewayConnInfo;
+import eu.arrowhead.common.messages.GatewayConnectionInfo;
+import eu.arrowhead.common.messages.ICNEnd;
 import eu.arrowhead.common.messages.ICNProposal;
 import eu.arrowhead.common.messages.ICNRequestForm;
 import eu.arrowhead.common.messages.ICNResult;
 import eu.arrowhead.common.messages.InterCloudAuthRequest;
 import eu.arrowhead.common.messages.InterCloudAuthResponse;
+import eu.arrowhead.common.messages.OrchestrationForm;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.common.messages.PreferredProvider;
+import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.messages.ServiceRequestForm;
+
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.Consumes;
@@ -193,53 +198,66 @@ public class GatekeeperResource {
 			throw new BadPayloadException("init_icn received bad payload: missing/incomplete ICNRequestForm.");
 		}
 
+		// Getting the public key
+		PublicKey consumerPublicKey = null;
+		try {
+			consumerPublicKey = SecurityUtils
+					.getPublicKey(GatekeeperService.getGetawaySystem().getAuthenticationInfo());
+		} catch (InvalidKeySpecException e) {
+			log.error("The stored auth info for the ArrowheadSystem " + GatekeeperService.getGetawaySystem().toString()
+					+ " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
+		}
+		// TODO: preferredBrokerList instead of null
 		// Compiling the payload and then getting the URI
 		ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(),
 				requestForm.getRequesterSystem(), requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-				requestForm.getAuthenticationInfo());
+				requestForm.getAuthenticationInfo(), null, GatekeeperMain.timeout, consumerPublicKey);
 
 		String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(),
 				requestForm.getTargetCloud().getPort(), requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
 		icnUri = UriBuilder.fromPath(icnUri).path("icn_proposal").toString();
 
-		// Sending the the request and then parsing the result
+		// Sending the request and then parsing the result
 		Response ICNProposalResponse = Utility.sendRequest(icnUri, "PUT", icnProposal);
-		GatewayConnInfo gwConnInfo = ICNProposalResponse.readEntity(GatewayConnInfo.class);
+		ICNEnd icnEnd = ICNProposalResponse.readEntity(ICNEnd.class);
+
+		// Sanity check
+		if (icnEnd.getInstructions() == null) {
+			log.error("InterCloud Negotiations failed!");
+			throw new RuntimeException("InterCloud Negotiations failed!");
+		}
 
 		// Sending request
 		String gatewayURI = Utility.getGatewayUri();
-		gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectAtConsumer").toString();
+		gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToConsumer").toString();
 
 		Map<String, String> metadata = requestForm.getRequestedService().getServiceMetadata();
 		// TODO: Add secureChannel to ArrowheadService serviceMetadata
 		Boolean isSecure = Boolean.parseBoolean(metadata.get("secureChannel"));
 
-		GatewayAtConsumerRequest connectionRequest = new GatewayAtConsumerRequest(gwConnInfo.getBrokerName(),
-				gwConnInfo.getBrokerPort(), gwConnInfo.getQueueName(), requestForm.getRequesterSystem(), isSecure,
-				gwConnInfo.getPayloadEncryption());
+		// Compiling the request
+		GatewayConnectionInfo gwConnInfo = icnEnd.getUseGateway();
+		ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(),
+				gwConnInfo.getBrokerPort(), gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
+				requestForm.getRequesterSystem(), isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
 
 		Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
-		GatewayAtConsumerResponse connectAtConsumerResponse = gatewayResponse
-				.readEntity(GatewayAtConsumerResponse.class);
+		ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse
+				.readEntity(ConnectToConsumerResponse.class);
 
-		HashMap<String, Object> restrictionMap = new HashMap<>();
-		DatabaseManager dm = DatabaseManager.getInstance();
-		restrictionMap.put("systemName", "gateway");
-		CoreSystem gatewayCore = dm.get(CoreSystem.class, restrictionMap);
-
-		if (gatewayCore == null) {
-			throw new RuntimeException("Gateway Core System not found in the database!");
-		}
+		CoreSystem gatewayCore = GatekeeperService.getGetawaySystem();
 
 		ArrowheadSystem gateway = new ArrowheadSystem();
 		gateway.setSystemGroup("coresystems");
 		gateway.setAddress(gatewayCore.getAddress());
-		gateway.setPort(gatewayCore.getPort());
+		gateway.setPort(connectToConsumerResponse.getServerSocketPort());
 		gateway.setSystemName(gatewayCore.getSystemName());
+		icnEnd.getInstructions().setProvider(gateway);
+		List<OrchestrationForm> instructions = new ArrayList<>();
+		instructions.add(icnEnd.getInstructions());
 
 		log.info("ICNRequest: returning ICNResult to Orchestrator.");
-		ICNResult initICNResponse = new ICNResult(connectAtConsumerResponse.getServerSocketPort(),
-				gwConnInfo.getAuthorizationToken(), gateway);
+		ICNResult initICNResponse = new ICNResult(new OrchestrationResponse(instructions));
 		return Response.status(ICNProposalResponse.getStatus()).entity(initICNResponse).build();
 	}
 
@@ -292,26 +310,40 @@ public class GatekeeperResource {
 			OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
 
 			String gatewayURI = Utility.getGatewayUri();
-			gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectAtProvider").toString();
+			gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToProvider").toString();
 
 			ArrowheadSystem provider = orchResponse.getResponse().get(0).getProvider();
 			Map<String, String> metadata = orchResponse.getResponse().get(0).getService().getServiceMetadata();
 			// TODO: Add secureChannel to ArrowheadService serviceMetadata
 			Boolean isSecure = Boolean.parseBoolean(metadata.get("secureChannel"));
 
-			GatewayAtProviderRequest connectionRequest = new GatewayAtProviderRequest(GatekeeperMain.getBroker(),
-					GatekeeperMain.getBrokerPort(), provider, isSecure);
+			ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(GatekeeperMain.getBroker(),
+					GatekeeperMain.getBrokerPort(), provider, isSecure, GatekeeperMain.timeout);
 
 			// Sending request, parsing response
 			Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
-			GatewayAtProviderResponse connectAtConsumerResponse = gatewayResponse
-					.readEntity(GatewayAtProviderResponse.class);
-		
-			String token = orchResponse.getResponse().get(0).getAuthorizationToken();
-			log.info("ICNProposal: returning the OrchestrationResponse to the requester Cloud.");
-			GatewayConnInfo gwConnInfo = new GatewayConnInfo(GatekeeperMain.getBroker(), GatekeeperMain.getBrokerPort(),
-					connectAtConsumerResponse.getQueueName(), connectAtConsumerResponse.getPayloadEncrytion(), token);
-			return Response.status(response.getStatus()).entity(gwConnInfo).build();
+			ConnectToProviderResponse connectToProviderResponse = gatewayResponse
+					.readEntity(ConnectToProviderResponse.class);
+
+			log.info(
+					"ICNProposal: returning the OrchestrationResponse and the GatewayConnectionInfo to the requester Cloud.");
+
+			// Getting the public key
+			PublicKey providerPublicKey = null;
+			try {
+				providerPublicKey = SecurityUtils
+						.getPublicKey(GatekeeperService.getGetawaySystem().getAuthenticationInfo());
+			} catch (InvalidKeySpecException e) {
+				log.error("The stored auth info for the ArrowheadSystem " + GatekeeperService.getGetawaySystem()
+						+ " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
+				e.printStackTrace();
+			}
+
+			GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(GatekeeperMain.getBroker(),
+					GatekeeperMain.getBrokerPort(), connectToProviderResponse.getQueueName(),
+					connectToProviderResponse.getControlQueueName(), providerPublicKey);
+			ICNEnd icnEnd = new ICNEnd(orchResponse.getResponse().get(0), gatewayConnectionInfo);
+			return Response.status(response.getStatus()).entity(icnEnd).build();
 		}
 	}
 

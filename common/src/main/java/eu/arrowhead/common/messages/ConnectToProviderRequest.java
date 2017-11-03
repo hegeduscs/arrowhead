@@ -2,18 +2,21 @@ package eu.arrowhead.common.messages;
 
 import eu.arrowhead.common.database.ArrowheadSystem;
 
-public class GatewayAtProviderRequest {
+public class ConnectToProviderRequest {
 
 	private String brokerName;
 	private Integer brokerPort;
 	private ArrowheadSystem provider;
 	private boolean isSecure;
+	private int timeout;
 
-	public GatewayAtProviderRequest(String brokerName, Integer brokerPort, ArrowheadSystem provider, boolean isSecure) {
+	public ConnectToProviderRequest(String brokerName, Integer brokerPort, ArrowheadSystem provider, boolean isSecure,
+			int timeout) {
 		this.brokerName = brokerName;
 		this.brokerPort = brokerPort;
 		this.provider = provider;
 		this.isSecure = isSecure;
+		this.timeout = timeout;
 	}
 
 	public String getBrokerName() {
@@ -47,5 +50,14 @@ public class GatewayAtProviderRequest {
 	public void setIsSecure(Boolean isSecure) {
 		this.isSecure = isSecure;
 	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+	
 
 }

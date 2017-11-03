@@ -1,41 +1,23 @@
 package eu.arrowhead.common.messages;
 
-import eu.arrowhead.common.database.ArrowheadSystem;
-
 public class ICNResult {
 
-	private int serverSocketPort;
-	private String authorizationToken;
-	private ArrowheadSystem provider;
+	OrchestrationResponse orchResponse;
 
-	public ICNResult(int serverSocketPort, String authorizationToken, ArrowheadSystem provider) {
-		this.serverSocketPort = serverSocketPort;
-		this.authorizationToken = authorizationToken;
-		this.provider = provider;
+	public ICNResult(OrchestrationResponse orchResponse) {
+		this.orchResponse = orchResponse;
 	}
 
-	public int getServerSocketPort() {
-		return serverSocketPort;
+	public OrchestrationResponse getOrchResponse() {
+		return orchResponse;
 	}
 
-	public void setServerSocketPort(int serverSocketPort) {
-		this.serverSocketPort = serverSocketPort;
+	public void setOrchResponse(OrchestrationResponse orchResponse) {
+		this.orchResponse = orchResponse;
 	}
 
-	public String getAuthorizationToken() {
-		return authorizationToken;
-	}
-
-	public void setAuthorizationToken(String authorizationToken) {
-		this.authorizationToken = authorizationToken;
-	}
-
-	public ArrowheadSystem getProvider() {
-		return provider;
-	}
-
-	public void setProvider(ArrowheadSystem provider) {
-		this.provider = provider;
-	}
-
+	public boolean isValid() {
+	    return orchResponse != null && orchResponse.getResponse() != null && !orchResponse.getResponse().isEmpty();
+	  }
+	
 }

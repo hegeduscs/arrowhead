@@ -4,14 +4,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.ServiceConfigurationError;
@@ -161,7 +166,22 @@ public final class SecurityUtils {
 		}
 		return sb.toString();
 	}
+	
+	public static PublicKey getPublicKey(String stringKey) throws InvalidKeySpecException {
+		byte[] byteKey = Base64.getDecoder().decode(stringKey);
+		X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
+		KeyFactory kf = null;
+		try {
+			kf = KeyFactory.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e) {
+			log.fatal("KeyFactory.getInstance(String) throws NoSuchAlgorithmException, code needs to be changed!");
+			e.printStackTrace();
+		}
 
+		// noinspection ConstantConditions
+		return kf.generatePublic(X509publicKey);
+	}
+	
 	public static TrustManager[] createTrustManagers() {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
@@ -177,5 +197,6 @@ public final class SecurityUtils {
 		return trustAllCerts;
 
 	}
+
 
 }

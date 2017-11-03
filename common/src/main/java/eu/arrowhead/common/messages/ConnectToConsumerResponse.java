@@ -1,10 +1,10 @@
 package eu.arrowhead.common.messages;
 
-public class GatewayAtConsumerResponse {
+public class ConnectToConsumerResponse {
 
 	private int serverSocketPort;
 
-	public GatewayAtConsumerResponse(int serverSocketPort) {
+	public ConnectToConsumerResponse(int serverSocketPort) {
 		this.serverSocketPort = serverSocketPort;
 	}
 
