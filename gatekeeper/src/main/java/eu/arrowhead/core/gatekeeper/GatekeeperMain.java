@@ -28,8 +28,6 @@ class GatekeeperMain {
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8446/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8447/");
-  private static final String BROKER = getProp().getProperty("broker_name");
-  private static final String BROKER_PORT = getProp().getProperty("broker_port");
   protected static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "5000"));
 	
   public static void main(String[] args) throws IOException {
@@ -168,17 +166,6 @@ class GatekeeperMain {
 
     return prop;
   }
-
-
-	public static String getBroker() {
-		return BROKER;
-	}
-	
-	public static int getBrokerPort() {
-		return Integer.valueOf(BROKER_PORT);
-	}
-	
-	
 	
 
 }
