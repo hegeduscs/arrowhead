@@ -5,6 +5,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.CoreSystem;
+import eu.arrowhead.common.database.KnownBroker;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -207,11 +208,14 @@ public class GatekeeperResource {
 			log.error("The stored auth info for the ArrowheadSystem " + GatekeeperService.getGetawaySystem().toString()
 					+ " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
 		}
-		// TODO: preferredBrokerList instead of null
+		// Getting the list of preferred brokers from database
+		DatabaseManager dm = DatabaseManager.getInstance();
+		List<KnownBroker> preferredBrokers = dm.getAll(KnownBroker.class, null);
+
 		// Compiling the payload and then getting the URI
 		ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(),
 				requestForm.getRequesterSystem(), requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-				requestForm.getAuthenticationInfo(), null, GatekeeperMain.timeout, consumerPublicKey);
+				requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout, consumerPublicKey);
 
 		String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(),
 				requestForm.getTargetCloud().getPort(), requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
@@ -309,6 +313,13 @@ public class GatekeeperResource {
 			Response response = Utility.sendRequest(orchestratorUri, "POST", serviceRequestForm);
 			OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
 
+			// Getting the list of preferred brokers from database
+			DatabaseManager dm = DatabaseManager.getInstance();
+			List<KnownBroker> preferredBrokers = dm.getAll(KnownBroker.class, null);
+			// Filtering common brokers
+			List<KnownBroker> commonBrokers = new ArrayList<KnownBroker>(icnProposal.getPreferredBrokers());
+			commonBrokers.retainAll(preferredBrokers);
+
 			String gatewayURI = Utility.getGatewayUri();
 			gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToProvider").toString();
 
@@ -317,8 +328,8 @@ public class GatekeeperResource {
 			// TODO: Add secureChannel to ArrowheadService serviceMetadata
 			Boolean isSecure = Boolean.parseBoolean(metadata.get("secureChannel"));
 
-			ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(GatekeeperMain.getBroker(),
-					GatekeeperMain.getBrokerPort(), provider, isSecure, GatekeeperMain.timeout);
+			ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(commonBrokers.get(0).getAddress(),
+					commonBrokers.get(0).getPort(), provider, isSecure, GatekeeperMain.timeout);
 
 			// Sending request, parsing response
 			Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
@@ -339,8 +350,8 @@ public class GatekeeperResource {
 				e.printStackTrace();
 			}
 
-			GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(GatekeeperMain.getBroker(),
-					GatekeeperMain.getBrokerPort(), connectToProviderResponse.getQueueName(),
+			GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(commonBrokers.get(0).getAddress(),
+					commonBrokers.get(0).getPort(), connectToProviderResponse.getQueueName(),
 					connectToProviderResponse.getControlQueueName(), providerPublicKey);
 			ICNEnd icnEnd = new ICNEnd(orchResponse.getResponse().get(0), gatewayConnectionInfo);
 			return Response.status(response.getStatus()).entity(icnEnd).build();

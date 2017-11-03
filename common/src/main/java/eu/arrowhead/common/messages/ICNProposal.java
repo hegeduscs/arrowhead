@@ -3,6 +3,7 @@ package eu.arrowhead.common.messages;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.database.KnownBroker;
 
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class ICNProposal {
 	private List<ArrowheadSystem> preferredSystems = new ArrayList<>();
 	private Map<String, Boolean> negotiationFlags = new HashMap<>();
 	private String authenticationInfo;
-	private List<String> preferredBrokers;
+	private List<KnownBroker> preferredBrokers;
 	private int timeout;
 	private PublicKey gatewayPublicKey;
 
@@ -27,7 +28,7 @@ public class ICNProposal {
 
 	public ICNProposal(ArrowheadService requestedService, ArrowheadCloud requesterCloud,
 			ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredSystems,
-			Map<String, Boolean> negotiationFlags, String authenticationInfo, List<String> preferredBrokers,
+			Map<String, Boolean> negotiationFlags, String authenticationInfo, List<KnownBroker> preferredBrokers,
 			int timeout, PublicKey gatewayPublicKey) {
 		this.requestedService = requestedService;
 		this.requesterCloud = requesterCloud;
@@ -88,11 +89,11 @@ public class ICNProposal {
 		this.authenticationInfo = authenticationInfo;
 	}
 
-	public List<String> getPreferredBrokers() {
+	public List<KnownBroker> getPreferredBrokers() {
 		return preferredBrokers;
 	}
 
-	public void setPreferredBrokers(List<String> preferredBrokers) {
+	public void setPreferredBrokers(List<KnownBroker> preferredBrokers) {
 		this.preferredBrokers = preferredBrokers;
 	}
 
