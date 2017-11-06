@@ -5,10 +5,10 @@ log4j.appender.DB=org.apache.log4j.jdbc.JDBCAppender
 # Set Database Driver
 log4j.appender.DB.driver=com.mysql.jdbc.Driver
 # Set Database URL
-log4j.appender.DB.URL=jdbc:mysql://arrowhead.tmit.bme.hu:3306/log
+log4j.appender.DB.URL=jdbc:mysql://localhost:3306/log
 # Set database user name and password
-log4j.appender.DB.user=admin
-log4j.appender.DB.password=123Admin!
+log4j.appender.DB.user=root
+log4j.appender.DB.password=root
 # Set the SQL statement to be executed.
 log4j.appender.DB.sql=INSERT INTO logs VALUES(DEFAULT,'%d{yyyy-MM-dd HH:mm:ss}','%C','%p','%m')
 # Define the layout for file appender
