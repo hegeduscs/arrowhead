@@ -7,4 +7,4 @@ base_uri=http://0.0.0.0:8446/
 base_uri_secured=https://0.0.0.0:8447/
 db_user=root
 db_password=root
-db_address=jdbc:mysql://localhost:3306/arrowhead?autoReconnect=true&useUnicode=yes
+db_address=jdbc:mysql://localhost:3306/arrowhead
