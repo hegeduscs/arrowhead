@@ -1,7 +1,10 @@
 package eu.arrowhead.core.gateway;
 
+import eu.arrowhead.common.messages.ConnectToConsumerRequest;
+import eu.arrowhead.common.messages.ConnectToConsumerResponse;
+import eu.arrowhead.common.messages.ConnectToProviderRequest;
+import eu.arrowhead.common.messages.ConnectToProviderResponse;
 import java.io.IOException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -9,13 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.apache.log4j.Logger;
-
-import eu.arrowhead.common.messages.ConnectToConsumerRequest;
-import eu.arrowhead.common.messages.ConnectToConsumerResponse;
-import eu.arrowhead.common.messages.ConnectToProviderRequest;
-import eu.arrowhead.common.messages.ConnectToProviderResponse;
 
 /**
  * This is the REST resource for the Gateway Core System.
@@ -25,7 +22,7 @@ import eu.arrowhead.common.messages.ConnectToProviderResponse;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatewayResource {
 
-	public static Logger log = Logger.getLogger(GatewayResource.class.getName());
+  public static final Logger log = Logger.getLogger(GatewayResource.class.getName());
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
@@ -41,8 +38,8 @@ public class GatewayResource {
 
 		String controlQueueName = queueName.concat("_control");
 
-		if (connectionRequest.getIsSecure() == false) {
-			GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),
+    if (!connectionRequest.getIsSecure()) {
+      GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),
 					connectionRequest.getBrokerPort(), queueName, controlQueueName);
 			try {
 				GatewayService.communicateWithProviderInsecure(gatewaySession, queueName, controlQueueName,
@@ -72,7 +69,7 @@ public class GatewayResource {
 	public Response consumerConnectionResource(ConnectToConsumerRequest connectionRequest) {
 		Integer serverSocketPort = GatewayService.getAvailablePort();
 
-		if (connectionRequest.getIsSecure() == true) {
+    if (connectionRequest.getIsSecure()) {
 
 			SecureServerSocketThread secureThread = new SecureServerSocketThread(serverSocketPort, connectionRequest);
 			secureThread.start();

@@ -25,12 +25,12 @@ class GatekeeperMain {
 
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(GatekeeperMain.class.getName());
+  private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8446/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8447/");
-  protected static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "5000"));
-	
+  static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
+
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
@@ -86,7 +86,7 @@ class GatekeeperMain {
     System.out.println("Starting insecure server at: " + BASE_URI);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(GatekeeperResource.class);
+    config.registerClasses(GatekeeperResource.class, GatekeeperApi.class);
     config.packages("eu.arrowhead.common");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -101,7 +101,7 @@ class GatekeeperMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AccessControlFilter.class, GatekeeperResource.class);
+    config.registerClasses(AccessControlFilter.class, GatekeeperResource.class, GatekeeperApi.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");

@@ -1,5 +1,11 @@
 package eu.arrowhead.core.gateway;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.GetResponse;
+import eu.arrowhead.common.messages.ConnectToProviderRequest;
+import eu.arrowhead.common.security.SecurityUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,22 +19,12 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
-
 import org.apache.log4j.Logger;
-
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.GetResponse;
-
-import eu.arrowhead.common.messages.ConnectToProviderRequest;
-import eu.arrowhead.common.security.SecurityUtils;
 
 /**
  * Contains miscellaneous helper functions for the Gateway.
@@ -36,7 +32,7 @@ import eu.arrowhead.common.security.SecurityUtils;
 
 public class GatewayService {
 
-	private static Logger log = Logger.getLogger(GatewayService.class.getName());
+  private static final Logger log = Logger.getLogger(GatewayService.class.getName());
 
 	private GatewayService() throws AssertionError {
 		throw new AssertionError("GatewayService is a non-instantiable class");

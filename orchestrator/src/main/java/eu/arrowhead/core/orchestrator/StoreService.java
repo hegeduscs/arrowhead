@@ -10,8 +10,8 @@ import java.util.List;
 
 public final class StoreService {
 
-  private static DatabaseManager dm = DatabaseManager.getInstance();
-  private static HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   /**
    * This method returns the active Orchestration Store entries for a consumer.

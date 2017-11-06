@@ -27,14 +27,14 @@ import org.apache.log4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CommonApi {
 
-  private static Logger log = Logger.getLogger(CommonApi.class.getName());
-  private DatabaseManager dm = DatabaseManager.getInstance();
-  private HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final Logger log = Logger.getLogger(CommonApi.class.getName());
+  private final DatabaseManager dm = DatabaseManager.getInstance();
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "mgmt/common got it!";
+    return "orchestrator/mgmt/common got it!";
   }
 
   /**

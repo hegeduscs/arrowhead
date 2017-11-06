@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class OrchestratorResource {
 
-  private static Logger log = Logger.getLogger(OrchestratorResource.class.getName());
+  private static final Logger log = Logger.getLogger(OrchestratorResource.class.getName());
 
   /**
    * Simple test method to see if the http server where this resource is registered works or not.

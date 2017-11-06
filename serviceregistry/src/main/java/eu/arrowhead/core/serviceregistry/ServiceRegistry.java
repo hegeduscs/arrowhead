@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 
 class ServiceRegistry {
 
-  private static Logger log = Logger.getLogger(ServiceRegistry.class.getName());
+  private static final Logger log = Logger.getLogger(ServiceRegistry.class.getName());
 
   static boolean register(ServiceRegistryEntry entry) throws DnsSDException {
 

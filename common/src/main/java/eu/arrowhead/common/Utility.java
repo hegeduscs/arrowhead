@@ -7,14 +7,7 @@ import eu.arrowhead.common.database.OwnCloud;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
-
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import javax.net.ssl.HostnameVerifier;
@@ -34,11 +27,11 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
-	private static Logger log = Logger.getLogger(Utility.class.getName());
+	private static final Logger log = Logger.getLogger(Utility.class.getName());
 	private static SSLContext sslContext = null;
-	private static DatabaseManager dm = DatabaseManager.getInstance();
-	private static HashMap<String, Object> restrictionMap = new HashMap<>();
-	private static HostnameVerifier allHostsValid = (hostname, session) -> {
+	private static final DatabaseManager dm = DatabaseManager.getInstance();
+	private static final HashMap<String, Object> restrictionMap = new HashMap<>();
+	private static final HostnameVerifier allHostsValid = (hostname, session) -> {
 		// Decide whether to allow the connection...
 		return true;
 	};

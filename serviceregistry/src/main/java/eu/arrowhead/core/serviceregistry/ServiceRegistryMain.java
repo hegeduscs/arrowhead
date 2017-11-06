@@ -31,21 +31,21 @@ class ServiceRegistryMain {
 
   public static Timer timer = null;
   //DNS-SD global settings
-  public static String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
-  public static String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
-  public static String tsigKeyValue = getDnsProp().getProperty("tsig.key", "RM/jKKEPYB83peT0DQnYGg==");
-  public static String dnsIpAddress = getDnsProp().getProperty("dns.ip", "152.66.246.237");
-  public static String dnsDomain = getDnsProp().getProperty("dns.registerDomain", "srv.arrowhead.tmit.bme.hu.");
-  public static String computerDomain = getDnsProp().getProperty("dns.domain", "arrowhead.tmit.bme.hu");
-  public static int dnsPort = new Integer(getDnsProp().getProperty("dns.port", "53"));
+  public static final String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
+  public static final String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
+  public static final String tsigKeyValue = getDnsProp().getProperty("tsig.key", "RM/jKKEPYB83peT0DQnYGg==");
+  public static final String dnsIpAddress = getDnsProp().getProperty("dns.ip", "152.66.246.237");
+  public static final String dnsDomain = getDnsProp().getProperty("dns.registerDomain", "srv.arrowhead.tmit.bme.hu.");
+  public static final String computerDomain = getDnsProp().getProperty("dns.domain", "arrowhead.tmit.bme.hu");
+  public static final int dnsPort = new Integer(getDnsProp().getProperty("dns.port", "53"));
   //property files
   private static Properties appProp, dnsProp;
-  public static int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
+  public static final int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
   private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
   private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
+  private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
 
   /**
    * Main method.

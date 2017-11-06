@@ -7,7 +7,6 @@ import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.orchestrator.api.CommonApi;
-import eu.arrowhead.core.orchestrator.api.ConfigurationApi;
 import eu.arrowhead.core.orchestrator.api.StoreApi;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +31,7 @@ class OrchestratorMain {
 
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(OrchestratorMain.class.getName());
+  private static final Logger log = Logger.getLogger(OrchestratorMain.class.getName());
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8440/orchestrator/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8441/orchestrator/");
@@ -97,7 +96,7 @@ class OrchestratorMain {
     System.out.println("Starting insecure server at: " + BASE_URI);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class, CommonApi.class, ConfigurationApi.class, StoreApi.class);
+    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class);
     config.packages("eu.arrowhead.common");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -112,7 +111,7 @@ class OrchestratorMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AccessControlFilter.class, OrchestratorResource.class, CommonApi.class, ConfigurationApi.class, StoreApi.class);
+    config.registerClasses(AccessControlFilter.class, OrchestratorResource.class, CommonApi.class, StoreApi.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");

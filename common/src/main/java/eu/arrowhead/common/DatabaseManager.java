@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DatabaseManager {
 
-  private static Logger log = Logger.getLogger(DatabaseManager.class.getName());
+  private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
   private static DatabaseManager instance = null;
   private static SessionFactory sessionFactory;
   private static Properties prop;

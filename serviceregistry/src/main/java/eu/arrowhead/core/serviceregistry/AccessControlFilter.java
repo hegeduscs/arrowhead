@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 @Priority(Priorities.AUTHORIZATION) //2nd highest priority constant, this filter gets executed after the SecurityFilter
 public class AccessControlFilter implements ContainerRequestFilter {
 
-  private static Logger log = Logger.getLogger(AccessControlFilter.class.getName());
+  private static final Logger log = Logger.getLogger(AccessControlFilter.class.getName());
   @Context
   private Configuration configuration;
 

@@ -40,7 +40,7 @@ import org.jetbrains.annotations.Nullable;
  */
 final class OrchestratorDriver {
 
-  private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
+  private static final Logger log = Logger.getLogger(OrchestratorService.class.getName());
 
   private OrchestratorDriver() throws AssertionError {
     throw new AssertionError("OrchestratorDriver is a non-instantiable class");

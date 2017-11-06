@@ -40,11 +40,11 @@ import org.apache.log4j.Logger;
 
 final class QoSManagerService {
 
-  private static Logger log = Logger.getLogger(QoSManagerService.class.getName());
-  private static VerifierAlgorithmFactory algorithmFactory = VerifierAlgorithmFactory.getInstance();
-  private static DriversFactory driverFactory = DriversFactory.getInstance();
-  private static DatabaseManager dm = DatabaseManager.getInstance();
-  private static HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final Logger log = Logger.getLogger(QoSManagerService.class.getName());
+  private static final VerifierAlgorithmFactory algorithmFactory = VerifierAlgorithmFactory.getInstance();
+  private static final DriversFactory driverFactory = DriversFactory.getInstance();
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   private QoSManagerService() throws AssertionError {
     throw new AssertionError("QoSManagerService is a non-instantiable class");

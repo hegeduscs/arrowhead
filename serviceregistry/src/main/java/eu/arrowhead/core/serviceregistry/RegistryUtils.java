@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 
 public class RegistryUtils {
 
-  private static Logger log = Logger.getLogger(RegistryUtils.class.getName());
+  private static final Logger log = Logger.getLogger(RegistryUtils.class.getName());
 
   static DnsSDRegistrator createRegistrator() throws DnsSDException {
     // Get the DNS specific settings from global static variables (from prop files)

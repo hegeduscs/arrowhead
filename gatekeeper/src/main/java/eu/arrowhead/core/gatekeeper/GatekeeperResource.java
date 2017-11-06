@@ -4,8 +4,8 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.database.CoreSystem;
-import eu.arrowhead.common.database.KnownBroker;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -92,7 +92,6 @@ public class GatekeeperResource {
       String uri;
       for (ArrowheadCloud cloud : requestForm.getSearchPerimeter()) {
         try {
-          // TODO gatekeeper szétszedése lásd arrowhead_todo doksi/új ötletek része
           uri = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
         }
         // We skip the clouds with missing information
@@ -191,22 +190,17 @@ public class GatekeeperResource {
       throw new BadPayloadException("init_icn received bad payload: missing/incomplete ICNRequestForm.");
     }
 
-    // Getting the public key
-    PublicKey consumerPublicKey = null;
-    try {
-      consumerPublicKey = SecurityUtils.getPublicKey(GatekeeperService.getGetawaySystem().getAuthenticationInfo());
-    } catch (InvalidKeySpecException e) {
-      log.error("The stored auth info for the ArrowheadSystem " + GatekeeperService.getGetawaySystem().toString()
-                    + " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
-    }
+    //TODO példányositáson módositani
     // Getting the list of preferred brokers from database
     DatabaseManager dm = DatabaseManager.getInstance();
-    List<KnownBroker> preferredBrokers = dm.getAll(KnownBroker.class, null);
+    List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
 
+    //TODO gatekeeper prop file-ában usegateway flag, amit belerakunk a proposal negotiationflagsébe
     // Compiling the payload and then getting the URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
                                               requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-                                              requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout, consumerPublicKey);
+                                              requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout,
+                                              Utility.getCoreSystem("gateway").getAuthenticationInfo());
 
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
                                    requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
@@ -227,8 +221,8 @@ public class GatekeeperResource {
     gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToConsumer").toString();
 
     Map<String, String> metadata = requestForm.getRequestedService().getServiceMetadata();
-    // TODO: Add secureChannel to ArrowheadService serviceMetadata
-    Boolean isSecure = Boolean.parseBoolean(metadata.get("secureChannel"));
+    // TODO: Add securityLevel to ArrowheadService serviceMetadata
+    Boolean isSecure = Boolean.parseBoolean(metadata.get("securityLevel"));
 
     // Compiling the request
     GatewayConnectionInfo gwConnInfo = icnEnd.getUseGateway();
@@ -240,7 +234,7 @@ public class GatekeeperResource {
     Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
     ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
 
-    CoreSystem gatewayCore = GatekeeperService.getGetawaySystem();
+    CoreSystem gatewayCore = Utility.getCoreSystem("gateway");
 
     ArrowheadSystem gateway = new ArrowheadSystem();
     gateway.setSystemGroup("coresystems");
@@ -256,6 +250,7 @@ public class GatekeeperResource {
     return Response.status(ICNProposalResponse.getStatus()).entity(initICNResponse).build();
   }
 
+  //TODO usegateway property használata !!!!
   /**
    * This function represents the provider-side of InterCloudNegotiations, where the Gatekeeper (after an Orchestration process) sends information
    * about the provider System. (SSL secured)
@@ -283,9 +278,9 @@ public class GatekeeperResource {
                                                    AuthenticationException.class.toString());
       return Response.status(Status.UNAUTHORIZED).entity(errorMessage).build();
     }
-    // If it is authorized, send a ServiceRequestForm to the Orchestrator and return
-    // the OrchestrationResponse
+    // If it is authorized, send a ServiceRequestForm to the Orchestrator and return the OrchestrationResponse
     else {
+      //TODO SRF ellenőrzése, hogy a gatekeeper által berakott flaget hogy kezeli le
       Map<String, Boolean> orchestrationFlags = icnProposal.getNegotiationFlags();
       List<PreferredProvider> preferredProviders = new ArrayList<>();
       for (ArrowheadSystem preferredSystem : icnProposal.getPreferredSystems()) {
@@ -303,9 +298,9 @@ public class GatekeeperResource {
 
       // Getting the list of preferred brokers from database
       DatabaseManager dm = DatabaseManager.getInstance();
-      List<KnownBroker> preferredBrokers = dm.getAll(KnownBroker.class, null);
+      List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
       // Filtering common brokers
-      List<KnownBroker> commonBrokers = new ArrayList<KnownBroker>(icnProposal.getPreferredBrokers());
+      List<Broker> commonBrokers = new ArrayList<>(icnProposal.getPreferredBrokers());
       commonBrokers.retainAll(preferredBrokers);
 
       String gatewayURI = Utility.getGatewayUri();
@@ -313,9 +308,10 @@ public class GatekeeperResource {
 
       ArrowheadSystem provider = orchResponse.getResponse().get(0).getProvider();
       Map<String, String> metadata = orchResponse.getResponse().get(0).getService().getServiceMetadata();
-      // TODO: Add secureChannel to ArrowheadService serviceMetadata
-      Boolean isSecure = Boolean.parseBoolean(metadata.get("secureChannel"));
+      // TODO: Add securityLevel to ArrowheadService serviceMetadata on the consumer side of things
+      Boolean isSecure = Boolean.parseBoolean(metadata.get("securityLevel"));
 
+      //TODO icnpProposalban javasolt és a gatekeeper saját timeoutja közül vegyük a kisebbet, és azt adjuk be a payloadban
       ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(commonBrokers.get(0).getAddress(), commonBrokers.get(0).getPort(),
                                                                                 provider, isSecure, GatekeeperMain.timeout);
 
@@ -328,10 +324,8 @@ public class GatekeeperResource {
       // Getting the public key
       PublicKey providerPublicKey = null;
       try {
-        providerPublicKey = SecurityUtils.getPublicKey(GatekeeperService.getGetawaySystem().getAuthenticationInfo());
+        providerPublicKey = SecurityUtils.getPublicKey(Utility.getCoreSystem("gateway").getAuthenticationInfo());
       } catch (InvalidKeySpecException e) {
-        log.error("The stored auth info for the ArrowheadSystem " + GatekeeperService.getGetawaySystem()
-                      + " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
         e.printStackTrace();
       }
 

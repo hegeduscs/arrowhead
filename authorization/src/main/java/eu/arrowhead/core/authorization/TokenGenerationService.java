@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 
 class TokenGenerationService {
 
-  private static Logger log = Logger.getLogger(TokenGenerationService.class.getName());
+  private static final Logger log = Logger.getLogger(TokenGenerationService.class.getName());
 
   static List<ArrowheadToken> generateTokens(TokenGenerationRequest request) {
     // First get the public key for each provider

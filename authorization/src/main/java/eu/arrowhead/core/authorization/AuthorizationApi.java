@@ -29,19 +29,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
-@Path("mgmt/auth")
+@Path("authorization/mgmt")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthorizationApi {
 
-  private static Logger log = Logger.getLogger(AuthorizationApi.class.getName());
-  private DatabaseManager dm = DatabaseManager.getInstance();
-  private HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final Logger log = Logger.getLogger(AuthorizationApi.class.getName());
+  private final DatabaseManager dm = DatabaseManager.getInstance();
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "mgmt/auth got it";
+    return "authorization/mgmt got it";
   }
 
   /**
@@ -70,7 +70,8 @@ public class AuthorizationApi {
    */
   @GET
   @Path("intracloud/systemgroup/{systemGroup}/systemname/{systemName}/services")
-  public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
+  public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
+                                                 @QueryParam("provider_side") boolean providerSide) {
 
     restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
@@ -81,7 +82,11 @@ public class AuthorizationApi {
     }
 
     restrictionMap.clear();
-    restrictionMap.put("consumer", system);
+    if (!providerSide) {
+      restrictionMap.put("consumer", system);
+    } else {
+      restrictionMap.put("provider", system);
+    }
     List<IntraCloudAuthorization> authRightsList = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
     if (authRightsList.isEmpty()) {
       log.info("AuthorizationApi:getSystemServices throws DataNotFoundException.");
@@ -98,8 +103,7 @@ public class AuthorizationApi {
 
   @GET
   @Path("intracloud/systemgroup/{systemGroup}/systemname/{systemName}")
-  public List<IntraCloudAuthorization> getSystemAuthRights(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
-                                                           @QueryParam("provider_side") boolean providerSide) {
+  public List<IntraCloudAuthorization> getSystemAuthRights(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
 
     restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
@@ -110,13 +114,9 @@ public class AuthorizationApi {
     }
 
     restrictionMap.clear();
-    if (!providerSide) {
-      restrictionMap.put("consumer", system);
-    } else {
-      restrictionMap.put("provider", system);
-    }
-
-    List<IntraCloudAuthorization> authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
+    restrictionMap.put("consumer", system);
+    restrictionMap.put("provider", system);
+    List<IntraCloudAuthorization> authRights = dm.getAllOfEither(IntraCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
       log.info("AuthorizationApi:getSystemAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("This System is not in the authorization database. " + system.toString());
@@ -233,24 +233,29 @@ public class AuthorizationApi {
   }
 
   /**
-   * Deletes all the authorization right relations where the given System is the consumer.
+   * Deletes all the authorization right relations where the given System is the consumer/provider (decided by query parameter).
    *
    * @return JAX-RS Response with status code 200 (if delete is succesxfull) or 204 (if nothing happens).
    */
   @DELETE
   @Path("intracloud/systemgroup/{systemGroup}/systemname/{systemName}")
-  public Response deleteSystemRelations(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
+  public Response deleteSystemRelations(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
+                                        @QueryParam("provider_side") boolean providerSide) {
 
     restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
-    ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
-    if (consumer == null) {
+    ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
+    if (system == null) {
       log.info("deleteSystemRelations had no effect.");
       return Response.noContent().build();
     }
 
     restrictionMap.clear();
-    restrictionMap.put("consumer", consumer);
+    if (!providerSide) {
+      restrictionMap.put("consumer", system);
+    } else {
+      restrictionMap.put("provider", system);
+    }
     List<IntraCloudAuthorization> authRightsList = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
     if (!authRightsList.isEmpty()) {
       for (IntraCloudAuthorization authRight : authRightsList) {

@@ -25,12 +25,11 @@ import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
 import org.apache.log4j.Logger;
 
 public final class SecurityUtils {
 
-	private static Logger log = Logger.getLogger(SecurityUtils.class.getName());
+  private static final Logger log = Logger.getLogger(SecurityUtils.class.getName());
 
 	public static KeyStore loadKeyStore(String filePath, String pass) {
 		File file = new File(filePath);

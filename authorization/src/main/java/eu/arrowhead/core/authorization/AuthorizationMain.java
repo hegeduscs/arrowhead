@@ -32,7 +32,7 @@ class AuthorizationMain {
   static PrivateKey privateKey = null;
   private static HttpServer server = null;
   private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(AuthorizationMain.class.getName());
+  private static final Logger log = Logger.getLogger(AuthorizationMain.class.getName());
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8444/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8445/");

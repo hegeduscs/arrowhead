@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
  */
 final class OrchestratorService {
 
-  private static Logger log = Logger.getLogger(OrchestratorService.class.getName());
+  private static final Logger log = Logger.getLogger(OrchestratorService.class.getName());
 
   private OrchestratorService() throws AssertionError {
     throw new AssertionError("OrchestratorService is a non-instantiable class");

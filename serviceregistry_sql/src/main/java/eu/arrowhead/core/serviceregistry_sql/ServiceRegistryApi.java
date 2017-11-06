@@ -21,19 +21,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
-@Path("mgmt/sr")
+@Path("serviceregistry/mgmt")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ServiceRegistryApi {
 
-  private static Logger log = Logger.getLogger(ServiceRegistryApi.class.getName());
-  private DatabaseManager dm = DatabaseManager.getInstance();
-  private HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final Logger log = Logger.getLogger(ServiceRegistryApi.class.getName());
+  private final DatabaseManager dm = DatabaseManager.getInstance();
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "mgmt/sr got it";
+    return "serviceregistry/mgmt got it";
   }
 
   @GET

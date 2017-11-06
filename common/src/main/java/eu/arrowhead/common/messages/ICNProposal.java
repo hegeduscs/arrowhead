@@ -3,9 +3,7 @@ package eu.arrowhead.common.messages;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.database.KnownBroker;
-
-import java.security.PublicKey;
+import eu.arrowhead.common.database.Broker;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,18 +17,17 @@ public class ICNProposal {
 	private List<ArrowheadSystem> preferredSystems = new ArrayList<>();
 	private Map<String, Boolean> negotiationFlags = new HashMap<>();
 	private String authenticationInfo;
-	private List<KnownBroker> preferredBrokers;
-	private int timeout;
-	private PublicKey gatewayPublicKey;
+  private List<Broker> preferredBrokers;
+  private int timeout;
+  private String gatewayPublicKey;
 
 	public ICNProposal() {
 	}
 
 	public ICNProposal(ArrowheadService requestedService, ArrowheadCloud requesterCloud,
-			ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredSystems,
-			Map<String, Boolean> negotiationFlags, String authenticationInfo, List<KnownBroker> preferredBrokers,
-			int timeout, PublicKey gatewayPublicKey) {
-		this.requestedService = requestedService;
+                     ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags,
+                     String authenticationInfo, List<Broker> preferredBrokers, int timeout, String gatewayPublicKey) {
+    this.requestedService = requestedService;
 		this.requesterCloud = requesterCloud;
 		this.requesterSystem = requesterSystem;
 		this.preferredSystems = preferredSystems;
@@ -89,12 +86,12 @@ public class ICNProposal {
 		this.authenticationInfo = authenticationInfo;
 	}
 
-	public List<KnownBroker> getPreferredBrokers() {
-		return preferredBrokers;
+  public List<Broker> getPreferredBrokers() {
+    return preferredBrokers;
 	}
 
-	public void setPreferredBrokers(List<KnownBroker> preferredBrokers) {
-		this.preferredBrokers = preferredBrokers;
+  public void setPreferredBrokers(List<Broker> preferredBrokers) {
+    this.preferredBrokers = preferredBrokers;
 	}
 
 	public int getTimeout() {
@@ -105,12 +102,12 @@ public class ICNProposal {
 		this.timeout = timeout;
 	}
 
-	public PublicKey getGatewayPublicKey() {
-		return gatewayPublicKey;
+  public String getGatewayPublicKey() {
+    return gatewayPublicKey;
 	}
 
-	public void setGatewayPublicKey(PublicKey gatewayPublicKey) {
-		this.gatewayPublicKey = gatewayPublicKey;
+  public void setGatewayPublicKey(String gatewayPublicKey) {
+    this.gatewayPublicKey = gatewayPublicKey;
 	}
 
 	public boolean isValid() {

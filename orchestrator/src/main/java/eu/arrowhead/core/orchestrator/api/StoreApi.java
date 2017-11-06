@@ -33,14 +33,14 @@ import org.apache.log4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 public class StoreApi {
 
-  private static Logger log = Logger.getLogger(StoreApi.class.getName());
-  private DatabaseManager dm = DatabaseManager.getInstance();
-  private HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final Logger log = Logger.getLogger(StoreApi.class.getName());
+  private final DatabaseManager dm = DatabaseManager.getInstance();
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "mgmt/store got it";
+    return "orchestrator/mgmt/store got it";
   }
 
   /**
@@ -108,6 +108,7 @@ public class StoreApi {
    * Returns the Orchestration Store entries from the database specified by the consumer (and the service).
    *
    * @return List<OrchestrationStore>
+   *
    * @throws BadPayloadException, DataNotFoundException
    */
   @PUT
@@ -290,7 +291,6 @@ public class StoreApi {
   @DELETE
   @Path("systemgroup/{systemGroup}/systemname/{systemName}")
   public Response deleteEntries(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
-    List<OrchestrationStore> store = new ArrayList<>();
 
     restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
@@ -298,7 +298,7 @@ public class StoreApi {
 
     restrictionMap.clear();
     restrictionMap.put("consumer", consumer);
-    store = dm.getAll(OrchestrationStore.class, restrictionMap);
+    List<OrchestrationStore> store = dm.getAll(OrchestrationStore.class, restrictionMap);
     if (store.isEmpty()) {
       log.info("deleteEntries had no effect.");
       return Response.noContent().build();

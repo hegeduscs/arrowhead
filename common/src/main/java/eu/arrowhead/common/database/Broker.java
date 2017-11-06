@@ -11,8 +11,8 @@ import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
-@Table(name = "known_broker", uniqueConstraints = { @UniqueConstraint(columnNames = { "broker_name" }) })
-public class KnownBroker {
+@Table(name = "broker", uniqueConstraints = {@UniqueConstraint(columnNames = {"broker_name"})})
+public class Broker {
 
 	@Column(name = "id")
 	@Id
@@ -37,11 +37,11 @@ public class KnownBroker {
 	@Column(name = "authentication_info", length = 2047)
 	private String authenticationInfo;
 
-	public KnownBroker() {
-	}
+  public Broker() {
+  }
 
-	public KnownBroker(String brokerName, String address, Integer port, boolean isSecure, String authenticationInfo) {
-		this.brokerName = brokerName;
+  public Broker(String brokerName, String address, Integer port, boolean isSecure, String authenticationInfo) {
+    this.brokerName = brokerName;
 		this.address = address;
 		this.port = port;
 		this.isSecure = isSecure;
@@ -94,33 +94,28 @@ public class KnownBroker {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
 		}
-		if (obj == null) {
-			return false;
+    if (o == null || getClass() != o.getClass()) {
+      return false;
 		}
-		if (!(obj instanceof KnownBroker)) {
-			return false;
+
+    Broker broker = (Broker) o;
+
+    if (!address.equals(broker.address)) {
+      return false;
 		}
-		KnownBroker other = (KnownBroker) obj;
-		if (address == null) {
-			if (other.address != null) {
-				return false;
-			}
-		} else if (!address.equals(other.address)) {
-			return false;
-		}
-		if (port == null) {
-			if (other.port != null) {
-				return false;
-			}
-		} else if (!port.equals(other.port)) {
-			return false;
-		}
-		return true;
-	}
+    return port.equals(broker.port);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = address.hashCode();
+    result = 31 * result + port.hashCode();
+    return result;
+  }
 
 	public boolean isValid() {
 		return brokerName != null && address != null;

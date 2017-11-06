@@ -18,7 +18,7 @@
     <mapping class="eu.arrowhead.common.database.OwnCloud"/>
     <mapping class="eu.arrowhead.common.database.ServiceRegistryEntry"/>
     <mapping class="eu.arrowhead.common.database.OrchestrationStore"/>
-    <mapping class="eu.arrowhead.common.database.KnownBroker"/>
+    <mapping class="eu.arrowhead.common.database.Broker"/>
     
     
     <!--

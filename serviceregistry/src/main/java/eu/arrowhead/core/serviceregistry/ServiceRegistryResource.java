@@ -31,7 +31,7 @@ import org.apache.log4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class ServiceRegistryResource {
 
-  private static Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
+  private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
