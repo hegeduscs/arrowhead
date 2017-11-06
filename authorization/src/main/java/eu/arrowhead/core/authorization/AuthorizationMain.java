@@ -101,7 +101,7 @@ class AuthorizationMain {
     System.out.println("Starting insecure server at: " + BASE_URI);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AuthorizationResource.class);
+    config.registerClasses(AuthorizationResource.class, AuthorizationApi.class);
     config.packages("eu.arrowhead.common");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -116,7 +116,7 @@ class AuthorizationMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AccessControlFilter.class, AuthorizationResource.class);
+    config.registerClasses(AccessControlFilter.class, AuthorizationResource.class, AuthorizationApi.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");

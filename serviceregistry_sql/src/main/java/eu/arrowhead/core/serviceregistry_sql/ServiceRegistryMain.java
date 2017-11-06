@@ -112,7 +112,7 @@ class ServiceRegistryMain {
     System.out.println("Starting insecure server at: " + BASE_URI);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(ServiceRegistryResource.class);
+    config.registerClasses(ServiceRegistryResource.class, ServiceRegistryApi.class);
     config.packages("eu.arrowhead.common");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -127,7 +127,7 @@ class ServiceRegistryMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AccessControlFilter.class, ServiceRegistryResource.class);
+    config.registerClasses(AccessControlFilter.class, ServiceRegistryResource.class, ServiceRegistryApi.class);
     config.packages("eu.arrowhead.common");
 
     String keystorePath = getProp().getProperty("ssl.keystore");

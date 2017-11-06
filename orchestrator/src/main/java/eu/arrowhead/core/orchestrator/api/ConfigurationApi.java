@@ -1,4 +1,4 @@
-package eu.arrowhead.core.api;
+package eu.arrowhead.core.orchestrator.api;
 
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadCloud;
@@ -23,7 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
-@Path("configuration")
+@Path("mgmt/config")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConfigurationApi {
@@ -35,7 +35,7 @@ public class ConfigurationApi {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "Got it";
+    return "mgmt/configuration got it";
   }
 
   /**
@@ -44,11 +44,10 @@ public class ConfigurationApi {
    * @return List<CoreSystem>
    */
   @GET
-  @Path("/coresystems")
+  @Path("coresystems")
   public List<CoreSystem> getAllCoreSystems() {
 
-    List<CoreSystem> systemList = new ArrayList<>();
-    systemList = dm.getAll(CoreSystem.class, restrictionMap);
+    List<CoreSystem> systemList = dm.getAll(CoreSystem.class, restrictionMap);
     if (systemList.isEmpty()) {
       log.info("ConfigurationApi:getAllCoreSystems throws DataNotFoundException");
       throw new DataNotFoundException("CoreSystems not found in the database.");
@@ -63,11 +62,10 @@ public class ConfigurationApi {
    * @return List<NeighborCloud>
    */
   @GET
-  @Path("/neighborhood")
+  @Path("neighborhood")
   public List<NeighborCloud> getAllNeighborClouds() {
 
-    List<NeighborCloud> cloudList = new ArrayList<>();
-    cloudList = dm.getAll(NeighborCloud.class, restrictionMap);
+    List<NeighborCloud> cloudList = dm.getAll(NeighborCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("ConfigurationApi:getAllNeighborClouds throws DataNotFoundException");
       throw new DataNotFoundException("NeighborClouds not found in the database.");
@@ -82,11 +80,10 @@ public class ConfigurationApi {
    * @return List<OwnCloud>
    */
   @GET
-  @Path("/owncloud")
+  @Path("owncloud")
   public List<OwnCloud> getAllOwnClouds() {
 
-    List<OwnCloud> cloudList = new ArrayList<>();
-    cloudList = dm.getAll(OwnCloud.class, restrictionMap);
+    List<OwnCloud> cloudList = dm.getAll(OwnCloud.class, restrictionMap);
     if (cloudList.isEmpty()) {
       log.info("ConfigurationApi:getAllOwnClouds throws DataNotFoundException");
       throw new DataNotFoundException("OwnClouds not found in the database.");
@@ -101,7 +98,7 @@ public class ConfigurationApi {
    * @return CoreSystem
    */
   @GET
-  @Path("/coresystems/{systemName}")
+  @Path("coresystems/{systemName}")
   public Response getCoreSystem(@PathParam("systemName") String systemName) {
 
     restrictionMap.put("systemName", systemName);
@@ -120,7 +117,7 @@ public class ConfigurationApi {
    * @return NeighborCloud
    */
   @GET
-  @Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")
+  @Path("neighborhood/operator/{operator}/cloudname/{cloudName}")
   public Response getNeighborCloud(@PathParam("operator") String operator, @PathParam("cloudName") String cloudName) {
 
     restrictionMap.put("operator", operator);
@@ -144,13 +141,13 @@ public class ConfigurationApi {
 
   /**
    * Adds a list of CoreSystems to the database. Elements which would cause DuplicateEntryException or BadPayloadException (caused by missing
-   * systemName, address or serviceURI) are being skipped. The returned list only contains the elements which was saved in the process.
+   * systemName, address or serviceURI) are being skipped. The returned list only contains the elements which were saved in the process.
    *
    * @return List<CoreSystem>
    */
   @POST
-  @Path("/coresystems")
-  public List<CoreSystem> addCoreSystems(List<CoreSystem> coreSystemList) {
+  @Path("coresystems")
+  public Response addCoreSystems(List<CoreSystem> coreSystemList) {
 
     List<CoreSystem> savedCoreSystems = new ArrayList<>();
     for (CoreSystem cs : coreSystemList) {
@@ -165,18 +162,22 @@ public class ConfigurationApi {
       }
     }
 
-    return savedCoreSystems;
+    if (savedCoreSystems.isEmpty()) {
+      return Response.status(Status.NO_CONTENT).build();
+    } else {
+      return Response.status(Status.CREATED).entity(savedCoreSystems).build();
+    }
   }
 
   /**
    * Adds a list of NeighborClouds to the database. Elements which would cause DuplicateEntryException or BadPayloadException (caused by missing
-   * operator, cloudName, address or serviceURI) are being skipped. The returned list only contains the elements which was saved in the process.
+   * operator, cloudName, address or serviceURI) are being skipped. The returned list only contains the elements which were saved in the process.
    *
    * @return List<NeighborCloud>
    */
   @POST
-  @Path("/neighborhood")
-  public List<NeighborCloud> addNeighborClouds(List<NeighborCloud> neighborCloudList) {
+  @Path("neighborhood")
+  public Response addNeighborClouds(List<NeighborCloud> neighborCloudList) {
 
     List<NeighborCloud> savedNeighborClouds = new ArrayList<>();
     for (NeighborCloud nc : neighborCloudList) {
@@ -201,7 +202,11 @@ public class ConfigurationApi {
       }
     }
 
-    return savedNeighborClouds;
+    if (savedNeighborClouds.isEmpty()) {
+      return Response.status(Status.NO_CONTENT).build();
+    } else {
+      return Response.status(Status.CREATED).entity(savedNeighborClouds).build();
+    }
   }
 
   /**
@@ -211,36 +216,43 @@ public class ConfigurationApi {
    * @return OwnCloud
    */
   @POST
-  @Path("/owncloud")
-  public OwnCloud addOwnCloud(OwnCloud ownCloud) {
+  @Path("owncloud")
+  public OwnCloud addOwnCloud(OwnCloud oc) {
 
-    if (!ownCloud.isValid()) {
+    if (!oc.isValid()) {
       log.info("ConfigurationApi:addOwnCloud throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing operator, cloudName " + "or address field! (ConfigurationApi:addOwnCloud)");
+      throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud in the entry payload.");
     }
 
-    List<OwnCloud> ownClouds = new ArrayList<>();
-    ownClouds = dm.getAll(OwnCloud.class, restrictionMap);
+    restrictionMap.put("operator", oc.getCloud().getOperator());
+    restrictionMap.put("cloudName", oc.getCloud().getCloudName());
+    ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
+    if (cloud == null) {
+      dm.save(oc.getCloud());
+    } else {
+      oc.setCloud(cloud);
+    }
+
+    List<OwnCloud> ownClouds = dm.getAll(OwnCloud.class, restrictionMap);
     if (!ownClouds.isEmpty()) {
-      for (OwnCloud cloud : ownClouds) {
-        dm.delete(cloud);
+      for (OwnCloud ownCloud : ownClouds) {
+        dm.delete(ownCloud);
       }
     }
 
-    ownCloud = dm.save(ownCloud);
-    return ownCloud;
+    return dm.save(oc);
   }
 
   /**
    * Updates an existing CoreSystem in the database. Returns 204 (no content) if the specified CoreSystem was not in the database.
    */
   @PUT
-  @Path("/coresystems")
+  @Path("coresystems")
   public Response updateCoreSystem(CoreSystem cs) {
 
     if (!cs.isValid()) {
       log.info("ConfigurationApi:updateCoreSystem throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing systemName, address or " + "serviceURI in the entry payload.");
+      throw new BadPayloadException("Bad payload: missing systemName, address or serviceURI in the entry payload.");
     }
 
     restrictionMap.put("systemName", cs.getSystemName());
@@ -256,19 +268,18 @@ public class ConfigurationApi {
     } else {
       return Response.noContent().build();
     }
-
   }
 
   /**
    * Updates an existing NeighborCloud in the database. Returns 204 (no content) if the specified NeighborCloud was not in the database.
    */
   @PUT
-  @Path("/neighborhood")
+  @Path("neighborhood")
   public Response updateNeighborCloud(NeighborCloud nc) {
 
     if (!nc.isValid()) {
       log.info("ConfigurationApi:updateNeighborCloud throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud" + "in the entry payload.");
+      throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud in the entry payload.");
     }
 
     restrictionMap.put("operator", nc.getCloud().getOperator());
@@ -289,15 +300,14 @@ public class ConfigurationApi {
     } else {
       return Response.noContent().build();
     }
-
   }
 
   /**
-   * Deletes the CoreSystem from the database specified by the system name. Returns 200 if the delete is succesful, 204 (no content) if the system was
-   * not in the database to begin with.
+   * Deletes the CoreSystem from the database specified by the system name. Returns 200 if the delete is successful, 204 (no content) if the system
+   * was not in the database to begin with.
    */
   @DELETE
-  @Path("/coresystems/{systemName}")
+  @Path("coresystems/{systemName}")
   public Response deleteCoreSystem(@PathParam("systemName") String systemName) {
 
     restrictionMap.put("systemName", systemName);
@@ -311,11 +321,11 @@ public class ConfigurationApi {
   }
 
   /**
-   * Deletes the NeighborCloud from the database specified by the operator and cloud name. Returns 200 if the delete is succesful, 204 (no content) if
-   * the system was not in the database to begin with.
+   * Deletes the NeighborCloud from the database specified by the operator and cloud name. Returns 200 if the delete is successful,
+   * 204 (no content) if the system was not in the database to begin with.
    */
   @DELETE
-  @Path("/neighborhood/operator/{operator}/cloudname/{cloudName}")
+  @Path("neighborhood/operator/{operator}/cloudname/{cloudName}")
   public Response deleteNeighborCloud(@PathParam("operator") String operator, @PathParam("cloudName") String cloudName) {
 
     restrictionMap.put("operator", operator);
@@ -335,6 +345,5 @@ public class ConfigurationApi {
       return Response.ok().build();
     }
   }
-
 
 }

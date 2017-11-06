@@ -11,7 +11,6 @@ import eu.arrowhead.common.security.SecurityUtils;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -166,26 +165,4 @@ public class ServiceRegistryResource {
     }
   }
 
-  @GET
-  @Path("all")
-  public Response getAllServices() {
-    List<ServiceRegistryEntry> serviceRegistry = dm.getAll(ServiceRegistryEntry.class, null);
-    ServiceQueryResult result = new ServiceQueryResult(serviceRegistry);
-    log.info("getAllServices returns " + result.getServiceQueryData().size() + " entries");
-    if (result.getServiceQueryData().isEmpty()) {
-      return Response.status(Status.NO_CONTENT).entity(result).build();
-    } else {
-      return Response.status(Response.Status.OK).entity(result).build();
-    }
-  }
-
-  @DELETE
-  @Path("all")
-  public Response removeAllServices() {
-    dm.deleteAll(ServiceRegistryEntry.class.getName());
-    log.info("removeAllServices returns successfully");
-    return Response.status(Status.OK).build();
-  }
-
-  //TODO add more convenience methods here
 }

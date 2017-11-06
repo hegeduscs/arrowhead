@@ -8,15 +8,13 @@ public class OrchestrationStoreQuery {
 
   private ArrowheadService requestedService;
   private ArrowheadSystem requesterSystem;
-  private Boolean onlyActive = false;
 
   public OrchestrationStoreQuery() {
   }
 
-  public OrchestrationStoreQuery(ArrowheadService requestedService, ArrowheadSystem requesterSystem, Boolean onlyActive) {
+  public OrchestrationStoreQuery(ArrowheadService requestedService, ArrowheadSystem requesterSystem) {
     this.requestedService = requestedService;
     this.requesterSystem = requesterSystem;
-    this.onlyActive = onlyActive;
   }
 
   public ArrowheadService getRequestedService() {
@@ -35,17 +33,11 @@ public class OrchestrationStoreQuery {
     this.requesterSystem = requesterSystem;
   }
 
-  public Boolean isOnlyActive() {
-    return onlyActive;
+  public boolean isValid() {
+    if (requestedService != null && !requestedService.isValid()) {
+      return false;
+    }
+    return requesterSystem != null && requesterSystem.isValid();
   }
-
-  public void setOnlyActive(Boolean onlyActive) {
-    this.onlyActive = onlyActive;
-  }
-
-  public boolean isPayloadUsable() {
-    return requesterSystem != null && requesterSystem.isValidForDatabase();
-  }
-
 
 }

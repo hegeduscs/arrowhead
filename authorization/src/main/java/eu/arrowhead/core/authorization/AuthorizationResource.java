@@ -121,7 +121,7 @@ public class AuthorizationResource {
    * @throws DataNotFoundException, BadPayloadException
    */
   @PUT
-  @Path("/intercloud")
+  @Path("intercloud")
   public Response isCloudAuthorized(InterCloudAuthRequest request) {
     if (!request.isPayloadUsable()) {
       log.error("isCloudAuthorized BadPayloadException");

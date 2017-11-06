@@ -28,7 +28,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     boolean isGetItCalled = requestContext.getMethod().equals("GET") && requestTarget.endsWith("authorization");
     if (sc.isSecure() && !isGetItCalled) {
       String subjectName = sc.getUserPrincipal().getName();
-      if (isClientAuthorized(subjectName)) {
+      if (isClientAuthorized(subjectName, requestTarget)) {
         log.info("SSL identification is successful! Cert: " + subjectName);
       } else {
         log.error(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget);
@@ -37,7 +37,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     }
   }
 
-  private boolean isClientAuthorized(String subjectName) {
+  private boolean isClientAuthorized(String subjectName, String requestTarget) {
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
     String serverCN = (String) configuration.getProperty("server_common_name");
 
@@ -46,18 +46,25 @@ public class AccessControlFilter implements ContainerRequestFilter {
       return false;
     }
 
-    // If this property is true, then every system from the local cloud can use the auth services
-    if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud"))) {
-      String[] serverFields = serverCN.split("\\.", 3);
-      String[] clientFields = clientCN.split("\\.", 3);
-      // serverFields contains: systemName, systemGroup, cloudName.operator.arrowhead.eu
-      return serverFields[2].equalsIgnoreCase(clientFields[2]);
-    }
-    // If it is not true, only the Orchestrator and Gatekeeper can use it
-    else {
+    if (requestTarget.contains("mgmt")) {
+      //Only the local HMI can use these methods
       String[] serverFields = serverCN.split("\\.", 2);
       // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
-      return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
+      return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
+    } else {
+      // If this property is true, then every system from the local cloud can use the auth services
+      if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud"))) {
+        String[] serverFields = serverCN.split("\\.", 3);
+        String[] clientFields = clientCN.split("\\.", 3);
+        // serverFields contains: systemName, systemGroup, cloudName.operator.arrowhead.eu
+        return serverFields[2].equalsIgnoreCase(clientFields[2]);
+      }
+      // If it is not true, only the Orchestrator and Gatekeeper can use it
+      else {
+        String[] serverFields = serverCN.split("\\.", 2);
+        // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
+        return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
+      }
     }
   }
 
