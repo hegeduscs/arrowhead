@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 public class PingProvidersTask extends TimerTask {
 
-  private static Logger log = Logger.getLogger(PingProvidersTask.class.getName());
+  private static final Logger log = Logger.getLogger(PingProvidersTask.class.getName());
 
   @Override
   public void run() {

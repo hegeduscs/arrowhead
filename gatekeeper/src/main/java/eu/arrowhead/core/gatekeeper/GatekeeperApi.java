@@ -31,7 +31,6 @@ public class GatekeeperApi {
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
-  //TODO bróker táblára is legyenek API hivasok
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -197,18 +196,106 @@ public class GatekeeperApi {
 
   @GET
   @Path("brokers/brokername/{brokerName}")
-  public Broker getBroker(@PathParam("brokerName") String brokerName) {
+  public Broker getBrokerByName(@PathParam("brokerName") String brokerName) {
 
     restrictionMap.put("brokerName", brokerName);
     Broker broker = dm.get(Broker.class, restrictionMap);
     if (broker == null) {
-      log.info("getBroker throws DataNotFoundException");
+      log.info("getBrokerByName throws DataNotFoundException");
       throw new DataNotFoundException("Requested Broker not found in the database.");
     }
 
     return broker;
   }
 
-  //TODO getBrokerByAddress address és port overwride opciókkal (2 fgv)
+  @GET
+  @Path("brokers/address/{address}")
+  public List<Broker> getBrokerByAddress(@PathParam("address") String address) {
+
+    restrictionMap.put("address", address);
+    List<Broker> brokerList = dm.getAll(Broker.class, restrictionMap);
+    if (brokerList.isEmpty()) {
+      log.info("getBrokerByAddress throws DataNotFoundException");
+      throw new DataNotFoundException("Brokers with this address not found in the database.");
+    }
+
+    return brokerList;
+  }
+
+  @GET
+  @Path("brokers/address/{address}/port/{port}")
+  public List<Broker> getBrokerByAddressAndPort(@PathParam("address") String address, @PathParam("port") int port) {
+
+    restrictionMap.put("address", address);
+    restrictionMap.put("port", port);
+    List<Broker> brokerList = dm.getAll(Broker.class, restrictionMap);
+    if (brokerList.isEmpty()) {
+      log.info("getBrokerByAddressAndPort throws DataNotFoundException");
+      throw new DataNotFoundException("Brokers with this address and port not found in the database.");
+    }
+
+    return brokerList;
+  }
+
+  @POST
+  @Path("brokers")
+  public Response addBrokers(List<Broker> brokerList) {
+
+    List<Broker> savedBrokers = new ArrayList<>();
+    for (Broker broker : brokerList) {
+      if (broker.isValid()) {
+        restrictionMap.clear();
+        restrictionMap.put("brokerName", broker.getBrokerName());
+        Broker retrievedBroker = dm.get(Broker.class, restrictionMap);
+        if (retrievedBroker == null) {
+          dm.save(broker);
+          savedBrokers.add(broker);
+        }
+      }
+    }
+
+    if (savedBrokers.isEmpty()) {
+      return Response.status(Status.NO_CONTENT).build();
+    } else {
+      return Response.status(Status.CREATED).entity(savedBrokers).build();
+    }
+  }
+
+  @PUT
+  @Path("brokers")
+  public Response updateBroker(Broker broker) {
+
+    if (!broker.isValid()) {
+      log.info("updateBroker throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: missing broker name or address in the entry payload.");
+    }
+
+    restrictionMap.put("brokerName", broker.getBrokerName());
+    Broker retrievedBroker = dm.get(Broker.class, restrictionMap);
+    if (retrievedBroker != null) {
+      retrievedBroker.setAddress(broker.getAddress());
+      retrievedBroker.setPort(broker.getPort());
+      retrievedBroker.setAuthenticationInfo(broker.getAuthenticationInfo());
+      retrievedBroker.setSecure(broker.isSecure());
+      retrievedBroker = dm.merge(retrievedBroker);
+      return Response.status(Status.ACCEPTED).entity(retrievedBroker).build();
+    } else {
+      return Response.noContent().build();
+    }
+  }
+
+  @DELETE
+  @Path("brokers/brokername/{brokerName}")
+  public Response deleteBroker(@PathParam("brokerName") String brokerName) {
+
+    restrictionMap.put("brokerName", brokerName);
+    Broker broker = dm.get(Broker.class, restrictionMap);
+    if (broker == null) {
+      return Response.noContent().build();
+    } else {
+      dm.delete(broker);
+      return Response.ok().build();
+    }
+  }
 
 }

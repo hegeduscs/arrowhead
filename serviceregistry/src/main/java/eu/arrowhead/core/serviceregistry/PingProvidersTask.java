@@ -24,7 +24,7 @@ public class PingProvidersTask extends TimerTask {
     pingAndRemoveServices();
   }
 
-  public void pingAndRemoveServices() {
+  private void pingAndRemoveServices() {
     DnsSDDomainEnumerator de;
     de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);
     DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());

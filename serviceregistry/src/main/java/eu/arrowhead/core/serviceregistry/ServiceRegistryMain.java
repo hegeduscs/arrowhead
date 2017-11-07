@@ -29,18 +29,18 @@ import org.glassfish.jersey.server.ResourceConfig;
  */
 class ServiceRegistryMain {
 
-  public static Timer timer = null;
+  private static Timer timer = null;
   //DNS-SD global settings
-  public static final String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
-  public static final String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
-  public static final String tsigKeyValue = getDnsProp().getProperty("tsig.key", "RM/jKKEPYB83peT0DQnYGg==");
-  public static final String dnsIpAddress = getDnsProp().getProperty("dns.ip", "152.66.246.237");
-  public static final String dnsDomain = getDnsProp().getProperty("dns.registerDomain", "srv.arrowhead.tmit.bme.hu.");
-  public static final String computerDomain = getDnsProp().getProperty("dns.domain", "arrowhead.tmit.bme.hu");
-  public static final int dnsPort = new Integer(getDnsProp().getProperty("dns.port", "53"));
+  static final String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
+  static final String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
+  static final String tsigKeyValue = getDnsProp().getProperty("tsig.key", "RM/jKKEPYB83peT0DQnYGg==");
+  static final String dnsIpAddress = getDnsProp().getProperty("dns.ip", "152.66.246.237");
+  static final String dnsDomain = getDnsProp().getProperty("dns.registerDomain", "srv.arrowhead.tmit.bme.hu.");
+  static final String computerDomain = getDnsProp().getProperty("dns.domain", "arrowhead.tmit.bme.hu");
+  static final int dnsPort = new Integer(getDnsProp().getProperty("dns.port", "53"));
   //property files
   private static Properties appProp, dnsProp;
-  public static final int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
+  static final int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
   private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
   private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
   private static HttpServer server = null;

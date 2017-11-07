@@ -1,11 +1,11 @@
 package eu.arrowhead.common.messages;
 
 public class ICNEnd {
-	
-	OrchestrationForm instructions;
-	GatewayConnectionInfo useGateway;
-	
-	public ICNEnd(OrchestrationForm instructions, GatewayConnectionInfo useGateway) {
+
+  private OrchestrationForm instructions;
+  private GatewayConnectionInfo useGateway;
+
+  public ICNEnd(OrchestrationForm instructions, GatewayConnectionInfo useGateway) {
 		this.instructions = instructions;
 		this.useGateway = useGateway;
 	}

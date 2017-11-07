@@ -56,7 +56,7 @@ import org.apache.log4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatekeeperResource {
 
-  private static Logger log = Logger.getLogger(GatekeeperResource.class.getName());
+  private static final Logger log = Logger.getLogger(GatekeeperResource.class.getName());
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)

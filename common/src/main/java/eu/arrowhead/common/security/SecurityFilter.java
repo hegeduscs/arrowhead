@@ -29,7 +29,7 @@ public class SecurityFilter implements ContainerRequestFilter {
     }
   }
 
-  public class Authorizer implements SecurityContext {
+  class Authorizer implements SecurityContext {
 
     private String user;
     private Principal principal;

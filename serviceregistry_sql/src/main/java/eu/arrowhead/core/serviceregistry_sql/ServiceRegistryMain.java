@@ -29,10 +29,10 @@ class ServiceRegistryMain {
   private static HttpServer secureServer = null;
   private static Timer timer = null;
   private static Properties prop;
-  private static Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
+  private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8442/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
-  static int pingTimeout = new Integer(getProp().getProperty("ping.timeout", "10000"));
+  static final int pingTimeout = new Integer(getProp().getProperty("ping.timeout", "10000"));
 
   public static void main(String[] args) throws IOException {
     System.out.println("Working directory: " + System.getProperty("user.dir"));

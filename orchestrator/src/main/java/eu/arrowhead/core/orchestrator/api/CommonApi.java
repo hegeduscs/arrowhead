@@ -134,7 +134,7 @@ public class CommonApi {
 
     if (!service.isValidForDatabase()) {
       log.info("CommonApi:updateService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing service group " + "or service definition in the entry payload.");
+      throw new BadPayloadException("Bad payload: missing service group or service definition in the entry payload.");
     }
 
     restrictionMap.put("serviceGroup", service.getServiceGroup());
@@ -155,7 +155,7 @@ public class CommonApi {
    * 204 (no content) if the service was not in the database to begin with.
    */
   @DELETE
-  @Path("/services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
+  @Path("services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
   public Response deleteService(@PathParam("serviceGroup") String serviceGroup, @PathParam("serviceDefinition") String serviceDefinition) {
 
     restrictionMap.put("serviceGroup", serviceGroup);
@@ -193,7 +193,7 @@ public class CommonApi {
    * @return List<ArrowheadSystem>
    */
   @GET
-  @Path("/systems/systemgroup/{systemGroup}")
+  @Path("systems/systemgroup/{systemGroup}")
   public List<ArrowheadSystem> getSystemGroup(@PathParam("systemGroup") String systemGroup) {
 
     restrictionMap.put("systemGroup", systemGroup);

@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 @Priority(Priorities.AUTHORIZATION) //2nd highest priority constant, this filter gets executed after the SecurityFilter
 public class AccessControlFilter implements ContainerRequestFilter {
 
-  private static Logger log = Logger.getLogger(AccessControlFilter.class.getName());
+  private static final Logger log = Logger.getLogger(AccessControlFilter.class.getName());
   @Context
   private Configuration configuration;
 
@@ -45,18 +45,25 @@ public class AccessControlFilter implements ContainerRequestFilter {
       log.info("Client cert does not have 6 parts, so the access will be denied.");
       return false;
     }
-    if (requestTarget.endsWith("init_gsd") || requestTarget.endsWith("init_icn")) {
-      // Only requests from the Orchestrator are allowed
+    if (requestTarget.contains("mgmt")) {
+      //Only the local HMI can use these methods
       String[] serverFields = serverCN.split("\\.", 2);
       // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
-
-      // If this is true, then the certificate is from the local Orchestrator
-      return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]);
+      return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
-      // Only requests from other Gatekeepers are allowed
-      String[] clientFields = clientCN.split("\\.", 3);
-      return clientFields[0].equalsIgnoreCase("gatekeeper") && clientFields[1].equalsIgnoreCase("coresystems") && clientFields[2]
-          .endsWith("arrowhead.eu");
+      if (requestTarget.endsWith("init_gsd") || requestTarget.endsWith("init_icn")) {
+        // Only requests from the Orchestrator are allowed
+        String[] serverFields = serverCN.split("\\.", 2);
+        // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
+
+        // If this is true, then the certificate is from the local Orchestrator
+        return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]);
+      } else {
+        // Only requests from other Gatekeepers are allowed
+        String[] clientFields = clientCN.split("\\.", 3);
+        return clientFields[0].equalsIgnoreCase("gatekeeper") && clientFields[1].equalsIgnoreCase("coresystems") && clientFields[2]
+            .endsWith("arrowhead.eu");
+      }
     }
   }
 
