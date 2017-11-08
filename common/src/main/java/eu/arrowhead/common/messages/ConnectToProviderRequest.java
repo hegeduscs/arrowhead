@@ -4,35 +4,34 @@ import eu.arrowhead.common.database.ArrowheadSystem;
 
 public class ConnectToProviderRequest {
 
-	private String brokerName;
-	private Integer brokerPort;
-	private ArrowheadSystem provider;
+  private String brokerHost;
+  private int brokerPort;
+  private ArrowheadSystem provider;
 	private boolean isSecure;
 	private int timeout;
 
-	public ConnectToProviderRequest(String brokerName, Integer brokerPort, ArrowheadSystem provider, boolean isSecure,
-			int timeout) {
-		this.brokerName = brokerName;
-		this.brokerPort = brokerPort;
+  public ConnectToProviderRequest(String brokerHost, int brokerPort, ArrowheadSystem provider, boolean isSecure, int timeout) {
+    this.brokerHost = brokerHost;
+    this.brokerPort = brokerPort;
 		this.provider = provider;
 		this.isSecure = isSecure;
 		this.timeout = timeout;
 	}
 
-	public String getBrokerName() {
-		return brokerName;
+  public String getBrokerHost() {
+    return brokerHost;
+  }
+
+  public void setBrokerHost(String brokerHost) {
+    this.brokerHost = brokerHost;
+  }
+
+  public int getBrokerPort() {
+    return brokerPort;
 	}
 
-	public void setBrokerName(String brokerName) {
-		this.brokerName = brokerName;
-	}
-
-	public Integer getBrokerPort() {
-		return brokerPort;
-	}
-
-	public void setBrokerPort(Integer brokerPort) {
-		this.brokerPort = brokerPort;
+  public void setBrokerPort(int brokerPort) {
+    this.brokerPort = brokerPort;
 	}
 
 	public ArrowheadSystem getProvider() {

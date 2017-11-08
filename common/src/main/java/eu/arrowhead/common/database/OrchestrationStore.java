@@ -78,7 +78,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
   @MapKeyColumn(name = "attribute_key")
-  @Column(name = "attribute_value")
+  @Column(name = "attribute_value", length = 2047)
   @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "store_entry_id"))
   private Map<String, String> attributes = new HashMap<>();
 

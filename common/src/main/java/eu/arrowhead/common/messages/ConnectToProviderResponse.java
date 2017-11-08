@@ -4,13 +4,13 @@ public class ConnectToProviderResponse {
 
 	private String queueName;
 	private String controlQueueName;
-	private String payloadEncrytion;
+  private String payloadEncryption;
 
-	public ConnectToProviderResponse(String queueName, String controlQueueName, String payloadEncrytion) {
-		this.queueName = queueName;
+  public ConnectToProviderResponse(String queueName, String controlQueueName, String payloadEncryption) {
+    this.queueName = queueName;
 		this.controlQueueName = controlQueueName;
-		this.payloadEncrytion = payloadEncrytion;
-	}
+    this.payloadEncryption = payloadEncryption;
+  }
 
 	public String getQueueName() {
 		return queueName;
@@ -28,12 +28,12 @@ public class ConnectToProviderResponse {
 		this.controlQueueName = controlQueueName;
 	}
 
-	public String getPayloadEncrytion() {
-		return payloadEncrytion;
-	}
+  public String getPayloadEncryption() {
+    return payloadEncryption;
+  }
 
-	public void setPayloadEncrytion(String payloadEncrytion) {
-		this.payloadEncrytion = payloadEncrytion;
-	}
+  public void setPayloadEncryption(String payloadEncryption) {
+    this.payloadEncryption = payloadEncryption;
+  }
 
 }

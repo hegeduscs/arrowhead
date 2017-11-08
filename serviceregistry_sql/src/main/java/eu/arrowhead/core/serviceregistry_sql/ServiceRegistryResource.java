@@ -108,7 +108,7 @@ public class ServiceRegistryResource {
     restrictionMap.put("providedService", service);
     List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, restrictionMap);
 
-    //TODO add version filter too later, if deemed needed
+    //NOTE add version filter too later, if deemed needed
 
     if (queryForm.isMetadataSearch()) {
       RegistryUtils.filterOnMeta(providedServices, queryForm.getService().getServiceMetadata());

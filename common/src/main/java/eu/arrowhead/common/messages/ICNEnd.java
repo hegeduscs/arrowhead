@@ -2,24 +2,28 @@ package eu.arrowhead.common.messages;
 
 public class ICNEnd {
 
-  private OrchestrationForm instructions;
-  private GatewayConnectionInfo useGateway;
+  private OrchestrationForm orchestrationForm;
+  private GatewayConnectionInfo gatewayConnInfo;
 
-  public ICNEnd(OrchestrationForm instructions, GatewayConnectionInfo useGateway) {
-		this.instructions = instructions;
-		this.useGateway = useGateway;
-	}
-	public OrchestrationForm getInstructions() {
-		return instructions;
-	}
-	public void setInstructions(OrchestrationForm instructions) {
-		this.instructions = instructions;
-	}
-	public GatewayConnectionInfo getUseGateway() {
-		return useGateway;
-	}
-	public void setUseGateway(GatewayConnectionInfo useGateway) {
-		this.useGateway = useGateway;
-	}
+  public ICNEnd(OrchestrationForm orchestrationForm, GatewayConnectionInfo gatewayConnInfo) {
+    this.orchestrationForm = orchestrationForm;
+    this.gatewayConnInfo = gatewayConnInfo;
+  }
+
+  public OrchestrationForm getOrchestrationForm() {
+    return orchestrationForm;
+  }
+
+  public void setOrchestrationForm(OrchestrationForm orchestrationForm) {
+    this.orchestrationForm = orchestrationForm;
+  }
+
+  public GatewayConnectionInfo getGatewayConnInfo() {
+    return gatewayConnInfo;
+  }
+
+  public void setGatewayConnInfo(GatewayConnectionInfo gatewayConnInfo) {
+    this.gatewayConnInfo = gatewayConnInfo;
+  }
 
 }

@@ -1,7 +1,5 @@
 package eu.arrowhead.common.messages;
 
-import java.security.PublicKey;
-
 import eu.arrowhead.common.database.ArrowheadSystem;
 
 public class ConnectToConsumerRequest {
@@ -13,11 +11,11 @@ public class ConnectToConsumerRequest {
 	private ArrowheadSystem consumer;
 	private Boolean isSecure;
 	private int timeout;
-	private PublicKey gatewayPublicKey;
+  private String gatewayPublicKey;
 
-	public ConnectToConsumerRequest(String brokerName, Integer brokerPort, String queueName, String controlQueueName,
-			ArrowheadSystem consumer, Boolean isSecure, int timeout, PublicKey gatewayPublicKey) {
-		this.brokerName = brokerName;
+	public ConnectToConsumerRequest(String brokerName, Integer brokerPort, String queueName, String controlQueueName, ArrowheadSystem consumer,
+                                  Boolean isSecure, int timeout, String gatewayPublicKey) {
+    this.brokerName = brokerName;
 		this.brokerPort = brokerPort;
 		this.queueName = queueName;
 		this.controlQueueName = controlQueueName;
@@ -83,12 +81,12 @@ public class ConnectToConsumerRequest {
 		this.timeout = timeout;
 	}
 
-	public PublicKey getGatewayPublicKey() {
-		return gatewayPublicKey;
+  public String getGatewayPublicKey() {
+    return gatewayPublicKey;
 	}
 
-	public void setGatewayPublicKey(PublicKey gatewayPublicKey) {
-		this.gatewayPublicKey = gatewayPublicKey;
+  public void setGatewayPublicKey(String gatewayPublicKey) {
+    this.gatewayPublicKey = gatewayPublicKey;
 	}
 
 }

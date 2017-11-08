@@ -111,6 +111,7 @@ public class StoreApi {
    *
    * @throws BadPayloadException, DataNotFoundException
    */
+  //TODO we need a service only option too here
   @PUT
   public Response getStoreEntries(OrchestrationStoreQuery query) {
 

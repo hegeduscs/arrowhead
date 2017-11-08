@@ -155,7 +155,7 @@ class GatekeeperMain {
     System.out.println("Gatekeeper Server(s) stopped");
   }
 
-  private static synchronized Properties getProp() {
+  static synchronized Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();
@@ -169,6 +169,6 @@ class GatekeeperMain {
 
     return prop;
   }
-	
+
 
 }
