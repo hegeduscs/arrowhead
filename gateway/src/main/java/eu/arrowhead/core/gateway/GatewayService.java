@@ -81,10 +81,10 @@ public class GatewayService {
    */
   static GatewaySession createSecureChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName) {
     // Get keystore and truststore files from app.properties
-    String keystorePass = GatewayMain.getProp().getProperty("ssl.keystorepass");
-    String keystorePath = GatewayMain.getProp().getProperty("ssl.keystore");
-    String truststorePass = GatewayMain.getProp().getProperty("ssl.truststorepass");
-    String truststorePath = GatewayMain.getProp().getProperty("ssl.truststore");
+    String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
+    String keystorePath = GatewayMain.getProp().getProperty("keystore");
+    String truststorePass = GatewayMain.getProp().getProperty("truststorepass");
+    String truststorePath = GatewayMain.getProp().getProperty("truststore");
 
     KeyStore ks = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     KeyStore tks = SecurityUtils.loadKeyStore(truststorePath, truststorePass);
@@ -133,8 +133,8 @@ public class GatewayService {
   }
 
   static SSLContext createSSLContext() {
-    String keystorePath = GatewayMain.getProp().getProperty("ssl.keystore");
-    String keystorePass = GatewayMain.getProp().getProperty("ssl.keystorepass");
+    String keystorePath = GatewayMain.getProp().getProperty("keystore");
+    String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
 
     SSLContext sslContext = null;

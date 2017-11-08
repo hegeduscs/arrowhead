@@ -41,8 +41,8 @@ class AuthorizationMain {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
 
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
-    KeyStore keyStore = SecurityUtils.loadKeyStore(getProp().getProperty("ssl.keystore"), getProp().getProperty("ssl.keystorepass"));
-    privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("ssl.keystorepass"));
+    KeyStore keyStore = SecurityUtils.loadKeyStore(getProp().getProperty("keystore"), getProp().getProperty("keystorepass"));
+    privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("keystorepass"));
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -119,11 +119,11 @@ class AuthorizationMain {
     config.registerClasses(AccessControlFilter.class, AuthorizationResource.class, AuthorizationApi.class);
     config.packages("eu.arrowhead.common");
 
-    String keystorePath = getProp().getProperty("ssl.keystore");
-    String keystorePass = getProp().getProperty("ssl.keystorepass");
-    String keyPass = getProp().getProperty("ssl.keypass");
-    String truststorePath = getProp().getProperty("ssl.truststore");
-    String truststorePass = getProp().getProperty("ssl.truststorepass");
+    String keystorePath = getProp().getProperty("keystore");
+    String keystorePass = getProp().getProperty("keystorepass");
+    String keyPass = getProp().getProperty("keypass");
+    String truststorePath = getProp().getProperty("truststore");
+    String truststorePass = getProp().getProperty("truststorepass");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);

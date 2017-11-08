@@ -270,9 +270,13 @@ public final class Utility {
 		return uri;
 	}
 
-	// IMPORTANT: only use this function with RuntimeExceptions that have a public
-	// String constructor
-	/*
+  public static boolean isUrlValid(String url, boolean isSecure) {
+    //TODO + use it in main methods
+    return false;
+  }
+
+  // IMPORTANT: only use this function with RuntimeExceptions that have a public String constructor
+  /*
 	 * private static <T extends RuntimeException> void throwExceptionAgain(Class<T>
 	 * exceptionType, String message) { try { throw
 	 * exceptionType.getConstructor(String.class).newInstance(message); } //

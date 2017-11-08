@@ -23,12 +23,16 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 class GatekeeperMain {
 
-  private static HttpServer server = null;
-  private static HttpServer secureServer = null;
+  private static HttpServer inboundServer = null;
+  private static HttpServer inboundSecureServer = null;
+  private static HttpServer outboundServer = null;
+  private static HttpServer outboundSecureServer = null;
   private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
   private static Properties prop;
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8446/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8447/");
+  private static final String INBOUND_BASE_URI = getProp().getProperty("inbound_base_uri", "http://0.0.0.0:8446/");
+  private static final String INBOUND_BASE_URI_SECURED = getProp().getProperty("inbound_base_uri_secured", "https://0.0.0.0:8447/");
+  private static final String OUTBOUND_BASE_URI = getProp().getProperty("outbound_base_uri", "http://0.0.0.0:8448/");
+  private static final String OUTBOUND_BASE_URI_SECURED = getProp().getProperty("outbound_base_uri_secured", "https://0.0.0.0:8449/");
   static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
 
   public static void main(String[] args) throws IOException {
@@ -46,14 +50,20 @@ class GatekeeperMain {
         ++i;
         switch (args[i]) {
           case "insecure":
-            server = startServer();
+            inboundServer = startServer(INBOUND_BASE_URI, GatekeeperApi.class, GatekeeperInboundResource.class);
+            outboundServer = startServer(OUTBOUND_BASE_URI, GatekeeperOutboundResource.class);
             break argLoop;
           case "secure":
-            secureServer = startSecureServer();
+            inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true, AccessControlFilter.class, GatekeeperApi.class,
+                                                    GatekeeperInboundResource.class);
+            outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false, AccessControlFilter.class, GatekeeperOutboundResource.class);
             break argLoop;
           case "both":
-            server = startServer();
-            secureServer = startSecureServer();
+            inboundServer = startServer(INBOUND_BASE_URI, GatekeeperApi.class, GatekeeperInboundResource.class);
+            outboundServer = startServer(OUTBOUND_BASE_URI, GatekeeperOutboundResource.class);
+            inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true, AccessControlFilter.class, GatekeeperApi.class,
+                                                    GatekeeperInboundResource.class);
+            outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false, AccessControlFilter.class, GatekeeperOutboundResource.class);
             break argLoop;
           default:
             log.fatal("Unknown server mode: " + args[i]);
@@ -62,7 +72,8 @@ class GatekeeperMain {
       }
     }
     if (!serverModeSet) {
-      server = startServer();
+      inboundServer = startServer(INBOUND_BASE_URI, GatekeeperApi.class, GatekeeperInboundResource.class);
+      outboundServer = startServer(OUTBOUND_BASE_URI, GatekeeperOutboundResource.class);
     }
 
     //This is here to initialize the database connection before the REST resources are initiated
@@ -81,34 +92,41 @@ class GatekeeperMain {
     }
   }
 
-  private static HttpServer startServer() throws IOException {
-    log.info("Starting server at: " + BASE_URI);
-    System.out.println("Starting insecure server at: " + BASE_URI);
+  //TODO  2 resource, mastercert használata az új truststorejához (új property), és 2 különböző szerver külön porton
+  private static HttpServer startServer(final String url, final Class<?>... classes) throws IOException {
+    log.info("Starting server at: " + url);
+    System.out.println("Starting insecure server at: " + url);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(GatekeeperResource.class, GatekeeperApi.class);
+    config.registerClasses(classes);
     config.packages("eu.arrowhead.common");
 
-    URI uri = UriBuilder.fromUri(BASE_URI).build();
+    URI uri = UriBuilder.fromUri(url).build();
     final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;
   }
 
-  private static HttpServer startSecureServer() throws IOException {
-    log.info("Starting server at: " + BASE_URI_SECURED);
-    System.out.println("Starting secure server at: " + BASE_URI_SECURED);
+  private static HttpServer startSecureServer(final String url, final boolean inbound, final Class<?>... classes) throws IOException {
+    log.info("Starting server at: " + url);
+    System.out.println("Starting secure server at: " + url);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AccessControlFilter.class, GatekeeperResource.class, GatekeeperApi.class);
+    config.registerClasses(classes);
     config.packages("eu.arrowhead.common");
 
-    String keystorePath = getProp().getProperty("ssl.keystore");
-    String keystorePass = getProp().getProperty("ssl.keystorepass");
-    String keyPass = getProp().getProperty("ssl.keypass");
-    String truststorePath = getProp().getProperty("ssl.truststore");
-    String truststorePass = getProp().getProperty("ssl.truststorepass");
+    String keystorePath = getProp().getProperty("keystore");
+    String keystorePass = getProp().getProperty("keystorepass");
+    String keyPass = getProp().getProperty("keypass");
+    String truststorePath, truststorePass;
+    if (inbound) {
+      truststorePath = getProp().getProperty("inbound_truststore");
+      truststorePass = getProp().getProperty("inbound_truststorepass");
+    } else {
+      truststorePath = getProp().getProperty("outbound_truststore");
+      truststorePass = getProp().getProperty("outbound_truststorepass");
+    }
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);
@@ -135,7 +153,7 @@ class GatekeeperMain {
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
-    URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+    URI uri = UriBuilder.fromUri(INBOUND_BASE_URI_SECURED).build();
     final HttpServer server = GrizzlyHttpServerFactory
         .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
@@ -144,15 +162,23 @@ class GatekeeperMain {
   }
 
   private static void shutdown() {
-    if (server != null) {
-      log.info("Stopping server at: " + BASE_URI);
-      server.shutdownNow();
+    if (inboundServer != null) {
+      log.info("Stopping server at: " + INBOUND_BASE_URI);
+      inboundServer.shutdownNow();
     }
-    if (secureServer != null) {
-      log.info("Stopping server at: " + BASE_URI_SECURED);
-      secureServer.shutdownNow();
+    if (inboundSecureServer != null) {
+      log.info("Stopping server at: " + INBOUND_BASE_URI_SECURED);
+      inboundSecureServer.shutdownNow();
     }
-    System.out.println("Gatekeeper Server(s) stopped");
+    if (outboundServer != null) {
+      log.info("Stopping server at: " + OUTBOUND_BASE_URI);
+      outboundServer.shutdown();
+    }
+    if (outboundSecureServer != null) {
+      log.info("Stopping server at: " + OUTBOUND_BASE_URI_SECURED);
+      outboundSecureServer.shutdown();
+    }
+    System.out.println("Gatekeeper Servers stopped");
   }
 
   static synchronized Properties getProp() {
@@ -169,6 +195,5 @@ class GatekeeperMain {
 
     return prop;
   }
-
 
 }
