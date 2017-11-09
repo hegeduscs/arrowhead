@@ -37,9 +37,10 @@ class OrchestratorMain {
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8441/orchestrator/");
 
   public static void main(String[] args) throws IOException {
-
-    System.out.println("Working directory: " + System.getProperty("user.dir"));
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+    System.out.println("Working directory: " + System.getProperty("user.dir"));
+    Utility.isUrlValid(BASE_URI, false);
+    Utility.isUrlValid(BASE_URI_SECURED, true);
 
     boolean daemon = false;
     boolean serverModeSet = false;

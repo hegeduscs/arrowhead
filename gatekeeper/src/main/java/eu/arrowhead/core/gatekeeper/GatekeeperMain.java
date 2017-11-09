@@ -37,6 +37,11 @@ class GatekeeperMain {
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+    System.out.println("Working directory: " + System.getProperty("user.dir"));
+    Utility.isUrlValid(INBOUND_BASE_URI, false);
+    Utility.isUrlValid(INBOUND_BASE_URI_SECURED, true);
+    Utility.isUrlValid(OUTBOUND_BASE_URI, false);
+    Utility.isUrlValid(OUTBOUND_BASE_URI_SECURED, true);
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -92,7 +97,6 @@ class GatekeeperMain {
     }
   }
 
-  //TODO  2 resource, mastercert használata az új truststorejához (új property), és 2 különböző szerver külön porton
   private static HttpServer startServer(final String url, final Class<?>... classes) throws IOException {
     log.info("Starting server at: " + url);
     System.out.println("Starting insecure server at: " + url);

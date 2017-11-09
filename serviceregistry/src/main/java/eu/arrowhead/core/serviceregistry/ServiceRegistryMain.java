@@ -51,9 +51,10 @@ class ServiceRegistryMain {
    * Main method.
    */
   public static void main(String[] args) throws IOException {
-
-    //setting up log4j logging based on prop file
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+    System.out.println("Working directory: " + System.getProperty("user.dir"));
+    Utility.isUrlValid(BASE_URI, false);
+    Utility.isUrlValid(BASE_URI_SECURED, true);
 
     //Setting up DNS
     System.setProperty("dns.server", getDnsProp().getProperty("dns.ip"));

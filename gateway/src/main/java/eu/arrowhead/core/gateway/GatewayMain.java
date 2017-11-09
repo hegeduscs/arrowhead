@@ -38,6 +38,9 @@ class GatewayMain {
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+    System.out.println("Working directory: " + System.getProperty("user.dir"));
+    Utility.isUrlValid(BASE_URI, false);
+    Utility.isUrlValid(BASE_URI_SECURED, true);
 
     boolean daemon = false;
     boolean serverModeSet = false;
