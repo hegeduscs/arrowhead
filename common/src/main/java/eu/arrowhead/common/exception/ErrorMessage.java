@@ -4,9 +4,8 @@ public class ErrorMessage {
 
   private String errorMessage;
   private int errorCode;
-  //TODO modify this once javadocs are published, it could even go to the specific exception doc
-  private String documentation = "No documentation yet.";
   private String exceptionType;
+  private String documentation = "https://github.com/hegeduscs/arrowhead/tree/master/documentation";
 
   public ErrorMessage() {
   }
@@ -33,20 +32,20 @@ public class ErrorMessage {
     this.errorCode = errorCode;
   }
 
-  public String getDocumentation() {
-    return documentation;
-  }
-
-  public void setDocumentation(String documentation) {
-    this.documentation = documentation;
-  }
-
   public String getExceptionType() {
     return exceptionType;
   }
 
   public void setExceptionType(String exceptionType) {
     this.exceptionType = exceptionType;
+  }
+
+  public String getDocumentation() {
+    return documentation;
+  }
+
+  public void setDocumentation(String documentation) {
+    this.documentation = documentation;
   }
 
 }

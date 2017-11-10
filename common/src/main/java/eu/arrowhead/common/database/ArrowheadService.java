@@ -33,7 +33,6 @@ public class ArrowheadService {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
 
-  //TODO look over entity classes and put NotNull annotation everywhere it should be there + use @Nullable too?!
   @Column(name = "service_group")
   @NotNull
   private String serviceGroup;

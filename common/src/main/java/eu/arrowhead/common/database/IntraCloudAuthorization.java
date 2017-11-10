@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
@@ -36,14 +37,17 @@ public class IntraCloudAuthorization {
 
   @JoinColumn(name = "consumer_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+  @NotNull
   private ArrowheadSystem consumer;
 
   @JoinColumn(name = "provider_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+  @NotNull
   private ArrowheadSystem provider;
 
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+  @NotNull
   private ArrowheadService service;
 
   public IntraCloudAuthorization() {

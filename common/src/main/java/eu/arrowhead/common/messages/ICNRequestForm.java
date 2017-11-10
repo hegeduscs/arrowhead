@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class ICNRequestForm {
 
-  //TODO QoS support?
   private ArrowheadService requestedService;
   private ArrowheadCloud targetCloud;
   private ArrowheadSystem requesterSystem;

@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
@@ -27,9 +28,11 @@ public class ServiceRegistryEntry {
   //mandatory fields
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @NotNull
   private ArrowheadService providedService;
   @JoinColumn(name = "provider_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @NotNull
   private ArrowheadSystem provider;
 
   //non-mandatory fields

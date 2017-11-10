@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
@@ -22,9 +23,11 @@ public class ArrowheadSystem {
   private int id;
 
   @Column(name = "system_group")
+  @NotNull
   private String systemGroup;
 
   @Column(name = "system_name")
+  @NotNull
   private String systemName;
 
   @Column(name = "address")
