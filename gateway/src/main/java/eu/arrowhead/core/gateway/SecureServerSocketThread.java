@@ -58,6 +58,7 @@ public class SecureServerSocketThread extends Thread {
       String subjectName = cert.getSubjectDN().getName();
       String consumerCNFromCert = SecurityUtils.getCertCNFromSubject(subjectName);
 
+      //FIXME systemName != consumerCN (use new util function in arrowheadsystem)
       if (!connectionRequest.getConsumer().getSystemName().equals(consumerCNFromCert) | !connectionRequest.getConsumer().getAddress()
           .equals(consumerIPFromCert)) {
         GatewayMain.portAllocationMap.replace(port, false, true);

@@ -155,4 +155,12 @@ public class ArrowheadSystem {
     return "(" + systemGroup + ":" + systemName + ")";
   }
 
+  public String toArrowheadCommonName(String operator, String cloudName) throws Exception {
+    if (systemGroup.contains(".") || systemName.contains(".") || operator.contains(".") || cloudName.contains(".")) {
+      throw new IllegalArgumentException("The string fields can not contain dots!");
+    }
+    //throws NPE if any of the fields are null
+    return systemName.concat(".").concat(systemGroup).concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
+  }
+
 }
