@@ -6,6 +6,9 @@ public class ConnectToProviderResponse {
 	private String controlQueueName;
   private String payloadEncryption;
 
+	public ConnectToProviderResponse() {
+	}
+
   public ConnectToProviderResponse(String queueName, String controlQueueName, String payloadEncryption) {
     this.queueName = queueName;
 		this.controlQueueName = controlQueueName;

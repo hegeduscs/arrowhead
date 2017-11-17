@@ -1,4 +1,4 @@
-keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\gatekeeper.testcloud1.jks
+keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\orchestrator.testcloud1.jks
 keystorepass=12345
 keypass=12345
 inbound_truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\master_arrowhead_cert.jks
@@ -13,4 +13,4 @@ db_user=root
 db_password=root
 db_address=jdbc:mysql://localhost:3306/arrowhead
 timeout=30000
-use_gateway=false
+use_gateway=true

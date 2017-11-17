@@ -80,7 +80,7 @@ class GatewayMain {
         shutdown();
       }));
     } else {
-      System.out.println("Press enter to shutdown Gatekeeper Server(s)...");
+      System.out.println("Press enter to shutdown Gateway Server(s)...");
       // noinspection ResultOfMethodCallIgnored
       System.in.read();
       shutdown();

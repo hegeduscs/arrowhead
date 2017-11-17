@@ -10,6 +10,9 @@ public class ConnectToProviderRequest {
 	private boolean isSecure;
 	private int timeout;
 
+  public ConnectToProviderRequest() {
+  }
+
   public ConnectToProviderRequest(String brokerHost, int brokerPort, ArrowheadSystem provider, boolean isSecure, int timeout) {
     this.brokerHost = brokerHost;
     this.brokerPort = brokerPort;
