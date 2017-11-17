@@ -7,6 +7,9 @@ public class ICNResult {
 	public ICNResult() {
 	}
 
+	public ICNResult() {
+	}
+
 	public ICNResult(OrchestrationResponse orchResponse) {
 		this.orchResponse = orchResponse;
 	}
