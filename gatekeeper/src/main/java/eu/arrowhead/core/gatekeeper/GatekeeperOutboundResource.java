@@ -60,7 +60,6 @@ public class GatekeeperOutboundResource {
   @PUT
   @Path("init_gsd")
   public Response GSDRequest(GSDRequestForm requestForm) {
-	  System.out.println("zolika");
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
       throw new BadPayloadException("init_gsd received bad payload: requestedService is missing or it is not valid.");

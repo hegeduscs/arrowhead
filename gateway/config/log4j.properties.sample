@@ -1,4 +1,4 @@
-# Define the root logger with appender file
+app.properties.sample# Define the root logger with appender file
 log4j.rootLogger=INFO, DB
 # Define the DB appender
 log4j.appender.DB=org.apache.log4j.jdbc.JDBCAppender

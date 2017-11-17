@@ -1,7 +1,7 @@
-keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\gatekeeper.testcloud1.jks
+keystore=C:\\Users\\sga\\Documents\\arrowhead\\certificates\\testcloud1\\gatekeeper.testcloud1.jks
 keystorepass=12345
 keypass=12345
-inbound_truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\master_arrowhead_cert.jks
+inbound_truststore=C:\\Users\\sga\\Documents\\arrowhead\\certificates\\master_arrowhead_cert.jks
 inbound_truststorepass=12345
 outbound_truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
 outbound_truststorepass=12345

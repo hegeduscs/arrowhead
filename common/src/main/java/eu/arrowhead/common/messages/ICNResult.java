@@ -3,6 +3,9 @@ package eu.arrowhead.common.messages;
 public class ICNResult {
 
 	private OrchestrationResponse orchResponse;
+	
+	public ICNResult() {
+	}
 
 	public ICNResult(OrchestrationResponse orchResponse) {
 		this.orchResponse = orchResponse;
