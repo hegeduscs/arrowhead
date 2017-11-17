@@ -151,36 +151,6 @@ public class GatewayService {
     return sslContext;
   }
 
-  static void communicateWithProviderInsecure(GatewaySession gatewaySession, String queueName, String controlQueueName,
-                                              ConnectToProviderRequest connectionRequest) throws IOException {
-    Channel channel = gatewaySession.getChannel();
-    Socket providerSocket = null;
-    GetResponse controlMessage = channel.basicGet(controlQueueName, false);
-    while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-      GetResponse message = channel.basicGet(queueName, false);
-      if (message == null) {
-        System.out.println("No message retrieved");
-      } else {
-        providerSocket = new Socket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
-        InputStream inProvider = providerSocket.getInputStream();
-        OutputStream outProvider = providerSocket.getOutputStream();
-        outProvider.write(message.getBody());
-
-        // get the answer from Provider
-        byte[] inputFromProvider = new byte[1024];
-        byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
-        System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
-        channel.basicPublish("", queueName, null, inputFromProviderFinal);
-      }
-      controlMessage = channel.basicGet(controlQueueName, false);
-    }
-    // Close sockets and the connection
-    channel.close();
-    gatewaySession.getConnection().close();
-    if (providerSocket != null) {
-      providerSocket.close();
-    }
-  }
 
   static void communicateWithProviderSecure(GatewaySession gatewaySession, String queueName, String controlQueueName,
                                             ConnectToProviderRequest connectionRequest) throws IOException {
