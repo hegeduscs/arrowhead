@@ -98,6 +98,7 @@ class GatekeeperMain {
   }
 
   private static HttpServer startServer(final String url, final Class<?>... classes) throws IOException {
+    //TODO log which resource starts at which port
     log.info("Starting server at: " + url);
     System.out.println("Starting insecure server at: " + url);
 

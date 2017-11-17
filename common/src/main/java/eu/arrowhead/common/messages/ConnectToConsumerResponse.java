@@ -4,6 +4,9 @@ public class ConnectToConsumerResponse {
 
 	private int serverSocketPort;
 
+	public ConnectToConsumerResponse() {
+	}
+
 	public ConnectToConsumerResponse(int serverSocketPort) {
 		this.serverSocketPort = serverSocketPort;
 	}

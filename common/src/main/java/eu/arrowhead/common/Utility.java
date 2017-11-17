@@ -90,12 +90,12 @@ public final class Utility {
           throw new NotAllowedException("Invalid method type was given to the Utility.sendRequest() method");
       }
     } catch (ProcessingException e) {
+      e.printStackTrace();
       log.error("UnavailableServerException occurred at " + uri);
       throw new UnavailableServerException("Could not get any response from: " + uri);
     }
 
-    // If the response status code does not start with 2 the request was not
-    // successful
+    // If the response status code does not start with 2 the request was not successful
     if (!(response.getStatusInfo().getFamily() == Family.SUCCESSFUL)) {
       ErrorMessage errorMessage;
       try {

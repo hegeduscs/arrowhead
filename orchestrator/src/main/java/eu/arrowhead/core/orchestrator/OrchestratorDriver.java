@@ -404,7 +404,7 @@ final class OrchestratorDriver {
           "No preferred Cloud found in the GSD response. Inter-Cloud matchmaking failed, since only preferred providers are allowed.");
     }
 
-    log.info("interCloudMatchmaking returns the first not preferred Cloud entry");
+    log.info("interCloudMatchmaking returns the first Cloud entry from the GSD results");
     return partnerClouds.get(0);
   }
 

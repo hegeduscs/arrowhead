@@ -8,6 +8,9 @@ public class GatewayConnectionInfo {
   private String controlQueueName;
   private String gatewayPublicKey;
 
+  public GatewayConnectionInfo() {
+  }
+
   public GatewayConnectionInfo(String brokerName, int brokerPort, String queueName, String controlQueueName, String gatewayPublicKey) {
     this.brokerName = brokerName;
     this.brokerPort = brokerPort;
