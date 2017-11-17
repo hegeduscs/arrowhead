@@ -5,6 +5,9 @@ public class ICNEnd {
   private OrchestrationForm orchestrationForm;
   private GatewayConnectionInfo gatewayConnInfo;
 
+  public ICNEnd() {
+  }
+
   public ICNEnd(OrchestrationForm orchestrationForm, GatewayConnectionInfo gatewayConnInfo) {
     this.orchestrationForm = orchestrationForm;
     this.gatewayConnInfo = gatewayConnInfo;
