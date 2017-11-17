@@ -42,23 +42,18 @@ public class GatewayResource {
 			// TODO sanity check on the success of the channel create, handle the error
 			GatewaySession gatewaySession = GatewayService.createInsecureChannel(connectionRequest.getBrokerHost(),
 					connectionRequest.getBrokerPort(), queueName, controlQueueName);
-			
-				InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName,
-						controlQueueName, connectionRequest);
-				insecureThread.start();
+
+			InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName,
+					connectionRequest);
+			insecureThread.start();
 		} else {
 			// TODO sanity check on the success of the channel create, handle the error
 			GatewaySession gatewaySession = GatewayService.createSecureChannel(connectionRequest.getBrokerHost(),
 					connectionRequest.getBrokerPort(), queueName, controlQueueName);
-			try {
-				GatewayService.communicateWithProviderSecure(gatewaySession, queueName, controlQueueName,
-						connectionRequest);
-			} catch (IOException e) {
-				log.error("ConnectToProvider(secure): I/O exception occured");
-				e.printStackTrace();
-				// NOTE return error? this should probably trip something up
-			}
 
+			SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName,
+					connectionRequest);
+			secureThread.start();
 		}
 
 		// TODO: PayloadEncryption instead of null
