@@ -15,7 +15,6 @@
     <module>gatekeeper</module>
     <module>authorization</module>
     <module>orchestrator</module>
-    <module>api</module>
     <module>serviceregistry_sql</module>
     <module>gateway</module>
   </modules>

@@ -8,9 +8,6 @@ public class ICNEnd {
   public ICNEnd() {
   }
 
-  public ICNEnd() {
-  }
-
   public ICNEnd(OrchestrationForm orchestrationForm, GatewayConnectionInfo gatewayConnInfo) {
     this.orchestrationForm = orchestrationForm;
     this.gatewayConnInfo = gatewayConnInfo;
