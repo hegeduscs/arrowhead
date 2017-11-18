@@ -21,7 +21,7 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-class GatekeeperMain {
+public class GatekeeperMain {
 
   private static HttpServer inboundServer = null;
   private static HttpServer inboundSecureServer = null;

@@ -21,7 +21,7 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-class QoSMain {
+public class QoSMain {
 
   private static HttpServer server = null;
   private static HttpServer secureServer = null;

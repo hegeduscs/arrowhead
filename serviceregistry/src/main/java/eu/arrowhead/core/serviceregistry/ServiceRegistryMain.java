@@ -27,7 +27,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 /**
  * Main class.
  */
-class ServiceRegistryMain {
+public class ServiceRegistryMain {
 
   private static Timer timer = null;
   //DNS-SD global settings
