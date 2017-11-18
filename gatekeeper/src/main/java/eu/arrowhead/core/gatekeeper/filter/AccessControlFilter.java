@@ -1,4 +1,4 @@
-package eu.arrowhead.core.authorization;
+package eu.arrowhead.core.gatekeeper.filter;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
@@ -25,8 +25,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
   public void filter(ContainerRequestContext requestContext) {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
-    boolean isGetItCalled = requestContext.getMethod().equals("GET") && requestTarget.endsWith("authorization");
-    if (sc.isSecure() && !isGetItCalled) {
+    if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
       String subjectName = sc.getUserPrincipal().getName();
       if (isClientAuthorized(subjectName, requestTarget)) {
         log.info("SSL identification is successful! Cert: " + subjectName);
@@ -37,6 +36,13 @@ public class AccessControlFilter implements ContainerRequestFilter {
     }
   }
 
+  private boolean isGetItCalled(String method, String requestTarget) {
+    if (!method.equals("GET")) {
+      return false;
+    }
+    return requestTarget.endsWith("gatekeeper") || requestTarget.endsWith("mgmt");
+  }
+
   private boolean isClientAuthorized(String subjectName, String requestTarget) {
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
     String serverCN = (String) configuration.getProperty("server_common_name");
@@ -45,25 +51,24 @@ public class AccessControlFilter implements ContainerRequestFilter {
       log.info("Client cert does not have 6 parts, so the access will be denied.");
       return false;
     }
-
     if (requestTarget.contains("mgmt")) {
       //Only the local HMI can use these methods
       String[] serverFields = serverCN.split("\\.", 2);
       // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
-      // If this property is true, then every system from the local cloud can use the auth services
-      if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud"))) {
-        String[] serverFields = serverCN.split("\\.", 3);
-        String[] clientFields = clientCN.split("\\.", 3);
-        // serverFields contains: systemName, systemGroup, cloudName.operator.arrowhead.eu
-        return serverFields[2].equalsIgnoreCase(clientFields[2]);
-      }
-      // If it is not true, only the Orchestrator and Gatekeeper can use it
-      else {
+      if (requestTarget.endsWith("init_gsd") || requestTarget.endsWith("init_icn")) {
+        // Only requests from the Orchestrator are allowed
         String[] serverFields = serverCN.split("\\.", 2);
         // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
-        return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
+
+        // If this is true, then the certificate is from the local Orchestrator
+        return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]);
+      } else {
+        // Only requests from other Gatekeepers are allowed
+        String[] clientFields = clientCN.split("\\.", 3);
+        return clientFields[0].equalsIgnoreCase("gatekeeper") && clientFields[1].equalsIgnoreCase("coresystems") && clientFields[2]
+            .endsWith("arrowhead.eu");
       }
     }
   }

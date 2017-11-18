@@ -1,20 +1,18 @@
-package eu.arrowhead.core.gateway;
+package eu.arrowhead.core.gateway.thread;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.GetResponse;
+import eu.arrowhead.common.messages.ConnectToProviderRequest;
+import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-
 import org.apache.log4j.Logger;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.GetResponse;
-
-import eu.arrowhead.common.messages.ConnectToProviderRequest;
-import eu.arrowhead.core.gateway.model.GatewaySession;
-
 public class InsecureSocketThread extends Thread {
-	private GatewaySession gatewaySession;
+
+  private GatewaySession gatewaySession;
 	private String queueName;
 	private String controlQueueName;
 	private ConnectToProviderRequest connectionRequest;

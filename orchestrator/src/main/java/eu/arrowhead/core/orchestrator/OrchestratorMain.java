@@ -35,6 +35,7 @@ class OrchestratorMain {
   private static Properties prop;
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8440/orchestrator/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8441/orchestrator/");
+  public static boolean DEBUG_MODE;
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -46,31 +47,37 @@ class OrchestratorMain {
     boolean serverModeSet = false;
     argLoop:
     for (int i = 0; i < args.length; ++i) {
-      if (args[i].equals("-d")) {
-        daemon = true;
-        System.out.println("Starting server as daemon!");
-      } else if (args[i].equals("-m")) {
-        serverModeSet = true;
-        ++i;
-        switch (args[i]) {
-          case "insecure":
-            server = startServer();
-            useSRService(false, true);
-            break argLoop;
-          case "secure":
-            secureServer = startSecureServer();
-            useSRService(true, true);
-            break argLoop;
-          case "both":
-            server = startServer();
-            secureServer = startSecureServer();
-            useSRService(false, true);
-            useSRService(true, true);
-            break argLoop;
-          default:
-            log.fatal("Unknown server mode: " + args[i]);
-            throw new AssertionError("Unknown server mode: " + args[i]);
-        }
+      switch (args[i]) {
+        case "-daemon":
+          daemon = true;
+          System.out.println("Starting server as daemon!");
+          break;
+        case "-d":
+          DEBUG_MODE = true;
+          System.out.println("Starting server in debug mode!");
+          break;
+        case "-m":
+          serverModeSet = true;
+          ++i;
+          switch (args[i]) {
+            case "insecure":
+              server = startServer();
+              useSRService(false, true);
+              break argLoop;
+            case "secure":
+              secureServer = startSecureServer();
+              useSRService(true, true);
+              break argLoop;
+            case "both":
+              server = startServer();
+              secureServer = startSecureServer();
+              useSRService(false, true);
+              useSRService(true, true);
+              break argLoop;
+            default:
+              log.fatal("Unknown server mode: " + args[i]);
+              throw new AssertionError("Unknown server mode: " + args[i]);
+          }
       }
     }
     if (!serverModeSet) {
@@ -98,7 +105,7 @@ class OrchestratorMain {
 
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class);
-    config.packages("eu.arrowhead.common");
+    config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.filter");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
     final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
@@ -112,8 +119,8 @@ class OrchestratorMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(AccessControlFilter.class, OrchestratorResource.class, CommonApi.class, StoreApi.class);
-    config.packages("eu.arrowhead.common");
+    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class);
+    config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.filter");
 
     String keystorePath = getProp().getProperty("keystore");
     String keystorePass = getProp().getProperty("keystorepass");

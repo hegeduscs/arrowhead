@@ -19,10 +19,9 @@ public class SecurityFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext context) throws IOException {
-    uriInfo = context.getUriInfo();
-
     X509Certificate[] chain = (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
     if (chain != null && chain.length > 0) {
+      uriInfo = context.getUriInfo();
       String subject = chain[0].getSubjectDN().getName();
       Authorizer securityContext = new Authorizer(subject);
       context.setSecurityContext(securityContext);

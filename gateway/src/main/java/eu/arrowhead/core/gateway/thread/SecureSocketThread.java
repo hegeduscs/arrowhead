@@ -1,27 +1,25 @@
-package eu.arrowhead.core.gateway;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-
-import org.apache.log4j.Logger;
+package eu.arrowhead.core.gateway.thread;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
-
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
+import eu.arrowhead.core.gateway.GatewayService;
 import eu.arrowhead.core.gateway.model.GatewaySession;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import org.apache.log4j.Logger;
 
 public class SecureSocketThread extends Thread {
-	GatewaySession gatewaySession;
-	String queueName;
-	String controlQueueName;
-	ConnectToProviderRequest connectionRequest;
-	private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());
+
+  private GatewaySession gatewaySession;
+  private String queueName;
+  private String controlQueueName;
+  private ConnectToProviderRequest connectionRequest;
+  private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());
 
 	public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
 			ConnectToProviderRequest connectionRequest) {

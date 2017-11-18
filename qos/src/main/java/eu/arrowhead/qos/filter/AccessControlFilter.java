@@ -1,4 +1,4 @@
-package eu.arrowhead.core.gateway;
+package eu.arrowhead.qos.filter;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;

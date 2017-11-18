@@ -1,10 +1,12 @@
-package eu.arrowhead.core.gateway;
+package eu.arrowhead.core.gateway.thread;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.core.gateway.GatewayMain;
+import eu.arrowhead.core.gateway.GatewayService;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +27,7 @@ public class SecureServerSocketThread extends Thread {
   private ConnectToConsumerRequest connectionRequest;
   private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
 
-  SecureServerSocketThread(int port, ConnectToConsumerRequest connectionRequest) {
+  public SecureServerSocketThread(int port, ConnectToConsumerRequest connectionRequest) {
     this.port = port;
     this.connectionRequest = connectionRequest;
   }

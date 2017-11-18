@@ -1,4 +1,4 @@
-package eu.arrowhead.core.serviceregistry_sql;
+package eu.arrowhead.core.orchestrator.filter;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
@@ -25,8 +25,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
   public void filter(ContainerRequestContext requestContext) {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
-    boolean isGetItCalled = requestContext.getMethod().equals("GET") && requestTarget.endsWith("serviceregistry");
-    if (sc.isSecure() && !isGetItCalled) {
+    if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
       String subjectName = sc.getUserPrincipal().getName();
       if (isClientAuthorized(subjectName, requestTarget)) {
         log.info("SSL identification is successful! Cert: " + subjectName);
@@ -35,6 +34,13 @@ public class AccessControlFilter implements ContainerRequestFilter {
         throw new AuthenticationException(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget);
       }
     }
+  }
+
+  private boolean isGetItCalled(String method, String requestTarget) {
+    if (!method.equals("GET")) {
+      return false;
+    }
+    return requestTarget.endsWith("orchestration") || requestTarget.endsWith("mgmt/common") || requestTarget.endsWith("mgmt/store");
   }
 
   private boolean isClientAuthorized(String subjectName, String requestTarget) {
@@ -47,11 +53,11 @@ public class AccessControlFilter implements ContainerRequestFilter {
     }
 
     if (requestTarget.contains("mgmt")) {
-      //Only the local HMI can use these methods
+      // Only the local HMI can use these methods
       String[] serverFields = serverCN.split("\\.", 2);
       // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
-    } else if (requestTarget.endsWith("register") || requestTarget.endsWith("remove")) {
+    } else {
       // All requests from the local cloud are allowed, so omit the first 2 parts of the common names (systemName.systemGroup)
       String[] serverFields = serverCN.split("\\.", 3);
       String[] clientFields = clientCN.split("\\.", 3);
@@ -59,16 +65,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
 
       // If this is true, then the certificates are from the same local cloud
       return serverFields[2].equalsIgnoreCase(clientFields[2]);
-    } else if (requestTarget.endsWith("query")) {
-      // Only requests from the Orchestrator and Gatekeeper are allowed
-      String[] serverFields = serverCN.split("\\.", 2);
-      // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
-
-      // If this is true, then the certificate is from the local Orchestrator or Gatekeeper
-      return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
     }
-
-    return false;
   }
 
 }

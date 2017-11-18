@@ -5,7 +5,10 @@ import eu.arrowhead.common.messages.ConnectToConsumerResponse;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.common.messages.ConnectToProviderResponse;
 import eu.arrowhead.core.gateway.model.GatewaySession;
-import java.io.IOException;
+import eu.arrowhead.core.gateway.thread.InsecureServerSocketThread;
+import eu.arrowhead.core.gateway.thread.InsecureSocketThread;
+import eu.arrowhead.core.gateway.thread.SecureServerSocketThread;
+import eu.arrowhead.core.gateway.thread.SecureSocketThread;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -43,17 +46,15 @@ public class GatewayResource {
 			GatewaySession gatewaySession = GatewayService.createInsecureChannel(connectionRequest.getBrokerHost(),
 					connectionRequest.getBrokerPort(), queueName, controlQueueName);
 
-			InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName,
-					connectionRequest);
-			insecureThread.start();
+			InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
+      insecureThread.start();
 		} else {
 			// TODO sanity check on the success of the channel create, handle the error
 			GatewaySession gatewaySession = GatewayService.createSecureChannel(connectionRequest.getBrokerHost(),
 					connectionRequest.getBrokerPort(), queueName, controlQueueName);
 
-			SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName,
-					connectionRequest);
-			secureThread.start();
+			SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
+      secureThread.start();
 		}
 
 		// TODO: PayloadEncryption instead of null
@@ -70,9 +71,8 @@ public class GatewayResource {
 			SecureServerSocketThread secureThread = new SecureServerSocketThread(serverSocketPort, connectionRequest);
 			secureThread.start();
 		} else {
-			InsecureServerSocketThread insecureThread = new InsecureServerSocketThread(serverSocketPort,
-					connectionRequest);
-			insecureThread.start();
+			InsecureServerSocketThread insecureThread = new InsecureServerSocketThread(serverSocketPort, connectionRequest);
+      insecureThread.start();
 		}
 
 		ConnectToConsumerResponse response = new ConnectToConsumerResponse(serverSocketPort);

@@ -38,7 +38,7 @@ public class QoSResource {
   }
 
   @PUT
-  @Path("/verify")
+  @Path("verify")
   public Response qosVerification(QoSVerify qosVerify) {
 
     QoSVerificationResponse qvr = QoSManagerService.qosVerify(qosVerify);
@@ -46,7 +46,7 @@ public class QoSResource {
   }
 
   @PUT
-  @Path("/reserve")
+  @Path("reserve")
   public Response qosReservation(QoSReserve qosReservation) throws ReservationException, DriverNotFoundException, IOException {
 
     QoSReservationResponse qosrr = QoSManagerService.qosReserve(qosReservation);
