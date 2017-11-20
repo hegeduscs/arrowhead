@@ -16,9 +16,9 @@ import javax.validation.constraints.NotNull;
 /**
  * JPA entity class for storing <tt>NeighborCloud</tt> information in the database. The <i>cloud_id</i> column must be unique.
  * <p>
- * The database table belonging to this class is a subset of the {@link ArrowheadCloud} table. If an <tt>ArrowheadCloud</tt>
- * can also be found in the <tt>NeighborCloud</tt> table, that means it is a trusted <tt>ArrowheadCloud</tt>, which can be queried during a Global
- * Service Discovery, Inter-Cloud Negotiations (by the Gatekeeper) and token generation (by the Authorization).
+ * The database table belonging to this class is a subset of the {@link ArrowheadCloud} table. If an <tt>ArrowheadCloud</tt> can also be found in the
+ * <tt>NeighborCloud</tt> table, that means it is a trusted <tt>ArrowheadCloud</tt>, which can be queried during a Global Service Discovery,
+ * Inter-Cloud Negotiations (by the Gatekeeper) and token generation (by the Authorization).
  *
  * @author Umlauf Zoltán
  * @see ArrowheadCloud

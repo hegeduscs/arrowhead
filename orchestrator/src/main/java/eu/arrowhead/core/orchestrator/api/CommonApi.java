@@ -285,8 +285,8 @@ public class CommonApi {
   }
 
   /**
-   * Deletes the ArrowheadSystem from the database specified by the system group and system name. Returns 200 if the delete is successful,
-   * 204 (no content) if the system was not in the database to begin with.
+   * Deletes the ArrowheadSystem from the database specified by the system group and system name. Returns 200 if the delete is successful, 204 (no
+   * content) if the system was not in the database to begin with.
    */
   @DELETE
   @Path("systems/systemgroup/{systemGroup}/systemname/{systemName}")

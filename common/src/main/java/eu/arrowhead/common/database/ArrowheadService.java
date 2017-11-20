@@ -43,7 +43,7 @@ public class ArrowheadService {
 
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
-  @CollectionTable(name = "arrowhead_service_interface_list", joinColumns = @JoinColumn(name="arrowhead_service_id"))
+  @CollectionTable(name = "arrowhead_service_interface_list", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
   private List<String> interfaces = new ArrayList<>();
 
   @ElementCollection(fetch = FetchType.LAZY)

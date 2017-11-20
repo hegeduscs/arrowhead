@@ -366,7 +366,6 @@ public class AuthorizationApi {
   }
 
 
-
   /**
    * Adds a new Cloud and its consumable Services to the database.
    *

@@ -129,8 +129,7 @@ final class OrchestratorDriver {
    *
    * @param srList The list of <tt>ServiceRegistryEntry</tt>s still being considered (after SR query and possibly Auth query)
    * @param preferredLocalProviders A set of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a subset
-   *     of the <i>preferredProviders</i> list from the {@link ServiceRequestForm}, which can also contain not
-   *     local <tt>ArrowheadSystem</tt>s.
+   *     of the <i>preferredProviders</i> list from the {@link ServiceRequestForm}, which can also contain not local <tt>ArrowheadSystem</tt>s.
    *
    * @return a list of <tt>ServiceRegistryEntry</tt>s which have preferred provider <tt>ArrowheadSystem</tt>s
    *

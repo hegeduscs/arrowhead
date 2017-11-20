@@ -42,15 +42,15 @@ public class GatewayResource {
 
     if (!connectionRequest.getIsSecure()) {
       // TODO sanity check on the success of the channel create, handle the error
-      GatewaySession gatewaySession =
-          GatewayService.createInsecureChannel(connectionRequest.getBrokerHost(), connectionRequest.getBrokerPort(), queueName, controlQueueName);
+      GatewaySession gatewaySession = GatewayService
+          .createInsecureChannel(connectionRequest.getBrokerHost(), connectionRequest.getBrokerPort(), queueName, controlQueueName);
 
       InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
       insecureThread.start();
     } else {
       // TODO sanity check on the success of the channel create, handle the error
-      GatewaySession gatewaySession =
-          GatewayService.createSecureChannel(connectionRequest.getBrokerHost(), connectionRequest.getBrokerPort(), queueName, controlQueueName);
+      GatewaySession gatewaySession = GatewayService
+          .createSecureChannel(connectionRequest.getBrokerHost(), connectionRequest.getBrokerPort(), queueName, controlQueueName);
 
       SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
       secureThread.start();

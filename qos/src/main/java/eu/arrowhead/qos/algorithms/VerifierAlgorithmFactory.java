@@ -41,8 +41,7 @@ public class VerifierAlgorithmFactory {
                                     Map<String, String> consumerDeviceCapabilities, List<ResourceReservation> providerDeviceQoSReservations,
                                     List<ResourceReservation> consumerDeviceQoSReservations, Map<String, String> requestedQoS,
                                     Map<String, String> commands)
-      throws InstantiationException, ClassNotFoundException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException,
-      InvocationTargetException {
+      throws InstantiationException, ClassNotFoundException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
     Class cls;
 
     // Class Invoking

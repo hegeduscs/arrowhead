@@ -21,50 +21,49 @@ public class SecureSocketThread extends Thread {
   private ConnectToProviderRequest connectionRequest;
   private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());
 
-	public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
-			ConnectToProviderRequest connectionRequest) {
-		this.gatewaySession = gatewaySession;
-		this.queueName = queueName;
-		this.controlQueueName = controlQueueName;
-		this.connectionRequest = connectionRequest;
-	}
+  public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName, ConnectToProviderRequest connectionRequest) {
+    this.gatewaySession = gatewaySession;
+    this.queueName = queueName;
+    this.controlQueueName = controlQueueName;
+    this.connectionRequest = connectionRequest;
+  }
 
-	public void run() {
-		try {
-			Channel channel = gatewaySession.getChannel();
-			SSLContext sslContext = GatewayService.createSSLContext();
-			SSLSocketFactory clientFactory = sslContext.getSocketFactory();
-			SSLSocket sslProviderSocket = null;
-			GetResponse controlMessage = channel.basicGet(controlQueueName, false);
-			while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-				GetResponse message = channel.basicGet(queueName, false);
-				if (message == null) {
-					System.out.println("No message retrieved");
-				} else {
-					sslProviderSocket = (SSLSocket) clientFactory.createSocket(
-							connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
-					InputStream inProvider = sslProviderSocket.getInputStream();
-					OutputStream outProvider = sslProviderSocket.getOutputStream();
-					outProvider.write(message.getBody());
+  public void run() {
+    try {
+      Channel channel = gatewaySession.getChannel();
+      SSLContext sslContext = GatewayService.createSSLContext();
+      SSLSocketFactory clientFactory = sslContext.getSocketFactory();
+      SSLSocket sslProviderSocket = null;
+      GetResponse controlMessage = channel.basicGet(controlQueueName, false);
+      while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
+        GetResponse message = channel.basicGet(queueName, false);
+        if (message == null) {
+          System.out.println("No message retrieved");
+        } else {
+          sslProviderSocket = (SSLSocket) clientFactory
+              .createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
+          InputStream inProvider = sslProviderSocket.getInputStream();
+          OutputStream outProvider = sslProviderSocket.getOutputStream();
+          outProvider.write(message.getBody());
 
-					// get the answer from Provider
-					byte[] inputFromProvider = new byte[1024];
-					byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
-					System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
-					channel.basicPublish("", queueName, null, inputFromProviderFinal);
-				}
-				controlMessage = channel.basicGet(controlQueueName, false);
-			}
-			// Close sockets and the connection
-			channel.close();
-			gatewaySession.getConnection().close();
-			if (sslProviderSocket != null) {
-				sslProviderSocket.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			log.error("ConnectToProvider(secure): I/O exception occured");
-		}
-	}
+          // get the answer from Provider
+          byte[] inputFromProvider = new byte[1024];
+          byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
+          System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
+          channel.basicPublish("", queueName, null, inputFromProviderFinal);
+        }
+        controlMessage = channel.basicGet(controlQueueName, false);
+      }
+      // Close sockets and the connection
+      channel.close();
+      gatewaySession.getConnection().close();
+      if (sslProviderSocket != null) {
+        sslProviderSocket.close();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      log.error("ConnectToProvider(secure): I/O exception occured");
+    }
+  }
 
 }

@@ -14,99 +14,99 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "broker", uniqueConstraints = {@UniqueConstraint(columnNames = {"broker_name"})})
 public class Broker {
 
-	@Column(name = "id")
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@XmlTransient
-	private int id;
+  @Column(name = "id")
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @XmlTransient
+  private int id;
 
-	@Column(name = "broker_name")
-	@NotNull
-	private String brokerName;
+  @Column(name = "broker_name")
+  @NotNull
+  private String brokerName;
 
-	@Column(name = "address")
-	@NotNull
-	private String address;
+  @Column(name = "address")
+  @NotNull
+  private String address;
 
-	@Column(name = "port")
-	private Integer port;
+  @Column(name = "port")
+  private Integer port;
 
-	@Column(name = "is_secure")
-	private boolean isSecure;
+  @Column(name = "is_secure")
+  private boolean isSecure;
 
-	@Column(name = "authentication_info", length = 2047)
-	private String authenticationInfo;
+  @Column(name = "authentication_info", length = 2047)
+  private String authenticationInfo;
 
   public Broker() {
   }
 
   public Broker(String brokerName, String address, Integer port, boolean isSecure, String authenticationInfo) {
     this.brokerName = brokerName;
-		this.address = address;
-		this.port = port;
-		this.isSecure = isSecure;
-		this.authenticationInfo = authenticationInfo;
-	}
+    this.address = address;
+    this.port = port;
+    this.isSecure = isSecure;
+    this.authenticationInfo = authenticationInfo;
+  }
 
-	@XmlTransient
-	public int getId() {
-		return id;
-	}
+  @XmlTransient
+  public int getId() {
+    return id;
+  }
 
-	public String getBrokerName() {
-		return brokerName;
-	}
+  public String getBrokerName() {
+    return brokerName;
+  }
 
-	public void setBrokerName(String brokerName) {
-		this.brokerName = brokerName;
-	}
+  public void setBrokerName(String brokerName) {
+    this.brokerName = brokerName;
+  }
 
-	public String getAddress() {
-		return address;
-	}
+  public String getAddress() {
+    return address;
+  }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
-	public int getPort() {
-		return port;
-	}
+  public int getPort() {
+    return port;
+  }
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+  public void setPort(int port) {
+    this.port = port;
+  }
 
-	public boolean isSecure() {
-		return isSecure;
-	}
+  public boolean isSecure() {
+    return isSecure;
+  }
 
-	public void setSecure(boolean secure) {
-		isSecure = secure;
-	}
+  public void setSecure(boolean secure) {
+    isSecure = secure;
+  }
 
-	public String getAuthenticationInfo() {
-		return authenticationInfo;
-	}
+  public String getAuthenticationInfo() {
+    return authenticationInfo;
+  }
 
-	public void setAuthenticationInfo(String authenticationInfo) {
-		this.authenticationInfo = authenticationInfo;
-	}
+  public void setAuthenticationInfo(String authenticationInfo) {
+    this.authenticationInfo = authenticationInfo;
+  }
 
-	@Override
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
-		}
+    }
     if (o == null || getClass() != o.getClass()) {
       return false;
-		}
+    }
 
     Broker broker = (Broker) o;
 
     if (!address.equals(broker.address)) {
       return false;
-		}
+    }
     return port.equals(broker.port);
   }
 
@@ -117,7 +117,7 @@ public class Broker {
     return result;
   }
 
-	public boolean isValid() {
-		return brokerName != null && address != null;
-	}
+  public boolean isValid() {
+    return brokerName != null && address != null;
+  }
 }

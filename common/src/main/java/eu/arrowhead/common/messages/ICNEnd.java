@@ -4,7 +4,7 @@ public class ICNEnd {
 
   private OrchestrationForm orchestrationForm;
   private GatewayConnectionInfo gatewayConnInfo;
-  
+
   public ICNEnd() {
   }
 

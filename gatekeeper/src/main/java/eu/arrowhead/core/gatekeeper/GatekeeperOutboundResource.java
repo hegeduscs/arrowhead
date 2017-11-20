@@ -111,7 +111,6 @@ public class GatekeeperOutboundResource {
   }
 
 
-
   /**
    * This function represents the consumer-side of InterCloudNegotiations, where the Gatekeeper sends information about the requester System. (SSL
    * secured)

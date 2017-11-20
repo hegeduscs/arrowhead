@@ -57,8 +57,7 @@ public class DriversFactory {
   public Map<String, String> generateCommands(String communicationProtocol, Map<String, String> networkConfiguration, ArrowheadSystem provider,
                                               ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands,
                                               Map<String, String> requestedQoS)
-      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
     // Class Invoking
     Class cls = findClass(communicationProtocol);

@@ -2,25 +2,25 @@ package eu.arrowhead.common.messages;
 
 public class ICNResult {
 
-	private OrchestrationResponse orchResponse;
-	
-	public ICNResult() {
-	}
+  private OrchestrationResponse orchResponse;
 
-	public ICNResult(OrchestrationResponse orchResponse) {
-		this.orchResponse = orchResponse;
-	}
+  public ICNResult() {
+  }
 
-	public OrchestrationResponse getOrchResponse() {
-		return orchResponse;
-	}
+  public ICNResult(OrchestrationResponse orchResponse) {
+    this.orchResponse = orchResponse;
+  }
 
-	public void setOrchResponse(OrchestrationResponse orchResponse) {
-		this.orchResponse = orchResponse;
-	}
+  public OrchestrationResponse getOrchResponse() {
+    return orchResponse;
+  }
 
-	public boolean isValid() {
-	    return orchResponse != null && orchResponse.getResponse() != null && !orchResponse.getResponse().isEmpty();
-	  }
-	
+  public void setOrchResponse(OrchestrationResponse orchResponse) {
+    this.orchResponse = orchResponse;
+  }
+
+  public boolean isValid() {
+    return orchResponse != null && orchResponse.getResponse() != null && !orchResponse.getResponse().isEmpty();
+  }
+
 }

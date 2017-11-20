@@ -224,7 +224,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   /**
    * Note: This class has a natural ordering that is inconsistent with equals().
-   *
+   * <p>
    * The field <i>priority</i> is used to sort instances of this class in a collection. Priority is non-negative. If this.priority < other.priority
    * that means <i>this</i> is more ahead in a collection than <i>other</i> and therefore has a higher priority. This means priority = 0 is the
    * highest priority for a Store entry.
