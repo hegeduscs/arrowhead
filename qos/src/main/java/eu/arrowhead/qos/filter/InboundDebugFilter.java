@@ -1,5 +1,6 @@
 package eu.arrowhead.qos.filter;
 
+import eu.arrowhead.common.Utility;
 import eu.arrowhead.qos.QoSMain;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -27,8 +28,9 @@ public class InboundDebugFilter implements ContainerRequestFilter {
         sb.append(line).append("\n");
       }
       br.close();
-      System.out.println(sb.toString());
-      InputStream in = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+      String prettyJson = Utility.toPrettyJson(sb.toString(), null);
+      System.out.println(prettyJson);
+      InputStream in = new ByteArrayInputStream(prettyJson.getBytes("UTF-8"));
       requestContext.setEntityStream(in);
     }
   }

@@ -1,5 +1,9 @@
 package eu.arrowhead.common;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.CoreSystem;
 import eu.arrowhead.common.database.NeighborCloud;
@@ -27,6 +31,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.jetbrains.annotations.Nullable;
 
 public final class Utility {
 
@@ -34,6 +39,7 @@ public final class Utility {
   private static SSLContext sslContext = null;
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
     // Decide whether to allow the connection...
     return true;
@@ -260,7 +266,7 @@ public final class Utility {
     return uri;
   }
 
-  public static boolean isUrlValid(String url, boolean isSecure) {
+  public static void isUrlValid(String url, boolean isSecure) {
     String errorMessage = " is not a valid URL to start a HTTP server! Please fix the URL in the properties file.";
     try {
       URI uri = new URI(url);
@@ -279,7 +285,18 @@ public final class Utility {
       throw new ServiceConfigurationError(url + errorMessage);
     }
 
-    return true;
+  }
+
+  public static String toPrettyJson(@Nullable String jsonString, @Nullable Object obj) {
+    if (jsonString != null) {
+      JsonParser parser = new JsonParser();
+      JsonObject json = parser.parse(jsonString).getAsJsonObject();
+      return gson.toJson(json);
+    }
+    if (obj != null) {
+      return gson.toJson(obj);
+    }
+    return null;
   }
 
   // IMPORTANT: only use this function with RuntimeExceptions that have a public String constructor

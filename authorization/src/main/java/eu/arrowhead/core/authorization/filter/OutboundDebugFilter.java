@@ -1,7 +1,6 @@
 package eu.arrowhead.core.authorization.filter;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import eu.arrowhead.common.Utility;
 import eu.arrowhead.core.authorization.AuthorizationMain;
 import java.io.IOException;
 import javax.annotation.Priority;
@@ -15,13 +14,11 @@ import javax.ws.rs.ext.Provider;
 @Priority(Priorities.USER)
 public class OutboundDebugFilter implements ContainerResponseFilter {
 
-  private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
   @Override
   public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
     if (AuthorizationMain.DEBUG_MODE) {
       System.out.println("Response to the request at: " + requestContext.getUriInfo().getRequestUri().toString());
-      System.out.println(gson.toJson(responseContext.getEntity()));
+      System.out.println(Utility.toPrettyJson(null, responseContext.getEntity()));
     }
   }
 }
