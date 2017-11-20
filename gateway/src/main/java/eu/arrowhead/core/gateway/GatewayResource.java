@@ -26,58 +26,57 @@ import org.apache.log4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatewayResource {
 
-	private static final Logger log = Logger.getLogger(GatewayResource.class.getName());
+  private static final Logger log = Logger.getLogger(GatewayResource.class.getName());
 
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt() {
-		return "This is the Gateway Resource. REST methods: connectToProvider, connectToConsumer.";
-	}
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public String getIt() {
+    return "This is the Gateway Resource. REST methods: connectToProvider, connectToConsumer.";
+  }
 
-	@PUT
-	@Path("connectToProvider")
-	public Response connectToProvider(ConnectToProviderRequest connectionRequest) {
-		String queueName = String.valueOf(System.currentTimeMillis()).concat(String.valueOf(Math.random())).replace(".",
-				"");
-		String controlQueueName = queueName.concat("_control");
+  @PUT
+  @Path("connectToProvider")
+  public Response connectToProvider(ConnectToProviderRequest connectionRequest) {
+    String queueName = String.valueOf(System.currentTimeMillis()).concat(String.valueOf(Math.random())).replace(".", "");
+    String controlQueueName = queueName.concat("_control");
 
-		if (!connectionRequest.getIsSecure()) {
-			// TODO sanity check on the success of the channel create, handle the error
-			GatewaySession gatewaySession = GatewayService.createInsecureChannel(connectionRequest.getBrokerHost(),
-					connectionRequest.getBrokerPort(), queueName, controlQueueName);
+    if (!connectionRequest.getIsSecure()) {
+      // TODO sanity check on the success of the channel create, handle the error
+      GatewaySession gatewaySession =
+          GatewayService.createInsecureChannel(connectionRequest.getBrokerHost(), connectionRequest.getBrokerPort(), queueName, controlQueueName);
 
-			InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
+      InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
       insecureThread.start();
-		} else {
-			// TODO sanity check on the success of the channel create, handle the error
-			GatewaySession gatewaySession = GatewayService.createSecureChannel(connectionRequest.getBrokerHost(),
-					connectionRequest.getBrokerPort(), queueName, controlQueueName);
+    } else {
+      // TODO sanity check on the success of the channel create, handle the error
+      GatewaySession gatewaySession =
+          GatewayService.createSecureChannel(connectionRequest.getBrokerHost(), connectionRequest.getBrokerPort(), queueName, controlQueueName);
 
-			SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
+      SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
       secureThread.start();
-		}
+    }
 
-		// TODO: PayloadEncryption instead of null
-		ConnectToProviderResponse response = new ConnectToProviderResponse(queueName, controlQueueName, null);
-		return Response.status(200).entity(response).build();
-	}
+    // TODO: PayloadEncryption instead of null
+    ConnectToProviderResponse response = new ConnectToProviderResponse(queueName, controlQueueName, null);
+    return Response.status(200).entity(response).build();
+  }
 
-	@PUT
-	@Path("connectToConsumer")
-	public Response connectToConsumer(ConnectToConsumerRequest connectionRequest) {
-		Integer serverSocketPort = GatewayService.getAvailablePort();
+  @PUT
+  @Path("connectToConsumer")
+  public Response connectToConsumer(ConnectToConsumerRequest connectionRequest) {
+    Integer serverSocketPort = GatewayService.getAvailablePort();
 
-		if (connectionRequest.getIsSecure()) {
-			SecureServerSocketThread secureThread = new SecureServerSocketThread(serverSocketPort, connectionRequest);
-			secureThread.start();
-		} else {
-			InsecureServerSocketThread insecureThread = new InsecureServerSocketThread(serverSocketPort, connectionRequest);
+    if (connectionRequest.getIsSecure()) {
+      SecureServerSocketThread secureThread = new SecureServerSocketThread(serverSocketPort, connectionRequest);
+      secureThread.start();
+    } else {
+      InsecureServerSocketThread insecureThread = new InsecureServerSocketThread(serverSocketPort, connectionRequest);
       insecureThread.start();
-		}
+    }
 
-		ConnectToConsumerResponse response = new ConnectToConsumerResponse(serverSocketPort);
-		log.info("Returning the ConnectToConsumerResponse to the Gatekeeper");
-		return Response.status(200).entity(response).build();
-	}
+    ConnectToConsumerResponse response = new ConnectToConsumerResponse(serverSocketPort);
+    log.info("Returning the ConnectToConsumerResponse to the Gatekeeper");
+    return Response.status(200).entity(response).build();
+  }
 
 }
