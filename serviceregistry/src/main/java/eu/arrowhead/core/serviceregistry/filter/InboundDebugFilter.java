@@ -28,10 +28,13 @@ public class InboundDebugFilter implements ContainerRequestFilter {
         sb.append(line).append("\n");
       }
       br.close();
-      String prettyJson = Utility.toPrettyJson(sb.toString(), null);
-      System.out.println(prettyJson);
-      InputStream in = new ByteArrayInputStream(prettyJson.getBytes("UTF-8"));
-      requestContext.setEntityStream(in);
+
+      if (!sb.toString().isEmpty()) {
+        String prettyJson = Utility.toPrettyJson(sb.toString(), null);
+        System.out.println(prettyJson);
+        InputStream in = new ByteArrayInputStream(prettyJson.getBytes("UTF-8"));
+        requestContext.setEntityStream(in);
+      }
     }
   }
 }
