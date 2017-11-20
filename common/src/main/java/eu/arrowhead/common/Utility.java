@@ -107,6 +107,8 @@ public final class Utility {
       try {
         errorMessage = response.readEntity(ErrorMessage.class);
       } catch (RuntimeException e) {
+        System.out.println("Request failed, response status code: " + response.getStatus());
+        System.out.println("Request failed, response body: " + toPrettyJson(null, response.getEntity()));
         log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
         throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
       }
