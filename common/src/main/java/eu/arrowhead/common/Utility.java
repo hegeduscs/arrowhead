@@ -101,18 +101,22 @@ public final class Utility {
       throw new UnavailableServerException("Could not get any response from: " + uri);
     }
 
+  //The response body has to be extracted before the stream closes
+    String errorMessageBody = toPrettyJson(null, response.getEntity());
     // If the response status code does not start with 2 the request was not successful
     if (!(response.getStatusInfo().getFamily() == Family.SUCCESSFUL)) {
       ErrorMessage errorMessage;
       try {
         errorMessage = response.readEntity(ErrorMessage.class);
       } catch (RuntimeException e) {
-        System.out.println("Request failed, response status code: " + response.getStatus());
-        System.out.println("Request failed, response body: " + toPrettyJson(null, response.getEntity()));
         log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
+        log.info("Request failed, response status code: " + response.getStatus());
+        log.info("Request failed, response body: " + toPrettyJson(null, errorMessageBody)); 
         throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
       }
       if (errorMessage == null) {
+        System.out.println("Request failed, response status code: " + response.getStatus());
+        System.out.println("Request failed, response body: " + toPrettyJson(null, errorMessageBody));
         log.error("Unknown reason for RuntimeException at the sendRequest() method.");
         throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
       } else if (errorMessage.getExceptionType() == null) {
