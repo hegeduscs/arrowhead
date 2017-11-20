@@ -58,9 +58,7 @@ public class InsecureServerSocketThread extends Thread {
       GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
       while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
         GetResponse message = channel.basicGet(connectionRequest.getQueueName(), false);
-        if (message == null) {
-          System.out.println("No message retrieved");
-        } else {
+        if (message != null) {
           outConsumer.write(message.getBody());
         }
         controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);

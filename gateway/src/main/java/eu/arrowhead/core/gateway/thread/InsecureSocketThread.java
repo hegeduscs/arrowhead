@@ -32,9 +32,7 @@ public class InsecureSocketThread extends Thread {
       GetResponse controlMessage = channel.basicGet(controlQueueName, false);
       while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
         GetResponse message = channel.basicGet(queueName, false);
-        if (message == null) {
-          System.out.println("No message retrieved");
-        } else {
+        if (message != null) {
           providerSocket = new Socket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
           InputStream inProvider = providerSocket.getInputStream();
           OutputStream outProvider = providerSocket.getOutputStream();
