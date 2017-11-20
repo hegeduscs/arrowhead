@@ -19,7 +19,7 @@ public class InboundDebugFilter implements ContainerRequestFilter {
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
     if (QoSMain.DEBUG_MODE) {
-      System.out.println("New request at: " + requestContext.getUriInfo().getRequestUri().toString());
+      System.out.println("New " + requestContext.getMethod() + " request at: " + requestContext.getUriInfo().getRequestUri().toString());
       BufferedReader br = new BufferedReader(new InputStreamReader(requestContext.getEntityStream(), "utf-8"));
       StringBuilder sb = new StringBuilder();
       String line;
