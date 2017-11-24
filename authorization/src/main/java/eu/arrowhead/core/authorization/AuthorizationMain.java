@@ -7,9 +7,11 @@ import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -98,9 +100,13 @@ public class AuthorizationMain {
         shutdown();
       }));
     } else {
-      System.out.println("Press enter to shutdown Authorization Server(s)...");
-      //noinspection ResultOfMethodCallIgnored
-      System.in.read();
+      System.out.println("Type \"stop\" to shutdown Authorization Server(s)...");
+      BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+      String input = "";
+      while (!input.equals("stop")) {
+        input = br.readLine();
+      }
+      br.close();
       shutdown();
     }
   }

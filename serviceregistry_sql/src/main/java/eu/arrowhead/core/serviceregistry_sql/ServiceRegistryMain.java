@@ -4,9 +4,11 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -105,9 +107,13 @@ public class ServiceRegistryMain {
         shutdown();
       }));
     } else {
-      System.out.println("Press enter to shutdown ServiceRegistry Server(s)...");
-      //noinspection ResultOfMethodCallIgnored
-      System.in.read();
+      System.out.println("Type \"stop\" to shutdown Service Registry Server(s)...");
+      BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+      String input = "";
+      while (!input.equals("stop")) {
+        input = br.readLine();
+      }
+      br.close();
       if (timer != null) {
         timer.cancel();
       }
