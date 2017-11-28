@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
@@ -50,7 +48,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
   private static final Name SERVICES_DNSSD_UDP = Name.fromConstantString("_services._dns-sd._udp");
 
   private final Name registrationDomain;
-  @Nullable
+
   private final Resolver resolver;
   private final Name servicesName;
 
@@ -111,7 +109,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
    *
    * @throws UnknownHostException if the DNS server name for the domain failed to resolve.
    */
-  @Nullable
+
   private Resolver findUpdateResolver(Name domain) throws UnknownHostException {
     SimpleResolver simpleResolver = null;
     try {
@@ -139,7 +137,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
     return simpleResolver;
   }
 
-  @NotNull
+
   public ServiceName makeServiceName(String name, ServiceType type) {
     return new ServiceName(name, type, registrationDomain.toString());
   }
@@ -171,7 +169,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
     timeToLive = ttl;
   }
 
-  public void setTSIGKey(@Nullable String name, @Nullable String algorithm, @Nullable String key) {
+  public void setTSIGKey(String name, String algorithm, String key) {
     if (name != null && algorithm != null && key != null) {
       resolver.setTSIGKey(new TSIG(algorithm, name, key));
     } else {
@@ -179,7 +177,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
     }
   }
 
-  public boolean registerService(@NotNull ServiceData serviceData) throws DnsSDException {
+  public boolean registerService(ServiceData serviceData) throws DnsSDException {
     try {
       ServiceName serviceName = serviceData.getName();
       Name dnsName = serviceName.toDnsName();
@@ -236,7 +234,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
    *
    * @param update the update to flush.
    */
-  private static void flushCache(@NotNull Update update) {
+  private static void flushCache(Update update) {
     Cache cache = Lookup.getDefaultCache(DClass.IN);
     Record[] records = update.getSectionArray(Section.UPDATE);
     for (Record rec : records) {
@@ -245,7 +243,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
     }
   }
 
-  public boolean unregisterService(@NotNull ServiceName serviceName) throws DnsSDException {
+  public boolean unregisterService(ServiceName serviceName) throws DnsSDException {
     try {
       Name dnsName = serviceName.toDnsName();
       Name typeName = new Name(serviceName.getType().toDnsString(), registrationDomain);

@@ -7,7 +7,6 @@ package com.github.danieln.dnssdjava;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Data about a service instance. A {@link ServiceName} uniquely identifies the service. The host and port specifies the service endpoint. A fully
@@ -21,7 +20,7 @@ public class ServiceData {
   private ServiceName name;
   private String host;
   private int port;
-  @NotNull
+
   private Map<String, String> properties = new HashMap<>();
 
   /**
@@ -102,7 +101,7 @@ public class ServiceData {
    *
    * @return a key-value mapping.
    */
-  @NotNull
+
   public Map<String, String> getProperties() {
     return properties;
   }

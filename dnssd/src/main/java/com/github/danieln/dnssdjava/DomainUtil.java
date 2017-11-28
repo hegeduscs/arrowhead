@@ -17,7 +17,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.ReverseMap;
@@ -37,7 +36,7 @@ class DomainUtil {
    *
    * @return a list of potential domain names.
    */
-  @NotNull
+
   static List<String> getComputerDomains() {
     String domain = System.getProperty("dnssd.domain");
     if (domain != null) {
@@ -87,7 +86,7 @@ class DomainUtil {
    *
    * @throws UnknownHostException if something went terribly wrong.
    */
-  private static InetAddress calculateNetworkAddress(@NotNull InterfaceAddress ifaddr) throws UnknownHostException {
+  private static InetAddress calculateNetworkAddress(InterfaceAddress ifaddr) throws UnknownHostException {
     byte[] addr = ifaddr.getAddress().getAddress();
     int n = ifaddr.getNetworkPrefixLength();
     int i = n / 8;
@@ -105,7 +104,7 @@ class DomainUtil {
    *
    * @return a list of potential host names.
    */
-  @NotNull
+
   static List<String> getComputerHostNames() {
     String hostname = System.getProperty("dnssd.hostname");
     if (hostname != null) {

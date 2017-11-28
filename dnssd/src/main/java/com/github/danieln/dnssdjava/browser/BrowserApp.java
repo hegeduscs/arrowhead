@@ -36,8 +36,6 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Graphical DNS-SD browser.
@@ -87,9 +85,9 @@ class BrowserApp extends JFrame {
     serviceInstanceList.setCellRenderer(new DefaultListCellRenderer() {
       private static final long serialVersionUID = 1L;
 
-      @NotNull
+
       @Override
-      public Component getListCellRendererComponent(JList list, @NotNull Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         setText(((ServiceName) value).getName());
         return this;
@@ -161,7 +159,7 @@ class BrowserApp extends JFrame {
 
       private Collection<String> domains;
 
-      @Nullable
+
       @Override
       protected Void doInBackground() throws Exception {
         domains = new ArrayList<>();
@@ -182,13 +180,13 @@ class BrowserApp extends JFrame {
   private void computerDomainChanged() {
     new SwingWorker<Void, Void>() {
 
-      @Nullable
+
       private final String domain = (String) computerDomainCombo.getSelectedItem();
 
       private Collection<String> domains;
       private String defDomain;
 
-      @Nullable
+
       @Override
       protected Void doInBackground() throws Exception {
         DnsSDDomainEnumerator de;
@@ -220,13 +218,13 @@ class BrowserApp extends JFrame {
   private void browsingDomainChanged() {
     new SwingWorker<Void, Void>() {
 
-      @Nullable
+
       private final String domain = (String) browsingDomainCombo.getSelectedItem();
 
       private DefaultListModel model;
       private DnsSDBrowser browser;
 
-      @Nullable
+
       @Override
       protected Void doInBackground() throws Exception {
         model = new DefaultListModel();
@@ -258,7 +256,7 @@ class BrowserApp extends JFrame {
 
       private DefaultListModel model;
 
-      @Nullable
+
       @Override
       protected Void doInBackground() throws Exception {
         model = new DefaultListModel();
@@ -295,7 +293,7 @@ class BrowserApp extends JFrame {
       private String port;
       private DefaultTableModel model;
 
-      @Nullable
+
       @Override
       protected Void doInBackground() throws Exception {
         model = new DefaultTableModel(new Object[]{"Key", "Value"}, 0) {
@@ -331,7 +329,7 @@ class BrowserApp extends JFrame {
 
   public class Listener implements ActionListener, ListSelectionListener {
 
-    public void actionPerformed(@NotNull ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
       if (e.getSource() == computerDomainCombo) {
         computerDomainChanged();
       } else if (e.getSource() == browsingDomainCombo) {
@@ -341,7 +339,7 @@ class BrowserApp extends JFrame {
       }
     }
 
-    public void valueChanged(@NotNull ListSelectionEvent e) {
+    public void valueChanged(ListSelectionEvent e) {
       if (e.getValueIsAdjusting()) {
         return;
       }

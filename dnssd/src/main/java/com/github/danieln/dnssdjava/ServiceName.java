@@ -7,8 +7,6 @@ package com.github.danieln.dnssdjava;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.xbill.DNS.Name;
 
 /**
@@ -50,7 +48,7 @@ public class ServiceName {
    *
    * @throws IllegalArgumentException if the string cannot be parsed as a ServiceName.
    */
-  public static ServiceName valueOf(@NotNull String s) {
+  public static ServiceName valueOf(String s) {
     int i = indexOfNonEscaped(s, '.');
     if (i < 0) {
       throw new IllegalArgumentException("No '.' in service name: " + s);
@@ -90,7 +88,7 @@ public class ServiceName {
    *
    * @see String#indexOf(int)
    */
-  private static int indexOfNonEscaped(@NotNull String string, char ch) {
+  private static int indexOfNonEscaped(String string, char ch) {
     for (int i = 0; i < string.length(); i++) {
       int c = string.charAt(i);
       if (c == '\\') {
@@ -111,7 +109,7 @@ public class ServiceName {
    *
    * @see #escape(String)
    */
-  private static String unescape(@NotNull String name) {
+  private static String unescape(String name) {
     return name.replaceAll("\\\\(.)", "$1");    // Replace "\x" with "x" for any x
   }
 
@@ -122,7 +120,7 @@ public class ServiceName {
    *
    * @return the Name as a ServiceName.
    */
-  static ServiceName fromDnsName(@NotNull Name dnsname) {
+  static ServiceName fromDnsName(Name dnsname) {
     if (dnsname.labels() < 4) {
       throw new IllegalArgumentException("Too few labels in service name: " + dnsname);
     }
@@ -140,7 +138,7 @@ public class ServiceName {
    *
    * @return the decoded string.
    */
-  private static String decodeName(@NotNull byte[] label) {
+  private static String decodeName(byte[] label) {
     // First byte is length
     return new String(label, 1, label.length - 1, NET_UNICODE);
   }
@@ -182,7 +180,7 @@ public class ServiceName {
   }
 
   @Override
-  public boolean equals(@Nullable Object obj) {
+  public boolean equals(Object obj) {
     if (obj == null) {
       return false;
     }
@@ -199,7 +197,7 @@ public class ServiceName {
     return (this.domain == null) ? (other.domain == null) : this.domain.equals(other.domain);
   }
 
-  @NotNull
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -217,7 +215,7 @@ public class ServiceName {
    *
    * @return the name with '.' and '\' escaped.
    */
-  private static String escape(@NotNull String name) {
+  private static String escape(String name) {
     return name.replaceAll("\\\\|\\.", "\\\\$0");    // Replace "\" with "\\" and "." with "\."
   }
 
@@ -245,8 +243,8 @@ public class ServiceName {
    *
    * @return the raw DNS label.
    */
-  @NotNull
-  private byte[] encodeName(@NotNull String s) {
+
+  private byte[] encodeName(String s) {
     byte[] tmp = s.getBytes(NET_UNICODE);
     if (tmp.length > 63) {
       throw new IllegalArgumentException("Name too long: " + s);
