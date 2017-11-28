@@ -48,7 +48,7 @@ final class OrchestratorService {
    *
    * @throws DataNotFoundException if no local provider <tt>ArrowheadSystem</tt> is found and <i>enableInterCloud</i> is false
    */
-  static OrchestrationResponse dynamicOrchestration(ServiceRequestForm srf) {
+  static OrchestrationResponse dynamicOrchestration(@NotNull ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     try {
@@ -120,7 +120,7 @@ final class OrchestratorService {
     /*
      * If the code reaches this part, that means the Intra-Cloud orchestration failed, but the Inter-Cloud orchestration is allowed, so we try that
      * too.
-		 */
+     */
     log.info("dynamicOrchestration: Intra-Cloud orchestration failed, moving to Inter-Cloud orchestration.");
     return triggerInterCloud(srf);
   }
@@ -131,7 +131,8 @@ final class OrchestratorService {
    *
    * @throws DataNotFoundException if all the queried Orchestration Store entry options were exhausted and none were found operational
    */
-  static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf) {
+  @NotNull
+  static OrchestrationResponse orchestrationFromStore(@NotNull ServiceRequestForm srf) {
     // Querying the Orchestration Store for matching entries
     List<OrchestrationStore> entryList = OrchestratorDriver.queryOrchestrationStore(srf.getRequesterSystem(), srf.getRequestedService());
 
@@ -163,7 +164,7 @@ final class OrchestratorService {
            * System), and not what is inside the SRF payload (which should be null anyways when requesting Store orchestration).
            *
            * WARNING: Collections.singletonList creates an immutable List, any change to it will result in UnsupportedOperationException
-					 */
+           */
             srf.setPreferredProviders(Collections.singletonList(new PreferredProvider(entry.getProviderSystem(), entry.getProviderCloud())));
             // Starting the ICN process
             ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(srf, entry.getProviderCloud());
@@ -188,7 +189,7 @@ final class OrchestratorService {
   /**
    * Represents the orchestration process where the requester System only asked for Inter-Cloud servicing.
    */
-  static OrchestrationResponse triggerInterCloud(ServiceRequestForm srf) {
+  static OrchestrationResponse triggerInterCloud(@NotNull ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     // Extracting the valid and unique ArrowheadClouds from the preferred providers
@@ -235,7 +236,7 @@ final class OrchestratorService {
    * that this request from the remote Orchestrator can be satisfied in this Cloud. (Gatekeeper polled the Service Registry and Authorization
    * Systems.)
    */
-  static OrchestrationResponse externalServiceRequest(ServiceRequestForm srf) {
+  static OrchestrationResponse externalServiceRequest(@NotNull ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     // Querying the Service Registry to get the list of Provider Systems
@@ -267,7 +268,8 @@ final class OrchestratorService {
    * @throws DataNotFoundException in case of Store orchestration, and the provider system from the database is not a match according to the
    *     remote cloud
    */
-  private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, List<ArrowheadSystem> preferredSystems, boolean storeOrchestration) {
+  private static OrchestrationResponse icnMatchmaking(@NotNull ICNResult icnResult, @Nullable List<ArrowheadSystem> preferredSystems,
+                                                      boolean storeOrchestration) {
     // We first try to find a match between the preferred systems and the received providers from the ICN result.
     if (preferredSystems != null && !preferredSystems.isEmpty()) {
       for (ArrowheadSystem preferredProvider : preferredSystems) {

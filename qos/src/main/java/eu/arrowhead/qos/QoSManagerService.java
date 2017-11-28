@@ -37,6 +37,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 final class QoSManagerService {
 
@@ -57,7 +58,8 @@ final class QoSManagerService {
    *
    * @return Returns if is possible or not and why.
    */
-  static QoSVerificationResponse qosVerify(QoSVerify message) {
+  @NotNull
+  static QoSVerificationResponse qosVerify(@NotNull QoSVerify message) {
     log.info("QoS: Verifying QoS paramteres.");
 
     NetworkDevice consumerNetworkDevice = getNetworkDeviceFromSystem(message.getConsumer());
@@ -96,7 +98,7 @@ final class QoSManagerService {
   }
   // request in a blocking for loop
 
-  private static NetworkDevice getNetworkDeviceFromSystem(ArrowheadSystem system) {
+  private static NetworkDevice getNetworkDeviceFromSystem(@NotNull ArrowheadSystem system) {
     restrictionMap.clear();
     restrictionMap.put("systemGroup", system.getSystemGroup());
     restrictionMap.put("systemName", system.getSystemName());
@@ -109,7 +111,8 @@ final class QoSManagerService {
     return deployedSystem.getNetworkDevice();
   }
 
-  private static List<ResourceReservation> getReservationsFromSystem(ArrowheadSystem system) {
+  @NotNull
+  private static List<ResourceReservation> getReservationsFromSystem(@NotNull ArrowheadSystem system) {
     restrictionMap.clear();
     restrictionMap.put("systemGroup", system.getSystemGroup());
     restrictionMap.put("systemName", system.getSystemName());
@@ -138,7 +141,7 @@ final class QoSManagerService {
    * @throws ReservationException The reservation on the devices was not possible.
    * @throws DriverNotFoundException The network type doesnt have a driver assigned.
    */
-  static QoSReservationResponse qosReserve(QoSReserve message) throws ReservationException, DriverNotFoundException, IOException {
+  static QoSReservationResponse qosReserve(@NotNull QoSReserve message) throws ReservationException, DriverNotFoundException, IOException {
     ArrowheadSystem consumer = message.getConsumer();
     ArrowheadSystem provider = message.getProvider();
 

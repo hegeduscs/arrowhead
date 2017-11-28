@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.TextParseException;
 
@@ -23,8 +24,9 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
   UnicastDnsSDFactory() {
   }
 
+  @NotNull
   @Override
-  public DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains) {
+  public DnsSDDomainEnumerator createDomainEnumerator(@NotNull Collection<String> computerDomains) {
     List<Name> domains = new ArrayList<>(computerDomains.size());
     for (String domain : computerDomains) {
       try {
@@ -36,8 +38,9 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
     return new UnicastDnsSDDomainEnumerator(domains);
   }
 
+  @NotNull
   @Override
-  public DnsSDBrowser createBrowser(Collection<String> browserDomains) {
+  public DnsSDBrowser createBrowser(@NotNull Collection<String> browserDomains) {
     List<Name> domains = new ArrayList<>(browserDomains.size());
     for (String domain : browserDomains) {
       try {
@@ -49,8 +52,9 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
     return new UnicastDnsSDBrowser(domains);
   }
 
+  @NotNull
   @Override
-  public DnsSDRegistrator createRegistrator(String registeringDomain) throws DnsSDException {
+  public DnsSDRegistrator createRegistrator(@NotNull String registeringDomain) throws DnsSDException {
     try {
       return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain));
     } catch (UnknownHostException ex) {
@@ -60,8 +64,9 @@ public class UnicastDnsSDFactory extends DnsSDFactory {
     }
   }
 
+  @NotNull
   @Override
-  public DnsSDRegistrator createRegistrator(String registeringDomain, InetSocketAddress resolverSocaddr) throws DnsSDException {
+  public DnsSDRegistrator createRegistrator(@NotNull String registeringDomain, InetSocketAddress resolverSocaddr) throws DnsSDException {
     try {
       return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain), resolverSocaddr);
     } catch (UnknownHostException ex) {

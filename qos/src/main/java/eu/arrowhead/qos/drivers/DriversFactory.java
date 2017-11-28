@@ -17,10 +17,12 @@ import eu.arrowhead.common.exception.ReservationException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
 public class DriversFactory {
 
   private static DriversFactory instance;
+  @NotNull
   private Class[] paramVerificationInfo = new Class[1];
 
   private DriversFactory() {
@@ -54,7 +56,9 @@ public class DriversFactory {
    * @throws ReservationException The StreamConfiguration found an error.
    * @throws DriverNotFoundException The selected type doesnt have an assigned driver.
    */
-  public Map<String, String> generateCommands(String communicationProtocol, Map<String, String> networkConfiguration, ArrowheadSystem provider,
+  @NotNull
+  public Map<String, String> generateCommands(@NotNull String communicationProtocol, Map<String, String> networkConfiguration,
+                                              ArrowheadSystem provider,
                                               ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands,
                                               Map<String, String> requestedQoS)
       throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
@@ -76,14 +80,14 @@ public class DriversFactory {
 
   }
 
-  public Class findClass(String communicationProtocol) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+  public Class findClass(@NotNull String communicationProtocol) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     // Class Invoking
     Class cls;
     cls = Class.forName("eu.arrowhead.qos.communication.drivers." + communicationProtocol.toUpperCase());
     return cls;
   }
 
-  public Method findMethod(Class cls) throws NoSuchMethodException {
+  public Method findMethod(@NotNull Class cls) throws NoSuchMethodException {
     return cls.getDeclaredMethod("reserveQoS", paramVerificationInfo);
   }
 

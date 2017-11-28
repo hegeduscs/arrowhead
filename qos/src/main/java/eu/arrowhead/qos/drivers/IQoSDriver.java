@@ -1,5 +1,7 @@
 package eu.arrowhead.qos.drivers;
 
+import org.jetbrains.annotations.Nullable;
+
 /* This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, you can obtain one at http://mozilla.org/MPL/2.0/. 
@@ -19,6 +21,6 @@ public interface IQoSDriver {
    *
    * @return Returns the stream configuration parameters.
    */
-  ReservationResponse reserveQoS(ReservationInfo info);
+  @Nullable ReservationResponse reserveQoS(ReservationInfo info);
 
 }

@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
@@ -47,7 +49,8 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
   }
 
   //@Override
-  public ServiceData getServiceData(ServiceName service) {
+  @Nullable
+  public ServiceData getServiceData(@NotNull ServiceName service) {
     Name serviceName = service.toDnsName();
     Lookup lookup = new Lookup(serviceName, Type.SRV);
     Record[] records = lookup.run();
@@ -99,7 +102,8 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
   }
 
   //@Override
-  public Collection<ServiceName> getServiceInstances(ServiceType type) {
+  @NotNull
+  public Collection<ServiceName> getServiceInstances(@NotNull ServiceType type) {
     List<ServiceName> results = new ArrayList<>();
     for (Name domain : browserDomains) {
       results.addAll(getServiceInstances(type, domain));
@@ -107,6 +111,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
     return results;
   }
 
+  @NotNull
   public Collection<ServiceType> getServiceTypes() {
     Set<ServiceType> results = new HashSet<>();
     for (Name domain : browserDomains) {
@@ -122,6 +127,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
    *
    * @return a list of service types.
    */
+  @NotNull
   private List<ServiceType> getServiceTypes(Name domainName) {
     try {
       List<ServiceType> results = new ArrayList<>();
@@ -157,7 +163,8 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
    *
    * @return a list of service names.
    */
-  private List<ServiceName> getServiceInstances(ServiceType type, Name domainName) {
+  @NotNull
+  private List<ServiceName> getServiceInstances(@NotNull ServiceType type, Name domainName) {
     if (type.getSubtypes().isEmpty()) {
       List<ServiceName> results = new ArrayList<>();
       getServiceInstances(type.toDnsString(), domainName, results);
@@ -178,7 +185,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
    * @param domainName the domain to browse.
    * @param results a collection to put found service names into.
    */
-  private void getServiceInstances(String type, Name domainName, Collection<ServiceName> results) {
+  private void getServiceInstances(@NotNull String type, Name domainName, @NotNull Collection<ServiceName> results) {
     try {
       Name typeDomainName = Name.fromString(type, domainName);
       Lookup lookup = new Lookup(typeDomainName, Type.PTR);

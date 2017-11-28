@@ -7,16 +7,19 @@ import eu.arrowhead.common.database.OrchestrationStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class StoreService {
 
+  @Nullable
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   /**
    * This method returns the active Orchestration Store entries for a consumer.
    */
-  public static List<OrchestrationStore> getDefaultStoreEntries(ArrowheadSystem consumer) {
+  public static List<OrchestrationStore> getDefaultStoreEntries(@NotNull ArrowheadSystem consumer) {
     restrictionMap.clear();
     ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
     if (savedConsumer == null) {
@@ -31,7 +34,7 @@ public final class StoreService {
   /**
    * This method returns a list of Orchestration Store entries specified by the consumer system and the requested service.
    */
-  public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service) {
+  public static List<OrchestrationStore> getStoreEntries(@NotNull ArrowheadSystem consumer, @NotNull ArrowheadService service) {
     restrictionMap.clear();
     ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
     ArrowheadService savedService = getRequestedService(service.getServiceGroup(), service.getServiceDefinition());
@@ -70,7 +73,7 @@ public final class StoreService {
     return dm.get(ArrowheadService.class, rm);
   }
 
-  private static boolean hasMatchingInterfaces(ArrowheadService savedService, ArrowheadService givenService) {
+  private static boolean hasMatchingInterfaces(@NotNull ArrowheadService savedService, @NotNull ArrowheadService givenService) {
     for (String givenInterface : givenService.getInterfaces()) {
       for (String savedInterface : savedService.getInterfaces()) {
         if (givenInterface.equals(savedInterface)) {

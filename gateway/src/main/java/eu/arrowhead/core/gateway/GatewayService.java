@@ -19,6 +19,8 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Contains miscellaneous helper functions for the Gateway.
@@ -42,6 +44,7 @@ public class GatewayService {
    *
    * @return GatewaySession
    */
+  @NotNull
   public static GatewaySession createInsecureChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName) {
     GatewaySession gatewaySession = new GatewaySession();
     try {
@@ -72,6 +75,7 @@ public class GatewayService {
    *
    * @return channel
    */
+  @NotNull
   public static GatewaySession createSecureChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName) {
     // Get keystore and truststore files from app.properties
     String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
@@ -89,7 +93,7 @@ public class GatewayService {
       kmf.init(ks, keystorePass.toCharArray());
       tmf = TrustManagerFactory.getInstance("SunX509");
       tmf.init(tks);
-    } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
+    } catch (@NotNull NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
       e.printStackTrace();
       log.fatal("GatewayService: Initializing the keyManagerFactory/trusManagerFactory failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Initializing the keyManagerFactory/trusManagerFactory failed", e);
@@ -99,7 +103,7 @@ public class GatewayService {
     try {
       c = SSLContext.getInstance("TLSv1.1");
       c.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-    } catch (NoSuchAlgorithmException | KeyManagementException e) {
+    } catch (@NotNull NoSuchAlgorithmException | KeyManagementException e) {
       e.printStackTrace();
       log.error("GatewayService: Initializing the sslcontext failed");
     }
@@ -125,6 +129,7 @@ public class GatewayService {
     return gatewaySession;
   }
 
+  @Nullable
   public static SSLContext createSSLContext() {
     String keystorePath = GatewayMain.getProp().getProperty("keystore");
     String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
@@ -137,7 +142,7 @@ public class GatewayService {
       kmf.init(keyStore, keystorePass.toCharArray());
       sslContext = SSLContext.getInstance("TLS");
       sslContext.init(kmf.getKeyManagers(), SecurityUtils.createTrustManagers(), null);
-    } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | KeyManagementException e) {
+    } catch (@NotNull NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | KeyManagementException e) {
       e.printStackTrace();
       log.error("createSSLContext: Initializing the keyManagerFactory failed");
     }
@@ -154,7 +159,8 @@ public class GatewayService {
    * @return The initialized ConcurrentHashMap
    */
   // Integer: port; Boolean: free (true) or reserved(false)
-  static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map, int portMin, int portMax) {
+  @NotNull
+  static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(@NotNull ConcurrentHashMap<Integer, Boolean> map, int portMin, int portMax) {
     for (int i = portMin; i <= portMax; i++) {
       map.put(i, true);
     }
@@ -166,6 +172,7 @@ public class GatewayService {
    *
    * @return serverSocketPort or null if no available port found
    */
+  @Nullable
   static Integer getAvailablePort() {
     Integer serverSocketPort = null;
     // Check the port range for

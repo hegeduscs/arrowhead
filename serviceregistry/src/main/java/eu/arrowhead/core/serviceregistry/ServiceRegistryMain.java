@@ -25,12 +25,15 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Main class.
  */
 public class ServiceRegistryMain {
 
+  @Nullable
   private static Timer timer = null;
   //DNS-SD global settings
   static final String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
@@ -46,7 +49,9 @@ public class ServiceRegistryMain {
   private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
   private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
 
+  @Nullable
   private static HttpServer server = null;
+  @Nullable
   private static HttpServer secureServer = null;
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
   public static boolean DEBUG_MODE;
@@ -54,7 +59,7 @@ public class ServiceRegistryMain {
   /**
    * Main method.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(@NotNull String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     Utility.isUrlValid(BASE_URI, false);

@@ -16,10 +16,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Entity class for storing Arrowhead Services in the database. The "service_group" and service_definition" columns must be unique together.
@@ -139,7 +140,7 @@ public class ArrowheadService {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(@Nullable Object obj) {
     if (this == obj) {
       return true;
     }
@@ -167,6 +168,7 @@ public class ArrowheadService {
     return true;
   }
 
+  @org.jetbrains.annotations.NotNull
   @Override
   public String toString() {
     return "(" + serviceGroup + ":" + serviceDefinition + ")";

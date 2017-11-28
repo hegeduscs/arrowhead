@@ -20,6 +20,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Path("serviceregistry/mgmt")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -27,9 +29,11 @@ import org.apache.log4j.Logger;
 public class ServiceRegistryApi {
 
   private static final Logger log = Logger.getLogger(ServiceRegistryApi.class.getName());
+  @Nullable
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
+  @NotNull
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -114,7 +118,7 @@ public class ServiceRegistryApi {
 
   @PUT
   @Path("update")
-  public Response updateServiceURI(ServiceRegistryEntry entry) {
+  public Response updateServiceURI(@NotNull ServiceRegistryEntry entry) {
 
     if (!entry.isValidFully()) {
       log.info("updateServiceURI throws BadPayloadException");

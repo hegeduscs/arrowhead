@@ -9,13 +9,14 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
+import org.jetbrains.annotations.NotNull;
 
 @Provider
 @Priority(Priorities.USER)
 public class OutboundDebugFilter implements ContainerResponseFilter {
 
   @Override
-  public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+  public void filter(@NotNull ContainerRequestContext requestContext, @NotNull ContainerResponseContext responseContext) throws IOException {
     if (GatekeeperMain.DEBUG_MODE) {
       if (responseContext.getEntity() != null) {
         System.out.println("Response to the request at: " + requestContext.getUriInfo().getRequestUri().toString());

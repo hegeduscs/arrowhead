@@ -27,6 +27,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FTTSE implements IQoSDriver {
 
@@ -40,8 +42,9 @@ public class FTTSE implements IQoSDriver {
   public FTTSE() {
   }
 
+  @Nullable
   @Override
-  public ReservationResponse reserveQoS(ReservationInfo info) {
+  public ReservationResponse reserveQoS(@NotNull ReservationInfo info) {
     Map<String, String> networkConfiguration = info.getNetworkConfiguration();
     ArrowheadSystem provider = info.getProvider();
     ArrowheadSystem consumer = info.getConsumer();
@@ -98,7 +101,7 @@ public class FTTSE implements IQoSDriver {
   /**
    * This method will see if there are enough parameters to generate the commands.
    */
-  private boolean validateNetworkCOnfiguration(Map<String, String> networkConfiguration) {
+  private boolean validateNetworkCOnfiguration(@NotNull Map<String, String> networkConfiguration) {
     if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.
         containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration
         .containsKey(NETWORK_MTU)) {
@@ -126,7 +129,9 @@ public class FTTSE implements IQoSDriver {
    *
    * @return Returns the parameters of the stream to be configured.
    */
-  public Map<String, String> generateCommands(Integer streamID, Integer elementaryCycle, Integer mtu, Map<String, String> requestedQoS) {
+  @NotNull
+  public Map<String, String> generateCommands(@NotNull Integer streamID, Integer elementaryCycle, Integer mtu,
+                                              @Nullable Map<String, String> requestedQoS) {
     Map<String, String> commands = new HashMap<>();
     Integer period = 5;
     Integer size = calculateSize(mtu);

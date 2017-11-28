@@ -21,12 +21,14 @@ import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 class TokenGenerationService {
 
   private static final Logger log = Logger.getLogger(TokenGenerationService.class.getName());
 
-  static List<ArrowheadToken> generateTokens(TokenGenerationRequest request) {
+  @NotNull
+  static List<ArrowheadToken> generateTokens(@NotNull TokenGenerationRequest request) {
     // First get the public key for each provider
     List<PublicKey> publicKeys = getProviderPublicKeys(request.getProviders());
 
@@ -37,7 +39,7 @@ class TokenGenerationService {
     Cipher cipher;
     try {
       cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+    } catch (@NotNull NoSuchAlgorithmException | NoSuchPaddingException e) {
       log.fatal("Cipher.getInstance(String) throws exception, code needs to be changed!");
       return tokens;
     }
@@ -125,7 +127,8 @@ class TokenGenerationService {
     return tokens;
   }
 
-  private static List<PublicKey> getProviderPublicKeys(List<ArrowheadSystem> providers) {
+  @NotNull
+  private static List<PublicKey> getProviderPublicKeys(@NotNull List<ArrowheadSystem> providers) {
     HashMap<String, Object> restrictionMap = new HashMap<>();
     List<PublicKey> keys = new ArrayList<>();
 
@@ -140,7 +143,7 @@ class TokenGenerationService {
         try {
           PublicKey key = getPublicKey(retrievedProvider.getAuthenticationInfo());
           keys.add(key);
-        } catch (InvalidKeySpecException | NullPointerException e) {
+        } catch (@NotNull InvalidKeySpecException | NullPointerException e) {
           log.error("The stored auth info for the ArrowheadSystem " + provider.toString()
                         + " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
           keys.add(null);
@@ -167,7 +170,7 @@ class TokenGenerationService {
     return keys;
   }
 
-  private static PublicKey getPublicKey(String stringKey) throws InvalidKeySpecException {
+  private static PublicKey getPublicKey(@NotNull String stringKey) throws InvalidKeySpecException {
     byte[] byteKey = Base64.getDecoder().decode(stringKey);
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
     KeyFactory kf = null;

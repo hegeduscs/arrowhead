@@ -4,12 +4,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import org.jetbrains.annotations.NotNull;
 
 @Provider
 public class UnavailableServerExceptionMapper implements ExceptionMapper<UnavailableServerException> {
 
   @Override
-  public Response toResponse(UnavailableServerException ex) {
+  public Response toResponse(@NotNull UnavailableServerException ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 503, UnavailableServerException.class.toString());
     return Response.status(Status.SERVICE_UNAVAILABLE).entity(errorMessage).header("Content-type", "application/json").build();

@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Factory class for creating {@link DnsSDBrowser}, {@link DnsSDRegistrator} and {@link DnsSDDomainEnumerator} objects.
@@ -84,7 +85,7 @@ public abstract class DnsSDFactory {
    *
    * @return a new {@link DnsSDBrowser}.
    */
-  public DnsSDBrowser createBrowser(DnsSDDomainEnumerator domainEnumerator) {
+  public DnsSDBrowser createBrowser(@NotNull DnsSDDomainEnumerator domainEnumerator) {
     Collection<String> list = domainEnumerator.getBrowsingDomains();
     if (list.isEmpty()) {
       String bd = domainEnumerator.getDefaultBrowsingDomain();
@@ -120,6 +121,7 @@ public abstract class DnsSDFactory {
    *
    * @return a list of potential domain names.
    */
+  @NotNull
   public List<String> getComputerDomains() {
     return DomainUtil.getComputerDomains();
   }
@@ -155,7 +157,7 @@ public abstract class DnsSDFactory {
    *
    * @throws DnsSDException if the registrator can't be created.
    */
-  public DnsSDRegistrator createRegistrator(DnsSDDomainEnumerator domainEnumerator) throws DnsSDException {
+  public DnsSDRegistrator createRegistrator(@NotNull DnsSDDomainEnumerator domainEnumerator) throws DnsSDException {
     String registeringDomain = domainEnumerator.getDefaultRegisteringDomain();
     if (registeringDomain == null) {
       Collection<String> domains = domainEnumerator.getRegisteringDomains();

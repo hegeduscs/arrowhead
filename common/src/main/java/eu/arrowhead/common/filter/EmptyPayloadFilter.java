@@ -6,12 +6,13 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+import org.jetbrains.annotations.NotNull;
 
 @Provider
 public class EmptyPayloadFilter implements ContainerRequestFilter {
 
   @Override
-  public void filter(ContainerRequestContext requestContext) throws IOException {
+  public void filter(@NotNull ContainerRequestContext requestContext) throws IOException {
     String method = requestContext.getMethod();
     if (method.equals("POST") || method.equals("PUT")) {
       int contentLength = requestContext.getLength();

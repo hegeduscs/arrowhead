@@ -59,7 +59,8 @@ final class OrchestratorDriver {
    *
    * @throws DataNotFoundException if the Service Registry response list is empty
    */
-  static List<ServiceRegistryEntry> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
+  static List<ServiceRegistryEntry> queryServiceRegistry(@org.jetbrains.annotations.NotNull ArrowheadService service, boolean metadataSearch,
+                                                         boolean pingProviders) {
     // Compiling the URI and the request payload
     String srUri = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path("query").toString();
     ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch);
@@ -97,6 +98,7 @@ final class OrchestratorDriver {
    *
    * @throws DataNotFoundException if none of the provider <tt>ArrowheadSystem</tt>s are authorized for this servicing
    */
+  @org.jetbrains.annotations.NotNull
   static Set<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, Set<ArrowheadSystem> providerSet) {
     // Compiling the URI and the request payload
     String uri = UriBuilder.fromPath(Utility.getAuthorizationUri()).path("intracloud").toString();
@@ -135,7 +137,9 @@ final class OrchestratorDriver {
    *
    * @throws DataNotFoundException if none of the <tt>ServiceRegistryEntry</tt>s from the given list contain a preferred <tt>ArrowheadSystem</tt>
    */
-  static List<ServiceRegistryEntry> removeNonPreferred(List<ServiceRegistryEntry> srList, Set<ArrowheadSystem> preferredLocalProviders) {
+  @org.jetbrains.annotations.NotNull
+  static List<ServiceRegistryEntry> removeNonPreferred(@org.jetbrains.annotations.NotNull List<ServiceRegistryEntry> srList,
+                                                       @org.jetbrains.annotations.NotNull Set<ArrowheadSystem> preferredLocalProviders) {
     // Using a simple nested for-loop for the filtering
     List<ServiceRegistryEntry> preferredList = new ArrayList<>();
     for (ArrowheadSystem system : preferredLocalProviders) {
@@ -175,7 +179,8 @@ final class OrchestratorDriver {
    * @return the chosen ServiceRegistryEntry object, containing the necessary <tt>ArrowheadSystem</tt> and <tt>String</tt> serviceUri information to
    *     contact the provider
    */
-  static ServiceRegistryEntry intraCloudMatchmaking(List<ServiceRegistryEntry> srList, Set<ArrowheadSystem> preferredLocalProviders) {
+  static ServiceRegistryEntry intraCloudMatchmaking(@org.jetbrains.annotations.NotNull List<ServiceRegistryEntry> srList,
+                                                    @org.jetbrains.annotations.NotNull Set<ArrowheadSystem> preferredLocalProviders) {
     // If there are no preferred providers, just return the first ServiceRegistryEntry
     if (preferredLocalProviders.isEmpty()) {
       log.info("intraCloudMatchmaking: no preferred local providers given, returning first ServiceRegistryEntry");
@@ -212,7 +217,8 @@ final class OrchestratorDriver {
    *
    * @throws DataNotFoundException if the Store query yielded no results
    */
-  static List<OrchestrationStore> queryOrchestrationStore(@NotNull ArrowheadSystem consumer, @Nullable ArrowheadService service) {
+  static List<OrchestrationStore> queryOrchestrationStore(@org.jetbrains.annotations.NotNull @NotNull ArrowheadSystem consumer,
+                                                          @Nullable ArrowheadService service) {
     List<OrchestrationStore> retrievedList;
 
     //If the service is null, we return all the default store entries.
@@ -254,7 +260,9 @@ final class OrchestratorDriver {
    *
    * @return the list of <tt>OrchestrationStore</tt> objects which remained from the query after the cross-check
    */
-  static List<OrchestrationStore> crossCheckStoreEntries(ServiceRequestForm srf, List<OrchestrationStore> entryList) {
+  @org.jetbrains.annotations.NotNull
+  static List<OrchestrationStore> crossCheckStoreEntries(@org.jetbrains.annotations.NotNull ServiceRequestForm srf,
+                                                         @org.jetbrains.annotations.NotNull List<OrchestrationStore> entryList) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
     Set<ArrowheadSystem> providerSystemsFromSR = new HashSet<>();
     Set<ArrowheadSystem> providerSystemsFromAuth;
@@ -374,7 +382,8 @@ final class OrchestratorDriver {
    *
    * @throws DataNotFoundException if there is no preferred provider Cloud available while <i>onlyPreferred</i> is set to true
    */
-  static ArrowheadCloud interCloudMatchmaking(GSDResult result, List<ArrowheadCloud> preferredClouds, boolean onlyPreferred) {
+  static ArrowheadCloud interCloudMatchmaking(@org.jetbrains.annotations.NotNull GSDResult result,
+                                              @org.jetbrains.annotations.NotNull List<ArrowheadCloud> preferredClouds, boolean onlyPreferred) {
     // Extracting the valid ArrowheadClouds from the GSDResult
     List<ArrowheadCloud> partnerClouds = new ArrayList<>();
     for (GSDAnswer answer : result.getResponse()) {
@@ -420,7 +429,7 @@ final class OrchestratorDriver {
    *
    * @throws DataNotFoundException if the ICN failed with the remote cloud for some reason
    */
-  static ICNResult doInterCloudNegotiations(ServiceRequestForm srf, ArrowheadCloud targetCloud) {
+  static ICNResult doInterCloudNegotiations(@org.jetbrains.annotations.NotNull ServiceRequestForm srf, ArrowheadCloud targetCloud) {
     // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
     List<ArrowheadSystem> preferredSystems = new ArrayList<>();
     for (PreferredProvider provider : srf.getPreferredProviders()) {

@@ -1,5 +1,7 @@
 package eu.arrowhead.common.messages;
 
+import org.jetbrains.annotations.NotNull;
+
 public class RawTokenInfo {
 
   private String s;
@@ -33,6 +35,7 @@ public class RawTokenInfo {
     this.e = e;
   }
 
+  @NotNull
   @Override
   public String toString() {
     return "ClassPojo [s = " + s + ", c = " + c + ", e = " + e + "]";

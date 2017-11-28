@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This is what the Orchestrator Core System receives from Arrowhead Systems trying to request services.
@@ -20,6 +21,7 @@ public class ServiceRequestForm {
   private ArrowheadSystem requesterSystem;
   private ArrowheadCloud requesterCloud;
   private ArrowheadService requestedService;
+  @NotNull
   private Map<String, Boolean> orchestrationFlags = new HashMap<>();
   private List<PreferredProvider> preferredProviders = new ArrayList<>();
   private Map<String, String> requestedQoS = new HashMap<>();
@@ -33,7 +35,7 @@ public class ServiceRequestForm {
     }
   }
 
-  private ServiceRequestForm(Builder builder) {
+  private ServiceRequestForm(@NotNull Builder builder) {
     requesterSystem = builder.requesterSystem;
     requesterCloud = builder.requesterCloud;
     requestedService = builder.requestedService;
@@ -67,11 +69,12 @@ public class ServiceRequestForm {
     this.requestedService = requestedService;
   }
 
+  @NotNull
   public Map<String, Boolean> getOrchestrationFlags() {
     return orchestrationFlags;
   }
 
-  public void setOrchestrationFlags(Map<String, Boolean> orchestrationFlags) {
+  public void setOrchestrationFlags(@NotNull Map<String, Boolean> orchestrationFlags) {
     for (String key : flagKeys) {
       if (!orchestrationFlags.containsKey(key)) {
         orchestrationFlags.put(key, false);
@@ -126,6 +129,7 @@ public class ServiceRequestForm {
     // Optional parameters
     private ArrowheadCloud requesterCloud;
     private ArrowheadService requestedService;
+    @NotNull
     private Map<String, Boolean> orchestrationFlags = new HashMap<>();
     private List<PreferredProvider> preferredProviders = new ArrayList<>();
     private Map<String, String> requestedQoS = new HashMap<>();
@@ -135,17 +139,20 @@ public class ServiceRequestForm {
       this.requesterSystem = requesterSystem;
     }
 
+    @NotNull
     public Builder requesterCloud(ArrowheadCloud cloud) {
       requesterCloud = cloud;
       return this;
     }
 
+    @NotNull
     public Builder requestedService(ArrowheadService service) {
       requestedService = service;
       return this;
     }
 
-    public Builder orchestrationFlags(Map<String, Boolean> flags) {
+    @NotNull
+    public Builder orchestrationFlags(@NotNull Map<String, Boolean> flags) {
       for (String key : flagKeys) {
         if (!flags.containsKey(key)) {
           flags.put(key, false);
@@ -155,21 +162,25 @@ public class ServiceRequestForm {
       return this;
     }
 
+    @NotNull
     public Builder preferredProviders(List<PreferredProvider> providers) {
       preferredProviders = providers;
       return this;
     }
 
+    @NotNull
     public Builder requestedQoS(Map<String, String> qos) {
       requestedQoS = qos;
       return this;
     }
 
+    @NotNull
     public Builder commands(Map<String, String> commands) {
       this.commands = commands;
       return this;
     }
 
+    @NotNull
     public ServiceRequestForm build() {
       return new ServiceRequestForm(this);
     }

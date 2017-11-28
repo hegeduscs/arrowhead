@@ -33,6 +33,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This is the REST resource for the Gatekeeper Core System.
@@ -43,8 +45,10 @@ import org.apache.log4j.Logger;
 public class GatekeeperOutboundResource {
 
   private static final Logger log = Logger.getLogger(GatekeeperOutboundResource.class.getName());
+  @Nullable
   private static final DatabaseManager dm = DatabaseManager.getInstance();
 
+  @NotNull
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -59,7 +63,7 @@ public class GatekeeperOutboundResource {
    */
   @PUT
   @Path("init_gsd")
-  public Response GSDRequest(GSDRequestForm requestForm) {
+  public Response GSDRequest(@NotNull GSDRequestForm requestForm) {
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
       throw new BadPayloadException("init_gsd received bad payload: requestedService is missing or it is not valid.");
@@ -119,7 +123,7 @@ public class GatekeeperOutboundResource {
    */
   @PUT
   @Path("init_icn")
-  public Response ICNRequest(ICNRequestForm requestForm) {
+  public Response ICNRequest(@NotNull ICNRequestForm requestForm) {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
       throw new BadPayloadException("init_icn received bad payload: missing/incomplete ICNRequestForm.");

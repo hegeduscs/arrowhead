@@ -28,6 +28,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Path("authorization/mgmt")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,9 +37,11 @@ import org.apache.log4j.Logger;
 public class AuthorizationApi {
 
   private static final Logger log = Logger.getLogger(AuthorizationApi.class.getName());
+  @Nullable
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
+  @NotNull
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -68,6 +72,7 @@ public class AuthorizationApi {
    *
    * @return List<ArrowheadService>
    */
+  @NotNull
   @GET
   @Path("intracloud/systemgroup/{systemGroup}/systemname/{systemName}/services")
   public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
@@ -158,7 +163,7 @@ public class AuthorizationApi {
    */
   @POST
   @Path("intracloud")
-  public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
+  public Response addSystemToAuthorized(@NotNull IntraCloudAuthEntry entry) {
 
     if (!entry.isPayloadUsable()) {
       log.info("AuthorizationApi:addSystemToAuthorized throws BadPayloadException.");
@@ -294,6 +299,7 @@ public class AuthorizationApi {
    *
    * @return List<ArrowheadService>
    */
+  @NotNull
   @GET
   @Path("intercloud/operator/{operator}/cloudname/{cloudName}/services")
   public Set<ArrowheadService> getCloudServices(@PathParam("operator") String operator, @PathParam("cloudName") String cloudName) {
@@ -373,7 +379,7 @@ public class AuthorizationApi {
    */
   @POST
   @Path("intercloud")
-  public Response addCloudToAuthorized(InterCloudAuthEntry entry) {
+  public Response addCloudToAuthorized(@NotNull InterCloudAuthEntry entry) {
 
     if (!entry.isPayloadUsable()) {
       log.info("AuthorizationApi:addCloudToAuthorized throws BadPayloadException.");

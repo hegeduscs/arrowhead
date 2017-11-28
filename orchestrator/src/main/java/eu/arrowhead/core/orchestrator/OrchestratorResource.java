@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * REST resource for the Orchestrator Core System.
@@ -33,6 +34,7 @@ public class OrchestratorResource {
   /**
    * Simple test method to see if the http server where this resource is registered works or not.
    */
+  @NotNull
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -46,7 +48,7 @@ public class OrchestratorResource {
    * @return OrchestrationResponse
    */
   @POST
-  public Response orchestrationProcess(ServiceRequestForm srf, @Context ContainerRequestContext requestContext) {
+  public Response orchestrationProcess(@NotNull ServiceRequestForm srf, @NotNull @Context ContainerRequestContext requestContext) {
     if (!srf.isValid()) {
       log.error("orchestrationProcess BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields. See the documentation of "
@@ -89,7 +91,7 @@ public class OrchestratorResource {
   @GET
   @Path("{systemGroup}/{systemName}")
   public Response storeOrchestrationProcess(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
-                                            @Context HttpServletRequest request) {
+                                            @NotNull @Context HttpServletRequest request) {
     ArrowheadSystem requesterSystem = new ArrowheadSystem(systemGroup, systemName, request.getRemoteAddr(), 0, null);
     log.info("Received a GET Store orchestration from: " + request.getRemoteAddr() + requesterSystem.toString());
 

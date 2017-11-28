@@ -25,12 +25,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.jetbrains.annotations.NotNull;
 
 @Path("qos")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class QoSResource {
 
+  @NotNull
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {

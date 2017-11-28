@@ -19,6 +19,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Path("gateway/mgmt")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -26,9 +28,11 @@ import org.apache.log4j.Logger;
 public class GatewayApi {
 
   private static final Logger log = Logger.getLogger(GatewayApi.class.getName());
+  @Nullable
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
+  @NotNull
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -64,7 +68,7 @@ public class GatewayApi {
 
   @POST
   @Path("brokers")
-  public Response addBrokers(List<Broker> brokerList) {
+  public Response addBrokers(@NotNull List<Broker> brokerList) {
 
     List<Broker> savedBrokers = new ArrayList<>();
     for (Broker broker : brokerList) {
@@ -88,7 +92,7 @@ public class GatewayApi {
 
   @PUT
   @Path("brokers")
-  public Response updateBroker(Broker broker) {
+  public Response updateBroker(@NotNull Broker broker) {
 
     if (!broker.isValid()) {
       log.info("updateBroker throws BadPayloadException");

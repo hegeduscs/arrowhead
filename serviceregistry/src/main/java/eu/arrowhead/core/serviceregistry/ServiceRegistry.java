@@ -16,12 +16,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 class ServiceRegistry {
 
   private static final Logger log = Logger.getLogger(ServiceRegistry.class.getName());
 
-  static boolean register(ServiceRegistryEntry entry) throws DnsSDException {
+  static boolean register(@NotNull ServiceRegistryEntry entry) throws DnsSDException {
 
     log.info("Entered SR register method.");
     //creating service name and type based on Arrowhead data
@@ -72,7 +73,7 @@ class ServiceRegistry {
     return allRegistered;
   }
 
-  static boolean unRegister(ServiceRegistryEntry entry) {
+  static boolean unRegister(@NotNull ServiceRegistryEntry entry) {
 
     log.info("Entered SR unregister method.");
 
@@ -112,7 +113,8 @@ class ServiceRegistry {
     return allRemoved;
   }
 
-  static ServiceQueryResult provideServices(ServiceQueryForm queryForm) {
+  @NotNull
+  static ServiceQueryResult provideServices(@NotNull ServiceQueryForm queryForm) {
 
     //creating DNS browser
     DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);
@@ -164,6 +166,7 @@ class ServiceRegistry {
     return sqr;
   }
 
+  @NotNull
   static ServiceQueryResult provideAllServices() throws DnsSDException {
     //Preparing DNS-SD
     DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);

@@ -19,10 +19,12 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class SecureServerSocketThread extends Thread {
 
   private int port;
+  @Nullable
   private SSLServerSocket sslServerSocket = null;
   private ConnectToConsumerRequest connectionRequest;
   private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());

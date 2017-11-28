@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
@@ -44,22 +46,27 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
     logger.log(Level.INFO, "Created DNS-SD DomainEnumerator for computer domains: {0}", computerDomains);
   }
 
+  @NotNull
   public Collection<String> getBrowsingDomains() {
     return getDomains(B_DNSSD_UDP);
   }
 
+  @Nullable
   public String getDefaultBrowsingDomain() {
     return getDomain(DB_DNSSD_UDP);
   }
 
+  @Nullable
   public String getDefaultRegisteringDomain() {
     return getDomain(DR_DNSSD_UDP);
   }
 
+  @NotNull
   public Collection<String> getLegacyBrowsingDomains() {
     return getDomains(LB_DNSSD_UDP);
   }
 
+  @NotNull
   public Collection<String> getRegisteringDomains() {
     return getDomains(R_DNSSD_UDP);
   }
@@ -71,7 +78,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    *
    * @return a domain name, the first one found.
    */
-  private String getDomain(Name rrName) {
+  private String getDomain(@NotNull Name rrName) {
     for (Name domain : computerDomains) {
       List<String> domains = getDomains(rrName, domain);
       if (!domains.isEmpty()) {
@@ -88,7 +95,8 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    *
    * @return a collection of domain names.
    */
-  private Collection<String> getDomains(Name rrName) {
+  @NotNull
+  private Collection<String> getDomains(@NotNull Name rrName) {
     List<String> results = new ArrayList<>();
     for (Name domain : computerDomains) {
       results.addAll(getDomains(rrName, domain));
@@ -103,7 +111,8 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    *
    * @return a collection of domain names.
    */
-  private List<String> getDomains(Name rrName, Name domainName) {
+  @NotNull
+  private List<String> getDomains(@NotNull Name rrName, Name domainName) {
     try {
       List<String> results = new ArrayList<>();
       Lookup lookup = new Lookup(Name.concatenate(rrName, domainName), Type.PTR);

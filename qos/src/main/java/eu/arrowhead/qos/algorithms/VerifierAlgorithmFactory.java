@@ -16,10 +16,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
 public class VerifierAlgorithmFactory {
 
   private static VerifierAlgorithmFactory instance;
+  @NotNull
   private Class[] paramVerificationInfo = new Class[1];
 
   private VerifierAlgorithmFactory() {
@@ -37,7 +39,8 @@ public class VerifierAlgorithmFactory {
   // Cause I think using interfaces and enums would be more clean and faster at runtime
   // Or if we keep this reflection pattern, than catch and handle the exceptions here in this method!
   //note: communicationProtocol == network.getNetworkType :/
-  public QoSVerifierResponse verify(String communicationProtocol, Map<String, String> providerDeviceCapabilities,
+  @NotNull
+  public QoSVerifierResponse verify(@NotNull String communicationProtocol, Map<String, String> providerDeviceCapabilities,
                                     Map<String, String> consumerDeviceCapabilities, List<ResourceReservation> providerDeviceQoSReservations,
                                     List<ResourceReservation> consumerDeviceQoSReservations, Map<String, String> requestedQoS,
                                     Map<String, String> commands)

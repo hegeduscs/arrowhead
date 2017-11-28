@@ -28,11 +28,16 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class AuthorizationMain {
 
+  @Nullable
   static PrivateKey privateKey = null;
+  @Nullable
   private static HttpServer server = null;
+  @Nullable
   private static HttpServer secureServer = null;
   private static final Logger log = Logger.getLogger(AuthorizationMain.class.getName());
   private static Properties prop;
@@ -40,7 +45,7 @@ public class AuthorizationMain {
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8445/");
   public static boolean DEBUG_MODE;
 
-  public static void main(String[] args) throws IOException {
+  public static void main(@NotNull String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     Utility.isUrlValid(BASE_URI, false);

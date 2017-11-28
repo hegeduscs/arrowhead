@@ -7,8 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * JPA entity class for storing <tt>CoreSystem</tt> information in the database. The <i>system_name</i> column must be unique.

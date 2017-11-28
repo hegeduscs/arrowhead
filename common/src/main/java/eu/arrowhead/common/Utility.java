@@ -31,11 +31,13 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class Utility {
 
   private static final Logger log = Logger.getLogger(Utility.class.getName());
+  @Nullable
   private static SSLContext sslContext = null;
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
@@ -53,7 +55,7 @@ public final class Utility {
     sslContext = context;
   }
 
-  public static <T> Response sendRequest(String uri, String method, T payload) {
+  public static <T> Response sendRequest(@NotNull String uri, @NotNull String method, T payload) {
     log.info("Sending " + method + " request to: " + uri);
 
     boolean isSecure = false;
@@ -131,7 +133,7 @@ public final class Utility {
     return response;
   }
 
-  public static String getUri(String address, int port, String serviceUri, boolean isSecure) {
+  public static String getUri(@Nullable String address, int port, @Nullable String serviceUri, boolean isSecure) {
     if (address == null || serviceUri == null) {
       log.error("Address and serviceUri can not be null (Utility:getUri throws NPE)");
       throw new NullPointerException("Address and serviceUri can not be null (Utility:getUri throws NPE)");
@@ -228,6 +230,7 @@ public final class Utility {
     return getUri(api.getAddress(), api.getPort(), api.getServiceURI(), api.getIsSecure());
   }
 
+  @NotNull
   public static List<String> getNeighborCloudURIs() {
     List<NeighborCloud> cloudList = new ArrayList<>();
     cloudList.addAll(dm.getAll(NeighborCloud.class, null));
@@ -265,14 +268,15 @@ public final class Utility {
     return coreSystem;
   }
 
-  public static String stripEndSlash(String uri) {
+  @Nullable
+  public static String stripEndSlash(@Nullable String uri) {
     if (uri != null && uri.endsWith("/")) {
       return uri.substring(0, uri.length() - 1);
     }
     return uri;
   }
 
-  public static void isUrlValid(String url, boolean isSecure) {
+  public static void isUrlValid(@NotNull String url, boolean isSecure) {
     String errorMessage = " is not a valid URL to start a HTTP server! Please fix the URL in the properties file.";
     try {
       URI uri = new URI(url);
@@ -293,6 +297,7 @@ public final class Utility {
 
   }
 
+  @Nullable
   public static String toPrettyJson(@Nullable String jsonString, @Nullable Object obj) {
     if (jsonString != null) {
       JsonParser parser = new JsonParser();

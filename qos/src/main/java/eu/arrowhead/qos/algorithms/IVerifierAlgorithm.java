@@ -10,6 +10,8 @@
 */
 package eu.arrowhead.qos.algorithms;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface IVerifierAlgorithm {
 
   /**
@@ -19,6 +21,6 @@ public interface IVerifierAlgorithm {
    *
    * @return Returns true or false with a rejetction motivation.
    */
-  VerificationResponse verifyQoS(VerificationInfo info);
+  @Nullable VerificationResponse verifyQoS(VerificationInfo info);
 
 }

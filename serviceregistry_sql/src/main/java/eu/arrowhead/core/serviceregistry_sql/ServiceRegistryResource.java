@@ -23,6 +23,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Path("serviceregistry")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -31,8 +33,10 @@ public class ServiceRegistryResource {
 
   private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
+  @Nullable
   static final DatabaseManager dm = DatabaseManager.getInstance();
 
+  @NotNull
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -41,7 +45,7 @@ public class ServiceRegistryResource {
 
   @POST
   @Path("register")
-  public Response registerService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
+  public Response registerService(@NotNull ServiceRegistryEntry entry, @NotNull @Context ContainerRequestContext requestContext) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValidFully()) {
       log.error("registerService throws BadPayloadException");
@@ -91,7 +95,7 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("query")
-  public Response queryRegistry(ServiceQueryForm queryForm) {
+  public Response queryRegistry(@NotNull ServiceQueryForm queryForm) {
     if (!queryForm.isValid()) {
       log.error("queryRegistry throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceQueryForm has missing/incomplete mandatory field(s).");
@@ -125,7 +129,7 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("remove")
-  public Response removeService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
+  public Response removeService(@NotNull ServiceRegistryEntry entry, @NotNull @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValidFully()) {
       log.error("removeService throws BadPayloadException");

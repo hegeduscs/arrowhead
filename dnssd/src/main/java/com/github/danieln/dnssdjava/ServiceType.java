@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Identifiers for service types. A DNS-SD service type consists of the application protocol name prepended with an underscore and the transport
@@ -20,6 +22,7 @@ public class ServiceType {
 
   private final String type;
   private final Transport transport;
+  @NotNull
   private final List<String> subtypes;
 
   /**
@@ -50,7 +53,7 @@ public class ServiceType {
    * @param baseType the base service type.
    * @param subtypes the subtypes of the service type, if any.
    */
-  private ServiceType(ServiceType baseType, String... subtypes) {
+  private ServiceType(@NotNull ServiceType baseType, String... subtypes) {
     this.type = baseType.type;
     this.transport = baseType.transport;
     this.subtypes = Collections.unmodifiableList(Arrays.asList(subtypes));
@@ -66,7 +69,8 @@ public class ServiceType {
    *
    * @throws IllegalArgumentException if the string cannot be parsed as a ServiceType.
    */
-  public static ServiceType valueOf(String s) {
+  @NotNull
+  public static ServiceType valueOf(@NotNull String s) {
     int i = s.indexOf(',');
     String domain = (i < 0) ? s : s.substring(0, i);
     String sublist = (i < 0) ? null : s.substring(i + 1);
@@ -98,6 +102,7 @@ public class ServiceType {
    *
    * @return a new ServiceType based on this ServiceType but with the given subtypes.
    */
+  @NotNull
   public ServiceType withSubtypes(String... subtypes) {
     return new ServiceType(this, subtypes);
   }
@@ -111,6 +116,7 @@ public class ServiceType {
    *
    * @return a new ServiceType based on this ServiceType but with the given subtype.
    */
+  @NotNull
   public ServiceType withSubtype(String subtype) {
     return new ServiceType(this, subtype);
   }
@@ -121,6 +127,7 @@ public class ServiceType {
    *
    * @return the base ServiceType without subtypes.
    */
+  @NotNull
   public ServiceType baseType() {
     if (subtypes.isEmpty()) {
       return this;
@@ -152,6 +159,7 @@ public class ServiceType {
    *
    * @return the list of subtypes.
    */
+  @NotNull
   public List<String> getSubtypes() {
     return subtypes;
   }
@@ -161,7 +169,7 @@ public class ServiceType {
    *
    * @return A string of the form "{type}.{transport}".
    */
-  String toDnsString() {
+  @NotNull String toDnsString() {
     return type + "." + transport;
   }
 
@@ -170,7 +178,7 @@ public class ServiceType {
    *
    * @return A list of strings of the form "{subtype}._sub.{type}.{transport}".
    */
-  List<String> toDnsStringsWithSubtype() {
+  @NotNull List<String> toDnsStringsWithSubtype() {
     List<String> list = new ArrayList<>(subtypes.size());
     for (String subtype : subtypes) {
       list.add(subtype + "._sub." + type + "." + transport);
@@ -187,7 +195,7 @@ public class ServiceType {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(@Nullable Object obj) {
     if (obj == null) {
       return false;
     }
@@ -206,6 +214,7 @@ public class ServiceType {
    *
    * @return a string of the format "{type}.{transport}[,{subtype}][,{subtype}][...]".
    */
+  @NotNull
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -235,6 +244,7 @@ public class ServiceType {
      *
      * @return the corresponding Transport constant.
      */
+    @NotNull
     static Transport fromLabel(String label) {
       for (Transport t : values()) {
         if (t.getLabel().equalsIgnoreCase(label)) {

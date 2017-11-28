@@ -13,6 +13,7 @@ package eu.arrowhead.qos.algorithms.implementations;
 import eu.arrowhead.qos.algorithms.IVerifierAlgorithm;
 import eu.arrowhead.qos.algorithms.VerificationInfo;
 import eu.arrowhead.qos.algorithms.VerificationResponse;
+import org.jetbrains.annotations.Nullable;
 
 public class FTTSE implements IVerifierAlgorithm {
 
@@ -22,6 +23,7 @@ public class FTTSE implements IVerifierAlgorithm {
   public FTTSE() {
   }
 
+  @Nullable
   @Override
   public VerificationResponse verifyQoS(VerificationInfo info) {
     return new VerificationResponse(true, null);
