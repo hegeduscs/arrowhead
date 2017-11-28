@@ -34,10 +34,13 @@ public class OrchestrationStoreQuery {
   }
 
   public boolean isValid() {
+    if (requesterSystem == null && requestedService == null) {
+      return false;
+    }
     if (requestedService != null && !requestedService.isValid()) {
       return false;
     }
-    return requesterSystem != null && requesterSystem.isValid();
+    return requesterSystem == null || requesterSystem.isValid();
   }
 
 }

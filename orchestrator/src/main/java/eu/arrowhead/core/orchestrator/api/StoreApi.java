@@ -115,7 +115,6 @@ public class StoreApi {
    *
    * @throws BadPayloadException, DataNotFoundException
    */
-  //TODO we need a service only option too here
   @PUT
   public Response getStoreEntries(@NotNull OrchestrationStoreQuery query) {
 
@@ -127,6 +126,8 @@ public class StoreApi {
     List<OrchestrationStore> store = new ArrayList<>();
     if (query.getRequestedService() == null) {
       StoreService.getDefaultStoreEntries(query.getRequesterSystem());
+    } else if (query.getRequesterSystem() == null) {
+      StoreService.getStoreEntries(query.getRequestedService());
     } else {
       StoreService.getStoreEntries(query.getRequesterSystem(), query.getRequestedService());
     }

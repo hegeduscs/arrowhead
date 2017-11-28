@@ -53,6 +53,20 @@ public final class StoreService {
     return dm.getAll(OrchestrationStore.class, restrictionMap);
   }
 
+  public static List<OrchestrationStore> getStoreEntries(@NotNull ArrowheadService service) {
+    restrictionMap.clear();
+    ArrowheadService savedService = getRequestedService(service.getServiceGroup(), service.getServiceDefinition());
+
+    if (!savedService.getInterfaces().isEmpty()) {
+      if (!hasMatchingInterfaces(savedService, service)) {
+        return new ArrayList<>();
+      }
+    }
+
+    restrictionMap.put("service", savedService);
+    return dm.getAll(OrchestrationStore.class, restrictionMap);
+  }
+
   /**
    * This private method returns an ArrowheadSystem from the database.
    */
@@ -74,6 +88,9 @@ public final class StoreService {
   }
 
   private static boolean hasMatchingInterfaces(@NotNull ArrowheadService savedService, @NotNull ArrowheadService givenService) {
+    if (givenService.getInterfaces().isEmpty()) {
+      return true;
+    }
     for (String givenInterface : givenService.getInterfaces()) {
       for (String savedInterface : savedService.getInterfaces()) {
         if (givenInterface.equals(savedInterface)) {
