@@ -4,12 +4,12 @@
   <parent>
     <artifactId>arrowhead</artifactId>
     <groupId>eu.arrowhead</groupId>
-    <version>M2</version>
+    <version>M3</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>serviceregistry_sql</artifactId>
-  <version>M2</version>
+  <version>M3</version>
   <packaging>jar</packaging>
   <properties>
     <maven.compiler.target>1.8</maven.compiler.target>
