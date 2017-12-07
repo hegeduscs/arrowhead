@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import org.apache.log4j.Logger;
 
 public class InsecureSocketThread extends Thread {
@@ -26,33 +27,39 @@ public class InsecureSocketThread extends Thread {
   }
 
   public void run() {
+
     try {
       Channel channel = gatewaySession.getChannel();
       Socket providerSocket = new Socket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
+      providerSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = providerSocket.getInputStream();
       OutputStream outProvider = providerSocket.getOutputStream();
-      GetResponse controlMessage = channel.basicGet(controlQueueName, false);
-      while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-        GetResponse message = channel.basicGet(queueName, false);
-        if (message != null) {
 
-          outProvider.write(message.getBody());
-
-          // get the answer from Provider
-          byte[] inputFromProvider = new byte[1024];
-          byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
-          System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
-          channel.basicPublish("", queueName, null, inputFromProviderFinal);
-          channel.basicPublish("", controlQueueName, null, "close".getBytes());
+      try {
+        GetResponse controlMessage = channel.basicGet(controlQueueName, false);
+        while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
+          GetResponse message = channel.basicGet(queueName, false);
+          if (message != null) {
+            outProvider.write(message.getBody());
+            // get the answer from Provider
+            byte[] inputFromProvider = new byte[1024];
+            byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
+            System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
+            channel.basicPublish("", queueName, null, inputFromProviderFinal);
+            channel.basicPublish("", controlQueueName, null, "close".getBytes());
+          }
+          controlMessage = channel.basicGet(  controlQueueName, false);
         }
-        controlMessage = channel.basicGet(controlQueueName, false);
+      } catch (SocketException e) {
+        providerSocket.close();
+        channel.close();
+        gatewaySession.getConnection().close();
       }
-      // Close sockets and the connection
+
+      providerSocket.close();
       channel.close();
       gatewaySession.getConnection().close();
-      if (providerSocket != null) {
-        providerSocket.close();
-      }
+
     } catch (IOException e) {
       e.printStackTrace();
       log.error("ConnectToProvider(insecure): I/O exception occured");

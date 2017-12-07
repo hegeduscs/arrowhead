@@ -10,70 +10,98 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import org.apache.log4j.Logger;
 
 public class InsecureServerSocketThread extends Thread {
 
-  private int port;
-  private ServerSocket serverSocket;
-  private ConnectToConsumerRequest connectionRequest;
-  private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
+	private int port;
+	private ServerSocket serverSocket;
+	private ConnectToConsumerRequest connectionRequest;
+	private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
+	private GatewaySession gatewaySession;
 
-  public InsecureServerSocketThread(int port, ConnectToConsumerRequest connectionRequest) {
-    this.port = port;
-    this.connectionRequest = connectionRequest;
-  }
+	public InsecureServerSocketThread(int port, ConnectToConsumerRequest connectionRequest) {
+		this.port = port;
+		this.connectionRequest = connectionRequest;
+		this.gatewaySession = null;
+	}
 
-  //TODO narrower try-catches + maybe create 1 (or 2 with secure version) method for the while loop part which has 4 different copies in 4 methods
-  public void run() {
+	// TODO narrower try-catches + maybe create 1 (or 2 with secure version) method
+	// for the while loop
+	// part which has 4 different copies in 4 methods
+	public void run() {
 
-    try {
-      serverSocket = new ServerSocket(port);
-      System.out.println("Insecure serverSocket is now running at port: " + port);
-    } catch (IOException e) {
-      e.printStackTrace();
-      log.error("Creating insecure ServerSocket failed");
-    }
+		try {
+			serverSocket = new ServerSocket(port);
+			System.out.println("Insecure serverSocket is now running at port: " + port);
+			log.info("Insecure serverSocket is now running at port: " + port);
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.error("Creating insecure ServerSocket failed");
+		}
 
-    try {
-      // Create socket for Consumer
-      Socket consumerSocket = serverSocket.accept();
-      InputStream inConsumer = consumerSocket.getInputStream();
-      OutputStream outConsumer = consumerSocket.getOutputStream();
+		try {
+			// Create socket for Consumer
+			serverSocket.setSoTimeout(connectionRequest.getTimeout());
+			// TODO: If the timeout expires and the operation would continue to block,
+			// java.io.InterruptedIOException is raised.
+			// The Socket is not closed in this case.
+			Socket consumerSocket = serverSocket.accept();
 
-      // Get the request from the Consumer
-      byte[] inputFromConsumer = new byte[1024];
-      byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
-      System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
+			InputStream inConsumer = consumerSocket.getInputStream();
+			OutputStream outConsumer = consumerSocket.getOutputStream();
+			log.info("Create socket for Consumer");
+			Channel channel = gatewaySession.getChannel();
 
-      // Create a channel
-      GatewaySession gatewaySession = GatewayService
-          .createInsecureChannel(connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), connectionRequest.getQueueName(),
-                                 connectionRequest.getControlQueueName());
-      Channel channel = gatewaySession.getChannel();
+			try {
+				// Get the request from the Consumer
+				byte[] inputFromConsumer = new byte[1024];
+				byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
+				System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 
-      channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
+				System.out.println("Consumer's request final:");
+				System.out.println(new String(inputFromConsumerFinal));
 
-      // Get the response and the control messages
-      GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
-      while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-        GetResponse message = channel.basicGet(connectionRequest.getQueueName(), false);
-        if (message != null) {
-          outConsumer.write(message.getBody());
-        }
-        controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
-      }
+				// Create a channel
+				GatewaySession gatewaySession = GatewayService.createInsecureChannel(connectionRequest.getBrokerName(),
+						connectionRequest.getBrokerPort(), connectionRequest.getQueueName(),
+						connectionRequest.getControlQueueName());
+				channel = gatewaySession.getChannel();
 
-      // Close sockets and the connection
-      channel.close();
-      gatewaySession.getConnection().close();
-      consumerSocket.close();
-      serverSocket.close();
+				channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
+				log.info("Publishing the request to the queue");
 
-    } catch (IOException e) {
-      e.printStackTrace();
-      log.error("Creating insecure clientSocket failed");
-    }
-  }
+				// Get the response and the control messages
+				GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
+				while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
+					GetResponse message = channel.basicGet(connectionRequest.getQueueName(), false);
+					if (message != null) {
+						outConsumer.write(message.getBody());
+						System.out.println("Broker response: ");
+						System.out.println(new String(message.getBody()));
+					}
+					controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
+				}
+
+			} catch (SocketException e) {
+				GatewayService.makeServerSocketFree(port);
+				channel.close();
+				gatewaySession.getConnection().close();
+				consumerSocket.close();
+				serverSocket.close();
+			}
+
+			GatewayService.makeServerSocketFree(port);
+			channel.close();
+			gatewaySession.getConnection().close();
+			consumerSocket.close();
+			serverSocket.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.error("Creating insecure clientSocket failed");
+		}
+	}
 
 }
