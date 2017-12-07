@@ -27,11 +27,13 @@ public class SecureServerSocketThread extends Thread {
   @Nullable
   private SSLServerSocket sslServerSocket = null;
   private ConnectToConsumerRequest connectionRequest;
-  private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
+  private GatewaySession gatewaySession;
+  private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName()); 
 
-  public SecureServerSocketThread(int port, ConnectToConsumerRequest connectionRequest) {
+  public SecureServerSocketThread(GatewaySession gatewaySession, int port, ConnectToConsumerRequest connectionRequest) {
     this.port = port;
     this.connectionRequest = connectionRequest;
+    this.gatewaySession = gatewaySession;
   }
 
   //TODO narrower try-catches
@@ -77,9 +79,7 @@ public class SecureServerSocketThread extends Thread {
       byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
       System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 
-      GatewaySession gatewaySession = GatewayService
-          .createSecureChannel(connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), connectionRequest.getQueueName(),
-                               connectionRequest.getControlQueueName());
+      
       Channel channel = gatewaySession.getChannel();
 
       channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);

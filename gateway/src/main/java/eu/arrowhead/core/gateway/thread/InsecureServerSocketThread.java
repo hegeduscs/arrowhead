@@ -21,10 +21,11 @@ public class InsecureServerSocketThread extends Thread {
 	private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
 	private GatewaySession gatewaySession;
 
-	public InsecureServerSocketThread(int port, ConnectToConsumerRequest connectionRequest) {
+	public InsecureServerSocketThread(GatewaySession gatewaySession, int port,
+			ConnectToConsumerRequest connectionRequest) {
 		this.port = port;
 		this.connectionRequest = connectionRequest;
-		this.gatewaySession = null;
+		this.gatewaySession = gatewaySession;
 	}
 
 	// TODO narrower try-catches + maybe create 1 (or 2 with secure version) method
