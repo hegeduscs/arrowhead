@@ -31,6 +31,7 @@ public class InsecureSocketThread extends Thread {
     try {
       Channel channel = gatewaySession.getChannel();
       Socket providerSocket = new Socket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
+      log.info("Create socket for Provider");
       providerSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = providerSocket.getInputStream();
       OutputStream outProvider = providerSocket.getOutputStream();
@@ -46,7 +47,7 @@ public class InsecureSocketThread extends Thread {
             byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
             System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
             channel.basicPublish("", queueName.concat("resp"), null, inputFromProviderFinal);
-            channel.basicPublish("", controlQueueName, null, "close".getBytes());
+            channel.basicPublish("", controlQueueName.concat("resp"), null, "close".getBytes());
           }
           controlMessage = channel.basicGet(controlQueueName, false);
         }

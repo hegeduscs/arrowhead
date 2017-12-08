@@ -53,6 +53,7 @@ public class GatewayService {
       channel.queueDeclare(queueName, false, false, false, null);
       channel.queueDeclare(queueName.concat("resp"), false, false, false, null);
       channel.queueDeclare(controlQueueName, false, false, false, null);
+      channel.queueDeclare(controlQueueName.concat("resp"), false, false, false, null);
       gatewaySession.setConnection(connection);
       gatewaySession.setChannel(channel);
 
@@ -117,6 +118,7 @@ public class GatewayService {
       channel.queueDeclare(queueName, false, true, true, null);
       channel.queueDeclare( queueName.concat("resp"), false, true, true, null);
       channel.queueDeclare(controlQueueName, false, false, false, null);
+      channel.queueDeclare(controlQueueName.concat("resp"), false, false, false, null);
       gatewaySession.setConnection(connection);
       gatewaySession.setChannel(channel);
     } catch (IOException e) {

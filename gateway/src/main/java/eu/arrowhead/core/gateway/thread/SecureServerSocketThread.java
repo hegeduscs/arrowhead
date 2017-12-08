@@ -85,15 +85,15 @@ public class SecureServerSocketThread extends Thread {
       channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
 
       // Get the response and the control messages
-      GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
+      GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
       while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-        GetResponse message = channel.basicGet(connectionRequest.getQueueName(), false);
+        GetResponse message = channel.basicGet(connectionRequest.getQueueName().concat("resp"), false);
         if (message == null) {
           System.out.println("No message retrieved");
         } else {
           outConsumer.write(message.getBody());
         }
-        controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
+        controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
       }
 
       // Close sockets and the connection
