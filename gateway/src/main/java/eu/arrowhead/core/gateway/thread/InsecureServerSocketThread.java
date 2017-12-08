@@ -52,7 +52,7 @@ public class InsecureServerSocketThread extends Thread {
 
 			InputStream inConsumer = consumerSocket.getInputStream();
 			OutputStream outConsumer = consumerSocket.getOutputStream();
-			log.info("Create socket for Consumer");
+			log.info("Create socket for Consumer Time:" + System.currentTimeMillis());
 			Channel channel = gatewaySession.getChannel();
 
 			try {
@@ -71,16 +71,17 @@ public class InsecureServerSocketThread extends Thread {
 				channel = gatewaySession.getChannel();
 
 				channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
-				log.info("Publishing the request to the queue");
+				log.info("Publishing the request to the queue; Time:" + System.currentTimeMillis());
 
 				// Get the response and the control messages
 				GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
 				while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-					GetResponse message = channel.basicGet(connectionRequest.getQueueName(), false);
+					GetResponse message = channel.basicGet(connectionRequest.getQueueName().concat("resp"), false);
 					if (message != null) {
 						outConsumer.write(message.getBody());
 						System.out.println("Broker response: ");
 						System.out.println(new String(message.getBody()));
+						GatewayService.makeServerSocketFree(port);
 					}
 					controlMessage = channel.basicGet(connectionRequest.getControlQueueName(), false);
 				}
@@ -91,6 +92,7 @@ public class InsecureServerSocketThread extends Thread {
 				gatewaySession.getConnection().close();
 				consumerSocket.close();
 				serverSocket.close();
+				log.info("ConsumerSocket closed; Time:" + System.currentTimeMillis() );
 			}
 
 			GatewayService.makeServerSocketFree(port);
@@ -98,6 +100,7 @@ public class InsecureServerSocketThread extends Thread {
 			gatewaySession.getConnection().close();
 			consumerSocket.close();
 			serverSocket.close();
+			log.info("ConsumerSocket closed; Time:" + System.currentTimeMillis() );
 
 		} catch (IOException e) {
 			e.printStackTrace();

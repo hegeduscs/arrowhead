@@ -45,20 +45,22 @@ public class InsecureSocketThread extends Thread {
             byte[] inputFromProvider = new byte[1024];
             byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
             System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
-            channel.basicPublish("", queueName, null, inputFromProviderFinal);
+            channel.basicPublish("", queueName.concat("resp"), null, inputFromProviderFinal);
             channel.basicPublish("", controlQueueName, null, "close".getBytes());
           }
-          controlMessage = channel.basicGet(  controlQueueName, false);
+          controlMessage = channel.basicGet(controlQueueName, false);
         }
       } catch (SocketException e) {
         providerSocket.close();
         channel.close();
         gatewaySession.getConnection().close();
+        log.info("ProviderSocket closed");
       }
 
       providerSocket.close();
       channel.close();
       gatewaySession.getConnection().close();
+      log.info("ProviderSocket closed");
 
     } catch (IOException e) {
       e.printStackTrace();

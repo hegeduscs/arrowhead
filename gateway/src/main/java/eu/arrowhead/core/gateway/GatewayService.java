@@ -51,11 +51,12 @@ public class GatewayService {
       Connection connection = factory.newConnection();
       Channel channel = connection.createChannel();
       channel.queueDeclare(queueName, false, false, false, null);
+      channel.queueDeclare(queueName.concat("resp"), false, false, false, null);
       channel.queueDeclare(controlQueueName, false, false, false, null);
       gatewaySession.setConnection(connection);
       gatewaySession.setChannel(channel);
 
-    } catch (IOException e) {
+    } catch (IOException | NullPointerException e) {
       e.printStackTrace();
       log.error("GatewayService: Creating the insecure channel failed");
     }
@@ -114,6 +115,7 @@ public class GatewayService {
       Connection connection = factory.newConnection();
       Channel channel = connection.createChannel();
       channel.queueDeclare(queueName, false, true, true, null);
+      channel.queueDeclare( queueName.concat("resp"), false, true, true, null);
       channel.queueDeclare(controlQueueName, false, false, false, null);
       gatewaySession.setConnection(connection);
       gatewaySession.setChannel(channel);
