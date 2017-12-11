@@ -60,7 +60,7 @@ public class ServiceRegistryResource {
         log.error("Provider system fields and cert common name do not match! Service registering denied.");
         throw new AuthenticationException(
             "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
-      }
+      } 
     }
 
     restrictionMap.put("serviceGroup", entry.getProvidedService().getServiceGroup());
