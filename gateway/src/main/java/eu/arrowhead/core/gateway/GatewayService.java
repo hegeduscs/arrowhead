@@ -3,6 +3,7 @@ package eu.arrowhead.core.gateway;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class GatewayService {
 
     } catch (IOException | NullPointerException e) {
       e.printStackTrace();
-      log.error("GatewayService: Creating the insecure channel failed");
+      log.error("Creating the insecure channel failed");
     }
     return gatewaySession;
   }
@@ -92,24 +93,23 @@ public class GatewayService {
       tmf = TrustManagerFactory.getInstance("SunX509");
       tmf.init(tks);
     } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
-      e.printStackTrace();
-      log.fatal("GatewayService: Initializing the keyManagerFactory/trusManagerFactory failed: " + e.toString() + " " + e.getMessage());
-      throw new ServiceConfigurationError("Initializing the keyManagerFactory/trusManagerFactory failed", e);
+      log.fatal("Initializing the keyManagerFactory/trusManagerFactory failed: " + e.toString() + " " + e.getMessage());
+      throw new ServiceConfigurationError("Initializing the keyManagerFactory/trustManagerFactory failed", e);
     }
 
-    SSLContext c = null;
+    SSLContext ctx = null;
     try {
-      c = SSLContext.getInstance("TLSv1.1");
-      c.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+      ctx = SSLContext.getInstance("TLSv1.1");
+      ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
     } catch (NoSuchAlgorithmException | KeyManagementException e) {
-      e.printStackTrace();
-      log.error("GatewayService: Initializing the sslcontext failed");
+      log.fatal("Initializing the SSLContext failed");
+      throw new ServiceConfigurationError("Initializing the SSLContext failed", e);
     }
 
     ConnectionFactory factory = new ConnectionFactory();
     factory.setHost(brokerHost);
     factory.setPort(brokerPort); // secure port: 5671
-    factory.useSslProtocol(c);
+    factory.useSslProtocol(ctx);
 
     GatewaySession gatewaySession = new GatewaySession();
     try {
@@ -123,7 +123,7 @@ public class GatewayService {
       gatewaySession.setChannel(channel);
     } catch (IOException e) {
       e.printStackTrace();
-      log.error("GatewayService: Creating the secure channel failed");
+      log.error("Creating the secure channel with the broker failed");
     }
 
     return gatewaySession;
@@ -141,9 +141,12 @@ public class GatewayService {
       kmf.init(keyStore, keystorePass.toCharArray());
       sslContext = SSLContext.getInstance("TLS");
       sslContext.init(kmf.getKeyManagers(), SecurityUtils.createTrustManagers(), null);
-    } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | KeyManagementException e) {
-      e.printStackTrace();
-      log.error("createSSLContext: Initializing the keyManagerFactory failed");
+    } catch (NoSuchAlgorithmException | KeyManagementException e) {
+      log.fatal("createSSLContext: Initializing the keyManagerFactory failed");
+      throw new ServiceConfigurationError("Initializing the keyManagerFactory failed for the SSLContext failed", e);
+    } catch (KeyStoreException | UnrecoverableKeyException e) {
+      log.error("createSSLContext: keystore malformed, factory init failed");
+      throw new AuthenticationException("Keystore is malformed, or the password is invalid", e);
     }
     return sslContext;
   }

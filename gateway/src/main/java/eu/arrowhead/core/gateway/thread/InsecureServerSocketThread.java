@@ -61,7 +61,7 @@ public class InsecureServerSocketThread extends Thread {
 				byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
 				System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 
-				System.out.println("Consumer's request final:");
+        System.out.println("Consumer's final request:");
 				System.out.println(new String(inputFromConsumerFinal));
 
 				// Create a channel
@@ -81,6 +81,7 @@ public class InsecureServerSocketThread extends Thread {
 						outConsumer.write(message.getBody());
 						System.out.println("Broker response: ");
 						System.out.println(new String(message.getBody()));
+            // NOTE ez mé?
 						GatewayService.makeServerSocketFree(port);
 					}
 					controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
