@@ -43,6 +43,7 @@ public class ArrowheadCloud {
   @Column(name = "authentication_info")
   private String authenticationInfo;
 
+  @Column(name = "is_secure")
   private boolean isSecure;
 
   public ArrowheadCloud() {
