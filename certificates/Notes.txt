@@ -34,18 +34,21 @@ How to create Arrowhead-compliant certificates
 ---------------
 How to extract crt and key files from jks files:
 
-1. Export the .der file
+1. Get the alias from .jks file
+keytool -v -list -keystore <FileName>.jks
+
+2. Export the .der file
 keytool -export -alias sample -file sample.der -keystore my.jks
 
-2.Convert the .der file to unencrypted PEM (crt file)
+3.Convert the .der file to unencrypted PEM (crt file)
 openssl x509 -inform der -in sample.der -out sample.crt
 
-3.Export the .p12 file
+4.Export the .p12 file
 keytool -importkeystore -srckeystore my.jks -destkeystore keystore.p12 -deststoretype PKCS12 -destkeypass pass
 
-4.Convert the .p12 file to unencrypted PEM (key file)
+5.Convert the .p12 file to unencrypted PEM (key file)
 openssl pkcs12 -in keystore.p12 -nodes -nocerts -out server.key
-
+ 
 --------------
 How to export certificate public key in Base64 with the ArrowheadProvider client skeleton:
 1. Edit the app.properties with the proper client and trust store keystores
