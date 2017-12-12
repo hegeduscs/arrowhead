@@ -103,7 +103,7 @@ public final class Utility {
       throw new UnavailableServerException("Could not get any response from: " + uri);
     }
 
-  //The response body has to be extracted before the stream closes
+    //The response body has to be extracted before the stream closes
     String errorMessageBody = toPrettyJson(null, response.getEntity());
     // If the response status code does not start with 2 the request was not successful
     if (!(response.getStatusInfo().getFamily() == Family.SUCCESSFUL)) {
@@ -113,7 +113,7 @@ public final class Utility {
       } catch (RuntimeException e) {
         log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
         log.info("Request failed, response status code: " + response.getStatus());
-        log.info("Request failed, response body: " + toPrettyJson(null, errorMessageBody)); 
+        log.info("Request failed, response body: " + toPrettyJson(null, errorMessageBody));
         throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
       }
       if (errorMessage == null) {
@@ -232,12 +232,12 @@ public final class Utility {
 
   @NotNull
   public static List<String> getNeighborCloudURIs() {
-    List<NeighborCloud> cloudList = new ArrayList<>();
-    cloudList.addAll(dm.getAll(NeighborCloud.class, null));
+    List<NeighborCloud> cloudList = new ArrayList<>(dm.getAll(NeighborCloud.class, null));
 
     List<String> uriList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
-      uriList.add(getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), false));
+      uriList.add(
+          getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), cloud.getCloud().isSecure()));
     }
 
     return uriList;
@@ -313,12 +313,12 @@ public final class Utility {
   // IMPORTANT: only use this function with RuntimeExceptions that have a public String constructor
   /*
    * private static <T extends RuntimeException> void throwExceptionAgain(Class<T>
-	 * exceptionType, String message) { try { throw
-	 * exceptionType.getConstructor(String.class).newInstance(message); } //
-	 * Exception is thrown if the given exception type does not have an accessible
-	 * constructor which accepts a String argument. catch (InstantiationException |
-	 * IllegalAccessException | IllegalArgumentException | InvocationTargetException
-	 * | NoSuchMethodException | SecurityException e) { e.printStackTrace(); } }
-	 */
+   * exceptionType, String message) { try { throw
+   * exceptionType.getConstructor(String.class).newInstance(message); } //
+   * Exception is thrown if the given exception type does not have an accessible
+   * constructor which accepts a String argument. catch (InstantiationException |
+   * IllegalAccessException | IllegalArgumentException | InvocationTargetException
+   * | NoSuchMethodException | SecurityException e) { e.printStackTrace(); } }
+   */
 
 }
