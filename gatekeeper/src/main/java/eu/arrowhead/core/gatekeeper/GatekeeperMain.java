@@ -103,7 +103,6 @@ public class GatekeeperMain {
         shutdown();
       }));
     } else {
-      System.out.println("Press enter to shutdown Gatekeeper Server(s)...");
       System.out.println("Type \"stop\" to shutdown Gatekeeper Server(s)...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       String input = "";
@@ -138,7 +137,6 @@ public class GatekeeperMain {
 
   private static HttpServer startSecureServer(final String url, final boolean inbound) throws IOException {
     log.info("Starting server at: " + url);
-    System.out.println("Starting secure server at: " + url);
 
     final ResourceConfig config = new ResourceConfig();
     if (inbound) {
