@@ -49,6 +49,7 @@ public class InsecureServerSocketThread extends Thread {
 			// java.io.InterruptedIOException is raised.
 			// The Socket is not closed in this case.
 			Socket consumerSocket = serverSocket.accept();
+			consumerSocket.setSoTimeout(connectionRequest.getTimeout());
 
 			InputStream inConsumer = consumerSocket.getInputStream();
 			OutputStream outConsumer = consumerSocket.getOutputStream();
@@ -61,33 +62,28 @@ public class InsecureServerSocketThread extends Thread {
 				byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
 				System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 
-        System.out.println("Consumer's final request:");
+				System.out.println("Consumer's final request:");
 				System.out.println(new String(inputFromConsumerFinal));
-
-				// Create a channel
-				GatewaySession gatewaySession = GatewayService.createInsecureChannel(connectionRequest.getBrokerName(),
-						connectionRequest.getBrokerPort(), connectionRequest.getQueueName(),
-						connectionRequest.getControlQueueName());
-				channel = gatewaySession.getChannel();
 
 				channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
 				log.info("Publishing the request to the queue");
 
 				// Get the response and the control messages
-				GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
+				GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"),
+						false);
 				while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
 					GetResponse message = channel.basicGet(connectionRequest.getQueueName().concat("resp"), false);
 					if (message != null) {
 						outConsumer.write(message.getBody());
 						System.out.println("Broker response: ");
 						System.out.println(new String(message.getBody()));
-            // NOTE ez mé?
-						GatewayService.makeServerSocketFree(port);
 					}
 					controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
 				}
 
 			} catch (SocketException e) {
+				log.error("Socket closed by remote partner");
+			} finally {
 				GatewayService.makeServerSocketFree(port);
 				channel.close();
 				gatewaySession.getConnection().close();
@@ -95,13 +91,6 @@ public class InsecureServerSocketThread extends Thread {
 				serverSocket.close();
 				log.info("ConsumerSocket closed");
 			}
-
-			GatewayService.makeServerSocketFree(port);
-			channel.close();
-			gatewaySession.getConnection().close();
-			consumerSocket.close();
-			serverSocket.close();
-			log.info("ConsumerSocket closed; Time:" + System.currentTimeMillis() );
 
 		} catch (IOException e) {
 			e.printStackTrace();

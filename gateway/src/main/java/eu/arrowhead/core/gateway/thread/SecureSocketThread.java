@@ -8,6 +8,8 @@ import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -34,6 +36,7 @@ public class SecureSocketThread extends Thread {
       SSLContext sslContext = GatewayService.createSSLContext();
       SSLSocketFactory clientFactory = sslContext.getSocketFactory();
       SSLSocket sslProviderSocket = null;
+      try {
       GetResponse controlMessage = channel.basicGet(controlQueueName, false);
       while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
         GetResponse message = channel.basicGet(queueName, false);
@@ -54,12 +57,17 @@ public class SecureSocketThread extends Thread {
         }
         controlMessage = channel.basicGet(controlQueueName.concat("resp"), false);
       }
-      // Close sockets and the connection
-      channel.close();
-      gatewaySession.getConnection().close();
-      if (sslProviderSocket != null) {
-        sslProviderSocket.close();
+      } catch (SocketException e) {
+    	  log.error("Socket closed by remote partner");
+      } finally {
+    	// Close sockets and the connection
+          channel.close();
+          gatewaySession.getConnection().close();
+          if (sslProviderSocket != null) {
+            sslProviderSocket.close();
+          }
       }
+      
     } catch (IOException e) {
       e.printStackTrace();
       log.error("ConnectToProvider(secure): I/O exception occured");

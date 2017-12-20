@@ -11,6 +11,7 @@ import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
@@ -23,89 +24,93 @@ import org.jetbrains.annotations.Nullable;
 
 public class SecureServerSocketThread extends Thread {
 
-  private int port;
-  @Nullable
-  private SSLServerSocket sslServerSocket = null;
-  private ConnectToConsumerRequest connectionRequest;
-  private GatewaySession gatewaySession;
-  private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName()); 
+	private int port;
+	@Nullable
+	private SSLServerSocket sslServerSocket = null;
+	private ConnectToConsumerRequest connectionRequest;
+	private GatewaySession gatewaySession;
+	private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
 
-  public SecureServerSocketThread(GatewaySession gatewaySession, int port, ConnectToConsumerRequest connectionRequest) {
-    this.port = port;
-    this.connectionRequest = connectionRequest;
-    this.gatewaySession = gatewaySession;
-  }
+	public SecureServerSocketThread(GatewaySession gatewaySession, int port,
+			ConnectToConsumerRequest connectionRequest) {
+		this.port = port;
+		this.connectionRequest = connectionRequest;
+		this.gatewaySession = gatewaySession;
+	}
 
-  //TODO narrower try-catches
-  public void run() {
-    SSLContext sslContext = GatewayService.createSSLContext();
-    // TODO: use the timeout
-    int timeout = connectionRequest.getTimeout();
+	// TODO narrower try-catches
+	public void run() {
+		SSLContext sslContext = GatewayService.createSSLContext();
+		// Socket for server to listen at.
+		SSLServerSocketFactory serverFactory = sslContext.getServerSocketFactory();
+		try {
+			sslServerSocket = (SSLServerSocket) serverFactory.createServerSocket(port);
+			sslServerSocket.setNeedClientAuth(true);
+			sslServerSocket.setSoTimeout(connectionRequest.getTimeout());
+			System.out.println("Secure serverSocket is now running at port: " + port + "\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.error("Creating secure serverSocket failed.");
+		}
 
-    // Socket for server to listen at.
-    SSLServerSocketFactory serverFactory = sslContext.getServerSocketFactory();
-    try {
-      sslServerSocket = (SSLServerSocket) serverFactory.createServerSocket(port);
-      sslServerSocket.setNeedClientAuth(true);
-      System.out.println("Secure serverSocket is now running at port: " + port + "\n");
-    } catch (IOException e) {
-      e.printStackTrace();
-      log.error("Creating secure serverSocket failed.");
-    }
+		try {
+			// Accept a client connection once Server receives one.
+			SSLSocket sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
+			SSLSession consumerSession = sslConsumerSocket.getSession();
+			String consumerIPFromCert = consumerSession.getPeerHost();
 
-    try {
-      // Accept a client connection once Server receives one.
-      SSLSocket sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
-      SSLSession consumerSession = sslConsumerSocket.getSession();
-      String consumerIPFromCert = consumerSession.getPeerHost();
+			Certificate[] serverCerts = consumerSession.getPeerCertificates();
+			X509Certificate cert = (X509Certificate) serverCerts[0];
+			String subjectName = cert.getSubjectDN().getName();
+			String consumerCNFromCert = SecurityUtils.getCertCNFromSubject(subjectName);
 
-      Certificate[] serverCerts = consumerSession.getPeerCertificates();
-      X509Certificate cert = (X509Certificate) serverCerts[0];
-      String subjectName = cert.getSubjectDN().getName();
-      String consumerCNFromCert = SecurityUtils.getCertCNFromSubject(subjectName);
+			// FIXME systemName != consumerCN (use new util function in arrowheadsystem)
+			if (!connectionRequest.getConsumer().getSystemName().equals(consumerCNFromCert)
+					| !connectionRequest.getConsumer().getAddress().equals(consumerIPFromCert)) {
+				GatewayMain.portAllocationMap.replace(port, false, true);
+				log.error("SecureServerThread: Consumer CNs or IPs not equal");
+				throw new AuthenticationException("SecureServerThread: Consumer CNs or IPs not equal");
+			}
+			
+			Channel channel = gatewaySession.getChannel();
 
-      //FIXME systemName != consumerCN (use new util function in arrowheadsystem)
-      if (!connectionRequest.getConsumer().getSystemName().equals(consumerCNFromCert) | !connectionRequest.getConsumer().getAddress()
-          .equals(consumerIPFromCert)) {
-        GatewayMain.portAllocationMap.replace(port, false, true);
-        log.error("SecureServerThread: Consumer CNs or IPs not equal");
-        throw new AuthenticationException("SecureServerThread: Consumer CNs or IPs not equal");
-      }
-      InputStream inConsumer = sslConsumerSocket.getInputStream();
-      OutputStream outConsumer = sslConsumerSocket.getOutputStream();
+			try {
+				InputStream inConsumer = sslConsumerSocket.getInputStream();
+				OutputStream outConsumer = sslConsumerSocket.getOutputStream();
 
-      // Get the request from the Consumer
-      byte[] inputFromConsumer = new byte[1024];
-      byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
-      System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
+				// Get the request from the Consumer
+				byte[] inputFromConsumer = new byte[1024];
+				byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
+				System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 
-      
-      Channel channel = gatewaySession.getChannel();
+				channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
 
-      channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
+				// Get the response and the control messages
+				GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"),
+						false);
+				while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
+					GetResponse message = channel.basicGet(connectionRequest.getQueueName().concat("resp"), false);
+					if (message == null) {
+						System.out.println("No message retrieved");
+					} else {
+						outConsumer.write(message.getBody());
+					}
+					controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
+				}
+			} catch (SocketException e) {
+				log.error("Socket closed by remote partner");
+			} finally {
+				// Close sockets and the connection
+				sslConsumerSocket.close();
+				sslServerSocket.close();
+				channel.close();
+				gatewaySession.getConnection().close();
+			}
 
-      // Get the response and the control messages
-      GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
-      while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-        GetResponse message = channel.basicGet(connectionRequest.getQueueName().concat("resp"), false);
-        if (message == null) {
-          System.out.println("No message retrieved");
-        } else {
-          outConsumer.write(message.getBody());
-        }
-        controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
-      }
-
-      // Close sockets and the connection
-      sslConsumerSocket.close();
-      sslServerSocket.close();
-      channel.close();
-      gatewaySession.getConnection().close();
-
-    } catch (IOException e) {
-      e.printStackTrace();
-      log.error("SecureServerThread: Creating secure clientSocket failed.");
-    }
-  }
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.error("SecureServerThread: Creating secure clientSocket failed.");
+		}
+	}
 
 }
