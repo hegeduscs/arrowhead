@@ -1,7 +1,11 @@
 package eu.arrowhead.core.gateway.thread;
 
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.GetResponse;
+import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.security.SecurityUtils;
@@ -68,10 +72,10 @@ public class SecureServerSocketThread extends Thread {
 			if (!connectionRequest.getConsumer().getSystemName().equals(consumerCNFromCert)
 					| !connectionRequest.getConsumer().getAddress().equals(consumerIPFromCert)) {
 				GatewayMain.portAllocationMap.replace(port, false, true);
-				log.error("SecureServerThread: Consumer CNs or IPs not equal");
-				throw new AuthenticationException("SecureServerThread: Consumer CNs or IPs not equal");
+				log.error("SecureServerThread: Consumer CNs or IPs are not equal");
+				throw new AuthenticationException("SecureServerThread: Consumer CNs or IPs are not equal");
 			}
-			
+
 			Channel channel = gatewaySession.getChannel();
 
 			try {
@@ -85,28 +89,54 @@ public class SecureServerSocketThread extends Thread {
 
 				channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
 
-				// Get the response and the control messages
-				GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"),
-						false);
-				while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-					GetResponse message = channel.basicGet(connectionRequest.getQueueName().concat("resp"), false);
-					if (message == null) {
-						System.out.println("No message retrieved");
-					} else {
-						outConsumer.write(message.getBody());
+				Consumer consumer = new DefaultConsumer(channel) {
+					@Override
+					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
+							byte[] body) throws IOException {
+						outConsumer.write(body);
+						System.out.println("Broker response: ");
+						System.out.println(new String(body));
 					}
-					controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
-				}
+
+				};
+
+				channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
+
+				Consumer controlConsumer = new DefaultConsumer(channel) {
+					@Override
+					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
+							byte[] body) throws IOException {
+						if (new String(body).equals("close")) {
+							GatewayService.makeServerSocketFree(port);
+							// Close sockets and the connection
+							try {
+								channel.close();
+								gatewaySession.getConnection().close();
+							} catch (AlreadyClosedException e) {
+								log.info("Channel already closed by Broker");
+							}
+							sslConsumerSocket.close();
+							sslServerSocket.close();
+							log.info("ConsumerSocket closed");
+						}
+					}
+				};
+				channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);
+
 			} catch (SocketException e) {
 				log.error("Socket closed by remote partner");
-			} finally {
+				GatewayService.makeServerSocketFree(port);
 				// Close sockets and the connection
+				try {
+					channel.close();
+					gatewaySession.getConnection().close();
+				} catch (AlreadyClosedException error) {
+					log.info("Channel already closed by Broker");
+				}
 				sslConsumerSocket.close();
 				sslServerSocket.close();
-				channel.close();
-				gatewaySession.getConnection().close();
+				log.info("ConsumerSocket closed");
 			}
-
 		} catch (IOException e) {
 			e.printStackTrace();
 			log.error("SecureServerThread: Creating secure clientSocket failed.");

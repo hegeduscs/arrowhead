@@ -1,7 +1,11 @@
 package eu.arrowhead.core.gateway.thread;
 
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.GetResponse;
+import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.core.gateway.GatewayService;
 import eu.arrowhead.core.gateway.model.GatewaySession;
@@ -45,9 +49,6 @@ public class InsecureServerSocketThread extends Thread {
 		try {
 			// Create socket for Consumer
 			serverSocket.setSoTimeout(connectionRequest.getTimeout());
-			// TODO: If the timeout expires and the operation would continue to block,
-			// java.io.InterruptedIOException is raised.
-			// The Socket is not closed in this case.
 			Socket consumerSocket = serverSocket.accept();
 			consumerSocket.setSoTimeout(connectionRequest.getTimeout());
 
@@ -68,25 +69,48 @@ public class InsecureServerSocketThread extends Thread {
 				channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
 				log.info("Publishing the request to the queue");
 
-				// Get the response and the control messages
-				GetResponse controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"),
-						false);
-				while (controlMessage == null || !(new String(controlMessage.getBody()).equals("close"))) {
-					GetResponse message = channel.basicGet(connectionRequest.getQueueName().concat("resp"), false);
-					if (message != null) {
-						outConsumer.write(message.getBody());
+				Consumer consumer = new DefaultConsumer(channel) {
+					@Override
+					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
+							byte[] body) throws IOException {
+						outConsumer.write(body);
 						System.out.println("Broker response: ");
-						System.out.println(new String(message.getBody()));
+						System.out.println(new String(body));
 					}
-					controlMessage = channel.basicGet(connectionRequest.getControlQueueName().concat("resp"), false);
-				}
+
+				};
+
+				channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
+
+				Consumer controlConsumer = new DefaultConsumer(channel) {
+					@Override
+					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
+							byte[] body) throws IOException {
+						if (new String(body).equals("close")) {
+							GatewayService.makeServerSocketFree(port);
+							try {
+								channel.close();
+								gatewaySession.getConnection().close();
+							} catch (AlreadyClosedException e) {
+								log.info("Channel already closed by Broker");
+							}
+							consumerSocket.close();
+							serverSocket.close();
+							log.info("ConsumerSocket closed");
+						}
+					}
+				};
+				channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);
 
 			} catch (SocketException e) {
 				log.error("Socket closed by remote partner");
-			} finally {
 				GatewayService.makeServerSocketFree(port);
-				channel.close();
-				gatewaySession.getConnection().close();
+				try {
+					channel.close();
+					gatewaySession.getConnection().close();
+				} catch (AlreadyClosedException error) {
+					log.info("Channel already closed by Broker");
+				}
 				consumerSocket.close();
 				serverSocket.close();
 				log.info("ConsumerSocket closed");

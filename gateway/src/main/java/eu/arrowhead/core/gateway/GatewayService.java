@@ -52,9 +52,9 @@ public class GatewayService {
       Connection connection = factory.newConnection();
       Channel channel = connection.createChannel();
       channel.queueDeclare(queueName, false, false, false, null);
-      channel.queueDeclare(queueName.concat("resp"), false, false, false, null);
+      channel.queueDeclare(queueName.concat("_resp"), false, false, false, null);
       channel.queueDeclare(controlQueueName, false, false, false, null);
-      channel.queueDeclare(controlQueueName.concat("resp"), false, false, false, null);
+      channel.queueDeclare(controlQueueName.concat("_resp"), false, false, false, null);
       gatewaySession.setConnection(connection);
       gatewaySession.setChannel(channel);
 
