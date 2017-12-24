@@ -116,7 +116,7 @@ public class GatewayService {
       Connection connection = factory.newConnection();
       Channel channel = connection.createChannel();
       channel.queueDeclare(queueName, false, true, true, null);
-      channel.queueDeclare( queueName.concat("resp"), false, true, true, null);
+      channel.queueDeclare(queueName.concat("resp"), false, true, true, null);
       channel.queueDeclare(controlQueueName, false, false, false, null);
       channel.queueDeclare(controlQueueName.concat("resp"), false, false, false, null);
       gatewaySession.setConnection(connection);
@@ -192,7 +192,7 @@ public class GatewayService {
     }
     return serverSocketPort;
   }
-  
+
   public static void makeServerSocketFree(Integer serverSocketPort) {
     GatewayMain.portAllocationMap.put(serverSocketPort, true);
   }

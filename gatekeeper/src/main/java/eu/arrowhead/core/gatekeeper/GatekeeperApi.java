@@ -21,8 +21,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Path("gatekeeper/mgmt")
 @Produces(MediaType.APPLICATION_JSON)
@@ -30,11 +28,11 @@ import org.jetbrains.annotations.Nullable;
 public class GatekeeperApi {
 
   private static final Logger log = Logger.getLogger(GatekeeperApi.class.getName());
-  @Nullable
+
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
-  @NotNull
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -95,7 +93,7 @@ public class GatekeeperApi {
    */
   @POST
   @Path("neighborhood")
-  public Response addNeighborClouds(@NotNull List<NeighborCloud> neighborCloudList) {
+  public Response addNeighborClouds(List<NeighborCloud> neighborCloudList) {
 
     List<NeighborCloud> savedNeighborClouds = new ArrayList<>();
     for (NeighborCloud nc : neighborCloudList) {
@@ -132,7 +130,7 @@ public class GatekeeperApi {
    */
   @PUT
   @Path("neighborhood")
-  public Response updateNeighborCloud(@NotNull NeighborCloud nc) {
+  public Response updateNeighborCloud(NeighborCloud nc) {
 
     if (!nc.isValid()) {
       log.info("GatekeeperApi:updateNeighborCloud throws BadPayloadException");
@@ -243,7 +241,7 @@ public class GatekeeperApi {
 
   @POST
   @Path("brokers")
-  public Response addBrokers(@NotNull List<Broker> brokerList) {
+  public Response addBrokers(List<Broker> brokerList) {
 
     List<Broker> savedBrokers = new ArrayList<>();
     for (Broker broker : brokerList) {
@@ -267,7 +265,7 @@ public class GatekeeperApi {
 
   @PUT
   @Path("brokers")
-  public Response updateBroker(@NotNull Broker broker) {
+  public Response updateBroker(Broker broker) {
 
     if (!broker.isValid()) {
       log.info("updateBroker throws BadPayloadException");

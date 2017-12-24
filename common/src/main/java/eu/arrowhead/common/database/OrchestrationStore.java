@@ -22,7 +22,6 @@ import org.hibernate.annotations.Check;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * JPA entity class for storing <tt>OrchestrationStore</tt> information in the database. The <i>arrowhead_service_id</i>, <i>consumer_system_id</i>,
@@ -230,7 +229,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
    * highest priority for a Store entry.
    */
   @Override
-  public int compareTo(@NotNull OrchestrationStore other) {
+  public int compareTo(OrchestrationStore other) {
     return this.priority - other.priority;
   }
 

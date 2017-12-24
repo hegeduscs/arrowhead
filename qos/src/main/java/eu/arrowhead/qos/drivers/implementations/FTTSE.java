@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, you can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This work was supported by National Funds through FCT (Portuguese
+ * Foundation for Science and Technology) and by the EU ECSEL JU
+ * funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
+ * JU grant nr. 332987.
+ * ISEP, Polytechnic Institute of Porto.
+ */
 package eu.arrowhead.qos.drivers.implementations;
 
 import eu.arrowhead.common.database.ArrowheadService;
@@ -27,8 +27,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class FTTSE implements IQoSDriver {
 
@@ -42,9 +40,9 @@ public class FTTSE implements IQoSDriver {
   public FTTSE() {
   }
 
-  @Nullable
+
   @Override
-  public ReservationResponse reserveQoS(@NotNull ReservationInfo info) {
+  public ReservationResponse reserveQoS(ReservationInfo info) {
     Map<String, String> networkConfiguration = info.getNetworkConfiguration();
     ArrowheadSystem provider = info.getProvider();
     ArrowheadSystem consumer = info.getConsumer();
@@ -101,7 +99,7 @@ public class FTTSE implements IQoSDriver {
   /**
    * This method will see if there are enough parameters to generate the commands.
    */
-  private boolean validateNetworkCOnfiguration(@NotNull Map<String, String> networkConfiguration) {
+  private boolean validateNetworkCOnfiguration(Map<String, String> networkConfiguration) {
     if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.
         containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration
         .containsKey(NETWORK_MTU)) {
@@ -129,9 +127,8 @@ public class FTTSE implements IQoSDriver {
    *
    * @return Returns the parameters of the stream to be configured.
    */
-  @NotNull
-  public Map<String, String> generateCommands(@NotNull Integer streamID, Integer elementaryCycle, Integer mtu,
-                                              @Nullable Map<String, String> requestedQoS) {
+
+  public Map<String, String> generateCommands(Integer streamID, Integer elementaryCycle, Integer mtu, Map<String, String> requestedQoS) {
     Map<String, String> commands = new HashMap<>();
     Integer period = 5;
     Integer size = calculateSize(mtu);
@@ -158,10 +155,10 @@ public class FTTSE implements IQoSDriver {
     }
     commands.put(STREAM_PARAMETERS_PERIOD, period.toString());
 
-		/*
+    /*
      * if period less than 1 the stream cannot be possible - this must never
-		 * happen because the verify method must verify this!
-		 */
+     * happen because the verify method must verify this!
+     */
     Integer MINIMUM_PERIOD = 1;
     if (period < MINIMUM_PERIOD) {
       throw new IllegalArgumentException("Period < MINIMUM_PERIOD");

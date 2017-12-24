@@ -8,21 +8,20 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>authorization</module>
     <module>common</module>
     <module>dnssd</module>
-    <module>serviceregistry</module>
-    <module>qos</module>
     <module>gatekeeper</module>
-    <module>authorization</module>
-    <module>orchestrator</module>
-    <module>serviceregistry_sql</module>
     <module>gateway</module>
+    <module>orchestrator</module>
+    <module>qos</module>
+    <module>serviceregistry</module>
+    <module>serviceregistry_sql</module>
   </modules>
+
   <properties>
     <mvn.compiler.version>3.1</mvn.compiler.version>
-    <mvn.glassfish.version>2.1</mvn.glassfish.version>
-    <mvn.war.version>2.4</mvn.war.version>
-    <mvn.tattletale.version>1.1.2.Final</mvn.tattletale.version>
+    <mvn.compile.target>1.8</mvn.compile.target>
     <jersey.version>2.23.1</jersey.version>
     <javax.servlet.version>3.1.0</javax.servlet.version>
     <log4j.version>1.2.17</log4j.version>
@@ -33,13 +32,16 @@
     <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
   <dependencyManagement>
     <dependencies>
+
       <dependency>
         <groupId>eu.arrowhead</groupId>
         <artifactId>common</artifactId>
         <version>${project.version}</version>
       </dependency>
+
       <dependency>
         <groupId>eu.arrowhead</groupId>
         <artifactId>dnssd</artifactId>
@@ -90,25 +92,21 @@
         <version>${gson.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>org.jetbrains</groupId>
-        <artifactId>annotations</artifactId>
-        <version>${jetbrains.annotations.version}</version>
-      </dependency>
-
     </dependencies>
   </dependencyManagement>
+
   <build>
     <defaultGoal>clean install</defaultGoal>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>${mvn.compiler.version}</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>${mvn.compile.target}</source>
+          <target>${mvn.compile.target}</target>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
 </project>

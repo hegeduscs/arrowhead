@@ -14,7 +14,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
-import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
@@ -28,11 +27,11 @@ public class ServiceRegistryEntry {
   //mandatory fields
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  @NotNull
+
   private ArrowheadService providedService;
   @JoinColumn(name = "provider_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  @NotNull
+
   private ArrowheadSystem provider;
 
   //non-mandatory fields
@@ -131,7 +130,6 @@ public class ServiceRegistryEntry {
     return provider != null && provider.isValid() && providedService != null && providedService.isValid();
   }
 
-  @org.jetbrains.annotations.NotNull
   @Override
   public String toString() {
     return providedService.toString() + ":" + provider.toString();

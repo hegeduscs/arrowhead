@@ -1,7 +1,6 @@
 package eu.arrowhead.common.messages;
 
 import eu.arrowhead.common.database.ArrowheadService;
-import org.jetbrains.annotations.NotNull;
 
 public class ServiceQueryForm {
 
@@ -19,7 +18,7 @@ public class ServiceQueryForm {
     this.metadataSearch = metadataSearch;
   }
 
-  public ServiceQueryForm(@NotNull ServiceRequestForm srf) {
+  public ServiceQueryForm(ServiceRequestForm srf) {
     this.service = srf.getRequestedService();
     this.pingProviders = srf.getOrchestrationFlags().get("pingProvider");
     this.metadataSearch = srf.getOrchestrationFlags().get("metadataSearch");

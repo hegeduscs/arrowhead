@@ -24,16 +24,14 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ServiceRegistryMain {
 
-  @Nullable
+
   private static HttpServer server = null;
-  @Nullable
+
   private static HttpServer secureServer = null;
-  @Nullable
+
   private static Timer timer = null;
   private static Properties prop;
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
@@ -42,7 +40,7 @@ public class ServiceRegistryMain {
   static final int pingTimeout = new Integer(getProp().getProperty("ping.timeout", "10000"));
   public static boolean DEBUG_MODE;
 
-  public static void main(@NotNull String[] args) throws IOException {
+  public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     Utility.isUrlValid(BASE_URI, false);

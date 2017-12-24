@@ -36,8 +36,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Path("gatekeeper")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -45,10 +43,10 @@ import org.jetbrains.annotations.Nullable;
 public class GatekeeperInboundResource {
 
   private static final Logger log = Logger.getLogger(GatekeeperInboundResource.class.getName());
-  @Nullable
+
   private static final DatabaseManager dm = DatabaseManager.getInstance();
 
-  @NotNull
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -63,7 +61,7 @@ public class GatekeeperInboundResource {
    */
   @PUT
   @Path("gsd_poll")
-  public Response GSDPoll(@NotNull GSDPoll gsdPoll) {
+  public Response GSDPoll(GSDPoll gsdPoll) {
     if (!gsdPoll.isValid()) {
       log.error("GSDPoll BadPayloadException");
       throw new BadPayloadException("gsd_poll received bad payload: requestedService/requesterCloud is missing or it is not valid.");
@@ -113,7 +111,7 @@ public class GatekeeperInboundResource {
    */
   @PUT
   @Path("icn_proposal")
-  public Response ICNProposal(@NotNull ICNProposal icnProposal) {
+  public Response ICNProposal(ICNProposal icnProposal) {
     if (!icnProposal.isValid()) {
       log.error("ICNProposal BadPayloadException");
       throw new BadPayloadException("icn_proposal received bad payload: missing/incomplete ICNProposal.");

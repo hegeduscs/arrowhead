@@ -28,8 +28,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * This is the REST resource for the Authorization Core System.
@@ -41,10 +39,10 @@ public class AuthorizationResource {
 
   private static final Logger log = Logger.getLogger(AuthorizationResource.class.getName());
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
-  @Nullable
+
   static final DatabaseManager dm = DatabaseManager.getInstance();
 
-  @NotNull
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -61,7 +59,7 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("intracloud")
-  public Response isSystemAuthorized(@NotNull IntraCloudAuthRequest request) {
+  public Response isSystemAuthorized(IntraCloudAuthRequest request) {
     if (!request.isValid()) {
       log.error("isSystemAuthorized BadPayloadException");
       throw new BadPayloadException("IntraCloudAuthRequest bad payload: missing/incomplete consumer, service or providerList in the request.");
@@ -126,7 +124,7 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("intercloud")
-  public Response isCloudAuthorized(@NotNull InterCloudAuthRequest request) {
+  public Response isCloudAuthorized(InterCloudAuthRequest request) {
     if (!request.isPayloadUsable()) {
       log.error("isCloudAuthorized BadPayloadException");
       throw new BadPayloadException("InterCloudAuthRequest bad payload: missing/incomplete cloud or service in the request payload.");
@@ -171,7 +169,7 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("token")
-  public Response tokenGeneration(@NotNull TokenGenerationRequest request) {
+  public Response tokenGeneration(TokenGenerationRequest request) {
     // Get the tokens from the service class (can throw run time exceptions)
     List<ArrowheadToken> tokens = TokenGenerationService.generateTokens(request);
     List<TokenData> tokenDataList = new ArrayList<>();

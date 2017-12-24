@@ -17,7 +17,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This is the REST resource for the Gateway Core System.
@@ -29,7 +28,7 @@ public class GatewayResource {
 
   private static final Logger log = Logger.getLogger(GatewayResource.class.getName());
 
-  @NotNull
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -38,7 +37,7 @@ public class GatewayResource {
 
   @PUT
   @Path("connectToProvider")
-  public Response connectToProvider(@NotNull ConnectToProviderRequest connectionRequest) {
+  public Response connectToProvider(ConnectToProviderRequest connectionRequest) {
     String queueName = String.valueOf(System.currentTimeMillis()).concat(String.valueOf(Math.random())).replace(".", "");
     String controlQueueName = queueName.concat("_control");
 
@@ -65,7 +64,7 @@ public class GatewayResource {
 
   @PUT
   @Path("connectToConsumer")
-  public Response connectToConsumer(@NotNull ConnectToConsumerRequest connectionRequest) {
+  public Response connectToConsumer(ConnectToConsumerRequest connectionRequest) {
     Integer serverSocketPort = GatewayService.getAvailablePort();
 
     if (connectionRequest.getIsSecure()) {

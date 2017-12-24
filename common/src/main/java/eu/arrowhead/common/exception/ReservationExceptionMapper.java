@@ -8,7 +8,6 @@ package eu.arrowhead.common.exception;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * @author ID0084D
@@ -17,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public class ReservationExceptionMapper implements ExceptionMapper<ReservationException> {
 
   @Override
-  public Response toResponse(@NotNull ReservationException ex) {
+  public Response toResponse(ReservationException ex) {
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400, ReservationException.class.toString());
     return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).header("Content-type", "application/json").build();
   }

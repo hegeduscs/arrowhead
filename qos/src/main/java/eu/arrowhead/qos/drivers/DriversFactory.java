@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, you can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This work was supported by National Funds through FCT (Portuguese
+ * Foundation for Science and Technology) and by the EU ECSEL JU
+ * funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
+ * JU grant nr. 332987.
+ * ISEP, Polytechnic Institute of Porto.
+ */
 package eu.arrowhead.qos.drivers;
 
 import eu.arrowhead.common.database.ArrowheadService;
@@ -17,12 +17,11 @@ import eu.arrowhead.common.exception.ReservationException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import org.jetbrains.annotations.NotNull;
 
 public class DriversFactory {
 
   private static DriversFactory instance;
-  @NotNull
+
   private Class[] paramVerificationInfo = new Class[1];
 
   private DriversFactory() {
@@ -56,12 +55,12 @@ public class DriversFactory {
    * @throws ReservationException The StreamConfiguration found an error.
    * @throws DriverNotFoundException The selected type doesnt have an assigned driver.
    */
-  @NotNull
-  public Map<String, String> generateCommands(@NotNull String communicationProtocol, Map<String, String> networkConfiguration,
-                                              ArrowheadSystem provider,
+
+  public Map<String, String> generateCommands(String communicationProtocol, Map<String, String> networkConfiguration, ArrowheadSystem provider,
                                               ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands,
                                               Map<String, String> requestedQoS)
-      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+             NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
     // Class Invoking
     Class cls = findClass(communicationProtocol);
@@ -80,14 +79,14 @@ public class DriversFactory {
 
   }
 
-  public Class findClass(@NotNull String communicationProtocol) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+  public Class findClass(String communicationProtocol) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     // Class Invoking
     Class cls;
     cls = Class.forName("eu.arrowhead.qos.communication.drivers." + communicationProtocol.toUpperCase());
     return cls;
   }
 
-  public Method findMethod(@NotNull Class cls) throws NoSuchMethodException {
+  public Method findMethod(Class cls) throws NoSuchMethodException {
     return cls.getDeclaredMethod("reserveQoS", paramVerificationInfo);
   }
 

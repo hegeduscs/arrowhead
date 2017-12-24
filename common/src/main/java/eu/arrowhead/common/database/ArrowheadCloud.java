@@ -8,8 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Entity class for storing Arrowhead Clouds in the database. The "operator" and "cloud_name" columns must be unique together.
@@ -24,11 +22,11 @@ public class ArrowheadCloud {
   private int id;
 
   @Column(name = "operator")
-  @NotNull
+
   private String operator;
 
   @Column(name = "cloud_name")
-  @NotNull
+
   private String cloudName;
 
   @Column(name = "address")
@@ -49,8 +47,8 @@ public class ArrowheadCloud {
   public ArrowheadCloud() {
   }
 
-  public ArrowheadCloud(@NotNull String operator, @NotNull String cloudName, String address, int port, String gatekeeperServiceURI,
-                        String authenticationInfo, boolean isSecure) {
+  public ArrowheadCloud(String operator, String cloudName, String address, int port, String gatekeeperServiceURI, String authenticationInfo,
+                        boolean isSecure) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;
@@ -144,7 +142,7 @@ public class ArrowheadCloud {
   }
 
   @Override
-  public boolean equals(@Nullable Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
@@ -169,7 +167,6 @@ public class ArrowheadCloud {
     return gatekeeperServiceURI != null ? gatekeeperServiceURI.equals(that.gatekeeperServiceURI) : that.gatekeeperServiceURI == null;
   }
 
-  @org.jetbrains.annotations.NotNull
   @Override
   public String toString() {
     return "(" + operator + ":" + cloudName + ")";

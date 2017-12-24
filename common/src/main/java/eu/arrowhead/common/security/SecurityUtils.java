@@ -26,15 +26,13 @@ import javax.naming.ldap.Rdn;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class SecurityUtils {
 
   private static final Logger log = Logger.getLogger(SecurityUtils.class.getName());
 
-  @NotNull
-  public static KeyStore loadKeyStore(@NotNull String filePath, @NotNull String pass) {
+
+  public static KeyStore loadKeyStore(String filePath, String pass) {
     File file = new File(filePath);
 
     try {
@@ -43,28 +41,28 @@ public final class SecurityUtils {
       keystore.load(is, pass.toCharArray());
       is.close();
       return keystore;
-    } catch (@NotNull KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
       e.printStackTrace();
       log.fatal("Loading the keystore failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Loading the keystore failed...", e);
     }
   }
 
-  @NotNull
-  public static X509Certificate getFirstCertFromKeyStore(@NotNull KeyStore keystore) {
+
+  public static X509Certificate getFirstCertFromKeyStore(KeyStore keystore) {
     try {
       Enumeration<String> enumeration = keystore.aliases();
       String alias = enumeration.nextElement();
       Certificate certificate = keystore.getCertificate(alias);
       return (X509Certificate) certificate;
-    } catch (@NotNull KeyStoreException | NoSuchElementException e) {
+    } catch (KeyStoreException | NoSuchElementException e) {
       e.printStackTrace();
       log.error("Getting the first cert from keystore failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Getting the first cert from keystore failed...", e);
     }
   }
 
-  @Nullable
+
   public static String getCertCNFromSubject(String subjectname) {
     String cn = null;
     try {
@@ -88,8 +86,8 @@ public final class SecurityUtils {
     return cn;
   }
 
-  @Nullable
-  public static PrivateKey getPrivateKey(@NotNull KeyStore keystore, @NotNull String pass) {
+
+  public static PrivateKey getPrivateKey(KeyStore keystore, String pass) {
     PrivateKey privatekey = null;
     String element;
     try {
@@ -101,7 +99,7 @@ public final class SecurityUtils {
           break;
         }
       }
-    } catch (@NotNull KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+    } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
       e.printStackTrace();
       log.error("Getting the private key from keystore failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Getting the private key from keystore failed...", e);
@@ -114,12 +112,12 @@ public final class SecurityUtils {
   }
 
   // NOTE dont forget to modify this, if we migrate to a version without system group
-  public static boolean isCommonNameArrowheadValid(@NotNull String commonName) {
+  public static boolean isCommonNameArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
     return cnFields.length == 6;
   }
 
-  public static X509Certificate getCertFromKeyStore(@NotNull KeyStore keystore, String name) {
+  public static X509Certificate getCertFromKeyStore(KeyStore keystore, String name) {
     Enumeration<String> enumeration;
     try {
       enumeration = keystore.aliases();
@@ -149,7 +147,7 @@ public final class SecurityUtils {
     return null;
   }
 
-  public static String getKeyEncoded(@Nullable Key key) {
+  public static String getKeyEncoded(Key key) {
     if (key == null) {
       return "";
     }
@@ -162,7 +160,7 @@ public final class SecurityUtils {
     return sb.toString();
   }
 
-  public static String getByteEncoded(@NotNull byte[] array) {
+  public static String getByteEncoded(byte[] array) {
     StringBuilder sb = new StringBuilder(array.length * 2);
     for (byte b : array) {
       sb.append(String.format("%02X", b & 0xff));
@@ -170,7 +168,7 @@ public final class SecurityUtils {
     return sb.toString();
   }
 
-  public static PublicKey getPublicKey(@NotNull String stringKey) throws InvalidKeySpecException {
+  public static PublicKey getPublicKey(String stringKey) throws InvalidKeySpecException {
     byte[] byteKey = Base64.getDecoder().decode(stringKey);
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
     KeyFactory kf = null;
@@ -185,10 +183,10 @@ public final class SecurityUtils {
     return kf.generatePublic(X509publicKey);
   }
 
-  @NotNull
+
   public static TrustManager[] createTrustManagers() {
     TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-      @NotNull
+
       public java.security.cert.X509Certificate[] getAcceptedIssuers() {
         return new java.security.cert.X509Certificate[]{};
       }

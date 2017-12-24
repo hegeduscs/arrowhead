@@ -4,7 +4,6 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
@@ -23,8 +22,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Path("serviceregistry")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -33,10 +30,10 @@ public class ServiceRegistryResource {
 
   private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
-  @Nullable
+
   static final DatabaseManager dm = DatabaseManager.getInstance();
 
-  @NotNull
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -45,7 +42,7 @@ public class ServiceRegistryResource {
 
   @POST
   @Path("register")
-  public Response registerService(@NotNull ServiceRegistryEntry entry, @NotNull @Context ContainerRequestContext requestContext) {
+  public Response registerService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValidFully()) {
       log.error("registerService throws BadPayloadException");
@@ -58,9 +55,9 @@ public class ServiceRegistryResource {
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0]) || !entry.getProvider().getSystemGroup()
           .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service registering denied.");
-        throw new AuthenticationException(
-            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
-      } 
+        /*throw new AuthenticationException(
+            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");*/
+      }
     }
 
     restrictionMap.put("serviceGroup", entry.getProvidedService().getServiceGroup());
@@ -95,7 +92,7 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("query")
-  public Response queryRegistry(@NotNull ServiceQueryForm queryForm) {
+  public Response queryRegistry(ServiceQueryForm queryForm) {
     if (!queryForm.isValid()) {
       log.error("queryRegistry throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceQueryForm has missing/incomplete mandatory field(s).");
@@ -129,7 +126,7 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("remove")
-  public Response removeService(@NotNull ServiceRegistryEntry entry, @NotNull @Context ContainerRequestContext requestContext) {
+  public Response removeService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValidFully()) {
       log.error("removeService throws BadPayloadException");
@@ -142,8 +139,8 @@ public class ServiceRegistryResource {
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0]) || !entry.getProvider().getSystemGroup()
           .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service removing denied.");
-        throw new AuthenticationException(
-            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+        /*throw new AuthenticationException(
+            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");*/
       }
     }
 

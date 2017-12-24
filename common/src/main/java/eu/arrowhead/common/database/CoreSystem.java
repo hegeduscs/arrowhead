@@ -8,7 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * JPA entity class for storing <tt>CoreSystem</tt> information in the database. The <i>system_name</i> column must be unique.
@@ -29,18 +28,18 @@ public class CoreSystem {
   private int id;
 
   @Column(name = "system_name")
-  @NotNull
+
   private String systemName;
 
   @Column(name = "address")
-  @NotNull
+
   private String address;
 
   @Column(name = "port")
   private int port;
 
   @Column(name = "service_uri")
-  @NotNull
+
   private String serviceURI;
 
   @Column(name = "is_secure")

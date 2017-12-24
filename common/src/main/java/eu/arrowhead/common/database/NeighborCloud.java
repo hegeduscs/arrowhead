@@ -11,7 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * JPA entity class for storing <tt>NeighborCloud</tt> information in the database. The <i>cloud_id</i> column must be unique.
@@ -32,7 +31,7 @@ public class NeighborCloud implements Serializable {
   @Id
   @JoinColumn(name = "cloud_id")
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  @NotNull
+
   private ArrowheadCloud cloud;
 
   public NeighborCloud() {

@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, you can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This work was supported by National Funds through FCT (Portuguese
+ * Foundation for Science and Technology) and by the EU ECSEL JU
+ * funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
+ * JU grant nr. 332987.
+ * ISEP, Polytechnic Institute of Porto.
+ */
 package eu.arrowhead.qos;
 
 import eu.arrowhead.common.DatabaseManager;
@@ -37,7 +37,6 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 final class QoSManagerService {
 
@@ -58,8 +57,8 @@ final class QoSManagerService {
    *
    * @return Returns if is possible or not and why.
    */
-  @NotNull
-  static QoSVerificationResponse qosVerify(@NotNull QoSVerify message) {
+
+  static QoSVerificationResponse qosVerify(QoSVerify message) {
     log.info("QoS: Verifying QoS paramteres.");
 
     NetworkDevice consumerNetworkDevice = getNetworkDeviceFromSystem(message.getConsumer());
@@ -98,7 +97,7 @@ final class QoSManagerService {
   }
   // request in a blocking for loop
 
-  private static NetworkDevice getNetworkDeviceFromSystem(@NotNull ArrowheadSystem system) {
+  private static NetworkDevice getNetworkDeviceFromSystem(ArrowheadSystem system) {
     restrictionMap.clear();
     restrictionMap.put("systemGroup", system.getSystemGroup());
     restrictionMap.put("systemName", system.getSystemName());
@@ -111,8 +110,8 @@ final class QoSManagerService {
     return deployedSystem.getNetworkDevice();
   }
 
-  @NotNull
-  private static List<ResourceReservation> getReservationsFromSystem(@NotNull ArrowheadSystem system) {
+
+  private static List<ResourceReservation> getReservationsFromSystem(ArrowheadSystem system) {
     restrictionMap.clear();
     restrictionMap.put("systemGroup", system.getSystemGroup());
     restrictionMap.put("systemName", system.getSystemName());
@@ -141,7 +140,7 @@ final class QoSManagerService {
    * @throws ReservationException The reservation on the devices was not possible.
    * @throws DriverNotFoundException The network type doesnt have a driver assigned.
    */
-  static QoSReservationResponse qosReserve(@NotNull QoSReserve message) throws ReservationException, DriverNotFoundException, IOException {
+  static QoSReservationResponse qosReserve(QoSReserve message) throws ReservationException, DriverNotFoundException, IOException {
     ArrowheadSystem consumer = message.getConsumer();
     ArrowheadSystem provider = message.getProvider();
 

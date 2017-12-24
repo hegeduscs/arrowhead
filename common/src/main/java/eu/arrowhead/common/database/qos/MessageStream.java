@@ -19,7 +19,6 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Table(name = "message_stream", uniqueConstraints = {
@@ -122,7 +121,7 @@ public class MessageStream {
    *
    * @return Returns String with the code.
    */
-  @NotNull
+
   public String getCode() {
     return provider.getSystemGroup() + "/" + provider.getSystemName() + "," + consumer.getSystemGroup() + "/" + consumer.getSystemName() + ","
         + service.getServiceGroup() + "/" + service.getServiceDefinition();

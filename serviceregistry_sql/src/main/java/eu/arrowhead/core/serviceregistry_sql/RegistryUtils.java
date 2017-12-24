@@ -6,11 +6,10 @@ import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.jetbrains.annotations.NotNull;
 
 class RegistryUtils {
 
-  static boolean pingHost(@NotNull String host, int port, int timeout) {
+  static boolean pingHost(String host, int port, int timeout) {
     try (Socket socket = new Socket()) {
       socket.connect(new InetSocketAddress(host, port), timeout);
       return true;
@@ -19,15 +18,15 @@ class RegistryUtils {
     }
   }
 
-  static void filterOnVersion(@NotNull List<ServiceRegistryEntry> fetchedList, int targetVersion) {
+  static void filterOnVersion(List<ServiceRegistryEntry> fetchedList, int targetVersion) {
     fetchedList.removeIf(current -> current.getVersion() != targetVersion);
   }
 
-  static void filterOnMeta(@NotNull List<ServiceRegistryEntry> fetchedList, @NotNull Map<String, String> metadata) {
+  static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, Map<String, String> metadata) {
     fetchedList.removeIf(current -> !metadata.equals(current.getProvidedService().getServiceMetadata()));
   }
 
-  static void filterOnPing(@NotNull List<ServiceRegistryEntry> fetchedList) {
+  static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
     Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();

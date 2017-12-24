@@ -17,13 +17,11 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class DatabaseManager {
 
   private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
-  @Nullable
+
   private static DatabaseManager instance = null;
   private static SessionFactory sessionFactory;
   private static Properties prop;
@@ -46,7 +44,7 @@ public class DatabaseManager {
   private DatabaseManager() {
   }
 
-  @Nullable
+
   public static DatabaseManager getInstance() {
     if (instance == null) {
       instance = new DatabaseManager();
@@ -96,7 +94,7 @@ public class DatabaseManager {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> T get(Class<T> queryClass, @Nullable Map<String, Object> restrictionMap) {
+  public <T> T get(Class<T> queryClass, Map<String, Object> restrictionMap) {
     T object;
     Transaction transaction = null;
 
@@ -124,9 +122,9 @@ public class DatabaseManager {
 
   //TODO get method with Object parameter maybe? could be possible with a big switch case
 
-  @NotNull
+
   @SuppressWarnings("unchecked")
-  public <T> List<T> getAll(Class<T> queryClass, @Nullable Map<String, Object> restrictionMap) {
+  public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
     List<T> retrievedList;
     Transaction transaction = null;
 
@@ -153,7 +151,7 @@ public class DatabaseManager {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> List<T> getAllOfEither(Class<T> queryClass, @Nullable Map<String, Object> restrictionMap) {
+  public <T> List<T> getAllOfEither(Class<T> queryClass, Map<String, Object> restrictionMap) {
     List<T> retrievedList;
     Transaction transaction = null;
 
@@ -179,8 +177,8 @@ public class DatabaseManager {
     return retrievedList;
   }
 
-  @NotNull
-  public <T> T save(@NotNull T object) {
+
+  public <T> T save(T object) {
     Transaction transaction = null;
 
     try (Session session = getSessionFactory().openSession()) {
@@ -205,8 +203,8 @@ public class DatabaseManager {
     return object;
   }
 
-  @NotNull
-  public <T> T merge(@NotNull T object) {
+
+  public <T> T merge(T object) {
     Transaction transaction = null;
 
     try (Session session = getSessionFactory().openSession()) {
@@ -231,7 +229,7 @@ public class DatabaseManager {
     return object;
   }
 
-  public <T> void delete(@NotNull T object) {
+  public <T> void delete(T object) {
     Transaction transaction = null;
 
     try (Session session = getSessionFactory().openSession()) {

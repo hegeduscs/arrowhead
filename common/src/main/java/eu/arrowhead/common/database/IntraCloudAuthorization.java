@@ -12,7 +12,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * JPA entity class for storing intra-cloud (within the cloud) authorization rights in the database. The <i>consumer_system_id</i>,
@@ -36,17 +35,17 @@ public class IntraCloudAuthorization {
 
   @JoinColumn(name = "consumer_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-  @NotNull
+
   private ArrowheadSystem consumer;
 
   @JoinColumn(name = "provider_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-  @NotNull
+
   private ArrowheadSystem provider;
 
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-  @NotNull
+
   private ArrowheadService service;
 
   public IntraCloudAuthorization() {

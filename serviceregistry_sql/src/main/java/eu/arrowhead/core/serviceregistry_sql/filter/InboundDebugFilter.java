@@ -12,14 +12,13 @@ import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.ext.Provider;
-import org.jetbrains.annotations.NotNull;
 
 @Provider
 @Priority(Priorities.USER)
 public class InboundDebugFilter implements ContainerRequestFilter {
 
   @Override
-  public void filter(@NotNull ContainerRequestContext requestContext) throws IOException {
+  public void filter(ContainerRequestContext requestContext) throws IOException {
     if (ServiceRegistryMain.DEBUG_MODE) {
       System.out.println("New " + requestContext.getMethod() + " request at: " + requestContext.getUriInfo().getRequestUri().toString());
       BufferedReader br = new BufferedReader(new InputStreamReader(requestContext.getEntityStream(), "utf-8"));

@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, you can obtain one at http://mozilla.org/MPL/2.0/. 
-*
-* This work was supported by National Funds through FCT (Portuguese
-* Foundation for Science and Technology) and by the EU ECSEL JU
-* funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
-* JU grant nr. 332987.
-* ISEP, Polytechnic Institute of Porto.
-*/
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, you can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This work was supported by National Funds through FCT (Portuguese
+ * Foundation for Science and Technology) and by the EU ECSEL JU
+ * funding, within Arrowhead project, ref. ARTEMIS/0001/2012,
+ * JU grant nr. 332987.
+ * ISEP, Polytechnic Institute of Porto.
+ */
 package eu.arrowhead.qos.algorithms;
 
 import eu.arrowhead.common.database.qos.ResourceReservation;
@@ -16,12 +16,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-import org.jetbrains.annotations.NotNull;
 
 public class VerifierAlgorithmFactory {
 
   private static VerifierAlgorithmFactory instance;
-  @NotNull
+
   private Class[] paramVerificationInfo = new Class[1];
 
   private VerifierAlgorithmFactory() {
@@ -39,12 +38,13 @@ public class VerifierAlgorithmFactory {
   // Cause I think using interfaces and enums would be more clean and faster at runtime
   // Or if we keep this reflection pattern, than catch and handle the exceptions here in this method!
   //note: communicationProtocol == network.getNetworkType :/
-  @NotNull
-  public QoSVerifierResponse verify(@NotNull String communicationProtocol, Map<String, String> providerDeviceCapabilities,
+
+  public QoSVerifierResponse verify(String communicationProtocol, Map<String, String> providerDeviceCapabilities,
                                     Map<String, String> consumerDeviceCapabilities, List<ResourceReservation> providerDeviceQoSReservations,
                                     List<ResourceReservation> consumerDeviceQoSReservations, Map<String, String> requestedQoS,
                                     Map<String, String> commands)
-      throws InstantiationException, ClassNotFoundException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+      throws InstantiationException, ClassNotFoundException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException,
+             InvocationTargetException {
     Class cls;
 
     // Class Invoking

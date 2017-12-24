@@ -27,8 +27,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Path("mgmt/store")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,11 +34,11 @@ import org.jetbrains.annotations.Nullable;
 public class StoreApi {
 
   private static final Logger log = Logger.getLogger(StoreApi.class.getName());
-  @Nullable
+
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
-  @NotNull
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -116,7 +114,7 @@ public class StoreApi {
    * @throws BadPayloadException, DataNotFoundException
    */
   @PUT
-  public Response getStoreEntries(@NotNull OrchestrationStoreQuery query) {
+  public Response getStoreEntries(OrchestrationStoreQuery query) {
 
     if (!query.isValid()) {
       log.info("StoreApi:getStoreEntries throws BadPayloadException.");
@@ -145,9 +143,9 @@ public class StoreApi {
    *
    * @return List<OrchestrationStore>
    */
-  @NotNull
+
   @POST
-  public List<OrchestrationStore> addStoreEntries(@NotNull List<OrchestrationStore> storeEntries) {
+  public List<OrchestrationStore> addStoreEntries(List<OrchestrationStore> storeEntries) {
 
     List<OrchestrationStore> store = new ArrayList<>();
     for (OrchestrationStore entry : storeEntries) {
@@ -241,7 +239,7 @@ public class StoreApi {
    */
   @PUT
   @Path("update")
-  public Response updateEntry(@NotNull OrchestrationStore payload) {
+  public Response updateEntry(OrchestrationStore payload) {
 
     if (payload.getId() == 0) {
       log.info("StoreApi:updateEntry throws BadPayloadException.");

@@ -8,8 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Entity class for storing Arrowhead Systems in the database. The "system_group" and "system_name" columns must be unique together.
@@ -24,11 +22,11 @@ public class ArrowheadSystem {
   private int id;
 
   @Column(name = "system_group")
-  @NotNull
+
   private String systemGroup;
 
   @Column(name = "system_name")
-  @NotNull
+
   private String systemName;
 
   @Column(name = "address")
@@ -119,7 +117,7 @@ public class ArrowheadSystem {
   }
 
   @Override
-  public boolean equals(@Nullable Object obj) {
+  public boolean equals(Object obj) {
     if (this == obj) {
       return true;
     }
@@ -154,15 +152,12 @@ public class ArrowheadSystem {
     return true;
   }
 
-  @org.jetbrains.annotations.NotNull
   @Override
   public String toString() {
     return "(" + systemGroup + ":" + systemName + ")";
   }
 
-  @org.jetbrains.annotations.NotNull
-  public String toArrowheadCommonName(@org.jetbrains.annotations.NotNull String operator, @org.jetbrains.annotations.NotNull String cloudName)
-      throws Exception {
+  public String toArrowheadCommonName(String operator, String cloudName) throws Exception {
     if (systemGroup.contains(".") || systemName.contains(".") || operator.contains(".") || cloudName.contains(".")) {
       throw new IllegalArgumentException("The string fields can not contain dots!");
     }

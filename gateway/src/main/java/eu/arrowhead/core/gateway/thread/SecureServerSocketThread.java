@@ -19,16 +19,15 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
 public class SecureServerSocketThread extends Thread {
 
   private int port;
-  @Nullable
+
   private SSLServerSocket sslServerSocket = null;
   private ConnectToConsumerRequest connectionRequest;
   private GatewaySession gatewaySession;
-  private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName()); 
+  private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
 
   public SecureServerSocketThread(GatewaySession gatewaySession, int port, ConnectToConsumerRequest connectionRequest) {
     this.port = port;
@@ -79,7 +78,6 @@ public class SecureServerSocketThread extends Thread {
       byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
       System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 
-      
       Channel channel = gatewaySession.getChannel();
 
       channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);

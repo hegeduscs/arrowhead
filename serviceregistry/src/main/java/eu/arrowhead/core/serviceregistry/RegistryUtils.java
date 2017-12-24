@@ -14,8 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class RegistryUtils {
 
@@ -32,15 +30,15 @@ public class RegistryUtils {
     return registrator;
   }
 
-  @Nullable
-  public static String removeLastChar(@Nullable String host, char charachter) {
+
+  public static String removeLastChar(String host, char charachter) {
     if (host != null && host.length() > 0 && host.charAt(host.length() - 1) == charachter) {
       return host.substring(0, host.length() - 1);
     }
     return host;
   }
 
-  public static void setServiceDataProperties(@NotNull ServiceRegistryEntry registryEntry, @NotNull ServiceData data) {
+  public static void setServiceDataProperties(ServiceRegistryEntry registryEntry, ServiceData data) {
     //setting up everything for the TXT record
     Map<String, String> properties = data.getProperties();
 
@@ -73,8 +71,8 @@ public class RegistryUtils {
     properties.put("txtvers", Integer.toString(registryEntry.getVersion()));
   }
 
-  @NotNull
-  public static ServiceRegistryEntry buildRegistryEntry(@NotNull ServiceData service) throws IllegalArgumentException {
+
+  public static ServiceRegistryEntry buildRegistryEntry(ServiceData service) throws IllegalArgumentException {
 
     //extracting fields from DNS record
     String providerName = service.getName().getName();
@@ -201,7 +199,7 @@ public class RegistryUtils {
     return providerService;
   }
 
-  public static boolean pingHost(@NotNull String host, int port, int timeout) {
+  public static boolean pingHost(String host, int port, int timeout) {
     try (Socket socket = new Socket()) {
       socket.connect(new InetSocketAddress(host, port), timeout);
       return true;
@@ -210,7 +208,7 @@ public class RegistryUtils {
     }
   }
 
-  public static void filterOnPing(@NotNull List<ServiceRegistryEntry> fetchedList) {
+  public static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
 
     Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
 
@@ -225,11 +223,11 @@ public class RegistryUtils {
     }
   }
 
-  public static void filterOnMeta(@NotNull List<ServiceRegistryEntry> fetchedList, @NotNull Map<String, String> metadata) {
+  public static void filterOnMeta(List<ServiceRegistryEntry> fetchedList, Map<String, String> metadata) {
     fetchedList.removeIf(current -> !metadata.equals(current.getProvidedService().getServiceMetadata()));
   }
 
-  public static void filteronVersion(@NotNull List<ServiceRegistryEntry> fetchedList, int targetVersion) {
+  public static void filteronVersion(List<ServiceRegistryEntry> fetchedList, int targetVersion) {
     Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();

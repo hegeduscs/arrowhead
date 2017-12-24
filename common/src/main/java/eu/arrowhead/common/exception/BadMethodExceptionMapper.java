@@ -4,12 +4,11 @@ import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import org.jetbrains.annotations.NotNull;
 
 @Provider
 public class BadMethodExceptionMapper implements ExceptionMapper<NotAllowedException> {
 
-  public Response toResponse(@NotNull NotAllowedException ex) {
+  public Response toResponse(NotAllowedException ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage;
     if (ex.getMessage() != null) {

@@ -13,7 +13,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 @Provider
 @Priority(Priorities.AUTHORIZATION) //2nd highest priority constant, this filter gets executed after the SecurityFilter
@@ -24,7 +23,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
   private Configuration configuration;
 
   @Override
-  public void filter(@NotNull ContainerRequestContext requestContext) {
+  public void filter(ContainerRequestContext requestContext) {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
     if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
@@ -38,14 +37,14 @@ public class AccessControlFilter implements ContainerRequestFilter {
     }
   }
 
-  private boolean isGetItCalled(@NotNull String method, @NotNull String requestTarget) {
+  private boolean isGetItCalled(String method, String requestTarget) {
     if (!method.equals("GET")) {
       return false;
     }
     return requestTarget.endsWith("authorization") || requestTarget.endsWith("mgmt");
   }
 
-  private boolean isClientAuthorized(String subjectName, @NotNull String requestTarget) {
+  private boolean isClientAuthorized(String subjectName, String requestTarget) {
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
     String serverCN = (String) configuration.getProperty("server_common_name");
 

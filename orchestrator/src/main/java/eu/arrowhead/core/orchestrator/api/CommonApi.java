@@ -21,8 +21,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Path("mgmt/common")
 @Produces(MediaType.APPLICATION_JSON)
@@ -30,11 +28,11 @@ import org.jetbrains.annotations.Nullable;
 public class CommonApi {
 
   private static final Logger log = Logger.getLogger(CommonApi.class.getName());
-  @Nullable
+
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 
-  @NotNull
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -106,7 +104,7 @@ public class CommonApi {
    */
   @POST
   @Path("services")
-  public Response addServices(@NotNull List<ArrowheadService> serviceList) {
+  public Response addServices(List<ArrowheadService> serviceList) {
 
     List<ArrowheadService> savedServices = new ArrayList<>();
     for (ArrowheadService service : serviceList) {
@@ -134,7 +132,7 @@ public class CommonApi {
    */
   @PUT
   @Path("services")
-  public Response updateService(@NotNull ArrowheadService service) {
+  public Response updateService(ArrowheadService service) {
 
     if (!service.isValidForDatabase()) {
       log.info("CommonApi:updateService throws BadPayloadException");
@@ -238,7 +236,7 @@ public class CommonApi {
    */
   @POST
   @Path("systems")
-  public Response addSystems(@NotNull List<ArrowheadSystem> systemList) {
+  public Response addSystems(List<ArrowheadSystem> systemList) {
 
     List<ArrowheadSystem> savedSystems = new ArrayList<>();
     for (ArrowheadSystem system : systemList) {
@@ -267,7 +265,7 @@ public class CommonApi {
    */
   @PUT
   @Path("systems")
-  public Response updateSystem(@NotNull ArrowheadSystem system) {
+  public Response updateSystem(ArrowheadSystem system) {
 
     if (!system.isValid()) {
       log.info("CommonApi:updateSystem throws BadPayloadException");
@@ -372,7 +370,7 @@ public class CommonApi {
    */
   @POST
   @Path("clouds")
-  public Response addClouds(@NotNull List<ArrowheadCloud> cloudList) {
+  public Response addClouds(List<ArrowheadCloud> cloudList) {
 
     List<ArrowheadCloud> savedClouds = new ArrayList<>();
     for (ArrowheadCloud cloud : cloudList) {
@@ -401,7 +399,7 @@ public class CommonApi {
    */
   @PUT
   @Path("clouds")
-  public Response updateCloud(@NotNull ArrowheadCloud cloud) {
+  public Response updateCloud(ArrowheadCloud cloud) {
 
     if (!cloud.isValid()) {
       log.info("CommonApi:updateCloud throws BadPayloadException");

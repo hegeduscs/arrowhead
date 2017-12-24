@@ -25,8 +25,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Path("serviceregistry")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -35,7 +33,7 @@ public class ServiceRegistryResource {
 
   private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
 
-  @NotNull
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -44,7 +42,7 @@ public class ServiceRegistryResource {
 
   @POST
   @Path("register")
-  public Response publishEntriesToRegistry(@NotNull ServiceRegistryEntry entry, @NotNull @Context ContainerRequestContext requestContext) {
+  public Response publishEntriesToRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (entry == null || !entry.isValidFully()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
@@ -76,7 +74,7 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("remove")
-  public Response removeEntriesFromRegistry(@NotNull ServiceRegistryEntry entry, @NotNull @Context ContainerRequestContext requestContext) {
+  public Response removeEntriesFromRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (entry == null || !entry.isValidFully()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
@@ -113,8 +111,8 @@ public class ServiceRegistryResource {
    */
   @POST
   @Path("/{serviceGroup}/{service}/{interf}")
-  public Response publishingToRegistry(@Nullable @PathParam("serviceGroup") String serviceGroup, @Nullable @PathParam("service") String service,
-                                       @Nullable @PathParam("interf") String interf, @Nullable ServiceRegistryEntry entry) {
+  public Response publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
+                                       @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 
     if (serviceGroup == null || service == null || interf == null || entry == null) {
       log.info("ServiceRegistry: Registration throws BadPayloadException");
@@ -145,8 +143,8 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("/{serviceGroup}/{service}/{interf}")
-  public Response removingFromRegistry(@Nullable @PathParam("serviceGroup") String serviceGroup, @Nullable @PathParam("service") String service,
-                                       @Nullable @PathParam("interf") String interf, @NotNull ServiceRegistryEntry entry) {
+  public Response removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
+                                       @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 
     if (serviceGroup == null || service == null || interf == null || !entry.isValid()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
@@ -180,7 +178,7 @@ public class ServiceRegistryResource {
    */
   @PUT
   @Path("query")
-  public Response getServiceQueryForm(@Nullable ServiceQueryForm queryForm) {
+  public Response getServiceQueryForm(ServiceQueryForm queryForm) {
     if (queryForm == null || !queryForm.isValid()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
       throw new BadPayloadException("Bad payload: the request form has missing/incomplete mandatory fields.");

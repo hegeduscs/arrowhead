@@ -8,8 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Entity
 @Table(name = "broker", uniqueConstraints = {@UniqueConstraint(columnNames = {"broker_name"})})
@@ -22,11 +20,11 @@ public class Broker {
   private int id;
 
   @Column(name = "broker_name")
-  @NotNull
+
   private String brokerName;
 
   @Column(name = "address")
-  @NotNull
+
   private String address;
 
   @Column(name = "port")
@@ -95,7 +93,7 @@ public class Broker {
   }
 
   @Override
-  public boolean equals(@Nullable Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }

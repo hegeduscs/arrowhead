@@ -10,7 +10,6 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
-import org.jetbrains.annotations.NotNull;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION) //Highest priority constant, this filter gets executed first
@@ -19,7 +18,7 @@ public class SecurityFilter implements ContainerRequestFilter {
   private UriInfo uriInfo;
 
   @Override
-  public void filter(@NotNull ContainerRequestContext context) throws IOException {
+  public void filter(ContainerRequestContext context) throws IOException {
     X509Certificate[] chain = (X509Certificate[]) context.getProperty("javax.servlet.request.X509Certificate");
     if (chain != null && chain.length > 0) {
       uriInfo = context.getUriInfo();
@@ -43,7 +42,7 @@ public class SecurityFilter implements ContainerRequestFilter {
       return this.principal;
     }
 
-    public boolean isUserInRole(@NotNull String role) {
+    public boolean isUserInRole(String role) {
       return (role.equals(user));
     }
 
