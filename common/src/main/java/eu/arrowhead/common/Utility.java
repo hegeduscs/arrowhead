@@ -207,7 +207,8 @@ public final class Utility {
 
     List<String> uriList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
-      uriList.add(getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), false));
+      uriList.add(
+          getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), cloud.getCloud().isSecure()));
     }
 
     return uriList;

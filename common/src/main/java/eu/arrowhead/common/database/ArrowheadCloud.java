@@ -39,16 +39,21 @@ public class ArrowheadCloud {
   @Column(name = "authentication_info")
   private String authenticationInfo;
 
+  @Column(name = "is_secure")
+  private boolean isSecure;
+
   public ArrowheadCloud() {
   }
 
-  public ArrowheadCloud(String operator, String cloudName, String address, int port, String gatekeeperServiceURI, String authenticationInfo) {
+  public ArrowheadCloud(String operator, String cloudName, String address, int port, String gatekeeperServiceURI, String authenticationInfo,
+                        boolean isSecure) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;
     this.port = port;
     this.gatekeeperServiceURI = gatekeeperServiceURI;
     this.authenticationInfo = authenticationInfo;
+    this.isSecure = isSecure;
   }
 
   @XmlTransient
@@ -106,6 +111,14 @@ public class ArrowheadCloud {
 
   public void setAuthenticationInfo(String authenticationInfo) {
     this.authenticationInfo = authenticationInfo;
+  }
+
+  public boolean isSecure() {
+    return isSecure;
+  }
+
+  public void setSecure(boolean secure) {
+    isSecure = secure;
   }
 
   public boolean isValid() {
