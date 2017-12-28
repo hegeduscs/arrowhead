@@ -4,6 +4,7 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
@@ -54,8 +55,8 @@ public class ServiceRegistryResource {
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0]) || !entry.getProvider().getSystemGroup()
           .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service registering denied.");
-        /*throw new AuthenticationException(
-            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");*/
+        throw new AuthenticationException(
+            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
       }
     }
 
@@ -138,8 +139,8 @@ public class ServiceRegistryResource {
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0]) || !entry.getProvider().getSystemGroup()
           .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service removing denied.");
-        /*throw new AuthenticationException(
-            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");*/
+        throw new AuthenticationException(
+            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
       }
     }
 
