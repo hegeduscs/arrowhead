@@ -29,9 +29,7 @@ public class ServiceRegistryMain {
 
 
   private static HttpServer server = null;
-
   private static HttpServer secureServer = null;
-
   private static Timer timer = null;
   private static Properties prop;
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());

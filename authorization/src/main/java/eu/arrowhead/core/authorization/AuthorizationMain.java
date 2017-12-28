@@ -31,11 +31,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class AuthorizationMain {
 
-
   static PrivateKey privateKey = null;
-
   private static HttpServer server = null;
-
   private static HttpServer secureServer = null;
   private static final Logger log = Logger.getLogger(AuthorizationMain.class.getName());
   private static Properties prop;

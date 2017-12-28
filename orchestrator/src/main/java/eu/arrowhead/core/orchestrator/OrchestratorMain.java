@@ -33,7 +33,6 @@ public class OrchestratorMain {
 
 
   private static HttpServer server = null;
-
   private static HttpServer secureServer = null;
   private static final Logger log = Logger.getLogger(OrchestratorMain.class.getName());
   private static Properties prop;

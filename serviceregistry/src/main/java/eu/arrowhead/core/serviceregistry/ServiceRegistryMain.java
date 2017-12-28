@@ -47,9 +47,7 @@ public class ServiceRegistryMain {
   private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
   private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
 
-
   private static HttpServer server = null;
-
   private static HttpServer secureServer = null;
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
   public static boolean DEBUG_MODE;

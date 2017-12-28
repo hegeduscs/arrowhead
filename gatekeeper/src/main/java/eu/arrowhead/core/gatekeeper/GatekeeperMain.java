@@ -25,13 +25,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class GatekeeperMain {
 
-
   private static HttpServer inboundServer = null;
-
   private static HttpServer inboundSecureServer = null;
-
   private static HttpServer outboundServer = null;
-
   private static HttpServer outboundSecureServer = null;
   private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
   private static Properties prop;

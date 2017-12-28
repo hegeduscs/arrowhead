@@ -27,7 +27,6 @@ public class QoSMain {
 
 
   private static HttpServer server = null;
-
   private static HttpServer secureServer = null;
   private static Logger log = Logger.getLogger(QoSMain.class.getName());
   private static Properties prop;
