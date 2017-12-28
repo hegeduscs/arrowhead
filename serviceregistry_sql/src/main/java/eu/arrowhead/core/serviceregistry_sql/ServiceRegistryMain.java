@@ -46,7 +46,7 @@ class ServiceRegistryMain {
     for (int i = 0; i < args.length; ++i) {
       if (args[i].equals("-d")) {
         daemon = true;
-        System.out.println("Starting SR SQLite as daemon!");
+        System.out.println("Starting Service Registry as daemon!");
       } else if (args[i].equals("-m")) {
         serverModeSet = true;
         ++i;
@@ -136,10 +136,10 @@ class ServiceRegistryMain {
     config.registerClasses(AccessControlFilter.class, ServiceRegistryResource.class);
     config.packages("eu.arrowhead.common");
 
-    String keystorePath = getProp().getProperty("ssl.keystore");
-    String keystorePass = getProp().getProperty("ssl.keystorepass");
-    String truststorePath = getProp().getProperty("ssl.truststore");
-    String truststorePass = getProp().getProperty("ssl.truststorepass");
+    String keystorePath = getProp().getProperty("keystore");
+    String keystorePass = getProp().getProperty("keystorepass");
+    String truststorePath = getProp().getProperty("truststore");
+    String truststorePass = getProp().getProperty("truststorepass");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);

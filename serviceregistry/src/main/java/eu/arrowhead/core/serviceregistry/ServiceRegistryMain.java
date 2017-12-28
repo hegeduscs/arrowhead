@@ -183,10 +183,10 @@ class ServiceRegistryMain {
     config.registerClasses(AccessControlFilter.class, ServiceRegistryResource.class);
     config.packages("eu.arrowhead.common");
 
-    String keystorePath = getAppProp().getProperty("ssl.keystore", "/home/arrowhead_test.jks");
-    String keystorePass = getAppProp().getProperty("ssl.keystorepass", "arrowhead");
-    String truststorePath = getAppProp().getProperty("ssl.truststore", "/home/arrowhead_test.jks");
-    String truststorePass = getAppProp().getProperty("ssl.truststorepass", "arrowhead");
+    String keystorePath = getAppProp().getProperty("keystore", "/home/arrowhead_test.jks");
+    String keystorePass = getAppProp().getProperty("keystorepass", "arrowhead");
+    String truststorePath = getAppProp().getProperty("truststore", "/home/arrowhead_test.jks");
+    String truststorePass = getAppProp().getProperty("truststorepass", "arrowhead");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);
