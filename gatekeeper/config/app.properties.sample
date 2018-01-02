@@ -18,5 +18,3 @@ cloud_keystore_pass=12345
 cloud_keypass=12345
 
 master_arrowhead_keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\master_arrowhead_cert.crt
-master_arrowhead_keystore_pass=12345
-master_arrowhead_keypass=12345
