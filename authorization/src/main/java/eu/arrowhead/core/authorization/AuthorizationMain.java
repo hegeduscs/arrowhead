@@ -167,6 +167,7 @@ public class AuthorizationMain {
     config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+    //TODO use different SSLEngineConfigurator to set an sslcontext with trustallcerts
     final HttpServer server = GrizzlyHttpServerFactory
         .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);

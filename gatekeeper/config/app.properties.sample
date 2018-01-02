@@ -1,7 +1,7 @@
-inbound_base_uri=http://0.0.0.0:8446/
-inbound_base_uri_secured=https://0.0.0.0:8447/
-outbound_base_uri=http://0.0.0.0:8448/
-outbound_base_uri_secured=https://0.0.0.0:8449/
+internal_base_uri=http://0.0.0.0:8446/
+internal_base_uri_secured=https://0.0.0.0:8447/
+external_base_uri=http://0.0.0.0:8448/
+external_base_uri_secured=https://0.0.0.0:8449/
 db_user=root
 db_password=root
 db_address=jdbc:mysql://localhost:3306/arrowhead
@@ -9,10 +9,14 @@ timeout=30000
 use_gateway=false
 
 #Certificate properties
-keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\gatekeeper.testcloud1.jks
-keystorepass=12345
-keypass=12345
-inbound_truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\master_arrowhead_cert.jks
-inbound_truststorepass=12345
-outbound_truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
-outbound_truststorepass=12345
+gatekeeper_keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\gatekeeper.testcloud1.jks
+gatekeeper_keystore_pass=12345
+gatekeeper_keypass=12345
+
+cloud_keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
+cloud_keystore_pass=12345
+cloud_keypass=12345
+
+master_arrowhead_keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\master_arrowhead_cert.crt
+master_arrowhead_keystore_pass=12345
+master_arrowhead_keypass=12345
