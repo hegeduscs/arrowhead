@@ -15,6 +15,7 @@ import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +34,6 @@ class TokenGenerationService {
 
     // Then create the ArrowheadToken for each provider (starting with the variable initializations before the for loop)
     RawTokenInfo rawTokenInfo = new RawTokenInfo();
-    Gson gson = new Gson();
     List<ArrowheadToken> tokens = new ArrayList<>();
     Cipher cipher;
     try {
@@ -86,7 +86,9 @@ class TokenGenerationService {
       }
 
       // There is an upper limit for the size of the token info, skip providers which exceeds this limit
-      String json = gson.toJson(rawTokenInfo);
+      String json = Utility.gson.toJson(rawTokenInfo);
+      //System.out.println("Raw token info: ");
+      //System.out.println(json);
       if (json.length() > 244) {
         tokens.add(null);
         log.error("ArrowheadToken exceeded the size limit. Skipped provider.");
@@ -97,8 +99,10 @@ class TokenGenerationService {
       try {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] tokenBytes = cipher.doFinal(json.getBytes("UTF8"));
+        //System.out.println("Token bytes: " + Arrays.toString(tokenBytes));
         signature.update(tokenBytes);
         byte[] sigBytes = signature.sign();
+        //System.out.println("Signature bytes: " + Arrays.toString(sigBytes));
 
         String tokenString = Base64.getEncoder().encodeToString(tokenBytes);
         String signatureString = Base64.getEncoder().encodeToString(sigBytes);

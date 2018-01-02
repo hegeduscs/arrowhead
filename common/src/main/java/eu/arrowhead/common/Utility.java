@@ -39,11 +39,11 @@ public final class Utility {
   private static SSLContext sslContext = null;
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
-  private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
     // Decide whether to allow the connection...
     return true;
   };
+  public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
   private Utility() throws AssertionError {
     throw new AssertionError("Utility is a non-instantiable class");
