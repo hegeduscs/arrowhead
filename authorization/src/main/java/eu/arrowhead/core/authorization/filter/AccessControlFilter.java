@@ -48,7 +48,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
     String serverCN = (String) configuration.getProperty("server_common_name");
 
-    if (!SecurityUtils.isCommonNameArrowheadValid(clientCN)) {
+    if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
       log.info("Client cert does not have 6 parts, so the access will be denied.");
       return false;
     }

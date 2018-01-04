@@ -97,7 +97,7 @@ public class GatekeeperOutboundResource {
     for (String uri : cloudURIs) {
       uri = UriBuilder.fromPath(uri).path("gsd_poll").toString();
       try {
-        response = Utility.sendRequest(uri, "PUT", gsdPoll);
+        response = Utility.sendRequest(uri, "PUT", gsdPoll, GatekeeperMain.outboundClientContext);
       }
       // We skip those that did not respond positively, add the rest to the result list
       catch (RuntimeException ex) {
@@ -142,7 +142,7 @@ public class GatekeeperOutboundResource {
                                    requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     icnUri = UriBuilder.fromPath(icnUri).path("icn_proposal").toString();
     // Sending the request, the response payload is use_gateway flag dependent
-    Response response = Utility.sendRequest(icnUri, "PUT", icnProposal);
+    Response response = Utility.sendRequest(icnUri, "PUT", icnProposal, GatekeeperMain.outboundClientContext);
 
     // If the gateway services are not requested, then just send back the ICN results to the Orchestrator right away
     if (!useGateway) {
@@ -165,7 +165,7 @@ public class GatekeeperOutboundResource {
                                                                               requestForm.getRequesterSystem(), isSecure, GatekeeperMain.timeout,
                                                                               gwConnInfo.getGatewayPublicKey());
     //Sending the gateway request and parsing the response
-    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
+    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest, GatekeeperMain.outboundClientContext);
     ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
 
     CoreSystem gateway = Utility.getCoreSystem("gateway");

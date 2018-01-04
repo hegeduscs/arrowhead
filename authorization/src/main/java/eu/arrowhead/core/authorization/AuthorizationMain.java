@@ -158,7 +158,7 @@ public class AuthorizationMain {
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     System.out.println("Server PublicKey Base64: " + Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded()));
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
-    if (!SecurityUtils.isCommonNameArrowheadValid(serverCN)) {
+    if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
       throw new AuthenticationException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
@@ -167,7 +167,6 @@ public class AuthorizationMain {
     config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-    //TODO use different SSLEngineConfigurator to set an sslcontext with trustallcerts
     final HttpServer server = GrizzlyHttpServerFactory
         .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);

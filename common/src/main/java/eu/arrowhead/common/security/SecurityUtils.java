@@ -1,10 +1,11 @@
 package eu.arrowhead.common.security;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +14,7 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -23,7 +25,10 @@ import java.util.ServiceConfigurationError;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.log4j.Logger;
 
@@ -33,11 +38,9 @@ public final class SecurityUtils {
 
 
   public static KeyStore loadKeyStore(String filePath, String pass) {
-    File file = new File(filePath);
-
     try {
       KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-      FileInputStream is = new FileInputStream(file);
+      InputStream is = new FileInputStream(filePath);
       keystore.load(is, pass.toCharArray());
       is.close();
       return keystore;
@@ -47,7 +50,6 @@ public final class SecurityUtils {
       throw new ServiceConfigurationError("Loading the keystore failed...", e);
     }
   }
-
 
   public static X509Certificate getFirstCertFromKeyStore(KeyStore keystore) {
     try {
@@ -61,7 +63,6 @@ public final class SecurityUtils {
       throw new ServiceConfigurationError("Getting the first cert from keystore failed...", e);
     }
   }
-
 
   public static String getCertCNFromSubject(String subjectname) {
     String cn = null;
@@ -85,7 +86,6 @@ public final class SecurityUtils {
 
     return cn;
   }
-
 
   public static PrivateKey getPrivateKey(KeyStore keystore, String pass) {
     PrivateKey privatekey = null;
@@ -111,10 +111,58 @@ public final class SecurityUtils {
     return privatekey;
   }
 
+  public static KeyStore createKeyStoreFromCert(String filePath, String alias) {
+    try {
+      InputStream is = new FileInputStream(filePath);
+      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+      X509Certificate cert = (X509Certificate) cf.generateCertificate(is);
+
+      KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+      keystore.load(null); // We don't need the KeyStore instance to come from a file.
+      keystore.setCertificateEntry(alias, cert);
+      return keystore;
+    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+      e.printStackTrace();
+      log.fatal("Keystore creation from cert failed: " + e.toString() + " " + e.getMessage());
+      throw new ServiceConfigurationError("Keystore creation from cert failed...", e);
+    }
+  }
+
+  public static SSLContext createMasterSSLContext(String keyStorePath, String keyStorePass, String keyPass, String masterArrowheadCertPath) {
+    try {
+      KeyStore keyStore = loadKeyStore(keyStorePath, keyStorePass);
+      String kmfAlgorithm = System.getProperty("ssl.KeyManagerFactory.algorithm", KeyManagerFactory.getDefaultAlgorithm());
+      KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(kmfAlgorithm);
+      keyManagerFactory.init(keyStore, keyPass != null ? keyPass.toCharArray() : keyStorePass.toCharArray());
+
+      KeyStore trustStore = SecurityUtils.createKeyStoreFromCert(masterArrowheadCertPath, "arrowhead.eu");
+      String tmfAlgorithm = System.getProperty("ssl.TrustManagerFactory.algorithm", TrustManagerFactory.getDefaultAlgorithm());
+      TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(tmfAlgorithm);
+      trustManagerFactory.init(trustStore);
+
+      String secProtocol = "TLS";
+      SSLContext sslContext = SSLContext.getInstance(secProtocol);
+      sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+
+      return sslContext;
+    } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | KeyManagementException e) {
+      e.printStackTrace();
+      log.fatal("Master SSLContext creation failed: " + e.toString() + " " + e.getMessage());
+      throw new ServiceConfigurationError("Master SSLContext creation failed...", e);
+    }
+  }
+
   // NOTE dont forget to modify this, if we migrate to a version without system group
-  public static boolean isCommonNameArrowheadValid(String commonName) {
+  // NOTE gatekeeper certs can be an exception to this rule
+  public static boolean isKeyStoreCNArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
     return cnFields.length == 6;
+  }
+
+  // NOTE gatekeeper certs can be an exception to this rule
+  public static boolean isTrustStoreCNArrowheadValid(String commonName) {
+    String[] cnFields = commonName.split("\\.", 0);
+    return cnFields.length == 4;
   }
 
   public static X509Certificate getCertFromKeyStore(KeyStore keystore, String name) {
@@ -191,10 +239,10 @@ public final class SecurityUtils {
         return new java.security.cert.X509Certificate[]{};
       }
 
-      public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      public void checkClientTrusted(X509Certificate[] chain, String authType) {
       }
 
-      public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      public void checkServerTrusted(X509Certificate[] chain, String authType) {
       }
     }};
     return trustAllCerts;

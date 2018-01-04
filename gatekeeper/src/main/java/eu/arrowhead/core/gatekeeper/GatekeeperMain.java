@@ -29,14 +29,18 @@ public class GatekeeperMain {
   private static HttpServer inboundSecureServer = null;
   private static HttpServer outboundServer = null;
   private static HttpServer outboundSecureServer = null;
-  private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
   private static Properties prop;
-  private static final String INBOUND_BASE_URI = getProp().getProperty("inbound_base_uri", "http://0.0.0.0:8446/");
-  private static final String INBOUND_BASE_URI_SECURED = getProp().getProperty("inbound_base_uri_secured", "https://0.0.0.0:8447/");
-  private static final String OUTBOUND_BASE_URI = getProp().getProperty("outbound_base_uri", "http://0.0.0.0:8448/");
-  private static final String OUTBOUND_BASE_URI_SECURED = getProp().getProperty("outbound_base_uri_secured", "https://0.0.0.0:8449/");
+
+  private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
+  private static final String INBOUND_BASE_URI = getProp().getProperty("internal_base_uri", "http://0.0.0.0:8446/");
+  private static final String INBOUND_BASE_URI_SECURED = getProp().getProperty("internal_base_uri_secured", "https://0.0.0.0:8447/");
+  private static final String OUTBOUND_BASE_URI = getProp().getProperty("external_base_uri", "http://0.0.0.0:8448/");
+  private static final String OUTBOUND_BASE_URI_SECURED = getProp().getProperty("external_base_uri_secured", "https://0.0.0.0:8449/");
+
   static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
+
   public static boolean DEBUG_MODE;
+  public static SSLContext outboundClientContext;
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -144,46 +148,63 @@ public class GatekeeperMain {
     }
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.gatekeeper.filter");
 
-    String keystorePath = getProp().getProperty("keystore");
-    String keystorePass = getProp().getProperty("keystorepass");
-    String keyPass = getProp().getProperty("keypass");
-    String truststorePath, truststorePass;
+    String gatekeeperKeystorePath = getProp().getProperty("gatekeeper_keystore");
+    String gatekeeperKeystorePass = getProp().getProperty("gatekeeper_keystore_pass");
+    String gatekeeperKeyPass = getProp().getProperty("gatekeeper_keypass");
+    String cloudKeystorePath = getProp().getProperty("cloud_keystore");
+    String cloudKeystorePass = getProp().getProperty("cloud_keystore_pass");
+    String cloudKeyPass = getProp().getProperty("cloud_keypass");
+    String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
+
+    SSLContext serverContext = null;
     if (inbound) {
-      truststorePath = getProp().getProperty("inbound_truststore");
-      truststorePass = getProp().getProperty("inbound_truststorepass");
+      serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
+
+      SSLContextConfigurator clientConfig = new SSLContextConfigurator();
+      clientConfig.setKeyStoreFile(gatekeeperKeystorePath);
+      clientConfig.setKeyStorePass(gatekeeperKeystorePass);
+      clientConfig.setKeyPass(gatekeeperKeyPass);
+      clientConfig.setTrustStoreFile(cloudKeystorePath);
+      clientConfig.setTrustStorePass(cloudKeystorePass);
+      if (!clientConfig.validateConfiguration(true)) {
+        log.fatal("Internal client SSL Context is not valid, check the certificate files or app.properties!");
+        throw new AuthenticationException("Internal client SSL Context is not valid, check the certificate files or app.properties!");
+      }
+      SSLContext clientContext = clientConfig.createSSLContext();
+
+      Utility.setSSLContext(clientContext);
     } else {
-      truststorePath = getProp().getProperty("outbound_truststore");
-      truststorePass = getProp().getProperty("outbound_truststorepass");
-    }
+      SSLContextConfigurator serverConfig = new SSLContextConfigurator();
+      serverConfig.setKeyStoreFile(gatekeeperKeystorePath);
+      serverConfig.setKeyStorePass(gatekeeperKeystorePass);
+      serverConfig.setKeyPass(gatekeeperKeyPass);
+      serverConfig.setTrustStoreFile(cloudKeystorePath);
+      serverConfig.setTrustStorePass(cloudKeystorePass);
+      if (!serverConfig.validateConfiguration(true)) {
+        log.fatal("External server SSL Context is not valid, check the certificate files or app.properties!");
+        throw new AuthenticationException("External server SSL Context is not valid, check the certificate files or app.properties!");
+      }
+      serverContext = serverConfig.createSSLContext();
 
-    SSLContextConfigurator sslCon = new SSLContextConfigurator();
-    sslCon.setKeyStoreFile(keystorePath);
-    sslCon.setKeyStorePass(keystorePass);
-    sslCon.setKeyPass(keyPass);
-    sslCon.setTrustStoreFile(truststorePath);
-    sslCon.setTrustStorePass(truststorePass);
-    if (!sslCon.validateConfiguration(true)) {
-      log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
-      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
-    }
+      outboundClientContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
-    SSLContext sslContext = sslCon.createSSLContext();
-    Utility.setSSLContext(sslContext);
-
-    KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-    X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
-    if (!SecurityUtils.isCommonNameArrowheadValid(serverCN)) {
-      log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
-      throw new AuthenticationException(
-          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      //TODO ezt a részt átmozgatni security utilsba teljesen? nincs is szükség SSLContextConfigurator-ra igy már sztem
+      //TODO hanem a loadkeystore-ba lehetne egy boolean paraméter, hogy ez keystore vagy trusttore, de előbb azért teszteljük a manuális működését
+      KeyStore keyStore = SecurityUtils.loadKeyStore(gatekeeperKeystorePath, gatekeeperKeystorePass);
+      X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
+      String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+      if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
+        log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+        throw new AuthenticationException(
+            "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      }
+      log.info("Certificate of the secure server: " + serverCN);
+      config.property("server_common_name", serverCN);
     }
-    log.info("Certificate of the secure server: " + serverCN);
-    config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(url).build();
     final HttpServer server = GrizzlyHttpServerFactory
-        .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
+        .createHttpServer(uri, config, true, new SSLEngineConfigurator(serverContext).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;

@@ -53,7 +53,7 @@ public final class Utility {
     sslContext = context;
   }
 
-  public static <T> Response sendRequest(String uri, String method, T payload) {
+  public static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {
     log.info("Sending " + method + " request to: " + uri);
 
     boolean isSecure = false;
@@ -66,12 +66,16 @@ public final class Utility {
     configuration.property(ClientProperties.READ_TIMEOUT, 30000);
 
     Client client;
-    if (isSecure && Utility.sslContext != null) {
-      client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
-    } else if (isSecure && Utility.sslContext == null) {
-      log.error("sendRequest() method throws AuthenticationException");
-      throw new AuthenticationException(
-          "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.");
+    if (isSecure) {
+      if (context != null) {
+        client = ClientBuilder.newBuilder().sslContext(context).withConfig(configuration).hostnameVerifier(allHostsValid).build();
+      } else if (Utility.sslContext != null) {
+        client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
+      } else {
+        log.error("sendRequest() method throws AuthenticationException");
+        throw new AuthenticationException(
+            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.");
+      }
     } else {
       client = ClientBuilder.newClient(configuration);
     }
@@ -129,6 +133,10 @@ public final class Utility {
     }
 
     return response;
+  }
+
+  public static <T> Response sendRequest(String uri, String method, T payload) {
+    return sendRequest(uri, method, payload, null);
   }
 
   public static String getUri(String address, int port, String serviceUri, boolean isSecure) {
@@ -216,18 +224,6 @@ public final class Utility {
     }
     return getUri(qos.getAddress(), qos.getPort(), qos.getServiceURI(), qos.getIsSecure());
   }
-
-  public static String getApiUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "api");
-    CoreSystem api = dm.get(CoreSystem.class, restrictionMap);
-    if (api == null) {
-      log.error("Utility:getApiUri System not found in the database!");
-      throw new RuntimeException("API Core System not found in the database!");
-    }
-    return getUri(api.getAddress(), api.getPort(), api.getServiceURI(), api.getIsSecure());
-  }
-
 
   public static List<String> getNeighborCloudURIs() {
     List<NeighborCloud> cloudList = new ArrayList<>(dm.getAll(NeighborCloud.class, null));
