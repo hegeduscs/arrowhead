@@ -112,6 +112,7 @@ public final class Utility {
       ErrorMessage errorMessage;
       try {
         errorMessage = response.readEntity(ErrorMessage.class);
+        client.close();
       } catch (RuntimeException e) {
         log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
         log.info("Request failed, response status code: " + response.getStatus());
@@ -132,6 +133,7 @@ public final class Utility {
       }
     }
 
+    client.close();
     return response;
   }
 
