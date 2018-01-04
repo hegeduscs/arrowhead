@@ -37,18 +37,15 @@ public class AccessControlFilter implements ContainerRequestFilter {
   }
 
   private boolean isGetItCalled(String method, String requestTarget) {
-    if (!method.equals("GET")) {
-      return false;
-    }
-    return requestTarget.endsWith("gatekeeper") || requestTarget.endsWith("mgmt");
+    return method.equals("GET") && (requestTarget.endsWith("gatekeeper") || requestTarget.endsWith("mgmt"));
   }
 
   private boolean isClientAuthorized(String subjectName, String requestTarget) {
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
     String serverCN = (String) configuration.getProperty("server_common_name");
 
-    if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
-      log.info("Client cert does not have 6 parts, so the access will be denied.");
+    if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN) || !SecurityUtils.isTrustStoreCNArrowheadValid(clientCN)) {
+      log.info("Client cert does not have a valid arrowhead keystore, so the access will be denied.");
       return false;
     }
     if (requestTarget.contains("mgmt")) {

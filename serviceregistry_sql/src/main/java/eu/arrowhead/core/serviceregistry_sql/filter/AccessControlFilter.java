@@ -37,10 +37,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
   }
 
   private boolean isGetItCalled(String method, String requestTarget) {
-    if (!method.equals("GET")) {
-      return false;
-    }
-    return requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt");
+    return method.equals("GET") && (requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt"));
   }
 
   private boolean isClientAuthorized(String subjectName, String requestTarget) {
