@@ -67,8 +67,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
       } else {
         // Only requests from other Gatekeepers are allowed
         String[] clientFields = clientCN.split("\\.", 3);
-        return clientFields[0].equalsIgnoreCase("gatekeeper") && clientFields[1].equalsIgnoreCase("coresystems") && clientFields[2]
-            .endsWith("arrowhead.eu");
+        return clientFields.length == 3 && clientFields[2].endsWith("arrowhead.eu");
       }
     }
   }
