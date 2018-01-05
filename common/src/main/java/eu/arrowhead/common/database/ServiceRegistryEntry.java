@@ -27,11 +27,10 @@ public class ServiceRegistryEntry {
   //mandatory fields
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-
   private ArrowheadService providedService;
+
   @JoinColumn(name = "provider_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-
   private ArrowheadSystem provider;
 
   //non-mandatory fields
