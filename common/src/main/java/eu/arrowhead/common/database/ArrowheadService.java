@@ -96,7 +96,7 @@ public class ArrowheadService {
     this.interfaces = interfaces;
   }
 
-  public void setInterfaces(String oneInterface) {
+  public void setOneInterface(String oneInterface) {
     this.interfaces.clear();
     this.interfaces.add(oneInterface);
   }
@@ -160,13 +160,10 @@ public class ArrowheadService {
       return false;
     }
     if (serviceGroup == null) {
-      if (other.serviceGroup != null) {
-        return false;
-      }
-    } else if (!serviceGroup.equals(other.serviceGroup)) {
-      return false;
+      return other.serviceGroup == null;
+    } else {
+      return serviceGroup.equals(other.serviceGroup);
     }
-    return true;
   }
 
   @Override
