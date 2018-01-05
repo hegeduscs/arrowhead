@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -115,6 +116,7 @@ public class ServiceRequestForm {
    *
    * @return true if the instance is in compliance with all the restrictions, false otherwise
    */
+  @JsonIgnore
   public boolean isValid() {
     return requesterSystem != null && requesterSystem.isValid() && !(requestedService != null && !requestedService.isValid()) && !(
         orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) && !(orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty()
