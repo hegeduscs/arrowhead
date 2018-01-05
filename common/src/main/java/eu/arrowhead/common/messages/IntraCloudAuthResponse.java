@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import java.util.HashMap;
 
@@ -22,6 +23,7 @@ public class IntraCloudAuthResponse {
     this.authorizationState = authorizationState;
   }
 
+  @JsonIgnore
   public boolean isPayloadUsable() {
     return !authorizationState.isEmpty();
   }

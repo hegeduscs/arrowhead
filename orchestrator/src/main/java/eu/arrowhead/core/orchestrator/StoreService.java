@@ -25,7 +25,7 @@ public final class StoreService {
     }
 
     restrictionMap.put("consumer", savedConsumer);
-    restrictionMap.put("isDefault", true);
+    restrictionMap.put("defaultEntry", true);
     return dm.getAll(OrchestrationStore.class, restrictionMap);
   }
 

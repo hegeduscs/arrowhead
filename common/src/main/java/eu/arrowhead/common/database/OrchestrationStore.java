@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   private int priority;
 
   @Column(name = "is_default")
-  private boolean isDefault;
+  private boolean defaultEntry;
 
   @Column(name = "name")
   private String name;
@@ -99,14 +100,14 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            int priority, boolean isDefault, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
+                            int priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
                             String serviceURI) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;
     this.providerCloud = providerCloud;
     this.priority = priority;
-    this.isDefault = isDefault;
+    this.defaultEntry = defaultEntry;
     this.name = name;
     this.lastUpdated = lastUpdated;
     this.instruction = instruction;
@@ -163,12 +164,12 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.priority = priority;
   }
 
-  public boolean isDefault() {
-    return isDefault;
+  public boolean isDefaultEntry() {
+    return defaultEntry;
   }
 
-  public void setDefault(boolean aDefault) {
-    isDefault = aDefault;
+  public void setDefaultEntry(boolean defaultEntry) {
+    this.defaultEntry = defaultEntry;
   }
 
   public String getName() {
@@ -216,9 +217,10 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
    *
    * @return true if the instance is in compliance with all the restrictions, false otherwise
    */
+  @JsonIgnore
   public boolean isValid() {
     return service != null && consumer != null && providerSystem != null && service.isValid() && consumer.isValid() && providerSystem.isValid()
-        && priority >= 1 && (!isDefault || providerCloud == null);
+        && priority >= 1 && (!defaultEntry || providerCloud == null);
   }
 
   /**

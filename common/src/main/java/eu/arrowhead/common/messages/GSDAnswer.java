@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 
@@ -32,6 +33,7 @@ public class GSDAnswer {
     this.providerCloud = providerCloud;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return requestedService.isValidForDatabase() && providerCloud.isValid();
   }

@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class GSDResult {
     this.response = response;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return response != null && !response.isEmpty();
   }

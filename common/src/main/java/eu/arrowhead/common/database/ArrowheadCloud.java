@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -42,20 +43,20 @@ public class ArrowheadCloud {
   private String authenticationInfo;
 
   @Column(name = "is_secure")
-  private boolean isSecure;
+  private boolean secure;
 
   public ArrowheadCloud() {
   }
 
   public ArrowheadCloud(String operator, String cloudName, String address, int port, String gatekeeperServiceURI, String authenticationInfo,
-                        boolean isSecure) {
+                        boolean secure) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;
     this.port = port;
     this.gatekeeperServiceURI = gatekeeperServiceURI;
     this.authenticationInfo = authenticationInfo;
-    this.isSecure = isSecure;
+    this.secure = secure;
   }
 
   @XmlTransient
@@ -116,17 +117,19 @@ public class ArrowheadCloud {
   }
 
   public boolean isSecure() {
-    return isSecure;
+    return secure;
   }
 
   public void setSecure(boolean secure) {
-    isSecure = secure;
+    this.secure = secure;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return operator != null && cloudName != null && address != null && gatekeeperServiceURI != null;
   }
 
+  @JsonIgnore
   public boolean isValidForDatabase() {
     return operator != null && cloudName != null;
   }

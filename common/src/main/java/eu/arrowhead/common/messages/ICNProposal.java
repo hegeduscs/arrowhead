@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -110,6 +111,7 @@ public class ICNProposal {
     this.gatewayPublicKey = gatewayPublicKey;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return requestedService != null && requesterCloud != null && requesterSystem != null && requestedService.isValid() && requesterCloud
         .isValidForDatabase() && requesterSystem.isValid();

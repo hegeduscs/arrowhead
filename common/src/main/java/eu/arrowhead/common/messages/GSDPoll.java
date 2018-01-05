@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 
@@ -32,6 +33,7 @@ public class GSDPoll {
     this.requesterCloud = requesterCloud;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return requestedService != null && requestedService.isValid() && requesterCloud != null && requesterCloud.isValidForDatabase();
   }

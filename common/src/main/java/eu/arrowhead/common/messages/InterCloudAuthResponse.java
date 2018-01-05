@@ -2,21 +2,21 @@ package eu.arrowhead.common.messages;
 
 public class InterCloudAuthResponse {
 
-  private boolean isAuthorized;
+  private boolean authorized;
 
   public InterCloudAuthResponse() {
   }
 
   public InterCloudAuthResponse(boolean isAuthorized) {
-    this.isAuthorized = isAuthorized;
+    this.authorized = isAuthorized;
   }
 
   public boolean isAuthorized() {
-    return isAuthorized;
+    return authorized;
   }
 
   public void setAuthorized(boolean isAuthorized) {
-    this.isAuthorized = isAuthorized;
+    this.authorized = isAuthorized;
   }
 
 }

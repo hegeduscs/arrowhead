@@ -1,6 +1,7 @@
 package eu.arrowhead.common.messages;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 
@@ -33,6 +34,7 @@ public class OrchestrationStoreQuery {
     this.requesterSystem = requesterSystem;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     if (requesterSystem == null && requestedService == null) {
       return false;

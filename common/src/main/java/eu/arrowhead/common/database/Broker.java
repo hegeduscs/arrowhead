@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,7 +32,7 @@ public class Broker {
   private Integer port;
 
   @Column(name = "is_secure")
-  private boolean isSecure;
+  private boolean secure;
 
   @Column(name = "authentication_info", length = 2047)
   private String authenticationInfo;
@@ -39,11 +40,11 @@ public class Broker {
   public Broker() {
   }
 
-  public Broker(String brokerName, String address, Integer port, boolean isSecure, String authenticationInfo) {
+  public Broker(String brokerName, String address, Integer port, boolean secure, String authenticationInfo) {
     this.brokerName = brokerName;
     this.address = address;
     this.port = port;
-    this.isSecure = isSecure;
+    this.secure = secure;
     this.authenticationInfo = authenticationInfo;
   }
 
@@ -77,11 +78,11 @@ public class Broker {
   }
 
   public boolean isSecure() {
-    return isSecure;
+    return secure;
   }
 
   public void setSecure(boolean secure) {
-    isSecure = secure;
+    this.secure = secure;
   }
 
   public String getAuthenticationInfo() {
@@ -116,6 +117,7 @@ public class Broker {
     return result;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return brokerName != null && address != null;
   }

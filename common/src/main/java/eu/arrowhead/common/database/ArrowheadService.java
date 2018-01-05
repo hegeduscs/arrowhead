@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -111,6 +112,7 @@ public class ArrowheadService {
   /*
    * @note  ArrowheadServices cannot contain the character "_" in any fields.
    */
+  @JsonIgnore
   public boolean isValid() {
 
     boolean areInterfacesClean = true;
@@ -124,6 +126,7 @@ public class ArrowheadService {
         .contains("_") && areInterfacesClean);
   }
 
+  @JsonIgnore
   public boolean isValidForDatabase() {
     return serviceGroup != null && serviceDefinition != null;
   }

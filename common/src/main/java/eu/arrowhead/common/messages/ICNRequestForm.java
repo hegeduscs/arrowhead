@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -78,6 +79,7 @@ public class ICNRequestForm {
     this.authenticationInfo = authenticationInfo;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return requestedService != null && targetCloud != null && requesterSystem != null && requestedService.isValid() && targetCloud.isValid()
         && requesterSystem.isValid();

@@ -163,7 +163,7 @@ public class AuthorizationApi {
   @Path("intracloud")
   public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
 
-    if (!entry.isPayloadUsable()) {
+    if (!entry.isValid()) {
       log.info("AuthorizationApi:addSystemToAuthorized throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: Missing/incomplete consumer, serviceList or providerList in the entry payload.");
     }

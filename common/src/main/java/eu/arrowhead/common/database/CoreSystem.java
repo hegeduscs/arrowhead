@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -43,7 +44,7 @@ public class CoreSystem {
   private String serviceURI;
 
   @Column(name = "is_secure")
-  private boolean isSecure;
+  private boolean secure;
 
   @Column(name = "authentication_info")
   private String authenticationInfo;
@@ -57,14 +58,14 @@ public class CoreSystem {
    * @param port The port number where the Core System offers its services (optional)
    * @param serviceURI The path where the REST resource(s) is/are available
    * @param isSecure Indicates weather the server uses HTTP or HTTPS protocol
-   * @param authenticationInfo In case <tt>isSecure</tt> is true, this field holds the Base64 coded public key of the Core System certificate
+   * @param authenticationInfo In case <tt>secure</tt> is true, this field holds the Base64 coded public key of the Core System certificate
    */
-  public CoreSystem(String systemName, String address, int port, String serviceURI, boolean isSecure, String authenticationInfo) {
+  public CoreSystem(String systemName, String address, int port, String serviceURI, boolean secure, String authenticationInfo) {
     this.systemName = systemName;
     this.address = address;
     this.port = port;
     this.serviceURI = serviceURI;
-    this.isSecure = isSecure;
+    this.secure = secure;
     this.authenticationInfo = authenticationInfo;
   }
 
@@ -106,11 +107,11 @@ public class CoreSystem {
   }
 
   public boolean getIsSecure() {
-    return isSecure;
+    return secure;
   }
 
   public void setIsSecure(boolean isSecure) {
-    this.isSecure = isSecure;
+    this.secure = isSecure;
   }
 
   public String getAuthenticationInfo() {
@@ -126,6 +127,7 @@ public class CoreSystem {
    *
    * @return False if <tt>systemName</tt>, <tt>address</tt> or <tt>serviceURI</tt> is null, true otherwise
    */
+  @JsonIgnore
   public boolean isValid() {
     return systemName != null && address != null && serviceURI != null;
   }

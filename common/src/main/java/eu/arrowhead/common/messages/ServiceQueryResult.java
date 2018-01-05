@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class ServiceQueryResult {
     this.serviceQueryData = serviceQueryData;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return serviceQueryData != null && !serviceQueryData.isEmpty();
   }

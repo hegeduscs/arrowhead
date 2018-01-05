@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import java.util.ArrayList;
@@ -43,7 +44,8 @@ public class IntraCloudAuthEntry {
     this.serviceList = serviceList;
   }
 
-  public boolean isPayloadUsable() {
+  @JsonIgnore
+  public boolean isValid() {
     if (consumer == null || serviceList.isEmpty() || providerList.isEmpty() || !consumer.isValidForDatabase()) {
       return false;
     }

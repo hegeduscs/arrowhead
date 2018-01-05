@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadService;
 
 public class ServiceQueryForm {
@@ -56,6 +57,7 @@ public class ServiceQueryForm {
     this.version = version;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return service != null && service.isValid();
   }

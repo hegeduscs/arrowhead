@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 
@@ -32,6 +33,7 @@ public class InterCloudAuthRequest {
     this.service = service;
   }
 
+  @JsonIgnore
   public boolean isPayloadUsable() {
     return cloud != null && service != null && cloud.isValidForDatabase() && service.isValidForDatabase();
   }

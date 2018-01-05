@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public class IntraCloudAuthRequest {
     this.service = service;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     if (consumer == null || service == null || providers.isEmpty() || !consumer.isValidForDatabase() || !service.isValidForDatabase()) {
       return false;

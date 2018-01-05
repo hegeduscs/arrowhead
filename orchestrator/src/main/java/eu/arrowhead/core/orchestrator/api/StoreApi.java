@@ -94,7 +94,7 @@ public class StoreApi {
   @Path("all_default")
   public List<OrchestrationStore> getDefaultStoreEntries() {
 
-    restrictionMap.put("isDefault", true);
+    restrictionMap.put("defaultEntry", true);
     List<OrchestrationStore> store = dm.getAll(OrchestrationStore.class, restrictionMap);
     if (store.isEmpty()) {
       log.info("StoreApi:getDefaultStoreEntries throws DataNotFoundException.");
@@ -203,7 +203,7 @@ public class StoreApi {
   }
 
   /**
-   * Toggles the isDefault boolean for the Orchestration Store entry specified by the id field.
+   * Toggles the <tt>defaultEntry</tt> boolean for the Orchestration Store entry specified by the id field.
    *
    * @return OrchestrationStore
    *
@@ -218,11 +218,11 @@ public class StoreApi {
     if (entry == null) {
       log.info("StoreApi:toggleIsDefault throws DataNotFoundException.");
       throw new DataNotFoundException("Orchestration Store entry with this id was not found in the database.");
-    } else if (entry.getProviderCloud() != null && !entry.isDefault()) {
+    } else if (entry.getProviderCloud() != null && !entry.isDefaultEntry()) {
       log.info("StoreApi:toggleIsDefault throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be set as default entries.");
     } else {
-      entry.setDefault(!entry.isDefault());
+      entry.setDefaultEntry(!entry.isDefaultEntry());
       dm.merge(entry);
       log.info("toggleIsDefault succesfully returns.");
       return Response.ok(entry).build();
@@ -251,12 +251,12 @@ public class StoreApi {
     if (storeEntry == null) {
       log.info("StoreApi:updateEntry throws DataNotFoundException.");
       throw new DataNotFoundException("Store entry specified by the id(" + payload.getId() + ") was not found in the database.");
-    } else if (storeEntry.getProviderCloud() != null && payload.isDefault()) {
+    } else if (storeEntry.getProviderCloud() != null && payload.isDefaultEntry()) {
       log.info("StoreApi:toggleIsDefault throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be set as default entries.");
     } else {
       storeEntry.setPriority(payload.getPriority());
-      storeEntry.setDefault(payload.isDefault());
+      storeEntry.setDefaultEntry(payload.isDefaultEntry());
       storeEntry.setName(payload.getName());
       storeEntry.setLastUpdated(new Date());
       storeEntry.setInstruction(payload.getInstruction());

@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -98,10 +99,12 @@ public class ArrowheadSystem {
     this.authenticationInfo = authenticationInfo;
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return systemGroup != null && systemName != null && address != null;
   }
 
+  @JsonIgnore
   public boolean isValidForDatabase() {
     return systemGroup != null && systemName != null;
   }

@@ -1,5 +1,6 @@
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class InterCloudAuthEntry {
     this.serviceList = serviceList;
   }
 
+  @JsonIgnore
   public boolean isPayloadUsable() {
     if (cloud == null || serviceList.isEmpty() || !cloud.isValidForDatabase()) {
       return false;
