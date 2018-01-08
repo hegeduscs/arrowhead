@@ -43,7 +43,6 @@ import org.apache.log4j.Logger;
 public class GatekeeperInboundResource {
 
   private static final Logger log = Logger.getLogger(GatekeeperInboundResource.class.getName());
-
   private static final DatabaseManager dm = DatabaseManager.getInstance();
 
 

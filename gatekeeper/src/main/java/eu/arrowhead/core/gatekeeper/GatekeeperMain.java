@@ -158,7 +158,7 @@ public class GatekeeperMain {
 
     SSLContext serverContext = null;
     if (inbound) {
-      serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
+      //serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
       SSLContextConfigurator clientConfig = new SSLContextConfigurator();
       clientConfig.setKeyStoreFile(gatekeeperKeystorePath);
@@ -173,6 +173,13 @@ public class GatekeeperMain {
       SSLContext clientContext = clientConfig.createSSLContext();
 
       Utility.setSSLContext(clientContext);
+
+      //NOTE temporary solution
+      URI uri = UriBuilder.fromUri(url).build();
+      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+      server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+      server.start();
+      return server;
     } else {
       SSLContextConfigurator serverConfig = new SSLContextConfigurator();
       serverConfig.setKeyStoreFile(gatekeeperKeystorePath);

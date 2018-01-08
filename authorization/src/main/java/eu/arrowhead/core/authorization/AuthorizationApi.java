@@ -35,7 +35,6 @@ import org.apache.log4j.Logger;
 public class AuthorizationApi {
 
   private static final Logger log = Logger.getLogger(AuthorizationApi.class.getName());
-
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 

@@ -33,7 +33,6 @@ public class ServiceRegistryResource {
 
   private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
 
-
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {

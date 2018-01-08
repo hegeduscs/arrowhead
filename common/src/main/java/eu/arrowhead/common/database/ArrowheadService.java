@@ -51,6 +51,8 @@ public class ArrowheadService {
   @MapKeyColumn(name = "metadata_key")
   @Column(name = "metadata_value")
   @CollectionTable(name = "arrowhead_service_metadata_map", joinColumns = @JoinColumn(name = "service_id"))
+  //TODO remove if not relevant anymore
+  //@XmlJavaTypeAdapter(MapAdapter.class)
   private Map<String, String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {

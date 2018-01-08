@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 public class GatewayApi {
 
   private static final Logger log = Logger.getLogger(GatewayApi.class.getName());
-
   private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
 

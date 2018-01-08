@@ -31,7 +31,6 @@ public class ServiceRegistryResource {
 
   private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
-
   static final DatabaseManager dm = DatabaseManager.getInstance();
 
 
