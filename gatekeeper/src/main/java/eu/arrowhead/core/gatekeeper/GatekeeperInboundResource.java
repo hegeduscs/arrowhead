@@ -132,6 +132,7 @@ public class GatekeeperInboundResource {
     // If it is authorized, send a ServiceRequestForm to the Orchestrator and return the OrchestrationResponse
     Map<String, Boolean> orchestrationFlags = icnProposal.getNegotiationFlags();
     List<PreferredProvider> preferredProviders = new ArrayList<>();
+   
     for (ArrowheadSystem preferredSystem : icnProposal.getPreferredSystems()) {
       preferredProviders.add(new PreferredProvider(preferredSystem, null));
     }
@@ -153,9 +154,17 @@ public class GatekeeperInboundResource {
 
     // Getting the list of preferred brokers from database
     List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
+  
     // Filtering common brokers
     List<Broker> commonBrokers = new ArrayList<>(icnProposal.getPreferredBrokers());
     commonBrokers.retainAll(preferredBrokers);
+    
+    /* TODO: kitalalni mi alapjan dontsuk el, hogy secure vagy insecureban vagyunk
+	for (Broker broker : commonBrokers) {
+    	if(broker.isSecure()) {
+    		
+    	}
+    } */
 
     // Compiling the gateway request payload
     String gatewayURI = Utility.getGatewayUri();

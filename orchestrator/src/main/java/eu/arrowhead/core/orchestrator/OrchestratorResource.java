@@ -47,13 +47,14 @@ public class OrchestratorResource {
    * @return OrchestrationResponse
    */
   @POST
-  public Response orchestrationProcess(ServiceRequestForm srf, @Context ContainerRequestContext requestContext) {
+  public Response orchestrationProcess(ServiceRequestForm  srf, @Context ContainerRequestContext requestContext) {
     if (!srf.isValid()) {
       log.error("orchestrationProcess BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields. See the documentation of "
                                         + "ServiceRequestForm for more details.");
     }
-    if (requestContext.getSecurityContext().isSecure()) {
+
+    if (!srf.getOrchestrationFlags().get("externalServiceRequest") && requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
       String[] clientFields = clientCN.split("\\.", 3);

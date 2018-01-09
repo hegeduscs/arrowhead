@@ -46,7 +46,7 @@ public class GatekeeperMain {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     Utility.isUrlValid(INBOUND_BASE_URI, false);
-    Utility.isUrlValid(INBOUND_BASE_URI_SECURED, true);
+   // Utility.isUrlValid(INBOUND_BASE_URI_SECURED, true);
     Utility.isUrlValid(OUTBOUND_BASE_URI, false);
     Utility.isUrlValid(OUTBOUND_BASE_URI_SECURED, true);
 
