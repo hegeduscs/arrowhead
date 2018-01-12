@@ -55,7 +55,7 @@ public class ServiceRegistryResource {
           .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service registering denied.");
         throw new AuthenticationException(
-            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+            "Provider system " + entry.getProvider().toStringLog() + " fields and cert common name (" + clientCN + ") do not match!");
       }
     }
 
@@ -87,7 +87,7 @@ public class ServiceRegistryResource {
           .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service removing denied.");
         throw new AuthenticationException(
-            "Provider system " + entry.getProvider().toString() + " fields and cert common name (" + clientCN + ") do not match!");
+            "Provider system " + entry.getProvider().toStringLog() + " fields and cert common name (" + clientCN + ") do not match!");
       }
     }
 

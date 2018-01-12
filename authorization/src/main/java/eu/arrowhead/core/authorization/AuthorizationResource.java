@@ -69,7 +69,7 @@ public class AuthorizationResource {
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
-      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().toString());
+      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().toStringLog());
     }
 
     IntraCloudAuthResponse response = new IntraCloudAuthResponse();
@@ -109,7 +109,7 @@ public class AuthorizationResource {
       }
     }
 
-    log.info("IntraCloud auth check for consumer " + request.getConsumer().toString() + " returns with " + authorizedCount + " possible provider");
+    log.info("IntraCloud auth check for consumer " + request.getConsumer().toStringLog() + " returns with " + authorizedCount + " possible provider");
     response.setAuthorizationMap(authorizationState);
     return Response.status(Status.OK).entity(response).build();
   }

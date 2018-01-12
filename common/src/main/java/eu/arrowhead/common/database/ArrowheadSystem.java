@@ -23,11 +23,9 @@ public class ArrowheadSystem {
   private int id;
 
   @Column(name = "system_group")
-
   private String systemGroup;
 
   @Column(name = "system_name")
-
   private String systemName;
 
   @Column(name = "address")
@@ -40,6 +38,18 @@ public class ArrowheadSystem {
   private String authenticationInfo;
 
   public ArrowheadSystem() {
+  }
+
+  public ArrowheadSystem(String json) {
+    String[] fields = json.split(",");
+    this.systemGroup = fields[0];
+    this.systemName = fields[1];
+
+    if (fields.length == 5) {
+      this.address = fields[2];
+      this.port = Integer.valueOf(fields[3]);
+      this.authenticationInfo = fields[4];
+    }
   }
 
   public ArrowheadSystem(String systemGroup, String systemName, String address, int port, String authenticationInfo) {
@@ -146,21 +156,22 @@ public class ArrowheadSystem {
       return false;
     }
     if (systemName == null) {
-      if (other.systemName != null) {
-        return false;
-      }
-    } else if (!systemName.equals(other.systemName)) {
-      return false;
+      return other.systemName == null;
+    } else {
+      return systemName.equals(other.systemName);
     }
-    return true;
   }
 
   @Override
   public String toString() {
+    return systemGroup + "," + systemName + "," + address + "," + port + "," + authenticationInfo;
+  }
+
+  public String toStringLog() {
     return "(" + systemGroup + ":" + systemName + ")";
   }
 
-  public String toArrowheadCommonName(String operator, String cloudName) throws Exception {
+  public String toArrowheadCommonName(String operator, String cloudName) {
     if (systemGroup.contains(".") || systemName.contains(".") || operator.contains(".") || cloudName.contains(".")) {
       throw new IllegalArgumentException("The string fields can not contain dots!");
     }

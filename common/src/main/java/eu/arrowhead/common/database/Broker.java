@@ -21,11 +21,9 @@ public class Broker {
   private int id;
 
   @Column(name = "broker_name")
-
   private String brokerName;
 
   @Column(name = "address")
-
   private String address;
 
   @Column(name = "port")

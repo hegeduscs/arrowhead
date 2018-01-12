@@ -32,7 +32,6 @@ public class NeighborCloud implements Serializable {
   @Id
   @JoinColumn(name = "cloud_id")
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-
   private ArrowheadCloud cloud;
 
   public NeighborCloud() {

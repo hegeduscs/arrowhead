@@ -1,7 +1,7 @@
 package eu.arrowhead.common.exception;
 
 /**
- * Used by the legacy Service Registry, to handle DNS-SD related exceptions.
+ * Used by the supportadapter Service Registry, to handle DNS-SD related exceptions.
  */
 public class DnsException extends RuntimeException {
 

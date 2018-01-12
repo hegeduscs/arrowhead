@@ -121,7 +121,7 @@ public class AuthorizationApi {
     List<IntraCloudAuthorization> authRights = dm.getAllOfEither(IntraCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
       log.info("AuthorizationApi:getSystemAuthRights throws DataNotFoundException.");
-      throw new DataNotFoundException("This System is not in the authorization database. " + system.toString());
+      throw new DataNotFoundException("This System is not in the authorization database. " + system.toStringLog());
     }
     log.info("getSystemAuthRights returns");
     return authRights;
@@ -171,7 +171,7 @@ public class AuthorizationApi {
     restrictionMap.put("systemName", entry.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
-      log.info("Consumer System " + entry.getConsumer().toString() + " was not in the database, saving it now.");
+      log.info("Consumer System " + entry.getConsumer().toStringLog() + " was not in the database, saving it now.");
       consumer = dm.save(entry.getConsumer());
     }
 
@@ -184,7 +184,7 @@ public class AuthorizationApi {
       restrictionMap.put("systemName", providerSystem.getSystemName());
       retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
       if (retrievedSystem == null) {
-        log.info("Provider System " + providerSystem.toString() + " was not in the database, saving it now.");
+        log.info("Provider System " + providerSystem.toStringLog() + " was not in the database, saving it now.");
         retrievedSystem = dm.save(providerSystem);
       }
       for (ArrowheadService service : entry.getServiceList()) {

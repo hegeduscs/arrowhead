@@ -34,11 +34,9 @@ public class ArrowheadService {
   private int id;
 
   @Column(name = "service_group")
-
   private String serviceGroup;
 
   @Column(name = "service_definition")
-
   private String serviceDefinition;
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -52,7 +50,7 @@ public class ArrowheadService {
   @Column(name = "metadata_value")
   @CollectionTable(name = "arrowhead_service_metadata_map", joinColumns = @JoinColumn(name = "service_id"))
   //TODO remove if not relevant anymore
-  //@XmlJavaTypeAdapter(MapAdapter.class)
+  //@XmlJavaTypeAdapter(StringMapAdapter.class)
   private Map<String, String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {

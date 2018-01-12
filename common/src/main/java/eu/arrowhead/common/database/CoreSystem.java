@@ -29,11 +29,9 @@ public class CoreSystem {
   private int id;
 
   @Column(name = "system_name")
-
   private String systemName;
 
   @Column(name = "address")
-
   private String address;
 
   @Column(name = "port")

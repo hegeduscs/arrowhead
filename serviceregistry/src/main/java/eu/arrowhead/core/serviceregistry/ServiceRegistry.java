@@ -21,7 +21,7 @@ class ServiceRegistry {
 
   private static final Logger log = Logger.getLogger(ServiceRegistry.class.getName());
 
-  static boolean register(ServiceRegistryEntry entry) throws DnsSDException {
+  static boolean register(ServiceRegistryEntry entry) {
 
     log.info("Entered SR register method.");
     //creating service name and type based on Arrowhead data
@@ -98,9 +98,9 @@ class ServiceRegistry {
         ServiceName name = registrator.makeServiceName(providerInstance, ServiceType.valueOf(serviceType));
 
         if (registrator.unregisterService(name)) {
-          log.info("Service unregistered: " + entry.getProvidedService().toString() + "," + interf + entry.getProvider().toString());
+          log.info("Service unregistered: " + entry.getProvidedService().toString() + "," + interf + entry.getProvider().toStringLog());
         } else {
-          log.info("No service to remove: " + entry.getProvidedService().toString() + "," + interf + entry.getProvider().toString());
+          log.info("No service to remove: " + entry.getProvidedService().toString() + "," + interf + entry.getProvider().toStringLog());
           //allRemoved = false;
         }
       } catch (DnsSDException ex) {
@@ -166,7 +166,7 @@ class ServiceRegistry {
   }
 
 
-  static ServiceQueryResult provideAllServices() throws DnsSDException {
+  static ServiceQueryResult provideAllServices() {
     //Preparing DNS-SD
     DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);
     DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());

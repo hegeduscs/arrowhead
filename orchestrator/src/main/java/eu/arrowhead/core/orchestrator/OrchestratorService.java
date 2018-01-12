@@ -347,7 +347,7 @@ final class OrchestratorService {
     }
 
     for (OrchestrationForm of : ofList) {
-      log.debug("Service: " + of.getService().toString() + " System: " + of.getProvider().toString() + " ServiceURI: " + of.getServiceURI()
+      log.debug("Service: " + of.getService().toString() + " System: " + of.getProvider().toStringLog() + " ServiceURI: " + of.getServiceURI()
                     + " Instruction: " + of.getInstruction() + " Token: " + of.getAuthorizationToken() + " Signature: " + of.getSignature());
     }
     log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");

@@ -34,12 +34,10 @@ public class InterCloudAuthorization {
 
   @JoinColumn(name = "consumer_cloud_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-
   private ArrowheadCloud cloud;
 
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-
   private ArrowheadService service;
 
   public InterCloudAuthorization() {

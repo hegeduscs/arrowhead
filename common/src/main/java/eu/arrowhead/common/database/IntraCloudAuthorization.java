@@ -35,17 +35,14 @@ public class IntraCloudAuthorization {
 
   @JoinColumn(name = "consumer_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-
   private ArrowheadSystem consumer;
 
   @JoinColumn(name = "provider_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-
   private ArrowheadSystem provider;
 
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-
   private ArrowheadService service;
 
   public IntraCloudAuthorization() {

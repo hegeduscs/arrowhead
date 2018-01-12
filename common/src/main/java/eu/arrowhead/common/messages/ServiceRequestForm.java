@@ -21,7 +21,6 @@ public class ServiceRequestForm {
   private ArrowheadSystem requesterSystem;
   private ArrowheadCloud requesterCloud;
   private ArrowheadService requestedService;
-
   private Map<String, Boolean> orchestrationFlags = new HashMap<>();
   private List<PreferredProvider> preferredProviders = new ArrayList<>();
   private Map<String, String> requestedQoS = new HashMap<>();

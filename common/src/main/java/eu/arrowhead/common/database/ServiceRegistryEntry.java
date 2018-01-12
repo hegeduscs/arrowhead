@@ -134,6 +134,6 @@ public class ServiceRegistryEntry {
 
   @Override
   public String toString() {
-    return providedService.toString() + ":" + provider.toString();
+    return providedService.toString() + ":" + provider.toStringLog();
   }
 }

@@ -23,11 +23,9 @@ public class ArrowheadCloud {
   private int id;
 
   @Column(name = "operator")
-
   private String operator;
 
   @Column(name = "cloud_name")
-
   private String cloudName;
 
   @Column(name = "address")

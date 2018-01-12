@@ -1,6 +1,5 @@
 package eu.arrowhead.core.authorization;
 
-import com.google.gson.Gson;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -15,7 +14,6 @@ import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -99,10 +97,10 @@ class TokenGenerationService {
       try {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] tokenBytes = cipher.doFinal(json.getBytes("UTF8"));
-        //System.out.println("Token bytes: " + Arrays.toString(tokenBytes));
+        //System.out.println("Token bytes: " + Arrays.toStringLog(tokenBytes));
         signature.update(tokenBytes);
         byte[] sigBytes = signature.sign();
-        //System.out.println("Signature bytes: " + Arrays.toString(sigBytes));
+        //System.out.println("Signature bytes: " + Arrays.toStringLog(sigBytes));
 
         String tokenString = Base64.getEncoder().encodeToString(tokenBytes);
         String signatureString = Base64.getEncoder().encodeToString(sigBytes);
@@ -147,7 +145,7 @@ class TokenGenerationService {
           PublicKey key = getPublicKey(retrievedProvider.getAuthenticationInfo());
           keys.add(key);
         } catch (InvalidKeySpecException | NullPointerException e) {
-          log.error("The stored auth info for the ArrowheadSystem " + provider.toString()
+          log.error("The stored auth info for the ArrowheadSystem " + provider.toStringLog()
                         + " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
           keys.add(null);
         }
