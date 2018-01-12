@@ -122,17 +122,17 @@ public class GatewayService {
 			throw new ServiceConfigurationError("Initializing the SSLContext failed", e);
 		}
 */
-		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost(brokerHost);
-		factory.setPort(brokerPort); // secure port: 5671
-		factory.useSslProtocol(GatewayMain.sslContext);
-
+		
 		GatewaySession gatewaySession = new GatewaySession();
 		try {
+			ConnectionFactory factory = new ConnectionFactory();
+			factory.setHost(brokerHost);
+			factory.setPort(brokerPort); // secure port: 5671
+			factory.useSslProtocol(GatewayMain.sslContext);
 			Connection connection = factory.newConnection();
 			Channel channel = connection.createChannel();
-			channel.queueDeclare(queueName, false, true, true, null);
-			channel.queueDeclare(queueName.concat("resp"), false, true, true, null);
+			channel.queueDeclare(queueName, false, false, false, null);
+			channel.queueDeclare(queueName.concat("resp"), false, false, false, null);
 			channel.queueDeclare(controlQueueName, false, false, false, null);
 			channel.queueDeclare(controlQueueName.concat("resp"), false, false, false, null);
 			gatewaySession.setConnection(connection);
