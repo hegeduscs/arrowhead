@@ -41,6 +41,7 @@ public class GatekeeperMain {
 
   public static boolean DEBUG_MODE;
   public static SSLContext outboundClientContext;
+  public static SSLContext outboundServerContext;
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -156,7 +157,6 @@ public class GatekeeperMain {
     String cloudKeyPass = getProp().getProperty("cloud_keypass");
     String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
 
-    SSLContext serverContext = null;
     if (inbound) {
       //serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
@@ -174,7 +174,7 @@ public class GatekeeperMain {
 
       Utility.setSSLContext(clientContext);
 
-      //NOTE temporary solution
+      //NOTE temporary solution until Keep-alive-timer called close problem is solved
       URI uri = UriBuilder.fromUri(url).build();
       final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
@@ -191,8 +191,7 @@ public class GatekeeperMain {
         log.fatal("External server SSL Context is not valid, check the certificate files or app.properties!");
         throw new AuthenticationException("External server SSL Context is not valid, check the certificate files or app.properties!");
       }
-      serverContext = serverConfig.createSSLContext();
-
+      outboundServerContext = serverConfig.createSSLContext();
       outboundClientContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
       //TODO ezt a részt átmozgatni security utilsba teljesen? nincs is szükség SSLContextConfigurator-ra igy már sztem
@@ -211,7 +210,7 @@ public class GatekeeperMain {
 
     URI uri = UriBuilder.fromUri(url).build();
     final HttpServer server = GrizzlyHttpServerFactory
-        .createHttpServer(uri, config, true, new SSLEngineConfigurator(serverContext).setClientMode(false).setNeedClientAuth(true));
+        .createHttpServer(uri, config, true, new SSLEngineConfigurator(outboundServerContext).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;
