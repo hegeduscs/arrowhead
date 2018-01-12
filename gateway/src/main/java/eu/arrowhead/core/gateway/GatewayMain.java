@@ -39,6 +39,7 @@ public class GatewayMain {
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8452/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8453/");
   public static boolean DEBUG_MODE;
+  public static SSLContext sslContext;
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -129,6 +130,8 @@ public class GatewayMain {
     String keyPass = getProp().getProperty("keypass");
     String truststorePath = getProp().getProperty("truststore");
     String truststorePass = getProp().getProperty("truststorepass");
+    String trustPass = getProp().getProperty("trustpass");
+    String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);
@@ -141,9 +144,9 @@ public class GatewayMain {
       throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
     }
 
-    SSLContext sslContext = sslCon.createSSLContext();
-    Utility.setSSLContext(sslContext);
-
+    sslContext = sslCon.createSSLContext();
+    sslContext = SecurityUtils.createMasterSSLContext(truststorePath, truststorePass, trustPass, masterArrowheadCertPath);
+    
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());

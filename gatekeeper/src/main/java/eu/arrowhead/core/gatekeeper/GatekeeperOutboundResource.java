@@ -164,7 +164,7 @@ public class GatekeeperOutboundResource {
                                                                               requestForm.getRequesterSystem(), isSecure, GatekeeperMain.timeout,
                                                                               gwConnInfo.getGatewayPublicKey());
     //Sending the gateway request and parsing the response
-    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest, GatekeeperMain.outboundClientContext);
+    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
     ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
 
     CoreSystem gateway = Utility.getCoreSystem("gateway");

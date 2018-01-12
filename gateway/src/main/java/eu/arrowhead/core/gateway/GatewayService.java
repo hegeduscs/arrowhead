@@ -86,7 +86,8 @@ public class GatewayService {
 	 */
 	public static GatewaySession createSecureChannel(String brokerHost, int brokerPort, String queueName,
 			String controlQueueName) {
-		// Get keystore and truststore files from app.properties
+		
+		/*// Get keystore and truststore files from app.properties
 		String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
 		String keystorePath = GatewayMain.getProp().getProperty("keystore");
 		String truststorePass = GatewayMain.getProp().getProperty("truststorepass");
@@ -120,11 +121,11 @@ public class GatewayService {
 			log.fatal("Initializing the SSLContext failed");
 			throw new ServiceConfigurationError("Initializing the SSLContext failed", e);
 		}
-
+*/
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(brokerHost);
 		factory.setPort(brokerPort); // secure port: 5671
-		factory.useSslProtocol(ctx);
+		factory.useSslProtocol(GatewayMain.sslContext);
 
 		GatewaySession gatewaySession = new GatewaySession();
 		try {

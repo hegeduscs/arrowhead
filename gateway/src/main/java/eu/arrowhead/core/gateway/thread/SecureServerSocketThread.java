@@ -58,20 +58,20 @@ public class SecureServerSocketThread extends Thread {
       // Accept a client connection once Server receives one.
       SSLSocket sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
       SSLSession consumerSession = sslConsumerSocket.getSession();
-      String consumerIPFromCert = consumerSession.getPeerHost();
-
+     // String consumerIPFromCert = consumerSession.getPeerHost();
+ /*
       Certificate[] serverCerts = consumerSession.getPeerCertificates();
       X509Certificate cert = (X509Certificate) serverCerts[0];
       String subjectName = cert.getSubjectDN().getName();
-      String consumerCNFromCert = SecurityUtils.getCertCNFromSubject(subjectName);
+      String consumerCNFromCert = SecurityUtils.getCertCNFromSubject(subjectName); 
 
-      // FIXME systemName != consumerCN (use new util function in arrowheadsystem)
+      //TODO ? Utility.getOwnCloud-ból + ArrowheadSysten.toArrowheadCommonName használata a CertCN validásához
       if (!connectionRequest.getConsumer().getSystemName().equals(consumerCNFromCert) | !connectionRequest.getConsumer().getAddress()
           .equals(consumerIPFromCert)) {
         GatewayMain.portAllocationMap.replace(port, false, true);
         log.error("SecureServerThread: Consumer CNs or IPs are not equal");
         throw new AuthenticationException("SecureServerThread: Consumer CNs or IPs are not equal");
-      }
+    } */
 
       Channel channel = gatewaySession.getChannel();
 
