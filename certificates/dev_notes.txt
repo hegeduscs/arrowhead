@@ -32,48 +32,6 @@ How to create Arrowhead-compliant certificates
 +1. Don't forget to delete the new certificate from the old one's keystore!
 
 ---------------
-How to create a Certificate Authority (CA):
-
-Version 1:
-1. Open KeyStore Explorer (http://keystore-explorer.org/downloads.html)
-
-2. Choose the "Create a new KeyStore" --> JKS 
-
-3. Right click --> Generate Key Pair
-
-4. Edit settings for the new certificate:
-  - validity period: e.g. set to 10 years
-  - Name --> There is a book icon with '@': set CN fields
-    CN: <systemName>.<systemGroup>.<cloudName>.<operator>.arrowhead.eu format
-    Other fields can be filled out arbitrarily.
-    
-5. Choose Add Extensions (in the bottom right corner) --> green plus sign --> 
-    Basic Constraints --> Subject is a CA
-    
-6. Follow the 5-6 steps from "How to create Arrowhead-compliant certificates"
-
-Version 2 (http://www.flatmtn.com/article/setting-openssl-create-certificates):
-
-1. Type this:
-   
-    CONFIG="
-    [req]
-    distinguished_name=dn
-    [dn]
-    organizationName=sampleOrganizationName
-    countryName=sampleCountryName
-    commonName=sampleCommonName
-    [ext]
-    basicConstraints=CA:TRUE,pathlen:0    //pathlen is optional
-    "
-2. openssl req -days 3650 -config <(echo "$CONFIG") -new -newkey rsa:2048 -nodes 
-   -x509 -extensions ext -keyout key.pem -out crt.pem
-
-3. openssl pkcs12 -export -inkey key.pem -in crt.pem -name test -out test.p12
-
-4. keytool -importkeystore -srckeystore test.p12 -srcstoretype pkcs12 -destkeystore test.jks
-
----------------
 How to extract crt and key files from jks files: (run as sudo/administrator)
 
 1. Get the alias from .jks file
