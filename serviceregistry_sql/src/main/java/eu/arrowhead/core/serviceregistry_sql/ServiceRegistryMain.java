@@ -51,7 +51,7 @@ public class ServiceRegistryMain {
       switch (args[i]) {
         case "-daemon":
           daemon = true;
-          System.out.println("Starting SR SQLite as daemon!");
+          System.out.println("Starting Service Registry as daemon!");
           break;
         case "-d":
           DEBUG_MODE = true;
