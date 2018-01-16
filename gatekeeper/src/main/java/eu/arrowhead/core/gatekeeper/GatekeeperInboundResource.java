@@ -150,7 +150,7 @@ public class GatekeeperInboundResource {
 		if (icnProposal.getNegotiationFlags().get("useGateway")) {
 			CoreSystem gateway = Utility.getCoreSystem("gateway");
 			icnProposal.getRequesterSystem().setSystemName(gateway.getSystemName());
-			icnProposal.getRequesterCloud().setCloudName("coresystems");
+			icnProposal.getRequesterSystem().setSystemGroup("coresystems");
 		}
 		ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
 				.requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService())
