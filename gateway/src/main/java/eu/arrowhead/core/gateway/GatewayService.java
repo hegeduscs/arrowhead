@@ -68,8 +68,9 @@ public class GatewayService {
 			gatewaySession.setChannel(channel);
 
 		} catch (IOException | NullPointerException e) {
-			e.printStackTrace();
 			log.error("Creating the channel to the Broker failed");
+			throw new RuntimeException(e.getMessage(), e);
+
 		}
 		return gatewaySession;
 	}
