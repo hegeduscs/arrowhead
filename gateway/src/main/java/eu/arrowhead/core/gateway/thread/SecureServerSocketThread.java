@@ -6,18 +6,14 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
-import eu.arrowhead.common.security.SecurityUtils;
-import eu.arrowhead.core.gateway.GatewayMain;
 import eu.arrowhead.core.gateway.GatewayService;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -31,7 +27,7 @@ public class SecureServerSocketThread extends Thread {
   private SSLServerSocket sslServerSocket = null;
   private ConnectToConsumerRequest connectionRequest;
   private GatewaySession gatewaySession;
-  private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
+  private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
 
   public SecureServerSocketThread(GatewaySession gatewaySession, int port, ConnectToConsumerRequest connectionRequest) {
     this.port = port;
@@ -58,21 +54,6 @@ public class SecureServerSocketThread extends Thread {
       // Accept a client connection once Server receives one.
       SSLSocket sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
       SSLSession consumerSession = sslConsumerSocket.getSession();
-     // String consumerIPFromCert = consumerSession.getPeerHost();
- /*
-      Certificate[] serverCerts = consumerSession.getPeerCertificates();
-      X509Certificate cert = (X509Certificate) serverCerts[0];
-      String subjectName = cert.getSubjectDN().getName();
-      String consumerCNFromCert = SecurityUtils.getCertCNFromSubject(subjectName); 
-
-      //TODO ? Utility.getOwnCloud-ból + ArrowheadSysten.toArrowheadCommonName használata a CertCN validásához
-      if (!connectionRequest.getConsumer().getSystemName().equals(consumerCNFromCert) | !connectionRequest.getConsumer().getAddress()
-          .equals(consumerIPFromCert)) {
-        GatewayMain.portAllocationMap.replace(port, false, true);
-        log.error("SecureServerThread: Consumer CNs or IPs are not equal");
-        throw new AuthenticationException("SecureServerThread: Consumer CNs or IPs are not equal");
-    } */
-
       Channel channel = gatewaySession.getChannel();
 
       try {

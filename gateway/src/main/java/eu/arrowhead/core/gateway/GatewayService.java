@@ -55,8 +55,9 @@ public class GatewayService {
 			factory.setHost(brokerHost);
 			factory.setPort(brokerPort);
 
-			factory.useSslProtocol(GatewayMain.sslContext);
-
+			if (isSecure) {
+				factory.useSslProtocol(GatewayMain.sslContext);
+			}
 			Connection connection = factory.newConnection();
 			Channel channel = connection.createChannel();
 			channel.queueDeclare(queueName, false, false, false, null);
