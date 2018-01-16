@@ -18,7 +18,6 @@ import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 import org.apache.log4j.Logger;
 
 /**
@@ -34,7 +33,7 @@ public class GatewayService {
 	}
 
 	/**
-	 * Creates an insecure channel
+	 * Creates a channel to the Broker
 	 *
 	 * @param brokerHost
 	 *            The hostname of the AMQP broker to use for connections
@@ -44,16 +43,20 @@ public class GatewayService {
 	 *            The name of the queue, should be unique
 	 * @param controlQueueName
 	 *            The name of the queue for control messages, should be unique
-	 *
-	 * @return GatewaySession
+	 * @param isSecure
+	 *            The type of the channel (secure or insecure)
+	 * @return GatewaySession, which contains a connection and a channel object
 	 */
-	public static GatewaySession createInsecureChannel(String brokerHost, int brokerPort, String queueName,
-			String controlQueueName) {
+	public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName,
+			String controlQueueName, boolean isSecure) {
 		GatewaySession gatewaySession = new GatewaySession();
 		try {
 			ConnectionFactory factory = new ConnectionFactory();
 			factory.setHost(brokerHost);
 			factory.setPort(brokerPort);
+
+			factory.useSslProtocol(GatewayMain.sslContext);
+
 			Connection connection = factory.newConnection();
 			Channel channel = connection.createChannel();
 			channel.queueDeclare(queueName, false, false, false, null);
@@ -65,83 +68,8 @@ public class GatewayService {
 
 		} catch (IOException | NullPointerException e) {
 			e.printStackTrace();
-			log.error("Creating the insecure channel failed");
+			log.error("Creating the channel to the Broker failed");
 		}
-		return gatewaySession;
-	}
-
-	/**
-	 * Creates a secure channel
-	 *
-	 * @param brokerHost
-	 *            The hostname of the AMQP broker to use for connections
-	 * @param brokerPort
-	 *            The port of the AMQP broker to use for connections
-	 * @param queueName
-	 *            The name of the queue, should be unique
-	 * @param controlQueueName
-	 *            The name of the queue for control messages, should be unique
-	 *
-	 * @return channel
-	 */
-	public static GatewaySession createSecureChannel(String brokerHost, int brokerPort, String queueName,
-			String controlQueueName) {
-		
-		/*// Get keystore and truststore files from app.properties
-		String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
-		String keystorePath = GatewayMain.getProp().getProperty("keystore");
-		String truststorePass = GatewayMain.getProp().getProperty("truststorepass");
-		String truststorePath = GatewayMain.getProp().getProperty("truststore");
-
-		KeyStore ks = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-		KeyStore tks = SecurityUtils.loadKeyStore(truststorePath, truststorePass);
-
-		KeyManagerFactory kmf;
-		TrustManagerFactory tmf;
-		try {
-			String kmfAlgorithm = System.getProperty("ssl.KeyManagerFactory.algorithm",
-					KeyManagerFactory.getDefaultAlgorithm());
-			kmf = KeyManagerFactory.getInstance(kmfAlgorithm);
-			kmf.init(ks, keystorePass.toCharArray());
-			String tmfAlgorithm = System.getProperty("ssl.TrustManagerFactory.algorithm",
-					TrustManagerFactory.getDefaultAlgorithm());
-			tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-			tmf.init(tks);
-		} catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
-			log.fatal("Initializing the keyManagerFactory/trusManagerFactory failed: " + e.toString() + " "
-					+ e.getMessage());
-			throw new ServiceConfigurationError("Initializing the keyManagerFactory/trustManagerFactory failed", e);
-		}
-
-		SSLContext ctx = null;
-		try {
-			ctx = SSLContext.getInstance("TLS");
-			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-		} catch (NoSuchAlgorithmException | KeyManagementException e) {
-			log.fatal("Initializing the SSLContext failed");
-			throw new ServiceConfigurationError("Initializing the SSLContext failed", e);
-		}
-*/
-		
-		GatewaySession gatewaySession = new GatewaySession();
-		try {
-			ConnectionFactory factory = new ConnectionFactory();
-			factory.setHost(brokerHost);
-			factory.setPort(brokerPort); // secure port: 5671
-			factory.useSslProtocol(GatewayMain.sslContext);
-			Connection connection = factory.newConnection();
-			Channel channel = connection.createChannel();
-			channel.queueDeclare(queueName, false, false, false, null);
-			channel.queueDeclare(queueName.concat("resp"), false, false, false, null);
-			channel.queueDeclare(controlQueueName, false, false, false, null);
-			channel.queueDeclare(controlQueueName.concat("resp"), false, false, false, null);
-			gatewaySession.setConnection(connection);
-			gatewaySession.setChannel(channel);
-		} catch (IOException e) {
-			e.printStackTrace();
-			log.error("Creating the secure channel with the broker failed");
-		}
-
 		return gatewaySession;
 	}
 
