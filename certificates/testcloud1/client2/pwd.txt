@@ -1,2 +1,0 @@
-jks: 12345
-cert, key files: 123456
