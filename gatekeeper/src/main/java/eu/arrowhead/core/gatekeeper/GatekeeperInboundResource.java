@@ -169,20 +169,6 @@ public class GatekeeperInboundResource {
 			return Response.status(response.getStatus()).entity(icnResult).build();
 		}
 
-		// Getting the list of preferred brokers from database
-		List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
-
-		// Filtering common brokers
-		List<Broker> commonBrokers = new ArrayList<>(icnProposal.getPreferredBrokers());
-		commonBrokers.retainAll(preferredBrokers);
-
-		/*
-		 * TODO: kitalalni mi alapjan dontsuk el, hogy secure vagy insecureban vagyunk
-		 * for (Broker broker : commonBrokers) { if(broker.isSecure()) {
-		 * 
-		 * } }
-		 */
-
 		// Compiling the gateway request payload
 		String gatewayURI = Utility.getGatewayUri();
 		gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToProvider").toString();
@@ -192,8 +178,34 @@ public class GatekeeperInboundResource {
 		boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
 		int timeout = icnProposal.getTimeout() > GatekeeperMain.timeout ? GatekeeperMain.timeout
 				: icnProposal.getTimeout();
-		ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(commonBrokers.get(0).getAddress(),
-				commonBrokers.get(0).getPort(), provider, isSecure, timeout);
+
+		// Getting the list of preferred brokers from database
+		List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
+
+		// Filtering common brokers
+		List<Broker> commonBrokers = new ArrayList<>(icnProposal.getPreferredBrokers());
+		commonBrokers.retainAll(preferredBrokers);
+		List<Broker> secureCommonBrokers = new ArrayList<>();
+		List<Broker> insecureCommonBrokers = new ArrayList<>();
+
+		for (Broker broker : commonBrokers) {
+			if (broker.isSecure()) {
+				secureCommonBrokers.add(broker);
+			} else {
+				insecureCommonBrokers.add(broker);
+			}
+		}
+		
+		Broker chosenBroker = null;
+		if (isSecure) {
+			chosenBroker = secureCommonBrokers.get(0);
+		} else {
+			chosenBroker = insecureCommonBrokers.get(0);
+		}
+
+		ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(),
+				chosenBroker.getPort(), provider, isSecure, timeout);
+
 		// Sending request, parsing response
 		Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
 		ConnectToProviderResponse connectToProviderResponse = gatewayResponse
