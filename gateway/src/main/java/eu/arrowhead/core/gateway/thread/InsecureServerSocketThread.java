@@ -1,7 +1,6 @@
 package eu.arrowhead.core.gateway.thread;
 
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
@@ -75,68 +74,33 @@ public class InsecureServerSocketThread extends Thread {
 					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
 							byte[] body) throws IOException {
 						if (new String(body).equals("close")) {
-							GatewayService.makeServerSocketFree(port);
-							try {
-								channel.close();
-								gatewaySession.getConnection().close();
-							} catch (AlreadyClosedException e) {
-								log.info("Channel already closed by Broker");
-								throw new RuntimeException(e.getMessage(), e);
-							}
-							consumerSocket.close();
-							serverSocket.close();
-							log.info("ConsumerSocket closed");
+							GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket);
 						}
 					}
 				};
 
 				while (true) {
-					try {
-						// Get the request from the Consumer
-						byte[] inputFromConsumer = new byte[1024];
-						byte[] inputFromConsumerFinal = null;
+					// Get the request from the Consumer
+					byte[] inputFromConsumer = new byte[1024];
+					byte[] inputFromConsumerFinal = null;
 
-						inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
+					inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
 
-						System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0,
-								inputFromConsumerFinal.length);
+					System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 
-						System.out.println("Consumer's final request:");
-						System.out.println(new String(inputFromConsumerFinal));
+					System.out.println("Consumer's final request:");
+					System.out.println(new String(inputFromConsumerFinal));
 
-						channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
-						log.info("Publishing the request to the queue");
+					channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
+					log.info("Publishing the request to the queue");
 
-						channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
-						channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true,
-								controlConsumer);
-					} catch (NegativeArraySizeException e) {						
-						log.error("Socket closed by remote partner");
-						GatewayService.makeServerSocketFree(port);
-						try {
-							channel.close();
-							gatewaySession.getConnection().close();
-						} catch (AlreadyClosedException error) {
-							log.info("Channel already closed by Broker");
-						}
-						consumerSocket.close();
-						serverSocket.close();
-						log.info("ConsumerSocket closed");
-						throw new RuntimeException(e.getMessage(), e);
-					}
+					channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
+					channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true,
+							controlConsumer);
+
 				}
-			} catch (SocketException e) {
-				log.error("Socket closed by remote partner");
-				GatewayService.makeServerSocketFree(port);
-				try {
-					channel.close();
-					gatewaySession.getConnection().close();
-				} catch (AlreadyClosedException error) {
-					log.info("Channel already closed by Broker");
-				}
-				consumerSocket.close();
-				serverSocket.close();
-				log.info("ConsumerSocket closed");
+			} catch (SocketException | NegativeArraySizeException e) {
+				GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket);
 			}
 
 		} catch (IOException e) {

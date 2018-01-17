@@ -1,5 +1,6 @@
 package eu.arrowhead.core.gateway;
 
+import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -7,6 +8,8 @@ import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -145,8 +148,20 @@ public class GatewayService {
 		return serverSocketPort;
 	}
 
-	public static void makeServerSocketFree(Integer serverSocketPort) {
-		GatewayMain.portAllocationMap.put(serverSocketPort, true);
+	public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket,
+			ServerSocket serverSocket) {
+		log.error("Socket closed by remote partner");
+		// Setting serverSocket free
+		GatewayMain.portAllocationMap.put(port, true);
+		try {
+			gatewaySession.getChannel().close();
+			gatewaySession.getConnection().close();
+			consumerSocket.close();
+			serverSocket.close();
+			log.info("ConsumerSocket closed");
+		} catch (AlreadyClosedException | IOException error) {
+			log.info("Channel already closed");
+		}
 	}
 
 }
