@@ -1,7 +1,6 @@
 package eu.arrowhead.core.gateway.thread;
 
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
@@ -13,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -24,9 +22,10 @@ import org.apache.log4j.Logger;
 public class SecureServerSocketThread extends Thread {
 
 	private int port;
-	private SSLServerSocket sslServerSocket = null;
+	private SSLServerSocket sslServerSocket;
 	private ConnectToConsumerRequest connectionRequest;
 	private GatewaySession gatewaySession;
+	
 	private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
 
 	public SecureServerSocketThread(GatewaySession gatewaySession, int port,
@@ -77,17 +76,7 @@ public class SecureServerSocketThread extends Thread {
 					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
 							byte[] body) throws IOException {
 						if (new String(body).equals("close")) {
-							GatewayService.makeServerSocketFree(port);
-							// Close sockets and the connection
-							try {
-								channel.close();
-								gatewaySession.getConnection().close();
-							} catch (AlreadyClosedException e) {
-								log.info("Channel already closed by Broker");
-							}
-							sslConsumerSocket.close();
-							sslServerSocket.close();
-							log.info("ConsumerSocket closed");
+							GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
 						}
 					}
 				};
@@ -103,19 +92,8 @@ public class SecureServerSocketThread extends Thread {
 					channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true,
 							controlConsumer);
 				}
-			} catch (SocketException e) {
-				log.error("Socket closed by remote partner");
-				GatewayService.makeServerSocketFree(port);
-				// Close sockets and the connection
-				try {
-					channel.close();
-					gatewaySession.getConnection().close();
-				} catch (AlreadyClosedException error) {
-					log.info("Channel already closed by Broker");
-				}
-				sslConsumerSocket.close();
-				sslServerSocket.close();
-				log.info("ConsumerSocket closed");
+			} catch (SocketException | NegativeArraySizeException e) {
+				GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

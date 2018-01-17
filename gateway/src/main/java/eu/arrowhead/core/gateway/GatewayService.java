@@ -1,5 +1,6 @@
 package eu.arrowhead.core.gateway;
 
+import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -7,6 +8,8 @@ import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -26,11 +29,7 @@ import org.apache.log4j.Logger;
 
 public class GatewayService {
 
-  private static final Logger log = Logger.getLogger(GatewayService.class.getName());
-  private static final int minPort = Integer.parseInt(GatewayMain.getProp().getProperty("min_port"));
-  private static final int maxPort = Integer.parseInt(GatewayMain.getProp().getProperty("max_port"));
-  private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
-      .initPortAllocationMap(new ConcurrentHashMap<Integer, Boolean>(), minPort, maxPort);
+	private static final Logger log = Logger.getLogger(GatewayService.class.getName());
 
 	private GatewayService() throws AssertionError {
 		throw new AssertionError("GatewayService is a non-instantiable class");
@@ -116,7 +115,8 @@ public class GatewayService {
 	 * @return The initialized ConcurrentHashMap
 	 */
 	// Integer: port; Boolean: free (true) or reserved(false)
-  private static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map, int portMin, int portMax) {
+	public static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map,
+			int portMin, int portMax) {
 		for (int i = portMin; i <= portMax; i++) {
 			map.put(i, true);
 		}
@@ -132,7 +132,7 @@ public class GatewayService {
 		Integer serverSocketPort = null;
 		// Check the port range for
 		ArrayList<Integer> freePorts = new ArrayList<>();
-    for (Entry<Integer, Boolean> entry : portAllocationMap.entrySet()) {
+		for (Entry<Integer, Boolean> entry : GatewayMain.portAllocationMap.entrySet()) {
 			if (entry.getValue().equals(true)) {
 				freePorts.add(entry.getKey());
 			}
@@ -143,13 +143,36 @@ public class GatewayService {
 			throw new RuntimeException("No available port found in port range");
 		} else {
 			serverSocketPort = freePorts.get(0);
-      portAllocationMap.put(serverSocketPort, false);
+			GatewayMain.portAllocationMap.put(serverSocketPort, false);
 		}
 		return serverSocketPort;
 	}
 
-	public static void makeServerSocketFree(Integer serverSocketPort) {
-    portAllocationMap.put(serverSocketPort, true);
+	public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket,
+			ServerSocket serverSocket) {
+		log.error("Socket closed by remote partner");
+		// Setting serverSocket free
+		GatewayMain.portAllocationMap.put(port, true);
+		try {
+			gatewaySession.getChannel().close();
+			gatewaySession.getConnection().close();
+			consumerSocket.close();
+			serverSocket.close();
+			log.info("ConsumerSocket closed");
+		} catch (AlreadyClosedException | IOException e) {
+			log.info("Channel already closed");
+		}
+	}
+
+	public static void providerSideClose(GatewaySession gatewaySession, Socket providerSocket) {
+		try {
+			providerSocket.close();
+			gatewaySession.getChannel().close();
+			gatewaySession.getConnection().close();
+			log.info("ProviderSocket closed");
+		} catch (AlreadyClosedException | IOException e) {
+			log.info("Channel already closed");
+		}
 	}
 
 }

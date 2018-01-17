@@ -23,6 +23,7 @@ public class SecureSocketThread extends Thread {
 	private String queueName;
 	private String controlQueueName;
 	private ConnectToProviderRequest connectionRequest;
+
 	private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());
 
 	public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
@@ -70,10 +71,7 @@ public class SecureSocketThread extends Thread {
 					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
 							byte[] body) throws IOException {
 						if (new String(body).equals("close")) {
-							sslProviderSocket.close();
-							channel.close();
-							gatewaySession.getConnection().close();
-							log.info("SSLProviderSocket closed");
+							GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
 						}
 					}
 				};
@@ -83,11 +81,8 @@ public class SecureSocketThread extends Thread {
 					channel.basicConsume(controlQueueName, true, controlConsumer);
 				}
 
-			} catch (SocketException e) {
-				log.error("Socket closed by remote partner");
-				sslProviderSocket.close();
-				channel.close();
-				gatewaySession.getConnection().close();
+			} catch (SocketException | NegativeArraySizeException e) {
+				GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
