@@ -1,0 +1,22 @@
+If creating channel failed while the rabbitmq server running:
+
+ Try: rabbitmqctl stop
+    - In case of:  "Error: unable to connect to node <NODENAME>: nodedown"
+    1. ps -ef | grep rabbit
+    2. kill <PID>
+    3. rabbitmqctl stop
+    4. cd /etc/init.d
+    5. systemctl start rabbitmq-server
+    6. Check: service --status-all or rabbitmqctl status
+    
+    -In case of: "Stopping and halting node <NODENAME>" - Step 5.-6. above
+    
+  
+  Path of the log files: /var/log/rabbitmq/<NODENAME>.log
+  
+  Path of the config file: /etc/rabbitmq/rabbitmq.config
+  
+  The Web UI is located at: http://server-name:15672/
+      -deafult username: guest
+      -default pwd: guest
+  
