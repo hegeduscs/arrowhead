@@ -68,8 +68,7 @@ public class SecureSocketThread extends Thread {
 
 				Consumer controlConsumer = new DefaultConsumer(channel) {
 					@Override
-					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-							byte[] body) throws IOException {
+					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
 						if (new String(body).equals("close")) {
 							GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
 						}

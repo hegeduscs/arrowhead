@@ -22,11 +22,11 @@ import org.apache.log4j.Logger;
 public class SecureServerSocketThread extends Thread {
 
 	private int port;
-	private SSLServerSocket sslServerSocket;
+  private SSLServerSocket sslServerSocket;
 	private ConnectToConsumerRequest connectionRequest;
 	private GatewaySession gatewaySession;
-	
-	private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
+
+  private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
 
 	public SecureServerSocketThread(GatewaySession gatewaySession, int port,
 			ConnectToConsumerRequest connectionRequest) {
@@ -73,10 +73,9 @@ public class SecureServerSocketThread extends Thread {
 
 				Consumer controlConsumer = new DefaultConsumer(channel) {
 					@Override
-					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-							byte[] body) throws IOException {
+          public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
 						if (new String(body).equals("close")) {
-							GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
+              GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
 						}
 					}
 				};
@@ -92,8 +91,8 @@ public class SecureServerSocketThread extends Thread {
 					channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true,
 							controlConsumer);
 				}
-			} catch (SocketException | NegativeArraySizeException e) {
-				GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
+      } catch (SocketException | NegativeArraySizeException e) {
+        GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -63,10 +63,9 @@ public class InsecureSocketThread extends Thread {
 
 				Consumer controlConsumer = new DefaultConsumer(channel) {
 					@Override
-					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-							byte[] body) throws IOException {
+          public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
 						if (new String(body).equals("close")) {
-							GatewayService.providerSideClose(gatewaySession, providerSocket);
+              GatewayService.providerSideClose(gatewaySession, providerSocket);
 						}
 					}
 				};
@@ -75,8 +74,8 @@ public class InsecureSocketThread extends Thread {
 					channel.basicConsume(queueName, true, consumer);
 					channel.basicConsume(controlQueueName, true, controlConsumer);
 				}
-			} catch (SocketException | NegativeArraySizeException e) {
-				GatewayService.providerSideClose(gatewaySession, providerSocket);
+      } catch (SocketException | NegativeArraySizeException e) {
+        GatewayService.providerSideClose(gatewaySession, providerSocket);
 			}
 
 		} catch (IOException e) {
