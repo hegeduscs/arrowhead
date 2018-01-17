@@ -6,6 +6,7 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
+import eu.arrowhead.core.gateway.GatewayService;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,7 +58,6 @@ public class InsecureSocketThread extends Thread {
 								inputFromProviderFinal.length);
 						log.info("Sending the response to Consumer");
 						channel.basicPublish("", queueName.concat("_resp"), null, inputFromProviderFinal);
-						//channel.basicPublish("", controlQueueName.concat("_resp"), null, "close".getBytes());
 					}
 				};
 
@@ -66,10 +66,7 @@ public class InsecureSocketThread extends Thread {
 					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
 							byte[] body) throws IOException {
 						if (new String(body).equals("close")) {
-							providerSocket.close();
-							channel.close();
-							gatewaySession.getConnection().close();
-							log.info("ProviderSocket closed");
+							GatewayService.providerSideClose(gatewaySession, providerSocket);
 						}
 					}
 				};
@@ -78,11 +75,8 @@ public class InsecureSocketThread extends Thread {
 					channel.basicConsume(queueName, true, consumer);
 					channel.basicConsume(controlQueueName, true, controlConsumer);
 				}
-			} catch (SocketException e) {
-				log.info("Socket closed by remote partner");
-				providerSocket.close();
-				channel.close();
-				gatewaySession.getConnection().close();
+			} catch (SocketException | NegativeArraySizeException e) {
+				GatewayService.providerSideClose(gatewaySession, providerSocket);
 			}
 
 		} catch (IOException e) {

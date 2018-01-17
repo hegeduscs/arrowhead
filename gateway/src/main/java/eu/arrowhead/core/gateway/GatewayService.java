@@ -159,7 +159,18 @@ public class GatewayService {
 			consumerSocket.close();
 			serverSocket.close();
 			log.info("ConsumerSocket closed");
-		} catch (AlreadyClosedException | IOException error) {
+		} catch (AlreadyClosedException | IOException e) {
+			log.info("Channel already closed");
+		}
+	}
+
+	public static void providerSideClose(GatewaySession gatewaySession, Socket providerSocket) {
+		try {
+			providerSocket.close();
+			gatewaySession.getChannel().close();
+			gatewaySession.getConnection().close();
+			log.info("ProviderSocket closed");
+		} catch (AlreadyClosedException | IOException e) {
 			log.info("Channel already closed");
 		}
 	}

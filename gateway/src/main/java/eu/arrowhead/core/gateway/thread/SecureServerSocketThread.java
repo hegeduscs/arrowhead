@@ -1,20 +1,17 @@
 package eu.arrowhead.core.gateway.thread;
 
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
-import eu.arrowhead.core.gateway.GatewayMain;
 import eu.arrowhead.core.gateway.GatewayService;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -25,9 +22,10 @@ import org.apache.log4j.Logger;
 public class SecureServerSocketThread extends Thread {
 
 	private int port;
-	private SSLServerSocket sslServerSocket = null;
+	private SSLServerSocket sslServerSocket;
 	private ConnectToConsumerRequest connectionRequest;
 	private GatewaySession gatewaySession;
+	
 	private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
 
 	public SecureServerSocketThread(GatewaySession gatewaySession, int port,
