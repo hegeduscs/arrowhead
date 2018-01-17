@@ -7,6 +7,7 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
+import eu.arrowhead.core.gateway.GatewayMain;
 import eu.arrowhead.core.gateway.GatewayService;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
@@ -77,17 +78,7 @@ public class SecureServerSocketThread extends Thread {
 					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
 							byte[] body) throws IOException {
 						if (new String(body).equals("close")) {
-							GatewayService.makeServerSocketFree(port);
-							// Close sockets and the connection
-							try {
-								channel.close();
-								gatewaySession.getConnection().close();
-							} catch (AlreadyClosedException e) {
-								log.info("Channel already closed by Broker");
-							}
-							sslConsumerSocket.close();
-							sslServerSocket.close();
-							log.info("ConsumerSocket closed");
+							GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
 						}
 					}
 				};
@@ -103,19 +94,8 @@ public class SecureServerSocketThread extends Thread {
 					channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true,
 							controlConsumer);
 				}
-			} catch (SocketException e) {
-				log.error("Socket closed by remote partner");
-				GatewayService.makeServerSocketFree(port);
-				// Close sockets and the connection
-				try {
-					channel.close();
-					gatewaySession.getConnection().close();
-				} catch (AlreadyClosedException error) {
-					log.info("Channel already closed by Broker");
-				}
-				sslConsumerSocket.close();
-				sslServerSocket.close();
-				log.info("ConsumerSocket closed");
+			} catch (SocketException | NegativeArraySizeException e) {
+				GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
