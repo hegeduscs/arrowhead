@@ -10,8 +10,8 @@ ping.scheduled=false
 ping.interval=60
 
 #Certificate properties
-keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\serviceregistry.testcloud1.jks
+keystore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/serviceregistry.testcloud1.jks
 keystorepass=12345
 keypass=12345
-truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
+truststore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/testcloud1_cert.jks
 truststorepass=12345

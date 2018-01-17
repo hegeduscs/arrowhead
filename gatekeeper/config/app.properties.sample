@@ -9,12 +9,12 @@ timeout=30000
 use_gateway=false
 
 #Certificate properties
-gatekeeper_keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\gatekeeper.testcloud1.jks
+gatekeeper_keystore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/gatekeeper.testcloud1.jks
 gatekeeper_keystore_pass=12345
 gatekeeper_keypass=12345
 
-cloud_keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
+cloud_keystore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/testcloud1_cert.jks
 cloud_keystore_pass=12345
 cloud_keypass=12345
 
-master_arrowhead_cert=C:\\Users\\Public\\Java\\arrowhead\\certificates\\master_arrowhead_cert.crt
+master_arrowhead_cert=C:/Users/Public/Java/arrowhead/certificates/master_arrowhead_cert.crt

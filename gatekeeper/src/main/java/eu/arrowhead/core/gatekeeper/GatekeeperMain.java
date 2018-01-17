@@ -25,35 +25,34 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class GatekeeperMain {
 
-  private static HttpServer inboundServer = null;
-  private static HttpServer inboundSecureServer = null;
-  private static HttpServer outboundServer = null;
-  private static HttpServer outboundSecureServer = null;
+  public static boolean DEBUG_MODE;
+  public static SSLContext outboundClientContext;
+  public static SSLContext outboundServerContext;
+
+  static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
+
+  private static HttpServer inboundServer;
+  private static HttpServer inboundSecureServer;
+  private static HttpServer outboundServer;
+  private static HttpServer outboundSecureServer;
   private static Properties prop;
 
-  private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
   private static final String INBOUND_BASE_URI = getProp().getProperty("internal_base_uri", "http://0.0.0.0:8446/");
   private static final String INBOUND_BASE_URI_SECURED = getProp().getProperty("internal_base_uri_secured", "https://0.0.0.0:8447/");
   private static final String OUTBOUND_BASE_URI = getProp().getProperty("external_base_uri", "http://0.0.0.0:8448/");
   private static final String OUTBOUND_BASE_URI_SECURED = getProp().getProperty("external_base_uri_secured", "https://0.0.0.0:8449/");
-
-  static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
-
-  public static boolean DEBUG_MODE;
-  public static SSLContext outboundClientContext;
-  public static SSLContext outboundServerContext;
+  private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     Utility.isUrlValid(INBOUND_BASE_URI, false);
-   // Utility.isUrlValid(INBOUND_BASE_URI_SECURED, true);
+    //Utility.isUrlValid(INBOUND_BASE_URI_SECURED, true);
     Utility.isUrlValid(OUTBOUND_BASE_URI, false);
     Utility.isUrlValid(OUTBOUND_BASE_URI_SECURED, true);
 
     boolean daemon = false;
     boolean serverModeSet = false;
-    argLoop:
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -71,17 +70,17 @@ public class GatekeeperMain {
             case "insecure":
               inboundServer = startServer(INBOUND_BASE_URI, true);
               outboundServer = startServer(OUTBOUND_BASE_URI, false);
-              break argLoop;
+              break;
             case "secure":
               inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true);
               outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false);
-              break argLoop;
+              break;
             case "both":
               inboundServer = startServer(INBOUND_BASE_URI, true);
               outboundServer = startServer(OUTBOUND_BASE_URI, false);
               inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true);
               outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false);
-              break argLoop;
+              break;
             default:
               log.fatal("Unknown server mode: " + args[i]);
               throw new AssertionError("Unknown server mode: " + args[i]);

@@ -31,8 +31,9 @@ import org.glassfish.jersey.server.ResourceConfig;
  */
 public class ServiceRegistryMain {
 
+  public static boolean DEBUG_MODE;
 
-  private static Timer timer = null;
+  static final int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
   //DNS-SD global settings
   static final String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
   static final String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
@@ -41,16 +42,15 @@ public class ServiceRegistryMain {
   static final String dnsDomain = getDnsProp().getProperty("dns.registerDomain", "srv.arrowhead.tmit.bme.hu.");
   static final String computerDomain = getDnsProp().getProperty("dns.domain", "arrowhead.tmit.bme.hu");
   static final int dnsPort = new Integer(getDnsProp().getProperty("dns.port", "53"));
-  //property files
+
+  private static HttpServer server;
+  private static HttpServer secureServer;
   private static Properties appProp, dnsProp;
-  static final int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
+  private static Timer timer;
+
   private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
   private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
-
-  private static HttpServer server = null;
-  private static HttpServer secureServer = null;
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
-  public static boolean DEBUG_MODE;
 
   /**
    * Main method.
@@ -68,7 +68,6 @@ public class ServiceRegistryMain {
 
     boolean daemon = false;
     boolean serverModeSet = false;
-    argLoop:
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -85,14 +84,14 @@ public class ServiceRegistryMain {
           switch (args[i]) {
             case "insecure":
               server = startServer();
-              break argLoop;
+              break;
             case "secure":
               secureServer = startSecureServer();
-              break argLoop;
+              break;
             case "both":
               server = startServer();
               secureServer = startSecureServer();
-              break argLoop;
+              break;
             default:
               log.fatal("Unknown server mode: " + args[i]);
               throw new AssertionError("Unknown server mode: " + args[i]);

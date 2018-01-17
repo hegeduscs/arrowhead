@@ -7,8 +7,8 @@ min_port=8000
 max_port=8100
 
 #Certificate properties
-keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\gateway.testcloud1.jks
+keystore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/gateway.testcloud1.jks
 keystorepass=12345
 keypass=12345
-truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
+truststore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/testcloud1_cert.jks
 truststorepass=12345

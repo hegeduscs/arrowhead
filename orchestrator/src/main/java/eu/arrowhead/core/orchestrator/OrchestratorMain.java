@@ -31,14 +31,15 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class OrchestratorMain {
 
+  public static boolean DEBUG_MODE;
 
-  private static HttpServer server = null;
-  private static HttpServer secureServer = null;
-  private static final Logger log = Logger.getLogger(OrchestratorMain.class.getName());
+  private static HttpServer server;
+  private static HttpServer secureServer;
   private static Properties prop;
+
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8440/orchestrator/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8441/orchestrator/");
-  public static boolean DEBUG_MODE;
+  private static final Logger log = Logger.getLogger(OrchestratorMain.class.getName());
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -48,7 +49,6 @@ public class OrchestratorMain {
 
     boolean daemon = false;
     boolean serverModeSet = false;
-    argLoop:
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -66,17 +66,17 @@ public class OrchestratorMain {
             case "insecure":
               server = startServer();
               useSRService(false, true);
-              break argLoop;
+              break;
             case "secure":
               secureServer = startSecureServer();
               useSRService(true, true);
-              break argLoop;
+              break;
             case "both":
               server = startServer();
               secureServer = startSecureServer();
               useSRService(false, true);
               useSRService(true, true);
-              break argLoop;
+              break;
             default:
               log.fatal("Unknown server mode: " + args[i]);
               throw new AssertionError("Unknown server mode: " + args[i]);

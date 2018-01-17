@@ -5,8 +5,8 @@ db_password=root
 db_address=jdbc:mysql://localhost:3306/arrowhead
 
 #Certificate properties
-keystore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\orchestrator.testcloud1.jks
+keystore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/orchestrator.testcloud1.jks
 keystorepass=12345
 keypass=12345
-truststore=C:\\Users\\Public\\Java\\arrowhead\\certificates\\testcloud1\\testcloud1_cert.jks
+truststore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/testcloud1_cert.jks
 truststorepass=12345

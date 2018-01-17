@@ -12,7 +12,6 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
@@ -25,21 +24,16 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class GatewayMain {
 
+  public static boolean DEBUG_MODE;
+  public static SSLContext sslContext;
 
-  private static HttpServer server = null;
-  private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(GatewayMain.class.getName());
+  private static HttpServer server;
+  private static HttpServer secureServer;
   private static Properties prop;
-
-  private static final int minPort = Integer.parseInt(getProp().getProperty("min_port"));
-  private static final int maxPort = Integer.parseInt(getProp().getProperty("max_port"));
-  public static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
-      .initPortAllocationMap(new ConcurrentHashMap<Integer, Boolean>(), minPort, maxPort);
 
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8452/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8453/");
-  public static boolean DEBUG_MODE;
-  public static SSLContext sslContext;
+  private static final Logger log = Logger.getLogger(GatewayMain.class.getName());
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -49,7 +43,6 @@ public class GatewayMain {
 
     boolean daemon = false;
     boolean serverModeSet = false;
-    argLoop:
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -66,14 +59,14 @@ public class GatewayMain {
           switch (args[i]) {
             case "insecure":
               server = startServer();
-              break argLoop;
+              break;
             case "secure":
               secureServer = startSecureServer();
-              break argLoop;
+              break;
             case "both":
               server = startServer();
               secureServer = startSecureServer();
-              break argLoop;
+              break;
             default:
               log.fatal("Unknown server mode: " + args[i]);
               throw new AssertionError("Unknown server mode: " + args[i]);
