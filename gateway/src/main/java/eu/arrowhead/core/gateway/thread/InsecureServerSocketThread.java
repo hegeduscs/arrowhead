@@ -91,26 +91,39 @@ public class InsecureServerSocketThread extends Thread {
 				};
 
 				while (true) {
-					// Get the request from the Consumer
-					byte[] inputFromConsumer = new byte[1024];
-					byte[] inputFromConsumerFinal;
 					try {
+						// Get the request from the Consumer
+						byte[] inputFromConsumer = new byte[1024];
+						byte[] inputFromConsumerFinal = null;
+
 						inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
-					} catch (NegativeArraySizeException e) {
-						log.error("The message was too long.");
+
+						System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0,
+								inputFromConsumerFinal.length);
+
+						System.out.println("Consumer's final request:");
+						System.out.println(new String(inputFromConsumerFinal));
+
+						channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
+						log.info("Publishing the request to the queue");
+
+						channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
+						channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true,
+								controlConsumer);
+					} catch (NegativeArraySizeException e) {						
+						log.error("Socket closed by remote partner");
+						GatewayService.makeServerSocketFree(port);
+						try {
+							channel.close();
+							gatewaySession.getConnection().close();
+						} catch (AlreadyClosedException error) {
+							log.info("Channel already closed by Broker");
+						}
+						consumerSocket.close();
+						serverSocket.close();
+						log.info("ConsumerSocket closed");
 						throw new RuntimeException(e.getMessage(), e);
 					}
-					System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
-
-					System.out.println("Consumer's final request:");
-					System.out.println(new String(inputFromConsumerFinal));
-
-					channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
-					log.info("Publishing the request to the queue");
-
-					channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
-					channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true,
-							controlConsumer);
 				}
 			} catch (SocketException e) {
 				log.error("Socket closed by remote partner");
