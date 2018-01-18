@@ -12,7 +12,6 @@ import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -84,7 +83,7 @@ public class SecureSocketThread extends Thread {
 			e.printStackTrace();
 			log.error("ConnectToProvider(secure): I/O exception occured");
       GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
-      throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage(), e);
+      throw new ArrowheadException(e.getMessage(), e);
 
 		}
 	}

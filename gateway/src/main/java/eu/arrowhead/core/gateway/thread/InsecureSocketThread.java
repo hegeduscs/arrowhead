@@ -12,7 +12,6 @@ import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.Socket;
 import org.apache.log4j.Logger;
 
@@ -77,7 +76,7 @@ public class InsecureSocketThread extends Thread {
     } catch (IOException | NegativeArraySizeException e) {
       log.error("Communication failed (Error occurred or remote peer closed the socket)");
       GatewayService.providerSideClose(gatewaySession, providerSocket);
-      throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage(), e);
+      throw new ArrowheadException(e.getMessage(), e);
 		}
 	}
 

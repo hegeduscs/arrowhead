@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -20,14 +21,13 @@ import org.hibernate.exception.ConstraintViolationException;
 
 public class DatabaseManager {
 
-  private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
-
-  private static DatabaseManager instance = null;
+  private static DatabaseManager instance;
   private static SessionFactory sessionFactory;
   private static Properties prop;
   private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead");
   private static final String dbUser = getProp().getProperty("db_user", "root");
   private static final String dbPassword = getProp().getProperty("db_password", "root");
+  private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
 
   static {
     try {
@@ -43,7 +43,6 @@ public class DatabaseManager {
 
   private DatabaseManager() {
   }
-
 
   public static DatabaseManager getInstance() {
     if (instance == null) {
@@ -120,9 +119,6 @@ public class DatabaseManager {
     return object;
   }
 
-  //TODO get method with Object parameter maybe? could be possible with a big switch case
-
-
   @SuppressWarnings("unchecked")
   public <T> List<T> getAll(Class<T> queryClass, Map<String, Object> restrictionMap) {
     List<T> retrievedList;
@@ -192,7 +188,7 @@ public class DatabaseManager {
       log.error("DatabaseManager:save throws DuplicateEntryException");
       throw new DuplicateEntryException(
           "DuplicateEntryException: there is already an entry in the database with these parameters. Please check the unique fields of the " + object
-              .getClass());
+              .getClass(), Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -218,7 +214,7 @@ public class DatabaseManager {
       log.error("DatabaseManager:merge throws DuplicateEntryException");
       throw new DuplicateEntryException(
           "DuplicateEntryException: there is already an entry in the database with these parameters. Please check the unique fields of the " + object
-              .getClass());
+              .getClass(), Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -243,7 +239,7 @@ public class DatabaseManager {
       log.error("DatabaseManager:delete throws ConstraintViolationException");
       throw new DuplicateEntryException(
           "ConstraintViolationException: there is a reference to this object in another table, which prevents the delete operation. (" + object
-              .getClass() + ")");
+              .getClass() + ")", Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString());
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
