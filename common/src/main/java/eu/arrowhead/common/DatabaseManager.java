@@ -187,8 +187,8 @@ public class DatabaseManager {
       }
       log.error("DatabaseManager:save throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. Please check the unique fields of the " + object
-              .getClass(), Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString());
+          "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
+          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -213,8 +213,8 @@ public class DatabaseManager {
       }
       log.error("DatabaseManager:merge throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "DuplicateEntryException: there is already an entry in the database with these parameters. Please check the unique fields of the " + object
-              .getClass(), Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString());
+          "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
+          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -238,8 +238,8 @@ public class DatabaseManager {
       }
       log.error("DatabaseManager:delete throws ConstraintViolationException");
       throw new DuplicateEntryException(
-          "ConstraintViolationException: there is a reference to this object in another table, which prevents the delete operation. (" + object
-              .getClass() + ")", Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString());
+          "There is a reference to this object in another table, which prevents the delete operation. (" + object.getClass() + ")",
+          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();

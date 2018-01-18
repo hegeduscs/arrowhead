@@ -145,7 +145,7 @@ public class OrchestratorMain {
     if (!sslCon.validateConfiguration(true)) {
       log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
       throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!",
-                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName() (), BASE_URI_SECURED)
+                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
     }
 
     SSLContext sslContext = sslCon.createSSLContext();
@@ -158,7 +158,7 @@ public class OrchestratorMain {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
       throw new AuthenticationException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.",
-          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName() (), BASE_URI_SECURED)
+          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
