@@ -5,6 +5,7 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.GSDResult;
 import eu.arrowhead.common.messages.ICNResult;
@@ -108,8 +109,8 @@ final class OrchestratorService {
     /*
      * If the Intra-Cloud orchestration fails somewhere (SR, Auth, filtering, matchmaking) we catch the exception, because Inter-Cloud
      * orchestration might be allowed. If not, we throw the same exception again.
-     */ catch (DataNotFoundException ex) {
-      if (!orchestrationFlags.get("enableInterCloud")) {
+     */ catch (ArrowheadException ex) {
+      if (ex.getExceptionType().contains("DataNotFoundException") && !orchestrationFlags.get("enableInterCloud")) {
         log.error("dynamicOrchestration: Intra-Cloud orchestration failed with DataNotFoundException, Inter-Cloud is not allowed.");
         throw new DataNotFoundException(ex.getMessage());
       }

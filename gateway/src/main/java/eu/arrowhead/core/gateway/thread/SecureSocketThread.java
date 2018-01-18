@@ -53,6 +53,7 @@ public class SecureSocketThread extends Thread {
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+       // byte[] decryptedMessage = GatewayService.decryptMessage(body);
           outProvider.write(body);
           log.info("Sending the request to Provider");
           // get the answer from Provider
@@ -60,6 +61,9 @@ public class SecureSocketThread extends Thread {
           byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
           System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
           log.info("Sending the response to Consumer");
+       // byte[] encryptedMessage =
+          // GatewayService.encryptMessage(inputFromProviderFinal,
+          // connectionRequest.getProviderGWPublicKey());
           channel.basicPublish("", queueName.concat("_resp"), null, inputFromProviderFinal);
           channel.basicPublish("", controlQueueName.concat("_resp"), null, "close".getBytes());
         }
