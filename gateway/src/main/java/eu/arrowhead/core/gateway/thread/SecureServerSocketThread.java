@@ -12,7 +12,6 @@ import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -94,8 +93,7 @@ public class SecureServerSocketThread extends Thread {
     } catch (IOException | NegativeArraySizeException e) {
       log.error("Communication failed (Error occurred or remote peer closed the socket)");
       GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
-      throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage(), e);
-
+      throw new ArrowheadException(e.getMessage(), e);
 		}
 	}
 
