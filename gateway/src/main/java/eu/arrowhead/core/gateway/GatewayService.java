@@ -7,6 +7,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.spec.InvalidKeySpecException;
@@ -126,6 +127,31 @@ public class GatewayService {
     }
     return encryptedMessage;
 
+  }
+
+  public static byte[] decryptMessage(byte[] encryptedMessage) {
+    Cipher cipher = null;
+    byte[] decryptedMessage = null;
+
+    try {
+      cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+      log.fatal("Cipher.getInstance(String) throws exception, code needs to be changed!");
+    }
+    try {
+      KeyStore keyStore = SecurityUtils.loadKeyStore(GatewayMain.getProp().getProperty("keystore"),
+          GatewayMain.getProp().getProperty("keystorepass"));
+      PrivateKey privateKey = SecurityUtils.getPrivateKey(keyStore, GatewayMain.getProp().getProperty("keystorepass"));
+      // decrypt the text using the private key
+      cipher.init(Cipher.DECRYPT_MODE, privateKey);
+      decryptedMessage = cipher.doFinal(encryptedMessage);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      log.error("Cipher or Signature class throws public key specific exception: " + e.getMessage());
+    }
+
+    return decryptedMessage;
   }
 
   public static SSLContext createSSLContext() {
