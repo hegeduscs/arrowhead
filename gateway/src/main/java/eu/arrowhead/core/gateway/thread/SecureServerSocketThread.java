@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -91,7 +93,7 @@ public class SecureServerSocketThread extends Thread {
 					channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true,
 							controlConsumer);
 				}
-      } catch (SocketException | NegativeArraySizeException e) {
+      } catch (SocketException | NegativeArraySizeException | SocketTimeoutException e) {
         GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
 			}
 		} catch (IOException e) {

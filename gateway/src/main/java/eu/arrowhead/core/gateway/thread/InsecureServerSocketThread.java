@@ -14,6 +14,8 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
+
 import org.apache.log4j.Logger;
 
 public class InsecureServerSocketThread extends Thread {
@@ -97,7 +99,7 @@ public class InsecureServerSocketThread extends Thread {
           channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);
 
 				}
-      } catch (SocketException | NegativeArraySizeException e) {
+      } catch (SocketException | NegativeArraySizeException | SocketTimeoutException e) {
         GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket);
 			}
 
