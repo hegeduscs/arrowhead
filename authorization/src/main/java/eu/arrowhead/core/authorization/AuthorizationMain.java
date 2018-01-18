@@ -47,8 +47,6 @@ public class AuthorizationMain {
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    System.out.println(AuthorizationMain.class.toString());
-    System.out.println(AuthorizationMain.class.getName());
     Utility.isUrlValid(BASE_URI, false);
     Utility.isUrlValid(BASE_URI_SECURED, true);
 
