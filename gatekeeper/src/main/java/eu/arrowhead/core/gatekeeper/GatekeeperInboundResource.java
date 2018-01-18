@@ -8,7 +8,6 @@ import eu.arrowhead.common.database.CoreSystem;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.common.messages.ConnectToProviderResponse;
 import eu.arrowhead.common.messages.GSDAnswer;
@@ -32,6 +31,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -43,14 +44,14 @@ import org.apache.log4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatekeeperInboundResource {
 
-	private static final Logger log = Logger.getLogger(GatekeeperInboundResource.class.getName());
-	private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final Logger log = Logger.getLogger(GatekeeperInboundResource.class.getName());
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
 
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt() {
-		return "This is the inbound Gatekeeper Resource. Offering resources at: gsd_poll, icn_proposal.";
-	}
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public String getIt() {
+    return "This is the inbound Gatekeeper Resource. Offering resources at: gsd_poll, icn_proposal.";
+  }
 
   /**
    * This function represents the provider-side of GlobalServiceDiscovery, where
@@ -97,11 +98,11 @@ public class GatekeeperInboundResource {
                                         DataNotFoundException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
       }
 
-			log.info("GSDPoll successful, sending back GSDAnswer");
-			GSDAnswer answer = new GSDAnswer(gsdPoll.getRequestedService(), Utility.getOwnCloud());
-			return Response.status(Status.OK).entity(answer).build();
-		}
-	}
+      log.info("GSDPoll successful, sending back GSDAnswer");
+      GSDAnswer answer = new GSDAnswer(gsdPoll.getRequestedService(), Utility.getOwnCloud());
+      return Response.status(Status.OK).entity(answer).build();
+    }
+  }
 
   /**
    * This function represents the provider-side of InterCloudNegotiations, where
@@ -132,27 +133,25 @@ public class GatekeeperInboundResource {
                                         Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
                                         requestContext.getUriInfo().getAbsolutePath().toString());
     }
-    // If it is authorized, send a ServiceRequestForm to the Orchestrator and return
-    // the OrchestrationResponse
+    // If it is authorized, send a ServiceRequestForm to the Orchestrator and return the OrchestrationResponse
     Map<String, Boolean> orchestrationFlags = icnProposal.getNegotiationFlags();
     List<PreferredProvider> preferredProviders = new ArrayList<>();
 
     for (ArrowheadSystem preferredSystem : icnProposal.getPreferredSystems()) {
       preferredProviders.add(new PreferredProvider(preferredSystem, null));
     }
-    // Changing the requesterSystem and the requesterCloud for the sake of proper
-    // token generation
+    // Changing the requesterSystem and the requesterCloud for the sake of proper token generation
     if (icnProposal.getNegotiationFlags().get("useGateway")) {
       CoreSystem gateway = Utility.getCoreSystem("gateway");
       icnProposal.getRequesterSystem().setSystemName(gateway.getSystemName());
       icnProposal.getRequesterSystem().setSystemGroup("coresystems");
     }
     ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
-        .requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService())
-        .orchestrationFlags(orchestrationFlags).preferredProviders(preferredProviders).build();
+        .requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService()).orchestrationFlags(orchestrationFlags)
+        .preferredProviders(preferredProviders).build();
 
-		String orchestratorUri = Utility.getOrchestratorUri();
-		orchestratorUri = UriBuilder.fromPath(orchestratorUri).toString();
+    String orchestratorUri = Utility.getOrchestratorUri();
+    orchestratorUri = UriBuilder.fromPath(orchestratorUri).toString();
 
     Response response = Utility.sendRequest(orchestratorUri, "POST", serviceRequestForm);
     OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
@@ -164,54 +163,52 @@ public class GatekeeperInboundResource {
       return Response.status(response.getStatus()).entity(icnResult).build();
     }
 
-		// Compiling the gateway request payload
-		String gatewayURI = Utility.getGatewayUri();
-		gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToProvider").toString();
+    // Compiling the gateway request payload
+    String gatewayURI = Utility.getGatewayUri();
+    gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToProvider").toString();
 
-		ArrowheadSystem provider = orchResponse.getResponse().get(0).getProvider();
-		Map<String, String> metadata = orchResponse.getResponse().get(0).getService().getServiceMetadata();
-		boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
-		int timeout = icnProposal.getTimeout() > GatekeeperMain.timeout ? GatekeeperMain.timeout
-				: icnProposal.getTimeout();
+    ArrowheadSystem provider = orchResponse.getResponse().get(0).getProvider();
+    Map<String, String> metadata = orchResponse.getResponse().get(0).getService().getServiceMetadata();
+    boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
+    int timeout = icnProposal.getTimeout() > GatekeeperMain.timeout ? GatekeeperMain.timeout : icnProposal.getTimeout();
 
-		// Getting the list of preferred brokers from database
-		List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
+    // Getting the list of preferred brokers from database
+    List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
 
-		// Filtering common brokers
-		List<Broker> commonBrokers = new ArrayList<>(icnProposal.getPreferredBrokers());
-		commonBrokers.retainAll(preferredBrokers);
-		List<Broker> secureCommonBrokers = new ArrayList<>();
-		List<Broker> insecureCommonBrokers = new ArrayList<>();
+    // Filtering common brokers
+    List<Broker> commonBrokers = new ArrayList<>(icnProposal.getPreferredBrokers());
+    commonBrokers.retainAll(preferredBrokers);
+    List<Broker> secureCommonBrokers = new ArrayList<>();
+    List<Broker> insecureCommonBrokers = new ArrayList<>();
 
-		for (Broker broker : commonBrokers) {
-			if (broker.isSecure()) {
-				secureCommonBrokers.add(broker);
-			} else {
-				insecureCommonBrokers.add(broker);
-			}
-		}
-		
-		Broker chosenBroker = null;
-		if (isSecure) {
-			chosenBroker = secureCommonBrokers.get(0);
-		} else {
-			chosenBroker = insecureCommonBrokers.get(0);
-		}
+    for (Broker broker : commonBrokers) {
+      if (broker.isSecure()) {
+        secureCommonBrokers.add(broker);
+      } else {
+        insecureCommonBrokers.add(broker);
+      }
+    }
 
-    ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(),
-        chosenBroker.getPort(), provider, isSecure, timeout, icnProposal.getAuthenticationInfo());
+    Broker chosenBroker = null;
+    if (isSecure) {
+      chosenBroker = secureCommonBrokers.get(0);
+    } else {
+      chosenBroker = insecureCommonBrokers.get(0);
+    }
 
-		// Sending request, parsing response
-		Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
-		ConnectToProviderResponse connectToProviderResponse = gatewayResponse
-				.readEntity(ConnectToProviderResponse.class);
+    ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(), chosenBroker.getPort(), provider, isSecure,
+                                                                              timeout, icnProposal.getAuthenticationInfo());
 
-    GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(commonBrokers.get(0).getAddress(),
-        commonBrokers.get(0).getPort(), connectToProviderResponse.getQueueName(),
-        connectToProviderResponse.getControlQueueName(), Utility.getCoreSystem("gateway").getAuthenticationInfo());
+    // Sending request, parsing response
+    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
+    ConnectToProviderResponse connectToProviderResponse = gatewayResponse.readEntity(ConnectToProviderResponse.class);
+
+    GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(commonBrokers.get(0).getAddress(), commonBrokers.get(0).getPort(),
+                                                                            connectToProviderResponse.getQueueName(),
+                                                                            connectToProviderResponse.getControlQueueName(),
+                                                                            Utility.getCoreSystem("gateway").getAuthenticationInfo());
     ICNEnd icnEnd = new ICNEnd(orchResponse.getResponse().get(0), gatewayConnectionInfo);
-    log.info(
-        "ICNProposal: returning the first OrchestrationForm and the GatewayConnectionInfo to the requester Cloud.");
+    log.info("ICNProposal: returning the first OrchestrationForm and the GatewayConnectionInfo to the requester Cloud.");
     return Response.status(response.getStatus()).entity(icnEnd).build();
   }
 

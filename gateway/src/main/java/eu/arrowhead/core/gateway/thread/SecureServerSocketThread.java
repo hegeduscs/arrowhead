@@ -5,7 +5,6 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.core.gateway.GatewayService;
@@ -24,12 +23,12 @@ import org.apache.log4j.Logger;
 public class SecureServerSocketThread extends Thread {
 
 	private int port;
-	private SSLServerSocket sslServerSocket;
-	private SSLSocket sslConsumerSocket;
+  private SSLServerSocket sslServerSocket;
+  private SSLSocket sslConsumerSocket;
 	private ConnectToConsumerRequest connectionRequest;
 	private GatewaySession gatewaySession;
 
-	private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
+  private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
 
 	public SecureServerSocketThread(GatewaySession gatewaySession, int port,
 			ConnectToConsumerRequest connectionRequest) {
@@ -59,45 +58,43 @@ public class SecureServerSocketThread extends Thread {
 			SSLSession consumerSession = sslConsumerSocket.getSession();
 			Channel channel = gatewaySession.getChannel();
 
-			InputStream inConsumer = sslConsumerSocket.getInputStream();
-			OutputStream outConsumer = sslConsumerSocket.getOutputStream();
+      InputStream inConsumer = sslConsumerSocket.getInputStream();
+      OutputStream outConsumer = sslConsumerSocket.getOutputStream();
 
-			Consumer consumer = new DefaultConsumer(channel) {
-				@Override
-				public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-						byte[] body) throws IOException {
-					outConsumer.write(body);
-					System.out.println("Broker response: ");
-					System.out.println(new String(body));
-				}
+      Consumer consumer = new DefaultConsumer(channel) {
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+          outConsumer.write(body);
+          System.out.println("Broker response: ");
+          System.out.println(new String(body));
+        }
 
-			};
+      };
 
-			Consumer controlConsumer = new DefaultConsumer(channel) {
-				@Override
-				public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-						byte[] body) {
-					if (new String(body).equals("close")) {
-						GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
-					}
-				}
-			};
+      Consumer controlConsumer = new DefaultConsumer(channel) {
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+          if (new String(body).equals("close")) {
+            GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
+          }
+        }
+      };
 
-			while (true) {
-				// Get the request from the Consumer
-				byte[] inputFromConsumer = new byte[1024];
-				byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
-				System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
+      while (true) {
+        // Get the request from the Consumer
+        byte[] inputFromConsumer = new byte[1024];
+        byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
+        System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 
-				channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
-				channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
-				channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);
-			}
+        channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
+        channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
+        channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);
+      }
 
-		} catch (IOException | NegativeArraySizeException e) {
-			log.error("Communication failed (Error occurred or remote peer closed the socket)");
-			GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
-			throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage(), e);
+    } catch (IOException | NegativeArraySizeException e) {
+      log.error("Communication failed (Error occurred or remote peer closed the socket)");
+      GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
+      throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage(), e);
 
 		}
 	}

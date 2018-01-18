@@ -16,8 +16,8 @@ public class ConnectToConsumerRequest {
   public ConnectToConsumerRequest() {
   }
 
-  public ConnectToConsumerRequest(String brokerName, Integer brokerPort, String queueName, String controlQueueName,
-      ArrowheadSystem consumer, Boolean isSecure, int timeout, String providerGWPublicKey) {
+  public ConnectToConsumerRequest(String brokerName, Integer brokerPort, String queueName, String controlQueueName, ArrowheadSystem consumer,
+                                  Boolean isSecure, int timeout, String providerGWPublicKey) {
     this.brokerName = brokerName;
     this.brokerPort = brokerPort;
     this.queueName = queueName;
