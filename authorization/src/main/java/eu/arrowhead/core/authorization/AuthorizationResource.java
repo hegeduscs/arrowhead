@@ -24,6 +24,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -58,10 +60,12 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("intracloud")
-  public Response isSystemAuthorized(IntraCloudAuthRequest request) {
+  public Response isSystemAuthorized(IntraCloudAuthRequest request, @Context ContainerRequestContext requestContext) {
     if (!request.isValid()) {
       log.error("isSystemAuthorized BadPayloadException");
-      throw new BadPayloadException("IntraCloudAuthRequest bad payload: missing/incomplete consumer, service or providerList in the request.");
+      throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.",
+                                    Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
+                                    requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.put("systemGroup", request.getConsumer().getSystemGroup());
@@ -69,7 +73,9 @@ public class AuthorizationResource {
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
-      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().toStringLog());
+      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().toStringLog(),
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+                                      requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     IntraCloudAuthResponse response = new IntraCloudAuthResponse();
@@ -123,18 +129,21 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("intercloud")
-  public Response isCloudAuthorized(InterCloudAuthRequest request) {
+  public Response isCloudAuthorized(InterCloudAuthRequest request, @Context ContainerRequestContext requestContext) {
     if (!request.isPayloadUsable()) {
       log.error("isCloudAuthorized BadPayloadException");
-      throw new BadPayloadException("InterCloudAuthRequest bad payload: missing/incomplete cloud or service in the request payload.");
+      throw new BadPayloadException("Bad payload: missing/incomplete cloud or service in the request payload.", Status.BAD_REQUEST.getStatusCode(),
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.put("operator", request.getCloud().getOperator());
     restrictionMap.put("cloudName", request.getCloud().getCloudName());
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
-      log.error("Requester cloud is not in the database. (isCloudAuthorized DataNotFoundException)");
-      throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString());
+      log.error("Requester cloud is not in the database. isCloudAuthorized DataNotFoundException");
+      throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString(),
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+                                      requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.clear();

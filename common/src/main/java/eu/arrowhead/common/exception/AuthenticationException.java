@@ -1,7 +1,5 @@
 package eu.arrowhead.common.exception;
 
-import java.net.HttpURLConnection;
-
 /**
  * Used throughout the project to signal authentication and authorization related problems. Results in a 401 HTTP code if it happens during normal
  * operation (after core systems servers started listening for requests).
@@ -11,11 +9,19 @@ import java.net.HttpURLConnection;
  */
 public class AuthenticationException extends ArrowheadException {
 
-  public AuthenticationException(final String message) {
-    super(HttpURLConnection.HTTP_UNAUTHORIZED, message);
+  public AuthenticationException(String msg, int errorCode, String exceptionType, String origin, Throwable cause) {
+    super(msg, errorCode, exceptionType, origin, cause);
   }
 
-  public AuthenticationException(String message, Throwable cause) {
-    super(HttpURLConnection.HTTP_UNAUTHORIZED, message, cause);
+  public AuthenticationException(String msg, int errorCode, String exceptionType, String origin) {
+    super(msg, errorCode, exceptionType, origin);
+  }
+
+  public AuthenticationException(String msg, Throwable cause) {
+    super(msg, cause);
+  }
+
+  public AuthenticationException(String msg) {
+    super(msg);
   }
 }

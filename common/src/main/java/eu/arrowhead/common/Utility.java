@@ -8,7 +8,9 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.CoreSystem;
 import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.database.OwnCloud;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import java.net.URI;
@@ -26,6 +28,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
@@ -74,7 +77,8 @@ public final class Utility {
       } else {
         log.error("sendRequest() method throws AuthenticationException");
         throw new AuthenticationException(
-            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.");
+            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), Utility.class.toString());
       }
     } else {
       client = ClientBuilder.newClient(configuration);
@@ -100,9 +104,9 @@ public final class Utility {
           throw new NotAllowedException("Invalid method type was given to the Utility.sendRequest() method");
       }
     } catch (ProcessingException e) {
-      e.printStackTrace();
       log.error("UnavailableServerException occurred at " + uri);
-      throw new UnavailableServerException("Could not get any response from: " + uri);
+      throw new UnavailableServerException("Could not get any response from: " + uri, Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                                           UnavailableServerException.class.getName(), Utility.class.toString(), e);
     }
 
     //The response body has to be extracted before the stream closes
@@ -115,20 +119,18 @@ public final class Utility {
       } catch (RuntimeException e) {
         log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
         log.info("Request failed, response status code: " + response.getStatus());
-        log.info("Request failed, response body: " + toPrettyJson(null, errorMessageBody));
-        throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+        log.info("Request failed, response body: " + errorMessageBody);
+        throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.", e);
       }
       if (errorMessage == null) {
-        System.out.println("Request failed, response status code: " + response.getStatus());
-        System.out.println("Request failed, response body: " + toPrettyJson(null, errorMessageBody));
         log.error("Unknown reason for RuntimeException at the sendRequest() method.");
-        throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
-      } else if (errorMessage.getExceptionType() == null) {
-        log.error("Request returned with exception: " + errorMessage.getErrorMessage());
-        throw new RuntimeException(errorMessage.getErrorMessage() + " (This exception was passed from another module)");
+        log.info("Request failed, response status code: " + response.getStatus());
+        log.info("Request failed, response body: " + errorMessageBody);
+        throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
       } else {
         log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
-        throw new RuntimeException(errorMessage.getErrorMessage() + " (This " + errorMessage.getExceptionType() + " was passed from another module)");
+        throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                     errorMessage.getOrigin());
       }
     }
 
@@ -165,7 +167,8 @@ public final class Utility {
     CoreSystem orchestrator = dm.get(CoreSystem.class, restrictionMap);
     if (orchestrator == null) {
       log.error("Utility:getOrchestratorUri System not found in the database!");
-      throw new RuntimeException("Orchestrator Core System not found in the database!");
+      throw new DataNotFoundException("Orchestrator Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), Utility.class.toString());
     }
     return getUri(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
   }
@@ -176,7 +179,8 @@ public final class Utility {
     CoreSystem serviceRegistry = dm.get(CoreSystem.class, restrictionMap);
     if (serviceRegistry == null) {
       log.error("Utility:getServiceRegistryUri System not found in the database!");
-      throw new RuntimeException("Service Registry Core System not found in the database!");
+      throw new DataNotFoundException("Service Registry Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), Utility.class.toString());
     }
     return getUri(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
   }
@@ -187,7 +191,8 @@ public final class Utility {
     CoreSystem authorization = dm.get(CoreSystem.class, restrictionMap);
     if (authorization == null) {
       log.error("Utility:getAuthorizationUri System not found in the database!");
-      throw new RuntimeException("Authorization Core System not found in the database!");
+      throw new DataNotFoundException("Authorization Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), Utility.class.toString());
     }
     return getUri(authorization.getAddress(), authorization.getPort(), authorization.getServiceURI(), authorization.getIsSecure());
   }
@@ -198,7 +203,8 @@ public final class Utility {
     CoreSystem gatekeeper = dm.get(CoreSystem.class, restrictionMap);
     if (gatekeeper == null) {
       log.error("Utility:getGatekeeperUri System not found in the database!");
-      throw new RuntimeException("Gatekeeper Core System not found in the database!");
+      throw new DataNotFoundException("Gatekeeper Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), Utility.class.toString());
     }
     return getUri(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
   }
@@ -209,7 +215,8 @@ public final class Utility {
     CoreSystem gateway = dm.get(CoreSystem.class, restrictionMap);
     if (gateway == null) {
       log.error("Utility:getGatewayUri System not found in the database!");
-      throw new RuntimeException("Gateway Core System not found in the database!");
+      throw new DataNotFoundException("Gateway Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), Utility.class.toString());
     }
     return getUri(gateway.getAddress(), gateway.getPort(), gateway.getServiceURI(), gateway.getIsSecure());
   }
@@ -220,7 +227,8 @@ public final class Utility {
     CoreSystem qos = dm.get(CoreSystem.class, restrictionMap);
     if (qos == null) {
       log.error("Utility:getQosUri System not found in the database!");
-      throw new RuntimeException("QoS Core System not found in the database!");
+      throw new DataNotFoundException("QoS Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), Utility.class.toString());
     }
     return getUri(qos.getAddress(), qos.getPort(), qos.getServiceURI(), qos.getIsSecure());
   }
@@ -241,7 +249,8 @@ public final class Utility {
     List<OwnCloud> cloudList = dm.getAll(OwnCloud.class, null);
     if (cloudList.isEmpty()) {
       log.error("Utility:getOwnCloud not found in the database.");
-      throw new RuntimeException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.");
+      throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.",
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), Utility.class.toString());
     }
     if (cloudList.size() > 1) {
       log.warn("own_cloud table should NOT have more than 1 rows.");
@@ -256,7 +265,8 @@ public final class Utility {
     CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
     if (coreSystem == null) {
       log.error("Utility:getCoreSystem " + systemName + " not found in the database.");
-      throw new RuntimeException("Requested Core System " + "(" + systemName + ") not found in the database!");
+      throw new DataNotFoundException("Requested Core System " + "(" + systemName + ") not found in the database!", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), Utility.class.toString());
     }
 
     return coreSystem;

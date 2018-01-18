@@ -2,38 +2,47 @@ package eu.arrowhead.common.exception;
 
 public class ArrowheadException extends RuntimeException {
 
-  private final int errorCode;
+  private int errorCode;
+  private final String exceptionType;
+  private final String origin;
 
-  /**
-   * Constructor.
-   *
-   * @param errorCode the HTTP status code for this exception
-   * @param msg human readable message
-   * @param cause reason for this exception
-   */
-  public ArrowheadException(final int errorCode, final String msg, final Throwable cause) {
+  public ArrowheadException(final String msg, final int errorCode, final String exceptionType, final String origin, final Throwable cause) {
     super(msg, cause);
     this.errorCode = errorCode;
+    this.exceptionType = exceptionType;
+    this.origin = origin;
   }
 
-  /**
-   * Constructor.
-   *
-   * @param errorCode the HTTP status code for this exception
-   * @param msg human readable message
-   */
-  public ArrowheadException(final int errorCode, final String msg) {
+  public ArrowheadException(final String msg, final int errorCode, final String exceptionType, final String origin) {
     super(msg);
     this.errorCode = errorCode;
+    this.exceptionType = exceptionType;
+    this.origin = origin;
   }
 
-  /**
-   * Return the HTTP status code for this exception.
-   *
-   * @return the HTTP status code
-   */
+  public ArrowheadException(final String msg, final Throwable cause) {
+    super(msg, cause);
+    this.errorCode = 0;
+    this.exceptionType = null;
+    this.origin = null;
+  }
+
+  public ArrowheadException(final String msg) {
+    super(msg);
+    this.errorCode = 0;
+    this.exceptionType = null;
+    this.origin = null;
+  }
+
   public int getErrorCode() {
     return errorCode;
   }
 
+  public String getExceptionType() {
+    return exceptionType;
+  }
+
+  public String getOrigin() {
+    return origin;
+  }
 }

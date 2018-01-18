@@ -7,7 +7,6 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.RawTokenInfo;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
-import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -21,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
 class TokenGenerationService {
@@ -124,7 +124,8 @@ class TokenGenerationService {
     }
     if (!nonNullTokenExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
-      throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, "Token generation failed for all the provider ArrowheadSystems.");
+      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                   ArrowheadException.class.toString(), TokenGenerationService.class.getName());
     }
 
     return tokens;
@@ -167,7 +168,8 @@ class TokenGenerationService {
     }
     if (!nonNullKeyExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
-      throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, "Token generation failed for all the provider ArrowheadSystems.");
+      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                   ArrowheadException.class.toString(), TokenGenerationService.class.getName());
     }
 
     return keys;

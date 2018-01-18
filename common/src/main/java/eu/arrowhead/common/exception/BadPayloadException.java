@@ -1,18 +1,23 @@
 package eu.arrowhead.common.exception;
 
-import java.net.HttpURLConnection;
-
 /**
- * Thrown if a resource receives a HTTP payload which have missing mandatory fields. The exception message mentions what are the mandatory fields each
- * case.
+ * Thrown if a resource receives a HTTP payload which have missing mandatory fields.
  */
 public class BadPayloadException extends ArrowheadException {
 
-  public BadPayloadException(final String message) {
-    super(HttpURLConnection.HTTP_BAD_REQUEST, message);
+  public BadPayloadException(String msg, int errorCode, String exceptionType, String origin, Throwable cause) {
+    super(msg, errorCode, exceptionType, origin, cause);
   }
 
-  public BadPayloadException(String message, Throwable cause) {
-    super(HttpURLConnection.HTTP_BAD_REQUEST, message, cause);
+  public BadPayloadException(String msg, int errorCode, String exceptionType, String origin) {
+    super(msg, errorCode, exceptionType, origin);
+  }
+
+  public BadPayloadException(String msg, Throwable cause) {
+    super(msg, cause);
+  }
+
+  public BadPayloadException(String msg) {
+    super(msg);
   }
 }

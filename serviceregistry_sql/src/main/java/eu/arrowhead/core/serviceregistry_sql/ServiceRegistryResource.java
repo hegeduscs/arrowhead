@@ -48,7 +48,8 @@ public class ServiceRegistryResource {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValidFully()) {
       log.error("registerService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
+      throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
@@ -58,7 +59,8 @@ public class ServiceRegistryResource {
           .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service registering denied.");
         throw new AuthenticationException(
-            "Provider system " + entry.getProvider().toStringLog() + " fields and cert common name (" + clientCN + ") do not match!");
+            "Provider system " + entry.getProvider().toStringLog() + " fields and cert common name (" + clientCN + ") do not match!",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
       }
     }
 
@@ -107,10 +109,11 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("query")
-  public Response queryRegistry(ServiceQueryForm queryForm) {
+  public Response queryRegistry(ServiceQueryForm queryForm, @Context ContainerRequestContext requestContext) {
     if (!queryForm.isValid()) {
       log.error("queryRegistry throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceQueryForm has missing/incomplete mandatory field(s).");
+      throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.put("serviceGroup", queryForm.getService().getServiceGroup());
@@ -145,7 +148,9 @@ public class ServiceRegistryResource {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValidFully()) {
       log.error("removeService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
+      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).",
+                                    Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
+                                    requestContext.getUriInfo().getAbsolutePath().toString());
     }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
@@ -155,7 +160,8 @@ public class ServiceRegistryResource {
           .equalsIgnoreCase(clientFields[1])) {
         log.error("Provider system fields and cert common name do not match! Service removing denied.");
         throw new AuthenticationException(
-            "Provider system " + entry.getProvider().toStringLog() + " fields and cert common name (" + clientCN + ") do not match!");
+            "Provider system " + entry.getProvider().toStringLog() + " fields and cert common name (" + clientCN + ") do not match!",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
       }
     }
 

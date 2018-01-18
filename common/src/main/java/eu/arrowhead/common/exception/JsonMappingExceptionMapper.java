@@ -11,7 +11,7 @@ public class JsonMappingExceptionMapper implements ExceptionMapper<JsonMappingEx
   @Override
   public Response toResponse(JsonMappingException ex) {
     ex.printStackTrace();
-    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400, JsonMappingException.class.toString());
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 400, JsonMappingException.class.toString(), null);
     return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build();
   }
 

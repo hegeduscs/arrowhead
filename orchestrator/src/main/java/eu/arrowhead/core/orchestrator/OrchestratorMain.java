@@ -19,6 +19,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Properties;
 import javax.net.ssl.SSLContext;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -143,7 +144,8 @@ public class OrchestratorMain {
     sslCon.setTrustStorePass(truststorePass);
     if (!sslCon.validateConfiguration(true)) {
       log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
-      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
+      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!",
+                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName() (), BASE_URI_SECURED)
     }
 
     SSLContext sslContext = sslCon.createSSLContext();
@@ -155,7 +157,8 @@ public class OrchestratorMain {
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
       throw new AuthenticationException(
-          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.",
+          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName() (), BASE_URI_SECURED)
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);

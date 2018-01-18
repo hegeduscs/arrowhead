@@ -1,18 +1,23 @@
 package eu.arrowhead.common.exception;
 
-import java.net.HttpURLConnection;
-
 /**
  * Thrown when a HTTP request times out because the endpoint is not available.
  */
 public class UnavailableServerException extends ArrowheadException {
 
-  public UnavailableServerException(final String message) {
-    super(HttpURLConnection.HTTP_UNAVAILABLE, message);
+  public UnavailableServerException(String msg, int errorCode, String exceptionType, String origin, Throwable cause) {
+    super(msg, errorCode, exceptionType, origin, cause);
   }
 
-  public UnavailableServerException(String message, Throwable cause) {
-    super(HttpURLConnection.HTTP_UNAVAILABLE, message, cause);
+  public UnavailableServerException(String msg, int errorCode, String exceptionType, String origin) {
+    super(msg, errorCode, exceptionType, origin);
   }
 
+  public UnavailableServerException(String msg, Throwable cause) {
+    super(msg, cause);
+  }
+
+  public UnavailableServerException(String msg) {
+    super(msg);
+  }
 }

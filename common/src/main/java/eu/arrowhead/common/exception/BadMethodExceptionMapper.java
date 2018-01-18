@@ -2,6 +2,7 @@ package eu.arrowhead.common.exception;
 
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
@@ -12,11 +13,11 @@ public class BadMethodExceptionMapper implements ExceptionMapper<NotAllowedExcep
     ex.printStackTrace();
     ErrorMessage errorMessage;
     if (ex.getMessage() != null) {
-      errorMessage = new ErrorMessage(ex.getMessage(), 405, NotAllowedException.class.toString());
+      errorMessage = new ErrorMessage(ex.getMessage(), 405, NotAllowedException.class.toString(), null);
     } else {
-      errorMessage = new ErrorMessage("Bad request: requested method is not allowed.", 405, NotAllowedException.class.toString());
+      errorMessage = new ErrorMessage("Bad request: this method type is not allowed here.", 405, NotAllowedException.class.toString(), null);
     }
 
-    return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity(errorMessage).header("Content-type", "application/json").build();
+    return Response.status(Status.METHOD_NOT_ALLOWED).entity(errorMessage).header("Content-type", "application/json").build();
   }
 }
