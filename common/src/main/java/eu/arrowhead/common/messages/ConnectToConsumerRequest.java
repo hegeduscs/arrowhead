@@ -11,20 +11,20 @@ public class ConnectToConsumerRequest {
   private ArrowheadSystem consumer;
   private Boolean isSecure;
   private int timeout;
-  private String gatewayPublicKey;
+  private String providerGWPublicKey;
 
   public ConnectToConsumerRequest() {
   }
 
-  public ConnectToConsumerRequest(String brokerName, Integer brokerPort, String queueName, String controlQueueName, ArrowheadSystem consumer,
-                                  Boolean isSecure, int timeout, String gatewayPublicKey) {
+  public ConnectToConsumerRequest(String brokerName, Integer brokerPort, String queueName, String controlQueueName,
+      ArrowheadSystem consumer, Boolean isSecure, int timeout, String providerGWPublicKey) {
     this.brokerName = brokerName;
     this.brokerPort = brokerPort;
     this.queueName = queueName;
     this.controlQueueName = controlQueueName;
     this.consumer = consumer;
     this.isSecure = isSecure;
-    this.gatewayPublicKey = gatewayPublicKey;
+    this.providerGWPublicKey = providerGWPublicKey;
     this.timeout = timeout;
   }
 
@@ -84,12 +84,12 @@ public class ConnectToConsumerRequest {
     this.timeout = timeout;
   }
 
-  public String getGatewayPublicKey() {
-    return gatewayPublicKey;
+  public String getProviderGWPublicKey() {
+    return providerGWPublicKey;
   }
 
-  public void setGatewayPublicKey(String gatewayPublicKey) {
-    this.gatewayPublicKey = gatewayPublicKey;
+  public void setProviderGWPublicKey(String providerGWPublicKey) {
+    this.providerGWPublicKey = providerGWPublicKey;
   }
 
 }
