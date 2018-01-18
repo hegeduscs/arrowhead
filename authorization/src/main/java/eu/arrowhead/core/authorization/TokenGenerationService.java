@@ -3,9 +3,11 @@ package eu.arrowhead.core.authorization;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.RawTokenInfo;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
+import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -122,7 +124,7 @@ class TokenGenerationService {
     }
     if (!nonNullTokenExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
-      throw new RuntimeException("Token generation failed for all the provider ArrowheadSystems.");
+      throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, "Token generation failed for all the provider ArrowheadSystems.");
     }
 
     return tokens;
@@ -165,7 +167,7 @@ class TokenGenerationService {
     }
     if (!nonNullKeyExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
-      throw new RuntimeException("Token generation failed for all the provider ArrowheadSystems.");
+      throw new ArrowheadException(HttpURLConnection.HTTP_INTERNAL_ERROR, "Token generation failed for all the provider ArrowheadSystems.");
     }
 
     return keys;

@@ -1,14 +1,18 @@
 package eu.arrowhead.common.exception;
 
+import java.net.HttpURLConnection;
+
 /**
  * Usually thrown by the Core System resources if a crucial database query (for example the query of the Service Registry or the Authorization) comes
  * back empty during the servicing of the request.
  */
-public class DataNotFoundException extends RuntimeException {
+public class DataNotFoundException extends ArrowheadException {
 
-  private static final long serialVersionUID = -1622261264080480479L;
+  public DataNotFoundException(final String message) {
+    super(HttpURLConnection.HTTP_NOT_FOUND, message);
+  }
 
-  public DataNotFoundException(String message) {
-    super(message);
+  public DataNotFoundException(String message, Throwable cause) {
+    super(HttpURLConnection.HTTP_NOT_FOUND, message, cause);
   }
 }

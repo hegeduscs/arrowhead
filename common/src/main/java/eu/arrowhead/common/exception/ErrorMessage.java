@@ -2,8 +2,8 @@ package eu.arrowhead.common.exception;
 
 public class ErrorMessage {
 
-  private String errorMessage;
   private int errorCode;
+  private String errorMessage;
   private String exceptionType;
   private String documentation = "https://github.com/hegeduscs/arrowhead/tree/master/documentation";
 
