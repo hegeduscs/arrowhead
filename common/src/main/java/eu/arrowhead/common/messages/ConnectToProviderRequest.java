@@ -9,16 +9,19 @@ public class ConnectToProviderRequest {
   private ArrowheadSystem provider;
   private boolean isSecure;
   private int timeout;
+  private String consumerGWPublicKey;
 
   public ConnectToProviderRequest() {
   }
 
-  public ConnectToProviderRequest(String brokerHost, int brokerPort, ArrowheadSystem provider, boolean isSecure, int timeout) {
+  public ConnectToProviderRequest(String brokerHost, int brokerPort, ArrowheadSystem provider, boolean isSecure,
+      int timeout, String consumerGWPublicKey) {
     this.brokerHost = brokerHost;
     this.brokerPort = brokerPort;
     this.provider = provider;
     this.isSecure = isSecure;
     this.timeout = timeout;
+    this.setConsumerGWPublicKey(consumerGWPublicKey);
   }
 
   public String getBrokerHost() {
@@ -61,5 +64,12 @@ public class ConnectToProviderRequest {
     this.timeout = timeout;
   }
 
+  public String getConsumerGWPublicKey() {
+    return consumerGWPublicKey;
+  }
+
+  public void setConsumerGWPublicKey(String consumerGWPublicKey) {
+    this.consumerGWPublicKey = consumerGWPublicKey;
+  }
 
 }
