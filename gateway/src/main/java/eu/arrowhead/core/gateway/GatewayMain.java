@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Properties;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
@@ -26,11 +27,12 @@ public class GatewayMain {
 
   public static boolean DEBUG_MODE;
   public static SSLContext sslContext;
-
+  
   private static HttpServer server;
   private static HttpServer secureServer;
   private static Properties prop;
-
+  private static String GATEWAY_PUBLIC_KEY;
+  
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8452/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8453/");
   private static final Logger log = Logger.getLogger(GatewayMain.class.getName());
@@ -139,9 +141,12 @@ public class GatewayMain {
 
     sslContext = sslCon.createSSLContext();
     sslContext = SecurityUtils.createMasterSSLContext(truststorePath, truststorePass, trustPass, masterArrowheadCertPath);
+   
     
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
+    GATEWAY_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
+    System.out.println("My certificate PublicKey in Base64: " + GATEWAY_PUBLIC_KEY);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");

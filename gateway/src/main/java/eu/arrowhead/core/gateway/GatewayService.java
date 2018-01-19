@@ -90,7 +90,7 @@ public class GatewayService {
     byte[] encryptedMessage = null;
     PublicKey publicKey;
 
-    try {
+    try {    
       publicKey = SecurityUtils.getPublicKey(publicKeyString);
     } catch (InvalidKeySpecException e) {
       log.fatal("The public key of the Gateway module is invalid");
