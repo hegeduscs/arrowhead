@@ -44,7 +44,7 @@ public class CoreSystem {
   @Column(name = "is_secure")
   private boolean secure;
 
-  @Column(name = "authentication_info")
+  @Column(name = "authentication_info", length = 2047)
   private String authenticationInfo;
 
   public CoreSystem() {
@@ -55,7 +55,7 @@ public class CoreSystem {
    * @param address IP address or hostname for the Core System (e.g. "127.0.0.1" or "arrowhead.tmit.bme.hu")
    * @param port The port number where the Core System offers its services (optional)
    * @param serviceURI The path where the REST resource(s) is/are available
-   * @param isSecure Indicates weather the server uses HTTP or HTTPS protocol
+   * @param secure Indicates weather the server uses HTTP or HTTPS protocol
    * @param authenticationInfo In case <tt>secure</tt> is true, this field holds the Base64 coded public key of the Core System certificate
    */
   public CoreSystem(String systemName, String address, int port, String serviceURI, boolean secure, String authenticationInfo) {
