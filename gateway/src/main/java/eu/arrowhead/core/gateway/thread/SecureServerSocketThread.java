@@ -63,8 +63,8 @@ public class SecureServerSocketThread extends Thread {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
             throws IOException {
-          // byte[] decryptedMessage = GatewayService.decryptMessage(body);
-          outConsumer.write(body);
+          byte[] decryptedMessage = GatewayService.decryptMessage(body);
+          outConsumer.write(decryptedMessage);
           System.out.println("Broker response: ");
           System.out.println(new String(body));
         }
@@ -75,7 +75,8 @@ public class SecureServerSocketThread extends Thread {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
             byte[] body) {
-          if (new String(body).equals("close")) {
+          byte[] decryptedMessage = GatewayService.decryptMessage(body);
+          if (new String(decryptedMessage).equals("close")) {
             GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
           }
         }
@@ -86,10 +87,9 @@ public class SecureServerSocketThread extends Thread {
         byte[] inputFromConsumer = new byte[1024];
         byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
         System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
-        // byte[] encryptedMessage =
-        // GatewayService.encryptMessage(inputFromConsumerFinal,
-        // connectionRequest.getProviderGWPublicKey());
-        channel.basicPublish("", connectionRequest.getQueueName(), null, inputFromConsumerFinal);
+        byte[] encryptedMessage = GatewayService.encryptMessage(inputFromConsumerFinal,
+            connectionRequest.getProviderGWPublicKey());
+        channel.basicPublish("", connectionRequest.getQueueName(), null, encryptedMessage);
         channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
         channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);
       }

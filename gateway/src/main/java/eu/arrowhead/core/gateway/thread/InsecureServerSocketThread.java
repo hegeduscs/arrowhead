@@ -96,7 +96,7 @@ public class InsecureServerSocketThread extends Thread {
     } catch (IOException | NegativeArraySizeException e) {
       log.error("Communication failed (Error occurred or remote peer closed the socket)");
       GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket);
-      throw new ArrowheadException(e.getMessage(), e);
+      throw new ArrowheadException(e.getMessage());
 		}
 	}
 
