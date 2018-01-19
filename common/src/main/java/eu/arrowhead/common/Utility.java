@@ -10,7 +10,9 @@ import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.database.OwnCloud;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import java.net.URI;
@@ -37,11 +39,17 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
-  private static final Logger log = Logger.getLogger(Utility.class.getName());
+  private static final String ARROWHEAD_EXCEPTION = "eu.arrowhead.common.exception.ArrowheadException";
+  private static final String AUTH_EXCEPTION = "eu.arrowhead.common.exception.AuthenticationException";
+  private static final String BAD_PAYLOAD_EXCEPTION = "eu.arrowhead.common.exception.BadPayloadException";
+  private static final String NOT_FOUND_EXCEPTION = "eu.arrowhead.common.exception.DataNotFoundException";
+  private static final String DUPLICATE_EXCEPTION = "eu.arrowhead.common.exception.DuplicateEntryException";
+  private static final String UNAVAILABLE_EXCEPTION = "eu.arrowhead.common.exception.UnavailableServerException";
 
-  private static SSLContext sslContext = null;
+  private static SSLContext sslContext;
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final Logger log = Logger.getLogger(Utility.class.getName());
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
     // Decide whether to allow the connection...
     return true;
@@ -109,29 +117,9 @@ public final class Utility {
                                            UnavailableServerException.class.getName(), Utility.class.toString(), e);
     }
 
-    //The response body has to be extracted before the stream closes
-    String errorMessageBody = toPrettyJson(null, response.getEntity());
     // If the response status code does not start with 2 the request was not successful
     if (!(response.getStatusInfo().getFamily() == Family.SUCCESSFUL)) {
-      ErrorMessage errorMessage;
-      try {
-        errorMessage = response.readEntity(ErrorMessage.class);
-      } catch (RuntimeException e) {
-        log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
-        log.info("Request failed, response status code: " + response.getStatus());
-        log.info("Request failed, response body: " + errorMessageBody);
-        throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.", e);
-      }
-      if (errorMessage == null) {
-        log.error("Unknown reason for RuntimeException at the sendRequest() method.");
-        log.info("Request failed, response status code: " + response.getStatus());
-        log.info("Request failed, response body: " + errorMessageBody);
-        throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
-      } else {
-        log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
-        throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                     errorMessage.getOrigin());
-      }
+      handleException(response, uri);
     }
 
     return response;
@@ -312,6 +300,50 @@ public final class Utility {
       return gson.toJson(obj);
     }
     return null;
+  }
+
+  private static void handleException(Response response, String uri) {
+    //The response body has to be extracted before the stream closes
+    String errorMessageBody = toPrettyJson(null, response.getEntity());
+    ErrorMessage errorMessage;
+    try {
+      errorMessage = response.readEntity(ErrorMessage.class);
+    } catch (RuntimeException e) {
+      log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
+      log.info("Request failed, response status code: " + response.getStatus());
+      log.info("Request failed, response body: " + errorMessageBody);
+      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.", e);
+    }
+    if (errorMessage == null) {
+      log.error("Unknown reason for RuntimeException at the sendRequest() method.");
+      log.info("Request failed, response status code: " + response.getStatus());
+      log.info("Request failed, response body: " + errorMessageBody);
+      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+    } else {
+      log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
+      switch (errorMessage.getExceptionType()) {
+        case ARROWHEAD_EXCEPTION:
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                       errorMessage.getOrigin());
+        case AUTH_EXCEPTION:
+          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                            errorMessage.getOrigin());
+        case BAD_PAYLOAD_EXCEPTION:
+          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                        errorMessage.getOrigin());
+        case NOT_FOUND_EXCEPTION:
+          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                          errorMessage.getOrigin());
+        case DUPLICATE_EXCEPTION:
+          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                            errorMessage.getOrigin());
+        case UNAVAILABLE_EXCEPTION:
+          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                               errorMessage.getOrigin());
+        default:
+          throw new RuntimeException(errorMessage.getErrorMessage());
+      }
+    }
   }
 
   // IMPORTANT: only use this function with RuntimeExceptions that have a public String constructor

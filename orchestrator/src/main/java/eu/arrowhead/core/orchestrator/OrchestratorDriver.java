@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
@@ -67,7 +68,8 @@ final class OrchestratorDriver {
     ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
     if (serviceQueryResult == null || !serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");
-      throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString());
+      throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString(), Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     // If there are non-valid entries in the Service Registry response, we filter those out
@@ -115,7 +117,8 @@ final class OrchestratorDriver {
     // Throwing exception if none of the providers are authorized for this consumer/service pair.
     if (authorizedSystems.isEmpty()) {
       log.error("queryAuthorization DataNotFoundException");
-      throw new DataNotFoundException("The consumer system is not authorized to receive servicing from any of the provider systems.");
+      throw new DataNotFoundException("The consumer system is not authorized to receive servicing from any of the provider systems.",
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("queryAuthorization is done, sending back " + authorizedSystems.size() + " authorized Systems");
@@ -148,7 +151,8 @@ final class OrchestratorDriver {
 
     if (preferredList.isEmpty()) {
       log.error("removeNonPreferred DataNotFoundException");
-      throw new DataNotFoundException("No preferred local System was found in the the list of potential provider Systems.");
+      throw new DataNotFoundException("No preferred local System was found in the the list of potential provider Systems.",
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("removeNonPreferred returns with " + preferredList.size() + " ServiceRegistryEntries.");
@@ -226,7 +230,8 @@ final class OrchestratorDriver {
 
     if (retrievedList.isEmpty()) {
       log.error("queryOrchestrationStore DataNotFoundException");
-      throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.toStringLog());
+      throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.toStringLog(),
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     } else {
       // Removing non-valid Store entries from the results
       List<OrchestrationStore> temp = new ArrayList<>();
@@ -355,7 +360,8 @@ final class OrchestratorDriver {
     GSDResult result = response.readEntity(GSDResult.class);
     if (!result.isValid()) {
       log.error("doGlobalServiceDiscovery DataNotFoundException");
-      throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.");
+      throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("doGlobalServiceDiscovery returns with " + result.getResponse().size() + " GSDAnswers");
@@ -401,7 +407,8 @@ final class OrchestratorDriver {
     if (onlyPreferred) {
       log.error("interCloudMatchmaking DataNotFoundException, preferredClouds size: " + preferredClouds.size());
       throw new DataNotFoundException(
-          "No preferred Cloud found in the GSD response. Inter-Cloud matchmaking failed, since only preferred providers are allowed.");
+          "No preferred Cloud found in the GSD response. Inter-Cloud matchmaking failed, since only preferred providers are allowed.",
+          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("interCloudMatchmaking returns the first Cloud entry from the GSD results");
@@ -449,7 +456,8 @@ final class OrchestratorDriver {
     ICNResult result = response.readEntity(ICNResult.class);
     if (!result.isValid()) {
       log.error("doInterCloudNegotiations DataNotFoundException");
-      throw new DataNotFoundException("ICN failed with the remote cloud.");
+      throw new DataNotFoundException("ICN failed with the remote cloud.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+                                      OrchestratorDriver.class.toString());
     }
 
     log.info("doInterCloudNegotiations returns with " + result.getOrchResponse().getResponse().size() + " possible providers");

@@ -1,5 +1,13 @@
 package eu.arrowhead.core.gateway;
 
+import com.rabbitmq.client.AlreadyClosedException;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,23 +23,12 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-
+import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
-
-import com.rabbitmq.client.AlreadyClosedException;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.security.SecurityUtils;
-import eu.arrowhead.core.gateway.model.GatewaySession;
 
 /**
  * Contains miscellaneous helper functions for the Gateway.
@@ -52,20 +49,15 @@ public class GatewayService {
   /**
    * Creates a channel to the Broker
    *
-   * @param brokerHost
-   *          The hostname of the AMQP broker to use for connections
-   * @param brokerPort
-   *          The port of the AMQP broker to use for connections
-   * @param queueName
-   *          The name of the queue, should be unique
-   * @param controlQueueName
-   *          The name of the queue for control messages, should be unique
-   * @param isSecure
-   *          The type of the channel (secure or insecure)
+   * @param brokerHost The hostname of the AMQP broker to use for connections
+   * @param brokerPort The port of the AMQP broker to use for connections
+   * @param queueName The name of the queue, should be unique
+   * @param controlQueueName The name of the queue for control messages, should be unique
+   * @param isSecure The type of the channel (secure or insecure)
+   *
    * @return GatewaySession, which contains a connection and a channel object
    */
-  public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName,
-      String controlQueueName, boolean isSecure) {
+  public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName, boolean isSecure) {
     GatewaySession gatewaySession = new GatewaySession();
     try {
       ConnectionFactory factory = new ConnectionFactory();
@@ -86,7 +78,8 @@ public class GatewayService {
 
     } catch (IOException | NullPointerException e) {
       log.error("Creating the channel to the Broker failed");
-      throw new RuntimeException(e.getMessage(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
+                                   GatewayService.class.toString(), e);
 
     }
     return gatewaySession;
@@ -101,7 +94,8 @@ public class GatewayService {
       publicKey = SecurityUtils.getPublicKey(publicKeyString);
     } catch (InvalidKeySpecException e) {
       log.fatal("The public key of the Gateway module is invalid");
-      throw new ArrowheadException(e.getMessage(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
+                                   GatewayService.class.toString(), e);
     }
     // Getting the private key from the keystore
     /*
@@ -115,6 +109,7 @@ public class GatewayService {
       cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
     } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
       log.fatal("Cipher.getInstance(String) throws exception, code needs to be changed!");
+      throw new ServiceConfigurationError(e.getMessage());
     }
 
     // Generate the encrypted message
@@ -139,8 +134,8 @@ public class GatewayService {
       log.fatal("Cipher.getInstance(String) throws exception, code needs to be changed!");
     }
     try {
-      KeyStore keyStore = SecurityUtils.loadKeyStore(GatewayMain.getProp().getProperty("keystore"),
-          GatewayMain.getProp().getProperty("keystorepass"));
+      KeyStore keyStore = SecurityUtils
+          .loadKeyStore(GatewayMain.getProp().getProperty("keystore"), GatewayMain.getProp().getProperty("keystorepass"));
       PrivateKey privateKey = SecurityUtils.getPrivateKey(keyStore, GatewayMain.getProp().getProperty("keystorepass"));
       // decrypt the text using the private key
       cipher.init(Cipher.DECRYPT_MODE, privateKey);
@@ -179,19 +174,15 @@ public class GatewayService {
   /**
    * Fill the ConcurrentHashMap with initial keys and values
    *
-   * @param map
-   *          ConcurrentHashMap which contains the port number and the
-   *          availability
-   * @param portMin
-   *          The lowest port number from the allowed range
-   * @param portMax
-   *          The highest port number from the allowed range
+   * @param map ConcurrentHashMap which contains the port number and the
+   *     availability
+   * @param portMin The lowest port number from the allowed range
+   * @param portMax The highest port number from the allowed range
    *
    * @return The initialized ConcurrentHashMap
    */
   // Integer: port; Boolean: free (true) or reserved(false)
-  private static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map,
-      int portMin, int portMax) {
+  private static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map, int portMin, int portMax) {
     for (int i = portMin; i <= portMax; i++) {
       map.put(i, true);
     }
@@ -223,8 +214,7 @@ public class GatewayService {
     return serverSocketPort;
   }
 
-  public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket,
-      ServerSocket serverSocket) {
+  public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket, ServerSocket serverSocket) {
     log.error("Socket closed by remote partner");
     // Setting serverSocket free
     portAllocationMap.put(port, true);

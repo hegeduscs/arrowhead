@@ -5,7 +5,6 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.GSDResult;
 import eu.arrowhead.common.messages.ICNResult;
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
@@ -109,10 +109,10 @@ final class OrchestratorService {
     /*
      * If the Intra-Cloud orchestration fails somewhere (SR, Auth, filtering, matchmaking) we catch the exception, because Inter-Cloud
      * orchestration might be allowed. If not, we throw the same exception again.
-     */ catch (ArrowheadException ex) {
-      if (ex.getExceptionType().contains("DataNotFoundException") && !orchestrationFlags.get("enableInterCloud")) {
+     */ catch (DataNotFoundException ex) {
+      if (!orchestrationFlags.get("enableInterCloud")) {
         log.error("dynamicOrchestration: Intra-Cloud orchestration failed with DataNotFoundException, Inter-Cloud is not allowed.");
-        throw new DataNotFoundException(ex.getMessage());
+        throw ex;
       }
     }
 
@@ -181,7 +181,8 @@ final class OrchestratorService {
 
       // If the for-loop finished but we still could not return a result, we throw a DataNotFoundException.
       log.error("orchestrationFromStore throws final DataNotFoundException");
-      throw new DataNotFoundException("OrchestrationFromStore failed with all " + entryList.size() + " queried Store entries.");
+      throw new DataNotFoundException("OrchestrationFromStore failed with all the queried (" + entryList.size() + ") Store entries.",
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
     }
   }
 
@@ -283,7 +284,8 @@ final class OrchestratorService {
     // Store based orchestration is "hard-wired", meaning only the stored provider System is acceptable
     if (storeOrchestration) {
       log.error("icnMatchmaking DataNotFoundException");
-      throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.");
+      throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.",
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
     }
     // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
     else {

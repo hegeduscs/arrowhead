@@ -28,6 +28,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -60,10 +62,11 @@ public class GatekeeperOutboundResource {
    */
   @PUT
   @Path("init_gsd")
-  public Response GSDRequest(GSDRequestForm requestForm) {
+  public Response GSDRequest(GSDRequestForm requestForm, @Context ContainerRequestContext requestContext) {
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
-      throw new BadPayloadException("init_gsd received bad payload: requestedService is missing or it is not valid.");
+      throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
@@ -120,10 +123,11 @@ public class GatekeeperOutboundResource {
    */
   @PUT
   @Path("init_icn")
-  public Response ICNRequest(ICNRequestForm requestForm) {
+  public Response ICNRequest(ICNRequestForm requestForm, @Context ContainerRequestContext requestContext) {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
-      throw new BadPayloadException("init_icn received bad payload: missing/incomplete ICNRequestForm.");
+      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     // Getting the list of preferred brokers from database + read in the use_gateway property

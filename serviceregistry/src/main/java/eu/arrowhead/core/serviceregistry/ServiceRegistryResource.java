@@ -1,6 +1,5 @@
 package eu.arrowhead.core.serviceregistry;
 
-import com.github.danieln.dnssdjava.DnsSDException;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
@@ -65,7 +64,7 @@ public class ServiceRegistryResource {
       } else {
         return Response.status(Response.Status.RESET_CONTENT).build();
       }
-    } catch (DnsSDException e) {
+    } catch (Exception e) {
       log.error("SR Registration failed:" + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -134,7 +133,7 @@ public class ServiceRegistryResource {
       } else {
         return Response.status(Response.Status.RESET_CONTENT).build();
       }
-    } catch (DnsSDException e) {
+    } catch (Exception e) {
       log.error("SR Registration failed:" + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -208,7 +207,7 @@ public class ServiceRegistryResource {
       } else {
         return Response.status(Response.Status.OK).entity(result).build();
       }
-    } catch (DnsSDException e) {
+    } catch (Exception e) {
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
