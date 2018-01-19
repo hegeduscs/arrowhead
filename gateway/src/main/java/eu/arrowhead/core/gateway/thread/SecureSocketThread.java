@@ -19,60 +19,62 @@ import org.apache.log4j.Logger;
 
 public class SecureSocketThread extends Thread {
 
-	private GatewaySession gatewaySession;
-	private String queueName;
-	private String controlQueueName;
+  private GatewaySession gatewaySession;
+  private String queueName;
+  private String controlQueueName;
   private SSLSocket sslProviderSocket;
-	private ConnectToProviderRequest connectionRequest;
+  private ConnectToProviderRequest connectionRequest;
 
-	private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());
+  private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());
 
-	public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
-			ConnectToProviderRequest connectionRequest) {
-		this.gatewaySession = gatewaySession;
-		this.queueName = queueName;
-		this.controlQueueName = controlQueueName;
-		this.connectionRequest = connectionRequest;
-	}
+  public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
+      ConnectToProviderRequest connectionRequest) {
+    this.gatewaySession = gatewaySession;
+    this.queueName = queueName;
+    this.controlQueueName = controlQueueName;
+    this.connectionRequest = connectionRequest;
+  }
 
-	public void run() {
-		try {
-			// Creating SSLsocket for Provider
-			Channel channel = gatewaySession.getChannel();
-			SSLContext sslContext = GatewayService.createSSLContext();
-			SSLSocketFactory clientFactory = sslContext.getSocketFactory();
-			SSLSocket sslProviderSocket = (SSLSocket) clientFactory.createSocket(
-					connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
-			sslProviderSocket.setSoTimeout(connectionRequest.getTimeout());
-			InputStream inProvider = sslProviderSocket.getInputStream();
-			OutputStream outProvider = sslProviderSocket.getOutputStream();
-			log.info("Create SSLsocket for Provider");
+  public void run() {
+    try {
+      // Creating SSLsocket for Provider
+      Channel channel = gatewaySession.getChannel();
+      SSLContext sslContext = GatewayService.createSSLContext();
+      SSLSocketFactory clientFactory = sslContext.getSocketFactory();
+      SSLSocket sslProviderSocket = (SSLSocket) clientFactory.createSocket(connectionRequest.getProvider().getAddress(),
+          connectionRequest.getProvider().getPort());
+      sslProviderSocket.setSoTimeout(connectionRequest.getTimeout());
+      InputStream inProvider = sslProviderSocket.getInputStream();
+      OutputStream outProvider = sslProviderSocket.getOutputStream();
+      log.info("Create SSLsocket for Provider");
 
-			// Receiving messages through AMQP Broker
+      // Receiving messages through AMQP Broker
 
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-       // byte[] decryptedMessage = GatewayService.decryptMessage(body);
-          outProvider.write(body);
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+            throws IOException {
+          byte[] decryptedMessage = GatewayService.decryptMessage(body);
+          outProvider.write(decryptedMessage);
           log.info("Sending the request to Provider");
           // get the answer from Provider
           byte[] inputFromProvider = new byte[1024];
           byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
           System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
           log.info("Sending the response to Consumer");
-       // byte[] encryptedMessage =
-          // GatewayService.encryptMessage(inputFromProviderFinal,
-          // connectionRequest.getProviderGWPublicKey());
-          channel.basicPublish("", queueName.concat("_resp"), null, inputFromProviderFinal);
+          byte[] encryptedMessage = GatewayService.encryptMessage(inputFromProviderFinal,
+              connectionRequest.getConsumerGWPublicKey());
+          channel.basicPublish("", queueName.concat("_resp"), null, encryptedMessage);
           channel.basicPublish("", controlQueueName.concat("_resp"), null, "close".getBytes());
         }
       };
 
       Consumer controlConsumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-          if (new String(body).equals("close")) {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
+            byte[] body) {
+          byte[] decryptedMessage = GatewayService.decryptMessage(body);
+          if (new String(decryptedMessage).equals("close")) {
             GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
           }
         }
@@ -84,12 +86,12 @@ public class SecureSocketThread extends Thread {
       }
 
     } catch (IOException | NegativeArraySizeException e) {
-			e.printStackTrace();
-			log.error("ConnectToProvider(secure): I/O exception occured");
+      e.printStackTrace();
+      log.error("ConnectToProvider(secure): I/O exception occured");
       GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
       throw new ArrowheadException(e.getMessage(), e);
 
-		}
-	}
+    }
+  }
 
 }
