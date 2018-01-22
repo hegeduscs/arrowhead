@@ -22,9 +22,6 @@ public class ArrowheadSystem {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
 
-  @Column(name = "system_group")
-  private String systemGroup;
-
   @Column(name = "system_name")
   private String systemName;
 
@@ -52,8 +49,7 @@ public class ArrowheadSystem {
     }
   }
 
-  public ArrowheadSystem(String systemGroup, String systemName, String address, int port, String authenticationInfo) {
-    this.systemGroup = systemGroup;
+  public ArrowheadSystem(String systemName, String address, int port, String authenticationInfo) {
     this.systemName = systemName;
     this.address = address;
     this.port = port;
@@ -67,14 +63,6 @@ public class ArrowheadSystem {
 
   public void setId(int id) {
     this.id = id;
-  }
-
-  public String getSystemGroup() {
-    return systemGroup;
-  }
-
-  public void setSystemGroup(String systemGroup) {
-    this.systemGroup = systemGroup;
   }
 
   public String getSystemName() {
@@ -111,12 +99,12 @@ public class ArrowheadSystem {
 
   @JsonIgnore
   public boolean isValid() {
-    return systemGroup != null && systemName != null && address != null;
+    return systemName != null && address != null;
   }
 
   @JsonIgnore
   public boolean isValidForDatabase() {
-    return systemGroup != null && systemName != null;
+    return systemName != null;
   }
 
   @Override
@@ -124,7 +112,6 @@ public class ArrowheadSystem {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((address == null) ? 0 : address.hashCode());
-    result = prime * result + ((systemGroup == null) ? 0 : systemGroup.hashCode());
     result = prime * result + ((systemName == null) ? 0 : systemName.hashCode());
     return result;
   }
@@ -148,13 +135,6 @@ public class ArrowheadSystem {
     } else if (!address.equals(other.address)) {
       return false;
     }
-    if (systemGroup == null) {
-      if (other.systemGroup != null) {
-        return false;
-      }
-    } else if (!systemGroup.equals(other.systemGroup)) {
-      return false;
-    }
     if (systemName == null) {
       return other.systemName == null;
     } else {
@@ -164,19 +144,15 @@ public class ArrowheadSystem {
 
   @Override
   public String toString() {
-    return systemGroup + "," + systemName + "," + address + "," + port + "," + authenticationInfo;
-  }
-
-  public String toStringLog() {
-    return "(" + systemGroup + ":" + systemName + ")";
+    return systemName + "," + address + "," + port + "," + authenticationInfo;
   }
 
   public String toArrowheadCommonName(String operator, String cloudName) {
-    if (systemGroup.contains(".") || systemName.contains(".") || operator.contains(".") || cloudName.contains(".")) {
+    if (systemName.contains(".") || operator.contains(".") || cloudName.contains(".")) {
       throw new IllegalArgumentException("The string fields can not contain dots!");
     }
     //throws NPE if any of the fields are null
-    return systemName.concat(".").concat(systemGroup).concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
+    return systemName.concat(".").concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
   }
 
 }

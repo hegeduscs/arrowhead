@@ -33,9 +33,6 @@ public class ArrowheadService {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
 
-  @Column(name = "service_group")
-  private String serviceGroup;
-
   @Column(name = "service_definition")
   private String serviceDefinition;
 
@@ -49,15 +46,12 @@ public class ArrowheadService {
   @MapKeyColumn(name = "metadata_key")
   @Column(name = "metadata_value")
   @CollectionTable(name = "arrowhead_service_metadata_map", joinColumns = @JoinColumn(name = "service_id"))
-  //TODO remove if not relevant anymore
-  //@XmlJavaTypeAdapter(StringMapAdapter.class)
   private Map<String, String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {
   }
 
-  public ArrowheadService(String serviceGroup, String serviceDefinition, List<String> interfaces, Map<String, String> serviceMetadata) {
-    this.serviceGroup = serviceGroup;
+  public ArrowheadService(String serviceDefinition, List<String> interfaces, Map<String, String> serviceMetadata) {
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;
     this.serviceMetadata = serviceMetadata;
