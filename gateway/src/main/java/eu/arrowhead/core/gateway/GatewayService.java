@@ -141,17 +141,17 @@ public class GatewayService {
       System.arraycopy(IV, 0, encryptedIVAndMessage, 0, ivSize);
       System.arraycopy(encryptedMessage, 0, encryptedIVAndMessage, ivSize, encryptedMessage.length);
 
+      // Initialize and return the value
+      GatewayEncryption gatewayEncryption = new GatewayEncryption();
+      gatewayEncryption.setEncryptedAESKey(encryptedAESKey);
+      gatewayEncryption.setEncryptedIVAndMessage(encryptedIVAndMessage);
+      return gatewayEncryption;
+
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES encryption.");
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
           GatewayService.class.toString(), e);
     }
-
-    // Initialize and return the value
-    GatewayEncryption gatewayEncryption = null;
-    gatewayEncryption.setEncryptedAESKey(encryptedAESKey);
-    gatewayEncryption.setEncryptedIVAndMessage(encryptedIVAndMessage);
-    return gatewayEncryption;
 
   }
 

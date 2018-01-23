@@ -27,7 +27,7 @@ public class SecureServerSocketThread extends Thread {
   private SSLSocket sslConsumerSocket;
   private ConnectToConsumerRequest connectionRequest;
   private GatewaySession gatewaySession;
-  private GatewayEncryption gatewayEncryption;
+  private GatewayEncryption gatewayEncryption = new GatewayEncryption();
 
   private static Boolean isAesKey = true;
   private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
@@ -97,10 +97,10 @@ public class SecureServerSocketThread extends Thread {
         byte[] inputFromConsumer = new byte[1024];
         byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
         System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
-        GatewayEncryption response = GatewayService.encryptMessage(inputFromConsumerFinal,
+        GatewayEncryption request = GatewayService.encryptMessage(inputFromConsumerFinal,
             connectionRequest.getProviderGWPublicKey());
-        channel.basicPublish("", connectionRequest.getQueueName(), null, response.getEncryptedAESKey());
-        channel.basicPublish("", connectionRequest.getQueueName(), null, response.getEncryptedIVAndMessage());
+        channel.basicPublish("", connectionRequest.getQueueName(), null, request.getEncryptedAESKey());
+        channel.basicPublish("", connectionRequest.getQueueName(), null, request.getEncryptedIVAndMessage());
         channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
         channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
         channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);

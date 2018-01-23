@@ -25,7 +25,7 @@ public class SecureSocketThread extends Thread {
   private String controlQueueName;
   private SSLSocket sslProviderSocket;
   private ConnectToProviderRequest connectionRequest;
-  private GatewayEncryption gatewayEncryption;
+  private GatewayEncryption gatewayEncryption = new GatewayEncryption();
 
   private static Boolean isAesKey = true;
   private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());

@@ -8,6 +8,11 @@ public class GatewayEncryption {
   public GatewayEncryption() {
   }
 
+  public GatewayEncryption(byte[] encryptedAESKey, byte[] encryptedIVAndMessage) {
+    this.encryptedAESKey = encryptedAESKey;
+    this.encryptedIVAndMessage = encryptedIVAndMessage;
+  }
+
   public byte[] getEncryptedAESKey() {
     return encryptedAESKey;
   }
