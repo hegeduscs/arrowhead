@@ -288,7 +288,9 @@ public class GatewayService {
 
   public static void providerSideClose(GatewaySession gatewaySession, Socket providerSocket) {
     try {
-      providerSocket.close();
+      if (providerSocket != null) {
+        providerSocket.close();
+      }
       gatewaySession.getChannel().close();
       gatewaySession.getConnection().close();
       log.info("ProviderSocket closed");
