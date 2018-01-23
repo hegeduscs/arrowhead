@@ -29,7 +29,6 @@ import eu.arrowhead.common.messages.QoSVerifierResponse;
 import eu.arrowhead.common.messages.QoSVerify;
 import eu.arrowhead.qos.algorithms.VerifierAlgorithmFactory;
 import eu.arrowhead.qos.drivers.DriversFactory;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,7 +98,6 @@ final class QoSManagerService {
 
   private static NetworkDevice getNetworkDeviceFromSystem(ArrowheadSystem system) {
     restrictionMap.clear();
-    restrictionMap.put("systemGroup", system.getSystemGroup());
     restrictionMap.put("systemName", system.getSystemName());
     ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
 
@@ -113,7 +111,6 @@ final class QoSManagerService {
 
   private static List<ResourceReservation> getReservationsFromSystem(ArrowheadSystem system) {
     restrictionMap.clear();
-    restrictionMap.put("systemGroup", system.getSystemGroup());
     restrictionMap.put("systemName", system.getSystemName());
     ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
 
@@ -140,7 +137,7 @@ final class QoSManagerService {
    * @throws ReservationException The reservation on the devices was not possible.
    * @throws DriverNotFoundException The network type doesnt have a driver assigned.
    */
-  static QoSReservationResponse qosReserve(QoSReserve message) throws ReservationException, DriverNotFoundException, IOException {
+  static QoSReservationResponse qosReserve(QoSReserve message) throws ReservationException, DriverNotFoundException {
     ArrowheadSystem consumer = message.getConsumer();
     ArrowheadSystem provider = message.getProvider();
 

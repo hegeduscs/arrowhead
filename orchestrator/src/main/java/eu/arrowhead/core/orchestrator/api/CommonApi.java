@@ -50,7 +50,7 @@ public class CommonApi {
 
     List<ArrowheadService> serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
     if (serviceList.isEmpty()) {
-      log.info("CommonApi:getAllServices throws DataNotFoundException");
+      log.info("getAllServices throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadServices not found in the database.");
     }
 
@@ -58,38 +58,18 @@ public class CommonApi {
   }
 
   /**
-   * Returns a list of ArrowheadServices from the database specified by the service group.
-   *
-   * @return List<ArrowheadService>
-   */
-  @GET
-  @Path("services/servicegroup/{serviceGroup}")
-  public List<ArrowheadService> getServiceGroup(@PathParam("serviceGroup") String serviceGroup) {
-
-    restrictionMap.put("serviceGroup", serviceGroup);
-    List<ArrowheadService> serviceList = dm.getAll(ArrowheadService.class, restrictionMap);
-    if (serviceList.isEmpty()) {
-      log.info("CommonApi:getServiceGroup throws DataNotFoundException");
-      throw new DataNotFoundException("ArrowheadServices not found in the database from this service group.");
-    }
-
-    return serviceList;
-  }
-
-  /**
-   * Returns an ArrowheadService from the database specified by the service group and service definition.
+   * Returns an ArrowheadService from the database specified by the service definition.
    *
    * @return ArrowheadService
    */
   @GET
-  @Path("services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
-  public ArrowheadService getService(@PathParam("serviceGroup") String serviceGroup, @PathParam("serviceDefinition") String serviceDefinition) {
+  @Path("services/servicedef/{serviceDefinition}")
+  public ArrowheadService getService(@PathParam("serviceDefinition") String serviceDefinition) {
 
-    restrictionMap.put("serviceGroup", serviceGroup);
     restrictionMap.put("serviceDefinition", serviceDefinition);
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
-      log.info("CommonApi:getService throws DataNotFoundException");
+      log.info("getService throws DataNotFoundException");
       throw new DataNotFoundException("Requested ArrowheadService not found in the database.");
     }
 
@@ -98,7 +78,7 @@ public class CommonApi {
 
   /**
    * Adds a list of ArrowheadServices to the database. Elements which would cause DuplicateEntryException or BadPayloadException (caused by missing
-   * serviceGroup or serviceDefinition) are being skipped. The returned list only contains the elements which were saved in the process.
+   * serviceDefinition) are being skipped. The returned list only contains the elements which were saved in the process.
    *
    * @return List<ArrowheadService>
    */
@@ -110,7 +90,6 @@ public class CommonApi {
     for (ArrowheadService service : serviceList) {
       if (service.isValidForDatabase()) {
         restrictionMap.clear();
-        restrictionMap.put("serviceGroup", service.getServiceGroup());
         restrictionMap.put("serviceDefinition", service.getServiceDefinition());
         ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
         if (retrievedService == null) {
@@ -135,11 +114,10 @@ public class CommonApi {
   public Response updateService(ArrowheadService service) {
 
     if (!service.isValidForDatabase()) {
-      log.info("CommonApi:updateService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing service group or service definition in the entry payload.");
+      log.info("updateService throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: missing service definition in the entry payload.");
     }
 
-    restrictionMap.put("serviceGroup", service.getServiceGroup());
     restrictionMap.put("serviceDefinition", service.getServiceDefinition());
     ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
     if (retrievedService != null) {
@@ -153,14 +131,13 @@ public class CommonApi {
   }
 
   /**
-   * Deletes the ArrowheadService from the database specified by the service group and service definition. Returns 200 if the delete is successful,
+   * Deletes the ArrowheadService from the database specified by the service definition. Returns 200 if the delete is successful,
    * 204 (no content) if the service was not in the database to begin with.
    */
   @DELETE
-  @Path("services/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
-  public Response deleteService(@PathParam("serviceGroup") String serviceGroup, @PathParam("serviceDefinition") String serviceDefinition) {
+  @Path("services/servicedef/{serviceDefinition}")
+  public Response deleteService(@PathParam("serviceDefinition") String serviceDefinition) {
 
-    restrictionMap.put("serviceGroup", serviceGroup);
     restrictionMap.put("serviceDefinition", serviceDefinition);
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -182,7 +159,7 @@ public class CommonApi {
 
     List<ArrowheadSystem> systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
     if (systemList.isEmpty()) {
-      log.info("CommonApi:getAllSystems throws DataNotFoundException");
+      log.info("getAllSystems throws DataNotFoundException");
       throw new DataNotFoundException("ArrowheadSystems not found in the database.");
     }
 
@@ -190,38 +167,18 @@ public class CommonApi {
   }
 
   /**
-   * Returns a list of ArrowheadSystems from the database specified by the system group.
-   *
-   * @return List<ArrowheadSystem>
-   */
-  @GET
-  @Path("systems/systemgroup/{systemGroup}")
-  public List<ArrowheadSystem> getSystemGroup(@PathParam("systemGroup") String systemGroup) {
-
-    restrictionMap.put("systemGroup", systemGroup);
-    List<ArrowheadSystem> systemList = dm.getAll(ArrowheadSystem.class, restrictionMap);
-    if (systemList.isEmpty()) {
-      log.info("CommonApi:getSystemGroup throws DataNotFoundException");
-      throw new DataNotFoundException("ArrowheadSystems not found in the database from this system group.");
-    }
-
-    return systemList;
-  }
-
-  /**
-   * Returns an ArrowheadSystem from the database specified by the system group and system name.
+   * Returns an ArrowheadSystem from the database specified by the system name.
    *
    * @return ArrowheadSystem
    */
   @GET
-  @Path("systems/systemgroup/{systemGroup}/systemname/{systemName}")
-  public ArrowheadSystem getSystem(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
+  @Path("systems/systemname/{systemName}")
+  public ArrowheadSystem getSystem(@PathParam("systemName") String systemName) {
 
-    restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
     if (system == null) {
-      log.info("CommonApi:getSystem throws DataNotFoundException");
+      log.info("getSystem throws DataNotFoundException");
       throw new DataNotFoundException("Requested ArrowheadSystem not found in the database.");
     }
 
@@ -230,7 +187,7 @@ public class CommonApi {
 
   /**
    * Adds a list of ArrowheadSystems to the database. Elements which would cause DuplicateEntryException or BadPayloadException (caused by missing
-   * systemGroup, systemName or address) are being skipped. The returned list only contains the elements which were saved in the process.
+   * systemName or address) are being skipped. The returned list only contains the elements which were saved in the process.
    *
    * @return List<ArrowheadSystem>
    */
@@ -242,7 +199,6 @@ public class CommonApi {
     for (ArrowheadSystem system : systemList) {
       if (system.isValid()) {
         restrictionMap.clear();
-        restrictionMap.put("systemGroup", system.getSystemGroup());
         restrictionMap.put("systemName", system.getSystemName());
         ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
         restrictionMap.clear();
@@ -268,11 +224,10 @@ public class CommonApi {
   public Response updateSystem(ArrowheadSystem system) {
 
     if (!system.isValid()) {
-      log.info("CommonApi:updateSystem throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing system group, system name or address in the entry payload.");
+      log.info("updateSystem throws BadPayloadException");
+      throw new BadPayloadException("Bad payload: missing system name or address in the entry payload.");
     }
 
-    restrictionMap.put("systemGroup", system.getSystemGroup());
     restrictionMap.put("systemName", system.getSystemName());
     ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
     if (retrievedSystem != null) {
@@ -287,14 +242,13 @@ public class CommonApi {
   }
 
   /**
-   * Deletes the ArrowheadSystem from the database specified by the system group and system name. Returns 200 if the delete is successful, 204 (no
+   * Deletes the ArrowheadSystem from the database specified by the system name. Returns 200 if the delete is successful, 204 (no
    * content) if the system was not in the database to begin with.
    */
   @DELETE
-  @Path("systems/systemgroup/{systemGroup}/systemname/{systemName}")
-  public Response deleteSystem(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
+  @Path("systems/systemname/{systemName}")
+  public Response deleteSystem(@PathParam("systemName") String systemName) {
 
-    restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
     if (system == null) {

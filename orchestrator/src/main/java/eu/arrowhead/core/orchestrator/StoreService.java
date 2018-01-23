@@ -19,7 +19,7 @@ public final class StoreService {
    */
   public static List<OrchestrationStore> getDefaultStoreEntries(ArrowheadSystem consumer) {
     restrictionMap.clear();
-    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
+    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemName());
     if (savedConsumer == null) {
       return new ArrayList<>();
     }
@@ -34,8 +34,8 @@ public final class StoreService {
    */
   public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service) {
     restrictionMap.clear();
-    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemGroup(), consumer.getSystemName());
-    ArrowheadService savedService = getRequestedService(service.getServiceGroup(), service.getServiceDefinition());
+    ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemName());
+    ArrowheadService savedService = getRequestedService(service.getServiceDefinition());
     if (savedConsumer == null || savedService == null) {
       return new ArrayList<>();
     }
@@ -53,7 +53,7 @@ public final class StoreService {
 
   public static List<OrchestrationStore> getStoreEntries(ArrowheadService service) {
     restrictionMap.clear();
-    ArrowheadService savedService = getRequestedService(service.getServiceGroup(), service.getServiceDefinition());
+    ArrowheadService savedService = getRequestedService(service.getServiceDefinition());
 
     if (!savedService.getInterfaces().isEmpty()) {
       if (!hasMatchingInterfaces(savedService, service)) {
@@ -68,9 +68,8 @@ public final class StoreService {
   /**
    * This private method returns an ArrowheadSystem from the database.
    */
-  private static ArrowheadSystem getConsumerSystem(String systemGroup, String systemName) {
+  private static ArrowheadSystem getConsumerSystem(String systemName) {
     HashMap<String, Object> rm = new HashMap<>();
-    rm.put("systemGroup", systemGroup);
     rm.put("systemName", systemName);
     return dm.get(ArrowheadSystem.class, rm);
   }
@@ -78,9 +77,8 @@ public final class StoreService {
   /**
    * This private method returns an ArrowheadService from the database.
    */
-  private static ArrowheadService getRequestedService(String serviceGroup, String serviceDefinition) {
+  private static ArrowheadService getRequestedService(String serviceDefinition) {
     HashMap<String, Object> rm = new HashMap<>();
-    rm.put("serviceGroup", serviceGroup);
     rm.put("serviceDefinition", serviceDefinition);
     return dm.get(ArrowheadService.class, rm);
   }

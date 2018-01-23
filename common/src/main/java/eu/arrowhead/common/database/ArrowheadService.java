@@ -25,7 +25,7 @@ import org.hibernate.annotations.LazyCollectionOption;
  * Entity class for storing Arrowhead Services in the database. The "service_group" and service_definition" columns must be unique together.
  */
 @Entity
-@Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_group", "service_definition"})})
+@Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_definition"})})
 public class ArrowheadService {
 
   @Column(name = "id")
@@ -64,14 +64,6 @@ public class ArrowheadService {
 
   public void setId(int id) {
     this.id = id;
-  }
-
-  public String getServiceGroup() {
-    return serviceGroup;
-  }
-
-  public void setServiceGroup(String serviceGroup) {
-    this.serviceGroup = serviceGroup;
   }
 
   public String getServiceDefinition() {
@@ -116,53 +108,36 @@ public class ArrowheadService {
       }
     }
 
-    return (serviceGroup != null && serviceDefinition != null && !interfaces.isEmpty() && !serviceGroup.contains("_") && !serviceDefinition
-        .contains("_") && areInterfacesClean);
+    return (serviceDefinition != null && !interfaces.isEmpty() && !serviceDefinition.contains("_") && areInterfacesClean);
   }
 
   @JsonIgnore
   public boolean isValidForDatabase() {
-    return serviceGroup != null && serviceDefinition != null;
+    return serviceDefinition != null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    ArrowheadService that = (ArrowheadService) o;
+
+    return serviceDefinition.equals(that.serviceDefinition);
   }
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((serviceDefinition == null) ? 0 : serviceDefinition.hashCode());
-    result = prime * result + ((serviceGroup == null) ? 0 : serviceGroup.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ArrowheadService other = (ArrowheadService) obj;
-    if (serviceDefinition == null) {
-      if (other.serviceDefinition != null) {
-        return false;
-      }
-    } else if (!serviceDefinition.equals(other.serviceDefinition)) {
-      return false;
-    }
-    if (serviceGroup == null) {
-      return other.serviceGroup == null;
-    } else {
-      return serviceGroup.equals(other.serviceGroup);
-    }
+    return serviceDefinition.hashCode();
   }
 
   @Override
   public String toString() {
-    return "(" + serviceGroup + ":" + serviceDefinition + ")";
+    return "\"" + serviceDefinition + "\"";
   }
 
 }

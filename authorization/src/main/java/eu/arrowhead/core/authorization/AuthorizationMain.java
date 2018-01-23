@@ -185,16 +185,16 @@ public class AuthorizationMain {
     ArrowheadService tokenGenerationService;
     if (isSecure) {
       uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-      authControlService = new ArrowheadService("coreservices", "SecureAuthorizationControl", Collections.singletonList("JSON"), null);
-      tokenGenerationService = new ArrowheadService("coreservices", "SecureTokenGeneration", Collections.singletonList("JSON"), null);
+      authControlService = new ArrowheadService("SecureAuthorizationControl", Collections.singletonList("JSON"), null);
+      tokenGenerationService = new ArrowheadService("SecureTokenGeneration", Collections.singletonList("JSON"), null);
     } else {
       uri = UriBuilder.fromUri(BASE_URI).build();
-      authControlService = new ArrowheadService("coreservices", "InsecureAuthorizationControl", Collections.singletonList("JSON"), null);
-      tokenGenerationService = new ArrowheadService("coreservices", "InsecureTokenGeneration", Collections.singletonList("JSON"), null);
+      authControlService = new ArrowheadService("InsecureAuthorizationControl", Collections.singletonList("JSON"), null);
+      tokenGenerationService = new ArrowheadService("InsecureTokenGeneration", Collections.singletonList("JSON"), null);
     }
 
     //Preparing the payloads
-    ArrowheadSystem authSystem = new ArrowheadSystem("coresystems", "authorization", uri.getHost(), uri.getPort(), null);
+    ArrowheadSystem authSystem = new ArrowheadSystem("authorization", uri.getHost(), uri.getPort(), null);
     ServiceRegistryEntry authControlEntry = new ServiceRegistryEntry(authControlService, authSystem, "authorization");
     ServiceRegistryEntry tokenGenEntry = new ServiceRegistryEntry(tokenGenerationService, authSystem, "authorization/token");
 

@@ -62,11 +62,10 @@ public class OrchestratorResource {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
       String[] clientFields = clientCN.split("\\.", 3);
-      if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0]) || !srf.getRequesterSystem().getSystemGroup()
-          .equalsIgnoreCase(clientFields[1])) {
-        log.error("Requester system fields and cert common name do not match!");
+      if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
+        log.error("Requester system name and cert common name do not match!");
         throw new AuthenticationException(
-            "Requester system " + srf.getRequesterSystem().toStringLog() + " fields and cert common name (" + clientCN + ") do not match!",
+            "Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
             Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
       }
     }
@@ -94,8 +93,11 @@ public class OrchestratorResource {
   @Path("support")
   public Response orchestrationProcessSupport(ServiceRequestFormSupport srfSupport, @Context ContainerRequestContext requestContext) {
     ArrowheadServiceSupport supportService = srfSupport.getRequestedService();
-    ArrowheadService service = new ArrowheadService(supportService.getServiceGroup(), supportService.getServiceDefinition(),
-                                                    supportService.getInterfaces(), supportService.getServiceMetadata());
+    ArrowheadService service = new ArrowheadService(supportService.getServiceDefinition(), supportService.getInterfaces(),
+                                                    supportService.getServiceMetadata());
+    if (supportService.getServiceGroup() != null) {
+      service.setServiceDefinition(supportService.getServiceGroup() + "_" + supportService.getServiceDefinition());
+    }
     ServiceRequestForm srf = new ServiceRequestForm.Builder(srfSupport.getRequesterSystem()).requesterCloud(srfSupport.getRequesterCloud())
         .requestedService(service).orchestrationFlags(srfSupport.getOrchestrationFlags()).preferredProviders(srfSupport.getPreferredProviders())
         .build();
@@ -109,11 +111,10 @@ public class OrchestratorResource {
    * Default Store orchestration process offered on a GET request, where the requester only has to send 2 String path parameters.
    */
   @GET
-  @Path("{systemGroup}/{systemName}")
-  public Response storeOrchestrationProcess(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
-                                            @Context HttpServletRequest request) {
-    ArrowheadSystem requesterSystem = new ArrowheadSystem(systemGroup, systemName, request.getRemoteAddr(), 0, null);
-    log.info("Received a GET Store orchestration from: " + request.getRemoteAddr() + requesterSystem.toStringLog());
+  @Path("{systemName}")
+  public Response storeOrchestrationProcess(@PathParam("systemName") String systemName, @Context HttpServletRequest request) {
+    ArrowheadSystem requesterSystem = new ArrowheadSystem(systemName, request.getRemoteAddr(), 0, null);
+    log.info("Received a GET Store orchestration from: " + request.getRemoteAddr() + requesterSystem.getSystemName());
 
     ServiceRequestForm srf = new ServiceRequestForm.Builder(requesterSystem).build();
     OrchestrationResponse orchResponse = OrchestratorService.orchestrationFromStore(srf);

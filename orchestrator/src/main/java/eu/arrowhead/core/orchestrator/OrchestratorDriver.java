@@ -230,7 +230,7 @@ final class OrchestratorDriver {
 
     if (retrievedList.isEmpty()) {
       log.error("queryOrchestrationStore DataNotFoundException");
-      throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.toStringLog(),
+      throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.getSystemName(),
                                       Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     } else {
       // Removing non-valid Store entries from the results

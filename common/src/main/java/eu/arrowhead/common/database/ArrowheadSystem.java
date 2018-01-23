@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * Entity class for storing Arrowhead Systems in the database. The "system_group" and "system_name" columns must be unique together.
  */
 @Entity
-@Table(name = "arrowhead_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_group", "system_name"})})
+@Table(name = "arrowhead_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_name"})})
 public class ArrowheadSystem {
 
   @Column(name = "id")
@@ -39,13 +39,12 @@ public class ArrowheadSystem {
 
   public ArrowheadSystem(String json) {
     String[] fields = json.split(",");
-    this.systemGroup = fields[0];
-    this.systemName = fields[1];
+    this.systemName = fields[0];
 
-    if (fields.length == 5) {
-      this.address = fields[2];
-      this.port = Integer.valueOf(fields[3]);
-      this.authenticationInfo = fields[4];
+    if (fields.length == 4) {
+      this.address = fields[1];
+      this.port = Integer.valueOf(fields[2]);
+      this.authenticationInfo = fields[3];
     }
   }
 
@@ -108,38 +107,31 @@ public class ArrowheadSystem {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((address == null) ? 0 : address.hashCode());
-    result = prime * result + ((systemName == null) ? 0 : systemName.hashCode());
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    ArrowheadSystem that = (ArrowheadSystem) o;
+
+    if (port != that.port) {
+      return false;
+    }
+    if (!systemName.equals(that.systemName)) {
+      return false;
+    }
+    return address.equals(that.address);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (!(obj instanceof ArrowheadSystem)) {
-      return false;
-    }
-    ArrowheadSystem other = (ArrowheadSystem) obj;
-    if (address == null) {
-      if (other.address != null) {
-        return false;
-      }
-    } else if (!address.equals(other.address)) {
-      return false;
-    }
-    if (systemName == null) {
-      return other.systemName == null;
-    } else {
-      return systemName.equals(other.systemName);
-    }
+  public int hashCode() {
+    int result = systemName.hashCode();
+    result = 31 * result + address.hashCode();
+    result = 31 * result + port;
+    return result;
   }
 
   @Override

@@ -68,12 +68,11 @@ public class AuthorizationResource {
                                     requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
-    restrictionMap.put("systemGroup", request.getConsumer().getSystemGroup());
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
-      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().toStringLog(),
+      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().getSystemName(),
                                       Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
                                       requestContext.getUriInfo().getAbsolutePath().toString());
     }
@@ -81,7 +80,6 @@ public class AuthorizationResource {
     IntraCloudAuthResponse response = new IntraCloudAuthResponse();
     HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<>();
     restrictionMap.clear();
-    restrictionMap.put("serviceGroup", request.getService().getServiceGroup());
     restrictionMap.put("serviceDefinition", request.getService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -97,7 +95,6 @@ public class AuthorizationResource {
     int authorizedCount = 0;
     for (ArrowheadSystem provider : request.getProviders()) {
       restrictionMap.clear();
-      restrictionMap.put("systemGroup", provider.getSystemGroup());
       restrictionMap.put("systemName", provider.getSystemName());
       ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
 
@@ -115,7 +112,8 @@ public class AuthorizationResource {
       }
     }
 
-    log.info("IntraCloud auth check for consumer " + request.getConsumer().toStringLog() + " returns with " + authorizedCount + " possible provider");
+    log.info(
+        "IntraCloud auth check for consumer " + request.getConsumer().getSystemName() + " returns with " + authorizedCount + " possible provider");
     response.setAuthorizationMap(authorizationState);
     return Response.status(Status.OK).entity(response).build();
   }
@@ -147,7 +145,6 @@ public class AuthorizationResource {
     }
 
     restrictionMap.clear();
-    restrictionMap.put("serviceGroup", request.getService().getServiceGroup());
     restrictionMap.put("serviceDefinition", request.getService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {

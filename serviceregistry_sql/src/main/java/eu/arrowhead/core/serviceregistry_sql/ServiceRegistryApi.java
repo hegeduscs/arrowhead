@@ -66,9 +66,8 @@ public class ServiceRegistryApi {
   }
 
   @GET
-  @Path("systemgroup/{systemGroup}/systemname/{systemName}")
-  public List<ServiceRegistryEntry> getAllByProvider(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
-    restrictionMap.put("systemGroup", systemGroup);
+  @Path("systemname/{systemName}")
+  public List<ServiceRegistryEntry> getAllByProvider(@PathParam("systemName") String systemName) {
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
     if (system == null) {
@@ -89,11 +88,8 @@ public class ServiceRegistryApi {
   }
 
   @GET
-  @Path("servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
-  public List<ServiceRegistryEntry> getAllByService(@PathParam("serviceGroup") String serviceGroup,
-                                                    @PathParam("serviceDefinition") String serviceDefinition) {
-
-    restrictionMap.put("serviceGroup", serviceGroup);
+  @Path("servicedef/{serviceDefinition}")
+  public List<ServiceRegistryEntry> getAllByService(@PathParam("serviceDefinition") String serviceDefinition) {
     restrictionMap.put("serviceDefinition", serviceDefinition);
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -122,7 +118,6 @@ public class ServiceRegistryApi {
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }
 
-    restrictionMap.put("serviceGroup", entry.getProvidedService().getServiceGroup());
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -131,7 +126,6 @@ public class ServiceRegistryApi {
     }
 
     restrictionMap.clear();
-    restrictionMap.put("systemGroup", entry.getProvider().getSystemGroup());
     restrictionMap.put("systemName", entry.getProvider().getSystemName());
     ArrowheadSystem provider = dm.get(ArrowheadSystem.class, restrictionMap);
     if (provider == null) {

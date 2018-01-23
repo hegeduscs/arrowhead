@@ -57,7 +57,7 @@ public class StoreApi {
     restrictionMap.put("id", id);
     OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
     if (entry == null) {
-      log.info("StoreApi:getStoreEntry throws DataNotFoundException");
+      log.info("getStoreEntry throws DataNotFoundException");
       throw new DataNotFoundException("Requested store entry was not found in the database.");
     } else {
       log.info("getStoreEntry returns a store entry.");
@@ -76,7 +76,7 @@ public class StoreApi {
 
     List<OrchestrationStore> store = dm.getAll(OrchestrationStore.class, restrictionMap);
     if (store.isEmpty()) {
-      log.info("StoreApi:getAllStoreEntries throws DataNotFoundException.");
+      log.info("getAllStoreEntries throws DataNotFoundException.");
       throw new DataNotFoundException("The Orchestration Store is empty.");
     }
 
@@ -97,7 +97,7 @@ public class StoreApi {
     restrictionMap.put("defaultEntry", true);
     List<OrchestrationStore> store = dm.getAll(OrchestrationStore.class, restrictionMap);
     if (store.isEmpty()) {
-      log.info("StoreApi:getDefaultStoreEntries throws DataNotFoundException.");
+      log.info("getDefaultStoreEntries throws DataNotFoundException.");
       throw new DataNotFoundException("Default Orchestration Store entries were not found.");
     }
 
@@ -117,7 +117,7 @@ public class StoreApi {
   public Response getStoreEntries(OrchestrationStoreQuery query) {
 
     if (!query.isValid()) {
-      log.info("StoreApi:getStoreEntries throws BadPayloadException.");
+      log.info("getStoreEntries throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem or requestedService is/are missing.");
     }
 
@@ -151,7 +151,6 @@ public class StoreApi {
     for (OrchestrationStore entry : storeEntries) {
       if (entry.isValid()) {
         restrictionMap.clear();
-        restrictionMap.put("systemGroup", entry.getConsumer().getSystemGroup());
         restrictionMap.put("systemName", entry.getConsumer().getSystemName());
         ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
         if (consumer == null) {
@@ -159,7 +158,6 @@ public class StoreApi {
         }
 
         restrictionMap.clear();
-        restrictionMap.put("serviceGroup", entry.getService().getServiceGroup());
         restrictionMap.put("serviceDefinition", entry.getService().getServiceDefinition());
         ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
         if (service == null) {
@@ -180,7 +178,6 @@ public class StoreApi {
         ArrowheadSystem providerSystem = null;
         if (entry.getProviderSystem() != null && entry.getProviderSystem().isValid()) {
           restrictionMap.clear();
-          restrictionMap.put("systemGroup", entry.getProviderSystem().getSystemGroup());
           restrictionMap.put("systemName", entry.getProviderSystem().getSystemName());
           providerSystem = dm.get(ArrowheadSystem.class, restrictionMap);
           if (providerSystem == null) {
@@ -216,10 +213,10 @@ public class StoreApi {
     restrictionMap.put("id", id);
     OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
     if (entry == null) {
-      log.info("StoreApi:toggleIsDefault throws DataNotFoundException.");
+      log.info("toggleIsDefault throws DataNotFoundException.");
       throw new DataNotFoundException("Orchestration Store entry with this id was not found in the database.");
     } else if (entry.getProviderCloud() != null && !entry.isDefaultEntry()) {
-      log.info("StoreApi:toggleIsDefault throws BadPayloadException.");
+      log.info("toggleIsDefault throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be set as default entries.");
     } else {
       entry.setDefaultEntry(!entry.isDefaultEntry());
@@ -242,17 +239,17 @@ public class StoreApi {
   public Response updateEntry(OrchestrationStore payload) {
 
     if (payload.getId() == 0) {
-      log.info("StoreApi:updateEntry throws BadPayloadException.");
+      log.info("updateEntry throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: id field is missing from the payload.");
     }
 
     restrictionMap.put("id", payload.getId());
     OrchestrationStore storeEntry = dm.get(OrchestrationStore.class, restrictionMap);
     if (storeEntry == null) {
-      log.info("StoreApi:updateEntry throws DataNotFoundException.");
+      log.info("updateEntry throws DataNotFoundException.");
       throw new DataNotFoundException("Store entry specified by the id(" + payload.getId() + ") was not found in the database.");
     } else if (storeEntry.getProviderCloud() != null && payload.isDefaultEntry()) {
-      log.info("StoreApi:toggleIsDefault throws BadPayloadException.");
+      log.info("updateEntry throws BadPayloadException.");
       throw new BadPayloadException("Only intra-cloud store entries can be set as default entries.");
     } else {
       storeEntry.setPriority(payload.getPriority());
@@ -294,10 +291,9 @@ public class StoreApi {
    * no matching entries were in the database to begin with.
    */
   @DELETE
-  @Path("systemgroup/{systemGroup}/systemname/{systemName}")
-  public Response deleteEntries(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
+  @Path("systemname/{systemName}")
+  public Response deleteEntries(@PathParam("systemName") String systemName) {
 
-    restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
 

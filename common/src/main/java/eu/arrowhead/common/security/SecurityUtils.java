@@ -159,7 +159,7 @@ public final class SecurityUtils {
     return cnFields.length == 6;
   }
 
-  // NOTE gatekeeper certs can be an exception to this rule
+  // NOTE gatekeeper certs can be an exception to this rule at the moment
   public static boolean isTrustStoreCNArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
     return cnFields.length == 4;

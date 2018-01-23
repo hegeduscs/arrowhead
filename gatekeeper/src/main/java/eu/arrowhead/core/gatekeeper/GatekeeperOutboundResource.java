@@ -173,7 +173,6 @@ public class GatekeeperOutboundResource {
 
     CoreSystem gateway = Utility.getCoreSystem("gateway");
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();
-    gatewaySystem.setSystemGroup("coresystems");
     gatewaySystem.setSystemName(gateway.getSystemName());
     gatewaySystem.setAddress(gateway.getAddress());
     gatewaySystem.setPort(connectToConsumerResponse.getServerSocketPort());

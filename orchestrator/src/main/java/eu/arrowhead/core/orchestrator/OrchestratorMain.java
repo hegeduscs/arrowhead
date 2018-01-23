@@ -176,14 +176,14 @@ public class OrchestratorMain {
     ArrowheadService orchService;
     if (isSecure) {
       uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-      orchService = new ArrowheadService("coreservices", "SecureOrchestrationService", Collections.singletonList("JSON"), null);
+      orchService = new ArrowheadService("SecureOrchestrationService", Collections.singletonList("JSON"), null);
     } else {
       uri = UriBuilder.fromUri(BASE_URI).build();
-      orchService = new ArrowheadService("coreservices", "InsecureOrchestrationService", Collections.singletonList("JSON"), null);
+      orchService = new ArrowheadService("InsecureOrchestrationService", Collections.singletonList("JSON"), null);
     }
 
     //Preparing the payload
-    ArrowheadSystem orchSystem = new ArrowheadSystem("coresystems", "orchestrator", uri.getHost(), uri.getPort(), null);
+    ArrowheadSystem orchSystem = new ArrowheadSystem("orchestrator", uri.getHost(), uri.getPort(), null);
     ServiceRegistryEntry orchEntry = new ServiceRegistryEntry(orchService, orchSystem, "orchestrator/orchestration");
 
     String baseUri = Utility.getServiceRegistryUri();

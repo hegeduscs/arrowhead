@@ -15,8 +15,7 @@ public class ServiceRegistryEntrySupport {
 
   public ServiceRegistryEntrySupport(ServiceRegistryEntry entry) {
     ArrowheadService service = entry.getProvidedService();
-    ArrowheadServiceSupport legacyService = new ArrowheadServiceSupport(service.getServiceGroup(), service.getServiceDefinition(),
-                                                                        service.getInterfaces(), service.getServiceMetadata());
+    ArrowheadServiceSupport legacyService = new ArrowheadServiceSupport(service);
     this.providedService = legacyService;
     this.provider = entry.getProvider();
     this.serviceURI = entry.getServiceURI();
