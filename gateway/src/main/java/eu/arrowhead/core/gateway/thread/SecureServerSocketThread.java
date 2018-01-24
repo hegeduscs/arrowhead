@@ -8,6 +8,7 @@ import com.rabbitmq.client.Envelope;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.core.gateway.GatewayService;
+import eu.arrowhead.core.gateway.model.GatewayEncryption;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,9 @@ public class SecureServerSocketThread extends Thread {
   private SSLSocket sslConsumerSocket;
   private ConnectToConsumerRequest connectionRequest;
   private GatewaySession gatewaySession;
+  private GatewayEncryption gatewayEncryption = new GatewayEncryption();
 
+  private static Boolean isAesKey = true;
   private static final Logger log = Logger.getLogger(SecureServerSocketThread.class.getName());
 
   public SecureServerSocketThread(GatewaySession gatewaySession, int port, ConnectToConsumerRequest connectionRequest) {
@@ -63,10 +66,18 @@ public class SecureServerSocketThread extends Thread {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
             throws IOException {
-          byte[] decryptedMessage = GatewayService.decryptMessage(body);
-          outConsumer.write(decryptedMessage);
-          System.out.println("Broker response: ");
-          System.out.println(new String(body));
+          if (isAesKey) {
+            isAesKey = false;
+            gatewayEncryption.setEncryptedAESKey(body);
+            System.out.println("AES Key received.");
+          } else {
+            isAesKey = true;
+            gatewayEncryption.setEncryptedIVAndMessage(body);
+            byte[] decryptedMessage = GatewayService.decryptMessage(gatewayEncryption);
+            outConsumer.write(decryptedMessage);
+            System.out.println("Broker response: ");
+            System.out.println(new String(decryptedMessage));
+          }
         }
 
       };
@@ -75,8 +86,7 @@ public class SecureServerSocketThread extends Thread {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
             byte[] body) {
-          byte[] decryptedMessage = GatewayService.decryptMessage(body);
-          if (new String(decryptedMessage).equals("close")) {
+          if (new String(body).equals("close")) {
             GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
           }
         }
@@ -87,9 +97,11 @@ public class SecureServerSocketThread extends Thread {
         byte[] inputFromConsumer = new byte[1024];
         byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
         System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
-        byte[] encryptedMessage = GatewayService.encryptMessage(inputFromConsumerFinal,
+        GatewayEncryption request = GatewayService.encryptMessage(inputFromConsumerFinal,
             connectionRequest.getProviderGWPublicKey());
-        channel.basicPublish("", connectionRequest.getQueueName(), null, encryptedMessage);
+        channel.basicPublish("", connectionRequest.getQueueName(), null, request.getEncryptedAESKey());
+        channel.basicPublish("", connectionRequest.getQueueName(), null, request.getEncryptedIVAndMessage());
+        channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
         channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
         channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);
       }

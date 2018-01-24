@@ -11,6 +11,8 @@ If creating channel failed while the rabbitmq server running:
     
     -In case of: "Stopping and halting node <NODENAME>" - Step 5.-6. above
     
+  Default insecure port: 5672
+  Default secure port: 5671
   
   Path of the log files: /var/log/rabbitmq/<NODENAME>.log
   

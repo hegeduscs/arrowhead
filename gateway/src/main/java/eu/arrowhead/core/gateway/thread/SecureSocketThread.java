@@ -8,6 +8,7 @@ import com.rabbitmq.client.Envelope;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.core.gateway.GatewayService;
+import eu.arrowhead.core.gateway.model.GatewayEncryption;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +25,9 @@ public class SecureSocketThread extends Thread {
   private String controlQueueName;
   private SSLSocket sslProviderSocket;
   private ConnectToProviderRequest connectionRequest;
+  private GatewayEncryption gatewayEncryption = new GatewayEncryption();
 
+  private static Boolean isAesKey = true;
   private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());
 
   public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
@@ -54,18 +57,28 @@ public class SecureSocketThread extends Thread {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
             throws IOException {
-          byte[] decryptedMessage = GatewayService.decryptMessage(body);
-          outProvider.write(decryptedMessage);
-          log.info("Sending the request to Provider");
-          // get the answer from Provider
-          byte[] inputFromProvider = new byte[1024];
-          byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
-          System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
-          log.info("Sending the response to Consumer");
-          byte[] encryptedMessage = GatewayService.encryptMessage(inputFromProviderFinal,
-              connectionRequest.getConsumerGWPublicKey());
-          channel.basicPublish("", queueName.concat("_resp"), null, encryptedMessage);
-          channel.basicPublish("", controlQueueName.concat("_resp"), null, "close".getBytes());
+          if (isAesKey) {
+            isAesKey = false;
+            gatewayEncryption.setEncryptedAESKey(body);
+            System.out.println("AES Key received.");
+          } else {
+            isAesKey = true;
+            gatewayEncryption.setEncryptedIVAndMessage(body);
+            byte[] decryptedMessage = GatewayService.decryptMessage(gatewayEncryption);
+            outProvider.write(decryptedMessage);
+            log.info("Sending the request to Provider");
+
+            // get the answer from Provider
+            byte[] inputFromProvider = new byte[1024];
+            byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
+            System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
+            log.info("Sending the response to Consumer");
+            GatewayEncryption response = GatewayService.encryptMessage(inputFromProviderFinal,
+                connectionRequest.getConsumerGWPublicKey());
+            channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedAESKey());
+            channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedIVAndMessage());
+            channel.basicPublish("", controlQueueName.concat("_resp"), null, "close".getBytes());
+          }
         }
       };
 
@@ -73,14 +86,14 @@ public class SecureSocketThread extends Thread {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
             byte[] body) {
-          byte[] decryptedMessage = GatewayService.decryptMessage(body);
-          if (new String(decryptedMessage).equals("close")) {
+          if (new String(body).equals("close")) {
             GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
           }
         }
       };
 
       while (true) {
+        channel.basicConsume(queueName, true, consumer);
         channel.basicConsume(queueName, true, consumer);
         channel.basicConsume(controlQueueName, true, controlConsumer);
       }
