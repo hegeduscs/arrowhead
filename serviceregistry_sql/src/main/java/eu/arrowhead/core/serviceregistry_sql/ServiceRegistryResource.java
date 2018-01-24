@@ -85,6 +85,7 @@ public class ServiceRegistryResource {
     } else {
       provider.setAddress(entry.getProvider().getAddress());
       provider.setPort(entry.getProvider().getPort());
+      provider.setAuthenticationInfo(entry.getProvider().getAuthenticationInfo());
       dm.merge(provider);
     }
     entry.setProvider(provider);
