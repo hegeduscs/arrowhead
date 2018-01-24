@@ -319,24 +319,24 @@ public final class Utility {
       log.info("Request failed, response status code: " + response.getStatus());
       log.info("Request failed, response body: " + errorMessageBody);
       throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+    } else if (errorMessage.getExceptionType() == null) {
+      log.info("Request failed, response status code: " + response.getStatus());
+      log.info("Request failed, response body: " + errorMessageBody);
+      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
     } else {
       log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
       switch (errorMessage.getExceptionType()) {
         case ARROWHEAD_EXCEPTION:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                       errorMessage.getOrigin());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage
+              .getOrigin());
         case AUTH_EXCEPTION:
-          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                            errorMessage.getOrigin());
+          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
         case BAD_PAYLOAD_EXCEPTION:
-          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                        errorMessage.getOrigin());
+          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
         case NOT_FOUND_EXCEPTION:
-          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                          errorMessage.getOrigin());
+          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
         case DUPLICATE_EXCEPTION:
-          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                            errorMessage.getOrigin());
+          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
         case UNAVAILABLE_EXCEPTION:
           throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
                                                errorMessage.getOrigin());
