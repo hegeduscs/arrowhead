@@ -326,9 +326,6 @@ public final class Utility {
     } else {
       log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
       switch (errorMessage.getExceptionType()) {
-        case ARROWHEAD_EXCEPTION:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                       errorMessage.getOrigin());
         case AUTH_EXCEPTION:
           throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
                                             errorMessage.getOrigin());
@@ -345,7 +342,8 @@ public final class Utility {
           throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
                                                errorMessage.getOrigin());
         default:
-          throw new RuntimeException(errorMessage.getErrorMessage());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                  errorMessage.getOrigin());
       }
     }
   }

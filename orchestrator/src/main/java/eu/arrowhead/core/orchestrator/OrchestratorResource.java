@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 /**
  * REST resource for the Orchestrator Core System.
  */
-@Path("orchestration")
+@Path("orchestrator/orchestration")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class OrchestratorResource {
