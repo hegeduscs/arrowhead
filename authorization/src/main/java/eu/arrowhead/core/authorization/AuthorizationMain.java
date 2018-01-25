@@ -5,6 +5,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
@@ -202,8 +203,8 @@ public class AuthorizationMain {
     if (registering) {
       try {
         Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
           Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
           Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
         } else {
@@ -212,8 +213,8 @@ public class AuthorizationMain {
       }
       try {
         Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
           Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", tokenGenEntry);
           Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
         } else {
