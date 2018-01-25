@@ -343,7 +343,7 @@ public final class Utility {
                                                errorMessage.getOrigin());
         default:
           throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                  errorMessage.getOrigin());
+                                       errorMessage.getOrigin());
       }
     }
   }
