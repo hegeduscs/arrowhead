@@ -1,14 +1,5 @@
 package eu.arrowhead.core.gateway;
 
-import com.rabbitmq.client.AlreadyClosedException;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.security.SecurityUtils;
-import eu.arrowhead.core.gateway.model.GatewayEncryption;
-import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,23 +12,30 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.Response.Status;
+
 import org.apache.log4j.Logger;
+
+import com.rabbitmq.client.AlreadyClosedException;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.core.gateway.model.GatewayEncryption;
+import eu.arrowhead.core.gateway.model.GatewaySession;
 
 /**
  * Contains miscellaneous helper functions for the Gateway.
@@ -142,9 +140,7 @@ public class GatewayService {
       System.arraycopy(encryptedMessage, 0, encryptedIVAndMessage, ivSize, encryptedMessage.length);
 
       // Initialize and return the value
-      GatewayEncryption gatewayEncryption = new GatewayEncryption();
-      gatewayEncryption.setEncryptedAESKey(encryptedAESKey);
-      gatewayEncryption.setEncryptedIVAndMessage(encryptedIVAndMessage);
+      GatewayEncryption gatewayEncryption = new GatewayEncryption(encryptedAESKey, encryptedIVAndMessage);
       return gatewayEncryption;
 
     } catch (GeneralSecurityException e) {
