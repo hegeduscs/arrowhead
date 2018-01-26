@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -29,7 +30,7 @@ public class ArrowheadSystem {
   @Column(name = "address")
   private String address;
 
-  @Column(name = "port")
+  @Transient
   private int port;
 
   @Column(name = "authentication_info", length = 2047)

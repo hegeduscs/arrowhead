@@ -43,7 +43,7 @@ public class ServiceRegistryResource {
   @Path("register")
   public Response registerService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
-    if (!entry.isValidFully()) {
+    if (!entry.isValid()) {
       log.error("registerService throws BadPayloadException");
       throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
                                     BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
@@ -60,6 +60,7 @@ public class ServiceRegistryResource {
             Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
       }
     }
+    entry.toDatabase();
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
@@ -67,7 +68,6 @@ public class ServiceRegistryResource {
       service = dm.save(entry.getProvidedService());
     } else {
       service.setInterfaces(entry.getProvidedService().getInterfaces());
-      service.setServiceMetadata(entry.getProvidedService().getServiceMetadata());
       dm.merge(service);
     }
     entry.setProvidedService(service);
@@ -79,13 +79,13 @@ public class ServiceRegistryResource {
       provider = dm.save(entry.getProvider());
     } else {
       provider.setAddress(entry.getProvider().getAddress());
-      provider.setPort(entry.getProvider().getPort());
       provider.setAuthenticationInfo(entry.getProvider().getAuthenticationInfo());
       dm.merge(provider);
     }
     entry.setProvider(provider);
 
     ServiceRegistryEntry savedEntry = dm.save(entry);
+    savedEntry.fromDatabase();
     log.info("New ServiceRegistryEntry " + entry.toString() + " is saved.");
     return Response.status(Status.CREATED).entity(savedEntry).build();
   }
@@ -109,9 +109,11 @@ public class ServiceRegistryResource {
     restrictionMap.clear();
     restrictionMap.put("providedService", service);
     List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, restrictionMap);
+    for (ServiceRegistryEntry entry : providedServices) {
+      entry.fromDatabase();
+    }
 
     //NOTE add version filter too later, if deemed needed
-
     if (queryForm.isMetadataSearch()) {
       RegistryUtils.filterOnMeta(providedServices, queryForm.getService().getServiceMetadata());
     }
@@ -128,7 +130,7 @@ public class ServiceRegistryResource {
   @Path("remove")
   public Response removeService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
-    if (!entry.isValidFully()) {
+    if (!entry.isValid()) {
       log.error("removeService throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).",
                                     Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
@@ -159,6 +161,7 @@ public class ServiceRegistryResource {
     ServiceRegistryEntry retrievedEntry = dm.get(ServiceRegistryEntry.class, restrictionMap);
     if (retrievedEntry != null) {
       dm.delete(retrievedEntry);
+      retrievedEntry.fromDatabase();
       log.info("ServiceRegistryEntry " + retrievedEntry.toString() + " deleted.");
       return Response.status(Status.OK).entity(retrievedEntry).build();
     } else {

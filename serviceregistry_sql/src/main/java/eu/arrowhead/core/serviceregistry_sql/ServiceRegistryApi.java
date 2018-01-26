@@ -113,7 +113,7 @@ public class ServiceRegistryApi {
   @Path("update")
   public Response updateServiceURI(ServiceRegistryEntry entry) {
 
-    if (!entry.isValidFully()) {
+    if (!entry.isValid()) {
       log.info("updateServiceURI throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }

@@ -15,8 +15,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
@@ -42,11 +42,7 @@ public class ArrowheadService {
   @CollectionTable(name = "arrowhead_service_interface_list", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
   private List<String> interfaces = new ArrayList<>();
 
-  @ElementCollection(fetch = FetchType.LAZY)
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @MapKeyColumn(name = "metadata_key")
-  @Column(name = "metadata_value")
-  @CollectionTable(name = "arrowhead_service_metadata_map", joinColumns = @JoinColumn(name = "service_id"))
+  @Transient
   private Map<String, String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {
@@ -102,12 +98,18 @@ public class ArrowheadService {
     this.serviceMetadata = metaData;
   }
 
-  /*
-   * @note  ArrowheadServices cannot contain the character "_" in any fields.
-   */
   @JsonIgnore
   public boolean isValid() {
+    return (serviceDefinition != null && !interfaces.isEmpty());
+  }
 
+  @JsonIgnore
+  public boolean isValidForDatabase() {
+    return serviceDefinition != null;
+  }
+
+  @JsonIgnore
+  public boolean isValidForDNSSD() {
     boolean areInterfacesClean = true;
     for (String interf : interfaces) {
       if (interf.contains("_")) {
@@ -116,11 +118,6 @@ public class ArrowheadService {
     }
 
     return (serviceDefinition != null && !interfaces.isEmpty() && !serviceDefinition.contains("_") && areInterfacesClean);
-  }
-
-  @JsonIgnore
-  public boolean isValidForDatabase() {
-    return serviceDefinition != null;
   }
 
   @Override

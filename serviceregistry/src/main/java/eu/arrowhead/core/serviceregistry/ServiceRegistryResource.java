@@ -37,7 +37,7 @@ public class ServiceRegistryResource {
   @Path("register")
   public Response publishEntriesToRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
-    /*if (entry == null || !entry.isValidFully()) {
+    /*if (entry == null || !entry.isValid()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
     }
@@ -70,7 +70,7 @@ public class ServiceRegistryResource {
   @Path("remove")
   public Response removeEntriesFromRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
-    /*if (entry == null || !entry.isValidFully()) {
+    /*if (entry == null || !entry.isValid()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service de-registration form has missing/incomplete mandatory fields.");
     }

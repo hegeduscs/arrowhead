@@ -270,6 +270,7 @@ final class OrchestratorDriver {
     if (srf.getRequestedService() == null) {
       for (OrchestrationStore entry : entryList) {
         // Querying the Service Registry for the current service
+        //TODO ezt a listát kell visszaadni inkább majd, miután a store entryk providerjeivel szűrtük
         List<ServiceRegistryEntry> srList = OrchestratorDriver
             .queryServiceRegistry(entry.getService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
         // Compiling the systems that provide the current service
