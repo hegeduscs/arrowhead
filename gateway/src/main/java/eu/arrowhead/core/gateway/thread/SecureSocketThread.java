@@ -77,7 +77,8 @@ public class SecureSocketThread extends Thread {
                 connectionRequest.getConsumerGWPublicKey());
             channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedAESKey());
             channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedIVAndMessage());
-            channel.basicPublish("", controlQueueName.concat("_resp"), null, "close".getBytes());
+            // channel.basicPublish("", controlQueueName.concat("_resp"), null,
+            // "close".getBytes());
           }
         }
       };
