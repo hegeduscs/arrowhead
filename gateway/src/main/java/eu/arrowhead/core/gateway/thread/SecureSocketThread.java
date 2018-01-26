@@ -93,16 +93,21 @@ public class SecureSocketThread extends Thread {
       };
 
       while (true) {
-        channel.basicConsume(queueName, true, consumer);
+        try {
+          channel.basicConsume(queueName, true, consumer);
+        } catch (IOException | NegativeArraySizeException e) {
+          e.printStackTrace();
+          log.error("ConnectToProvider(secure): I/O exception occured");
+          GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
+          throw new ArrowheadException(e.getMessage(), e);
+        }
         channel.basicConsume(queueName, true, consumer);
         channel.basicConsume(controlQueueName, true, controlConsumer);
       }
 
     } catch (IOException | NegativeArraySizeException e) {
-      e.printStackTrace();
-      log.error("ConnectToProvider(secure): I/O exception occured");
+      log.info("Remote peer properly closed the socket.");
       GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
-      throw new ArrowheadException(e.getMessage(), e);
 
     }
   }
