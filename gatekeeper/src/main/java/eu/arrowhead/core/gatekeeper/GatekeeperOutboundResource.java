@@ -47,7 +47,6 @@ public class GatekeeperOutboundResource {
   private static final Logger log = Logger.getLogger(GatekeeperOutboundResource.class.getName());
   private static final DatabaseManager dm = DatabaseManager.getInstance();
 
-
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -55,8 +54,9 @@ public class GatekeeperOutboundResource {
   }
 
   /**
-   * This function represents the consumer-side of GlobalServiceDiscovery, where the GateKeeper of the consumer System tries to find a provider Cloud
-   * for the requested Service.
+   * This function represents the consumer-side of GlobalServiceDiscovery, where
+   * the GateKeeper of the consumer System tries to find a provider Cloud for the
+   * requested Service.
    *
    * @return GSDResult
    */
@@ -65,14 +65,16 @@ public class GatekeeperOutboundResource {
   public Response GSDRequest(GSDRequestForm requestForm, @Context ContainerRequestContext requestContext) {
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.",
+          Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
+          requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
     GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
 
-    // If no preferred Clouds were given, send GSD poll requests to the neighbor Clouds
+    // If no preferred Clouds were given, send GSD poll requests to the neighbor
+    // Clouds
     List<String> cloudURIs = new ArrayList<>();
     if (requestForm.getSearchPerimeter().isEmpty()) {
       cloudURIs = Utility.getNeighborCloudURIs();
@@ -101,23 +103,24 @@ public class GatekeeperOutboundResource {
       try {
         response = Utility.sendRequest(uri, "PUT", gsdPoll, GatekeeperMain.outboundClientContext);
       }
-      // We skip those that did not respond positively, add the rest to the result list
+      // We skip those that did not respond positively, add the rest to the result
+      // list
       catch (RuntimeException ex) {
         continue;
       }
       gsdAnswerList.add(response.readEntity(GSDAnswer.class));
     }
 
-    // Sending back the results. The orchestrator will validate the results (result list might be empty) and decide how to proceed.
+    // Sending back the results. The orchestrator will validate the results (result
+    // list might be empty) and decide how to proceed.
     GSDResult gsdResult = new GSDResult(gsdAnswerList);
     log.info("GSDRequest: Sending " + gsdAnswerList.size() + " GSDPoll results to Orchestrator.");
     return Response.status(Status.OK).entity(gsdResult).build();
   }
 
-
   /**
-   * This function represents the consumer-side of InterCloudNegotiations, where the Gatekeeper sends information about the requester System. (SSL
-   * secured)
+   * This function represents the consumer-side of InterCloudNegotiations, where
+   * the Gatekeeper sends information about the requester System. (SSL secured)
    *
    * @return ICNResult
    */
@@ -126,28 +129,31 @@ public class GatekeeperOutboundResource {
   public Response ICNRequest(ICNRequestForm requestForm, @Context ContainerRequestContext requestContext) {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.",
+          Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
+          requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
-    // Getting the list of preferred brokers from database + read in the use_gateway property
+    // Getting the list of preferred brokers from database + read in the use_gateway
+    // property
     List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
     boolean useGateway = Boolean.valueOf(GatekeeperMain.getProp().getProperty("use_gateway", "false"));
     requestForm.getNegotiationFlags().put("useGateway", useGateway);
 
     // Compiling the payload and then getting the request URI
-    ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
-                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-                                              requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout,
-                                              Utility.getCoreSystem("gateway").getAuthenticationInfo());
+    ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(),
+        requestForm.getRequesterSystem(), requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
+        requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout,
+        Utility.getCoreSystem("gateway").getAuthenticationInfo());
 
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
-                                   requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
+        requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     icnUri = UriBuilder.fromPath(icnUri).path("icn_proposal").toString();
     // Sending the request, the response payload is use_gateway flag dependent
     Response response = Utility.sendRequest(icnUri, "PUT", icnProposal, GatekeeperMain.outboundClientContext);
 
-    // If the gateway services are not requested, then just send back the ICN results to the Orchestrator right away
+    // If the gateway services are not requested, then just send back the ICN
+    // results to the Orchestrator right away
     if (!useGateway) {
       ICNResult icnResult = response.readEntity(ICNResult.class);
       log.info("ICNRequest: returning ICNResult to Orchestrator.");
@@ -163,12 +169,12 @@ public class GatekeeperOutboundResource {
     Map<String, String> metadata = requestForm.getRequestedService().getServiceMetadata();
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
     GatewayConnectionInfo gwConnInfo = icnEnd.getGatewayConnInfo();
-    ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(), gwConnInfo.getBrokerPort(),
-                                                                              gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
-                                                                              requestForm.getRequesterSystem(), isSecure, GatekeeperMain.timeout,
-                                                                              gwConnInfo.getGatewayPublicKey());
-    //Sending the gateway request and parsing the response
-    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
+    ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(),
+        gwConnInfo.getBrokerPort(), gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
+        requestForm.getRequesterSystem(), isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
+    // Sending the gateway request and parsing the response
+    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest,
+        GatekeeperMain.outboundServerContext);
     ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
 
     CoreSystem gateway = Utility.getCoreSystem("gateway");

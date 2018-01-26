@@ -48,6 +48,7 @@ public class SecureServerSocketThread extends Thread {
       sslServerSocket.setNeedClientAuth(true);
       sslServerSocket.setSoTimeout(connectionRequest.getTimeout());
       System.out.println("Secure serverSocket is now running at port: " + port + "\n");
+      log.info("Create SSLserverSocket for Provider");
     } catch (IOException e) {
       e.printStackTrace();
       log.error("Creating secure serverSocket failed.");
@@ -69,12 +70,14 @@ public class SecureServerSocketThread extends Thread {
           if (isAesKey) {
             isAesKey = false;
             gatewayEncryption.setEncryptedAESKey(body);
+            log.info("AES Key received.");
             System.out.println("AES Key received.");
           } else {
             isAesKey = true;
             gatewayEncryption.setEncryptedIVAndMessage(body);
             byte[] decryptedMessage = GatewayService.decryptMessage(gatewayEncryption);
             outConsumer.write(decryptedMessage);
+            log.info("Sending the response to Consumer");
             System.out.println("Broker response: ");
             System.out.println(new String(decryptedMessage));
           }
