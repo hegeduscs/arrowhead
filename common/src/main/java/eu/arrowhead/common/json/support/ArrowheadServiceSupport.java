@@ -1,4 +1,4 @@
-package eu.arrowhead.common.json.supportadapter;
+package eu.arrowhead.common.json.support;
 
 import eu.arrowhead.common.database.ArrowheadService;
 import java.util.ArrayList;
@@ -21,12 +21,8 @@ public class ArrowheadServiceSupport {
   public ArrowheadServiceSupport(ArrowheadService service) {
     if (service.getServiceDefinition().contains("_")) {
       String[] parts = service.getServiceDefinition().split("_");
-      if (parts.length >= 2) {
-        this.serviceGroup = parts[0];
-        this.serviceDefinition = parts[1];
-      } else {
-        this.serviceDefinition = service.getServiceDefinition();
-      }
+      this.serviceGroup = parts[0];
+      this.serviceDefinition = parts[1];
     } else {
       this.serviceDefinition = service.getServiceDefinition();
     }

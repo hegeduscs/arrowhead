@@ -1,12 +1,8 @@
 package eu.arrowhead.core.orchestrator;
 
-import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.json.supportadapter.ArrowheadServiceSupport;
-import eu.arrowhead.common.json.supportadapter.OrchestrationResponseSupport;
-import eu.arrowhead.common.json.supportadapter.ServiceRequestFormSupport;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.common.security.SecurityUtils;
@@ -89,24 +85,6 @@ public class OrchestratorResource {
     return Response.status(Status.OK).entity(orchResponse).build();
   }
 
-  @POST
-  @Path("support")
-  public Response orchestrationProcessSupport(ServiceRequestFormSupport srfSupport, @Context ContainerRequestContext requestContext) {
-    ArrowheadServiceSupport supportService = srfSupport.getRequestedService();
-    ArrowheadService service = new ArrowheadService(supportService.getServiceDefinition(), supportService.getInterfaces(),
-                                                    supportService.getServiceMetadata());
-    if (supportService.getServiceGroup() != null) {
-      service.setServiceDefinition(supportService.getServiceGroup() + "_" + supportService.getServiceDefinition());
-    }
-    ServiceRequestForm srf = new ServiceRequestForm.Builder(srfSupport.getRequesterSystem()).requesterCloud(srfSupport.getRequesterCloud())
-        .requestedService(service).orchestrationFlags(srfSupport.getOrchestrationFlags()).preferredProviders(srfSupport.getPreferredProviders())
-        .build();
-
-    Response response = orchestrationProcess(srf, requestContext);
-    OrchestrationResponseSupport orchResponseSupport = new OrchestrationResponseSupport((OrchestrationResponse) response.getEntity());
-    return Response.status(Status.OK).entity(orchResponseSupport).build();
-  }
-
   /**
    * Default Store orchestration process offered on a GET request, where the requester only has to send 2 String path parameters.
    */
@@ -114,7 +92,7 @@ public class OrchestratorResource {
   @Path("{systemName}")
   public Response storeOrchestrationProcess(@PathParam("systemName") String systemName, @Context HttpServletRequest request) {
     ArrowheadSystem requesterSystem = new ArrowheadSystem(systemName, request.getRemoteAddr(), 0, null);
-    log.info("Received a GET Store orchestration from: " + request.getRemoteAddr() + requesterSystem.getSystemName());
+    log.info("Received a GET Store orchestration from: " + request.getRemoteAddr() + " " + requesterSystem.getSystemName());
 
     ServiceRequestForm srf = new ServiceRequestForm.Builder(requesterSystem).build();
     OrchestrationResponse orchResponse = OrchestratorService.orchestrationFromStore(srf);

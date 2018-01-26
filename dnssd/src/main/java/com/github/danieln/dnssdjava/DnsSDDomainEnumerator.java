@@ -36,7 +36,7 @@ public interface DnsSDDomainEnumerator {
   String getDefaultRegisteringDomain();
 
   /**
-   * Get the "supportadapter browsing" or "automatic browsing" domains.
+   * Get the "support browsing" or "automatic browsing" domains.
    *
    * @return a collection of domain names.
    */

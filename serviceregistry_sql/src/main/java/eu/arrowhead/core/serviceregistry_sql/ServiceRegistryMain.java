@@ -4,6 +4,7 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.core.serviceregistry_sql.support.OldServiceRegResource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -129,7 +130,7 @@ public class ServiceRegistryMain {
     System.out.println("Starting insecure server at: " + BASE_URI);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(ServiceRegistryResource.class, ServiceRegistryApi.class);
+    config.registerClasses(ServiceRegistryResource.class, ServiceRegistryApi.class, OldServiceRegResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.serviceregistry_sql.filter");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -144,7 +145,7 @@ public class ServiceRegistryMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(ServiceRegistryResource.class, ServiceRegistryApi.class);
+    config.registerClasses(ServiceRegistryResource.class, ServiceRegistryApi.class, OldServiceRegResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.serviceregistry_sql.filter");
 
     String keystorePath = getProp().getProperty("keystore");

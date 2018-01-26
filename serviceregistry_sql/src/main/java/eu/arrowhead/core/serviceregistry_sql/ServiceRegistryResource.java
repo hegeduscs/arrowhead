@@ -6,8 +6,6 @@ import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.json.supportadapter.ArrowheadServiceSupport;
-import eu.arrowhead.common.json.supportadapter.ServiceRegistryEntrySupport;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.security.SecurityUtils;
@@ -34,7 +32,6 @@ public class ServiceRegistryResource {
   private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
   static final DatabaseManager dm = DatabaseManager.getInstance();
-
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -91,22 +88,6 @@ public class ServiceRegistryResource {
     ServiceRegistryEntry savedEntry = dm.save(entry);
     log.info("New ServiceRegistryEntry " + entry.toString() + " is saved.");
     return Response.status(Status.CREATED).entity(savedEntry).build();
-  }
-
-  @POST
-  @Path("register/support")
-  public Response registerServiceSupport(ServiceRegistryEntrySupport supportEntry, @Context ContainerRequestContext requestContext) {
-    ArrowheadServiceSupport supportService = supportEntry.getProvidedService();
-    ArrowheadService service = new ArrowheadService(supportService.getServiceDefinition(), supportService.getInterfaces(),
-                                                    supportService.getServiceMetadata());
-    if (supportService.getServiceGroup() != null) {
-      service.setServiceDefinition(supportService.getServiceGroup() + "_" + supportService.getServiceDefinition());
-    }
-    ServiceRegistryEntry entry = new ServiceRegistryEntry(service, supportEntry.getProvider(), supportEntry.getServiceURI());
-
-    Response response = registerService(entry, requestContext);
-    ServiceRegistryEntrySupport savedSupportEntry = new ServiceRegistryEntrySupport((ServiceRegistryEntry) response.getEntity());
-    return Response.status(Status.CREATED).entity(savedSupportEntry).build();
   }
 
   @PUT
@@ -184,22 +165,6 @@ public class ServiceRegistryResource {
       log.info("ServiceRegistryEntry " + entry.toString() + " was not found in the SR to delete.");
       return Response.status(Status.NO_CONTENT).entity(entry).build();
     }
-  }
-
-  @PUT
-  @Path("remove/support")
-  public Response removeServiceSupport(ServiceRegistryEntrySupport supportEntry, @Context ContainerRequestContext requestContext) {
-    ArrowheadServiceSupport supportService = supportEntry.getProvidedService();
-    ArrowheadService service = new ArrowheadService(supportService.getServiceDefinition(), supportService.getInterfaces(),
-                                                    supportService.getServiceMetadata());
-    if (supportService.getServiceGroup() != null) {
-      service.setServiceDefinition(supportService.getServiceGroup() + "_" + supportService.getServiceDefinition());
-    }
-    ServiceRegistryEntry entry = new ServiceRegistryEntry(service, supportEntry.getProvider(), supportEntry.getServiceURI());
-
-    Response response = removeService(entry, requestContext);
-    ServiceRegistryEntrySupport savedSupportEntry = new ServiceRegistryEntrySupport((ServiceRegistryEntry) response.getEntity());
-    return Response.status(Status.NO_CONTENT).entity(savedSupportEntry).build();
   }
 
 }

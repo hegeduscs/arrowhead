@@ -1,11 +1,11 @@
-package eu.arrowhead.common.json.supportadapter;
+package eu.arrowhead.common.json.support;
 
-import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.messages.OrchestrationForm;
 
 public class OrchestrationFormSupport {
 
   private ArrowheadServiceSupport service;
-  private ArrowheadSystem provider;
+  private ArrowheadSystemSupport provider;
   private String serviceURI;
   private String instruction;
   private String authorizationToken;
@@ -14,13 +14,13 @@ public class OrchestrationFormSupport {
   public OrchestrationFormSupport() {
   }
 
-  public OrchestrationFormSupport(ArrowheadServiceSupport service, ArrowheadSystem provider, String serviceURI) {
+  public OrchestrationFormSupport(ArrowheadServiceSupport service, ArrowheadSystemSupport provider, String serviceURI) {
     this.service = service;
     this.provider = provider;
     this.serviceURI = serviceURI;
   }
 
-  public OrchestrationFormSupport(ArrowheadServiceSupport service, ArrowheadSystem provider, String serviceURI, String instruction,
+  public OrchestrationFormSupport(ArrowheadServiceSupport service, ArrowheadSystemSupport provider, String serviceURI, String instruction,
                                   String authorizationToken, String signature) {
     this.service = service;
     this.provider = provider;
@@ -28,6 +28,15 @@ public class OrchestrationFormSupport {
     this.instruction = instruction;
     this.authorizationToken = authorizationToken;
     this.signature = signature;
+  }
+
+  public OrchestrationFormSupport(OrchestrationForm form) {
+    this.service = new ArrowheadServiceSupport(form.getService());
+    this.provider = new ArrowheadSystemSupport(form.getProvider());
+    this.serviceURI = form.getServiceURI();
+    this.instruction = form.getInstruction();
+    this.authorizationToken = form.getAuthorizationToken();
+    this.signature = form.getSignature();
   }
 
   public ArrowheadServiceSupport getService() {
@@ -38,11 +47,11 @@ public class OrchestrationFormSupport {
     this.service = service;
   }
 
-  public ArrowheadSystem getProvider() {
+  public ArrowheadSystemSupport getProvider() {
     return provider;
   }
 
-  public void setProvider(ArrowheadSystem provider) {
+  public void setProvider(ArrowheadSystemSupport provider) {
     this.provider = provider;
   }
 

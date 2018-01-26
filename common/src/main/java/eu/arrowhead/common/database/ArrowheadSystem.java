@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eu.arrowhead.common.json.support.ArrowheadSystemSupport;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -37,6 +38,13 @@ public class ArrowheadSystem {
   public ArrowheadSystem() {
   }
 
+  public ArrowheadSystem(String systemName, String address, int port, String authenticationInfo) {
+    this.systemName = systemName;
+    this.address = address;
+    this.port = port;
+    this.authenticationInfo = authenticationInfo;
+  }
+
   public ArrowheadSystem(String json) {
     String[] fields = json.split(",");
     this.systemName = fields[0];
@@ -48,11 +56,11 @@ public class ArrowheadSystem {
     }
   }
 
-  public ArrowheadSystem(String systemName, String address, int port, String authenticationInfo) {
-    this.systemName = systemName;
-    this.address = address;
-    this.port = port;
-    this.authenticationInfo = authenticationInfo;
+  public ArrowheadSystem(ArrowheadSystemSupport system) {
+    this.systemName = system.getSystemGroup() + "_" + system.getSystemName();
+    this.address = system.getAddress();
+    this.port = system.getPort();
+    this.authenticationInfo = system.getAuthenticationInfo();
   }
 
   @XmlTransient

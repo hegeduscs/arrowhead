@@ -9,6 +9,7 @@ import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.orchestrator.api.CommonApi;
 import eu.arrowhead.core.orchestrator.api.StoreApi;
+import eu.arrowhead.core.orchestrator.support.OldOrchResource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -113,7 +114,7 @@ public class OrchestratorMain {
     System.out.println("Starting insecure server at: " + BASE_URI);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class);
+    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class, OldOrchResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.filter");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -128,7 +129,7 @@ public class OrchestratorMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class);
+    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class, OldOrchResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.filter");
 
     String keystorePath = getProp().getProperty("keystore");

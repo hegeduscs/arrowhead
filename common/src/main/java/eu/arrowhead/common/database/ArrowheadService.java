@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eu.arrowhead.common.json.support.ArrowheadServiceSupport;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,12 @@ public class ArrowheadService {
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;
     this.serviceMetadata = serviceMetadata;
+  }
+
+  public ArrowheadService(ArrowheadServiceSupport service) {
+    this.serviceDefinition = service.getServiceGroup() + "_" + service.getServiceDefinition();
+    this.interfaces = service.getInterfaces();
+    this.serviceMetadata = service.getServiceMetadata();
   }
 
   @XmlTransient
