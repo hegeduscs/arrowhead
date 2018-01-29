@@ -18,7 +18,6 @@ public class ActiveSession {
   private String queueName;
   private String controlQueueName;
   private Boolean isSecure;
-  private Boolean useToken;
   private Date startSession;
 
   public ActiveSession() {
@@ -26,7 +25,7 @@ public class ActiveSession {
 
   public ActiveSession(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, ArrowheadSystem provider,
       ArrowheadCloud providerCloud, ArrowheadService service, String brokerName, int brokerPort, int serverSocketPort,
-      String queueName, String controlQueueName, Boolean isSecure, Boolean useToken, Date startSession) {
+      String queueName, String controlQueueName, Boolean isSecure, Date startSession) {
     this.consumer = consumer;
     this.consumerCloud = consumerCloud;
     this.provider = provider;
@@ -38,7 +37,22 @@ public class ActiveSession {
     this.queueName = queueName;
     this.controlQueueName = controlQueueName;
     this.isSecure = isSecure;
-    this.useToken = useToken;
+    this.startSession = startSession;
+  }
+
+  public ActiveSession(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, ArrowheadSystem provider,
+      ArrowheadCloud providerCloud, ArrowheadService service, String brokerName, int brokerPort, String queueName,
+      String controlQueueName, Boolean isSecure, Date startSession) {
+    this.consumer = consumer;
+    this.consumerCloud = consumerCloud;
+    this.provider = provider;
+    this.providerCloud = providerCloud;
+    this.service = service;
+    this.brokerName = brokerName;
+    this.brokerPort = brokerPort;
+    this.queueName = queueName;
+    this.controlQueueName = controlQueueName;
+    this.isSecure = isSecure;
     this.startSession = startSession;
   }
 
@@ -128,14 +142,6 @@ public class ActiveSession {
 
   public void setIsSecure(Boolean isSecure) {
     this.isSecure = isSecure;
-  }
-
-  public Boolean getUseToken() {
-    return useToken;
-  }
-
-  public void setUseToken(Boolean useToken) {
-    this.useToken = useToken;
   }
 
   public Date getStartSession() {

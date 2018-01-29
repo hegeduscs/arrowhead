@@ -16,7 +16,6 @@ public class ConnectToConsumerRequest {
   private ArrowheadCloud providerCloud;
   private ArrowheadService service;
   private Boolean isSecure;
-  private Boolean useToken;
   private int timeout;
   private String providerGWPublicKey;
 
@@ -25,7 +24,7 @@ public class ConnectToConsumerRequest {
 
   public ConnectToConsumerRequest(String brokerName, int brokerPort, String queueName, String controlQueueName,
       ArrowheadSystem consumer, ArrowheadSystem provider, ArrowheadCloud consumerCloud, ArrowheadCloud providerCloud,
-      ArrowheadService service, Boolean isSecure, Boolean useToken, int timeout, String providerGWPublicKey) {
+      ArrowheadService service, Boolean isSecure, int timeout, String providerGWPublicKey) {
     this.brokerName = brokerName;
     this.brokerPort = brokerPort;
     this.queueName = queueName;
@@ -36,7 +35,6 @@ public class ConnectToConsumerRequest {
     this.providerCloud = providerCloud;
     this.service = service;
     this.isSecure = isSecure;
-    this.useToken = useToken;
     this.timeout = timeout;
     this.providerGWPublicKey = providerGWPublicKey;
   }
@@ -119,14 +117,6 @@ public class ConnectToConsumerRequest {
 
   public void setIsSecure(Boolean isSecure) {
     this.isSecure = isSecure;
-  }
-
-  public Boolean getUseToken() {
-    return useToken;
-  }
-
-  public void setUseToken(Boolean useToken) {
-    this.useToken = useToken;
   }
 
   public int getTimeout() {

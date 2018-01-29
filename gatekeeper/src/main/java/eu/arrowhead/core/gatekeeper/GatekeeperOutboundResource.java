@@ -172,8 +172,9 @@ public class GatekeeperOutboundResource {
     ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(),
         gwConnInfo.getBrokerPort(), gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
         requestForm.getRequesterSystem(), icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
-        requestForm.getTargetCloud(), requestForm.getRequestedService(), isSecure,
-        metadata.get("security").equals("token"), GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
+        requestForm.getTargetCloud(), requestForm.getRequestedService(), isSecure, GatekeeperMain.timeout,
+        gwConnInfo.getGatewayPublicKey());
+
     // Sending the gateway request and parsing the response
     Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest,
         GatekeeperMain.outboundServerContext);
