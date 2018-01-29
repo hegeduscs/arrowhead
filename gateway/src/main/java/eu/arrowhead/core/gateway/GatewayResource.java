@@ -60,8 +60,7 @@ public class GatewayResource {
     ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(),
         connectionRequest.getConsumerCloud(), connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
         connectionRequest.getService(), connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), 0,
-        queueName, controlQueueName, connectionRequest.getIsSecure(), connectionRequest.getUseToken(),
-        new Date(System.currentTimeMillis()));
+        queueName, controlQueueName, connectionRequest.getIsSecure(), new Date(System.currentTimeMillis()));
     // Add the session to the management queue
     GatewayService.activeSessions.put(queueName, activeSession);
 
@@ -91,7 +90,7 @@ public class GatewayResource {
         connectionRequest.getConsumerCloud(), connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
         connectionRequest.getService(), connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(),
         serverSocketPort, connectionRequest.getQueueName(), connectionRequest.getControlQueueName(),
-        connectionRequest.getIsSecure(), connectionRequest.getUseToken(), new Date(System.currentTimeMillis()));
+        connectionRequest.getIsSecure(), new Date(System.currentTimeMillis()));
     // Add the session to the management queue
     GatewayService.activeSessions.put(connectionRequest.getQueueName(), activeSession);
 
