@@ -13,8 +13,8 @@ public class ActiveSession {
   private ArrowheadCloud providerCloud;
   private ArrowheadService service;
   private String brokerName;
-  private int brokerPort;
-  private int serverSocketPort;
+  private Integer brokerPort;
+  private Integer serverSocketPort;
   private String queueName;
   private String controlQueueName;
   private Boolean isSecure;
@@ -24,7 +24,7 @@ public class ActiveSession {
   }
 
   public ActiveSession(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, ArrowheadSystem provider,
-      ArrowheadCloud providerCloud, ArrowheadService service, String brokerName, int brokerPort, int serverSocketPort,
+      ArrowheadCloud providerCloud, ArrowheadService service, String brokerName, Integer brokerPort, Integer serverSocketPort,
       String queueName, String controlQueueName, Boolean isSecure, Date startSession) {
     this.consumer = consumer;
     this.consumerCloud = consumerCloud;
@@ -34,22 +34,6 @@ public class ActiveSession {
     this.brokerName = brokerName;
     this.brokerPort = brokerPort;
     this.serverSocketPort = serverSocketPort;
-    this.queueName = queueName;
-    this.controlQueueName = controlQueueName;
-    this.isSecure = isSecure;
-    this.startSession = startSession;
-  }
-
-  public ActiveSession(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, ArrowheadSystem provider,
-      ArrowheadCloud providerCloud, ArrowheadService service, String brokerName, int brokerPort, String queueName,
-      String controlQueueName, Boolean isSecure, Date startSession) {
-    this.consumer = consumer;
-    this.consumerCloud = consumerCloud;
-    this.provider = provider;
-    this.providerCloud = providerCloud;
-    this.service = service;
-    this.brokerName = brokerName;
-    this.brokerPort = brokerPort;
     this.queueName = queueName;
     this.controlQueueName = controlQueueName;
     this.isSecure = isSecure;
@@ -104,19 +88,19 @@ public class ActiveSession {
     this.brokerName = brokerName;
   }
 
-  public int getBrokerPort() {
+  public Integer getBrokerPort() {
     return brokerPort;
   }
 
-  public void setBrokerPort(int brokerPort) {
+  public void setBrokerPort(Integer brokerPort) {
     this.brokerPort = brokerPort;
   }
 
-  public int getServerSocketPort() {
+  public Integer getServerSocketPort() {
     return serverSocketPort;
   }
 
-  public void setServerSocketPort(int serverSocketPort) {
+  public void setServerSocketPort(Integer serverSocketPort) {
     this.serverSocketPort = serverSocketPort;
   }
 

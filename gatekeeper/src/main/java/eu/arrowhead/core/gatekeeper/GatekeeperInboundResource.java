@@ -145,7 +145,8 @@ public class GatekeeperInboundResource {
     for (ArrowheadSystem preferredSystem : icnProposal.getPreferredSystems()) {
       preferredProviders.add(new PreferredProvider(preferredSystem, null));
     }
-    ArrowheadSystem consumer = icnProposal.getRequesterSystem();
+    ArrowheadSystem consumer = new ArrowheadSystem(icnProposal.getRequesterSystem());
+    
     // Changing the requesterSystem and the requesterCloud for the sake of proper
     // token generation
     if (icnProposal.getNegotiationFlags().get("useGateway")) {
@@ -204,8 +205,8 @@ public class GatekeeperInboundResource {
     }
 
     ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(),
-        chosenBroker.getPort(), consumer, provider, icnProposal.getRequesterCloud(),
-        Utility.getOwnCloud(), icnProposal.getRequestedService(), isSecure, timeout, icnProposal.getGatewayPublicKey());
+        chosenBroker.getPort(), consumer, provider, icnProposal.getRequesterCloud(), Utility.getOwnCloud(),
+        icnProposal.getRequestedService(), isSecure, timeout, icnProposal.getGatewayPublicKey());
 
     // Sending request, parsing response
     Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
