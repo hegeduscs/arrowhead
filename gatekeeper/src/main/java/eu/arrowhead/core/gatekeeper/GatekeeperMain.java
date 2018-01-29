@@ -2,6 +2,9 @@ package eu.arrowhead.core.gatekeeper;
 
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
@@ -12,6 +15,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Properties;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
@@ -29,8 +33,14 @@ public class GatekeeperMain {
   public static SSLContext outboundClientContext;
   public static SSLContext outboundServerContext;
 
+  static String AUTH_CONTROL_URI;
+  static String GATEWAY_CONSUMER_URI;
+  static String GATEWAY_PROVIDER_URI;
+  static String ORCHESTRATOR_URI = getProp().getProperty("orch_base_uri");
+  static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
   static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
 
+  private static String BASE64_PUBLIC_KEY;
   private static HttpServer inboundServer;
   private static HttpServer inboundSecureServer;
   private static HttpServer outboundServer;
@@ -50,6 +60,14 @@ public class GatekeeperMain {
     //Utility.isUrlValid(INBOUND_BASE_URI_SECURED, true);
     Utility.isUrlValid(OUTBOUND_BASE_URI, false);
     Utility.isUrlValid(OUTBOUND_BASE_URI_SECURED, true);
+    if (SERVICE_REGISTRY_URI.startsWith("https")) {
+      Utility.isUrlValid(SERVICE_REGISTRY_URI, true);
+    } else {
+      Utility.isUrlValid(SERVICE_REGISTRY_URI, false);
+    }
+    if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
+      SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
+    }
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -91,6 +109,7 @@ public class GatekeeperMain {
       inboundServer = startServer(INBOUND_BASE_URI, true);
       outboundServer = startServer(OUTBOUND_BASE_URI, false);
     }
+    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
 
     //This is here to initialize the database connection before the REST resources are initiated
     DatabaseManager dm = DatabaseManager.getInstance();
@@ -213,6 +232,61 @@ public class GatekeeperMain {
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;
+  }
+
+  private static void useSRService(boolean isSecure, boolean registering) {
+    URI uri;
+    ArrowheadService gsdService;
+    ArrowheadService icnService;
+    ArrowheadSystem gkSystem;
+    if (isSecure) {
+      uri = UriBuilder.fromUri(OUTBOUND_BASE_URI_SECURED).build();
+      gsdService = new ArrowheadService("coreservices", "SecureGlobalServiceDiscovery", Collections.singletonList("JSON"), null);
+      icnService = new ArrowheadService("coreservices", "SecureInterCloudNegotiations", Collections.singletonList("JSON"), null);
+      gkSystem = new ArrowheadSystem("coresystems", "gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY, "certificate");
+    } else {
+      uri = UriBuilder.fromUri(OUTBOUND_BASE_URI).build();
+      gsdService = new ArrowheadService("coreservices", "InsecureGlobalServiceDiscovery", Collections.singletonList("JSON"), null);
+      icnService = new ArrowheadService("coreservices", "InsecureInterCloudNegotiations", Collections.singletonList("JSON"), null);
+      gkSystem = new ArrowheadSystem("coresystems", "gatekeeper", uri.getHost(), uri.getPort(), null);
+    }
+
+    //Preparing the payload
+    ServiceRegistryEntry gsdEntry = new ServiceRegistryEntry(gsdService, gkSystem, "gatekeeper/init_gsd");
+    ServiceRegistryEntry icnEntry = new ServiceRegistryEntry(icnService, gkSystem, "gatekeeper/init_icn");
+
+    if (registering) {
+      try {
+        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", gsdEntry);
+      } catch (RuntimeException e) {
+        if (e.getMessage().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", gsdEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", gsdEntry);
+        } else {
+          System.out.println("GSD service registration failed.");
+        }
+      }
+      try {
+        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", icnEntry);
+      } catch (RuntimeException e) {
+        if (e.getMessage().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", icnEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", icnEntry);
+        } else {
+          System.out.println("ICN service registration failed.");
+        }
+      }
+    } else {
+      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", gsdEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", icnEntry);
+    }
+  }
+
+  private static void getCoreSystemServiceUris() {
+    AUTH_CONTROL_URI = Utility.getAuthControlServiceUri();
+    GATEWAY_CONSUMER_URI = Utility.getGatewayConsumerUri();
+    GATEWAY_PROVIDER_URI = Utility.getGatewayProviderUri();
+    ORCHESTRATOR_URI = Utility.getOrchestratorServiceUri();
   }
 
   private static void shutdown() {

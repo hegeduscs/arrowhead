@@ -6,9 +6,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import eu.arrowhead.common.database.ArrowheadCloud;
-import eu.arrowhead.common.database.CoreSystem;
+import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.database.OwnCloud;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -16,11 +18,14 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.common.messages.ServiceQueryForm;
+import eu.arrowhead.common.messages.ServiceQueryResult;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceConfigurationError;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -40,16 +45,18 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
+  private static SSLContext sslContext;
+  private static String SERVICE_REGISTRY_URI;
+
+  public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
+
   private static final String ARROWHEAD_EXCEPTION = "eu.arrowhead.common.exception.ArrowheadException";
   private static final String AUTH_EXCEPTION = "eu.arrowhead.common.exception.AuthenticationException";
   private static final String BAD_PAYLOAD_EXCEPTION = "eu.arrowhead.common.exception.BadPayloadException";
   private static final String NOT_FOUND_EXCEPTION = "eu.arrowhead.common.exception.DataNotFoundException";
   private static final String DUPLICATE_EXCEPTION = "eu.arrowhead.common.exception.DuplicateEntryException";
   private static final String UNAVAILABLE_EXCEPTION = "eu.arrowhead.common.exception.UnavailableServerException";
-
-  private static SSLContext sslContext;
   private static final DatabaseManager dm = DatabaseManager.getInstance();
-  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(Utility.class.getName());
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
     // Decide whether to allow the connection...
@@ -63,6 +70,11 @@ public final class Utility {
 
   public static void setSSLContext(SSLContext context) {
     sslContext = context;
+  }
+
+  public static void setServiceRegistryUri(String serviceRegistryUri) {
+    SERVICE_REGISTRY_URI = serviceRegistryUri;
+    SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("query").build().toString();
   }
 
   public static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {
@@ -113,7 +125,8 @@ public final class Utility {
           throw new NotAllowedException("Invalid method type was given to the Utility.sendRequest() method");
       }
     } catch (ProcessingException e) {
-      log.error("UnavailableServerException occurred at " + uri);
+      log.error("UnavailableServerException occurred at " + uri, e);
+      //TODO új log és SR query beiktatása új threaden
       throw new UnavailableServerException("Could not get any response from: " + uri, Status.SERVICE_UNAVAILABLE.getStatusCode(),
                                            UnavailableServerException.class.getName(), Utility.class.toString(), e);
     }
@@ -150,76 +163,130 @@ public final class Utility {
     return ub.toString();
   }
 
-  public static String getOrchestratorUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "orchestrator");
-    CoreSystem orchestrator = dm.get(CoreSystem.class, restrictionMap);
-    if (orchestrator == null) {
-      log.error("Utility:getOrchestratorUri System not found in the database!");
-      throw new DataNotFoundException("Orchestrator Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), Utility.class.toString());
+  public static String getOrchestratorServiceUri() {
+    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureOrchestrationService", Collections.singletonList("JSON"), null)
+        : new ArrowheadService("SecureOrchestrationService", Collections.singletonList("JSON"), secureServerMetadata);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
+    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
+    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
+
+    if (result.isValid()) {
+      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
+      ArrowheadSystem orchestrator = entry.getProvider();
+      boolean isSecure = entry.getMetadata().contains("security");
+      return getUri(orchestrator.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+    } else {
+      log.fatal("getOrchestratorServiceUri: query came back empty!");
+      throw new ServiceConfigurationError("Orchestration Service not found in the Service Registry!");
     }
-    return getUri(orchestrator.getAddress(), orchestrator.getPort(), orchestrator.getServiceURI(), orchestrator.getIsSecure());
   }
 
-  public static String getServiceRegistryUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "serviceregistry");
-    CoreSystem serviceRegistry = dm.get(CoreSystem.class, restrictionMap);
-    if (serviceRegistry == null) {
-      log.error("Utility:getServiceRegistryUri System not found in the database!");
-      throw new DataNotFoundException("Service Registry Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), Utility.class.toString());
+  public static String getAuthControlServiceUri() {
+    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureAuthorizationControl", Collections.singletonList("JSON"), null)
+        : new ArrowheadService("SecureAuthorizationControl", Collections.singletonList("JSON"), secureServerMetadata);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
+    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
+    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
+
+    if (result.isValid()) {
+      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
+      ArrowheadSystem authorization = entry.getProvider();
+      boolean isSecure = entry.getMetadata().contains("security");
+      return getUri(authorization.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+    } else {
+      log.fatal("getAuthControlServiceUri: query came back empty!");
+      throw new ServiceConfigurationError("Authorization Control Service not found in the Service Registry!");
     }
-    return getUri(serviceRegistry.getAddress(), serviceRegistry.getPort(), serviceRegistry.getServiceURI(), serviceRegistry.getIsSecure());
   }
 
-  public static String getAuthorizationUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "authorization");
-    CoreSystem authorization = dm.get(CoreSystem.class, restrictionMap);
-    if (authorization == null) {
-      log.error("Utility:getAuthorizationUri System not found in the database!");
-      throw new DataNotFoundException("Authorization Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), Utility.class.toString());
+  public static String getTokenGenerationServiceUri() {
+    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureTokenGeneration", Collections.singletonList("JSON"), null)
+        : new ArrowheadService("SecureTokenGeneration", Collections.singletonList("JSON"), secureServerMetadata);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
+    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
+    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
+
+    if (result.isValid()) {
+      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
+      ArrowheadSystem authorization = entry.getProvider();
+      boolean isSecure = entry.getMetadata().contains("security");
+      return getUri(authorization.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+    } else {
+      log.fatal("getTokenGenerationServiceUri: query came back empty!");
+      throw new ServiceConfigurationError("Token Generation Service not found in the Service Registry!");
     }
-    return getUri(authorization.getAddress(), authorization.getPort(), authorization.getServiceURI(), authorization.getIsSecure());
   }
 
-  public static String getGatekeeperUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "gatekeeper");
-    CoreSystem gatekeeper = dm.get(CoreSystem.class, restrictionMap);
-    if (gatekeeper == null) {
-      log.error("Utility:getGatekeeperUri System not found in the database!");
-      throw new DataNotFoundException("Gatekeeper Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), Utility.class.toString());
+  public static String getGsdServiceUri() {
+    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureGlobalServiceDiscovery", Collections.singletonList("JSON"), null)
+        : new ArrowheadService("SecureGlobalServiceDiscovery", Collections.singletonList("JSON"), secureServerMetadata);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
+    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
+    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
+
+    if (result.isValid()) {
+      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
+      ArrowheadSystem gatekeeper = entry.getProvider();
+      boolean isSecure = entry.getMetadata().contains("security");
+      return getUri(gatekeeper.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+    } else {
+      log.fatal("getGsdServiceUri: query came back empty!");
+      throw new ServiceConfigurationError("GlobalServiceDiscovery Service not found in the Service Registry!");
     }
-    return getUri(gatekeeper.getAddress(), gatekeeper.getPort(), gatekeeper.getServiceURI(), gatekeeper.getIsSecure());
   }
 
-  public static String getGatewayUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "gateway");
-    CoreSystem gateway = dm.get(CoreSystem.class, restrictionMap);
-    if (gateway == null) {
-      log.error("Utility:getGatewayUri System not found in the database!");
-      throw new DataNotFoundException("Gateway Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), Utility.class.toString());
+  public static String getIcnServiceUri() {
+    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureInterCloudNegotiations", Collections.singletonList("JSON"), null)
+        : new ArrowheadService("SecureInterCloudNegotiations", Collections.singletonList("JSON"), secureServerMetadata);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
+    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
+    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
+
+    if (result.isValid()) {
+      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
+      ArrowheadSystem gatekeeper = entry.getProvider();
+      boolean isSecure = entry.getMetadata().contains("security");
+      return getUri(gatekeeper.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+    } else {
+      log.fatal("getIcnServiceUri: query came back empty!");
+      throw new ServiceConfigurationError("InterCloudNegotiation Service not found in the Service Registry!");
     }
-    return getUri(gateway.getAddress(), gateway.getPort(), gateway.getServiceURI(), gateway.getIsSecure());
   }
 
-  public static String getQosUri() {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", "qos");
-    CoreSystem qos = dm.get(CoreSystem.class, restrictionMap);
-    if (qos == null) {
-      log.error("Utility:getQosUri System not found in the database!");
-      throw new DataNotFoundException("QoS Core System not found in the database!", Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), Utility.class.toString());
+  public static String getGatewayProviderUri() {
+    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureConnectToProvider", Collections.singletonList("JSON"), null)
+        : new ArrowheadService("SecureConnectToProvider", Collections.singletonList("JSON"), secureServerMetadata);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
+    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
+    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
+
+    if (result.isValid()) {
+      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
+      ArrowheadSystem gateway = entry.getProvider();
+      boolean isSecure = entry.getMetadata().contains("security");
+      return getUri(gateway.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+    } else {
+      log.fatal("getGatewayProviderUri: query came back empty!");
+      throw new ServiceConfigurationError("GatewayProvider Service not found in the Service Registry!");
     }
-    return getUri(qos.getAddress(), qos.getPort(), qos.getServiceURI(), qos.getIsSecure());
+  }
+
+  public static String getGatewayConsumerUri() {
+    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureConnectToConsumer", Collections.singletonList("JSON"), null)
+        : new ArrowheadService("SecureConnectToConsumer", Collections.singletonList("JSON"), secureServerMetadata);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
+    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
+    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
+
+    if (result.isValid()) {
+      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
+      ArrowheadSystem gateway = entry.getProvider();
+      boolean isSecure = entry.getMetadata().contains("security");
+      return getUri(gateway.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+    } else {
+      log.fatal("getGatewayConsumerUri: query came back empty!");
+      throw new ServiceConfigurationError("GatewayConsumer Service not found in the Service Registry!");
+    }
   }
 
   public static List<String> getNeighborCloudURIs() {
@@ -248,20 +315,6 @@ public final class Utility {
     return cloudList.get(0).getCloud();
   }
 
-  public static CoreSystem getCoreSystem(String systemName) {
-    restrictionMap.clear();
-    restrictionMap.put("systemName", systemName);
-    CoreSystem coreSystem = dm.get(CoreSystem.class, restrictionMap);
-    if (coreSystem == null) {
-      log.error("Utility:getCoreSystem " + systemName + " not found in the database.");
-      throw new DataNotFoundException("Requested Core System " + "(" + systemName + ") not found in the database!", Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), Utility.class.toString());
-    }
-
-    return coreSystem;
-  }
-
-
   public static String stripEndSlash(String uri) {
     if (uri != null && uri.endsWith("/")) {
       return uri.substring(0, uri.length() - 1);
@@ -289,7 +342,6 @@ public final class Utility {
     }
 
   }
-
 
   public static String toPrettyJson(String jsonString, Object obj) {
     if (jsonString != null) {

@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
 /**
@@ -315,8 +314,7 @@ final class OrchestratorService {
       }
 
       // Getting the Authorization token generation resource URI, compiling the request payload
-      String authUri = Utility.getAuthorizationUri();
-      authUri = UriBuilder.fromPath(authUri).path("token").toString();
+      //String authUri = Utility.getTokenGenerationServiceUri();
       TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
                                                                        srf.getRequestedService(), 0);
       //Sending request, parsing response
