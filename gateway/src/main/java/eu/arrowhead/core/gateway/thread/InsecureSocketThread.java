@@ -17,37 +17,40 @@ import org.apache.log4j.Logger;
 
 public class InsecureSocketThread extends Thread {
 
-	private GatewaySession gatewaySession;
-	private String queueName;
-	private String controlQueueName;
-	private ConnectToProviderRequest connectionRequest;
+  private GatewaySession gatewaySession;
+  private String queueName;
+  private String controlQueueName;
+  private ConnectToProviderRequest connectionRequest;
   private Socket providerSocket;
-	private static final Logger log = Logger.getLogger(InsecureSocketThread.class.getName());
+  private static Boolean isFirstMessage = true;
+  private static final Logger log = Logger.getLogger(InsecureSocketThread.class.getName());
 
-	public InsecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
-			ConnectToProviderRequest connectionRequest) {
-		this.gatewaySession = gatewaySession;
-		this.queueName = queueName;
-		this.controlQueueName = controlQueueName;
-		this.connectionRequest = connectionRequest;
-	}
+  public InsecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
+      ConnectToProviderRequest connectionRequest) {
+    this.gatewaySession = gatewaySession;
+    this.queueName = queueName;
+    this.controlQueueName = controlQueueName;
+    this.connectionRequest = connectionRequest;
+  }
 
-	public void run() {
+  public void run() {
 
-		try {
-			// Creating socket for Provider
-			Channel channel = gatewaySession.getChannel();
-      providerSocket = new Socket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
-			providerSocket.setSoTimeout(connectionRequest.getTimeout());
-			InputStream inProvider = providerSocket.getInputStream();
-			OutputStream outProvider = providerSocket.getOutputStream();
-			log.info("Create socket for Provider");
+    try {
+      // Creating socket for Provider
+      Channel channel = gatewaySession.getChannel();
+      providerSocket = new Socket(connectionRequest.getProvider().getAddress(),
+          connectionRequest.getProvider().getPort());
+      providerSocket.setSoTimeout(connectionRequest.getTimeout());
+      InputStream inProvider = providerSocket.getInputStream();
+      OutputStream outProvider = providerSocket.getOutputStream();
+      log.info("Create socket for Provider");
 
-			// Receiving messages through AMQP Broker
+      // Receiving messages through AMQP Broker
 
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+            throws IOException {
           outProvider.write(body);
           log.info("Sending the request to Provider");
           // get the answer from Provider
@@ -61,9 +64,10 @@ public class InsecureSocketThread extends Thread {
 
       Consumer controlConsumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
+            byte[] body) {
           if (new String(body).equals("close")) {
-            GatewayService.providerSideClose(gatewaySession, providerSocket);
+            GatewayService.providerSideClose(gatewaySession, providerSocket, queueName);
           }
         }
       };
@@ -71,13 +75,16 @@ public class InsecureSocketThread extends Thread {
       while (true) {
         channel.basicConsume(queueName, true, consumer);
         channel.basicConsume(controlQueueName, true, controlConsumer);
+        isFirstMessage = false;
       }
 
     } catch (IOException | NegativeArraySizeException e) {
-      log.error("Communication failed (Error occurred or remote peer closed the socket)");
-      GatewayService.providerSideClose(gatewaySession, providerSocket);
-      throw new ArrowheadException(e.getMessage(), e);
-		}
-	}
+      GatewayService.providerSideClose(gatewaySession, providerSocket, queueName);
+      if (isFirstMessage) {
+        log.error("Communication failed (Error occurred or remote peer closed the socket)");
+        throw new ArrowheadException(e.getMessage());
+      }
+    }
 
+  }
 }

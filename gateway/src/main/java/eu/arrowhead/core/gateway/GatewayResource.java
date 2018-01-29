@@ -1,14 +1,19 @@
 package eu.arrowhead.core.gateway;
 
+import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.messages.ConnectToConsumerResponse;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.common.messages.ConnectToProviderResponse;
+import eu.arrowhead.core.gateway.model.ActiveSession;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 import eu.arrowhead.core.gateway.thread.InsecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.InsecureSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureSocketThread;
+
+import java.util.Date;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -26,62 +31,87 @@ import org.apache.log4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatewayResource {
 
-	private static final Logger log = Logger.getLogger(GatewayResource.class.getName());
+  private static final Logger log = Logger.getLogger(GatewayResource.class.getName());
 
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getIt() {
-		return "This is the Gateway Resource. REST methods: connectToProvider, connectToConsumer.";
-	}
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public String getIt() {
+    return "This is the Gateway Resource. REST methods: connectToProvider, connectToConsumer.";
+  }
 
-	@PUT
-	@Path("connectToProvider")
-	public Response connectToProvider(ConnectToProviderRequest connectionRequest) {
-		String queueName = String.valueOf(System.currentTimeMillis()).concat(String.valueOf(Math.random())).replace(".",
-				"");
-		String controlQueueName = queueName.concat("_control");
+  @GET
+  @Path("management")
+  @Produces(MediaType.TEXT_PLAIN)
+  public String sessionManagement() {
+    if (GatewayService.activeSessions.isEmpty()) {
+      return "There are no active sessions.";
+    } else {
+      return Utility.toPrettyJson(null, GatewayService.activeSessions);
+    }
+  }
 
-		// TODO sanity check on the success of the channel create, handle the error
-		GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerHost(),
-				connectionRequest.getBrokerPort(), queueName, controlQueueName, connectionRequest.getIsSecure());
+  @PUT
+  @Path("connectToProvider")
+  public Response connectToProvider(ConnectToProviderRequest connectionRequest) {
+    String queueName = String.valueOf(System.currentTimeMillis()).concat(String.valueOf(Math.random())).replace(".",
+        "");
+    String controlQueueName = queueName.concat("_control");
 
-		if (connectionRequest.getIsSecure()) {
-			SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName,
-					connectionRequest);
-			secureThread.start();
-		} else {
-			InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName,
-					connectionRequest);
-			insecureThread.start();
-		}
+    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(),
+        connectionRequest.getConsumerCloud(), connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
+        connectionRequest.getService(), connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), 0,
+        queueName, controlQueueName, connectionRequest.getIsSecure(), connectionRequest.getUseToken(),
+        new Date(System.currentTimeMillis()));
+    // Add the session to the management queue
+    GatewayService.activeSessions.put(queueName, activeSession);
 
-		// TODO: PayloadEncryption instead of null
-		ConnectToProviderResponse response = new ConnectToProviderResponse(queueName, controlQueueName, null);
-		return Response.status(200).entity(response).build();
-	}
+    GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),
+        connectionRequest.getBrokerPort(), queueName, controlQueueName, connectionRequest.getIsSecure());
 
-	@PUT
-	@Path("connectToConsumer")
-	public Response connectToConsumer(ConnectToConsumerRequest connectionRequest) {
-		Integer serverSocketPort = GatewayService.getAvailablePort();
-		// TODO sanity check on the success of the channel create, handle the error
-		GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),
-				connectionRequest.getBrokerPort(), connectionRequest.getQueueName(),
-				connectionRequest.getControlQueueName(), connectionRequest.getIsSecure());
+    if (connectionRequest.getIsSecure()) {
+      SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName,
+          connectionRequest);
+      secureThread.start();
+    } else {
+      InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName,
+          connectionRequest);
+      insecureThread.start();
+    }
 
-		if (connectionRequest.getIsSecure()) {
-			SecureServerSocketThread secureThread = new SecureServerSocketThread(gatewaySession, serverSocketPort,
-					connectionRequest);
-			secureThread.start();
-		} else {
-			InsecureServerSocketThread insecureThread = new InsecureServerSocketThread(gatewaySession, serverSocketPort,
-					connectionRequest);
-			insecureThread.start();
-		}
+    ConnectToProviderResponse response = new ConnectToProviderResponse(queueName, controlQueueName, null);
+    return Response.status(200).entity(response).build();
+  }
 
-		ConnectToConsumerResponse response = new ConnectToConsumerResponse(serverSocketPort);
-		log.info("Returning the ConnectToConsumerResponse to the Gatekeeper");
-		return Response.status(200).entity(response).build();
-	}
+  @PUT
+  @Path("connectToConsumer")
+  public Response connectToConsumer(ConnectToConsumerRequest connectionRequest) {
+    Integer serverSocketPort = GatewayService.getAvailablePort();
+
+    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(),
+        connectionRequest.getConsumerCloud(), connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
+        connectionRequest.getService(), connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(),
+        serverSocketPort, connectionRequest.getQueueName(), connectionRequest.getControlQueueName(),
+        connectionRequest.getIsSecure(), connectionRequest.getUseToken(), new Date(System.currentTimeMillis()));
+    // Add the session to the management queue
+    GatewayService.activeSessions.put(connectionRequest.getQueueName(), activeSession);
+
+    GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),
+        connectionRequest.getBrokerPort(), connectionRequest.getQueueName(), connectionRequest.getControlQueueName(),
+        connectionRequest.getIsSecure());
+
+    if (connectionRequest.getIsSecure()) {
+      SecureServerSocketThread secureThread = new SecureServerSocketThread(gatewaySession, serverSocketPort,
+          connectionRequest);
+      secureThread.start();
+    } else {
+      InsecureServerSocketThread insecureThread = new InsecureServerSocketThread(gatewaySession, serverSocketPort,
+          connectionRequest);
+      insecureThread.start();
+    }
+
+    ConnectToConsumerResponse response = new ConnectToConsumerResponse(serverSocketPort);
+    log.info("Returning the ConnectToConsumerResponse to the Gatekeeper");
+    return Response.status(200).entity(response).build();
+  }
 
 }

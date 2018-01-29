@@ -18,45 +18,48 @@ import org.apache.log4j.Logger;
 
 public class InsecureServerSocketThread extends Thread {
 
-	private int port;
-	private ServerSocket serverSocket;
+  private int port;
+  private ServerSocket serverSocket;
   private Socket consumerSocket;
-	private ConnectToConsumerRequest connectionRequest;
-	private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
-	private GatewaySession gatewaySession;
+  private ConnectToConsumerRequest connectionRequest;
 
-	public InsecureServerSocketThread(GatewaySession gatewaySession, int port,
-			ConnectToConsumerRequest connectionRequest) {
-		this.port = port;
-		this.connectionRequest = connectionRequest;
-		this.gatewaySession = gatewaySession;
-	}
+  private static Boolean isFirstMessage = true;
+  private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
+  private GatewaySession gatewaySession;
 
-	public void run() {
+  public InsecureServerSocketThread(GatewaySession gatewaySession, int port,
+      ConnectToConsumerRequest connectionRequest) {
+    this.port = port;
+    this.connectionRequest = connectionRequest;
+    this.gatewaySession = gatewaySession;
+  }
 
-		try {
-			serverSocket = new ServerSocket(port);
-			System.out.println("Insecure serverSocket is now running at port: " + port);
-			log.info("Insecure serverSocket is now running at port: " + port);
-		} catch (IOException e) {
-			log.error("Creating insecure ServerSocket failed");
+  public void run() {
+
+    try {
+      serverSocket = new ServerSocket(port);
+      System.out.println("Insecure serverSocket is now running at port: " + port);
+      log.info("Insecure serverSocket is now running at port: " + port);
+    } catch (IOException e) {
+      log.error("Creating insecure ServerSocket failed");
       throw new ArrowheadException(e.getMessage(), e);
-		}
+    }
 
-		try {
-			// Create socket for Consumer
-			serverSocket.setSoTimeout(connectionRequest.getTimeout());
+    try {
+      // Create socket for Consumer
+      serverSocket.setSoTimeout(connectionRequest.getTimeout());
       consumerSocket = serverSocket.accept();
-			consumerSocket.setSoTimeout(connectionRequest.getTimeout());
+      consumerSocket.setSoTimeout(connectionRequest.getTimeout());
 
-			InputStream inConsumer = consumerSocket.getInputStream();
-			OutputStream outConsumer = consumerSocket.getOutputStream();
-			log.info("Create socket for Consumer");
-			Channel channel = gatewaySession.getChannel();
+      InputStream inConsumer = consumerSocket.getInputStream();
+      OutputStream outConsumer = consumerSocket.getOutputStream();
+      log.info("Create socket for Consumer");
+      Channel channel = gatewaySession.getChannel();
 
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+            throws IOException {
           outConsumer.write(body);
           System.out.println("Broker response: ");
           System.out.println(new String(body));
@@ -66,9 +69,11 @@ public class InsecureServerSocketThread extends Thread {
 
       Consumer controlConsumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
+            byte[] body) {
           if (new String(body).equals("close")) {
-            GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket);
+            GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket,
+                connectionRequest.getQueueName());
           }
         }
       };
@@ -90,14 +95,17 @@ public class InsecureServerSocketThread extends Thread {
 
         channel.basicConsume(connectionRequest.getQueueName().concat("_resp"), true, consumer);
         channel.basicConsume(connectionRequest.getControlQueueName().concat("_resp"), true, controlConsumer);
-
+        isFirstMessage = false;
       }
 
     } catch (IOException | NegativeArraySizeException e) {
-      log.error("Communication failed (Error occurred or remote peer closed the socket)");
-      GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket);
-      throw new ArrowheadException(e.getMessage());
-		}
-	}
+      GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket,
+          connectionRequest.getQueueName());
+      if (isFirstMessage) {
+        log.error("Communication failed (Error occurred or remote peer closed the socket)");
+        throw new ArrowheadException(e.getMessage());
+      }
+    }
+  }
 
 }
