@@ -11,6 +11,9 @@ import eu.arrowhead.core.gateway.thread.InsecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.InsecureSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureSocketThread;
+
+import java.util.Date;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -54,8 +57,15 @@ public class GatewayResource {
         "");
     String controlQueueName = queueName.concat("_control");
 
-    // TODO sanity check on the success of the channel create, handle the error
-    GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerHost(),
+    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(),
+        connectionRequest.getConsumerCloud(), connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
+        connectionRequest.getService(), connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), 0,
+        queueName, controlQueueName, connectionRequest.getIsSecure(), connectionRequest.getUseToken(),
+        new Date(System.currentTimeMillis()));
+    // Add the session to the management queue
+    GatewayService.activeSessions.put(queueName, activeSession);
+
+    GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),
         connectionRequest.getBrokerPort(), queueName, controlQueueName, connectionRequest.getIsSecure());
 
     if (connectionRequest.getIsSecure()) {
@@ -77,9 +87,12 @@ public class GatewayResource {
   public Response connectToConsumer(ConnectToConsumerRequest connectionRequest) {
     Integer serverSocketPort = GatewayService.getAvailablePort();
 
+    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(),
+        connectionRequest.getConsumerCloud(), connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
+        connectionRequest.getService(), connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(),
+        serverSocketPort, connectionRequest.getQueueName(), connectionRequest.getControlQueueName(),
+        connectionRequest.getIsSecure(), connectionRequest.getUseToken(), new Date(System.currentTimeMillis()));
     // Add the session to the management queue
-    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(), connectionRequest.getBrokerName(),
-        connectionRequest.getBrokerPort(), serverSocketPort, connectionRequest.getIsSecure());
     GatewayService.activeSessions.put(connectionRequest.getQueueName(), activeSession);
 
     GatewaySession gatewaySession = GatewayService.createChannel(connectionRequest.getBrokerName(),

@@ -67,7 +67,7 @@ public class InsecureSocketThread extends Thread {
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
             byte[] body) {
           if (new String(body).equals("close")) {
-            GatewayService.providerSideClose(gatewaySession, providerSocket);
+            GatewayService.providerSideClose(gatewaySession, providerSocket, queueName);
           }
         }
       };
@@ -79,7 +79,7 @@ public class InsecureSocketThread extends Thread {
       }
 
     } catch (IOException | NegativeArraySizeException e) {
-      GatewayService.providerSideClose(gatewaySession, providerSocket);
+      GatewayService.providerSideClose(gatewaySession, providerSocket, queueName);
       if (isFirstMessage) {
         log.error("Communication failed (Error occurred or remote peer closed the socket)");
         throw new ArrowheadException(e.getMessage());

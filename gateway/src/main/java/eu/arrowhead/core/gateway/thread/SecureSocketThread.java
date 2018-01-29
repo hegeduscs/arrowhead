@@ -87,7 +87,7 @@ public class SecureSocketThread extends Thread {
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
             byte[] body) {
           if (new String(body).equals("close")) {
-            GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
+            GatewayService.providerSideClose(gatewaySession, sslProviderSocket, queueName);
           }
         }
       };
@@ -98,7 +98,7 @@ public class SecureSocketThread extends Thread {
         } catch (IOException | NegativeArraySizeException e) {
           e.printStackTrace();
           log.error("ConnectToProvider(secure): I/O exception occured");
-          GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
+          GatewayService.providerSideClose(gatewaySession, sslProviderSocket, queueName);
           throw new ArrowheadException(e.getMessage(), e);
         }
         channel.basicConsume(queueName, true, consumer);
@@ -107,7 +107,7 @@ public class SecureSocketThread extends Thread {
 
     } catch (IOException | NegativeArraySizeException e) {
       log.info("Remote peer properly closed the socket.");
-      GatewayService.providerSideClose(gatewaySession, sslProviderSocket);
+      GatewayService.providerSideClose(gatewaySession, sslProviderSocket, queueName);
 
     }
   }

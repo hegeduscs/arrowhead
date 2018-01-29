@@ -203,7 +203,9 @@ public class GatekeeperInboundResource {
     }
 
     ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(),
-        chosenBroker.getPort(), provider, isSecure, timeout, icnProposal.getGatewayPublicKey());
+        chosenBroker.getPort(), icnProposal.getRequesterSystem(), provider, icnProposal.getRequesterCloud(),
+        Utility.getOwnCloud(), icnProposal.getRequestedService(), isSecure,
+        icnProposal.getNegotiationFlags().get("securityLevel"), timeout, icnProposal.getGatewayPublicKey());
 
     // Sending request, parsing response
     Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);

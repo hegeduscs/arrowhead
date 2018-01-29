@@ -268,7 +268,6 @@ public class GatewayService {
 
   public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket,
       ServerSocket serverSocket, String queueName) {
-    log.error("Socket closed by remote partner");
     // Setting serverSocket free
     portAllocationMap.put(port, true);
     activeSessions.remove(queueName);
@@ -286,8 +285,9 @@ public class GatewayService {
     }
   }
 
-  public static void providerSideClose(GatewaySession gatewaySession, Socket providerSocket) {
+  public static void providerSideClose(GatewaySession gatewaySession, Socket providerSocket, String queueName) {
     try {
+      activeSessions.remove(queueName);
       if (providerSocket != null) {
         providerSocket.close();
       }
