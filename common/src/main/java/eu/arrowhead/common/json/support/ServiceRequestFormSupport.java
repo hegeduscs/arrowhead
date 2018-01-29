@@ -17,6 +17,10 @@ public class ServiceRequestFormSupport {
   @XmlJavaTypeAdapter(BooleanMapAdapter.class)
   private Map<String, Boolean> orchestrationFlags = new HashMap<>();
   private List<PreferredProvider> preferredProviders = new ArrayList<>();
+  @XmlJavaTypeAdapter(StringMapAdapter.class)
+  private Map<String, String> requestedQoS = new HashMap<>();
+  @XmlJavaTypeAdapter(StringMapAdapter.class)
+  private Map<String, String> commands = new HashMap<>();
 
   public ServiceRequestFormSupport() {
   }
@@ -76,5 +80,21 @@ public class ServiceRequestFormSupport {
 
   public void setPreferredProviders(List<PreferredProvider> preferredProviders) {
     this.preferredProviders = preferredProviders;
+  }
+
+  public Map<String, String> getRequestedQoS() {
+    return requestedQoS;
+  }
+
+  public void setRequestedQoS(Map<String, String> requestedQoS) {
+    this.requestedQoS = requestedQoS;
+  }
+
+  public Map<String, String> getCommands() {
+    return commands;
+  }
+
+  public void setCommands(Map<String, String> commands) {
+    this.commands = commands;
   }
 }

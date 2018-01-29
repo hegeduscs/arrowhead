@@ -258,7 +258,6 @@ public class StoreApi {
       storeEntry.setLastUpdated(new Date());
       storeEntry.setInstruction(payload.getInstruction());
       storeEntry.setAttributes(payload.getAttributes());
-      storeEntry.setServiceURI(payload.getServiceURI());
       storeEntry = dm.merge(storeEntry);
 
       log.info("updateEntry successfully returns.");

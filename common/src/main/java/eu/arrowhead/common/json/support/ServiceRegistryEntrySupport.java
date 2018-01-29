@@ -1,5 +1,6 @@
 package eu.arrowhead.common.json.support;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 
 public class ServiceRegistryEntrySupport {
@@ -7,6 +8,10 @@ public class ServiceRegistryEntrySupport {
   private ArrowheadServiceSupport providedService;
   private ArrowheadSystemSupport provider;
   private String serviceURI;
+
+  private int version = 1;
+  @JsonProperty("UDP")
+  private boolean UDP = false;
 
   public ServiceRegistryEntrySupport() {
   }
@@ -47,4 +52,19 @@ public class ServiceRegistryEntrySupport {
     this.serviceURI = serviceURI;
   }
 
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
+  }
+
+  public boolean isUDP() {
+    return UDP;
+  }
+
+  public void setUDP(boolean UDP) {
+    this.UDP = UDP;
+  }
 }

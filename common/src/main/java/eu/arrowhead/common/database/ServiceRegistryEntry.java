@@ -69,6 +69,7 @@ public class ServiceRegistryEntry {
   public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, String serviceURI) {
     this.providedService = providedService;
     this.provider = provider;
+    this.port = provider.getPort();
     this.serviceURI = serviceURI;
   }
 

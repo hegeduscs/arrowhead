@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Check;
@@ -84,7 +85,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "store_entry_id"))
   private Map<String, String> attributes = new HashMap<>();
 
-  @Column(name = "service_uri")
+  @Transient
   private String serviceURI;
 
   public OrchestrationStore() {
