@@ -75,7 +75,8 @@ public class SecureServerSocketThread extends Thread {
               System.out.println("AES Key received.");
             } catch (NegativeArraySizeException e) {
               log.error("Communication failed (Error occurred or remote peer closed the socket)");
-              GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
+              GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket,
+                  connectionRequest.getQueueName());
               throw new ArrowheadException(e.getMessage(), e);
             }
           } else {
@@ -96,7 +97,8 @@ public class SecureServerSocketThread extends Thread {
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
             byte[] body) {
           if (new String(body).equals("close")) {
-            GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
+            GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket,
+                connectionRequest.getQueueName());
           }
         }
       };
@@ -112,7 +114,8 @@ public class SecureServerSocketThread extends Thread {
           channel.basicPublish("", connectionRequest.getQueueName(), null, request.getEncryptedAESKey());
         } catch (IOException | NegativeArraySizeException e) {
           log.error("Communication failed (Error occurred or remote peer closed the socket)");
-          GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
+          GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket,
+              connectionRequest.getQueueName());
           throw new ArrowheadException(e.getMessage(), e);
         }
         channel.basicPublish("", connectionRequest.getQueueName(), null, request.getEncryptedIVAndMessage());
@@ -123,7 +126,8 @@ public class SecureServerSocketThread extends Thread {
 
     } catch (IOException | NegativeArraySizeException e) {
       log.info("Remote peer properly closed the socket.");
-      GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket);
+      GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket,
+          connectionRequest.getQueueName());
     }
   }
 

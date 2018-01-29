@@ -34,6 +34,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.core.gateway.model.ActiveSession;
 import eu.arrowhead.core.gateway.model.GatewayEncryption;
 import eu.arrowhead.core.gateway.model.GatewaySession;
 
@@ -50,6 +51,7 @@ public class GatewayService {
   private static final int maxPort = Integer.parseInt(GatewayMain.getProp().getProperty("max_port"));
   private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
       .initPortAllocationMap(new ConcurrentHashMap<Integer, Boolean>(), minPort, maxPort);
+  protected static ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<String, ActiveSession>();
 
   private GatewayService() throws AssertionError {
     throw new AssertionError("GatewayService is a non-instantiable class");
@@ -265,11 +267,13 @@ public class GatewayService {
   }
 
   public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket,
-      ServerSocket serverSocket) {
+      ServerSocket serverSocket, String queueName) {
     log.error("Socket closed by remote partner");
     // Setting serverSocket free
     portAllocationMap.put(port, true);
+    activeSessions.remove(queueName);
     try {
+
       gatewaySession.getChannel().close();
       gatewaySession.getConnection().close();
       if (consumerSocket != null) {

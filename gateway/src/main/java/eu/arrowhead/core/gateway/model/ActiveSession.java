@@ -14,7 +14,6 @@ public class ActiveSession {
   private String queueName;
   private String controlQueueName;
   private Boolean isSecure;
-  private int useToken;
   private String date;
 
   public ActiveSession() {
@@ -123,14 +122,6 @@ public class ActiveSession {
 
   public void setIsSecure(Boolean isSecure) {
     this.isSecure = isSecure;
-  }
-
-  public int getUseToken() {
-    return useToken;
-  }
-
-  public void setUseToken(int useToken) {
-    this.useToken = useToken;
   }
 
   public String getDate() {
