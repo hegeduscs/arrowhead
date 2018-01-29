@@ -262,16 +262,16 @@ final class OrchestratorDriver {
 
   static List<OrchestrationStore> crossCheckStoreEntries(ServiceRequestForm srf, List<OrchestrationStore> entryList) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
+    List<ServiceRegistryEntry> srList = new ArrayList<>();
+    List<OrchestrationStore> toRemove = new ArrayList<>();
     Set<ArrowheadSystem> providerSystemsFromSR = new HashSet<>();
     Set<ArrowheadSystem> providerSystemsFromAuth;
-    List<OrchestrationStore> toRemove = new ArrayList<>();
 
     // If true, the Orchestration Store was queried for default entries, meaning the service is different for each store entry
     if (srf.getRequestedService() == null) {
       for (OrchestrationStore entry : entryList) {
         // Querying the Service Registry for the current service
-        //TODO SR entrykből állitsuk be a serviceURI-t orchstore entryknél
-        List<ServiceRegistryEntry> srList = OrchestratorDriver
+        srList = OrchestratorDriver
             .queryServiceRegistry(entry.getService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
         // Compiling the systems that provide the current service
         for (ServiceRegistryEntry srEntry : srList) {
@@ -293,8 +293,7 @@ final class OrchestratorDriver {
     else {
       try {
         // Querying the Service Registry for the service
-        //TODO SR entrykből állitsuk be a serviceURI-t orchstore entryknél
-        List<ServiceRegistryEntry> srList = OrchestratorDriver
+        srList = OrchestratorDriver
             .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
         // Compiling the systems that provide the service
         for (ServiceRegistryEntry srEntry : srList) {
@@ -335,6 +334,13 @@ final class OrchestratorDriver {
       }
     }
 
+    for (OrchestrationStore storeEntry : entryList) {
+      for (ServiceRegistryEntry srEntry : srList) {
+        if (storeEntry.getService().equals(srEntry.getProvidedService()) && storeEntry.getProviderSystem().equals(srEntry.getProvider())) {
+          storeEntry.setServiceURI(srEntry.getServiceURI());
+        }
+      }
+    }
     log.info("crossCheckStoreEntries returns " + entryList.size() + " orchestration store entries");
     return entryList;
   }

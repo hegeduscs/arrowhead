@@ -126,9 +126,6 @@ public class ArrowheadSystem {
 
     ArrowheadSystem that = (ArrowheadSystem) o;
 
-    if (port != that.port) {
-      return false;
-    }
     if (!systemName.equals(that.systemName)) {
       return false;
     }
@@ -139,7 +136,6 @@ public class ArrowheadSystem {
   public int hashCode() {
     int result = systemName.hashCode();
     result = 31 * result + address.hashCode();
-    result = 31 * result + port;
     return result;
   }
 
