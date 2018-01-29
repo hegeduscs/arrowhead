@@ -60,7 +60,7 @@ final class OrchestratorDriver {
    */
   static List<ServiceRegistryEntry> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
     // Compiling the URI and the request payload
-    String srUri = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path("query").toString();
+    String srUri = UriBuilder.fromPath(OrchestratorMain.SERVICE_REGISTRY_URI).path("query").toString();
     ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch);
 
     // Sending the request, parsing the returned result
@@ -100,7 +100,7 @@ final class OrchestratorDriver {
 
   static Set<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, Set<ArrowheadSystem> providerSet) {
     // Compiling the URI and the request payload
-    String uri = UriBuilder.fromPath(Utility.getAuthorizationUri()).path("intracloud").toString();
+    String uri = UriBuilder.fromPath(OrchestratorMain.AUTH_CONTROL_URI).path("intracloud").toString();
     IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerSet, service);
 
     // Sending the request, parsing the returned result
@@ -358,13 +358,11 @@ final class OrchestratorDriver {
    * @throws DataNotFoundException if none of the discovered <tt>ArrowheadCloud</tt>s returned back positive result
    */
   static GSDResult doGlobalServiceDiscovery(ArrowheadService requestedService, List<ArrowheadCloud> preferredClouds) {
-    // Compiling the URI and the request payload
-    String uri = Utility.getGatekeeperUri();
-    uri = UriBuilder.fromPath(uri).path("init_gsd").toString();
+    // Compiling the request payload
     GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds);
 
     // Sending the request, sanity check on the returned result
-    Response response = Utility.sendRequest(uri, "PUT", requestForm);
+    Response response = Utility.sendRequest(OrchestratorMain.GSD_SERVICE_URI, "PUT", requestForm);
     GSDResult result = response.readEntity(GSDResult.class);
     if (!result.isValid()) {
       log.error("doGlobalServiceDiscovery DataNotFoundException");
@@ -457,10 +455,8 @@ final class OrchestratorDriver {
     ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems,
                                                     negotiationFlags, null);
 
-    // Compiling the URI, sending the request, doing sanity check on the returned result
-    String uri = Utility.getGatekeeperUri();
-    uri = UriBuilder.fromPath(uri).path("init_icn").toString();
-    Response response = Utility.sendRequest(uri, "PUT", requestForm);
+    // Sending the request, doing sanity check on the returned result
+    Response response = Utility.sendRequest(OrchestratorMain.ICN_SERVICE_URI, "PUT", requestForm);
     ICNResult result = response.readEntity(ICNResult.class);
     if (!result.isValid()) {
       log.error("doInterCloudNegotiations DataNotFoundException");

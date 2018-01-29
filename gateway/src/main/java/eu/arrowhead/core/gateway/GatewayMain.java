@@ -1,6 +1,10 @@
 package eu.arrowhead.core.gateway;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
@@ -12,6 +16,7 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Properties;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.UriBuilder;
@@ -27,11 +32,12 @@ public class GatewayMain {
 
   public static boolean DEBUG_MODE;
   public static SSLContext sslContext;
-  
+
+  private static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
+  private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
   private static HttpServer secureServer;
   private static Properties prop;
-  private static String GATEWAY_PUBLIC_KEY;
   
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8452/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8453/");
@@ -42,6 +48,15 @@ public class GatewayMain {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     Utility.isUrlValid(BASE_URI, false);
     Utility.isUrlValid(BASE_URI_SECURED, true);
+    if (SERVICE_REGISTRY_URI.startsWith("https")) {
+      Utility.isUrlValid(SERVICE_REGISTRY_URI, true);
+    } else {
+      Utility.isUrlValid(SERVICE_REGISTRY_URI, false);
+    }
+    if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
+      SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
+    }
+    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -78,6 +93,7 @@ public class GatewayMain {
     if (!serverModeSet) {
       server = startServer();
     }
+    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
 
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
@@ -145,8 +161,7 @@ public class GatewayMain {
     
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    GATEWAY_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
-    System.out.println("My certificate PublicKey in Base64: " + GATEWAY_PUBLIC_KEY);
+    BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
@@ -162,6 +177,54 @@ public class GatewayMain {
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;
+  }
+
+  private static void useSRService(boolean isSecure, boolean registering) {
+    URI uri;
+    ArrowheadService providerService;
+    ArrowheadService consumerService;
+    ArrowheadSystem gatewaySystem;
+    if (isSecure) {
+      uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+      providerService = new ArrowheadService("SecureConnectToProvider", Collections.singletonList("JSON"), Utility.secureServerMetadata);
+      consumerService = new ArrowheadService("SecureConnectToConsumer", Collections.singletonList("JSON"), Utility.secureServerMetadata);
+      gatewaySystem = new ArrowheadSystem("gateway", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
+    } else {
+      uri = UriBuilder.fromUri(BASE_URI).build();
+      providerService = new ArrowheadService("InsecureConnectToProvider", Collections.singletonList("JSON"), null);
+      consumerService = new ArrowheadService("InsecureConnectToConsumer", Collections.singletonList("JSON"), null);
+      gatewaySystem = new ArrowheadSystem("gateway", uri.getHost(), uri.getPort(), null);
+    }
+
+    //Preparing the payloads
+    ServiceRegistryEntry providerEntry = new ServiceRegistryEntry(providerService, gatewaySystem, "gateway/connectToProvider");
+    ServiceRegistryEntry consumerEntry = new ServiceRegistryEntry(consumerService, gatewaySystem, "gateway/connectToConsumer");
+
+    if (registering) {
+      try {
+        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", providerEntry);
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", providerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", providerEntry);
+        } else {
+          System.out.println("Gateway CTP service registration failed.");
+        }
+      }
+      try {
+        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", consumerEntry);
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", consumerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", consumerEntry);
+        } else {
+          System.out.println("Gateway CTC service registration failed.");
+        }
+      }
+    } else {
+      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", providerEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", consumerEntry);
+    }
   }
 
   private static void shutdown() {

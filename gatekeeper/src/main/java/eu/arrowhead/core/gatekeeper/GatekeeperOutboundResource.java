@@ -5,7 +5,6 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
-import eu.arrowhead.common.database.CoreSystem;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.messages.ConnectToConsumerResponse;
@@ -139,7 +138,7 @@ public class GatekeeperOutboundResource {
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
                                               requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
                                               requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout,
-                                              Utility.getCoreSystem("gateway").getAuthenticationInfo());
+                                              GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
 
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
                                    requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
@@ -157,9 +156,6 @@ public class GatekeeperOutboundResource {
     ICNEnd icnEnd = response.readEntity(ICNEnd.class);
 
     // Compiling the gateway request payload
-    String gatewayURI = Utility.getGatewayUri();
-    gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToConsumer").toString();
-
     Map<String, String> metadata = requestForm.getRequestedService().getServiceMetadata();
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
     GatewayConnectionInfo gwConnInfo = icnEnd.getGatewayConnInfo();
@@ -168,15 +164,15 @@ public class GatekeeperOutboundResource {
                                                                               requestForm.getRequesterSystem(), isSecure, GatekeeperMain.timeout,
                                                                               gwConnInfo.getGatewayPublicKey());
     //Sending the gateway request and parsing the response
-    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
+    Response gatewayResponse = Utility
+        .sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
     ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
 
-    CoreSystem gateway = Utility.getCoreSystem("gateway");
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();
-    gatewaySystem.setSystemName(gateway.getSystemName());
-    gatewaySystem.setAddress(gateway.getAddress());
+    gatewaySystem.setSystemName(GatekeeperMain.GATEWAY_CONSUMER_URI[1]);
+    gatewaySystem.setAddress(GatekeeperMain.GATEWAY_CONSUMER_URI[2]);
     gatewaySystem.setPort(connectToConsumerResponse.getServerSocketPort());
-    gatewaySystem.setAuthenticationInfo(gateway.getAuthenticationInfo());
+    gatewaySystem.setAuthenticationInfo(GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
     icnEnd.getOrchestrationForm().setProvider(gatewaySystem);
     List<OrchestrationForm> orchResponse = new ArrayList<>();
     orchResponse.add(icnEnd.getOrchestrationForm());

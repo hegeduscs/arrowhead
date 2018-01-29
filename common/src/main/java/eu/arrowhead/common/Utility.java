@@ -126,7 +126,7 @@ public final class Utility {
       }
     } catch (ProcessingException e) {
       log.error("UnavailableServerException occurred at " + uri, e);
-      //TODO új log és SR query beiktatása új threaden
+      //TODO GK-ban és Orchban új kimenő filter, ami az ilyen exceptionöket látja, és hatására új SR queryt kezdeményez
       throw new UnavailableServerException("Could not get any response from: " + uri, Status.SERVICE_UNAVAILABLE.getStatusCode(),
                                            UnavailableServerException.class.getName(), Utility.class.toString(), e);
     }
@@ -143,7 +143,7 @@ public final class Utility {
     return sendRequest(uri, method, payload, null);
   }
 
-  public static String getUri(String address, int port, String serviceUri, boolean isSecure) {
+  private static String getUri(String address, int port, String serviceUri, boolean isSecure) {
     if (address == null || serviceUri == null) {
       log.error("Address and serviceUri can not be null (Utility:getUri throws NPE)");
       throw new NullPointerException("Address and serviceUri can not be null (Utility:getUri throws NPE)");
@@ -162,6 +162,9 @@ public final class Utility {
     log.info("Utility:getUri returning this: " + ub.toString());
     return ub.toString();
   }
+
+  //TODO SD-ket private static final stringbe rakni, és a 8 függvény getUri-hoz hasonlóan 1 függvényt hivjon meg
+  //note tuti kell? gateway függvényeknél string[] a return
 
   public static String getOrchestratorServiceUri() {
     ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureOrchestrationService", Collections.singletonList("JSON"), null)
@@ -253,7 +256,7 @@ public final class Utility {
     }
   }
 
-  public static String getGatewayProviderUri() {
+  public static String[] getGatewayProviderUri() {
     ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureConnectToProvider", Collections.singletonList("JSON"), null)
         : new ArrowheadService("SecureConnectToProvider", Collections.singletonList("JSON"), secureServerMetadata);
     ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
@@ -264,14 +267,15 @@ public final class Utility {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
       ArrowheadSystem gateway = entry.getProvider();
       boolean isSecure = entry.getMetadata().contains("security");
-      return getUri(gateway.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+      String gatewayUri = getUri(gateway.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+      return new String[]{gatewayUri, gateway.getSystemName(), gateway.getAddress(), gateway.getAuthenticationInfo()};
     } else {
       log.fatal("getGatewayProviderUri: query came back empty!");
       throw new ServiceConfigurationError("GatewayProvider Service not found in the Service Registry!");
     }
   }
 
-  public static String getGatewayConsumerUri() {
+  public static String[] getGatewayConsumerUri() {
     ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureConnectToConsumer", Collections.singletonList("JSON"), null)
         : new ArrowheadService("SecureConnectToConsumer", Collections.singletonList("JSON"), secureServerMetadata);
     ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
@@ -282,7 +286,8 @@ public final class Utility {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
       ArrowheadSystem gateway = entry.getProvider();
       boolean isSecure = entry.getMetadata().contains("security");
-      return getUri(gateway.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+      String gatewayUri = getUri(gateway.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+      return new String[]{gatewayUri, gateway.getSystemName(), gateway.getAddress(), gateway.getAuthenticationInfo()};
     } else {
       log.fatal("getGatewayConsumerUri: query came back empty!");
       throw new ServiceConfigurationError("GatewayConsumer Service not found in the Service Registry!");

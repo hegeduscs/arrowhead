@@ -1,19 +1,19 @@
-#URLs
+# URLs
 base_uri=http://0.0.0.0:8444/
 base_uri_secured=https://0.0.0.0:8445/
 sr_base_uri=http://0.0.0.0:8442/
 
-#Database
+# Database parameters
 db_user=root
 db_password=root
 db_address=jdbc:mysql://localhost:3306/arrowhead
 
-#Certificate properties
+# Certificate related paths and passwords
 keystore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/authorization.testcloud1.jks
 keystorepass=12345
 keypass=12345
 truststore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/testcloud1_cert.jks
 truststorepass=12345
 
-#Other
+# Other
 enable_auth_for_cloud=false

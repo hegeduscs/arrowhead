@@ -314,11 +314,10 @@ final class OrchestratorService {
       }
 
       // Getting the Authorization token generation resource URI, compiling the request payload
-      //String authUri = Utility.getTokenGenerationServiceUri();
       TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
                                                                        srf.getRequestedService(), 0);
       //Sending request, parsing response
-      Response authResponse = Utility.sendRequest(authUri, "PUT", tokenRequest);
+      Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
       tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
     }
 

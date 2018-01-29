@@ -5,6 +5,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
@@ -171,7 +172,8 @@ public class AuthorizationMain {
 
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    System.out.println("Server PublicKey Base64: " + Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded()));
+    BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
+    System.out.println("Server PublicKey Base64: " + BASE64_PUBLIC_KEY);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
@@ -214,8 +216,8 @@ public class AuthorizationMain {
     if (registering) {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", authControlEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
         } else {
@@ -224,8 +226,8 @@ public class AuthorizationMain {
       }
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
         } else {

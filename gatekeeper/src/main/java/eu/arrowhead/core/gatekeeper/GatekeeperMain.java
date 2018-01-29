@@ -5,6 +5,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
@@ -15,6 +16,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Properties;
 import javax.net.ssl.SSLContext;
@@ -34,8 +36,8 @@ public class GatekeeperMain {
   public static SSLContext outboundServerContext;
 
   static String AUTH_CONTROL_URI;
-  static String GATEWAY_CONSUMER_URI;
-  static String GATEWAY_PROVIDER_URI;
+  static String[] GATEWAY_CONSUMER_URI;
+  static String[] GATEWAY_PROVIDER_URI;
   static String ORCHESTRATOR_URI = getProp().getProperty("orch_base_uri");
   static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
   static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
@@ -110,6 +112,7 @@ public class GatekeeperMain {
       outboundServer = startServer(OUTBOUND_BASE_URI, false);
     }
     Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
+    getCoreSystemServiceUris();
 
     //This is here to initialize the database connection before the REST resources are initiated
     DatabaseManager dm = DatabaseManager.getInstance();
@@ -216,6 +219,7 @@ public class GatekeeperMain {
       //TODO hanem a loadkeystore-ba lehetne egy boolean paraméter, hogy ez keystore vagy trusttore, de előbb azért teszteljük a manuális működését
       KeyStore keyStore = SecurityUtils.loadKeyStore(gatekeeperKeystorePath, gatekeeperKeystorePass);
       X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
+      BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
       String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
       if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
         log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
@@ -241,14 +245,14 @@ public class GatekeeperMain {
     ArrowheadSystem gkSystem;
     if (isSecure) {
       uri = UriBuilder.fromUri(OUTBOUND_BASE_URI_SECURED).build();
-      gsdService = new ArrowheadService("coreservices", "SecureGlobalServiceDiscovery", Collections.singletonList("JSON"), null);
-      icnService = new ArrowheadService("coreservices", "SecureInterCloudNegotiations", Collections.singletonList("JSON"), null);
-      gkSystem = new ArrowheadSystem("coresystems", "gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY, "certificate");
+      gsdService = new ArrowheadService("SecureGlobalServiceDiscovery", Collections.singletonList("JSON"), Utility.secureServerMetadata);
+      icnService = new ArrowheadService("SecureInterCloudNegotiations", Collections.singletonList("JSON"), Utility.secureServerMetadata);
+      gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     } else {
       uri = UriBuilder.fromUri(OUTBOUND_BASE_URI).build();
-      gsdService = new ArrowheadService("coreservices", "InsecureGlobalServiceDiscovery", Collections.singletonList("JSON"), null);
-      icnService = new ArrowheadService("coreservices", "InsecureInterCloudNegotiations", Collections.singletonList("JSON"), null);
-      gkSystem = new ArrowheadSystem("coresystems", "gatekeeper", uri.getHost(), uri.getPort(), null);
+      gsdService = new ArrowheadService("InsecureGlobalServiceDiscovery", Collections.singletonList("JSON"), null);
+      icnService = new ArrowheadService("InsecureInterCloudNegotiations", Collections.singletonList("JSON"), null);
+      gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), null);
     }
 
     //Preparing the payload
@@ -258,8 +262,8 @@ public class GatekeeperMain {
     if (registering) {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", gsdEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", gsdEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", gsdEntry);
         } else {
@@ -268,8 +272,8 @@ public class GatekeeperMain {
       }
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", icnEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", icnEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", icnEntry);
         } else {
@@ -287,6 +291,7 @@ public class GatekeeperMain {
     GATEWAY_CONSUMER_URI = Utility.getGatewayConsumerUri();
     GATEWAY_PROVIDER_URI = Utility.getGatewayProviderUri();
     ORCHESTRATOR_URI = Utility.getOrchestratorServiceUri();
+    System.out.println("Core system URLs acquired.");
   }
 
   private static void shutdown() {
