@@ -8,10 +8,10 @@ db_password=root
 db_address=jdbc:mysql://localhost:3306/arrowhead
 
 # Certificate related paths and passwords
-keystore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/serviceregistry.testcloud1.jks
+keystore=src/main/resources/serviceregistry.testcloud1.jks
 keystorepass=12345
 keypass=12345
-truststore=C:/Users/Public/Java/arrowhead/certificates/testcloud1/testcloud1_cert.jks
+truststore=src/main/resources/testcloud1_cert.jks
 truststorepass=12345
 
 # scheduled ping for remove unaccessible services
