@@ -77,9 +77,7 @@ public class InsecureServerSocketThread extends Thread {
       while (true) {
         // Get the request from the Consumer
         byte[] inputFromConsumer = new byte[1024];
-        byte[] inputFromConsumerFinal = null;
-
-        inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
+        byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
 
         System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
 

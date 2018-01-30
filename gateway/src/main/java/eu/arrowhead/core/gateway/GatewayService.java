@@ -46,8 +46,8 @@ public class GatewayService {
   private static final int minPort = Integer.parseInt(GatewayMain.getProp().getProperty("min_port"));
   private static final int maxPort = Integer.parseInt(GatewayMain.getProp().getProperty("max_port"));
   private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
-      .initPortAllocationMap(new ConcurrentHashMap<Integer, Boolean>(), minPort, maxPort);
-  protected static ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<String, ActiveSession>();
+      .initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);
+  protected static ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
 
   private GatewayService() throws AssertionError {
     throw new AssertionError("GatewayService is a non-instantiable class");
@@ -132,8 +132,7 @@ public class GatewayService {
       System.arraycopy(encryptedMessage, 0, encryptedIVAndMessage, ivSize, encryptedMessage.length);
 
       // Initialize and return the value
-      GatewayEncryption gatewayEncryption = new GatewayEncryption(encryptedAESKey, encryptedIVAndMessage);
-      return gatewayEncryption;
+      return new GatewayEncryption(encryptedAESKey, encryptedIVAndMessage);
 
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES encryption.");
@@ -147,7 +146,7 @@ public class GatewayService {
     Cipher cipherRSA;
     Cipher cipherAES;
     PrivateKey privateKey;
-    byte[] decryptedMessage = null;
+    byte[] decryptedMessage;
 
     try {
       KeyStore keyStore = SecurityUtils
@@ -192,8 +191,8 @@ public class GatewayService {
     String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
 
-    SSLContext sslContext = null;
-    KeyManagerFactory kmf = null;
+    SSLContext sslContext;
+    KeyManagerFactory kmf;
     try {
       kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
       kmf.init(keyStore, keystorePass.toCharArray());
@@ -233,7 +232,7 @@ public class GatewayService {
    * @return serverSocketPort or null if no available port found
    */
   public static Integer getAvailablePort() {
-    Integer serverSocketPort = null;
+    Integer serverSocketPort;
     // Check the port range for
     ArrayList<Integer> freePorts = new ArrayList<>();
     for (Entry<Integer, Boolean> entry : portAllocationMap.entrySet()) {

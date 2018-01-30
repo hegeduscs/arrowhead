@@ -55,6 +55,7 @@ public final class Utility {
   public static final String ICN_SERVICE = "InterCloudNegotiations";
   public static final String GW_CONSUMER_SERVICE = "ConnectToConsumer";
   public static final String GW_PROVIDER_SERVICE = "ConnectToProvider";
+  public static final String GW_SESSION_MGMT = "SessionManagement";
   public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
 
   private static final String AUTH_EXCEPTION = "eu.arrowhead.common.exception.AuthenticationException";

@@ -190,14 +190,17 @@ public class GatewayMain {
                                                             Collections.singletonList("JSON"), null);
     ArrowheadService consumerService = new ArrowheadService(Utility.createSD(Utility.GW_CONSUMER_SERVICE, isSecure),
                                                             Collections.singletonList("JSON"), null);
+    ArrowheadService mgmtService = new ArrowheadService(Utility.createSD(Utility.GW_SESSION_MGMT, isSecure), Collections.singletonList("JSON"), null);
     if (isSecure) {
       providerService.setServiceMetadata(Utility.secureServerMetadata);
       consumerService.setServiceMetadata(Utility.secureServerMetadata);
+      mgmtService.setServiceMetadata(Utility.secureServerMetadata);
     }
 
     //Preparing the payloads
     ServiceRegistryEntry providerEntry = new ServiceRegistryEntry(providerService, gatewaySystem, "gateway/connectToProvider");
     ServiceRegistryEntry consumerEntry = new ServiceRegistryEntry(consumerService, gatewaySystem, "gateway/connectToConsumer");
+    ServiceRegistryEntry mgmtEntry = new ServiceRegistryEntry(mgmtService, gatewaySystem, "gateway/management");
 
     if (registering) {
       try {
@@ -220,9 +223,20 @@ public class GatewayMain {
           System.out.println("Gateway CTC service registration failed.");
         }
       }
+      try {
+        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", mgmtEntry);
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", mgmtEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", mgmtEntry);
+        } else {
+          System.out.println("Gateway CTC service registration failed.");
+        }
+      }
     } else {
       Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", providerEntry);
       Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", consumerEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", mgmtEntry);
       System.out.println("Gateway services deregistered.");
     }
   }

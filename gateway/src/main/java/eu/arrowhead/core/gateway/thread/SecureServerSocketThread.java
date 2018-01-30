@@ -38,7 +38,6 @@ public class SecureServerSocketThread extends Thread {
     this.gatewaySession = gatewaySession;
   }
 
-  // TODO narrower try-catches
   public void run() {
     SSLContext sslContext = GatewayService.createSSLContext();
     // Socket for server to listen at.
@@ -56,7 +55,7 @@ public class SecureServerSocketThread extends Thread {
 
     try {
       // Accept a client connection once Server receives one.
-      SSLSocket sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
+      sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
       SSLSession consumerSession = sslConsumerSocket.getSession();
       Channel channel = gatewaySession.getChannel();
 

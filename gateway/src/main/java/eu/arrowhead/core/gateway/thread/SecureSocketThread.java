@@ -43,7 +43,7 @@ public class SecureSocketThread extends Thread {
       Channel channel = gatewaySession.getChannel();
       SSLContext sslContext = GatewayService.createSSLContext();
       SSLSocketFactory clientFactory = sslContext.getSocketFactory();
-      SSLSocket sslProviderSocket = (SSLSocket) clientFactory
+      sslProviderSocket = (SSLSocket) clientFactory
           .createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
       sslProviderSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = sslProviderSocket.getInputStream();
@@ -104,7 +104,6 @@ public class SecureSocketThread extends Thread {
     } catch (IOException | NegativeArraySizeException e) {
       log.info("Remote peer properly closed the socket.");
       GatewayService.providerSideClose(gatewaySession, sslProviderSocket, queueName);
-
     }
   }
 
