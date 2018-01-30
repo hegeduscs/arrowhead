@@ -22,12 +22,11 @@ public class InsecureSocketThread extends Thread {
   private String controlQueueName;
   private ConnectToProviderRequest connectionRequest;
   private Socket providerSocket;
-  
+
   private static Boolean isFirstMessage = true;
   private static final Logger log = Logger.getLogger(InsecureSocketThread.class.getName());
 
-  public InsecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
-      ConnectToProviderRequest connectionRequest) {
+  public InsecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName, ConnectToProviderRequest connectionRequest) {
     this.gatewaySession = gatewaySession;
     this.queueName = queueName;
     this.controlQueueName = controlQueueName;
@@ -39,8 +38,7 @@ public class InsecureSocketThread extends Thread {
     try {
       // Creating socket for Provider
       Channel channel = gatewaySession.getChannel();
-      providerSocket = new Socket(connectionRequest.getProvider().getAddress(),
-          connectionRequest.getProvider().getPort());
+      providerSocket = new Socket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
       providerSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = providerSocket.getInputStream();
       OutputStream outProvider = providerSocket.getOutputStream();
@@ -50,8 +48,7 @@ public class InsecureSocketThread extends Thread {
 
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-            throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
           outProvider.write(body);
           log.info("Sending the request to Provider");
         }
@@ -59,8 +56,7 @@ public class InsecureSocketThread extends Thread {
 
       Consumer controlConsumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-            byte[] body) {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
           if (new String(body).equals("close")) {
             GatewayService.providerSideClose(gatewaySession, providerSocket, queueName);
           }

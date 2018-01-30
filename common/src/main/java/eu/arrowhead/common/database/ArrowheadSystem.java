@@ -65,13 +65,12 @@ public class ArrowheadSystem {
   }
 
   public ArrowheadSystem(ArrowheadSystem system) {
-    this.systemGroup = system.systemGroup;
     this.systemName = system.systemName;
     this.address = system.address;
     this.port = system.port;
     this.authenticationInfo = system.authenticationInfo;
   }
-  
+
   @XmlTransient
   public int getId() {
     return id;

@@ -1,5 +1,15 @@
 package eu.arrowhead.core.gateway;
 
+import com.rabbitmq.client.AlreadyClosedException;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.core.gateway.model.ActiveSession;
+import eu.arrowhead.core.gateway.model.GatewayEncryption;
+import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -16,27 +26,13 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.Response.Status;
-
 import org.apache.log4j.Logger;
-
-import com.rabbitmq.client.AlreadyClosedException;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
-import eu.arrowhead.common.security.SecurityUtils;
-import eu.arrowhead.core.gateway.model.ActiveSession;
-import eu.arrowhead.core.gateway.model.GatewayEncryption;
-import eu.arrowhead.core.gateway.model.GatewaySession;
 
 /**
  * Contains miscellaneous helper functions for the Gateway.
@@ -60,21 +56,15 @@ public class GatewayService {
   /**
    * Creates a channel to the Broker
    *
-   * @param brokerHost
-   *          The hostname of the AMQP broker to use for connections
-   * @param brokerPort
-   *          The port of the AMQP broker to use for connections
-   * @param queueName
-   *          The name of the queue, should be unique
-   * @param controlQueueName
-   *          The name of the queue for control messages, should be unique
-   * @param isSecure
-   *          The type of the channel (secure or insecure)
+   * @param brokerHost The hostname of the AMQP broker to use for connections
+   * @param brokerPort The port of the AMQP broker to use for connections
+   * @param queueName The name of the queue, should be unique
+   * @param controlQueueName The name of the queue for control messages, should be unique
+   * @param isSecure The type of the channel (secure or insecure)
    *
    * @return GatewaySession, which contains a connection and a channel object
    */
-  public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName,
-      String controlQueueName, boolean isSecure) {
+  public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName, boolean isSecure) {
     GatewaySession gatewaySession = new GatewaySession();
     try {
       ConnectionFactory factory = new ConnectionFactory();
@@ -96,7 +86,7 @@ public class GatewayService {
     } catch (IOException | NullPointerException e) {
       log.error("Creating the channel to the Broker failed");
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-          GatewayService.class.toString(), e);
+                                   GatewayService.class.toString(), e);
 
     }
     return gatewaySession;
@@ -116,7 +106,7 @@ public class GatewayService {
     } catch (GeneralSecurityException e) {
       log.fatal("The initialization of the RSA cipher failed.");
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-          GatewayService.class.toString(), e);
+                                   GatewayService.class.toString(), e);
     }
 
     // Creating the random IV (Initialization vector)
@@ -148,7 +138,7 @@ public class GatewayService {
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES encryption.");
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-          GatewayService.class.toString(), e);
+                                   GatewayService.class.toString(), e);
     }
 
   }
@@ -160,15 +150,15 @@ public class GatewayService {
     byte[] decryptedMessage = null;
 
     try {
-      KeyStore keyStore = SecurityUtils.loadKeyStore(GatewayMain.getProp().getProperty("keystore"),
-          GatewayMain.getProp().getProperty("keystorepass"));
+      KeyStore keyStore = SecurityUtils
+          .loadKeyStore(GatewayMain.getProp().getProperty("keystore"), GatewayMain.getProp().getProperty("keystorepass"));
       privateKey = SecurityUtils.getPrivateKey(keyStore, GatewayMain.getProp().getProperty("keystorepass"));
       cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
       cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
     } catch (GeneralSecurityException e) {
       log.fatal("The initialization of the RSA cipher failed.");
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-          GatewayService.class.toString(), e);
+                                   GatewayService.class.toString(), e);
     }
 
     try {
@@ -191,7 +181,7 @@ public class GatewayService {
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES decryption.");
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-          GatewayService.class.toString(), e);
+                                   GatewayService.class.toString(), e);
     }
 
     return decryptedMessage;
@@ -222,19 +212,15 @@ public class GatewayService {
   /**
    * Fill the ConcurrentHashMap with initial keys and values
    *
-   * @param map
-   *          ConcurrentHashMap which contains the port number and the
-   *          availability
-   * @param portMin
-   *          The lowest port number from the allowed range
-   * @param portMax
-   *          The highest port number from the allowed range
+   * @param map ConcurrentHashMap which contains the port number and the
+   *     availability
+   * @param portMin The lowest port number from the allowed range
+   * @param portMax The highest port number from the allowed range
    *
    * @return The initialized ConcurrentHashMap
    */
   // Integer: port; Boolean: free (true) or reserved(false)
-  private static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map,
-      int portMin, int portMax) {
+  private static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map, int portMin, int portMax) {
     for (int i = portMin; i <= portMax; i++) {
       map.put(i, true);
     }
@@ -266,8 +252,8 @@ public class GatewayService {
     return serverSocketPort;
   }
 
-  public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket,
-      ServerSocket serverSocket, String queueName) {
+  public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket, ServerSocket serverSocket,
+                                       String queueName) {
     // Setting serverSocket free
     portAllocationMap.put(port, true);
     activeSessions.remove(queueName);

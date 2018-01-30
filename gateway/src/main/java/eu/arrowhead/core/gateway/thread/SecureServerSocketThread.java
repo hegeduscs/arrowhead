@@ -65,8 +65,7 @@ public class SecureServerSocketThread extends Thread {
 
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-            throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
           if (isAesKey) {
             try {
               isAesKey = false;
@@ -75,8 +74,7 @@ public class SecureServerSocketThread extends Thread {
               System.out.println("AES Key received.");
             } catch (NegativeArraySizeException e) {
               log.error("Communication failed (Error occurred or remote peer closed the socket)");
-              GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket,
-                  connectionRequest.getQueueName());
+              GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket, connectionRequest.getQueueName());
               throw new ArrowheadException(e.getMessage(), e);
             }
           } else {
@@ -94,11 +92,9 @@ public class SecureServerSocketThread extends Thread {
 
       Consumer controlConsumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-            byte[] body) {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
           if (new String(body).equals("close")) {
-            GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket,
-                connectionRequest.getQueueName());
+            GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket, connectionRequest.getQueueName());
           }
         }
       };
@@ -108,14 +104,12 @@ public class SecureServerSocketThread extends Thread {
         byte[] inputFromConsumer = new byte[1024];
         byte[] inputFromConsumerFinal = new byte[inConsumer.read(inputFromConsumer)];
         System.arraycopy(inputFromConsumer, 0, inputFromConsumerFinal, 0, inputFromConsumerFinal.length);
-        GatewayEncryption request = GatewayService.encryptMessage(inputFromConsumerFinal,
-            connectionRequest.getProviderGWPublicKey());
+        GatewayEncryption request = GatewayService.encryptMessage(inputFromConsumerFinal, connectionRequest.getProviderGWPublicKey());
         try {
           channel.basicPublish("", connectionRequest.getQueueName(), null, request.getEncryptedAESKey());
         } catch (IOException | NegativeArraySizeException e) {
           log.error("Communication failed (Error occurred or remote peer closed the socket)");
-          GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket,
-              connectionRequest.getQueueName());
+          GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket, connectionRequest.getQueueName());
           throw new ArrowheadException(e.getMessage(), e);
         }
         channel.basicPublish("", connectionRequest.getQueueName(), null, request.getEncryptedIVAndMessage());
@@ -126,8 +120,7 @@ public class SecureServerSocketThread extends Thread {
 
     } catch (IOException | NegativeArraySizeException e) {
       log.info("Remote peer properly closed the socket.");
-      GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket,
-          connectionRequest.getQueueName());
+      GatewayService.consumerSideClose(gatewaySession, port, sslConsumerSocket, sslServerSocket, connectionRequest.getQueueName());
     }
   }
 

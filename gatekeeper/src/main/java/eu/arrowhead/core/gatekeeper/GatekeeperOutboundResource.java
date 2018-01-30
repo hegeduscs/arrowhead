@@ -139,7 +139,7 @@ public class GatekeeperOutboundResource {
                                               requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout,
                                               GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
 
-    //TODO isSecure false mindig jó?
+    //NOTE isSecure false constant is temporary
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
                                    requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
     icnUri = UriBuilder.fromPath(icnUri).path("icn_proposal").toString();
@@ -159,15 +159,16 @@ public class GatekeeperOutboundResource {
     Map<String, String> metadata = requestForm.getRequestedService().getServiceMetadata();
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
     GatewayConnectionInfo gwConnInfo = icnEnd.getGatewayConnInfo();
-    ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(),
-        gwConnInfo.getBrokerPort(), gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
-        requestForm.getRequesterSystem(), icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
-        requestForm.getTargetCloud(), requestForm.getRequestedService(), isSecure, GatekeeperMain.timeout,
-        gwConnInfo.getGatewayPublicKey());
+    ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(), gwConnInfo.getBrokerPort(),
+                                                                              gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
+                                                                              requestForm.getRequesterSystem(),
+                                                                              icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
+                                                                              requestForm.getTargetCloud(), requestForm.getRequestedService(),
+                                                                              isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
 
     // Sending the gateway request and parsing the response
-    Response gatewayResponse = Utility.sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest,
-        GatekeeperMain.outboundServerContext);
+    Response gatewayResponse = Utility
+        .sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
     ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
 
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();

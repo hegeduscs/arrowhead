@@ -1,12 +1,12 @@
 package eu.arrowhead.core.gateway.model;
 
-import java.util.Date;
-
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import java.util.Date;
 
 public class ActiveSession {
+
   private ArrowheadSystem consumer;
   private ArrowheadCloud consumerCloud;
   private ArrowheadSystem provider;
@@ -23,9 +23,9 @@ public class ActiveSession {
   public ActiveSession() {
   }
 
-  public ActiveSession(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, ArrowheadSystem provider,
-      ArrowheadCloud providerCloud, ArrowheadService service, String brokerName, Integer brokerPort, Integer serverSocketPort,
-      String queueName, String controlQueueName, Boolean isSecure, Date startSession) {
+  public ActiveSession(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, ArrowheadSystem provider, ArrowheadCloud providerCloud,
+                       ArrowheadService service, String brokerName, Integer brokerPort, Integer serverSocketPort, String queueName,
+                       String controlQueueName, Boolean isSecure, Date startSession) {
     this.consumer = consumer;
     this.consumerCloud = consumerCloud;
     this.provider = provider;

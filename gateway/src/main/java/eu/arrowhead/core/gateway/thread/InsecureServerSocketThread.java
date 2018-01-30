@@ -27,8 +27,7 @@ public class InsecureServerSocketThread extends Thread {
   private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
   private GatewaySession gatewaySession;
 
-  public InsecureServerSocketThread(GatewaySession gatewaySession, int port,
-      ConnectToConsumerRequest connectionRequest) {
+  public InsecureServerSocketThread(GatewaySession gatewaySession, int port, ConnectToConsumerRequest connectionRequest) {
     this.port = port;
     this.connectionRequest = connectionRequest;
     this.gatewaySession = gatewaySession;
@@ -58,8 +57,7 @@ public class InsecureServerSocketThread extends Thread {
 
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-            throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
           outConsumer.write(body);
           System.out.println("Broker response: ");
           System.out.println(new String(body));
@@ -69,11 +67,9 @@ public class InsecureServerSocketThread extends Thread {
 
       Consumer controlConsumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-            byte[] body) {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
           if (new String(body).equals("close")) {
-            GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket,
-                connectionRequest.getQueueName());
+            GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket, connectionRequest.getQueueName());
           }
         }
       };
@@ -99,8 +95,7 @@ public class InsecureServerSocketThread extends Thread {
       }
 
     } catch (IOException | NegativeArraySizeException e) {
-      GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket,
-          connectionRequest.getQueueName());
+      GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket, connectionRequest.getQueueName());
       if (isFirstMessage) {
         log.error("Communication failed (Error occurred or remote peer closed the socket)");
         throw new ArrowheadException(e.getMessage());

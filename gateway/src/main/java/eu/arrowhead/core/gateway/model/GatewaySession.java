@@ -5,30 +5,30 @@ import com.rabbitmq.client.Connection;
 
 public class GatewaySession {
 
-	private Connection connection;
-	private Channel channel;
+  private Connection connection;
+  private Channel channel;
 
-	public GatewaySession() {
-	}
+  public GatewaySession() {
+  }
 
-	public GatewaySession(Connection connection, Channel channel) {
-		this.connection = connection;
-		this.channel = channel;
-	}
+  public GatewaySession(Connection connection, Channel channel) {
+    this.connection = connection;
+    this.channel = channel;
+  }
 
-	public Connection getConnection() {
-		return connection;
-	}
+  public Connection getConnection() {
+    return connection;
+  }
 
-	public void setConnection(Connection connection) {
-		this.connection = connection;
-	}
+  public void setConnection(Connection connection) {
+    this.connection = connection;
+  }
 
-	public Channel getChannel() {
-		return channel;
-	}
+  public Channel getChannel() {
+    return channel;
+  }
 
-	public void setChannel(com.rabbitmq.client.Channel channel) {
-		this.channel = channel;
-	}
+  public void setChannel(com.rabbitmq.client.Channel channel) {
+    this.channel = channel;
+  }
 }

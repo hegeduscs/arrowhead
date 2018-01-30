@@ -72,8 +72,7 @@ public class AuthorizationApi {
 
   @GET
   @Path("intracloud/systemname/{systemName}/services")
-  public Set<ArrowheadService> getSystemServices(@PathParam("systemName") String systemName,
-                                                 @QueryParam("provider_side") boolean providerSide) {
+  public Set<ArrowheadService> getSystemServices(@PathParam("systemName") String systemName, @QueryParam("provider_side") boolean providerSide) {
 
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);

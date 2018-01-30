@@ -20,9 +20,8 @@ public class ConnectToProviderRequest {
   public ConnectToProviderRequest() {
   }
 
-  public ConnectToProviderRequest(String brokerName, int brokerPort, ArrowheadSystem consumer, ArrowheadSystem provider,
-      ArrowheadCloud consumerCloud, ArrowheadCloud providerCloud, ArrowheadService service, boolean isSecure,
-      int timeout, String consumerGWPublicKey) {
+  public ConnectToProviderRequest(String brokerName, int brokerPort, ArrowheadSystem consumer, ArrowheadSystem provider, ArrowheadCloud consumerCloud,
+                                  ArrowheadCloud providerCloud, ArrowheadService service, boolean isSecure, int timeout, String consumerGWPublicKey) {
     this.brokerName = brokerName;
     this.brokerPort = brokerPort;
     this.consumer = consumer;

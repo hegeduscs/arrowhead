@@ -30,8 +30,7 @@ public class SecureSocketThread extends Thread {
   private static Boolean isAesKey = true;
   private static final Logger log = Logger.getLogger(SecureSocketThread.class.getName());
 
-  public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName,
-      ConnectToProviderRequest connectionRequest) {
+  public SecureSocketThread(GatewaySession gatewaySession, String queueName, String controlQueueName, ConnectToProviderRequest connectionRequest) {
     this.gatewaySession = gatewaySession;
     this.queueName = queueName;
     this.controlQueueName = controlQueueName;
@@ -44,8 +43,8 @@ public class SecureSocketThread extends Thread {
       Channel channel = gatewaySession.getChannel();
       SSLContext sslContext = GatewayService.createSSLContext();
       SSLSocketFactory clientFactory = sslContext.getSocketFactory();
-      SSLSocket sslProviderSocket = (SSLSocket) clientFactory.createSocket(connectionRequest.getProvider().getAddress(),
-          connectionRequest.getProvider().getPort());
+      SSLSocket sslProviderSocket = (SSLSocket) clientFactory
+          .createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
       sslProviderSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = sslProviderSocket.getInputStream();
       OutputStream outProvider = sslProviderSocket.getOutputStream();
@@ -55,8 +54,7 @@ public class SecureSocketThread extends Thread {
 
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-            throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
           if (isAesKey) {
             isAesKey = false;
             gatewayEncryption.setEncryptedAESKey(body);
@@ -74,8 +72,7 @@ public class SecureSocketThread extends Thread {
 
       Consumer controlConsumer = new DefaultConsumer(channel) {
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-            byte[] body) {
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
           if (new String(body).equals("close")) {
             GatewayService.providerSideClose(gatewaySession, sslProviderSocket, queueName);
           }
@@ -93,14 +90,13 @@ public class SecureSocketThread extends Thread {
         }
         channel.basicConsume(queueName, true, consumer);
         channel.basicConsume(controlQueueName, true, controlConsumer);
-        
+
         // Get the answer from Provider
         byte[] inputFromProvider = new byte[1024];
         byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
         System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
         log.info("Sending the response to Consumer");
-        GatewayEncryption response = GatewayService.encryptMessage(inputFromProviderFinal,
-            connectionRequest.getConsumerGWPublicKey());
+        GatewayEncryption response = GatewayService.encryptMessage(inputFromProviderFinal, connectionRequest.getConsumerGWPublicKey());
         channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedAESKey());
         channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedIVAndMessage());
       }
