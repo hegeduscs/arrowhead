@@ -4,7 +4,6 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
-import eu.arrowhead.common.database.CoreSystem;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -71,10 +70,8 @@ public class GatekeeperInboundResource {
     }
 
     // Polling the Authorization System about the consumer Cloud
-    InterCloudAuthRequest authRequest = new InterCloudAuthRequest(gsdPoll.getRequesterCloud(),
-        gsdPoll.getRequestedService());
-    String authUri = Utility.getAuthorizationUri();
-    authUri = UriBuilder.fromPath(authUri).path("intercloud").toString();
+    InterCloudAuthRequest authRequest = new InterCloudAuthRequest(gsdPoll.getRequesterCloud(), gsdPoll.getRequestedService());
+    String authUri = UriBuilder.fromPath(GatekeeperMain.AUTH_CONTROL_URI).path("intercloud").toString();
     Response authResponse = Utility.sendRequest(authUri, "PUT", authRequest);
 
     // If the consumer Cloud is not authorized an error is returned
@@ -87,8 +84,7 @@ public class GatekeeperInboundResource {
     // If it is authorized, poll the Service Registry for the requested Service
     else {
       // Compiling the URI and the request payload
-      String srUri = Utility.getServiceRegistryUri();
-      srUri = UriBuilder.fromPath(srUri).path("query").toString();
+      String srUri = UriBuilder.fromPath(GatekeeperMain.SERVICE_REGISTRY_URI).path("query").toString();
       ServiceQueryForm queryForm = new ServiceQueryForm(gsdPoll.getRequestedService(), false, false);
 
       // Sending back provider Cloud information if the SR poll has results
@@ -124,10 +120,8 @@ public class GatekeeperInboundResource {
     }
 
     // Polling the Authorization System about the consumer Cloud
-    InterCloudAuthRequest authRequest = new InterCloudAuthRequest(icnProposal.getRequesterCloud(),
-        icnProposal.getRequestedService());
-    String authUri = Utility.getAuthorizationUri();
-    authUri = UriBuilder.fromPath(authUri).path("intercloud").toString();
+    InterCloudAuthRequest authRequest = new InterCloudAuthRequest(icnProposal.getRequesterCloud(), icnProposal.getRequestedService());
+    String authUri = UriBuilder.fromPath(GatekeeperMain.AUTH_CONTROL_URI).path("intercloud").toString();
     Response authResponse = Utility.sendRequest(authUri, "PUT", authRequest);
 
     // If the consumer Cloud is not authorized an error is returned
@@ -137,8 +131,7 @@ public class GatekeeperInboundResource {
           Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
           requestContext.getUriInfo().getAbsolutePath().toString());
     }
-    // If it is authorized, send a ServiceRequestForm to the Orchestrator and return
-    // the OrchestrationResponse
+    // If it is authorized, send a ServiceRequestForm to the Orchestrator and return the OrchestrationResponse
     Map<String, Boolean> orchestrationFlags = icnProposal.getNegotiationFlags();
     List<PreferredProvider> preferredProviders = new ArrayList<>();
 
@@ -146,21 +139,17 @@ public class GatekeeperInboundResource {
       preferredProviders.add(new PreferredProvider(preferredSystem, null));
     }
     ArrowheadSystem consumer = new ArrowheadSystem(icnProposal.getRequesterSystem());
-    
-    // Changing the requesterSystem and the requesterCloud for the sake of proper
-    // token generation
+
+    //TODO cloudot nem kéne módosítani? meg a requestersystem többi részét is
+    // Changing the requesterSystem for the sake of proper token generation
     if (icnProposal.getNegotiationFlags().get("useGateway")) {
-      CoreSystem gateway = Utility.getCoreSystem("gateway");
-      icnProposal.getRequesterSystem().setSystemName(gateway.getSystemName());
-      icnProposal.getRequesterSystem().setSystemGroup("coresystems");
+      icnProposal.getRequesterSystem().setSystemName(GatekeeperMain.GATEWAY_PROVIDER_URI[1]);
     }
     ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
         .requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService())
         .orchestrationFlags(orchestrationFlags).preferredProviders(preferredProviders).build();
 
-    String orchestratorUri = Utility.getOrchestratorUri();
-    orchestratorUri = UriBuilder.fromPath(orchestratorUri).toString();
-
+    String orchestratorUri = UriBuilder.fromPath(GatekeeperMain.ORCHESTRATOR_URI).path("orchestrator").path("orchestration").toString();
     Response response = Utility.sendRequest(orchestratorUri, "POST", serviceRequestForm);
     OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
     // If the gateway service is not requested, then return the full orchestration
@@ -172,9 +161,6 @@ public class GatekeeperInboundResource {
     }
 
     // Compiling the gateway request payload
-    String gatewayURI = Utility.getGatewayUri();
-    gatewayURI = UriBuilder.fromPath(gatewayURI).path("connectToProvider").toString();
-
     ArrowheadSystem provider = orchResponse.getResponse().get(0).getProvider();
     Map<String, String> metadata = orchResponse.getResponse().get(0).getService().getServiceMetadata();
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
@@ -209,15 +195,14 @@ public class GatekeeperInboundResource {
         icnProposal.getRequestedService(), isSecure, timeout, icnProposal.getGatewayPublicKey());
 
     // Sending request, parsing response
-    Response gatewayResponse = Utility.sendRequest(gatewayURI, "PUT", connectionRequest);
+    Response gatewayResponse = Utility.sendRequest(GatekeeperMain.GATEWAY_PROVIDER_URI[0], "PUT", connectionRequest);
     ConnectToProviderResponse connectToProviderResponse = gatewayResponse.readEntity(ConnectToProviderResponse.class);
 
     GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(commonBrokers.get(0).getAddress(),
         commonBrokers.get(0).getPort(), connectToProviderResponse.getQueueName(),
-        connectToProviderResponse.getControlQueueName(), Utility.getCoreSystem("gateway").getAuthenticationInfo());
+        connectToProviderResponse.getControlQueueName(), GatekeeperMain.GATEWAY_PROVIDER_URI[3]);
     ICNEnd icnEnd = new ICNEnd(orchResponse.getResponse().get(0), gatewayConnectionInfo);
-    log.info(
-        "ICNProposal: returning the first OrchestrationForm and the GatewayConnectionInfo to the requester Cloud.");
+    log.info("ICNProposal: returning the first OrchestrationForm and the GatewayConnectionInfo to the requester Cloud.");
     return Response.status(response.getStatus()).entity(icnEnd).build();
   }
 

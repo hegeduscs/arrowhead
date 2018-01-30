@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eu.arrowhead.common.json.support.ArrowheadServiceSupport;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +15,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
@@ -25,16 +26,13 @@ import org.hibernate.annotations.LazyCollectionOption;
  * Entity class for storing Arrowhead Services in the database. The "service_group" and service_definition" columns must be unique together.
  */
 @Entity
-@Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_group", "service_definition"})})
+@Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_definition"})})
 public class ArrowheadService {
 
   @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
-
-  @Column(name = "service_group")
-  private String serviceGroup;
 
   @Column(name = "service_definition")
   private String serviceDefinition;
@@ -44,21 +42,22 @@ public class ArrowheadService {
   @CollectionTable(name = "arrowhead_service_interface_list", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
   private List<String> interfaces = new ArrayList<>();
 
-  @ElementCollection(fetch = FetchType.LAZY)
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @MapKeyColumn(name = "metadata_key")
-  @Column(name = "metadata_value")
-  @CollectionTable(name = "arrowhead_service_metadata_map", joinColumns = @JoinColumn(name = "service_id"))
+  @Transient
   private Map<String, String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {
   }
 
-  public ArrowheadService(String serviceGroup, String serviceDefinition, List<String> interfaces, Map<String, String> serviceMetadata) {
-    this.serviceGroup = serviceGroup;
+  public ArrowheadService(String serviceDefinition, List<String> interfaces, Map<String, String> serviceMetadata) {
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;
     this.serviceMetadata = serviceMetadata;
+  }
+
+  public ArrowheadService(ArrowheadServiceSupport service) {
+    this.serviceDefinition = service.getServiceGroup() + "_" + service.getServiceDefinition();
+    this.interfaces = service.getInterfaces();
+    this.serviceMetadata = service.getServiceMetadata();
   }
 
   @XmlTransient
@@ -68,14 +67,6 @@ public class ArrowheadService {
 
   public void setId(int id) {
     this.id = id;
-  }
-
-  public String getServiceGroup() {
-    return serviceGroup;
-  }
-
-  public void setServiceGroup(String serviceGroup) {
-    this.serviceGroup = serviceGroup;
   }
 
   public String getServiceDefinition() {
@@ -107,12 +98,18 @@ public class ArrowheadService {
     this.serviceMetadata = metaData;
   }
 
-  /*
-   * @note  ArrowheadServices cannot contain the character "_" in any fields.
-   */
   @JsonIgnore
   public boolean isValid() {
+    return (serviceDefinition != null && !interfaces.isEmpty());
+  }
 
+  @JsonIgnore
+  public boolean isValidForDatabase() {
+    return serviceDefinition != null;
+  }
+
+  @JsonIgnore
+  public boolean isValidForDNSSD() {
     boolean areInterfacesClean = true;
     for (String interf : interfaces) {
       if (interf.contains("_")) {
@@ -120,53 +117,31 @@ public class ArrowheadService {
       }
     }
 
-    return (serviceGroup != null && serviceDefinition != null && !interfaces.isEmpty() && !serviceGroup.contains("_") && !serviceDefinition
-        .contains("_") && areInterfacesClean);
+    return (serviceDefinition != null && !interfaces.isEmpty() && !serviceDefinition.contains("_") && areInterfacesClean);
   }
 
-  @JsonIgnore
-  public boolean isValidForDatabase() {
-    return serviceGroup != null && serviceDefinition != null;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    ArrowheadService that = (ArrowheadService) o;
+
+    return serviceDefinition.equals(that.serviceDefinition);
   }
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((serviceDefinition == null) ? 0 : serviceDefinition.hashCode());
-    result = prime * result + ((serviceGroup == null) ? 0 : serviceGroup.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ArrowheadService other = (ArrowheadService) obj;
-    if (serviceDefinition == null) {
-      if (other.serviceDefinition != null) {
-        return false;
-      }
-    } else if (!serviceDefinition.equals(other.serviceDefinition)) {
-      return false;
-    }
-    if (serviceGroup == null) {
-      return other.serviceGroup == null;
-    } else {
-      return serviceGroup.equals(other.serviceGroup);
-    }
+    return serviceDefinition.hashCode();
   }
 
   @Override
   public String toString() {
-    return "(" + serviceGroup + ":" + serviceDefinition + ")";
+    return "\"" + serviceDefinition + "\"";
   }
 
 }

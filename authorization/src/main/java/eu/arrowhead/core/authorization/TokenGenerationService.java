@@ -62,7 +62,7 @@ class TokenGenerationService {
       }
 
       // Set consumer info string
-      String c = request.getConsumer().getSystemName() + "." + request.getConsumer().getSystemGroup();
+      String c = request.getConsumer().getSystemName();
       if (request.getConsumerCloud() != null) {
         c = c.concat(".").concat(request.getConsumerCloud().getCloudName()).concat(".").concat(request.getConsumerCloud().getOperator());
       } else {
@@ -72,8 +72,7 @@ class TokenGenerationService {
       rawTokenInfo.setC(c);
 
       // Set service info string
-      String s = request.getService().getInterfaces().get(0) + "." + request.getService().getServiceDefinition() + "." + request.getService()
-          .getServiceGroup();
+      String s = request.getService().getInterfaces().get(0) + "." + request.getService().getServiceDefinition();
       rawTokenInfo.setS(s);
 
       // Set the token validity duration
@@ -139,7 +138,6 @@ class TokenGenerationService {
     for (ArrowheadSystem provider : providers) {
       // Get the provider from the database
       restrictionMap.clear();
-      restrictionMap.put("systemGroup", provider.getSystemGroup());
       restrictionMap.put("systemName", provider.getSystemName());
       ArrowheadSystem retrievedProvider = AuthorizationResource.dm.get(ArrowheadSystem.class, restrictionMap);
 
@@ -148,8 +146,8 @@ class TokenGenerationService {
           PublicKey key = getPublicKey(retrievedProvider.getAuthenticationInfo());
           keys.add(key);
         } catch (InvalidKeySpecException | NullPointerException e) {
-          log.error("The stored auth info for the ArrowheadSystem " + provider.toStringLog()
-                        + " is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
+          log.error("The stored auth info for the ArrowheadSystem (" + provider.getSystemName()
+                        + ") is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
           keys.add(null);
         }
       } else {

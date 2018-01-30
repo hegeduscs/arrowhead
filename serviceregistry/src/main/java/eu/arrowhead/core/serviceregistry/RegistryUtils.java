@@ -15,13 +15,13 @@ import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
 
+//NOTE Block comments are here in this class to preserve legacy code without syntax error
 public class RegistryUtils {
 
   private static final Logger log = Logger.getLogger(RegistryUtils.class.getName());
 
   static DnsSDRegistrator createRegistrator() throws DnsSDException {
-    // Get the DNS specific settings from global static variables (from prop files)
-    // and then set up Registrator
+    // Get the DNS specific settings from global static variables (from prop files) and then set up Registrator
     InetSocketAddress dnsServerAddress = new InetSocketAddress(ServiceRegistryMain.dnsIpAddress, ServiceRegistryMain.dnsPort);
     DnsSDRegistrator registrator = DnsSDFactory.getInstance().createRegistrator(ServiceRegistryMain.dnsDomain, dnsServerAddress);
     if (!ServiceRegistryMain.tsigKeyName.isEmpty()) {
@@ -47,9 +47,9 @@ public class RegistryUtils {
     }
 
     //Arrowhead core-related metadata
-    if (registryEntry.getProvider().getSystemGroup() != null) {
+    /*if (registryEntry.getProvider().getSystemGroup() != null) {
       properties.put("ahsysgrp", registryEntry.getProvider().getSystemGroup());
-    }
+    }*/
     if (registryEntry.getProvider().getSystemName() != null) {
       properties.put("ahsysname", registryEntry.getProvider().getSystemName());
     }
@@ -109,7 +109,7 @@ public class RegistryUtils {
       if (serviceName.startsWith("_") && array.length == 4) {
         List<String> intf = new ArrayList<>();
         intf.add(array[3]);
-        arrowheadService.setServiceGroup(array[2]);
+        /*arrowheadService.setServiceGroup(array[2]);*/
         if (array[1].contains("ahf-")) {
           arrowheadService.setServiceDefinition(array[1].substring(4));
         } else {
@@ -148,7 +148,7 @@ public class RegistryUtils {
     if (properties.containsKey("ahsysname") || properties.containsKey("ahsysgrp")) {
 
       arrowheadSystem.setSystemName(properties.get("ahsysname"));
-      arrowheadSystem.setSystemGroup(properties.get("ahsysgrp"));
+      /*arrowheadSystem.setSystemGroup(properties.get("ahsysgrp"));*/
 
       //sanity checking if instance equals TXT fields
       if (providerName.contains("_")) {
@@ -168,7 +168,7 @@ public class RegistryUtils {
         String[] array = providerName.split("_");
         if (array.length == 2) {
           arrowheadSystem.setSystemName(array[0]);
-          arrowheadSystem.setSystemGroup(array[1]);
+          /*arrowheadSystem.setSystemGroup(array[1]);*/
         } else {
           throw new IllegalArgumentException("Entry cannot be parsed into ArrowheadSystem.");
         }
@@ -214,8 +214,7 @@ public class RegistryUtils {
 
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();
-      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("127.0.0.1") || current.getProvider()
-          .getAddress().equals("0.0.0.0")) {
+      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("127.0.0.1") || current.getProvider().getAddress().equals("0.0.0.0")) {
         iterator.remove();
       } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
         iterator.remove();

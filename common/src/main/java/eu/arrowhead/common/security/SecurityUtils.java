@@ -153,13 +153,13 @@ public final class SecurityUtils {
   }
 
   // NOTE dont forget to modify this, if we migrate to a version without system group
-  // NOTE gatekeeper certs can be an exception to this rule
+  // NOTE gatekeeper certs can be an exception to this rule at the moment
   public static boolean isKeyStoreCNArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
     return cnFields.length == 6;
   }
 
-  // NOTE gatekeeper certs can be an exception to this rule
+  // NOTE gatekeeper certs can be an exception to this rule at the moment
   public static boolean isTrustStoreCNArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
     return cnFields.length == 4;

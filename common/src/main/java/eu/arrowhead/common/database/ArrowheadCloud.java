@@ -32,7 +32,7 @@ public class ArrowheadCloud {
   private String address;
 
   @Column(name = "port")
-  private int port;
+  private Integer port;
 
   @Column(name = "gatekeeper_service_uri")
   private String gatekeeperServiceURI;
@@ -46,7 +46,7 @@ public class ArrowheadCloud {
   public ArrowheadCloud() {
   }
 
-  public ArrowheadCloud(String operator, String cloudName, String address, int port, String gatekeeperServiceURI, String authenticationInfo,
+  public ArrowheadCloud(String operator, String cloudName, String address, Integer port, String gatekeeperServiceURI, String authenticationInfo,
                         boolean secure) {
     this.operator = operator;
     this.cloudName = cloudName;
@@ -90,11 +90,11 @@ public class ArrowheadCloud {
     this.address = address;
   }
 
-  public int getPort() {
+  public Integer getPort() {
     return port;
   }
 
-  public void setPort(int port) {
+  public void setPort(Integer port) {
     this.port = port;
   }
 
@@ -133,16 +133,6 @@ public class ArrowheadCloud {
   }
 
   @Override
-  public int hashCode() {
-    int result = operator != null ? operator.hashCode() : 0;
-    result = 31 * result + (cloudName != null ? cloudName.hashCode() : 0);
-    result = 31 * result + (address != null ? address.hashCode() : 0);
-    result = 31 * result + port;
-    result = 31 * result + (gatekeeperServiceURI != null ? gatekeeperServiceURI.hashCode() : 0);
-    return result;
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -153,19 +143,29 @@ public class ArrowheadCloud {
 
     ArrowheadCloud that = (ArrowheadCloud) o;
 
-    if (port != that.port) {
+    if (!operator.equals(that.operator)) {
       return false;
     }
-    if (operator != null ? !operator.equals(that.operator) : that.operator != null) {
+    if (!cloudName.equals(that.cloudName)) {
       return false;
     }
-    if (cloudName != null ? !cloudName.equals(that.cloudName) : that.cloudName != null) {
+    if (!address.equals(that.address)) {
       return false;
     }
-    if (address != null ? !address.equals(that.address) : that.address != null) {
+    if (!port.equals(that.port)) {
       return false;
     }
-    return gatekeeperServiceURI != null ? gatekeeperServiceURI.equals(that.gatekeeperServiceURI) : that.gatekeeperServiceURI == null;
+    return gatekeeperServiceURI.equals(that.gatekeeperServiceURI);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = operator.hashCode();
+    result = 31 * result + cloudName.hashCode();
+    result = 31 * result + address.hashCode();
+    result = 31 * result + port.hashCode();
+    result = 31 * result + gatekeeperServiceURI.hashCode();
+    return result;
   }
 
   @Override

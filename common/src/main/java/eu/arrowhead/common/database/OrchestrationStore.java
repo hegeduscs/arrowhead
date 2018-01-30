@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Check;
@@ -35,7 +36,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "orchestration_store", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
-@Check(constraints = "priority >= 0")
+@Check(constraints = "priority >= 1")
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @Column(name = "id")
@@ -62,7 +63,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   private ArrowheadCloud providerCloud;
 
   @Column(name = "priority")
-  private int priority;
+  private Integer priority;
 
   @Column(name = "is_default")
   private boolean defaultEntry;
@@ -84,7 +85,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "store_entry_id"))
   private Map<String, String> attributes = new HashMap<>();
 
-  @Column(name = "service_uri")
+  @Transient
   private String serviceURI;
 
   public OrchestrationStore() {
@@ -100,7 +101,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            int priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
+                            Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
                             String serviceURI) {
     this.service = service;
     this.consumer = consumer;
@@ -156,11 +157,11 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.providerCloud = providerCloud;
   }
 
-  public int getPriority() {
+  public Integer getPriority() {
     return priority;
   }
 
-  public void setPriority(int priority) {
+  public void setPriority(Integer priority) {
     this.priority = priority;
   }
 

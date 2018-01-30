@@ -1,4 +1,4 @@
-package eu.arrowhead.common.json.supportadapter;
+package eu.arrowhead.common.json.support;
 
 import eu.arrowhead.common.messages.OrchestrationForm;
 import eu.arrowhead.common.messages.OrchestrationResponse;
@@ -13,14 +13,10 @@ public class OrchestrationResponseSupport {
   }
 
   public OrchestrationResponseSupport(OrchestrationResponse orchResponse) {
-    List<OrchestrationFormSupport> response = new ArrayList<>();
     for (OrchestrationForm form : orchResponse.getResponse()) {
-      ArrowheadServiceSupport supportService = new ArrowheadServiceSupport(form.getService());
-      OrchestrationFormSupport supportForm = new OrchestrationFormSupport(supportService, form.getProvider(), form.getServiceURI(),
-                                                                          form.getInstruction(), form.getAuthorizationToken(), form.getSignature());
+      OrchestrationFormSupport supportForm = new OrchestrationFormSupport(form);
       response.add(supportForm);
     }
-    this.response = response;
   }
 
   public OrchestrationResponseSupport(List<OrchestrationFormSupport> response) {

@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
 /**
@@ -315,12 +314,10 @@ final class OrchestratorService {
       }
 
       // Getting the Authorization token generation resource URI, compiling the request payload
-      String authUri = Utility.getAuthorizationUri();
-      authUri = UriBuilder.fromPath(authUri).path("token").toString();
       TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
                                                                        srf.getRequestedService(), 0);
       //Sending request, parsing response
-      Response authResponse = Utility.sendRequest(authUri, "PUT", tokenRequest);
+      Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
       tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
     }
 
@@ -350,7 +347,7 @@ final class OrchestratorService {
     }
 
     for (OrchestrationForm of : ofList) {
-      log.debug("Service: " + of.getService().toString() + " System: " + of.getProvider().toStringLog() + " ServiceURI: " + of.getServiceURI()
+      log.debug("Service: " + of.getService().toString() + " System: " + of.getProvider().getSystemName() + " ServiceURI: " + of.getServiceURI()
                     + " Instruction: " + of.getInstruction() + " Token: " + of.getAuthorizationToken() + " Signature: " + of.getSignature());
     }
     log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");

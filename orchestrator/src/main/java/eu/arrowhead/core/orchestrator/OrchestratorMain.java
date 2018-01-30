@@ -4,10 +4,12 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.orchestrator.api.CommonApi;
 import eu.arrowhead.core.orchestrator.api.StoreApi;
+import eu.arrowhead.core.orchestrator.support.OldOrchResource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +18,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Properties;
 import javax.net.ssl.SSLContext;
@@ -34,6 +37,13 @@ public class OrchestratorMain {
 
   public static boolean DEBUG_MODE;
 
+  static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
+  static String AUTH_CONTROL_URI;
+  static String TOKEN_GEN_URI;
+  static String GSD_SERVICE_URI;
+  static String ICN_SERVICE_URI;
+
+  private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
   private static HttpServer secureServer;
   private static Properties prop;
@@ -47,6 +57,14 @@ public class OrchestratorMain {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     Utility.isUrlValid(BASE_URI, false);
     Utility.isUrlValid(BASE_URI_SECURED, true);
+    if (SERVICE_REGISTRY_URI.startsWith("https")) {
+      Utility.isUrlValid(SERVICE_REGISTRY_URI, true);
+    } else {
+      Utility.isUrlValid(SERVICE_REGISTRY_URI, false);
+    }
+    if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
+      SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
+    }
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -88,6 +106,8 @@ public class OrchestratorMain {
       server = startServer();
       useSRService(false, true);
     }
+    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
+    getCoreSystemServiceUris();
 
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
@@ -112,7 +132,7 @@ public class OrchestratorMain {
     System.out.println("Starting insecure server at: " + BASE_URI);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class);
+    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class, OldOrchResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.filter");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -127,7 +147,7 @@ public class OrchestratorMain {
     System.out.println("Starting secure server at: " + BASE_URI_SECURED);
 
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class);
+    config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class, OldOrchResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.filter");
 
     String keystorePath = getProp().getProperty("keystore");
@@ -153,6 +173,7 @@ public class OrchestratorMain {
 
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
+    BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
@@ -172,35 +193,39 @@ public class OrchestratorMain {
   }
 
   private static void useSRService(boolean isSecure, boolean registering) {
-    URI uri;
-    ArrowheadService orchService;
+    URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
+    ArrowheadSystem orchSystem = new ArrowheadSystem("orchestrator", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
+    ArrowheadService orchService = new ArrowheadService(Utility.createSD(Utility.ORCH_SERVICE, isSecure), Collections.singletonList("JSON"), null);
     if (isSecure) {
-      uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-      orchService = new ArrowheadService("coreservices", "SecureOrchestrationService", Collections.singletonList("JSON"), null);
-    } else {
-      uri = UriBuilder.fromUri(BASE_URI).build();
-      orchService = new ArrowheadService("coreservices", "InsecureOrchestrationService", Collections.singletonList("JSON"), null);
+      orchService.setServiceMetadata(Utility.secureServerMetadata);
     }
 
     //Preparing the payload
-    ArrowheadSystem orchSystem = new ArrowheadSystem("coresystems", "orchestrator", uri.getHost(), uri.getPort(), null);
     ServiceRegistryEntry orchEntry = new ServiceRegistryEntry(orchService, orchSystem, "orchestrator/orchestration");
 
-    String baseUri = Utility.getServiceRegistryUri();
     if (registering) {
       try {
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", orchEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", orchEntry);
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", orchEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", orchEntry);
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", orchEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", orchEntry);
         } else {
           System.out.println("Orchestration service registration failed.");
         }
       }
     } else {
-      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", orchEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", orchEntry);
+      System.out.println("Orchestration service deregistered.");
     }
+  }
+
+  public static void getCoreSystemServiceUris() {
+    AUTH_CONTROL_URI = Utility.getServiceInfo(Utility.AUTH_CONTROL_SERVICE)[0];
+    TOKEN_GEN_URI = Utility.getServiceInfo(Utility.TOKEN_GEN_SERVICE)[0];
+    GSD_SERVICE_URI = Utility.getServiceInfo(Utility.GSD_SERVICE)[0];
+    ICN_SERVICE_URI = Utility.getServiceInfo(Utility.ICN_SERVICE)[0];
+    System.out.println("Core system URLs acquired.");
   }
 
   private static void shutdown() {

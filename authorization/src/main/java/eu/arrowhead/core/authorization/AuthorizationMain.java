@@ -5,6 +5,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
@@ -36,6 +37,8 @@ public class AuthorizationMain {
 
   static PrivateKey privateKey;
 
+  private static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
+  private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
   private static HttpServer secureServer;
   private static Properties prop;
@@ -49,6 +52,14 @@ public class AuthorizationMain {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     Utility.isUrlValid(BASE_URI, false);
     Utility.isUrlValid(BASE_URI_SECURED, true);
+    if (SERVICE_REGISTRY_URI.startsWith("https")) {
+      Utility.isUrlValid(SERVICE_REGISTRY_URI, true);
+    } else {
+      Utility.isUrlValid(SERVICE_REGISTRY_URI, false);
+    }
+    if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
+      SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
+    }
 
     KeyStore keyStore = SecurityUtils.loadKeyStore(getProp().getProperty("keystore"), getProp().getProperty("keystorepass"));
     privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("keystorepass"));
@@ -93,6 +104,7 @@ public class AuthorizationMain {
       server = startServer();
       useSRService(false, true);
     }
+    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
 
     //This is here to initialize the database connection before the REST resources are initiated
     DatabaseManager dm = DatabaseManager.getInstance();
@@ -160,7 +172,8 @@ public class AuthorizationMain {
 
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    System.out.println("Server PublicKey Base64: " + Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded()));
+    BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
+    System.out.println("Server PublicKey Base64: " + BASE64_PUBLIC_KEY);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
@@ -180,49 +193,46 @@ public class AuthorizationMain {
   }
 
   private static void useSRService(boolean isSecure, boolean registering) {
-    URI uri;
-    ArrowheadService authControlService;
-    ArrowheadService tokenGenerationService;
+    URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
+    ArrowheadSystem authSystem = new ArrowheadSystem("authorization", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
+    ArrowheadService authControlService = new ArrowheadService(Utility.createSD(Utility.AUTH_CONTROL_SERVICE, isSecure),
+                                                               Collections.singletonList("JSON"), null);
+    ArrowheadService tokenGenerationService = new ArrowheadService(Utility.createSD(Utility.TOKEN_GEN_SERVICE, isSecure),
+                                                                   Collections.singletonList("JSON"), null);
     if (isSecure) {
-      uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-      authControlService = new ArrowheadService("coreservices", "SecureAuthorizationControl", Collections.singletonList("JSON"), null);
-      tokenGenerationService = new ArrowheadService("coreservices", "SecureTokenGeneration", Collections.singletonList("JSON"), null);
-    } else {
-      uri = UriBuilder.fromUri(BASE_URI).build();
-      authControlService = new ArrowheadService("coreservices", "InsecureAuthorizationControl", Collections.singletonList("JSON"), null);
-      tokenGenerationService = new ArrowheadService("coreservices", "InsecureTokenGeneration", Collections.singletonList("JSON"), null);
+      authControlService.setServiceMetadata(Utility.secureServerMetadata);
+      tokenGenerationService.setServiceMetadata(Utility.secureServerMetadata);
     }
 
     //Preparing the payloads
-    ArrowheadSystem authSystem = new ArrowheadSystem("coresystems", "authorization", uri.getHost(), uri.getPort(), null);
     ServiceRegistryEntry authControlEntry = new ServiceRegistryEntry(authControlService, authSystem, "authorization");
     ServiceRegistryEntry tokenGenEntry = new ServiceRegistryEntry(tokenGenerationService, authSystem, "authorization/token");
 
-    String baseUri = Utility.getServiceRegistryUri();
     if (registering) {
       try {
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", authControlEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", authControlEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
         } else {
           System.out.println("Authorization control service registration failed.");
         }
       }
       try {
-        Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
-      } catch (RuntimeException e) {
-        if (e.getMessage().contains("DuplicateEntryException")) {
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", tokenGenEntry);
-          Utility.sendRequest(UriBuilder.fromUri(baseUri).path("register").build().toString(), "POST", tokenGenEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
+      } catch (ArrowheadException e) {
+        if (e.getExceptionType().contains("DuplicateEntryException")) {
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
         } else {
           System.out.println("Token generation service registration failed.");
         }
       }
     } else {
-      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", authControlEntry);
-      Utility.sendRequest(UriBuilder.fromUri(baseUri).path("remove").build().toString(), "PUT", tokenGenEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", authControlEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
+      System.out.println("Authorization services deregistered.");
     }
   }
 

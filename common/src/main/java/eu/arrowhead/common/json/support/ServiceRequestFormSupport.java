@@ -1,8 +1,8 @@
-package eu.arrowhead.common.json.supportadapter;
+package eu.arrowhead.common.json.support;
 
 import eu.arrowhead.common.database.ArrowheadCloud;
-import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.messages.PreferredProvider;
+import eu.arrowhead.common.messages.ServiceRequestForm;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,17 +11,29 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class ServiceRequestFormSupport {
 
-  private ArrowheadSystem requesterSystem;
+  private ArrowheadSystemSupport requesterSystem;
   private ArrowheadCloud requesterCloud;
   private ArrowheadServiceSupport requestedService;
   @XmlJavaTypeAdapter(BooleanMapAdapter.class)
   private Map<String, Boolean> orchestrationFlags = new HashMap<>();
   private List<PreferredProvider> preferredProviders = new ArrayList<>();
+  @XmlJavaTypeAdapter(StringMapAdapter.class)
+  private Map<String, String> requestedQoS = new HashMap<>();
+  @XmlJavaTypeAdapter(StringMapAdapter.class)
+  private Map<String, String> commands = new HashMap<>();
 
   public ServiceRequestFormSupport() {
   }
 
-  public ServiceRequestFormSupport(ArrowheadSystem requesterSystem, ArrowheadCloud requesterCloud, ArrowheadServiceSupport requestedService,
+  public ServiceRequestFormSupport(ServiceRequestForm srf) {
+    this.requesterSystem = new ArrowheadSystemSupport(srf.getRequesterSystem());
+    this.requesterCloud = srf.getRequesterCloud();
+    this.requestedService = new ArrowheadServiceSupport(srf.getRequestedService());
+    this.orchestrationFlags = srf.getOrchestrationFlags();
+    this.preferredProviders = srf.getPreferredProviders();
+  }
+
+  public ServiceRequestFormSupport(ArrowheadSystemSupport requesterSystem, ArrowheadCloud requesterCloud, ArrowheadServiceSupport requestedService,
                                    Map<String, Boolean> orchestrationFlags, List<PreferredProvider> preferredProviders) {
     this.requesterSystem = requesterSystem;
     this.requesterCloud = requesterCloud;
@@ -30,11 +42,11 @@ public class ServiceRequestFormSupport {
     this.preferredProviders = preferredProviders;
   }
 
-  public ArrowheadSystem getRequesterSystem() {
+  public ArrowheadSystemSupport getRequesterSystem() {
     return requesterSystem;
   }
 
-  public void setRequesterSystem(ArrowheadSystem requesterSystem) {
+  public void setRequesterSystem(ArrowheadSystemSupport requesterSystem) {
     this.requesterSystem = requesterSystem;
   }
 
@@ -68,5 +80,21 @@ public class ServiceRequestFormSupport {
 
   public void setPreferredProviders(List<PreferredProvider> preferredProviders) {
     this.preferredProviders = preferredProviders;
+  }
+
+  public Map<String, String> getRequestedQoS() {
+    return requestedQoS;
+  }
+
+  public void setRequestedQoS(Map<String, String> requestedQoS) {
+    this.requestedQoS = requestedQoS;
+  }
+
+  public Map<String, String> getCommands() {
+    return commands;
+  }
+
+  public void setCommands(Map<String, String> commands) {
+    this.commands = commands;
   }
 }

@@ -1,15 +1,9 @@
 package eu.arrowhead.core.serviceregistry;
 
-import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
-import eu.arrowhead.common.security.SecurityUtils;
-import java.util.ArrayList;
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -28,6 +22,7 @@ import org.apache.log4j.Logger;
 @Path("serviceregistry")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+//NOTE Block comments are here in this class to preserve legacy code without syntax error
 public class ServiceRegistryResource {
 
   private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
@@ -42,7 +37,7 @@ public class ServiceRegistryResource {
   @Path("register")
   public Response publishEntriesToRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
-    if (entry == null || !entry.isValidFully()) {
+    /*if (entry == null || !entry.isValid()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
     }
@@ -67,14 +62,15 @@ public class ServiceRegistryResource {
     } catch (Exception e) {
       log.error("SR Registration failed:" + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    }
+    }*/
+    return null;
   }
 
   @PUT
   @Path("remove")
   public Response removeEntriesFromRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
-    if (entry == null || !entry.isValidFully()) {
+    /*if (entry == null || !entry.isValid()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service de-registration form has missing/incomplete mandatory fields.");
     }
@@ -101,7 +97,8 @@ public class ServiceRegistryResource {
       return Response.status(Response.Status.OK).build();
     } else {
       return Response.status(Response.Status.NO_CONTENT).build();
-    }
+    }*/
+    return null;
   }
 
   /*
@@ -112,7 +109,7 @@ public class ServiceRegistryResource {
   public Response publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
                                        @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 
-    if (serviceGroup == null || service == null || interf == null || entry == null) {
+    /*if (serviceGroup == null || service == null || interf == null || entry == null) {
       log.info("ServiceRegistry: Registration throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.");
     }
@@ -136,7 +133,8 @@ public class ServiceRegistryResource {
     } catch (Exception e) {
       log.error("SR Registration failed:" + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    }
+    }*/
+    return null;
   }
 
   @PUT
@@ -144,7 +142,7 @@ public class ServiceRegistryResource {
   public Response removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
                                        @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 
-    if (serviceGroup == null || service == null || interf == null || !entry.isValid()) {
+    /*if (serviceGroup == null || service == null || interf == null || !entry.isValid()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.");
     }
@@ -168,7 +166,8 @@ public class ServiceRegistryResource {
       return Response.status(Response.Status.OK).build();
     } else {
       return Response.status(Response.Status.NO_CONTENT).build();
-    }
+    }*/
+    return null;
   }
 
   /*

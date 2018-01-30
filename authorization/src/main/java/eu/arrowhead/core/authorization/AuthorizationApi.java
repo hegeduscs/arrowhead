@@ -56,7 +56,7 @@ public class AuthorizationApi {
 
     List<IntraCloudAuthorization> authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
-      log.info("AuthorizationApi:getIntraCloudAuthRights throws DataNotFoundException.");
+      log.info("getIntraCloudAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("IntraCloud authorization rights were not found in the database.");
     }
 
@@ -71,16 +71,15 @@ public class AuthorizationApi {
    */
 
   @GET
-  @Path("intracloud/systemgroup/{systemGroup}/systemname/{systemName}/services")
-  public Set<ArrowheadService> getSystemServices(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
+  @Path("intracloud/systemname/{systemName}/services")
+  public Set<ArrowheadService> getSystemServices(@PathParam("systemName") String systemName,
                                                  @QueryParam("provider_side") boolean providerSide) {
 
-    restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
     if (system == null) {
-      log.info("AuthorizationApi:getSystemServices throws DataNotFoundException.");
-      throw new DataNotFoundException("This System is not in the authorization database. (SG: " + systemGroup + ", SN: " + systemName + ")");
+      log.info("getSystemServices throws DataNotFoundException.");
+      throw new DataNotFoundException("The system " + systemName + " is not in the authorization database");
     }
 
     restrictionMap.clear();
@@ -91,7 +90,7 @@ public class AuthorizationApi {
     }
     List<IntraCloudAuthorization> authRightsList = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
     if (authRightsList.isEmpty()) {
-      log.info("AuthorizationApi:getSystemServices throws DataNotFoundException.");
+      log.info("getSystemServices throws DataNotFoundException.");
       throw new DataNotFoundException("IntraCloud authorization rights were not found in the database for this consumer system.");
     }
 
@@ -104,15 +103,14 @@ public class AuthorizationApi {
   }
 
   @GET
-  @Path("intracloud/systemgroup/{systemGroup}/systemname/{systemName}")
-  public List<IntraCloudAuthorization> getSystemAuthRights(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName) {
+  @Path("intracloud/systemname/{systemName}")
+  public List<IntraCloudAuthorization> getSystemAuthRights(@PathParam("systemName") String systemName) {
 
-    restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
     if (system == null) {
-      log.info("AuthorizationApi:getSystemAuthRights throws DataNotFoundException.");
-      throw new DataNotFoundException("This System is not in the authorization database. (SG: " + systemGroup + ", SN: " + systemName + ")");
+      log.info("getSystemAuthRights throws DataNotFoundException.");
+      throw new DataNotFoundException("The system " + systemName + " is not in the authorization database");
     }
 
     restrictionMap.clear();
@@ -120,31 +118,29 @@ public class AuthorizationApi {
     restrictionMap.put("provider", system);
     List<IntraCloudAuthorization> authRights = dm.getAllOfEither(IntraCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
-      log.info("AuthorizationApi:getSystemAuthRights throws DataNotFoundException.");
-      throw new DataNotFoundException("This System is not in the authorization database. " + system.toStringLog());
+      log.info("getSystemAuthRights throws DataNotFoundException.");
+      throw new DataNotFoundException("This System is not in the authorization database. " + system.getSystemName());
     }
     log.info("getSystemAuthRights returns");
     return authRights;
   }
 
   @GET
-  @Path("intracloud/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
-  public List<IntraCloudAuthorization> getServiceIntraAuthRights(@PathParam("serviceGroup") String serviceGroup,
-                                                                 @PathParam("serviceDefinition") String serviceDefinition) {
+  @Path("intracloud/servicedef/{serviceDefinition}")
+  public List<IntraCloudAuthorization> getServiceIntraAuthRights(@PathParam("serviceDefinition") String serviceDefinition) {
 
-    restrictionMap.put("serviceGroup", serviceGroup);
     restrictionMap.put("serviceDefinition", serviceDefinition);
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
-      log.info("AuthorizationApi:getServiceIntraAuthRights throws DataNotFoundException.");
-      throw new DataNotFoundException("This Service is not in the authorization database. (SG: " + serviceGroup + ", SD: " + serviceDefinition + ")");
+      log.info("getServiceIntraAuthRights throws DataNotFoundException.");
+      throw new DataNotFoundException("The service " + serviceDefinition + " is not in the authorization database");
     }
 
     restrictionMap.clear();
     restrictionMap.put("service", service);
     List<IntraCloudAuthorization> authRights = dm.getAll(IntraCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
-      log.info("AuthorizationApi:getServiceIntraAuthRights throws DataNotFoundException.");
+      log.info("getServiceIntraAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("This Service is not in the authorization database. " + service.toString());
     }
     log.info("getServiceIntraAuthRights returns");
@@ -163,15 +159,14 @@ public class AuthorizationApi {
   public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
 
     if (!entry.isValid()) {
-      log.info("AuthorizationApi:addSystemToAuthorized throws BadPayloadException.");
+      log.info("addSystemToAuthorized throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: Missing/incomplete consumer, serviceList or providerList in the entry payload.");
     }
 
-    restrictionMap.put("systemGroup", entry.getConsumer().getSystemGroup());
     restrictionMap.put("systemName", entry.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
-      log.info("Consumer System " + entry.getConsumer().toStringLog() + " was not in the database, saving it now.");
+      log.info("Consumer System " + entry.getConsumer().getSystemName() + " was not in the database, saving it now.");
       consumer = dm.save(entry.getConsumer());
     }
 
@@ -180,16 +175,14 @@ public class AuthorizationApi {
     List<IntraCloudAuthorization> savedAuthRights = new ArrayList<>();
     for (ArrowheadSystem providerSystem : entry.getProviderList()) {
       restrictionMap.clear();
-      restrictionMap.put("systemGroup", providerSystem.getSystemGroup());
       restrictionMap.put("systemName", providerSystem.getSystemName());
       retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
       if (retrievedSystem == null) {
-        log.info("Provider System " + providerSystem.toStringLog() + " was not in the database, saving it now.");
+        log.info("Provider System " + providerSystem.getSystemName() + " was not in the database, saving it now.");
         retrievedSystem = dm.save(providerSystem);
       }
       for (ArrowheadService service : entry.getServiceList()) {
         restrictionMap.clear();
-        restrictionMap.put("serviceGroup", service.getServiceGroup());
         restrictionMap.put("serviceDefinition", service.getServiceDefinition());
         retrievedService = dm.get(ArrowheadService.class, restrictionMap);
         if (retrievedService == null) {
@@ -240,11 +233,9 @@ public class AuthorizationApi {
    * @return JAX-RS Response with status code 200 (if delete is succesxfull) or 204 (if nothing happens).
    */
   @DELETE
-  @Path("intracloud/systemgroup/{systemGroup}/systemname/{systemName}")
-  public Response deleteSystemRelations(@PathParam("systemGroup") String systemGroup, @PathParam("systemName") String systemName,
-                                        @QueryParam("provider_side") boolean providerSide) {
+  @Path("intracloud/systemname/{systemName}")
+  public Response deleteSystemRelations(@PathParam("systemName") String systemName, @QueryParam("provider_side") boolean providerSide) {
 
-    restrictionMap.put("systemGroup", systemGroup);
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
     if (system == null) {
@@ -283,7 +274,7 @@ public class AuthorizationApi {
 
     List<InterCloudAuthorization> authRights = dm.getAll(InterCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
-      log.info("AuthorizationApi:getInterCloudAuthRights throws DataNotFoundException.");
+      log.info("getInterCloudAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("InterCloud authorization rights were not found in the database.");
     }
 
@@ -305,8 +296,8 @@ public class AuthorizationApi {
     restrictionMap.put("cloudName", cloudName);
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
-      log.info("AuthorizationApi:getCloudServices throws DataNotFoundException.");
-      throw new DataNotFoundException("Consumer Cloud is not in the authorization database. (OP: " + operator + ", CN: " + cloudName + ")");
+      log.info("getCloudServices throws DataNotFoundException.");
+      throw new DataNotFoundException("Consumer Cloud (" + operator + ":" + cloudName + ") is not in the authorization database");
     }
 
     restrictionMap.clear();
@@ -329,15 +320,15 @@ public class AuthorizationApi {
     restrictionMap.put("cloudName", cloudName);
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
-      log.info("AuthorizationApi:getCloudServices throws DataNotFoundException.");
-      throw new DataNotFoundException("Consumer Cloud is not in the authorization database. (OP: " + operator + ", CN: " + cloudName + ")");
+      log.info("getCloudServices throws DataNotFoundException.");
+      throw new DataNotFoundException("Consumer Cloud (" + operator + ":" + cloudName + ") is not in the authorization database");
     }
 
     restrictionMap.clear();
     restrictionMap.put("cloud", cloud);
     List<InterCloudAuthorization> authRightsList = dm.getAll(InterCloudAuthorization.class, restrictionMap);
     if (authRightsList.isEmpty()) {
-      log.info("AuthorizationApi:getCloudAuthRights throws DataNotFoundException.");
+      log.info("getCloudAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("This Cloud is not in the authorization database. " + cloud.toString());
     }
     log.info("getCloudAuthRights successfully returns " + authRightsList.size() + " auth entries.");
@@ -345,29 +336,26 @@ public class AuthorizationApi {
   }
 
   @GET
-  @Path("intercloud/servicegroup/{serviceGroup}/servicedef/{serviceDefinition}")
-  public List<InterCloudAuthorization> getServiceInterAuthRights(@PathParam("serviceGroup") String serviceGroup,
-                                                                 @PathParam("serviceDefinition") String serviceDefinition) {
+  @Path("intercloud/servicedef/{serviceDefinition}")
+  public List<InterCloudAuthorization> getServiceInterAuthRights(@PathParam("serviceDefinition") String serviceDefinition) {
 
-    restrictionMap.put("serviceGroup", serviceGroup);
     restrictionMap.put("serviceDefinition", serviceDefinition);
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
-      log.info("AuthorizationApi:getServiceInterAuthRights throws DataNotFoundException.");
-      throw new DataNotFoundException("This Service is not in the authorization database. (SG: " + serviceGroup + ", SD: " + serviceDefinition + ")");
+      log.info("getServiceInterAuthRights throws DataNotFoundException.");
+      throw new DataNotFoundException("Consumer Cloud (" + serviceDefinition + ") is not in the authorization database");
     }
 
     restrictionMap.clear();
     restrictionMap.put("service", service);
     List<InterCloudAuthorization> authRights = dm.getAll(InterCloudAuthorization.class, restrictionMap);
     if (authRights.isEmpty()) {
-      log.info("AuthorizationApi:getServiceInterAuthRights throws DataNotFoundException.");
+      log.info("getServiceInterAuthRights throws DataNotFoundException.");
       throw new DataNotFoundException("This Service is not in the authorization database. " + service.toString());
     }
     log.info("getServiceInterAuthRights returns");
     return authRights;
   }
-
 
   /**
    * Adds a new Cloud and its consumable Services to the database.
@@ -379,7 +367,7 @@ public class AuthorizationApi {
   public Response addCloudToAuthorized(InterCloudAuthEntry entry) {
 
     if (!entry.isPayloadUsable()) {
-      log.info("AuthorizationApi:addCloudToAuthorized throws BadPayloadException.");
+      log.info("addCloudToAuthorized throws BadPayloadException.");
       throw new BadPayloadException("Bad payload: Missing/incomplete cloud or serviceList in the entry payload.");
     }
 
@@ -395,7 +383,6 @@ public class AuthorizationApi {
     List<InterCloudAuthorization> savedAuthRights = new ArrayList<>();
     for (ArrowheadService service : entry.getServiceList()) {
       restrictionMap.clear();
-      restrictionMap.put("serviceGroup", service.getServiceGroup());
       restrictionMap.put("serviceDefinition", service.getServiceDefinition());
       retrievedService = dm.get(ArrowheadService.class, restrictionMap);
       if (retrievedService == null) {

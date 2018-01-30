@@ -1,28 +1,28 @@
-package eu.arrowhead.common.json.supportadapter;
+package eu.arrowhead.common.json.support;
 
-import eu.arrowhead.common.database.ArrowheadService;
-import eu.arrowhead.common.database.ArrowheadSystem;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 
 public class ServiceRegistryEntrySupport {
 
   private ArrowheadServiceSupport providedService;
-  private ArrowheadSystem provider;
+  private ArrowheadSystemSupport provider;
   private String serviceURI;
+
+  private int version = 1;
+  @JsonProperty("UDP")
+  private boolean UDP = false;
 
   public ServiceRegistryEntrySupport() {
   }
 
   public ServiceRegistryEntrySupport(ServiceRegistryEntry entry) {
-    ArrowheadService service = entry.getProvidedService();
-    ArrowheadServiceSupport legacyService = new ArrowheadServiceSupport(service.getServiceGroup(), service.getServiceDefinition(),
-                                                                        service.getInterfaces(), service.getServiceMetadata());
-    this.providedService = legacyService;
-    this.provider = entry.getProvider();
+    this.providedService = new ArrowheadServiceSupport(entry.getProvidedService());
+    this.provider = new ArrowheadSystemSupport(entry.getProvider());
     this.serviceURI = entry.getServiceURI();
   }
 
-  public ServiceRegistryEntrySupport(ArrowheadServiceSupport providedService, ArrowheadSystem provider, String serviceURI) {
+  public ServiceRegistryEntrySupport(ArrowheadServiceSupport providedService, ArrowheadSystemSupport provider, String serviceURI) {
     this.providedService = providedService;
     this.provider = provider;
     this.serviceURI = serviceURI;
@@ -36,11 +36,11 @@ public class ServiceRegistryEntrySupport {
     this.providedService = providedService;
   }
 
-  public ArrowheadSystem getProvider() {
+  public ArrowheadSystemSupport getProvider() {
     return provider;
   }
 
-  public void setProvider(ArrowheadSystem provider) {
+  public void setProvider(ArrowheadSystemSupport provider) {
     this.provider = provider;
   }
 
@@ -52,4 +52,19 @@ public class ServiceRegistryEntrySupport {
     this.serviceURI = serviceURI;
   }
 
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
+  }
+
+  public boolean isUDP() {
+    return UDP;
+  }
+
+  public void setUDP(boolean UDP) {
+    this.UDP = UDP;
+  }
 }

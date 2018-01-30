@@ -60,7 +60,7 @@ final class OrchestratorDriver {
    */
   static List<ServiceRegistryEntry> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
     // Compiling the URI and the request payload
-    String srUri = UriBuilder.fromPath(Utility.getServiceRegistryUri()).path("query").toString();
+    String srUri = UriBuilder.fromPath(OrchestratorMain.SERVICE_REGISTRY_URI).path("query").toString();
     ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch);
 
     // Sending the request, parsing the returned result
@@ -100,7 +100,7 @@ final class OrchestratorDriver {
 
   static Set<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, Set<ArrowheadSystem> providerSet) {
     // Compiling the URI and the request payload
-    String uri = UriBuilder.fromPath(Utility.getAuthorizationUri()).path("intracloud").toString();
+    String uri = UriBuilder.fromPath(OrchestratorMain.AUTH_CONTROL_URI).path("intracloud").toString();
     IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerSet, service);
 
     // Sending the request, parsing the returned result
@@ -230,7 +230,7 @@ final class OrchestratorDriver {
 
     if (retrievedList.isEmpty()) {
       log.error("queryOrchestrationStore DataNotFoundException");
-      throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.toStringLog(),
+      throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.getSystemName(),
                                       Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     } else {
       // Removing non-valid Store entries from the results
@@ -262,15 +262,16 @@ final class OrchestratorDriver {
 
   static List<OrchestrationStore> crossCheckStoreEntries(ServiceRequestForm srf, List<OrchestrationStore> entryList) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
+    List<ServiceRegistryEntry> srList = new ArrayList<>();
+    List<OrchestrationStore> toRemove = new ArrayList<>();
     Set<ArrowheadSystem> providerSystemsFromSR = new HashSet<>();
     Set<ArrowheadSystem> providerSystemsFromAuth;
-    List<OrchestrationStore> toRemove = new ArrayList<>();
 
     // If true, the Orchestration Store was queried for default entries, meaning the service is different for each store entry
     if (srf.getRequestedService() == null) {
       for (OrchestrationStore entry : entryList) {
         // Querying the Service Registry for the current service
-        List<ServiceRegistryEntry> srList = OrchestratorDriver
+        srList = OrchestratorDriver
             .queryServiceRegistry(entry.getService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
         // Compiling the systems that provide the current service
         for (ServiceRegistryEntry srEntry : srList) {
@@ -292,7 +293,7 @@ final class OrchestratorDriver {
     else {
       try {
         // Querying the Service Registry for the service
-        List<ServiceRegistryEntry> srList = OrchestratorDriver
+        srList = OrchestratorDriver
             .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
         // Compiling the systems that provide the service
         for (ServiceRegistryEntry srEntry : srList) {
@@ -333,6 +334,13 @@ final class OrchestratorDriver {
       }
     }
 
+    for (OrchestrationStore storeEntry : entryList) {
+      for (ServiceRegistryEntry srEntry : srList) {
+        if (storeEntry.getService().equals(srEntry.getProvidedService()) && storeEntry.getProviderSystem().equals(srEntry.getProvider())) {
+          storeEntry.setServiceURI(srEntry.getServiceURI());
+        }
+      }
+    }
     log.info("crossCheckStoreEntries returns " + entryList.size() + " orchestration store entries");
     return entryList;
   }
@@ -350,13 +358,11 @@ final class OrchestratorDriver {
    * @throws DataNotFoundException if none of the discovered <tt>ArrowheadCloud</tt>s returned back positive result
    */
   static GSDResult doGlobalServiceDiscovery(ArrowheadService requestedService, List<ArrowheadCloud> preferredClouds) {
-    // Compiling the URI and the request payload
-    String uri = Utility.getGatekeeperUri();
-    uri = UriBuilder.fromPath(uri).path("init_gsd").toString();
+    // Compiling the request payload
     GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds);
 
     // Sending the request, sanity check on the returned result
-    Response response = Utility.sendRequest(uri, "PUT", requestForm);
+    Response response = Utility.sendRequest(OrchestratorMain.GSD_SERVICE_URI, "PUT", requestForm);
     GSDResult result = response.readEntity(GSDResult.class);
     if (!result.isValid()) {
       log.error("doGlobalServiceDiscovery DataNotFoundException");
@@ -449,10 +455,8 @@ final class OrchestratorDriver {
     ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems,
                                                     negotiationFlags, null);
 
-    // Compiling the URI, sending the request, doing sanity check on the returned result
-    String uri = Utility.getGatekeeperUri();
-    uri = UriBuilder.fromPath(uri).path("init_icn").toString();
-    Response response = Utility.sendRequest(uri, "PUT", requestForm);
+    // Sending the request, doing sanity check on the returned result
+    Response response = Utility.sendRequest(OrchestratorMain.ICN_SERVICE_URI, "PUT", requestForm);
     ICNResult result = response.readEntity(ICNResult.class);
     if (!result.isValid()) {
       log.error("doInterCloudNegotiations DataNotFoundException");

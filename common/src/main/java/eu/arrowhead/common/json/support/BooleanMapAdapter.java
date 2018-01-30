@@ -1,6 +1,6 @@
-package eu.arrowhead.common.json.supportadapter;
+package eu.arrowhead.common.json.support;
 
-import eu.arrowhead.common.json.supportadapter.BooleanMapAdapter.MapLike;
+import eu.arrowhead.common.json.support.BooleanMapAdapter.MapLike;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

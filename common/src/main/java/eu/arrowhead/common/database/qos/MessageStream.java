@@ -123,8 +123,7 @@ public class MessageStream {
    */
 
   public String getCode() {
-    return provider.getSystemGroup() + "/" + provider.getSystemName() + "," + consumer.getSystemGroup() + "/" + consumer.getSystemName() + ","
-        + service.getServiceGroup() + "/" + service.getServiceDefinition();
+    return provider.getSystemName() + "," + consumer.getSystemName() + "," + service.getServiceDefinition();
   }
 
 }

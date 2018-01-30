@@ -67,11 +67,11 @@ public class Broker {
     this.address = address;
   }
 
-  public int getPort() {
+  public Integer getPort() {
     return port;
   }
 
-  public void setPort(int port) {
+  public void setPort(Integer port) {
     this.port = port;
   }
 

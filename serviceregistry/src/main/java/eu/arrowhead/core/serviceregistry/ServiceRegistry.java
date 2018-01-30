@@ -9,7 +9,6 @@ import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import com.github.danieln.dnssdjava.ServiceType;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import java.util.ArrayList;
@@ -17,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.log4j.Logger;
 
+//NOTE Block comments are here in this class to preserve legacy code without syntax error
 class ServiceRegistry {
 
   private static final Logger log = Logger.getLogger(ServiceRegistry.class.getName());
@@ -25,7 +25,7 @@ class ServiceRegistry {
 
     log.info("Entered SR register method.");
     //creating service name and type based on Arrowhead data
-    String serviceGroup = entry.getProvidedService().getServiceGroup();
+    /*String serviceGroup = entry.getProvidedService().getServiceGroup();
     String serviceDefinition = entry.getProvidedService().getServiceDefinition();
 
     //ArrowheadSystem is the instance name with underscores
@@ -69,7 +69,8 @@ class ServiceRegistry {
         throw new DnsException(ex.getMessage());
       }
     }
-    return allRegistered;
+    return allRegistered;*/
+    return false;
   }
 
   static boolean unRegister(ServiceRegistryEntry entry) {
@@ -77,7 +78,7 @@ class ServiceRegistry {
     log.info("Entered SR unregister method.");
 
     //creating service name and type based on Arrowhead data
-    String serviceGroup = entry.getProvidedService().getServiceGroup();
+    /*String serviceGroup = entry.getProvidedService().getServiceGroup();
     String serviceDefinition = entry.getProvidedService().getServiceDefinition();
 
     //ArrowheadSystem is the instance name with underscores
@@ -109,7 +110,8 @@ class ServiceRegistry {
         throw new DnsException(ex.getMessage());
       }
     }
-    return allRemoved;
+    return allRemoved;*/
+    return false;
   }
 
 
@@ -126,12 +128,13 @@ class ServiceRegistry {
     //building look-up service types for query
     for (String interf : queryForm.getService().getInterfaces()) {
 
-      String serviceType = "_ahf-" + queryForm.getService().getServiceDefinition() + "_" + queryForm.getService().getServiceGroup() + "_" + interf;
+      /*String serviceType = "_ahf-" + queryForm.getService().getServiceDefinition() + "_" + queryForm.getService().getServiceGroup() + "_" +
+      interf;*/
 
       //getting the instances for each interface on each transport layer
       Collection<ServiceName> instances = new ArrayList<>();
-      instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._tcp")));
-      instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._udp")));
+      /*instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._tcp")));
+      instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._udp")));*/
 
       for (ServiceName instance : instances) {
         ServiceData serviceInstance = browser.getServiceData(instance);
