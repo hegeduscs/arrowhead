@@ -48,9 +48,15 @@ public final class Utility {
   private static SSLContext sslContext;
   private static String SERVICE_REGISTRY_URI;
 
+  public static final String ORCH_SERVICE = "OrchestrationService";
+  public static final String AUTH_CONTROL_SERVICE = "AuthorizationControl";
+  public static final String TOKEN_GEN_SERVICE = "TokenGeneration";
+  public static final String GSD_SERVICE = "GlobalServiceDiscovery";
+  public static final String ICN_SERVICE = "InterCloudNegotiations";
+  public static final String GW_CONSUMER_SERVICE = "ConnectToConsumer";
+  public static final String GW_PROVIDER_SERVICE = "ConnectToProvider";
   public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
 
-  private static final String ARROWHEAD_EXCEPTION = "eu.arrowhead.common.exception.ArrowheadException";
   private static final String AUTH_EXCEPTION = "eu.arrowhead.common.exception.AuthenticationException";
   private static final String BAD_PAYLOAD_EXCEPTION = "eu.arrowhead.common.exception.BadPayloadException";
   private static final String NOT_FOUND_EXCEPTION = "eu.arrowhead.common.exception.DataNotFoundException";
@@ -126,7 +132,6 @@ public final class Utility {
       }
     } catch (ProcessingException e) {
       log.error("UnavailableServerException occurred at " + uri, e);
-      //TODO GK-ban és Orchban új kimenő filter, ami az ilyen exceptionöket látja, és hatására új SR queryt kezdeményez
       throw new UnavailableServerException("Could not get any response from: " + uri, Status.SERVICE_UNAVAILABLE.getStatusCode(),
                                            UnavailableServerException.class.getName(), Utility.class.toString(), e);
     }
@@ -143,7 +148,53 @@ public final class Utility {
     return sendRequest(uri, method, payload, null);
   }
 
-  private static String getUri(String address, int port, String serviceUri, boolean isSecure) {
+  private static void handleException(Response response, String uri) {
+    //The response body has to be extracted before the stream closes
+    String errorMessageBody = toPrettyJson(null, response.getEntity());
+    ErrorMessage errorMessage;
+    try {
+      errorMessage = response.readEntity(ErrorMessage.class);
+    } catch (RuntimeException e) {
+      log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
+      log.info("Request failed, response status code: " + response.getStatus());
+      log.info("Request failed, response body: " + errorMessageBody);
+      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.", e);
+    }
+    if (errorMessage == null) {
+      log.error("Unknown reason for RuntimeException at the sendRequest() method.");
+      log.info("Request failed, response status code: " + response.getStatus());
+      log.info("Request failed, response body: " + errorMessageBody);
+      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+    } else if (errorMessage.getExceptionType() == null) {
+      log.info("Request failed, response status code: " + response.getStatus());
+      log.info("Request failed, response body: " + errorMessageBody);
+      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+    } else {
+      log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
+      switch (errorMessage.getExceptionType()) {
+        case AUTH_EXCEPTION:
+          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                            errorMessage.getOrigin());
+        case BAD_PAYLOAD_EXCEPTION:
+          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                        errorMessage.getOrigin());
+        case NOT_FOUND_EXCEPTION:
+          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                          errorMessage.getOrigin());
+        case DUPLICATE_EXCEPTION:
+          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                            errorMessage.getOrigin());
+        case UNAVAILABLE_EXCEPTION:
+          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                               errorMessage.getOrigin());
+        default:
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+                                       errorMessage.getOrigin());
+      }
+    }
+  }
+
+  public static String getUri(String address, int port, String serviceUri, boolean isSecure) {
     if (address == null || serviceUri == null) {
       log.error("Address and serviceUri can not be null (Utility:getUri throws NPE)");
       throw new NullPointerException("Address and serviceUri can not be null (Utility:getUri throws NPE)");
@@ -163,134 +214,24 @@ public final class Utility {
     return ub.toString();
   }
 
-  //TODO SD-ket private static final stringbe rakni, és a 8 függvény getUri-hoz hasonlóan 1 függvényt hivjon meg
-  //note tuti kell? gateway függvényeknél string[] a return
-
-  public static String getOrchestratorServiceUri() {
-    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureOrchestrationService", Collections.singletonList("JSON"), null)
-        : new ArrowheadService("SecureOrchestrationService", Collections.singletonList("JSON"), secureServerMetadata);
+  public static String[] getServiceInfo(String serviceId) {
+    ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null)
+        : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
     ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
     Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
     ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-
     if (result.isValid()) {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
-      ArrowheadSystem orchestrator = entry.getProvider();
+      ArrowheadSystem coreSystem = entry.getProvider();
       boolean isSecure = entry.getMetadata().contains("security");
-      return getUri(orchestrator.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+      String serviceUri = getUri(coreSystem.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+      if (serviceId.equals(GW_CONSUMER_SERVICE) || serviceId.equals(GW_PROVIDER_SERVICE)) {
+        return new String[]{serviceUri, coreSystem.getSystemName(), coreSystem.getAddress(), coreSystem.getAuthenticationInfo()};
+      }
+      return new String[]{serviceUri};
     } else {
-      log.fatal("getOrchestratorServiceUri: query came back empty!");
-      throw new ServiceConfigurationError("Orchestration Service not found in the Service Registry!");
-    }
-  }
-
-  public static String getAuthControlServiceUri() {
-    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureAuthorizationControl", Collections.singletonList("JSON"), null)
-        : new ArrowheadService("SecureAuthorizationControl", Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
-    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
-    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-
-    if (result.isValid()) {
-      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
-      ArrowheadSystem authorization = entry.getProvider();
-      boolean isSecure = entry.getMetadata().contains("security");
-      return getUri(authorization.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
-    } else {
-      log.fatal("getAuthControlServiceUri: query came back empty!");
-      throw new ServiceConfigurationError("Authorization Control Service not found in the Service Registry!");
-    }
-  }
-
-  public static String getTokenGenerationServiceUri() {
-    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureTokenGeneration", Collections.singletonList("JSON"), null)
-        : new ArrowheadService("SecureTokenGeneration", Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
-    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
-    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-
-    if (result.isValid()) {
-      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
-      ArrowheadSystem authorization = entry.getProvider();
-      boolean isSecure = entry.getMetadata().contains("security");
-      return getUri(authorization.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
-    } else {
-      log.fatal("getTokenGenerationServiceUri: query came back empty!");
-      throw new ServiceConfigurationError("Token Generation Service not found in the Service Registry!");
-    }
-  }
-
-  public static String getGsdServiceUri() {
-    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureGlobalServiceDiscovery", Collections.singletonList("JSON"), null)
-        : new ArrowheadService("SecureGlobalServiceDiscovery", Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
-    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
-    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-
-    if (result.isValid()) {
-      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
-      ArrowheadSystem gatekeeper = entry.getProvider();
-      boolean isSecure = entry.getMetadata().contains("security");
-      return getUri(gatekeeper.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
-    } else {
-      log.fatal("getGsdServiceUri: query came back empty!");
-      throw new ServiceConfigurationError("GlobalServiceDiscovery Service not found in the Service Registry!");
-    }
-  }
-
-  public static String getIcnServiceUri() {
-    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureInterCloudNegotiations", Collections.singletonList("JSON"), null)
-        : new ArrowheadService("SecureInterCloudNegotiations", Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
-    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
-    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-
-    if (result.isValid()) {
-      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
-      ArrowheadSystem gatekeeper = entry.getProvider();
-      boolean isSecure = entry.getMetadata().contains("security");
-      return getUri(gatekeeper.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
-    } else {
-      log.fatal("getIcnServiceUri: query came back empty!");
-      throw new ServiceConfigurationError("InterCloudNegotiation Service not found in the Service Registry!");
-    }
-  }
-
-  public static String[] getGatewayProviderUri() {
-    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureConnectToProvider", Collections.singletonList("JSON"), null)
-        : new ArrowheadService("SecureConnectToProvider", Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
-    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
-    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-
-    if (result.isValid()) {
-      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
-      ArrowheadSystem gateway = entry.getProvider();
-      boolean isSecure = entry.getMetadata().contains("security");
-      String gatewayUri = getUri(gateway.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
-      return new String[]{gatewayUri, gateway.getSystemName(), gateway.getAddress(), gateway.getAuthenticationInfo()};
-    } else {
-      log.fatal("getGatewayProviderUri: query came back empty!");
-      throw new ServiceConfigurationError("GatewayProvider Service not found in the Service Registry!");
-    }
-  }
-
-  public static String[] getGatewayConsumerUri() {
-    ArrowheadService service = sslContext == null ? new ArrowheadService("InsecureConnectToConsumer", Collections.singletonList("JSON"), null)
-        : new ArrowheadService("SecureConnectToConsumer", Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
-    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
-    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-
-    if (result.isValid()) {
-      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
-      ArrowheadSystem gateway = entry.getProvider();
-      boolean isSecure = entry.getMetadata().contains("security");
-      String gatewayUri = getUri(gateway.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
-      return new String[]{gatewayUri, gateway.getSystemName(), gateway.getAddress(), gateway.getAuthenticationInfo()};
-    } else {
-      log.fatal("getGatewayConsumerUri: query came back empty!");
-      throw new ServiceConfigurationError("GatewayConsumer Service not found in the Service Registry!");
+      log.fatal("getServiceInfo: SR query came back empty for: " + serviceId);
+      throw new ServiceConfigurationError(serviceId + " (service) not found in the Service Registry!");
     }
   }
 
@@ -366,61 +307,12 @@ public final class Utility {
     return null;
   }
 
-  private static void handleException(Response response, String uri) {
-    //The response body has to be extracted before the stream closes
-    String errorMessageBody = toPrettyJson(null, response.getEntity());
-    ErrorMessage errorMessage;
-    try {
-      errorMessage = response.readEntity(ErrorMessage.class);
-    } catch (RuntimeException e) {
-      log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
-      log.info("Request failed, response status code: " + response.getStatus());
-      log.info("Request failed, response body: " + errorMessageBody);
-      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.", e);
-    }
-    if (errorMessage == null) {
-      log.error("Unknown reason for RuntimeException at the sendRequest() method.");
-      log.info("Request failed, response status code: " + response.getStatus());
-      log.info("Request failed, response body: " + errorMessageBody);
-      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
-    } else if (errorMessage.getExceptionType() == null) {
-      log.info("Request failed, response status code: " + response.getStatus());
-      log.info("Request failed, response body: " + errorMessageBody);
-      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+  public static String createSD(String baseSD, boolean isSecure) {
+    if (isSecure) {
+      return "Secure" + baseSD;
     } else {
-      log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
-      switch (errorMessage.getExceptionType()) {
-        case AUTH_EXCEPTION:
-          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                            errorMessage.getOrigin());
-        case BAD_PAYLOAD_EXCEPTION:
-          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                        errorMessage.getOrigin());
-        case NOT_FOUND_EXCEPTION:
-          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                          errorMessage.getOrigin());
-        case DUPLICATE_EXCEPTION:
-          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                            errorMessage.getOrigin());
-        case UNAVAILABLE_EXCEPTION:
-          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                               errorMessage.getOrigin());
-        default:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                       errorMessage.getOrigin());
-      }
+      return "Insecure" + baseSD;
     }
   }
-
-  // IMPORTANT: only use this function with RuntimeExceptions that have a public String constructor
-  /*
-   * private static <T extends RuntimeException> void throwExceptionAgain(Class<T>
-   * exceptionType, String message) { try { throw
-   * exceptionType.getConstructor(String.class).newInstance(message); } //
-   * Exception is thrown if the given exception type does not have an accessible
-   * constructor which accepts a String argument. catch (InstantiationException |
-   * IllegalAccessException | IllegalArgumentException | InvocationTargetException
-   * | NoSuchMethodException | SecurityException e) { e.printStackTrace(); } }
-   */
 
 }

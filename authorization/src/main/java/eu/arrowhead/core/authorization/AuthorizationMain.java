@@ -193,20 +193,15 @@ public class AuthorizationMain {
   }
 
   private static void useSRService(boolean isSecure, boolean registering) {
-    URI uri;
-    ArrowheadService authControlService;
-    ArrowheadService tokenGenerationService;
-    ArrowheadSystem authSystem;
+    URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
+    ArrowheadSystem authSystem = new ArrowheadSystem("authorization", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
+    ArrowheadService authControlService = new ArrowheadService(Utility.createSD(Utility.AUTH_CONTROL_SERVICE, isSecure),
+                                                               Collections.singletonList("JSON"), null);
+    ArrowheadService tokenGenerationService = new ArrowheadService(Utility.createSD(Utility.TOKEN_GEN_SERVICE, isSecure),
+                                                                   Collections.singletonList("JSON"), null);
     if (isSecure) {
-      uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-      authControlService = new ArrowheadService("SecureAuthorizationControl", Collections.singletonList("JSON"), Utility.secureServerMetadata);
-      tokenGenerationService = new ArrowheadService("SecureTokenGeneration", Collections.singletonList("JSON"), Utility.secureServerMetadata);
-      authSystem = new ArrowheadSystem("authorization", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
-    } else {
-      uri = UriBuilder.fromUri(BASE_URI).build();
-      authControlService = new ArrowheadService("InsecureAuthorizationControl", Collections.singletonList("JSON"), null);
-      tokenGenerationService = new ArrowheadService("InsecureTokenGeneration", Collections.singletonList("JSON"), null);
-      authSystem = new ArrowheadSystem("authorization", uri.getHost(), uri.getPort(), null);
+      authControlService.setServiceMetadata(Utility.secureServerMetadata);
+      tokenGenerationService.setServiceMetadata(Utility.secureServerMetadata);
     }
 
     //Preparing the payloads
@@ -237,6 +232,7 @@ public class AuthorizationMain {
     } else {
       Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", authControlEntry);
       Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
+      System.out.println("Authorization services deregistered.");
     }
   }
 

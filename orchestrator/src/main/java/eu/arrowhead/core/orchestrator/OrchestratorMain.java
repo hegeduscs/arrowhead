@@ -193,17 +193,11 @@ public class OrchestratorMain {
   }
 
   private static void useSRService(boolean isSecure, boolean registering) {
-    URI uri;
-    ArrowheadService orchService;
-    ArrowheadSystem orchSystem;
+    URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
+    ArrowheadSystem orchSystem = new ArrowheadSystem("orchestrator", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
+    ArrowheadService orchService = new ArrowheadService(Utility.createSD(Utility.ORCH_SERVICE, isSecure), Collections.singletonList("JSON"), null);
     if (isSecure) {
-      uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-      orchService = new ArrowheadService("SecureOrchestrationService", Collections.singletonList("JSON"), Utility.secureServerMetadata);
-      orchSystem = new ArrowheadSystem("orchestrator", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
-    } else {
-      uri = UriBuilder.fromUri(BASE_URI).build();
-      orchService = new ArrowheadService("InsecureOrchestrationService", Collections.singletonList("JSON"), null);
-      orchSystem = new ArrowheadSystem("orchestrator", uri.getHost(), uri.getPort(), null);
+      orchService.setServiceMetadata(Utility.secureServerMetadata);
     }
 
     //Preparing the payload
@@ -222,14 +216,16 @@ public class OrchestratorMain {
       }
     } else {
       Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", orchEntry);
+      System.out.println("Orchestration service deregistered.");
     }
   }
 
-  private static void getCoreSystemServiceUris() {
-    AUTH_CONTROL_URI = Utility.getAuthControlServiceUri();
-    TOKEN_GEN_URI = Utility.getTokenGenerationServiceUri();
-    GSD_SERVICE_URI = Utility.getGsdServiceUri();
-    ICN_SERVICE_URI = Utility.getIcnServiceUri();
+  public static void getCoreSystemServiceUris() {
+    AUTH_CONTROL_URI = Utility.getServiceInfo(Utility.AUTH_CONTROL_SERVICE)[0];
+    TOKEN_GEN_URI = Utility.getServiceInfo(Utility.TOKEN_GEN_SERVICE)[0];
+    GSD_SERVICE_URI = Utility.getServiceInfo(Utility.GSD_SERVICE)[0];
+    ICN_SERVICE_URI = Utility.getServiceInfo(Utility.ICN_SERVICE)[0];
+    System.out.println("Core system URLs acquired.");
   }
 
   private static void shutdown() {

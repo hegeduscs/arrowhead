@@ -37,7 +37,7 @@ public class ServiceRegistryEntry {
 
   //non-mandatory fields for JSON
   @Column(name = "port")
-  private int port;
+  private Integer port;
 
   @Column(name = "service_uri")
   private String serviceURI;
@@ -47,7 +47,7 @@ public class ServiceRegistryEntry {
   private String metadata;
 
   @Column(name = "version")
-  private int version = 1;
+  private Integer version = 1;
 
   @Column(name = "udp")
   private boolean UDP = false;
@@ -73,15 +73,15 @@ public class ServiceRegistryEntry {
     this.serviceURI = serviceURI;
   }
 
-  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, int port, String serviceURI) {
+  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI) {
     this.providedService = providedService;
     this.provider = provider;
     this.port = port;
     this.serviceURI = serviceURI;
   }
 
-  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, int port, String serviceURI, String metadata, int version,
-                              boolean UDP) {
+  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, String metadata,
+                              Integer version, boolean UDP) {
     this.providedService = providedService;
     this.provider = provider;
     this.port = port;
@@ -116,11 +116,11 @@ public class ServiceRegistryEntry {
     this.provider = provider;
   }
 
-  public int getPort() {
+  public Integer getPort() {
     return port;
   }
 
-  public void setPort(int port) {
+  public void setPort(Integer port) {
     this.port = port;
   }
 
@@ -140,11 +140,11 @@ public class ServiceRegistryEntry {
     this.metadata = metadata;
   }
 
-  public int getVersion() {
+  public Integer getVersion() {
     return version;
   }
 
-  public void setVersion(int version) {
+  public void setVersion(Integer version) {
     this.version = version;
   }
 
@@ -205,7 +205,7 @@ public class ServiceRegistryEntry {
         this.providedService.getServiceMetadata().put(pair[0], pair[1]);
       }
     }
-    if (port != 0 && provider.getPort() == 0) {
+    if (port != null && provider.getPort() == 0) {
       provider.setPort(port);
     }
   }

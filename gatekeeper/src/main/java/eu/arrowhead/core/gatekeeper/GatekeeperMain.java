@@ -90,16 +90,20 @@ public class GatekeeperMain {
             case "insecure":
               inboundServer = startServer(INBOUND_BASE_URI, true);
               outboundServer = startServer(OUTBOUND_BASE_URI, false);
+              useSRService(false, true);
               break;
             case "secure":
               inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true);
               outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false);
+              useSRService(true, true);
               break;
             case "both":
               inboundServer = startServer(INBOUND_BASE_URI, true);
               outboundServer = startServer(OUTBOUND_BASE_URI, false);
               inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true);
               outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false);
+              useSRService(false, true);
+              useSRService(true, true);
               break;
             default:
               log.fatal("Unknown server mode: " + args[i]);
@@ -110,6 +114,7 @@ public class GatekeeperMain {
     if (!serverModeSet) {
       inboundServer = startServer(INBOUND_BASE_URI, true);
       outboundServer = startServer(OUTBOUND_BASE_URI, false);
+      useSRService(false, true);
     }
     Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
     getCoreSystemServiceUris();
@@ -239,20 +244,13 @@ public class GatekeeperMain {
   }
 
   private static void useSRService(boolean isSecure, boolean registering) {
-    URI uri;
-    ArrowheadService gsdService;
-    ArrowheadService icnService;
-    ArrowheadSystem gkSystem;
+    URI uri = isSecure ? UriBuilder.fromUri(OUTBOUND_BASE_URI_SECURED).build() : UriBuilder.fromUri(OUTBOUND_BASE_URI).build();
+    ArrowheadSystem gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
+    ArrowheadService gsdService = new ArrowheadService(Utility.createSD(Utility.GSD_SERVICE, isSecure), Collections.singletonList("JSON"), null);
+    ArrowheadService icnService = new ArrowheadService(Utility.createSD(Utility.ICN_SERVICE, isSecure), Collections.singletonList("JSON"), null);
     if (isSecure) {
-      uri = UriBuilder.fromUri(OUTBOUND_BASE_URI_SECURED).build();
-      gsdService = new ArrowheadService("SecureGlobalServiceDiscovery", Collections.singletonList("JSON"), Utility.secureServerMetadata);
-      icnService = new ArrowheadService("SecureInterCloudNegotiations", Collections.singletonList("JSON"), Utility.secureServerMetadata);
-      gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
-    } else {
-      uri = UriBuilder.fromUri(OUTBOUND_BASE_URI).build();
-      gsdService = new ArrowheadService("InsecureGlobalServiceDiscovery", Collections.singletonList("JSON"), null);
-      icnService = new ArrowheadService("InsecureInterCloudNegotiations", Collections.singletonList("JSON"), null);
-      gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), null);
+      gsdService.setServiceMetadata(Utility.secureServerMetadata);
+      icnService.setServiceMetadata(Utility.secureServerMetadata);
     }
 
     //Preparing the payload
@@ -283,14 +281,15 @@ public class GatekeeperMain {
     } else {
       Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", gsdEntry);
       Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", icnEntry);
+      System.out.println("Gatekeeper services deregistered.");
     }
   }
 
-  private static void getCoreSystemServiceUris() {
-    AUTH_CONTROL_URI = Utility.getAuthControlServiceUri();
-    GATEWAY_CONSUMER_URI = Utility.getGatewayConsumerUri();
-    GATEWAY_PROVIDER_URI = Utility.getGatewayProviderUri();
-    ORCHESTRATOR_URI = Utility.getOrchestratorServiceUri();
+  public static void getCoreSystemServiceUris() {
+    AUTH_CONTROL_URI = Utility.getServiceInfo(Utility.AUTH_CONTROL_SERVICE)[0];
+    GATEWAY_CONSUMER_URI = Utility.getServiceInfo(Utility.GW_CONSUMER_SERVICE);
+    GATEWAY_PROVIDER_URI = Utility.getServiceInfo(Utility.GW_PROVIDER_SERVICE);
+    ORCHESTRATOR_URI = Utility.getServiceInfo(Utility.ORCH_SERVICE)[0];
     System.out.println("Core system URLs acquired.");
   }
 
@@ -306,10 +305,12 @@ public class GatekeeperMain {
     if (outboundServer != null) {
       log.info("Stopping server at: " + OUTBOUND_BASE_URI);
       outboundServer.shutdown();
+      useSRService(false, false);
     }
     if (outboundSecureServer != null) {
       log.info("Stopping server at: " + OUTBOUND_BASE_URI_SECURED);
       outboundSecureServer.shutdown();
+      useSRService(true, false);
     }
     System.out.println("Gatekeeper Servers stopped");
   }
