@@ -68,17 +68,6 @@ public class SecureSocketThread extends Thread {
             outProvider.write(decryptedMessage);
             log.info("Sending the request to Provider");
 
-            // get the answer from Provider
-            byte[] inputFromProvider = new byte[1024];
-            byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
-            System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
-            log.info("Sending the response to Consumer");
-            GatewayEncryption response = GatewayService.encryptMessage(inputFromProviderFinal,
-                connectionRequest.getConsumerGWPublicKey());
-            channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedAESKey());
-            channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedIVAndMessage());
-            // channel.basicPublish("", controlQueueName.concat("_resp"), null,
-            // "close".getBytes());
           }
         }
       };
@@ -104,6 +93,16 @@ public class SecureSocketThread extends Thread {
         }
         channel.basicConsume(queueName, true, consumer);
         channel.basicConsume(controlQueueName, true, controlConsumer);
+        
+        // Get the answer from Provider
+        byte[] inputFromProvider = new byte[1024];
+        byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
+        System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
+        log.info("Sending the response to Consumer");
+        GatewayEncryption response = GatewayService.encryptMessage(inputFromProviderFinal,
+            connectionRequest.getConsumerGWPublicKey());
+        channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedAESKey());
+        channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedIVAndMessage());
       }
 
     } catch (IOException | NegativeArraySizeException e) {

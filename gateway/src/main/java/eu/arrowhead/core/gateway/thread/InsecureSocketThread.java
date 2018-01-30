@@ -22,7 +22,7 @@ public class InsecureSocketThread extends Thread {
   private String controlQueueName;
   private ConnectToProviderRequest connectionRequest;
   private Socket providerSocket;
-  private static byte[] actualMessage;
+  
   private static Boolean isFirstMessage = true;
   private static final Logger log = Logger.getLogger(InsecureSocketThread.class.getName());
 
@@ -52,7 +52,8 @@ public class InsecureSocketThread extends Thread {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
             throws IOException {
-          actualMessage = body;
+          outProvider.write(body);
+          log.info("Sending the request to Provider");
         }
       };
 
@@ -69,8 +70,6 @@ public class InsecureSocketThread extends Thread {
       while (true) {
         channel.basicConsume(queueName, true, consumer);
         channel.basicConsume(controlQueueName, true, controlConsumer);
-        outProvider.write(actualMessage);
-        log.info("Sending the request to Provider");
         // get the answer from Provider
         byte[] inputFromProvider = new byte[1024];
         byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
