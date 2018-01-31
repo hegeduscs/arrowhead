@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 AITIA International Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * This work is part of the Productive 4.0 innovation project, which receives grants from the
+ * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ * national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.Utility;
@@ -51,8 +78,7 @@ final class OrchestratorService {
 
     try {
       // Querying the Service Registry
-      List<ServiceRegistryEntry> srList = OrchestratorDriver
-          .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+      List<ServiceRegistryEntry> srList = OrchestratorDriver.queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
 
       // Cross-checking the SR response with the Authorization
       Set<ArrowheadSystem> providerSystems = new HashSet<>();
@@ -180,8 +206,7 @@ final class OrchestratorService {
 
       // If the for-loop finished but we still could not return a result, we throw a DataNotFoundException.
       log.error("orchestrationFromStore throws final DataNotFoundException");
-      throw new DataNotFoundException("OrchestrationFromStore failed with all the queried (" + entryList.size() + ") Store entries.",
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
+      throw new DataNotFoundException("OrchestrationFromStore failed with all the queried (" + entryList.size() + ") Store entries.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
     }
   }
 
@@ -216,8 +241,7 @@ final class OrchestratorService {
       // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
       List<ArrowheadSystem> preferredSystems = new ArrayList<>();
       for (PreferredProvider provider : srf.getPreferredProviders()) {
-        if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
-            .getProviderSystem().isValid()) {
+        if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider.getProviderSystem().isValid()) {
           preferredSystems.add(provider.getProviderSystem());
         }
       }
@@ -239,8 +263,7 @@ final class OrchestratorService {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     // Querying the Service Registry to get the list of Provider Systems
-    List<ServiceRegistryEntry> srList = OrchestratorDriver
-        .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+    List<ServiceRegistryEntry> srList = OrchestratorDriver.queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
 
     // If needed, removing the non-preferred providers from the SR response. (If needed, matchmaking is done after this at the request sender Cloud.)
     if (orchestrationFlags.get("onlyPreferred")) {
@@ -283,8 +306,7 @@ final class OrchestratorService {
     // Store based orchestration is "hard-wired", meaning only the stored provider System is acceptable
     if (storeOrchestration) {
       log.error("icnMatchmaking DataNotFoundException");
-      throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.",
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
+      throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
     }
     // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
     else {
@@ -301,8 +323,7 @@ final class OrchestratorService {
    *     requested.
    * @param instructions Optional additional information, which can be passed back to the requester <tt>ArrowheadSystem</tt>
    */
-  private static OrchestrationResponse compileOrchestrationResponse(List<ServiceRegistryEntry> srList, ServiceRequestForm srf,
-                                                                    List<String> instructions) {
+  private static OrchestrationResponse compileOrchestrationResponse(List<ServiceRegistryEntry> srList, ServiceRequestForm srf, List<String> instructions) {
     // Arrange token generation for every provider, if it was requested in the service metadata
     Map<String, String> metadata = srf.getRequestedService().getServiceMetadata();
     TokenGenerationResponse tokenResponse = null;
@@ -314,8 +335,7 @@ final class OrchestratorService {
       }
 
       // Getting the Authorization token generation resource URI, compiling the request payload
-      TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
-                                                                       srf.getRequestedService(), 0);
+      TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList, srf.getRequestedService(), 0);
       //Sending request, parsing response
       Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
       tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
@@ -347,8 +367,7 @@ final class OrchestratorService {
     }
 
     for (OrchestrationForm of : ofList) {
-      log.debug("Service: " + of.getService().toString() + " System: " + of.getProvider().getSystemName() + " ServiceURI: " + of.getServiceURI()
-                    + " Instruction: " + of.getInstruction() + " Token: " + of.getAuthorizationToken() + " Signature: " + of.getSignature());
+      log.debug("Service: " + of.getService().toString() + " System: " + of.getProvider().getSystemName() + " ServiceURI: " + of.getServiceURI() + " Instruction: " + of.getInstruction() + " Token: " + of.getAuthorizationToken() + " Signature: " + of.getSignature());
     }
     log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");
     return new OrchestrationResponse(ofList);

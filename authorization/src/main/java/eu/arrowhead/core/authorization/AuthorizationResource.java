@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 AITIA International Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * This work is part of the Productive 4.0 innovation project, which receives grants from the
+ * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ * national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.core.authorization;
 
 import eu.arrowhead.common.DatabaseManager;
@@ -63,8 +90,8 @@ public class AuthorizationResource {
   public Response isSystemAuthorized(IntraCloudAuthRequest request, @Context ContainerRequestContext requestContext) {
     if (!request.isValid()) {
       log.error("isSystemAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.",
-                                    Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
+      throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.", Status.BAD_REQUEST
+          .getStatusCode(), BadPayloadException.class.getName(),
                                     requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
@@ -72,8 +99,7 @@ public class AuthorizationResource {
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
-      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().getSystemName(),
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().getSystemName(), Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
                                       requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
@@ -112,8 +138,7 @@ public class AuthorizationResource {
       }
     }
 
-    log.info(
-        "IntraCloud auth check for consumer " + request.getConsumer().getSystemName() + " returns with " + authorizedCount + " possible provider");
+    log.info("IntraCloud auth check for consumer " + request.getConsumer().getSystemName() + " returns with " + authorizedCount + " possible provider");
     response.setAuthorizationMap(authorizationState);
     return Response.status(Status.OK).entity(response).build();
   }
@@ -139,8 +164,8 @@ public class AuthorizationResource {
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
       log.error("Requester cloud is not in the database. isCloudAuthorized DataNotFoundException");
-      throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString(),
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+      throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString(), Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+
                                       requestContext.getUriInfo().getAbsolutePath().toString());
     }
 

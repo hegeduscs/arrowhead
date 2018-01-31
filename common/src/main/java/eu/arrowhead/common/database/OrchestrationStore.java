@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 AITIA International Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * This work is part of the Productive 4.0 innovation project, which receives grants from the
+ * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ * national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,8 +61,7 @@ import org.hibernate.annotations.Type;
  * @author Umlauf Zoltán
  */
 @Entity
-@Table(name = "orchestration_store", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
+@Table(name = "orchestration_store", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
 @Check(constraints = "priority >= 1")
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
@@ -91,8 +117,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   public OrchestrationStore() {
   }
 
-  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            int priority) {
+  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, int priority) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;
@@ -100,8 +125,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.priority = priority;
   }
 
-  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
+  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
                             String serviceURI) {
     this.service = service;
     this.consumer = consumer;
@@ -220,8 +244,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
    */
   @JsonIgnore
   public boolean isValid() {
-    return service != null && consumer != null && providerSystem != null && service.isValid() && consumer.isValid() && providerSystem.isValid()
-        && priority >= 1 && (!defaultEntry || providerCloud == null);
+    return service != null && consumer != null && providerSystem != null && service.isValid() && consumer.isValid() && providerSystem.isValid() && priority >= 1 && (!defaultEntry || providerCloud == null);
+
   }
 
   /**

@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 AITIA International Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * This work is part of the Productive 4.0 innovation project, which receives grants from the
+ * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ * national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.core.gateway;
 
 import com.rabbitmq.client.AlreadyClosedException;
@@ -45,8 +72,7 @@ public class GatewayService {
   private static final int keySize = 16;
   private static final int minPort = Integer.parseInt(GatewayMain.getProp().getProperty("min_port"));
   private static final int maxPort = Integer.parseInt(GatewayMain.getProp().getProperty("max_port"));
-  private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
-      .initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);
+  private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService.initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);
   protected static ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
 
   private GatewayService() throws AssertionError {
@@ -85,8 +111,8 @@ public class GatewayService {
 
     } catch (IOException | NullPointerException e) {
       log.error("Creating the channel to the Broker failed");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(), GatewayService.class
+          .toString(), e);
 
     }
     return gatewaySession;
@@ -105,8 +131,7 @@ public class GatewayService {
       cipherRSA.init(Cipher.ENCRYPT_MODE, publicKey);
     } catch (GeneralSecurityException e) {
       log.fatal("The initialization of the RSA cipher failed.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(), GatewayService.class.toString(), e);
     }
 
     // Creating the random IV (Initialization vector)
@@ -136,8 +161,7 @@ public class GatewayService {
 
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES encryption.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(), GatewayService.class.toString(), e);
     }
   }
 
@@ -148,15 +172,14 @@ public class GatewayService {
     byte[] decryptedMessage;
 
     try {
-      KeyStore keyStore = SecurityUtils
-          .loadKeyStore(GatewayMain.getProp().getProperty("keystore"), GatewayMain.getProp().getProperty("keystorepass"));
+      KeyStore keyStore = SecurityUtils.loadKeyStore(GatewayMain.getProp().getProperty("keystore"), GatewayMain.getProp().getProperty("keystorepass"
+                                                                                                                                          + ""));
       privateKey = SecurityUtils.getPrivateKey(keyStore, GatewayMain.getProp().getProperty("keystorepass"));
       cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
       cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
     } catch (GeneralSecurityException e) {
       log.fatal("The initialization of the RSA cipher failed.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(), GatewayService.class.toString(), e);
     }
 
     try {
@@ -178,8 +201,8 @@ public class GatewayService {
       decryptedMessage = cipherAES.doFinal(encryptedBytes);
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES decryption.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(), GatewayService.class
+          .toString(), e);
     }
 
     return decryptedMessage;
@@ -250,8 +273,7 @@ public class GatewayService {
     return serverSocketPort;
   }
 
-  public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket, ServerSocket serverSocket,
-                                       String queueName) {
+  public static void consumerSideClose(GatewaySession gatewaySession, Integer port, Socket consumerSocket, ServerSocket serverSocket, String queueName) {
     // Setting serverSocket free
     portAllocationMap.put(port, true);
     activeSessions.remove(queueName);

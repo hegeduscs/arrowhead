@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 AITIA International Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * This work is part of the Productive 4.0 innovation project, which receives grants from the
+ * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ * national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.common;
 
 import com.google.gson.Gson;
@@ -105,8 +132,8 @@ public final class Utility {
       } else {
         log.error("sendRequest() method throws AuthenticationException");
         throw new AuthenticationException(
-            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), Utility.class.toString());
+            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.", Status
+            .UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), Utility.class.toString());
       }
     } else {
       client = ClientBuilder.newClient(configuration);
@@ -174,23 +201,18 @@ public final class Utility {
       log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
       switch (errorMessage.getExceptionType()) {
         case AUTH_EXCEPTION:
-          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                            errorMessage.getOrigin());
+          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
         case BAD_PAYLOAD_EXCEPTION:
-          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                        errorMessage.getOrigin());
+          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
         case NOT_FOUND_EXCEPTION:
-          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                          errorMessage.getOrigin());
+          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
         case DUPLICATE_EXCEPTION:
-          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                            errorMessage.getOrigin());
+          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
         case UNAVAILABLE_EXCEPTION:
           throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
                                                errorMessage.getOrigin());
         default:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                       errorMessage.getOrigin());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
       }
     }
   }
@@ -216,8 +238,7 @@ public final class Utility {
   }
 
   public static String[] getServiceInfo(String serviceId) {
-    ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null)
-        : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
+    ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null) : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
     ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
     Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
     ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
@@ -241,8 +262,7 @@ public final class Utility {
 
     List<String> uriList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
-      uriList.add(
-          getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), cloud.getCloud().isSecure()));
+      uriList.add(getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), cloud.getCloud().isSecure()));
     }
 
     return uriList;
@@ -252,8 +272,7 @@ public final class Utility {
     List<OwnCloud> cloudList = dm.getAll(OwnCloud.class, null);
     if (cloudList.isEmpty()) {
       log.error("Utility:getOwnCloud not found in the database.");
-      throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.",
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), Utility.class.toString());
+      throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), Utility.class.toString());
     }
     if (cloudList.size() > 1) {
       log.warn("own_cloud table should NOT have more than 1 rows.");
@@ -281,8 +300,7 @@ public final class Utility {
         throw new ServiceConfigurationError(url + errorMessage);
       }
       if ((isSecure && "http".equals(uri.getScheme())) || (!isSecure && "https".equals(uri.getScheme()))) {
-        throw new ServiceConfigurationError("Secure URIs should use the HTTPS protocol and insecure URIs should use the HTTP protocol. Please fix "
-                                                + "the following URL accordingly in the properties file: " + url);
+        throw new ServiceConfigurationError("Secure URIs should use the HTTPS protocol and insecure URIs should use the HTTP protocol. Please fix " + "the following URL accordingly in the properties file: " + url);
       }
     } catch (URISyntaxException e) {
       throw new ServiceConfigurationError(url + errorMessage);

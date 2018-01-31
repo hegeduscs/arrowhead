@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 AITIA International Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * This work is part of the Productive 4.0 innovation project, which receives grants from the
+ * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ * national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.core.gatekeeper;
 
 import eu.arrowhead.common.DatabaseManager;
@@ -123,8 +150,8 @@ public class GatekeeperOutboundResource {
   public Response ICNRequest(ICNRequestForm requestForm, @Context ContainerRequestContext requestContext) {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(), BadPayloadException
+          .class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     //TODO beolvasást mainbe kiszervezni
@@ -134,10 +161,8 @@ public class GatekeeperOutboundResource {
     requestForm.getNegotiationFlags().put("useGateway", useGateway);
 
     // Compiling the payload and then getting the request URI
-    ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
-                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-                                              requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout,
-                                              GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
+    ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(), requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
+                                              requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout, GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
 
     //NOTE isSecure false constant is temporary
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
@@ -159,16 +184,14 @@ public class GatekeeperOutboundResource {
     Map<String, String> metadata = requestForm.getRequestedService().getServiceMetadata();
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
     GatewayConnectionInfo gwConnInfo = icnEnd.getGatewayConnInfo();
-    ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(), gwConnInfo.getBrokerPort(),
-                                                                              gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
+    ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(), gwConnInfo.getBrokerPort(), gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
                                                                               requestForm.getRequesterSystem(),
                                                                               icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
                                                                               requestForm.getTargetCloud(), requestForm.getRequestedService(),
                                                                               isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
 
     // Sending the gateway request and parsing the response
-    Response gatewayResponse = Utility
-        .sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
+    Response gatewayResponse = Utility.sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
     ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
 
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();

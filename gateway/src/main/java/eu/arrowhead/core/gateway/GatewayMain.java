@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 AITIA International Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * This work is part of the Productive 4.0 innovation project, which receives grants from the
+ * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ * national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.core.gateway;
 
 import eu.arrowhead.common.Utility;
@@ -169,15 +196,13 @@ public class GatewayMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
-      throw new AuthenticationException(
-          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      throw new AuthenticationException("Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-    final HttpServer server = GrizzlyHttpServerFactory
-        .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
+    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
     server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
     server.start();
     return server;
@@ -186,10 +211,9 @@ public class GatewayMain {
   private static void useSRService(boolean isSecure, boolean registering) {
     URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
     ArrowheadSystem gatewaySystem = new ArrowheadSystem("gateway", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
-    ArrowheadService providerService = new ArrowheadService(Utility.createSD(Utility.GW_PROVIDER_SERVICE, isSecure),
-                                                            Collections.singletonList("JSON"), null);
-    ArrowheadService consumerService = new ArrowheadService(Utility.createSD(Utility.GW_CONSUMER_SERVICE, isSecure),
-                                                            Collections.singletonList("JSON"), null);
+    ArrowheadService providerService = new ArrowheadService(Utility.createSD(Utility.GW_PROVIDER_SERVICE, isSecure), Collections.singletonList
+        ("JSON"), null);
+    ArrowheadService consumerService = new ArrowheadService(Utility.createSD(Utility.GW_CONSUMER_SERVICE, isSecure), Collections.singletonList("JSON"), null);
     ArrowheadService mgmtService = new ArrowheadService(Utility.createSD(Utility.GW_SESSION_MGMT, isSecure), Collections.singletonList("JSON"), null);
     if (isSecure) {
       providerService.setServiceMetadata(Utility.secureServerMetadata);
