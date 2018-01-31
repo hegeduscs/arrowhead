@@ -139,7 +139,6 @@ public class GatewayService {
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
                                    GatewayService.class.toString(), e);
     }
-
   }
 
   public static byte[] decryptMessage(GatewayEncryption gatewayEncryption) {

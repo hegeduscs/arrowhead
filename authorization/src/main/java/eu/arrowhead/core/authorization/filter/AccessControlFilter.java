@@ -49,27 +49,23 @@ public class AccessControlFilter implements ContainerRequestFilter {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
-      log.info("Client cert does not have 6 parts, so the access will be denied.");
+      log.info("Client cert does not have 5 parts, so the access will be denied.");
       return false;
     }
 
+    String[] serverFields = serverCN.split("\\.", 2);
+    // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
       // Only the local HMI can use these methods
-      String[] serverFields = serverCN.split("\\.", 2);
-      // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
       // If this property is true, then every system from the local cloud can use the auth services
       if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud"))) {
-        String[] serverFields = serverCN.split("\\.", 3);
-        String[] clientFields = clientCN.split("\\.", 3);
-        // serverFields contains: systemName, systemGroup, cloudName.operator.arrowhead.eu
-        return serverFields[2].equalsIgnoreCase(clientFields[2]);
+        String[] clientFields = clientCN.split("\\.", 2);
+        return serverFields[1].equalsIgnoreCase(clientFields[1]);
       }
       // If it is not true, only the Orchestrator and Gatekeeper can use it
       else {
-        String[] serverFields = serverCN.split("\\.", 2);
-        // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
         return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
       }
     }

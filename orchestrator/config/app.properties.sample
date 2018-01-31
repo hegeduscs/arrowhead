@@ -9,8 +9,8 @@ db_password=root
 db_address=jdbc:mysql://localhost:3306/arrowhead
 
 # Certificate related paths and passwords
-keystore=src/main/resources/orchestrator.testcloud1.jks
+keystore=config/certificates/orchestrator.testcloud1.jks
 keystorepass=12345
 keypass=12345
-truststore=src/main/resources/testcloud1_cert.jks
+truststore=config/certificates/testcloud1_cert.jks
 truststorepass=12345

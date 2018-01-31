@@ -1,8 +1,9 @@
-package eu.arrowhead.core.gatekeeper.filter;
+package eu.arrowhead.core.authorization.filter;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.core.authorization.AuthorizationMain;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -11,14 +12,14 @@ import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.ext.Provider;
 import org.apache.log4j.Logger;
 
-@Provider
+//Legacy version of the AccessControlFilter, with certificates containing the system group field
+//@Provider Uncomment this line to activate the filter
 @Priority(Priorities.AUTHORIZATION) //2nd highest priority constant, this filter gets executed after the SecurityFilter
-public class AccessControlFilter implements ContainerRequestFilter {
+public class SupportAccessControlFilter implements ContainerRequestFilter {
 
-  private static final Logger log = Logger.getLogger(AccessControlFilter.class.getName());
+  private static final Logger log = Logger.getLogger(SupportAccessControlFilter.class.getName());
   @Context
   private Configuration configuration;
 
@@ -34,41 +35,38 @@ public class AccessControlFilter implements ContainerRequestFilter {
         log.error(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget);
         throw new AuthenticationException(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget,
                                           Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
-                                          SupportAccessControlFilter.class.toString());
+                                          AccessControlFilter.class.toString());
       }
     }
   }
 
   private boolean isGetItCalled(String method, String requestTarget) {
-    return method.equals("GET") && (requestTarget.endsWith("gatekeeper") || requestTarget.endsWith("mgmt"));
+    return method.equals("GET") && (requestTarget.endsWith("authorization") || requestTarget.endsWith("mgmt"));
   }
 
-  //TODO refactor to no systemgroup
   private boolean isClientAuthorized(String subjectName, String requestTarget) {
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
     String serverCN = (String) configuration.getProperty("server_common_name");
 
-    if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN) && !SecurityUtils.isTrustStoreCNArrowheadValid(clientCN)) {
-      log.info("Client cert does not have a valid arrowhead keystore, so the access will be denied.");
+    if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
+      log.info("Client cert does not have 5 parts, so the access will be denied.");
       return false;
     }
+
+    String[] serverFields = serverCN.split("\\.", 2);
+    // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
-      //Only the local HMI can use these methods
-      String[] serverFields = serverCN.split("\\.", 2);
-      // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
+      // Only the local HMI can use these methods
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
-      if (requestTarget.endsWith("init_gsd") || requestTarget.endsWith("init_icn")) {
-        // Only requests from the Orchestrator are allowed
-        String[] serverFields = serverCN.split("\\.", 2);
-        // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
-
-        // If this is true, then the certificate is from the local Orchestrator
-        return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]);
-      } else {
-        // Only requests from other Gatekeepers are allowed
-        String[] clientFields = clientCN.split("\\.", 3);
-        return clientFields.length == 3 && clientFields[2].endsWith("arrowhead.eu");
+      // If this property is true, then every system from the local cloud can use the auth services
+      if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud"))) {
+        String[] clientFields = clientCN.split("\\.", 2);
+        return serverFields[1].equalsIgnoreCase(clientFields[1]);
+      }
+      // If it is not true, only the Orchestrator and Gatekeeper can use it
+      else {
+        return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
       }
     }
   }

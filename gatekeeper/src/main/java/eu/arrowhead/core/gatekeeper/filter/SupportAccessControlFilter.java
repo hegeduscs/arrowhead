@@ -11,14 +11,14 @@ import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.ext.Provider;
 import org.apache.log4j.Logger;
 
-@Provider
+//Legacy version of the AccessControlFilter, with certificates containing the system group field
+//@Provider Uncomment this line to activate the filter
 @Priority(Priorities.AUTHORIZATION) //2nd highest priority constant, this filter gets executed after the SecurityFilter
-public class AccessControlFilter implements ContainerRequestFilter {
+public class SupportAccessControlFilter implements ContainerRequestFilter {
 
-  private static final Logger log = Logger.getLogger(AccessControlFilter.class.getName());
+  private static final Logger log = Logger.getLogger(SupportAccessControlFilter.class.getName());
   @Context
   private Configuration configuration;
 
@@ -43,7 +43,6 @@ public class AccessControlFilter implements ContainerRequestFilter {
     return method.equals("GET") && (requestTarget.endsWith("gatekeeper") || requestTarget.endsWith("mgmt"));
   }
 
-  //TODO refactor to no systemgroup
   private boolean isClientAuthorized(String subjectName, String requestTarget) {
     String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
     String serverCN = (String) configuration.getProperty("server_common_name");
