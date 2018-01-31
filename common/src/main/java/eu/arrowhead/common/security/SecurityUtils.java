@@ -1,24 +1,6 @@
 /*
  * Copyright (c) 2018 AITIA International Inc.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
  * This work is part of the Productive 4.0 innovation project, which receives grants from the
  * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
  * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
@@ -189,6 +171,11 @@ public final class SecurityUtils {
   public static boolean isTrustStoreCNArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
     return cnFields.length == 4 && cnFields[3].equals("arrowhead") && cnFields[4].equals("eu");
+  }
+
+  public static boolean isKeyStoreCNArrowheadValidLegacy(String commonName) {
+    String[] cnFields = commonName.split("\\.", 0);
+    return cnFields.length == 6 && cnFields[3].equals("arrowhead") && cnFields[4].equals("eu");
   }
 
   public static X509Certificate getCertFromKeyStore(KeyStore keystore, String name) {

@@ -7,12 +7,11 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.core.authorization.filter;
+package eu.arrowhead.core.gateway.filter;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
-import eu.arrowhead.core.authorization.AuthorizationMain;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -42,15 +41,15 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
         log.info("SSL identification is successful! Cert: " + subjectName);
       } else {
         log.error(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget);
-        throw new AuthenticationException(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget, Status
-            .UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
-                                          AccessControlFilter.class.toString());
+        throw new AuthenticationException(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget,
+                                          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
+                                          SupportAccessControlFilter.class.toString());
       }
     }
   }
 
   private boolean isGetItCalled(String method, String requestTarget) {
-    return method.equals("GET") && (requestTarget.endsWith("authorization") || requestTarget.endsWith("mgmt"));
+    return method.equals("GET") && (requestTarget.endsWith("gateway") || requestTarget.endsWith("mgmt"));
   }
 
   private boolean isClientAuthorized(String subjectName, String requestTarget) {
@@ -65,18 +64,11 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
     String[] serverFields = serverCN.split("\\.", 2);
     // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
-      // Only the local HMI can use these methods
+      // Only the local HMI can use the API methods
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
-      // If this property is true, then every system from the local cloud can use the auth services
-      if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud"))) {
-        String[] clientFields = clientCN.split("\\.", 2);
-        return serverFields[1].equalsIgnoreCase(clientFields[1]);
-      }
-      // If it is not true, only the Orchestrator and Gatekeeper can use it
-      else {
-        return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
-      }
+      // Only the local Gatekeeper can use the resource methods
+      return clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
     }
   }
 
