@@ -205,7 +205,7 @@ public class ServiceRegistryEntry {
       }
       metadata = sb.toString().substring(0, sb.length() - 1);
     }
-    if (provider.getPort() != 0 && port == 0) {
+    if (provider.getPort() != 0 && (port == null || port == 0)) {
       port = provider.getPort();
     }
     endOfValidity = new Date(System.currentTimeMillis() + ttl);
