@@ -94,15 +94,17 @@ public class ServiceRegistryEntry {
     this.serviceURI = serviceURI;
   }
 
-  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, String metadata, Integer
-      version, boolean UDP) {
+  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, Integer version,
+                              boolean UDP, int ttl, String metadata, Date endOfValidity) {
     this.providedService = providedService;
     this.provider = provider;
     this.port = port;
     this.serviceURI = serviceURI;
-    this.metadata = metadata;
     this.version = version;
     this.UDP = UDP;
+    this.ttl = ttl;
+    this.metadata = metadata;
+    this.endOfValidity = endOfValidity;
   }
 
   @XmlTransient
