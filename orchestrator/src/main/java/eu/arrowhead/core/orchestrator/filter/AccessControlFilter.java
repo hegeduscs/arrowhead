@@ -62,19 +62,15 @@ public class AccessControlFilter implements ContainerRequestFilter {
       return false;
     }
 
+    String[] serverFields = serverCN.split("\\.", 2);
+    // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
       // Only the local HMI can use these methods
-      String[] serverFields = serverCN.split("\\.", 2);
-      // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
-      // All requests from the local cloud are allowed, so omit the first 2 parts of the common names (systemName.systemGroup)
-      String[] serverFields = serverCN.split("\\.", 3);
-      String[] clientFields = clientCN.split("\\.", 3);
-      // serverFields contains: coreSystemName, coresystems, cloudName.operator.arrowhead.eu
-
-      // If this is true, then the certificates are from the same local cloud
-      return serverFields[2].equalsIgnoreCase(clientFields[2]);
+      // All requests from the local cloud are allowed
+      String[] clientFields = clientCN.split("\\.", 2);
+      return serverFields[1].equalsIgnoreCase(clientFields[1]);
     }
   }
 
