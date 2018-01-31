@@ -12,10 +12,14 @@ package eu.arrowhead.core.orchestrator.support;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.json.support.OrchestrationResponseSupport;
+import eu.arrowhead.common.json.support.PreferredProviderSupport;
 import eu.arrowhead.common.json.support.ServiceRequestFormSupport;
 import eu.arrowhead.common.messages.OrchestrationResponse;
+import eu.arrowhead.common.messages.PreferredProvider;
 import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.core.orchestrator.OrchestratorResource;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -34,7 +38,12 @@ public class OldOrchResource {
   public Response supportOrchestrationProcess(ServiceRequestFormSupport srfSupport, @Context ContainerRequestContext requestContext) {
     ArrowheadSystem system = new ArrowheadSystem(srfSupport.getRequesterSystem());
     ArrowheadService service = new ArrowheadService(srfSupport.getRequestedService());
-    ServiceRequestForm srf = new ServiceRequestForm.Builder(system).requesterCloud(srfSupport.getRequesterCloud()).requestedService(service).orchestrationFlags(srfSupport.getOrchestrationFlags()).preferredProviders(srfSupport.getPreferredProviders()).build();
+    List<PreferredProvider> preferredProviders = new ArrayList<>();
+    for (PreferredProviderSupport supportProvider : srfSupport.getPreferredProviders()) {
+      preferredProviders.add(new PreferredProvider(supportProvider));
+    }
+    ServiceRequestForm srf = new ServiceRequestForm.Builder(system).requesterCloud(srfSupport.getRequesterCloud()).requestedService(service)
+        .orchestrationFlags(srfSupport.getOrchestrationFlags()).preferredProviders(preferredProviders).build();
 
     OrchestratorResource orchResource = new OrchestratorResource();
     Response response = orchResource.orchestrationProcess(srf, requestContext);

@@ -23,8 +23,7 @@ public class OrchestrationResponseSupport {
 
   public OrchestrationResponseSupport(OrchestrationResponse orchResponse) {
     for (OrchestrationForm form : orchResponse.getResponse()) {
-      OrchestrationFormSupport supportForm = new OrchestrationFormSupport(form);
-      response.add(supportForm);
+      response.add(new OrchestrationFormSupport(form));
     }
   }
 

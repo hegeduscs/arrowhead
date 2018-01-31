@@ -22,7 +22,7 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * Entity class for storing Arrowhead Systems in the database. The "system_group" and "system_name" columns must be unique together.
+ * Entity class for storing Arrowhead Systems in the database. The "system_name" column must be unique.
  */
 @Entity
 @Table(name = "arrowhead_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_name"})})

@@ -25,7 +25,7 @@ public class ServiceRequestFormSupport {
   private ArrowheadServiceSupport requestedService;
   @XmlJavaTypeAdapter(BooleanMapAdapter.class)
   private Map<String, Boolean> orchestrationFlags = new HashMap<>();
-  private List<PreferredProvider> preferredProviders = new ArrayList<>();
+  private List<PreferredProviderSupport> preferredProviders = new ArrayList<>();
   @XmlJavaTypeAdapter(StringMapAdapter.class)
   private Map<String, String> requestedQoS = new HashMap<>();
   @XmlJavaTypeAdapter(StringMapAdapter.class)
@@ -39,11 +39,13 @@ public class ServiceRequestFormSupport {
     this.requesterCloud = srf.getRequesterCloud();
     this.requestedService = new ArrowheadServiceSupport(srf.getRequestedService());
     this.orchestrationFlags = srf.getOrchestrationFlags();
-    this.preferredProviders = srf.getPreferredProviders();
+    for (PreferredProvider provider : srf.getPreferredProviders()) {
+      preferredProviders.add(new PreferredProviderSupport(provider));
+    }
   }
 
   public ServiceRequestFormSupport(ArrowheadSystemSupport requesterSystem, ArrowheadCloud requesterCloud, ArrowheadServiceSupport requestedService,
-                                   Map<String, Boolean> orchestrationFlags, List<PreferredProvider> preferredProviders) {
+                                   Map<String, Boolean> orchestrationFlags, List<PreferredProviderSupport> preferredProviders) {
     this.requesterSystem = requesterSystem;
     this.requesterCloud = requesterCloud;
     this.requestedService = requestedService;
@@ -83,11 +85,11 @@ public class ServiceRequestFormSupport {
     this.orchestrationFlags = orchestrationFlags;
   }
 
-  public List<PreferredProvider> getPreferredProviders() {
+  public List<PreferredProviderSupport> getPreferredProviders() {
     return preferredProviders;
   }
 
-  public void setPreferredProviders(List<PreferredProvider> preferredProviders) {
+  public void setPreferredProviders(List<PreferredProviderSupport> preferredProviders) {
     this.preferredProviders = preferredProviders;
   }
 

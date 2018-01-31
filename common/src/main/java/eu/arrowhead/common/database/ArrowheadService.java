@@ -32,7 +32,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 /**
- * Entity class for storing Arrowhead Services in the database. The "service_group" and service_definition" columns must be unique together.
+ * Entity class for storing Arrowhead Services in the database. The "service_definition" column must be unique.
  */
 @Entity
 @Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_definition"})})

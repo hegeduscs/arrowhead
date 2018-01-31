@@ -7,36 +7,35 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.common.messages;
+package eu.arrowhead.common.json.support;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
-import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.json.support.PreferredProviderSupport;
+import eu.arrowhead.common.messages.PreferredProvider;
 
-public class PreferredProvider {
+public class PreferredProviderSupport {
 
-  private ArrowheadSystem providerSystem;
+  private ArrowheadSystemSupport providerSystem;
   private ArrowheadCloud providerCloud;
 
-  public PreferredProvider() {
+  public PreferredProviderSupport() {
   }
 
-  public PreferredProvider(ArrowheadSystem providerSystem, ArrowheadCloud providerCloud) {
+  public PreferredProviderSupport(PreferredProvider provider) {
+    this.providerSystem = new ArrowheadSystemSupport(provider.getProviderSystem());
+    this.providerCloud = provider.getProviderCloud();
+  }
+
+  public PreferredProviderSupport(ArrowheadSystemSupport providerSystem, ArrowheadCloud providerCloud) {
     this.providerSystem = providerSystem;
     this.providerCloud = providerCloud;
   }
 
-  public PreferredProvider(PreferredProviderSupport supportProvider) {
-    this.providerSystem = new ArrowheadSystem(supportProvider.getProviderSystem());
-    this.providerCloud = supportProvider.getProviderCloud();
-  }
-
-  public ArrowheadSystem getProviderSystem() {
+  public ArrowheadSystemSupport getProviderSystem() {
     return providerSystem;
   }
 
-  public void setProviderSystem(ArrowheadSystem providerSystem) {
+  public void setProviderSystem(ArrowheadSystemSupport providerSystem) {
     this.providerSystem = providerSystem;
   }
 
