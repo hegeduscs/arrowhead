@@ -208,9 +208,7 @@ public class ServiceRegistryEntry {
     if (provider.getPort() != 0 && port == 0) {
       port = provider.getPort();
     }
-    if (ttl > 0) {
-      endOfValidity = new Date(System.currentTimeMillis() + ttl);
-    }
+    endOfValidity = new Date(System.currentTimeMillis() + ttl);
   }
 
   @JsonIgnore
