@@ -10,7 +10,7 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.List;
+import java.util.Date;
 import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
@@ -51,21 +52,25 @@ public class ServiceRegistryEntry {
   @Column(name = "service_uri")
   private String serviceURI;
 
-  @JsonIgnore
-  @Column(name = "metadata")
-  private String metadata;
-
   @Column(name = "version")
   private Integer version = 1;
 
   @Column(name = "udp")
   private boolean UDP = false;
 
-  //only for backwards compatibility, used by DNS-SD
+  //Time to live in seconds - endOfValidity is calculated from this
   @Transient
-  private List<String> interfaces;
-  @Transient
-  private String TSIG_key;
+  private int ttl;
+
+  //only for database
+  @JsonIgnore
+  @Column(name = "metadata")
+  private String metadata;
+
+  @JsonIgnore
+  @Column(name = "end_of_validity")
+  @Type(type = "timestamp")
+  private Date endOfValidity;
 
   public ServiceRegistryEntry() {
   }
@@ -141,14 +146,6 @@ public class ServiceRegistryEntry {
     this.serviceURI = serviceURI;
   }
 
-  public String getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(String metadata) {
-    this.metadata = metadata;
-  }
-
   public Integer getVersion() {
     return version;
   }
@@ -165,20 +162,28 @@ public class ServiceRegistryEntry {
     this.UDP = UDP;
   }
 
-  public List<String> getInterfaces() {
-    return interfaces;
+  public int getTtl() {
+    return ttl;
   }
 
-  public void setInterfaces(List<String> interfaces) {
-    this.interfaces = interfaces;
+  public void setTtl(int ttl) {
+    this.ttl = ttl;
   }
 
-  public String getTSIG_key() {
-    return TSIG_key;
+  public String getMetadata() {
+    return metadata;
   }
 
-  public void setTSIG_key(String TSIG_key) {
-    this.TSIG_key = TSIG_key;
+  public void setMetadata(String metadata) {
+    this.metadata = metadata;
+  }
+
+  public Date getEndOfValidity() {
+    return endOfValidity;
+  }
+
+  public void setEndOfValidity(Date endOfValidity) {
+    this.endOfValidity = endOfValidity;
   }
 
   @JsonIgnore
@@ -202,6 +207,9 @@ public class ServiceRegistryEntry {
     }
     if (provider.getPort() != 0 && port == 0) {
       port = provider.getPort();
+    }
+    if (ttl > 0) {
+      endOfValidity = new Date(System.currentTimeMillis() + ttl);
     }
   }
 
