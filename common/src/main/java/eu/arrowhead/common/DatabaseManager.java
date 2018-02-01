@@ -33,7 +33,7 @@ public class DatabaseManager {
   private static DatabaseManager instance;
   private static SessionFactory sessionFactory;
   private static Properties prop;
-  private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://arrowhead.tmit.bme.hu:3306/arrowhead");
+  private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://localhost:3306/log");
   private static final String dbUser = getProp().getProperty("db_user", "root");
   private static final String dbPassword = getProp().getProperty("db_password", "root");
   private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
@@ -41,7 +41,8 @@ public class DatabaseManager {
   static {
     try {
       if (sessionFactory == null) {
-        sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress).setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+        sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
+            .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
       }
     } catch (Exception e) {
       log.fatal("Database connection failed, check the configuration!");
@@ -94,7 +95,8 @@ public class DatabaseManager {
 
   private SessionFactory getSessionFactory() {
     if (sessionFactory == null) {
-      sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress).setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+      sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
+          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
     }
     return sessionFactory;
   }
@@ -193,8 +195,9 @@ public class DatabaseManager {
         transaction.rollback();
       }
       log.error("DatabaseManager:save throws DuplicateEntryException");
-      throw new DuplicateEntryException("There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
-                                        Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+      throw new DuplicateEntryException(
+          "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
+          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -218,8 +221,9 @@ public class DatabaseManager {
         transaction.rollback();
       }
       log.error("DatabaseManager:merge throws DuplicateEntryException");
-      throw new DuplicateEntryException("There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
-                                        Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+      throw new DuplicateEntryException(
+          "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
+          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -243,7 +247,8 @@ public class DatabaseManager {
       }
       log.error("DatabaseManager:delete throws ConstraintViolationException");
       throw new DuplicateEntryException(
-          "There is a reference to this object in another table, which prevents the delete operation. (" + object.getClass() + ")", Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+          "There is a reference to this object in another table, which prevents the delete operation. (" + object.getClass() + ")",
+          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();

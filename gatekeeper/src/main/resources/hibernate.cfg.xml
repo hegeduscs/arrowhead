@@ -18,24 +18,8 @@
     <property name="show_sql">true</property>
     <property name="hibernate.hbm2ddl.auto">update</property>
     <mapping class="eu.arrowhead.common.database.ArrowheadCloud"/>
-    <mapping class="eu.arrowhead.common.database.ArrowheadSystem"/>
-    <mapping class="eu.arrowhead.common.database.ArrowheadService"/>
     <mapping class="eu.arrowhead.common.database.Broker"/>
-    <mapping class="eu.arrowhead.common.database.InterCloudAuthorization"/>
-    <mapping class="eu.arrowhead.common.database.IntraCloudAuthorization"/>
     <mapping class="eu.arrowhead.common.database.NeighborCloud"/>
-    <mapping class="eu.arrowhead.common.database.OrchestrationStore"/>
     <mapping class="eu.arrowhead.common.database.OwnCloud"/>
-    <mapping class="eu.arrowhead.common.database.ServiceRegistryEntry"/>
-
-    <!--
-    <mapping class="eu.arrowhead.common.database.qos.DeployedSystem"/>
-    <mapping class="eu.arrowhead.common.database.qos.MessageStream"/>
-    <mapping class="eu.arrowhead.common.database.qos.Network"/>
-    <mapping class="eu.arrowhead.common.database.qos.NetworkDevice"/>
-    <mapping class="eu.arrowhead.common.database.qos.Node"/>
-    <mapping class="eu.arrowhead.common.database.qos.ResourceReservation"/>
-    <mapping class="eu.arrowhead.common.database.qos.Topology"/>
-    -->
   </session-factory>
 </hibernate-configuration>

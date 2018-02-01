@@ -34,9 +34,10 @@ public class InboundDebugFilter implements ContainerRequestFilter {
       StringBuilder sb = new StringBuilder();
       String line;
       while ((line = br.readLine()) != null) {
-        sb.append(line).append("\n");
+        sb.append(line);
       }
       br.close();
+      System.out.println(sb.toString());
 
       if (!sb.toString().isEmpty()) {
         String prettyJson = Utility.toPrettyJson(sb.toString(), null);

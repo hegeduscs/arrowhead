@@ -52,6 +52,7 @@ public class GatekeeperMain {
   static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
 
   private static String BASE64_PUBLIC_KEY;
+  private static boolean FIRST_SR_QUERY = true;
   private static HttpServer inboundServer;
   private static HttpServer inboundSecureServer;
   private static HttpServer outboundServer;
@@ -78,6 +79,10 @@ public class GatekeeperMain {
     }
     if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
       SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
+    }
+    ORCHESTRATOR_URI = Utility.stripEndSlash(ORCHESTRATOR_URI);
+    if (!ORCHESTRATOR_URI.endsWith("orchestrator/orchestration")) {
+      ORCHESTRATOR_URI = UriBuilder.fromUri(ORCHESTRATOR_URI).path("orchestrator").path("orchestration").build().toString();
     }
 
     boolean daemon = false;
@@ -296,8 +301,11 @@ public class GatekeeperMain {
     AUTH_CONTROL_URI = Utility.getServiceInfo(Utility.AUTH_CONTROL_SERVICE)[0];
     GATEWAY_CONSUMER_URI = Utility.getServiceInfo(Utility.GW_CONSUMER_SERVICE);
     GATEWAY_PROVIDER_URI = Utility.getServiceInfo(Utility.GW_PROVIDER_SERVICE);
-    ORCHESTRATOR_URI = Utility.getServiceInfo(Utility.ORCH_SERVICE)[0];
+    if (!FIRST_SR_QUERY) {
+      ORCHESTRATOR_URI = Utility.getServiceInfo(Utility.ORCH_SERVICE)[0];
+    }
     System.out.println("Core system URLs acquired.");
+    FIRST_SR_QUERY = false;
   }
 
   private static void shutdown() {

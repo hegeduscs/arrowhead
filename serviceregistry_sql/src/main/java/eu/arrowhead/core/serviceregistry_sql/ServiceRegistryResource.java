@@ -60,8 +60,7 @@ public class ServiceRegistryResource {
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
-      String[] clientFields = clientCN.split("\\.", 3);
-      //NOTE cert structure change needed for this
+      String[] clientFields = clientCN.split("\\.", 2);
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
         log.error("Provider system name and cert common name do not match! Service registering denied.");
         throw new AuthenticationException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
@@ -146,7 +145,7 @@ public class ServiceRegistryResource {
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
       String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
-      String[] clientFields = clientCN.split("\\.", 3);
+      String[] clientFields = clientCN.split("\\.", 2);
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
         log.error("Provider system name and cert common name do not match! Service removing denied.");
         throw new AuthenticationException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",

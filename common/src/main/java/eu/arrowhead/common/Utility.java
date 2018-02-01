@@ -221,13 +221,16 @@ public final class Utility {
 
   public static String[] getServiceInfo(String serviceId) {
     ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null) : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, false, false);
     Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
     ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
     if (result.isValid()) {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
       ArrowheadSystem coreSystem = entry.getProvider();
-      boolean isSecure = entry.getMetadata().contains("security");
+      boolean isSecure = false;
+      if (entry.getMetadata() != null) {
+        isSecure = entry.getMetadata().contains("security");
+      }
       String serviceUri = getUri(coreSystem.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
       if (serviceId.equals(GW_CONSUMER_SERVICE) || serviceId.equals(GW_PROVIDER_SERVICE)) {
         return new String[]{serviceUri, coreSystem.getSystemName(), coreSystem.getAddress(), coreSystem.getAuthenticationInfo()};
@@ -287,7 +290,6 @@ public final class Utility {
     } catch (URISyntaxException e) {
       throw new ServiceConfigurationError(url + errorMessage);
     }
-
   }
 
   public static String toPrettyJson(String jsonString, Object obj) {
