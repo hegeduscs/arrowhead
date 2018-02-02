@@ -214,7 +214,7 @@ public class RegistryUtils {
 
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();
-      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("0.0.0.0")) {
+      if (current.getProvider().getAddress().equals("0.0.0.0")) {
         iterator.remove();
       } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
         iterator.remove();
@@ -227,13 +227,7 @@ public class RegistryUtils {
   }
 
   public static void filteronVersion(List<ServiceRegistryEntry> fetchedList, int targetVersion) {
-    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
-    while (iterator.hasNext()) {
-      ServiceRegistryEntry current = iterator.next();
-      if (current.getVersion() != targetVersion) {
-        iterator.remove();
-      }
-    }
+    fetchedList.removeIf(current -> current.getVersion() != targetVersion);
   }
 
 }

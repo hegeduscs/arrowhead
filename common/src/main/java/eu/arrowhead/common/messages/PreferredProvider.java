@@ -63,4 +63,8 @@ public class PreferredProvider {
     return providerCloud != null && providerCloud.isValid();
   }
 
+  @Override
+  public String toString() {
+    return "PreferredProvider{" + "providerSystem=" + providerSystem + ", providerCloud=" + providerCloud + '}';
+  }
 }

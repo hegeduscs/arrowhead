@@ -45,7 +45,6 @@ public final class SecurityUtils {
 
   private static final Logger log = Logger.getLogger(SecurityUtils.class.getName());
 
-
   public static KeyStore loadKeyStore(String filePath, String pass) {
     try {
       KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -149,8 +148,7 @@ public final class SecurityUtils {
       TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(tmfAlgorithm);
       trustManagerFactory.init(trustStore);
 
-      String secProtocol = "TLS";
-      SSLContext sslContext = SSLContext.getInstance(secProtocol);
+      SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
 
       return sslContext;
@@ -159,6 +157,19 @@ public final class SecurityUtils {
       log.fatal("Master SSLContext creation failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Master SSLContext creation failed...", e);
     }
+  }
+
+  public static SSLContext createAcceptAllSSLContext() {
+    SSLContext sslContext = null;
+    try {
+      sslContext = SSLContext.getInstance("TLS");
+      sslContext.init(null, createTrustManagers(), null);
+    } catch (NoSuchAlgorithmException | KeyManagementException e) {
+      e.printStackTrace();
+      log.fatal("AcceptAll SSLContext creation failed: " + e.toString() + " " + e.getMessage());
+      throw new ServiceConfigurationError("AcceptAll SSLContext creation failed...", e);
+    }
+    return sslContext;
   }
 
   // NOTE gatekeeper certs can be an exception to this rule at the moment
@@ -170,7 +181,7 @@ public final class SecurityUtils {
   // NOTE gatekeeper certs can be an exception to this rule at the moment
   public static boolean isTrustStoreCNArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
-    return cnFields.length == 4 && cnFields[3].equals("arrowhead") && cnFields[4].equals("eu");
+    return cnFields.length == 4 && cnFields[2].equals("arrowhead") && cnFields[3].equals("eu");
   }
 
   public static boolean isKeyStoreCNArrowheadValidLegacy(String commonName) {
@@ -244,9 +255,8 @@ public final class SecurityUtils {
     return kf.generatePublic(X509publicKey);
   }
 
-
   public static TrustManager[] createTrustManagers() {
-    TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+    return new TrustManager[]{new X509TrustManager() {
 
       public java.security.cert.X509Certificate[] getAcceptedIssuers() {
         return new java.security.cert.X509Certificate[]{};
@@ -258,8 +268,6 @@ public final class SecurityUtils {
       public void checkServerTrusted(X509Certificate[] chain, String authType) {
       }
     }};
-    return trustAllCerts;
   }
-
 
 }

@@ -14,6 +14,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.messages.ConnectToConsumerResponse;
@@ -105,16 +106,26 @@ public class GatekeeperOutboundResource {
     Response response;
     int i = 0;
     for (String uri : cloudURIs) {
-      i++;
       uri = UriBuilder.fromPath(uri).path("gsd_poll").toString();
       try {
         response = Utility.sendRequest(uri, "PUT", gsdPoll, GatekeeperMain.outboundClientContext);
       }
       // We skip those that did not respond positively, add the rest to the result list
-      catch (RuntimeException ex) {
-        log.info("GSD request failed at: " + uri);
-        ex.printStackTrace();
-        continue;
+      catch (ArrowheadException ex) {
+        // If it is the last iteration and we had no positive responses to the GSD, send exception instead
+        if (i == cloudURIs.size() - 1 && gsdAnswerList.isEmpty()) {
+          ex.printStackTrace();
+          log.error("GSD failed for all potential provider clouds! See stack traces for details in console output.");
+          throw new ArrowheadException("GSD failed for all potential provider clouds! The last exception message: " + ex.getMessage(),
+                                       ex.getErrorCode(), ex.getClass().getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+        } else {
+          System.out.println("GSD request failed at: " + uri);
+          ex.printStackTrace();
+          System.out.println("Continuing the GSD with the next cloud!");
+          continue;
+        }
+      } finally {
+        i++;
       }
       gsdAnswerList.add(response.readEntity(GSDAnswer.class));
     }
@@ -136,8 +147,8 @@ public class GatekeeperOutboundResource {
   public Response ICNRequest(ICNRequestForm requestForm, @Context ContainerRequestContext requestContext) {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(), BadPayloadException
-          .class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     //TODO beolvasást mainbe kiszervezni
@@ -147,8 +158,10 @@ public class GatekeeperOutboundResource {
     requestForm.getNegotiationFlags().put("useGateway", useGateway);
 
     // Compiling the payload and then getting the request URI
-    ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(), requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-                                              requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout, GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
+    ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
+                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
+                                              requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout,
+                                              GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
 
     //NOTE isSecure false constant is temporary
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
@@ -170,14 +183,16 @@ public class GatekeeperOutboundResource {
     Map<String, String> metadata = requestForm.getRequestedService().getServiceMetadata();
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
     GatewayConnectionInfo gwConnInfo = icnEnd.getGatewayConnInfo();
-    ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(), gwConnInfo.getBrokerPort(), gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
+    ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(), gwConnInfo.getBrokerPort(),
+                                                                              gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
                                                                               requestForm.getRequesterSystem(),
                                                                               icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
                                                                               requestForm.getTargetCloud(), requestForm.getRequestedService(),
                                                                               isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
 
     // Sending the gateway request and parsing the response
-    Response gatewayResponse = Utility.sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
+    Response gatewayResponse = Utility
+        .sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
     ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
 
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();

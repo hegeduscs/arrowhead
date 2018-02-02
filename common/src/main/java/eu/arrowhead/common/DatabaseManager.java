@@ -12,10 +12,12 @@ package eu.arrowhead.common;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.ServiceConfigurationError;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
@@ -46,7 +48,7 @@ public class DatabaseManager {
       }
     } catch (Exception e) {
       log.fatal("Database connection failed, check the configuration!");
-      e.printStackTrace();
+      throw new ServiceConfigurationError("Database connection could not be established, check app.properties!", e);
     }
   }
 
@@ -68,6 +70,9 @@ public class DatabaseManager {
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);
       }
+    } catch (FileNotFoundException ex) {
+      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
+                                              + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

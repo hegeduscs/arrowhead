@@ -221,10 +221,10 @@ public final class Utility {
 
   public static String[] getServiceInfo(String serviceId) {
     ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null) : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, false, false);
+    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
     Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
     ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-    if (result.isValid()) {
+    if (result != null && result.isValid()) {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
       ArrowheadSystem coreSystem = entry.getProvider();
       boolean isSecure = false;

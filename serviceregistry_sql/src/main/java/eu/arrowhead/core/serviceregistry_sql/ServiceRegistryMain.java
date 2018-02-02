@@ -17,15 +17,18 @@ import eu.arrowhead.core.serviceregistry_sql.support.OldServiceRegResource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
+import java.util.ServiceConfigurationError;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.net.ssl.SSLContext;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -135,24 +138,25 @@ public class ServiceRegistryMain {
 
 
   private static HttpServer startServer() throws IOException {
-    log.info("Starting server at: " + BASE_URI);
-    System.out.println("Starting insecure server at: " + BASE_URI);
-
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(ServiceRegistryResource.class, ServiceRegistryApi.class, OldServiceRegResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.serviceregistry_sql.filter");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
-    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
-    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-    server.start();
-    return server;
+    try {
+      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+      server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+      server.start();
+      log.info("Started server at: " + BASE_URI);
+      System.out.println("Started insecure server at: " + BASE_URI);
+      return server;
+    } catch (ProcessingException e) {
+      throw new ServiceConfigurationError(
+          "Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and not in use already)", e);
+    }
   }
 
   private static HttpServer startSecureServer() throws IOException {
-    log.info("Starting server at: " + BASE_URI_SECURED);
-    System.out.println("Starting secure server at: " + BASE_URI_SECURED);
-
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(ServiceRegistryResource.class, ServiceRegistryApi.class, OldServiceRegResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.serviceregistry_sql.filter");
@@ -180,16 +184,25 @@ public class ServiceRegistryMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
-      throw new AuthenticationException("Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
-    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
-    server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-    server.start();
-    return server;
+    try {
+      final HttpServer server = GrizzlyHttpServerFactory
+          .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
+      server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+      server.start();
+      log.info("Started server at: " + BASE_URI_SECURED);
+      System.out.println("Started secure server at: " + BASE_URI_SECURED);
+      return server;
+    } catch (ProcessingException e) {
+      throw new ServiceConfigurationError(
+          "Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and not in use already)", e);
+    }
   }
 
   private static void shutdown() {
@@ -212,6 +225,9 @@ public class ServiceRegistryMain {
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);
       }
+    } catch (FileNotFoundException ex) {
+      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
+                                              + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
