@@ -43,7 +43,7 @@ public class PingProvidersTask extends TimerTask {
           int port = serviceInstanceData.getPort();
           RegistryUtils.removeLastChar(hostName, '.');
           boolean toBeRemoved = false;
-          if (hostName == "127.0.0.1" || hostName == "localhost") {
+          if (hostName.equals("127.0.0.1") || hostName.equals("localhost")) {
             toBeRemoved = true;
           } else if (!RegistryUtils.pingHost(hostName, port, ServiceRegistryMain.pingTimeout)) {
             toBeRemoved = true;

@@ -59,10 +59,10 @@ public class GatekeeperMain {
   private static HttpServer outboundSecureServer;
   private static Properties prop;
 
-  private static final String INBOUND_BASE_URI = getProp().getProperty("internal_base_uri", "http://0.0.0.0:8446/");
-  private static final String INBOUND_BASE_URI_SECURED = getProp().getProperty("internal_base_uri_secured", "https://0.0.0.0:8447/");
-  private static final String OUTBOUND_BASE_URI = getProp().getProperty("external_base_uri", "http://0.0.0.0:8448/");
-  private static final String OUTBOUND_BASE_URI_SECURED = getProp().getProperty("external_base_uri_secured", "https://0.0.0.0:8449/");
+  private static final String INBOUND_BASE_URI = getProp().getProperty("internal_base_uri", "http://127.0.0.1:8446/");
+  private static final String INBOUND_BASE_URI_SECURED = getProp().getProperty("internal_base_uri_secured", "https://127.0.0.1:8447/");
+  private static final String OUTBOUND_BASE_URI = getProp().getProperty("external_base_uri", "http://127.0.0.1:8448/");
+  private static final String OUTBOUND_BASE_URI_SECURED = getProp().getProperty("external_base_uri_secured", "https://127.0.0.1:8449/");
   private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
 
   public static void main(String[] args) throws IOException {

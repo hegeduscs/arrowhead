@@ -48,8 +48,8 @@ public class ServiceRegistryMain {
   private static Properties appProp, dnsProp;
   private static Timer timer;
 
-  private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://0.0.0.0:8442/");
-  private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://0.0.0.0:8443/");
+  private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://127.0.0.1:8442/");
+  private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://127.0.0.1:8443/");
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
 
   /**

@@ -1,12 +1,12 @@
 # URLs
-base_uri=http://0.0.0.0:8440
-base_uri_secured=https://0.0.0.0:8441
-sr_base_uri=http://0.0.0.0:8442
+base_uri=http://127.0.0.1:8440
+base_uri_secured=https://127.0.0.1:8441
+sr_base_uri=http://127.0.0.1:8442
 
 # Database parameters
 db_user=root
 db_password=root
-db_address=jdbc:mysql://localhost:3306/arrowhead
+db_address=jdbc:mysql://127.0.0.1:3306/arrowhead
 
 # Certificate related paths and passwords
 keystore=config/certificates/orchestrator.testcloud1.jks

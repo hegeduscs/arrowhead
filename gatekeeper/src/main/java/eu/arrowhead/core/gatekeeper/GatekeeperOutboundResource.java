@@ -103,13 +103,17 @@ public class GatekeeperOutboundResource {
     // Finalizing the URIs, process the responses
     List<GSDAnswer> gsdAnswerList = new ArrayList<>();
     Response response;
+    int i = 0;
     for (String uri : cloudURIs) {
+      i++;
       uri = UriBuilder.fromPath(uri).path("gsd_poll").toString();
       try {
         response = Utility.sendRequest(uri, "PUT", gsdPoll, GatekeeperMain.outboundClientContext);
       }
       // We skip those that did not respond positively, add the rest to the result list
       catch (RuntimeException ex) {
+        log.info("GSD request failed at: " + uri);
+        ex.printStackTrace();
         continue;
       }
       gsdAnswerList.add(response.readEntity(GSDAnswer.class));

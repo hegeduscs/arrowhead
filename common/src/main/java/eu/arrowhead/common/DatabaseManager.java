@@ -33,7 +33,7 @@ public class DatabaseManager {
   private static DatabaseManager instance;
   private static SessionFactory sessionFactory;
   private static Properties prop;
-  private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://localhost:3306/log");
+  private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://127.0.0.1:3306/log");
   private static final String dbUser = getProp().getProperty("db_user", "root");
   private static final String dbPassword = getProp().getProperty("db_password", "root");
   private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());

@@ -214,8 +214,7 @@ public class RegistryUtils {
 
     while (iterator.hasNext()) {
       ServiceRegistryEntry current = iterator.next();
-      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("127.0.0.1") || current.getProvider()
-          .getAddress().equals("0.0.0.0")) {
+      if (current.getProvider().getAddress().equals("localhost") || current.getProvider().getAddress().equals("0.0.0.0")) {
         iterator.remove();
       } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
         iterator.remove();

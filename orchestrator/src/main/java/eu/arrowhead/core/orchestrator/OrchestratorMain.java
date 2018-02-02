@@ -57,8 +57,8 @@ public class OrchestratorMain {
   private static HttpServer secureServer;
   private static Properties prop;
 
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8440/orchestrator/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8441/orchestrator/");
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8440/orchestrator/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8441/orchestrator/");
   private static final Logger log = Logger.getLogger(OrchestratorMain.class.getName());
 
   public static void main(String[] args) throws IOException {

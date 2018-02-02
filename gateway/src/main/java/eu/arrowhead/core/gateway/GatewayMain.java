@@ -48,8 +48,8 @@ public class GatewayMain {
   private static HttpServer secureServer;
   private static Properties prop;
 
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8452/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8453/");
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8452/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8453/");
   private static final Logger log = Logger.getLogger(GatewayMain.class.getName());
 
   public static void main(String[] args) throws IOException {
@@ -236,7 +236,7 @@ public class GatewayMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", mgmtEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", mgmtEntry);
         } else {
-          System.out.println("Gateway CTC service registration failed.");
+          System.out.println("Gateway management service registration failed.");
         }
       }
     } else {

@@ -54,12 +54,10 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  @javax.validation.constraints.NotNull
   private ArrowheadService service;
 
   @JoinColumn(name = "consumer_system_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  @javax.validation.constraints.NotNull
   private ArrowheadSystem consumer;
 
   @JoinColumn(name = "provider_system_id")

@@ -30,8 +30,8 @@ public class QoSMain {
   private static HttpServer secureServer = null;
   private static Logger log = Logger.getLogger(QoSMain.class.getName());
   private static Properties prop;
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://0.0.0.0:8448/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://0.0.0.0:8449/");
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8448/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8449/");
   static final String MONITOR_URL = getProp().getProperty("monitor_url", "");
   public static boolean DEBUG_MODE;
 
