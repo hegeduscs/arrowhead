@@ -155,8 +155,7 @@ public class GatekeeperInboundResource {
         .requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService()).orchestrationFlags(orchestrationFlags)
         .preferredProviders(preferredProviders).build();
 
-    String orchestratorUri = UriBuilder.fromPath(GatekeeperMain.ORCHESTRATOR_URI).path("orchestrator").path("orchestration").toString();
-    Response response = Utility.sendRequest(orchestratorUri, "POST", serviceRequestForm);
+    Response response = Utility.sendRequest(GatekeeperMain.ORCHESTRATOR_URI, "POST", serviceRequestForm);
     OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
     // If the gateway service is not requested, then return the full orchestration response
     if (!icnProposal.getNegotiationFlags().get("useGateway")) {
