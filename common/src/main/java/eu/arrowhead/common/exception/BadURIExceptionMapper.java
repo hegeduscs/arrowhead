@@ -11,22 +11,21 @@ package eu.arrowhead.common.exception;
 
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.server.ContainerRequest;
 
 @Provider
 public class BadURIExceptionMapper implements ExceptionMapper<NotFoundException> {
 
   @Inject
-  private ContainerRequestContext requestContext;
+  private javax.inject.Provider<ContainerRequest> requestContext;
 
   public Response toResponse(NotFoundException ex) {
     ex.printStackTrace();
-    ErrorMessage errorMessage = new ErrorMessage(requestContext.getUriInfo().getPath() + " is not a valid path!", 404,
-        NotFoundException.class.getName(), requestContext.getUriInfo().getBaseUri().toString());
+    ErrorMessage errorMessage = new ErrorMessage(requestContext.get().getPath(true) + " is not a valid path!", 404, NotFoundException.class.getName(),
+                                                 requestContext.get().getBaseUri().toString());
     return Response.status(Response.Status.NOT_FOUND).entity(errorMessage).header("Content-type", "application/json").build();
   }
 }
