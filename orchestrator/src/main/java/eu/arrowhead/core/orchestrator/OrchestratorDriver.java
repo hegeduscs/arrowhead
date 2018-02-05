@@ -338,6 +338,9 @@ final class OrchestratorDriver {
     for (OrchestrationStore storeEntry : entryList) {
       for (ServiceRegistryEntry srEntry : srList) {
         if (storeEntry.getService().equals(srEntry.getProvidedService()) && storeEntry.getProviderSystem().equals(srEntry.getProvider())) {
+          //This will include the service metadata and port, which is only stored in the Service Registry
+          storeEntry.setService(srEntry.getProvidedService());
+          storeEntry.setProviderSystem(srEntry.getProvider());
           storeEntry.setServiceURI(srEntry.getServiceURI());
         }
       }
