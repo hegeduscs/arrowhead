@@ -52,6 +52,7 @@ public class GatekeeperMain {
   static String[] GATEWAY_PROVIDER_URI;
   static String ORCHESTRATOR_URI = getProp().getProperty("orch_base_uri");
   static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
+  static boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
   static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
 
   private static String BASE64_PUBLIC_KEY;
@@ -322,8 +323,10 @@ public class GatekeeperMain {
 
   public static void getCoreSystemServiceUris() {
     AUTH_CONTROL_URI = Utility.getServiceInfo(Utility.AUTH_CONTROL_SERVICE)[0];
-    GATEWAY_CONSUMER_URI = Utility.getServiceInfo(Utility.GW_CONSUMER_SERVICE);
-    GATEWAY_PROVIDER_URI = Utility.getServiceInfo(Utility.GW_PROVIDER_SERVICE);
+    if (USE_GATEWAY) {
+      GATEWAY_CONSUMER_URI = Utility.getServiceInfo(Utility.GW_CONSUMER_SERVICE);
+      GATEWAY_PROVIDER_URI = Utility.getServiceInfo(Utility.GW_PROVIDER_SERVICE);
+    }
     if (!FIRST_SR_QUERY) {
       ORCHESTRATOR_URI = Utility.getServiceInfo(Utility.ORCH_SERVICE)[0];
     }

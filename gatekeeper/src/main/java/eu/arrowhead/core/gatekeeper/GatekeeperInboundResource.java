@@ -85,8 +85,8 @@ public class GatekeeperInboundResource {
     // If the consumer Cloud is not authorized an error is returned
     if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
       log.info("GSD poll: Requester Cloud is UNAUTHORIZED, sending back error");
-      throw new AuthenticationException("Requester Cloud is UNAUTHORIZED to consume this service, GSD poll failed.", Status.UNAUTHORIZED
-          .getStatusCode(), AuthenticationException.class.getName(),
+      throw new AuthenticationException("Requester Cloud is UNAUTHORIZED to consume this service, GSD poll failed.",
+                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
                                         requestContext.getUriInfo().getAbsolutePath().toString());
     }
     // If it is authorized, poll the Service Registry for the requested Service
@@ -122,7 +122,8 @@ public class GatekeeperInboundResource {
   public Response ICNProposal(ICNProposal icnProposal, @Context ContainerRequestContext requestContext) {
     if (!icnProposal.isValid()) {
       log.error("ICNProposal BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNProposal.", Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: missing/incomplete ICNProposal.", Status.BAD_REQUEST.getStatusCode(),
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     // Polling the Authorization System about the consumer Cloud
@@ -133,7 +134,8 @@ public class GatekeeperInboundResource {
     // If the consumer Cloud is not authorized an error is returned
     if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
       log.info("ICNProposal: Requester Cloud is UNAUTHORIZED, sending back error");
-      throw new AuthenticationException("Requester Cloud is UNAUTHORIZED to consume this service, ICNProposal failed.", Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
+      throw new AuthenticationException("Requester Cloud is UNAUTHORIZED to consume this service, ICNProposal failed.",
+                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
                                         requestContext.getUriInfo().getAbsolutePath().toString());
     }
     // If it is authorized, send a ServiceRequestForm to the Orchestrator and return the OrchestrationResponse
@@ -149,7 +151,8 @@ public class GatekeeperInboundResource {
     if (icnProposal.getNegotiationFlags().get("useGateway")) {
       icnProposal.getRequesterSystem().setSystemName(GatekeeperMain.GATEWAY_PROVIDER_URI[1]);
     }
-    ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem()).requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService()).orchestrationFlags(orchestrationFlags)
+    ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
+        .requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService()).orchestrationFlags(orchestrationFlags)
         .preferredProviders(preferredProviders).build();
 
     String orchestratorUri = UriBuilder.fromPath(GatekeeperMain.ORCHESTRATOR_URI).path("orchestrator").path("orchestration").toString();
@@ -193,8 +196,8 @@ public class GatekeeperInboundResource {
     }
 
     ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(), chosenBroker.getPort(), consumer, provider,
-                                                                              icnProposal.getRequesterCloud(), Utility.getOwnCloud(), icnProposal
-                                                                                  .getRequestedService(), isSecure, timeout,
+                                                                              icnProposal.getRequesterCloud(), Utility.getOwnCloud(),
+                                                                              icnProposal.getRequestedService(), isSecure, timeout,
                                                                               icnProposal.getGatewayPublicKey());
 
     // Sending request, parsing response
@@ -202,8 +205,8 @@ public class GatekeeperInboundResource {
     ConnectToProviderResponse connectToProviderResponse = gatewayResponse.readEntity(ConnectToProviderResponse.class);
 
     GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(commonBrokers.get(0).getAddress(), commonBrokers.get(0).getPort(),
-                                                                            connectToProviderResponse.getQueueName(), connectToProviderResponse
-                                                                                .getControlQueueName(),
+                                                                            connectToProviderResponse.getQueueName(),
+                                                                            connectToProviderResponse.getControlQueueName(),
                                                                             GatekeeperMain.GATEWAY_PROVIDER_URI[3]);
     ICNEnd icnEnd = new ICNEnd(orchResponse.getResponse().get(0), gatewayConnectionInfo);
     log.info("ICNProposal: returning the first OrchestrationForm and the GatewayConnectionInfo to the requester Cloud.");

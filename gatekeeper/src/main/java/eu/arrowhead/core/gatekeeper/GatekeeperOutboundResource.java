@@ -151,17 +151,16 @@ public class GatekeeperOutboundResource {
                                     BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
-    //TODO beolvasást mainbe kiszervezni
-    // Getting the list of preferred brokers from database + read in the use_gateway property
-    List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
-    boolean useGateway = Boolean.valueOf(GatekeeperMain.getProp().getProperty("use_gateway", "false"));
-    requestForm.getNegotiationFlags().put("useGateway", useGateway);
-
+    requestForm.getNegotiationFlags().put("useGateway", GatekeeperMain.USE_GATEWAY);
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
                                               requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-                                              requestForm.getAuthenticationInfo(), preferredBrokers, GatekeeperMain.timeout,
-                                              GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
+                                              requestForm.getAuthenticationInfo(), null, GatekeeperMain.timeout, null);
+
+    if (GatekeeperMain.USE_GATEWAY) {
+      icnProposal.setPreferredBrokers(dm.getAll(Broker.class, null));
+      icnProposal.setAuthenticationInfo(GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
+    }
 
     //NOTE isSecure false constant is temporary
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
@@ -171,7 +170,7 @@ public class GatekeeperOutboundResource {
     Response response = Utility.sendRequest(icnUri, "PUT", icnProposal, GatekeeperMain.outboundClientContext);
 
     // If the gateway services are not requested, then just send back the ICN results to the Orchestrator right away
-    if (!useGateway) {
+    if (!GatekeeperMain.USE_GATEWAY) {
       ICNResult icnResult = response.readEntity(ICNResult.class);
       log.info("ICNRequest: returning ICNResult to Orchestrator.");
       return Response.status(response.getStatus()).entity(icnResult).build();
