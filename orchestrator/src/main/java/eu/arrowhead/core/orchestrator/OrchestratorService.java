@@ -322,14 +322,18 @@ final class OrchestratorService {
                                                                     List<String> instructions) {
     // Arrange token generation for every provider, if it was requested in the service metadata
     Map<String, String> metadata;
-    TokenGenerationRequest tokenRequest = null;
+    TokenGenerationResponse tokenResponse = null;
     if (srf.getRequestedService() == null) {
       for (ServiceRegistryEntry entry : srList) {
         metadata = entry.getProvidedService().getServiceMetadata();
         if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
           // Compiling the request payload
-          tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), null, Collections.singletonList(entry.getProvider()),
-                                                    entry.getProvidedService(), 0);
+          TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), null,
+                                                                           Collections.singletonList(entry.getProvider()), entry.getProvidedService(),
+                                                                           0);
+          // Sending the token generation request, parsing the response
+          Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
+          tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
         }
       }
     } else {
@@ -342,12 +346,13 @@ final class OrchestratorService {
         }
 
         // Compiling the request payload
-        tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList, srf.getRequestedService(), 0);
+        TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
+                                                                         srf.getRequestedService(), 0);
+        // Sending the token generation request, parsing the response
+        Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
+        tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
       }
     }
-    // Sending the token generation request, parsing the response
-    Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-    TokenGenerationResponse tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
 
     // Create an OrchestrationForm for every provider
     List<OrchestrationForm> ofList = new ArrayList<>();
