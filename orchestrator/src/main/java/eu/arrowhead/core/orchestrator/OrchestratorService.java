@@ -27,6 +27,7 @@ import eu.arrowhead.common.messages.TokenGenerationRequest;
 import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -321,22 +322,33 @@ final class OrchestratorService {
   private static OrchestrationResponse compileOrchestrationResponse(List<ServiceRegistryEntry> srList, ServiceRequestForm srf,
                                                                     List<String> instructions) {
     // Arrange token generation for every provider, if it was requested in the service metadata
-    Map<String, String> metadata = srf.getRequestedService().getServiceMetadata();
-    TokenGenerationResponse tokenResponse = null;
-    if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
-      // Getting all the provider Systems from the Service Registry entries
-      List<ArrowheadSystem> providerList = new ArrayList<>();
+    Map<String, String> metadata = new HashMap<>();
+    TokenGenerationRequest tokenRequest = null;
+    if (srf.getRequestedService() == null) {
       for (ServiceRegistryEntry entry : srList) {
-        providerList.add(entry.getProvider());
+        metadata = entry.getProvidedService().getServiceMetadata();
+        if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
+          // Compiling the request payload
+          tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), null, Collections.singletonList(entry.getProvider()),
+                                                    entry.getProvidedService(), 0);
+        }
       }
+    } else {
+      metadata = srf.getRequestedService().getServiceMetadata();
+      if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
+        // Getting all the provider Systems from the Service Registry entries
+        List<ArrowheadSystem> providerList = new ArrayList<>();
+        for (ServiceRegistryEntry entry : srList) {
+          providerList.add(entry.getProvider());
+        }
 
-      // Getting the Authorization token generation resource URI, compiling the request payload
-      TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
-                                                                       srf.getRequestedService(), 0);
-      //Sending request, parsing response
-      Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-      tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
+        // Compiling the request payload
+        tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList, srf.getRequestedService(), 0);
+      }
     }
+    // Sending the token generation request, parsing the response
+    Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
+    TokenGenerationResponse tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
 
     // Create an OrchestrationForm for every provider
     List<OrchestrationForm> ofList = new ArrayList<>();

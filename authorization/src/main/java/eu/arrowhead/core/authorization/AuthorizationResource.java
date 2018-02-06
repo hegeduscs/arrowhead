@@ -72,8 +72,8 @@ public class AuthorizationResource {
   public Response isSystemAuthorized(IntraCloudAuthRequest request, @Context ContainerRequestContext requestContext) {
     if (!request.isValid()) {
       log.error("isSystemAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.", Status.BAD_REQUEST
-          .getStatusCode(), BadPayloadException.class.getName(),
+      throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.",
+                                    Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
                                     requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
@@ -81,7 +81,8 @@ public class AuthorizationResource {
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
-      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().getSystemName(), Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+      throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().getSystemName(),
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
                                       requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
@@ -120,7 +121,8 @@ public class AuthorizationResource {
       }
     }
 
-    log.info("IntraCloud auth check for consumer " + request.getConsumer().getSystemName() + " returns with " + authorizedCount + " possible provider");
+    log.info(
+        "IntraCloud auth check for consumer " + request.getConsumer().getSystemName() + " returns with " + authorizedCount + " possible provider");
     response.setAuthorizationMap(authorizationState);
     return Response.status(Status.OK).entity(response).build();
   }
@@ -135,7 +137,7 @@ public class AuthorizationResource {
   @PUT
   @Path("intercloud")
   public Response isCloudAuthorized(InterCloudAuthRequest request, @Context ContainerRequestContext requestContext) {
-    if (!request.isPayloadUsable()) {
+    if (!request.isValid()) {
       log.error("isCloudAuthorized BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete cloud or service in the request payload.", Status.BAD_REQUEST.getStatusCode(),
                                     BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
@@ -146,8 +148,8 @@ public class AuthorizationResource {
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (cloud == null) {
       log.error("Requester cloud is not in the database. isCloudAuthorized DataNotFoundException");
-      throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString(), Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
-
+      throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString(),
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
                                       requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
@@ -181,7 +183,13 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("token")
-  public Response tokenGeneration(TokenGenerationRequest request) {
+  public Response tokenGeneration(TokenGenerationRequest request, @Context ContainerRequestContext requestContext) {
+    if (!request.isValid()) {
+      log.error("tokenGeneration BadPayloadException");
+      throw new BadPayloadException("TokenGenerationRequest has missing/incomplete fields.", Status.BAD_REQUEST.getStatusCode(),
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+    }
+
     // Get the tokens from the service class (can throw run time exceptions)
     List<ArrowheadToken> tokens = TokenGenerationService.generateTokens(request);
     List<TokenData> tokenDataList = new ArrayList<>();

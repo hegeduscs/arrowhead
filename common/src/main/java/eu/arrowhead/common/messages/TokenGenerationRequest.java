@@ -9,6 +9,7 @@
 
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -26,7 +27,8 @@ public class TokenGenerationRequest {
   public TokenGenerationRequest() {
   }
 
-  public TokenGenerationRequest(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, List<ArrowheadSystem> providers, ArrowheadService service, int duration) {
+  public TokenGenerationRequest(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, List<ArrowheadSystem> providers, ArrowheadService service,
+                                int duration) {
     this.consumer = consumer;
     this.consumerCloud = consumerCloud;
     this.providers = providers;
@@ -72,6 +74,18 @@ public class TokenGenerationRequest {
 
   public void setDuration(int duration) {
     this.duration = duration;
+  }
+
+  @JsonIgnore
+  public boolean isValid() {
+    boolean areProvidersValid = true;
+    for (ArrowheadSystem provider : providers) {
+      if (!provider.isValidForDatabase()) {
+        areProvidersValid = false;
+      }
+    }
+
+    return !providers.isEmpty() && areProvidersValid && consumer != null && consumer.isValidForDatabase() && service != null && service.isValid();
   }
 
 }

@@ -43,7 +43,7 @@ public class InterCloudAuthRequest {
   }
 
   @JsonIgnore
-  public boolean isPayloadUsable() {
+  public boolean isValid() {
     return cloud != null && service != null && cloud.isValidForDatabase() && service.isValidForDatabase();
   }
 
