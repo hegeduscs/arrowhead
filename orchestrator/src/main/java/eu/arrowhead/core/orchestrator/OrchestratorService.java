@@ -27,7 +27,6 @@ import eu.arrowhead.common.messages.TokenGenerationRequest;
 import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -322,7 +321,7 @@ final class OrchestratorService {
   private static OrchestrationResponse compileOrchestrationResponse(List<ServiceRegistryEntry> srList, ServiceRequestForm srf,
                                                                     List<String> instructions) {
     // Arrange token generation for every provider, if it was requested in the service metadata
-    Map<String, String> metadata = new HashMap<>();
+    Map<String, String> metadata;
     TokenGenerationRequest tokenRequest = null;
     if (srf.getRequestedService() == null) {
       for (ServiceRegistryEntry entry : srList) {
