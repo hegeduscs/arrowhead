@@ -90,7 +90,8 @@ final class OrchestratorDriver {
     }
     serviceQueryResult.getServiceQueryData().removeAll(temp);
 
-    log.info("queryServiceRegistry was successful, number of potential providers for" + service.toString() + " is " + serviceQueryResult.getServiceQueryData().size());
+    log.info("queryServiceRegistry was successful, number of potential providers for" + service.toString() + " is " + serviceQueryResult
+        .getServiceQueryData().size());
     return serviceQueryResult.getServiceQueryData();
   }
 
@@ -125,7 +126,8 @@ final class OrchestratorDriver {
     // Throwing exception if none of the providers are authorized for this consumer/service pair.
     if (authorizedSystems.isEmpty()) {
       log.error("queryAuthorization DataNotFoundException");
-      throw new DataNotFoundException("The consumer system is not authorized to receive servicing from any of the provider systems.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+      throw new DataNotFoundException("The consumer system is not authorized to receive servicing from any of the provider systems.",
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("queryAuthorization is done, sending back " + authorizedSystems.size() + " authorized Systems");
@@ -158,7 +160,8 @@ final class OrchestratorDriver {
 
     if (preferredList.isEmpty()) {
       log.error("removeNonPreferred DataNotFoundException");
-      throw new DataNotFoundException("No preferred local System was found in the the list of potential provider Systems.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+      throw new DataNotFoundException("No preferred local System was found in the the list of potential provider Systems.",
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("removeNonPreferred returns with " + preferredList.size() + " ServiceRegistryEntries.");
@@ -236,7 +239,8 @@ final class OrchestratorDriver {
 
     if (retrievedList.isEmpty()) {
       log.error("queryOrchestrationStore DataNotFoundException");
-      throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.getSystemName(), Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+      throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.getSystemName(),
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     } else {
       // Removing non-valid Store entries from the results
       List<OrchestrationStore> temp = new ArrayList<>();
@@ -277,11 +281,14 @@ final class OrchestratorDriver {
       for (OrchestrationStore entry : entryList) {
         try {
           // Querying the Service Registry for the current service
-          srList = OrchestratorDriver
+          List<ServiceRegistryEntry> serviceList = OrchestratorDriver
               .queryServiceRegistry(entry.getService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
-          // Compiling the systems that provide the current service
-          for (ServiceRegistryEntry srEntry : srList) {
+          // Compiling the systems that provide the current service + filtering service list based on providers (to set port and metadata later)
+          for (ServiceRegistryEntry srEntry : serviceList) {
             providerSystemsFromSR.add(srEntry.getProvider());
+            if (srEntry.getProvider().equals(entry.getProviderSystem())) {
+              srList.add(srEntry);
+            }
           }
 
           // Querying the Authorization to see if the provider system is authorized for this servicing or not
@@ -302,7 +309,8 @@ final class OrchestratorDriver {
     else {
       try {
         // Querying the Service Registry for the service
-        srList = OrchestratorDriver.queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+        srList = OrchestratorDriver
+            .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
         // Compiling the systems that provide the service
         for (ServiceRegistryEntry srEntry : srList) {
           providerSystemsFromSR.add(srEntry.getProvider());
@@ -320,7 +328,8 @@ final class OrchestratorDriver {
 
         // Loop over the store entries and remove an entry, if the SR or Auth crosscheck fails
         for (OrchestrationStore entry : entryList) {
-          if (entry.getProviderCloud() == null && (!providerSystemsFromSR.contains(entry.getProviderSystem()) || !providerSystemsFromAuth.contains(entry.getProviderSystem()))) {
+          if (entry.getProviderCloud() == null && (!providerSystemsFromSR.contains(entry.getProviderSystem()) || !providerSystemsFromAuth
+              .contains(entry.getProviderSystem()))) {
             toRemove.add(entry);
           }
         }
@@ -376,7 +385,8 @@ final class OrchestratorDriver {
     GSDResult result = response.readEntity(GSDResult.class);
     if (!result.isValid()) {
       log.error("doGlobalServiceDiscovery DataNotFoundException");
-      throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+      throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.", Status.NOT_FOUND.getStatusCode(),
+                                      DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("doGlobalServiceDiscovery returns with " + result.getResponse().size() + " GSDAnswers");
@@ -422,7 +432,8 @@ final class OrchestratorDriver {
     if (onlyPreferred) {
       log.error("interCloudMatchmaking DataNotFoundException, preferredClouds size: " + preferredClouds.size());
       throw new DataNotFoundException(
-          "No preferred Cloud found in the GSD response. Inter-Cloud matchmaking failed, since only preferred providers are allowed.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+          "No preferred Cloud found in the GSD response. Inter-Cloud matchmaking failed, since only preferred providers are allowed.",
+          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("interCloudMatchmaking returns the first Cloud entry from the GSD results");
@@ -446,7 +457,8 @@ final class OrchestratorDriver {
     // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
     List<ArrowheadSystem> preferredSystems = new ArrayList<>();
     for (PreferredProvider provider : srf.getPreferredProviders()) {
-      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider.getProviderSystem().isValid()) {
+      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
+          .getProviderSystem().isValid()) {
         preferredSystems.add(provider.getProviderSystem());
       }
     }
