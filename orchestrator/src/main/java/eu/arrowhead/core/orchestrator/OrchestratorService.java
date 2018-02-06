@@ -14,6 +14,7 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.GSDResult;
 import eu.arrowhead.common.messages.ICNResult;
@@ -185,8 +186,8 @@ final class OrchestratorService {
             return icnMatchmaking(icnResult, Collections.singletonList(entry.getProviderSystem()), true);
           }
           // If the ICN process failed on this store entry, we catch the exception and go to the next Store entry in the for-loop.
-          catch (DataNotFoundException ex) {
-            log.info("orchestrationFromStore catches DataNotFoundException at ICN process, going to the next Store entry");
+          catch (ArrowheadException ex) {
+            log.info("orchestrationFromStore catches ArrowheadException at ICN process, going to the next Store entry");
             ex.printStackTrace();
             System.out
                 .println("Inter-Cloud store based orchestration failed for " + srf.getPreferredProviders().get(0) + ", moving to the next option.");
