@@ -275,18 +275,24 @@ final class OrchestratorDriver {
     // If true, the Orchestration Store was queried for default entries, meaning the service is different for each store entry
     if (srf.getRequestedService() == null) {
       for (OrchestrationStore entry : entryList) {
-        // Querying the Service Registry for the current service
-        srList = OrchestratorDriver.queryServiceRegistry(entry.getService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
-        // Compiling the systems that provide the current service
-        for (ServiceRegistryEntry srEntry : srList) {
-          providerSystemsFromSR.add(srEntry.getProvider());
-        }
+        try {
+          // Querying the Service Registry for the current service
+          srList = OrchestratorDriver
+              .queryServiceRegistry(entry.getService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+          // Compiling the systems that provide the current service
+          for (ServiceRegistryEntry srEntry : srList) {
+            providerSystemsFromSR.add(srEntry.getProvider());
+          }
 
-        // Querying the Authorization to see if the provider system is authorized for this servicing or not
-        providerSystemsFromAuth = OrchestratorDriver.queryAuthorization(entry.getConsumer(), entry.getService(), Collections.singleton(entry.getProviderSystem()));
+          // Querying the Authorization to see if the provider system is authorized for this servicing or not
+          providerSystemsFromAuth = OrchestratorDriver
+              .queryAuthorization(entry.getConsumer(), entry.getService(), Collections.singleton(entry.getProviderSystem()));
 
-        // Remove the Store entry from the list, if the SR or Auth crosscheck fails
-        if (!providerSystemsFromSR.contains(entry.getProviderSystem()) || !providerSystemsFromAuth.contains(entry.getProviderSystem())) {
+          // Remove the Store entry from the list, if the SR or Auth crosscheck fails
+          if (!providerSystemsFromSR.contains(entry.getProviderSystem()) || !providerSystemsFromAuth.contains(entry.getProviderSystem())) {
+            toRemove.add(entry);
+          }
+        } catch (DataNotFoundException e) {
           toRemove.add(entry);
         }
       }
