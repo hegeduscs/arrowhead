@@ -68,7 +68,8 @@ How to add our root certificate to the JDK
 1. Go to the ~/jdk1.8.0_92/jre/bin
 2. Copy the master_arrowhead_cert.crt here
 3. Open a command line as administrator here
-4. Type: keytool -import -alias "arrowhead.eu" -keystore $JAVA_HOME/jre/lib/security/cacerts -file master_arrowhead_cert.crt
+4. Type: keytool -import -alias "arrowhead.eu" -keystore "$JAVA_HOME/jre/lib/security/cacerts" -file master_arrowhead_cert.crt
+5. The default password is "changeit", then type "y" and hit enter. The certificate is added to the JDK truststore now.
 
 How to delete an alias from java cacerts keystore
 1. keytool -delete -alias "aliasname" -keystore "filepathtocacerts"
