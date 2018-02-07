@@ -73,5 +73,5 @@ How to add our root certificate to the JDK
 5. The default password is "changeit", then type "y" and hit enter. The certificate is added to the JDK truststore now.
 
 How to delete an alias from java cacerts keystore
-1. keytool -delete -alias "aliasname" -keystore "filepathtocacerts"
+1. keytool -delete -alias "aliasname" -keystore "file_path_to_cacerts"
     - password: changeit
