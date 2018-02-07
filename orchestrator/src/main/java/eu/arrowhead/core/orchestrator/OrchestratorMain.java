@@ -232,7 +232,7 @@ public class OrchestratorMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", orchEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", orchEntry);
         } else {
-          System.out.println("Orchestration service registration failed.");
+          throw new ArrowheadException("Orchestration service registration failed.", e);
         }
       }
     } else {

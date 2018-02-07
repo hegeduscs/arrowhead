@@ -236,7 +236,7 @@ public class AuthorizationMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", authControlEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
         } else {
-          System.out.println("Authorization control service registration failed.");
+          throw new ArrowheadException("Authorization control service registration failed.", e);
         }
       }
       try {
@@ -246,7 +246,7 @@ public class AuthorizationMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
         } else {
-          System.out.println("Token generation service registration failed.");
+          throw new ArrowheadException("Token generation service registration failed.", e);
         }
       }
     } else {

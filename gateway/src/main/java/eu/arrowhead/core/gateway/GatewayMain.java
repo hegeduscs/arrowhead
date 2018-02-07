@@ -228,7 +228,7 @@ public class GatewayMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", providerEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", providerEntry);
         } else {
-          System.out.println("Gateway CTP service registration failed.");
+          throw new ArrowheadException("Gateway CTP service registration failed.", e);
         }
       }
       try {
@@ -238,7 +238,7 @@ public class GatewayMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", consumerEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", consumerEntry);
         } else {
-          System.out.println("Gateway CTC service registration failed.");
+          throw new ArrowheadException("Gateway CTC service registration failed.", e);
         }
       }
       try {
@@ -248,7 +248,7 @@ public class GatewayMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", mgmtEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", mgmtEntry);
         } else {
-          System.out.println("Gateway management service registration failed.");
+          throw new ArrowheadException("Gateway management service registration failed.", e);
         }
       }
     } else {

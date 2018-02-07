@@ -301,7 +301,7 @@ public class GatekeeperMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", gsdEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", gsdEntry);
         } else {
-          System.out.println("GSD service registration failed.");
+          throw new ArrowheadException("GSD service registration failed.", e);
         }
       }
       try {
@@ -311,7 +311,7 @@ public class GatekeeperMain {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", icnEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", icnEntry);
         } else {
-          System.out.println("ICN service registration failed.");
+          throw new ArrowheadException("ICN service registration failed.", e);
         }
       }
     } else {
