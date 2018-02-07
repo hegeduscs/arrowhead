@@ -228,7 +228,10 @@ public final class Utility {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
       ArrowheadSystem coreSystem = entry.getProvider();
       boolean isSecure = false;
-      if (entry.getMetadata() != null) {
+      if (!entry.getProvidedService().getServiceMetadata().isEmpty()) {
+        isSecure = entry.getProvidedService().getServiceMetadata().containsKey("security");
+      }
+      else if(entry.getMetadata() != null){
         isSecure = entry.getMetadata().contains("security");
       }
       String serviceUri = getUri(coreSystem.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
