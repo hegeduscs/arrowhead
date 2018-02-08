@@ -5,7 +5,7 @@
 ### Usage and testing
 Clone the repo:
 
-`git pull https://github.com/hegeduscs/arrowhead.git`
+`git clone -b M3-dev https://github.com/hegeduscs/arrowhead.git`
 
 Import the project into your choice of IDE or build the modules with maven:
 
