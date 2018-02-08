@@ -12,6 +12,7 @@ package eu.arrowhead.common.exception;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ContainerResponse;
@@ -25,8 +26,14 @@ public class JsonMappingExceptionMapper implements ExceptionMapper<JsonMappingEx
   @Override
   public Response toResponse(JsonMappingException ex) {
     ex.printStackTrace();
-    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), responseContext.get().getStatus(), JsonMappingException.class.getName(),
-        responseContext.get().getRequestContext().getAbsolutePath().toString());
+    ErrorMessage errorMessage;
+    if (responseContext.get() != null) {
+      errorMessage = new ErrorMessage(ex.getMessage(), responseContext.get().getStatus(), JsonMappingException.class.getName(),
+          responseContext.get().getRequestContext().getAbsolutePath().toString());
+    } else {
+      errorMessage = new ErrorMessage(ex.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), JsonMappingException.class.getName(),
+          null);
+    }
     return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build();
   }
 
