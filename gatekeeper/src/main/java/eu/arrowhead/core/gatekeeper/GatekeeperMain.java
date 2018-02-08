@@ -206,7 +206,7 @@ public class GatekeeperMain {
 
     SSLContext serverContext;
     if (inbound) {
-      serverContext = SecurityUtils.createAcceptAllSSLContext();
+      serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
       SSLContextConfigurator clientConfig = new SSLContextConfigurator();
       clientConfig.setKeyStoreFile(gatekeeperKeystorePath);
