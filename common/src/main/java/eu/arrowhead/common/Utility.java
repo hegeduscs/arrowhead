@@ -29,6 +29,7 @@ import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
@@ -161,6 +163,14 @@ public final class Utility {
   private static void handleException(Response response, String uri) {
     //The response body has to be extracted before the stream closes
     String errorMessageBody = toPrettyJson(null, response.getEntity());
+    if (errorMessageBody == null || errorMessageBody.equals("null")) {
+      response.bufferEntity();
+      errorMessageBody = response.readEntity(String.class);
+      if (errorMessageBody.length() > 250) {
+        errorMessageBody = errorMessageBody.substring(0, 250);
+      }
+    }
+
     ErrorMessage errorMessage;
     try {
       errorMessage = response.readEntity(ErrorMessage.class);
