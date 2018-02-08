@@ -53,7 +53,6 @@ final class QoSManagerService {
    * Verifies if the requestedQoS is possible on the selected providers.
    *
    * @param message QoSVerify parameters.
-   *
    * @return Returns if is possible or not and why.
    */
 
@@ -79,7 +78,7 @@ final class QoSManagerService {
       try {
         QoSVerifierResponse response = algorithmFactory
             .verify(network.getNetworkType(), providerNetworkDevice.getNetworkCapabilities(), consumerNetworkDevice.getNetworkCapabilities(),
-                    providerReservations, consumerReservations, message.getRequestedQoS(), message.getCommands());
+                providerReservations, consumerReservations, message.getRequestedQoS(), message.getCommands());
 
         qosVerificationResponse.addResponse(provider, response.getResponse());
         if (!response.getResponse()) {
@@ -131,9 +130,7 @@ final class QoSManagerService {
    * Reserves a QoS on the consumer and provider stream.
    *
    * @param message QoSReservation parameters.
-   *
    * @return Returns if the reservation was possible.
-   *
    * @throws ReservationException The reservation on the devices was not possible.
    * @throws DriverNotFoundException The network type doesnt have a driver assigned.
    */
@@ -157,7 +154,7 @@ final class QoSManagerService {
     try {
       commands = driverFactory
           .generateCommands(network.getNetworkType(), network.getNetworkConfigurations(), provider, consumer, message.getService(),
-                            message.getCommands(), message.getRequestedQoS());
+              message.getCommands(), message.getRequestedQoS());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -174,8 +171,8 @@ final class QoSManagerService {
     boolean ruleApplied = response.getStatusInfo().getFamily() == Family.SUCCESSFUL;
 
     return new QoSReservationResponse(ruleApplied,
-                                      new QoSReservationCommand(message.getService(), message.getConsumer(), message.getProvider(), commands,
-                                                                message.getRequestedQoS()));
+        new QoSReservationCommand(message.getService(), message.getConsumer(), message.getProvider(), commands,
+            message.getRequestedQoS()));
   }
 
 }

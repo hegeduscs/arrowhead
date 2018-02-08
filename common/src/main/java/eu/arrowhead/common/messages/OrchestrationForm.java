@@ -31,7 +31,7 @@ public class OrchestrationForm {
   }
 
   public OrchestrationForm(ArrowheadService service, ArrowheadSystem provider, String serviceURI, String instruction, String authorizationToken,
-                           String signature) {
+      String signature) {
     this.service = service;
     this.provider = provider;
     this.serviceURI = serviceURI;

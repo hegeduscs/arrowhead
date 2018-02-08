@@ -55,7 +55,7 @@ public class ServiceRegistryResource {
     if (!entry.isValid()) {
       log.error("registerService throws BadPayloadException");
       throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
@@ -63,8 +63,9 @@ public class ServiceRegistryResource {
       String[] clientFields = clientCN.split("\\.", 2);
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
         log.error("Provider system name and cert common name do not match! Service registering denied.");
-        throw new AuthenticationException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-                                          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+        throw new AuthenticationException(
+            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
       }
     }
     entry.toDatabase();
@@ -103,7 +104,7 @@ public class ServiceRegistryResource {
     if (!queryForm.isValid()) {
       log.error("queryRegistry throws BadPayloadException");
       throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.put("serviceDefinition", queryForm.getService().getServiceDefinition());
@@ -139,8 +140,9 @@ public class ServiceRegistryResource {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValid()) {
       log.error("removeService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
-                                    requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).",
+          Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
+          requestContext.getUriInfo().getAbsolutePath().toString());
     }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
@@ -148,8 +150,9 @@ public class ServiceRegistryResource {
       String[] clientFields = clientCN.split("\\.", 2);
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
         log.error("Provider system name and cert common name do not match! Service removing denied.");
-        throw new AuthenticationException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-                                          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+        throw new AuthenticationException(
+            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
       }
     }
 

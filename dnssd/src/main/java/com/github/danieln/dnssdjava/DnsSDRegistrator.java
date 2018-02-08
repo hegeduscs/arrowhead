@@ -33,7 +33,6 @@ public interface DnsSDRegistrator {
    *
    * @param name the service name.
    * @param type the service type.
-   *
    * @return a service name.
    */
   ServiceName makeServiceName(String name, ServiceType type);
@@ -43,7 +42,6 @@ public interface DnsSDRegistrator {
    * ServiceData#setHost(String)}. This method seems to work better than using <code>InetAddress.getLocalHost().getCanonicalHostName()</code>
    *
    * @return the fully qualified host name.
-   *
    * @throws UnknownHostException if the host name cannot be found.
    */
   String getLocalHostName() throws UnknownHostException;
@@ -67,7 +65,7 @@ public interface DnsSDRegistrator {
    *
    * @param name the name of the key.
    * @param algorithm the signature algorithm, one of {@link #TSIG_ALGORITHM_HMAC_MD5}, {@link #TSIG_ALGORITHM_HMAC_SHA1}, {@link
-   *     #TSIG_ALGORITHM_HMAC_SHA256}
+   * #TSIG_ALGORITHM_HMAC_SHA256}
    * @param key the base64 encoded key.
    */
   void setTSIGKey(String name, String algorithm, String key);
@@ -77,9 +75,7 @@ public interface DnsSDRegistrator {
    * collision.
    *
    * @param serviceData the service to register.
-   *
    * @return true if the service was registered, false if the service name was already registered.
-   *
    * @throws DnsSDException if the service couldn't be registered due to some error.
    */
   boolean registerService(ServiceData serviceData) throws DnsSDException;
@@ -88,9 +84,7 @@ public interface DnsSDRegistrator {
    * Remove a service from DNS-SD.
    *
    * @param serviceName the name of the service to remove.
-   *
    * @return true if the service was removed, false if no service was found.
-   *
    * @throws DnsSDException if the service couldn't be unregistered due to some error.
    */
   boolean unregisterService(ServiceName serviceName) throws DnsSDException;

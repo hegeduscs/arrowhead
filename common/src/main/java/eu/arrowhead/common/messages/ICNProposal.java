@@ -34,8 +34,9 @@ public class ICNProposal {
   public ICNProposal() {
   }
 
-  public ICNProposal(ArrowheadService requestedService, ArrowheadCloud requesterCloud, ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo,
-                     List<Broker> preferredBrokers, int timeout, String gatewayPublicKey) {
+  public ICNProposal(ArrowheadService requestedService, ArrowheadCloud requesterCloud, ArrowheadSystem requesterSystem,
+      List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo,
+      List<Broker> preferredBrokers, int timeout, String gatewayPublicKey) {
     this.requestedService = requestedService;
     this.requesterCloud = requesterCloud;
     this.requesterSystem = requesterSystem;
@@ -121,7 +122,8 @@ public class ICNProposal {
 
   @JsonIgnore
   public boolean isValid() {
-    return requestedService != null && requesterCloud != null && requesterSystem != null && requestedService.isValid() && requesterCloud.isValidForDatabase() && requesterSystem.isValid();
+    return requestedService != null && requesterCloud != null && requesterSystem != null && requestedService.isValid() && requesterCloud
+        .isValidForDatabase() && requesterSystem.isValid();
   }
 
 }

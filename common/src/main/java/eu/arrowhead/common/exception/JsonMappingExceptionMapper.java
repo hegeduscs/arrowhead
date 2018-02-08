@@ -26,7 +26,7 @@ public class JsonMappingExceptionMapper implements ExceptionMapper<JsonMappingEx
   public Response toResponse(JsonMappingException ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), responseContext.get().getStatus(), JsonMappingException.class.getName(),
-                                                 responseContext.get().getRequestContext().getAbsolutePath().toString());
+        responseContext.get().getRequestContext().getAbsolutePath().toString());
     return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build();
   }
 

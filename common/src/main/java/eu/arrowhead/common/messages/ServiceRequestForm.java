@@ -25,8 +25,8 @@ import java.util.Map;
 public class ServiceRequestForm {
 
   private static final List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
-                                                                             "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
-                                                                             "onlyPreferred", "enableQoS"));
+      "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
+      "onlyPreferred", "enableQoS"));
   private ArrowheadSystem requesterSystem;
   private ArrowheadCloud requesterCloud;
   private ArrowheadService requestedService;
@@ -116,17 +116,16 @@ public class ServiceRequestForm {
   }
 
   /**
-   * Simple inspector method to check weather a ServiceRequestForm instance is valid to be processed by the Orchestrator.
-   * <p>
-   * The mandatory requesterSystem field can not be null and has to be valid. If the requestedService is not null, it has to be valid.
-   * PreferredProviders list can not be empty, if the onlyPreferred flag is true. RequestedQoS and commands lists can not be empty, if the enableQoS
-   * flag is true.
+   * Simple inspector method to check weather a ServiceRequestForm instance is valid to be processed by the Orchestrator. <p> The mandatory
+   * requesterSystem field can not be null and has to be valid. If the requestedService is not null, it has to be valid. PreferredProviders list can
+   * not be empty, if the onlyPreferred flag is true. RequestedQoS and commands lists can not be empty, if the enableQoS flag is true.
    *
    * @return true if the instance is in compliance with all the restrictions, false otherwise
    */
   @JsonIgnore
   public boolean isValid() {
-    return requesterSystem != null && requesterSystem.isValid() && !(requestedService != null && !requestedService.isValid()) && !(orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) && !(orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty()
+    return requesterSystem != null && requesterSystem.isValid() && !(requestedService != null && !requestedService.isValid()) && !(
+        orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) && !(orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty()
         || commands.isEmpty()));
   }
 

@@ -30,7 +30,8 @@ public class ICNRequestForm {
   public ICNRequestForm() {
   }
 
-  public ICNRequestForm(ArrowheadService requestedService, ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem, List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo) {
+  public ICNRequestForm(ArrowheadService requestedService, ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem,
+      List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo) {
     this.requestedService = requestedService;
     this.targetCloud = targetCloud;
     this.requesterSystem = requesterSystem;
@@ -89,7 +90,8 @@ public class ICNRequestForm {
 
   @JsonIgnore
   public boolean isValid() {
-    return requestedService != null && targetCloud != null && requesterSystem != null && requestedService.isValid() && targetCloud.isValid() && requesterSystem.isValid();
+    return requestedService != null && targetCloud != null && requesterSystem != null && requestedService.isValid() && targetCloud.isValid()
+        && requesterSystem.isValid();
   }
 
 }

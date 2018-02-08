@@ -227,7 +227,7 @@ public class ServiceRegistryMain {
       }
     } catch (FileNotFoundException ex) {
       throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
+          + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

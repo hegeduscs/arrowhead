@@ -59,12 +59,10 @@ final class OrchestratorDriver {
    *
    * @param service The <tt>ArrowheadService</tt> object for which the list of potential <tt>ArrowheadSystem</tt> providers are needed
    * @param metadataSearch If true, the stored <tt>ArrowheadService</tt>s have to have the same metadata to be returned in the response.
-   * @param pingProviders If true, the Service Registry is asked to ping the service provider <tt>ArrowheadSystem</tt> (where the service is
-   *     offered) to check if a connection can be established or not. Normally providers have to remove their offered services from the Service
-   *     Registry before going offline, but this feature can be used to ensure offline providers are filtered out.
-   *
+   * @param pingProviders If true, the Service Registry is asked to ping the service provider <tt>ArrowheadSystem</tt> (where the service is offered)
+   * to check if a connection can be established or not. Normally providers have to remove their offered services from the Service Registry before
+   * going offline, but this feature can be used to ensure offline providers are filtered out.
    * @return list of potential service providers with their offered services (interfaces, metadata, service URI)
-   *
    * @throws DataNotFoundException if the Service Registry response list is empty
    */
   static List<ServiceRegistryEntry> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
@@ -78,7 +76,7 @@ final class OrchestratorDriver {
     if (serviceQueryResult == null || !serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");
       throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString(), Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+          DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     // If there are non-valid entries in the Service Registry response, we filter those out
@@ -101,9 +99,7 @@ final class OrchestratorDriver {
    * @param consumer The <tt>ArrowheadSystem</tt> object representing the consumer system
    * @param service The <tt>ArrowheadService</tt> object representing the service to be consumed
    * @param providerSet The set of <tt>ArrowheadSystem</tt> objects representing the potential provider systems
-   *
    * @return list of the authorized provider <tt>ArrowheadSystem</tt>s
-   *
    * @throws DataNotFoundException if none of the provider <tt>ArrowheadSystem</tt>s are authorized for this servicing
    */
 
@@ -127,7 +123,7 @@ final class OrchestratorDriver {
     if (authorizedSystems.isEmpty()) {
       log.error("queryAuthorization DataNotFoundException");
       throw new DataNotFoundException("The consumer system is not authorized to receive servicing from any of the provider systems.",
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("queryAuthorization is done, sending back " + authorizedSystems.size() + " authorized Systems");
@@ -139,11 +135,9 @@ final class OrchestratorDriver {
    * This method is called when the <i>onlyPreferred</i> orchestration flag is set to true.
    *
    * @param srList The list of <tt>ServiceRegistryEntry</tt>s still being considered (after SR query and possibly Auth query)
-   * @param preferredLocalProviders A set of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a subset
-   *     of the <i>preferredProviders</i> list from the {@link ServiceRequestForm}, which can also contain not local <tt>ArrowheadSystem</tt>s.
-   *
+   * @param preferredLocalProviders A set of local <tt>ArrowheadSystem</tt>s preferred by the requester <tt>ArrowheadSystem</tt>. This is a subset of
+   * the <i>preferredProviders</i> list from the {@link ServiceRequestForm}, which can also contain not local <tt>ArrowheadSystem</tt>s.
    * @return a list of <tt>ServiceRegistryEntry</tt>s which have preferred provider <tt>ArrowheadSystem</tt>s
-   *
    * @throws DataNotFoundException if none of the <tt>ServiceRegistryEntry</tt>s from the given list contain a preferred <tt>ArrowheadSystem</tt>
    */
 
@@ -161,7 +155,7 @@ final class OrchestratorDriver {
     if (preferredList.isEmpty()) {
       log.error("removeNonPreferred DataNotFoundException");
       throw new DataNotFoundException("No preferred local System was found in the the list of potential provider Systems.",
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("removeNonPreferred returns with " + preferredList.size() + " ServiceRegistryEntries.");
@@ -176,17 +170,14 @@ final class OrchestratorDriver {
   /**
    * As the last step of the local orchestration process (if requested with the <i>matchmaking</i> orchestration flag) we pick out 1 provider from the
    * remaining list. Providers preferred by the consumer have higher priority. Custom matchmaking algorithm can be implemented here, as of now it just
-   * returns the first (preferred) provider from the list.
-   * <p>
-   * If the <i>onlyPreferred</i> orchestration flag is set to true, then it is guaranteed there will be at least 1 preferred provider to choose from,
-   * since this method is called after {@link #removeNonPreferred(List, Set)}, where a {@link eu.arrowhead.common.exception.DataNotFoundException} is
-   * thrown if no preferred provider was found.
+   * returns the first (preferred) provider from the list. <p> If the <i>onlyPreferred</i> orchestration flag is set to true, then it is guaranteed
+   * there will be at least 1 preferred provider to choose from, since this method is called after {@link #removeNonPreferred(List, Set)}, where a
+   * {@link eu.arrowhead.common.exception.DataNotFoundException} is thrown if no preferred provider was found.
    *
    * @param srList The list of <tt>ServiceRegistryEntry</tt>s still being considered
    * @param preferredLocalProviders The set of <tt>ArrowheadSystem</tt>s in this Local Cloud preferred by the requester system
-   *
    * @return the chosen ServiceRegistryEntry object, containing the necessary <tt>ArrowheadSystem</tt> and <tt>String</tt> serviceUri information to
-   *     contact the provider
+   * contact the provider
    */
   static ServiceRegistryEntry intraCloudMatchmaking(List<ServiceRegistryEntry> srList, Set<ArrowheadSystem> preferredLocalProviders) {
     // If there are no preferred providers, just return the first ServiceRegistryEntry
@@ -220,9 +211,7 @@ final class OrchestratorDriver {
    *
    * @param consumer The <tt>ArrowheadSystem</tt> object representing the consumer system (mandatory)
    * @param service The <tt>ArrowheadService</tt> object representing the service to be consumed (optional)
-   *
    * @return a list of <tt>OrchestrationStore</tt> objects matching the query criteria
-   *
    * @throws DataNotFoundException if the Store query yielded no results
    */
   static List<OrchestrationStore> queryOrchestrationStore(ArrowheadSystem consumer, ArrowheadService service) {
@@ -240,7 +229,7 @@ final class OrchestratorDriver {
     if (retrievedList.isEmpty()) {
       log.error("queryOrchestrationStore DataNotFoundException");
       throw new DataNotFoundException("No Orchestration Store entries were found for consumer " + consumer.getSystemName(),
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     } else {
       // Removing non-valid Store entries from the results
       List<OrchestrationStore> temp = new ArrayList<>();
@@ -264,8 +253,7 @@ final class OrchestratorDriver {
    *
    * @param srf The <tt>ServiceRequestForm</tt> from the requester <tt>ArrowheadSystem</tt>
    * @param entryList Result of the <i>Orchestration Store</i> query. All the entries matching the criteria provided by the
-   *     <tt>ServiceRequestForm</tt>
-   *
+   * <tt>ServiceRequestForm</tt>
    * @return the list of <tt>OrchestrationStore</tt> objects which remained from the query after the cross-check
    */
 
@@ -368,12 +356,10 @@ final class OrchestratorDriver {
    * Initiates the Global Service Discovery process by sending a request to the Gatekeeper Core System.
    *
    * @param requestedService The <tt>ArrowheadService</tt> object representing the service for which the Gatekeeper will try to find a provider
-   *     system
-   * @param preferredClouds A list of <tt>ArrowheadCloud</tt>s which are preferred by the requester system for service consumption. If this list
-   *     is empty, the Gatekeeper will send GSD poll requests to the <tt>NeighborCloud</tt>s instead.
-   *
+   * system
+   * @param preferredClouds A list of <tt>ArrowheadCloud</tt>s which are preferred by the requester system for service consumption. If this list is
+   * empty, the Gatekeeper will send GSD poll requests to the <tt>NeighborCloud</tt>s instead.
    * @return the GSD result from the Gatekeeper Core System
-   *
    * @throws DataNotFoundException if none of the discovered <tt>ArrowheadCloud</tt>s returned back positive result
    */
   static GSDResult doGlobalServiceDiscovery(ArrowheadService requestedService, List<ArrowheadCloud> preferredClouds) {
@@ -386,7 +372,7 @@ final class OrchestratorDriver {
     if (!result.isValid()) {
       log.error("doGlobalServiceDiscovery DataNotFoundException");
       throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.", Status.NOT_FOUND.getStatusCode(),
-                                      DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
+          DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
     }
 
     log.info("doGlobalServiceDiscovery returns with " + result.getResponse().size() + " GSDAnswers");
@@ -400,10 +386,8 @@ final class OrchestratorDriver {
    * @param result The <tt>GSDResult</tt> object contains the <tt>ArrowheadCloud</tt>s which responded positively to the GSD polling.
    * @param preferredClouds The <tt>ArrowheadCloud</tt>s preferred by the requester <tt>ArrowheadSystem</tt>.
    * @param onlyPreferred An orchestration flags, indicating whether or not the requester <tt>ArrowheadSystem</tt> only wants to consume the
-   *     <tt>ArrowheadService</tt> from a preferred provider.
-   *
+   * <tt>ArrowheadService</tt> from a preferred provider.
    * @return the target <tt>ArrowheadCloud</tt> for the ICN process
-   *
    * @throws DataNotFoundException if there is no preferred provider Cloud available while <i>onlyPreferred</i> is set to true
    */
   static ArrowheadCloud interCloudMatchmaking(GSDResult result, List<ArrowheadCloud> preferredClouds, boolean onlyPreferred) {
@@ -445,12 +429,9 @@ final class OrchestratorDriver {
    * Gatekeeper Core System. The <tt>ICNRequestForm</tt> is a complex object containing all the necessary information to create a
    * <tt>ServiceRequestForm</tt> at the remote cloud.
    *
-   * @param srf The <tt>ServiceRequestForm</tt> sent in by the requester <tt>ArrowheadSystem</tt>. 4 different fields of it is used in this
-   *     method.
+   * @param srf The <tt>ServiceRequestForm</tt> sent in by the requester <tt>ArrowheadSystem</tt>. 4 different fields of it is used in this method.
    * @param targetCloud The <tt>ArrowheadCloud</tt> entity this local cloud chose to do ICN with.
-   *
    * @return a boxed {@link OrchestrationResponse} object from the remote cloud
-   *
    * @throws DataNotFoundException if the ICN failed with the remote cloud for some reason
    */
   static ICNResult doInterCloudNegotiations(ServiceRequestForm srf, ArrowheadCloud targetCloud) {
@@ -472,7 +453,7 @@ final class OrchestratorDriver {
 
     // Creating the ICNRequestForm object, which is the payload of the request sent to the Gatekeeper
     ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems,
-                                                    negotiationFlags, null);
+        negotiationFlags, null);
 
     // Sending the request, doing sanity check on the returned result
     Response response = Utility.sendRequest(OrchestratorMain.ICN_SERVICE_URI, "PUT", requestForm);
@@ -480,7 +461,7 @@ final class OrchestratorDriver {
     if (!result.isValid()) {
       log.error("doInterCloudNegotiations DataNotFoundException");
       throw new DataNotFoundException("ICN failed with the remote cloud.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
-                                      OrchestratorDriver.class.toString());
+          OrchestratorDriver.class.toString());
     }
 
     log.info("doInterCloudNegotiations returns with " + result.getOrchResponse().getResponse().size() + " possible providers");

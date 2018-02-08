@@ -36,14 +36,14 @@ import org.hibernate.annotations.Type;
 
 /**
  * JPA entity class for storing <tt>OrchestrationStore</tt> information in the database. The <i>arrowhead_service_id</i>, <i>consumer_system_id</i>,
- * <i>priority</i> and <i>is_default</i> columns must be unique together. The <i>priority</i> integer can not be negative.
- * <p>
- * The class implements the <tt>Comparable</tt> interface based on the priority field (but does not override the equals() method).
+ * <i>priority</i> and <i>is_default</i> columns must be unique together. The <i>priority</i> integer can not be negative. <p> The class implements
+ * the <tt>Comparable</tt> interface based on the priority field (but does not override the equals() method).
  *
  * @author Umlauf Zoltán
  */
 @Entity
-@Table(name = "orchestration_store", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
+@Table(name = "orchestration_store", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
 @Check(constraints = "priority >= 1 AND (provider_cloud_id IS NULL OR is_default = 0)")
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
@@ -97,7 +97,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   public OrchestrationStore() {
   }
 
-  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, int priority) {
+  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
+      int priority) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;
@@ -105,8 +106,9 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.priority = priority;
   }
 
-  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud, Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
-                            String serviceURI) {
+  public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
+      Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
+      String serviceURI) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;
@@ -224,16 +226,15 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
    */
   @JsonIgnore
   public boolean isValid() {
-    return service != null && consumer != null && providerSystem != null && service.isValid() && consumer.isValid() && providerSystem.isValid() && priority >= 1 && (!defaultEntry || providerCloud == null);
+    return service != null && consumer != null && providerSystem != null && service.isValid() && consumer.isValid() && providerSystem.isValid()
+        && priority >= 1 && (!defaultEntry || providerCloud == null);
 
   }
 
   /**
-   * Note: This class has a natural ordering that is inconsistent with equals().
-   * <p>
-   * The field <i>priority</i> is used to sort instances of this class in a collection. Priority is non-negative. If this.priority < other.priority
-   * that means <i>this</i> is more ahead in a collection than <i>other</i> and therefore has a higher priority. This means priority = 0 is the
-   * highest priority for a Store entry.
+   * Note: This class has a natural ordering that is inconsistent with equals(). <p> The field <i>priority</i> is used to sort instances of this class
+   * in a collection. Priority is non-negative. If this.priority < other.priority that means <i>this</i> is more ahead in a collection than
+   * <i>other</i> and therefore has a higher priority. This means priority = 0 is the highest priority for a Store entry.
    */
   @Override
   public int compareTo(OrchestrationStore other) {

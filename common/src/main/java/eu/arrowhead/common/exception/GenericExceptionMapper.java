@@ -24,7 +24,7 @@ public class GenericExceptionMapper implements ExceptionMapper<RuntimeException>
   public Response toResponse(RuntimeException ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), responseContext.get().getStatus(), ex.getClass().getName(),
-                                                 responseContext.get().getRequestContext().getAbsolutePath().toString());
+        responseContext.get().getRequestContext().getAbsolutePath().toString());
     return Response.status(Status.INTERNAL_SERVER_ERROR).entity(errorMessage).header("Content-type", "application/json").build();
   }
 }

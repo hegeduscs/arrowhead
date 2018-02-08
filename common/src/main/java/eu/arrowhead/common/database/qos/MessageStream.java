@@ -30,7 +30,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "message_stream", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "provider_system_id"})})
+@Table(name = "message_stream", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "provider_system_id"})})
 public class MessageStream {
 
   @Column(name = "id")
@@ -66,7 +67,8 @@ public class MessageStream {
   public MessageStream() {
   }
 
-  public MessageStream(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem provider, ResourceReservation qualityOfService, Map<String, String> configuration, String type) {
+  public MessageStream(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem provider, ResourceReservation qualityOfService,
+      Map<String, String> configuration, String type) {
     this.service = service;
     this.consumer = consumer;
     this.provider = provider;

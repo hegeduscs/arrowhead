@@ -143,7 +143,7 @@ public final class Utility {
     } catch (ProcessingException e) {
       log.error("UnavailableServerException occurred at " + uri, e);
       throw new UnavailableServerException("Could not get any response from: " + uri, Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                                           UnavailableServerException.class.getName(), Utility.class.toString(), e);
+          UnavailableServerException.class.getName(), Utility.class.toString(), e);
     }
 
     // If the response status code does not start with 2 the request was not successful
@@ -183,18 +183,23 @@ public final class Utility {
       log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
       switch (errorMessage.getExceptionType()) {
         case AUTH_EXCEPTION:
-          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
+          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+              errorMessage.getOrigin());
         case BAD_PAYLOAD_EXCEPTION:
-          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
+          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+              errorMessage.getOrigin());
         case NOT_FOUND_EXCEPTION:
-          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
+          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+              errorMessage.getOrigin());
         case DUPLICATE_EXCEPTION:
-          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
+          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+              errorMessage.getOrigin());
         case UNAVAILABLE_EXCEPTION:
           throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                               errorMessage.getOrigin());
+              errorMessage.getOrigin());
         default:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(), errorMessage.getOrigin());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
+              errorMessage.getOrigin());
       }
     }
   }
@@ -220,7 +225,8 @@ public final class Utility {
   }
 
   public static String[] getServiceInfo(String serviceId) {
-    ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null) : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
+    ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null)
+        : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
     ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
     Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
     ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
@@ -230,8 +236,7 @@ public final class Utility {
       boolean isSecure = false;
       if (!entry.getProvidedService().getServiceMetadata().isEmpty()) {
         isSecure = entry.getProvidedService().getServiceMetadata().containsKey("security");
-      }
-      else if(entry.getMetadata() != null){
+      } else if (entry.getMetadata() != null) {
         isSecure = entry.getMetadata().contains("security");
       }
       String serviceUri = getUri(coreSystem.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
@@ -250,7 +255,8 @@ public final class Utility {
 
     List<String> uriList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
-      uriList.add(getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), cloud.getCloud().isSecure()));
+      uriList.add(
+          getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), cloud.getCloud().isSecure()));
     }
 
     return uriList;
@@ -260,7 +266,8 @@ public final class Utility {
     List<OwnCloud> cloudList = dm.getAll(OwnCloud.class, null);
     if (cloudList.isEmpty()) {
       log.error("Utility:getOwnCloud not found in the database.");
-      throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), Utility.class.toString());
+      throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.",
+          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), Utility.class.toString());
     }
     if (cloudList.size() > 1) {
       log.warn("own_cloud table should NOT have more than 1 rows.");
@@ -288,7 +295,8 @@ public final class Utility {
         throw new ServiceConfigurationError(url + errorMessage);
       }
       if ((isSecure && "http".equals(uri.getScheme())) || (!isSecure && "https".equals(uri.getScheme()))) {
-        throw new ServiceConfigurationError("Secure URIs should use the HTTPS protocol and insecure URIs should use the HTTP protocol. Please fix " + "the following URL accordingly in the properties file: " + url);
+        throw new ServiceConfigurationError("Secure URIs should use the HTTPS protocol and insecure URIs should use the HTTP protocol. Please fix "
+            + "the following URL accordingly in the properties file: " + url);
       }
     } catch (URISyntaxException e) {
       throw new ServiceConfigurationError(url + errorMessage);

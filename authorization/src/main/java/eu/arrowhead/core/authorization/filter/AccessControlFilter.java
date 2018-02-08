@@ -44,7 +44,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
         log.error(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget);
         throw new AuthenticationException(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget, Status
             .UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
-                                          AccessControlFilter.class.toString());
+            AccessControlFilter.class.toString());
       }
     }
   }

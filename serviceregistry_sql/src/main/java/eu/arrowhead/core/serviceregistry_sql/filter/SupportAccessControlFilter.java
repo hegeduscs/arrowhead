@@ -42,8 +42,8 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
       } else {
         log.error(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget);
         throw new AuthenticationException(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget,
-                                          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
-                                          SupportAccessControlFilter.class.toString());
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
+            SupportAccessControlFilter.class.toString());
       }
     }
   }

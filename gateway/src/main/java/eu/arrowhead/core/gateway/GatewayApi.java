@@ -53,7 +53,7 @@ public class GatewayApi {
     if (brokerList.isEmpty()) {
       log.info("getAllBroker throws DataNotFoundException");
       throw new DataNotFoundException("Brokers not found in the database.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
-                                      GatewayApi.class.toString());
+          GatewayApi.class.toString());
     }
 
     return brokerList;
@@ -104,7 +104,8 @@ public class GatewayApi {
 
     if (!broker.isValid()) {
       log.info("updateBroker throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing broker name or address.", Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(), GatewayApi.class.toString());
+      throw new BadPayloadException("Bad payload: missing broker name or address.", Status.BAD_REQUEST.getStatusCode(),
+          BadPayloadException.class.getName(), GatewayApi.class.toString());
     }
 
     restrictionMap.put("brokerName", broker.getBrokerName());

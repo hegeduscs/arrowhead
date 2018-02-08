@@ -24,11 +24,9 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * JPA entity class for storing inter-cloud authorization rights in the database. The <i>consumer_cloud_id</i> and <i>arrowhead_service_id</i> columns
- * must be unique together.
- * <p>
- * The table contains foreign keys to {@link ArrowheadCloud} and {@link ArrowheadService}. A particular <tt>ArrowheadCloud</tt> -
- * <tt>ArrowheadService</tt> pair is authorized if there is a database entry for it in this table. The existence of the database entry means the given
- * cloud can consume the given service from an {@link ArrowheadSystem} inside the Local Cloud.
+ * must be unique together. <p> The table contains foreign keys to {@link ArrowheadCloud} and {@link ArrowheadService}. A particular
+ * <tt>ArrowheadCloud</tt> - <tt>ArrowheadService</tt> pair is authorized if there is a database entry for it in this table. The existence of the
+ * database entry means the given cloud can consume the given service from an {@link ArrowheadSystem} inside the Local Cloud.
  *
  * @author Umlauf Zoltán
  */

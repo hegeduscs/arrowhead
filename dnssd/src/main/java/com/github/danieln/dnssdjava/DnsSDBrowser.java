@@ -18,7 +18,6 @@ public interface DnsSDBrowser {
    * Get the service details for a service.
    *
    * @param service the name of the service.
-   *
    * @return the service data.
    */
   ServiceData getServiceData(ServiceName service);
@@ -28,7 +27,6 @@ public interface DnsSDBrowser {
    * registered under those subtypes.
    *
    * @param type the service type to look up.
-   *
    * @return a collection of service names.
    */
   Collection<ServiceName> getServiceInstances(ServiceType type);

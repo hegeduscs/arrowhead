@@ -52,7 +52,8 @@ public class SecureSocketThread extends Thread {
       Channel channel = gatewaySession.getChannel();
       SSLContext sslContext = GatewayService.createSSLContext();
       SSLSocketFactory clientFactory = sslContext.getSocketFactory();
-      sslProviderSocket = (SSLSocket) clientFactory.createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
+      sslProviderSocket = (SSLSocket) clientFactory
+          .createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort());
       sslProviderSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = sslProviderSocket.getInputStream();
       OutputStream outProvider = sslProviderSocket.getOutputStream();

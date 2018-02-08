@@ -179,7 +179,7 @@ public class OrchestratorMain {
     if (!sslCon.validateConfiguration(true)) {
       log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
       throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!",
-                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
     }
 
     SSLContext sslContext = sslCon.createSSLContext();
@@ -273,7 +273,7 @@ public class OrchestratorMain {
       }
     } catch (FileNotFoundException ex) {
       throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
+          + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

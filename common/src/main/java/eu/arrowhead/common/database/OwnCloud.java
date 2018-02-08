@@ -23,11 +23,9 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * JPA entity class for storing <tt>OwnCloud</tt> information in the database. The <i>cloud_id</i> column must be unique.
- * <p>
- * The database table belonging to this class stores the information about the Local Cloud, meaning this table should only have 1 entry at all times.
- * The information in this table is used during Global Service Discovery, Inter-Cloud Negotiations (by the Gatekeeper) and token generation (by the
- * Authorization).
+ * JPA entity class for storing <tt>OwnCloud</tt> information in the database. The <i>cloud_id</i> column must be unique. <p> The database table
+ * belonging to this class stores the information about the Local Cloud, meaning this table should only have 1 entry at all times. The information in
+ * this table is used during Global Service Discovery, Inter-Cloud Negotiations (by the Gatekeeper) and token generation (by the Authorization).
  *
  * @author Umlauf Zoltán
  * @see ArrowheadCloud

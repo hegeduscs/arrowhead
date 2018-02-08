@@ -43,9 +43,7 @@ public class ServiceName {
    * #toString()}.
    *
    * @param s the string to be parsed.
-   *
    * @return a ServiceName representing the service specified by the argument.
-   *
    * @throws IllegalArgumentException if the string cannot be parsed as a ServiceName.
    */
   public static ServiceName valueOf(String s) {
@@ -83,9 +81,7 @@ public class ServiceName {
    *
    * @param string the string to look through.
    * @param ch the character to find.
-   *
    * @return the index of the first occurrence, or -1 if it can't be found.
-   *
    * @see String#indexOf(int)
    */
   private static int indexOfNonEscaped(String string, char ch) {
@@ -104,9 +100,7 @@ public class ServiceName {
    * Undo escaping of a service name.
    *
    * @param name the escaped name.
-   *
    * @return the name with escapes removed.
-   *
    * @see #escape(String)
    */
   private static String unescape(String name) {
@@ -117,7 +111,6 @@ public class ServiceName {
    * Make a new ServiceName from a dnsjava {@link Name}.
    *
    * @param dnsname the Name to convert.
-   *
    * @return the Name as a ServiceName.
    */
   static ServiceName fromDnsName(Name dnsname) {
@@ -135,7 +128,6 @@ public class ServiceName {
    * Decode a raw DNS label into a string. The methods in dnsjava don't understand UTF-8 and escapes some characters, we don't want that here.
    *
    * @param label the raw label data.
-   *
    * @return the decoded string.
    */
   private static String decodeName(byte[] label) {
@@ -212,7 +204,6 @@ public class ServiceName {
    * Escape a service name according to RFC6763 chapter 4.3.
    *
    * @param name the name to escape.
-   *
    * @return the name with '.' and '\' escaped.
    */
   private static String escape(String name) {
@@ -240,7 +231,6 @@ public class ServiceName {
    * Encode a string into a raw DNS label. The methods in dnsjava don't understand UTF-8 and escapes some characters, we don't want that here.
    *
    * @param s the string to encode.
-   *
    * @return the raw DNS label.
    */
 

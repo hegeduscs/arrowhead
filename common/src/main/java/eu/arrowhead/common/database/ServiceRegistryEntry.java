@@ -95,7 +95,7 @@ public class ServiceRegistryEntry {
   }
 
   public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, Integer version,
-                              boolean UDP, int ttl, String metadata, Date endOfValidity) {
+      boolean UDP, int ttl, String metadata, Date endOfValidity) {
     this.providedService = providedService;
     this.provider = provider;
     this.port = port;

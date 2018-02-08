@@ -60,7 +60,7 @@ public class OrchestratorResource {
     if (!srf.isValid()) {
       log.error("orchestrationProcess BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     if (!srf.getOrchestrationFlags().get("externalServiceRequest") && requestContext.getSecurityContext().isSecure()) {
@@ -69,8 +69,9 @@ public class OrchestratorResource {
       String[] clientFields = clientCN.split("\\.", 2);
       if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
         log.error("Requester system name and cert common name do not match!");
-        throw new AuthenticationException("Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-                                          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+        throw new AuthenticationException(
+            "Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
       }
     }
 

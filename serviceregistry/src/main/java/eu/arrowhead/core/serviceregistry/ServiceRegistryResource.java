@@ -107,7 +107,7 @@ public class ServiceRegistryResource {
   @POST
   @Path("/{serviceGroup}/{service}/{interf}")
   public Response publishingToRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-                                       @PathParam("interf") String interf, ServiceRegistryEntry entry) {
+      @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 
     /*if (serviceGroup == null || service == null || interf == null || entry == null) {
       log.info("ServiceRegistry: Registration throws BadPayloadException");
@@ -140,7 +140,7 @@ public class ServiceRegistryResource {
   @PUT
   @Path("/{serviceGroup}/{service}/{interf}")
   public Response removingFromRegistry(@PathParam("serviceGroup") String serviceGroup, @PathParam("service") String service,
-                                       @PathParam("interf") String interf, ServiceRegistryEntry entry) {
+      @PathParam("interf") String interf, ServiceRegistryEntry entry) {
 
     /*if (serviceGroup == null || service == null || interf == null || !entry.isValid()) {
       log.info("ServiceRegistry:Query throws BadPayloadException");

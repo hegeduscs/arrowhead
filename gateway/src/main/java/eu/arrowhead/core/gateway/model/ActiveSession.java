@@ -33,8 +33,8 @@ public class ActiveSession {
   }
 
   public ActiveSession(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, ArrowheadSystem provider, ArrowheadCloud providerCloud,
-                       ArrowheadService service, String brokerName, Integer brokerPort, Integer serverSocketPort, String queueName, String
-                           controlQueueName, Boolean isSecure, Date startSession) {
+      ArrowheadService service, String brokerName, Integer brokerPort, Integer serverSocketPort, String queueName, String
+      controlQueueName, Boolean isSecure, Date startSession) {
     this.consumer = consumer;
     this.consumerCloud = consumerCloud;
     this.provider = provider;

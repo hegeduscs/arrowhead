@@ -138,8 +138,8 @@ public class CommonApi {
   }
 
   /**
-   * Deletes the ArrowheadService from the database specified by the service definition. Returns 200 if the delete is successful,
-   * 204 (no content) if the service was not in the database to begin with.
+   * Deletes the ArrowheadService from the database specified by the service definition. Returns 200 if the delete is successful, 204 (no content) if
+   * the service was not in the database to begin with.
    */
   @DELETE
   @Path("services/servicedef/{serviceDefinition}")
@@ -249,8 +249,8 @@ public class CommonApi {
   }
 
   /**
-   * Deletes the ArrowheadSystem from the database specified by the system name. Returns 200 if the delete is successful, 204 (no
-   * content) if the system was not in the database to begin with.
+   * Deletes the ArrowheadSystem from the database specified by the system name. Returns 200 if the delete is successful, 204 (no content) if the
+   * system was not in the database to begin with.
    */
   @DELETE
   @Path("systems/systemname/{systemName}")
