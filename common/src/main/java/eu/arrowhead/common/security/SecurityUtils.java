@@ -139,7 +139,7 @@ public final class SecurityUtils {
       KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(kmfAlgorithm);
       keyManagerFactory.init(keyStore, keyPass != null ? keyPass.toCharArray() : keyStorePass.toCharArray());
 
-      KeyStore trustStore = SecurityUtils.createKeyStoreFromCert(masterArrowheadCertPath, "arrowhead.eu");
+      KeyStore trustStore = createKeyStoreFromCert(masterArrowheadCertPath, "arrowhead.eu");
       String tmfAlgorithm = System.getProperty("ssl.TrustManagerFactory.algorithm", TrustManagerFactory.getDefaultAlgorithm());
       TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(tmfAlgorithm);
       trustManagerFactory.init(trustStore);
