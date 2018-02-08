@@ -14,7 +14,7 @@ keystorepass=12345
 keypass=12345
 truststore=config/certificates/testcloud1_cert.jks
 truststorepass=12345
-trustpass=13245
+trustpass=12345
 master_arrowhead_cert=config/certificates/master_arrowhead_cert.crt
 
 # Other
