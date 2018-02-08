@@ -189,9 +189,9 @@ public class AuthorizationMain {
     System.out.println("Server PublicKey Base64: " + BASE64_PUBLIC_KEY);
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
-      log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
       throw new AuthenticationException(
-          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.",
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts.",
           Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
     }
     log.info("Certificate of the secure server: " + serverCN);

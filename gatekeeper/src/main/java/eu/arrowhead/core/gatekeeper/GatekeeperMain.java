@@ -186,8 +186,6 @@ public class GatekeeperMain {
   }
 
   private static HttpServer startSecureServer(final String url, final boolean inbound) throws IOException {
-    log.info("Starting server at: " + url);
-
     final ResourceConfig config = new ResourceConfig();
     if (inbound) {
       config.registerClasses(GatekeeperApi.class, GatekeeperInboundResource.class);
@@ -218,18 +216,9 @@ public class GatekeeperMain {
         log.fatal("Internal client SSL Context is not valid, check the certificate files or app.properties!");
         throw new AuthenticationException("Internal client SSL Context is not valid, check the certificate files or app.properties!");
       }
+
       SSLContext clientContext = clientConfig.createSSLContext();
-
       Utility.setSSLContext(clientContext);
-
-      /*//NOTE temporary solution until Keep-alive-timer called close problem is solved
-      URI uri = UriBuilder.fromUri(url).build();
-      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
-      server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-      server.start();
-      log.info("Started inbound server at: " + url);
-      System.out.println("Started secure inbound server at: " + url);
-      return server;*/
     } else {
       SSLContextConfigurator serverConfig = new SSLContextConfigurator();
       serverConfig.setKeyStoreFile(gatekeeperKeystorePath);
@@ -245,16 +234,14 @@ public class GatekeeperMain {
       outboundServerContext = serverContext;
       outboundClientContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
-      //TODO ezt a részt átmozgatni security utilsba teljesen? nincs is szükség SSLContextConfigurator-ra igy már sztem
-      //TODO hanem a loadkeystore-ba lehetne egy boolean paraméter, hogy ez keystore vagy trusttore, de előbb azért teszteljük a manuális működését
       KeyStore keyStore = SecurityUtils.loadKeyStore(gatekeeperKeystorePath, gatekeeperKeystorePass);
       X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
       BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
       String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
       if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
-        log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+        log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
         throw new AuthenticationException(
-            "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+            "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
       }
       log.info("Certificate of the secure server: " + serverCN);
       config.property("server_common_name", serverCN);
