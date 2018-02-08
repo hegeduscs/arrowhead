@@ -43,7 +43,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class GatewayMain {
 
   public static boolean DEBUG_MODE;
-  public static SSLContext sslContext;
+  public static SSLContext clientContext;
 
   private static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
   private static String BASE64_PUBLIC_KEY;
@@ -158,8 +158,8 @@ public class GatewayMain {
     String keyPass = getProp().getProperty("keypass");
     String truststorePath = getProp().getProperty("truststore");
     String truststorePass = getProp().getProperty("truststorepass");
-//    String trustPass = getProp().getProperty("trustpass");
-//    String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
+    String trustPass = getProp().getProperty("trustpass");
+    String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);
@@ -172,8 +172,8 @@ public class GatewayMain {
       throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
     }
 
-    sslContext = sslCon.createSSLContext();
-    Utility.setSSLContext(sslContext);
+    Utility.setSSLContext(sslCon.createSSLContext());
+    clientContext = SecurityUtils.createMasterSSLContext(truststorePath, truststorePass, trustPass, masterArrowheadCertPath);
 
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
@@ -181,7 +181,8 @@ public class GatewayMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
-      throw new AuthenticationException("Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 6 parts.");
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
@@ -206,7 +207,8 @@ public class GatewayMain {
     ArrowheadSystem gatewaySystem = new ArrowheadSystem("gateway", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     ArrowheadService providerService = new ArrowheadService(Utility.createSD(Utility.GW_PROVIDER_SERVICE, isSecure), Collections.singletonList
         ("JSON"), null);
-    ArrowheadService consumerService = new ArrowheadService(Utility.createSD(Utility.GW_CONSUMER_SERVICE, isSecure), Collections.singletonList("JSON"), null);
+    ArrowheadService consumerService = new ArrowheadService(Utility.createSD(Utility.GW_CONSUMER_SERVICE, isSecure),
+        Collections.singletonList("JSON"), null);
     ArrowheadService mgmtService = new ArrowheadService(Utility.createSD(Utility.GW_SESSION_MGMT, isSecure), Collections.singletonList("JSON"), null);
     if (isSecure) {
       providerService.setServiceMetadata(Utility.secureServerMetadata);
@@ -282,7 +284,7 @@ public class GatewayMain {
       }
     } catch (FileNotFoundException ex) {
       throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
+          + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

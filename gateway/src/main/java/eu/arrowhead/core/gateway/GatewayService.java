@@ -80,7 +80,7 @@ public class GatewayService {
       factory.setPort(brokerPort);
 
       if (isSecure) {
-        factory.useSslProtocol(GatewayMain.sslContext);
+        factory.useSslProtocol(GatewayMain.clientContext);
       }
       Connection connection = factory.newConnection();
       Channel channel = connection.createChannel();

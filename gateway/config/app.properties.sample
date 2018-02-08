@@ -14,6 +14,8 @@ keystorepass=12345
 keypass=12345
 truststore=config/certificates/testcloud1_cert.jks
 truststorepass=12345
+trustpass=13245
+master_arrowhead_cert=config/certificates/master_arrowhead_cert.crt
 
 # Other
 min_port=8000

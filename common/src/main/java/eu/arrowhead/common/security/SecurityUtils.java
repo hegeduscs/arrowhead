@@ -160,7 +160,7 @@ public final class SecurityUtils {
   }
 
   public static SSLContext createAcceptAllSSLContext() {
-    SSLContext sslContext = null;
+    SSLContext sslContext;
     try {
       sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, createTrustManagers(), null);
