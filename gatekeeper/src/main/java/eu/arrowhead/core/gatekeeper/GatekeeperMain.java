@@ -204,7 +204,7 @@ public class GatekeeperMain {
     String cloudKeyPass = getProp().getProperty("cloud_keypass");
     String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
 
-    SSLContext serverContext = null;
+    SSLContext serverContext;
     if (inbound) {
       serverContext = SecurityUtils.createAcceptAllSSLContext();
 
@@ -356,7 +356,7 @@ public class GatekeeperMain {
     System.out.println("Gatekeeper Servers stopped");
   }
 
-  static synchronized Properties getProp() {
+  private static synchronized Properties getProp() {
     try {
       if (prop == null) {
         prop = new Properties();

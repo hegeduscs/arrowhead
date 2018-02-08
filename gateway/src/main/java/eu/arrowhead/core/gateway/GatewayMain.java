@@ -68,7 +68,6 @@ public class GatewayMain {
     if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
       SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
     }
-    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -159,8 +158,8 @@ public class GatewayMain {
     String keyPass = getProp().getProperty("keypass");
     String truststorePath = getProp().getProperty("truststore");
     String truststorePass = getProp().getProperty("truststorepass");
-    String trustPass = getProp().getProperty("trustpass");
-    String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
+//    String trustPass = getProp().getProperty("trustpass");
+//    String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
 
     SSLContextConfigurator sslCon = new SSLContextConfigurator();
     sslCon.setKeyStoreFile(keystorePath);
@@ -174,7 +173,7 @@ public class GatewayMain {
     }
 
     sslContext = sslCon.createSSLContext();
-    sslContext = SecurityUtils.createMasterSSLContext(truststorePath, truststorePass, trustPass, masterArrowheadCertPath);
+    Utility.setSSLContext(sslContext);
 
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
