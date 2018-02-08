@@ -3,6 +3,11 @@ base_uri=http://127.0.0.1:8452/
 base_uri_secured=https://127.0.0.1:8453/
 sr_base_uri=http://127.0.0.1:8442/
 
+# Database parameters
+# db_user=Change and use these parameters only
+# db_password=if you dont log on localhost with root/root credentials
+# db_address=jdbc:mysql://127.0.0.1:3306/log
+
 # Certificate related paths and passwords
 keystore=config/certificates/gateway.testcloud1.jks
 keystorepass=12345
