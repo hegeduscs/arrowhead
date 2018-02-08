@@ -53,7 +53,6 @@ public final class SecurityUtils {
       is.close();
       return keystore;
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
-      e.printStackTrace();
       log.fatal("Loading the keystore failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Loading the keystore failed...", e);
     }
@@ -66,7 +65,6 @@ public final class SecurityUtils {
       Certificate certificate = keystore.getCertificate(alias);
       return (X509Certificate) certificate;
     } catch (KeyStoreException | NoSuchElementException e) {
-      e.printStackTrace();
       log.error("Getting the first cert from keystore failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Getting the first cert from keystore failed...", e);
     }
@@ -108,7 +106,6 @@ public final class SecurityUtils {
         }
       }
     } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-      e.printStackTrace();
       log.error("Getting the private key from keystore failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Getting the private key from keystore failed...", e);
     }
@@ -130,7 +127,6 @@ public final class SecurityUtils {
       keystore.setCertificateEntry(alias, cert);
       return keystore;
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
-      e.printStackTrace();
       log.fatal("Keystore creation from cert failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Keystore creation from cert failed...", e);
     }
@@ -153,7 +149,6 @@ public final class SecurityUtils {
 
       return sslContext;
     } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | KeyManagementException e) {
-      e.printStackTrace();
       log.fatal("Master SSLContext creation failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("Master SSLContext creation failed...", e);
     }
@@ -165,7 +160,6 @@ public final class SecurityUtils {
       sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, createTrustManagers(), null);
     } catch (NoSuchAlgorithmException | KeyManagementException e) {
-      e.printStackTrace();
       log.fatal("AcceptAll SSLContext creation failed: " + e.toString() + " " + e.getMessage());
       throw new ServiceConfigurationError("AcceptAll SSLContext creation failed...", e);
     }
