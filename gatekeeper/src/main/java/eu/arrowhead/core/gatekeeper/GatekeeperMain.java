@@ -216,7 +216,6 @@ public class GatekeeperMain {
         log.fatal("Internal client SSL Context is not valid, check the certificate files or app.properties!");
         throw new AuthenticationException("Internal client SSL Context is not valid, check the certificate files or app.properties!");
       }
-
       SSLContext clientContext = clientConfig.createSSLContext();
       Utility.setSSLContext(clientContext);
     } else {
@@ -232,6 +231,7 @@ public class GatekeeperMain {
       }
       serverContext = serverConfig.createSSLContext();
       outboundServerContext = serverContext;
+
       outboundClientContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
       KeyStore keyStore = SecurityUtils.loadKeyStore(gatekeeperKeystorePath, gatekeeperKeystorePass);

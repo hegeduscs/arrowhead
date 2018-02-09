@@ -75,6 +75,7 @@ public class AuthorizationMain {
 
     KeyStore keyStore = SecurityUtils.loadKeyStore(getProp().getProperty("keystore"), getProp().getProperty("keystorepass"));
     privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("keystorepass"));
+    System.out.println("private key: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
 
     boolean daemon = false;
     boolean serverModeSet = false;

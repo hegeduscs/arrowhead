@@ -1,3 +1,7 @@
+Our broker module is running on RabbitMQ. A setup guide can be found on these links:
+http://www.rabbitmq.com/download.html   http://www.rabbitmq.com/getstarted.html
+
+
 If creating channel failed while the rabbitmq server running:
 
  Try: rabbitmqctl stop
