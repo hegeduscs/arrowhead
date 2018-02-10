@@ -166,13 +166,11 @@ public final class SecurityUtils {
     return sslContext;
   }
 
-  // NOTE gatekeeper certs can be an exception to this rule at the moment
   public static boolean isKeyStoreCNArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
     return cnFields.length == 5 && cnFields[3].equals("arrowhead") && cnFields[4].equals("eu");
   }
 
-  // NOTE gatekeeper certs can be an exception to this rule at the moment
   public static boolean isTrustStoreCNArrowheadValid(String commonName) {
     String[] cnFields = commonName.split("\\.", 0);
     return cnFields.length == 4 && cnFields[2].equals("arrowhead") && cnFields[3].equals("eu");

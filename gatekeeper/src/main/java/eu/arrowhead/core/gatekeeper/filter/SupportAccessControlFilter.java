@@ -36,14 +36,13 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
     if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
-      String subjectName = sc.getUserPrincipal().getName();
-      if (isClientAuthorized(subjectName, requestTarget)) {
-        log.info("SSL identification is successful! Cert: " + subjectName);
+      String commonName = SecurityUtils.getCertCNFromSubject(sc.getUserPrincipal().getName());
+      if (isClientAuthorized(commonName, requestTarget)) {
+        log.info("SSL identification is successful! Cert: " + commonName);
       } else {
-        log.error(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget);
-        throw new AuthenticationException(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget, Status
-            .UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
-            SupportAccessControlFilter.class.toString());
+        log.error(commonName + " is unauthorized to access " + requestTarget);
+        throw new AuthenticationException(commonName + " is unauthorized to access " + requestTarget, Status.UNAUTHORIZED.getStatusCode(),
+                                          AuthenticationException.class.getName(), SupportAccessControlFilter.class.toString());
       }
     }
   }
@@ -52,8 +51,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
     return method.equals("GET") && (requestTarget.endsWith("gatekeeper") || requestTarget.endsWith("mgmt"));
   }
 
-  private boolean isClientAuthorized(String subjectName, String requestTarget) {
-    String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
+  private boolean isClientAuthorized(String clientCN, String requestTarget) {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
     if (!SecurityUtils.isKeyStoreCNArrowheadValidLegacy(clientCN) && !SecurityUtils.isTrustStoreCNArrowheadValid(clientCN)) {
@@ -63,7 +61,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
     if (requestTarget.contains("mgmt")) {
       //Only the local HMI can use these methods
       String[] serverFields = serverCN.split("\\.", 2);
-      // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
+      // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu OR arrowhead, eu
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
       if (requestTarget.endsWith("init_gsd") || requestTarget.endsWith("init_icn")) {
@@ -76,7 +74,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
       } else {
         // Only requests from other Gatekeepers are allowed
         String[] clientFields = clientCN.split("\\.", 3);
-        return clientFields.length == 3 && clientFields[2].endsWith("arrowhead.eu");
+        return clientFields[0].equals("gatekeeper") && clientFields[2].endsWith("arrowhead.eu");
       }
     }
   }

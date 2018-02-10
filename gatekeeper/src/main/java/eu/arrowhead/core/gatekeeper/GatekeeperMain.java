@@ -188,9 +188,9 @@ public class GatekeeperMain {
   private static HttpServer startSecureServer(final String url, final boolean inbound) throws IOException {
     final ResourceConfig config = new ResourceConfig();
     if (inbound) {
-      config.registerClasses(GatekeeperApi.class, GatekeeperInboundResource.class);
+      config.registerClasses(GatekeeperInboundResource.class);
     } else {
-      config.registerClasses(GatekeeperOutboundResource.class);
+      config.registerClasses(GatekeeperApi.class, GatekeeperOutboundResource.class);
     }
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.gatekeeper.filter");
 
@@ -205,6 +205,8 @@ public class GatekeeperMain {
     SSLContext serverContext;
     if (inbound) {
       serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
+
+      config.property("server_common_name", getServerCN(masterArrowheadCertPath, "arrowhead.eu"));
 
       SSLContextConfigurator clientConfig = new SSLContextConfigurator();
       clientConfig.setKeyStoreFile(gatekeeperKeystorePath);
@@ -234,17 +236,7 @@ public class GatekeeperMain {
 
       outboundClientContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
-      KeyStore keyStore = SecurityUtils.loadKeyStore(gatekeeperKeystorePath, gatekeeperKeystorePass);
-      X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-      BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
-      String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
-      if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
-        log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
-        throw new AuthenticationException(
-            "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
-      }
-      log.info("Certificate of the secure server: " + serverCN);
-      config.property("server_common_name", serverCN);
+      config.property("server_common_name", getServerCN(gatekeeperKeystorePath, gatekeeperKeystorePass));
     }
 
     URI uri = UriBuilder.fromUri(url).build();
@@ -322,6 +314,27 @@ public class GatekeeperMain {
     FIRST_SR_QUERY = false;
   }
 
+  private static String getServerCN(String certPath, String certPassOrAlias) {
+    KeyStore keyStore;
+    if (certPath.endsWith("crt")) {
+      keyStore = SecurityUtils.createKeyStoreFromCert(certPath, certPassOrAlias);
+    } else {
+      keyStore = SecurityUtils.loadKeyStore(certPath, certPassOrAlias);
+    }
+
+    X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
+    BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
+    String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
+    if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
+      log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
+    }
+
+    log.info("Certificate of the secure server: " + serverCN);
+    return serverCN;
+  }
+
   private static void shutdown() {
     if (inboundServer != null) {
       log.info("Stopping server at: " + INBOUND_BASE_URI);
@@ -354,7 +367,7 @@ public class GatekeeperMain {
       }
     } catch (FileNotFoundException ex) {
       throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-          + "the config folder can be found)", ex);
+                                              + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

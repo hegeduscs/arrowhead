@@ -36,14 +36,13 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
     if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
-      String subjectName = sc.getUserPrincipal().getName();
-      if (isClientAuthorized(subjectName, requestTarget)) {
-        log.info("SSL identification is successful! Cert: " + subjectName);
+      String commonName = SecurityUtils.getCertCNFromSubject(sc.getUserPrincipal().getName());
+      if (isClientAuthorized(commonName, requestTarget)) {
+        log.info("SSL identification is successful! Cert: " + commonName);
       } else {
-        log.error(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget);
-        throw new AuthenticationException(SecurityUtils.getCertCNFromSubject(subjectName) + " is unauthorized to access " + requestTarget,
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
-            SupportAccessControlFilter.class.toString());
+        log.error(commonName + " is unauthorized to access " + requestTarget);
+        throw new AuthenticationException(commonName + " is unauthorized to access " + requestTarget, Status.UNAUTHORIZED.getStatusCode(),
+                                          AuthenticationException.class.getName(), SupportAccessControlFilter.class.toString());
       }
     }
   }
@@ -52,8 +51,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
     return method.equals("GET") && (requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt"));
   }
 
-  private boolean isClientAuthorized(String subjectName, String requestTarget) {
-    String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
+  private boolean isClientAuthorized(String clientCN, String requestTarget) {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
     if (!SecurityUtils.isKeyStoreCNArrowheadValidLegacy(clientCN)) {
