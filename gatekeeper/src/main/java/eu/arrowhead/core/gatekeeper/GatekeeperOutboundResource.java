@@ -155,11 +155,11 @@ public class GatekeeperOutboundResource {
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
                                               requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-                                              requestForm.getAuthenticationInfo(), null, GatekeeperMain.timeout, null);
+                                              null, GatekeeperMain.timeout, null);
 
     if (GatekeeperMain.USE_GATEWAY) {
       icnProposal.setPreferredBrokers(dm.getAll(Broker.class, null));
-      icnProposal.setAuthenticationInfo(GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
+      icnProposal.setGatewayPublicKey(GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
     }
 
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
