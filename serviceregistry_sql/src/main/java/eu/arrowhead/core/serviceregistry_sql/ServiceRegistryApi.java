@@ -120,17 +120,17 @@ public class ServiceRegistryApi {
 
   @PUT
   @Path("update")
-  public Response updateServiceURI(ServiceRegistryEntry entry) {
-
+  public Response updateServiceRegistryEntry(ServiceRegistryEntry entry) {
     if (!entry.isValid()) {
-      log.info("updateServiceURI throws BadPayloadException");
+      log.info("updateServiceRegistryEntry throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
     }
+    entry.toDatabase();
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
-      log.info("updateServiceURI throws DataNotFoundException");
+      log.info("updateServiceRegistryEntry throws DataNotFoundException");
       throw new DataNotFoundException("Requested Service Registry entry not found in the database.");
     }
 
@@ -138,7 +138,7 @@ public class ServiceRegistryApi {
     restrictionMap.put("systemName", entry.getProvider().getSystemName());
     ArrowheadSystem provider = dm.get(ArrowheadSystem.class, restrictionMap);
     if (provider == null) {
-      log.info("updateServiceURI throws DataNotFoundException");
+      log.info("updateServiceRegistryEntry throws DataNotFoundException");
       throw new DataNotFoundException("Requested Service Registry entry not found in the database.");
     }
 
@@ -147,13 +147,18 @@ public class ServiceRegistryApi {
     restrictionMap.put("providedService", service);
     ServiceRegistryEntry retreivedEntry = dm.get(ServiceRegistryEntry.class, restrictionMap);
     if (retreivedEntry == null) {
-      log.info("updateServiceURI throws DataNotFoundException");
+      log.info("updateServiceRegistryEntry throws DataNotFoundException");
       throw new DataNotFoundException("Requested Service Registry entry not found in the database.");
     }
     retreivedEntry.setServiceURI(entry.getServiceURI());
+    if (entry.getPort() > 0) {
+      retreivedEntry.setPort(entry.getPort());
+    }
+    retreivedEntry.setMetadata(entry.getMetadata());
+    retreivedEntry.setEndOfValidity(entry.getEndOfValidity());
     retreivedEntry = dm.merge(retreivedEntry);
 
-    log.info("updateServiceURI successfully returns.");
+    log.info("updateServiceRegistryEntry successfully returns.");
     return Response.status(Status.ACCEPTED).entity(retreivedEntry).build();
   }
 
