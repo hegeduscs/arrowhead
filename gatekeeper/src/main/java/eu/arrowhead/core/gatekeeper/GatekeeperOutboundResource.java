@@ -74,7 +74,7 @@ public class GatekeeperOutboundResource {
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
-          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
@@ -117,7 +117,7 @@ public class GatekeeperOutboundResource {
           ex.printStackTrace();
           log.error("GSD failed for all potential provider clouds! See stack traces for details in console output.");
           throw new ArrowheadException("GSD failed for all potential provider clouds! The last exception message: " + ex.getMessage(),
-              ex.getErrorCode(), ex.getClass().getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                       ex.getErrorCode(), ex.getClass().getName(), requestContext.getUriInfo().getAbsolutePath().toString());
         } else {
           System.out.println("GSD request failed at: " + uri);
           ex.printStackTrace();
@@ -148,14 +148,14 @@ public class GatekeeperOutboundResource {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
-          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     requestForm.getNegotiationFlags().put("useGateway", GatekeeperMain.USE_GATEWAY);
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
-        requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-        requestForm.getAuthenticationInfo(), null, GatekeeperMain.timeout, null);
+                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
+                                              requestForm.getAuthenticationInfo(), null, GatekeeperMain.timeout, null);
 
     if (GatekeeperMain.USE_GATEWAY) {
       icnProposal.setPreferredBrokers(dm.getAll(Broker.class, null));
@@ -182,11 +182,11 @@ public class GatekeeperOutboundResource {
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
     GatewayConnectionInfo gwConnInfo = icnEnd.getGatewayConnInfo();
     ConnectToConsumerRequest connectionRequest = new ConnectToConsumerRequest(gwConnInfo.getBrokerName(), gwConnInfo.getBrokerPort(),
-        gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
-        requestForm.getRequesterSystem(),
-        icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
-        requestForm.getTargetCloud(), requestForm.getRequestedService(),
-        isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
+                                                                              gwConnInfo.getQueueName(), gwConnInfo.getControlQueueName(),
+                                                                              requestForm.getRequesterSystem(),
+                                                                              icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
+                                                                              requestForm.getTargetCloud(), requestForm.getRequestedService(),
+                                                                              isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
 
     // Sending the gateway request and parsing the response
     Response gatewayResponse = Utility
