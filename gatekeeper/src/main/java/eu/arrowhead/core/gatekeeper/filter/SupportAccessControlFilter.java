@@ -61,7 +61,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
     if (requestTarget.contains("mgmt")) {
       //Only the local HMI can use these methods
       String[] serverFields = serverCN.split("\\.", 2);
-      // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu OR arrowhead, eu
+      // serverFields (when considered) contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
       if (requestTarget.endsWith("init_gsd") || requestTarget.endsWith("init_icn")) {
@@ -74,7 +74,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
       } else {
         // Only requests from other Gatekeepers are allowed
         String[] clientFields = clientCN.split("\\.", 3);
-        return clientFields[0].equals("gatekeeper") && clientFields[2].endsWith("arrowhead.eu");
+        return clientFields.length == 3 && clientFields[2].endsWith("arrowhead.eu");
       }
     }
   }

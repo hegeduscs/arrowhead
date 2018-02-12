@@ -205,8 +205,7 @@ public class GatekeeperMain {
     SSLContext serverContext;
     if (inbound) {
       serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
-
-      config.property("server_common_name", getServerCN(masterArrowheadCertPath, "arrowhead.eu"));
+      config.property("server_common_name", getServerCN(cloudKeystorePath, cloudKeystorePass, true));
 
       SSLContextConfigurator clientConfig = new SSLContextConfigurator();
       clientConfig.setKeyStoreFile(gatekeeperKeystorePath);
@@ -233,10 +232,9 @@ public class GatekeeperMain {
       }
       serverContext = serverConfig.createSSLContext();
       outboundServerContext = serverContext;
+      config.property("server_common_name", getServerCN(gatekeeperKeystorePath, gatekeeperKeystorePass, false));
 
       outboundClientContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
-
-      config.property("server_common_name", getServerCN(gatekeeperKeystorePath, gatekeeperKeystorePass));
     }
 
     URI uri = UriBuilder.fromUri(url).build();
@@ -314,21 +312,21 @@ public class GatekeeperMain {
     FIRST_SR_QUERY = false;
   }
 
-  private static String getServerCN(String certPath, String certPassOrAlias) {
-    KeyStore keyStore;
-    if (certPath.endsWith("crt")) {
-      keyStore = SecurityUtils.createKeyStoreFromCert(certPath, certPassOrAlias);
-    } else {
-      keyStore = SecurityUtils.loadKeyStore(certPath, certPassOrAlias);
-    }
-
+  private static String getServerCN(String certPath, String certPass, boolean inbound) {
+    KeyStore keyStore = SecurityUtils.loadKeyStore(certPath, certPass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
     BASE64_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
-    if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
-      log.fatal("Server CN is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
+    if (inbound && !SecurityUtils.isTrustStoreCNArrowheadValid(serverCN)) {
+      log.fatal("Server CN is not compliant with the Arrowhead cert structure.");
       throw new AuthenticationException(
-          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts.");
+          "Server CN ( " + serverCN
+              + ") is not compliant with the Arrowhead cert structure, since it does not have 4 parts, or does not end with arrowhead.eu.");
+    } else if (!inbound && !SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
+      log.fatal("Server CN is not compliant with the Arrowhead cert structure");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN
+              + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not end with arrowhead.eu.");
     }
 
     log.info("Certificate of the secure server: " + serverCN);
@@ -367,7 +365,7 @@ public class GatekeeperMain {
       }
     } catch (FileNotFoundException ex) {
       throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
+          + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
