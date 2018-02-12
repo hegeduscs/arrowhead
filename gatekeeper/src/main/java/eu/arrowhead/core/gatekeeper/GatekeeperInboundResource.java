@@ -13,6 +13,7 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -185,11 +186,14 @@ public class GatekeeperInboundResource {
       }
     }
 
-    Broker chosenBroker = null;
-    if (isSecure) {
+    Broker chosenBroker;
+    if (isSecure && secureCommonBrokers.size() > 0) {
       chosenBroker = secureCommonBrokers.get(0);
-    } else {
+    } else if (insecureCommonBrokers.size() > 0) {
       chosenBroker = insecureCommonBrokers.get(0);
+    } else {
+      String security = isSecure ? "secure" : "insecure";
+      throw new ArrowheadException("Could not find a common " + security + " broker, data path creation failed.");
     }
 
     ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(), chosenBroker.getPort(), consumer, provider,
