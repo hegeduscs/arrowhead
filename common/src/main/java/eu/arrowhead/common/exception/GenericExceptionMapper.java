@@ -15,13 +15,13 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.server.ContainerResponse;
 
-public class GenericExceptionMapper implements ExceptionMapper<RuntimeException> {
+public class GenericExceptionMapper implements ExceptionMapper<Exception> {
 
   @Inject
   private javax.inject.Provider<ContainerResponse> responseContext;
 
   @Override
-  public Response toResponse(RuntimeException ex) {
+  public Response toResponse(Exception ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage;
     if (responseContext.get() != null) {
