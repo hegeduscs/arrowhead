@@ -26,7 +26,6 @@ public class ICNProposal {
   private ArrowheadSystem requesterSystem;
   private List<ArrowheadSystem> preferredSystems = new ArrayList<>();
   private Map<String, Boolean> negotiationFlags = new HashMap<>();
-  private String authenticationInfo;
   private List<Broker> preferredBrokers;
   private int timeout;
   private String gatewayPublicKey;
@@ -35,14 +34,13 @@ public class ICNProposal {
   }
 
   public ICNProposal(ArrowheadService requestedService, ArrowheadCloud requesterCloud, ArrowheadSystem requesterSystem,
-                     List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo,
-                     List<Broker> preferredBrokers, int timeout, String gatewayPublicKey) {
+      List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags,
+      List<Broker> preferredBrokers, int timeout, String gatewayPublicKey) {
     this.requestedService = requestedService;
     this.requesterCloud = requesterCloud;
     this.requesterSystem = requesterSystem;
     this.preferredSystems = preferredSystems;
     this.negotiationFlags = negotiationFlags;
-    this.authenticationInfo = authenticationInfo;
     this.preferredBrokers = preferredBrokers;
     this.timeout = timeout;
     this.gatewayPublicKey = gatewayPublicKey;
@@ -86,14 +84,6 @@ public class ICNProposal {
 
   public void setNegotiationFlags(Map<String, Boolean> negotiationFlags) {
     this.negotiationFlags = negotiationFlags;
-  }
-
-  public String getAuthenticationInfo() {
-    return authenticationInfo;
-  }
-
-  public void setAuthenticationInfo(String authenticationInfo) {
-    this.authenticationInfo = authenticationInfo;
   }
 
   public List<Broker> getPreferredBrokers() {
