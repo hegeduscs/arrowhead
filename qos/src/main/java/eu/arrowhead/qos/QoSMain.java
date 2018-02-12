@@ -13,6 +13,8 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import javax.net.ssl.SSLContext;
@@ -28,15 +30,20 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class QoSMain {
 
+  public static boolean DEBUG_MODE;
 
-  private static HttpServer server = null;
-  private static HttpServer secureServer = null;
-  private static Logger log = Logger.getLogger(QoSMain.class.getName());
+  static final String MONITOR_URL = getProp().getProperty("monitor_url", "");
+
+  private static HttpServer server;
+  private static HttpServer secureServer;
   private static Properties prop;
+
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8448/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8449/");
-  static final String MONITOR_URL = getProp().getProperty("monitor_url", "");
-  public static boolean DEBUG_MODE;
+  private static final Logger log = Logger.getLogger(QoSMain.class.getName());
+  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "db_user", "db_password", "db_address", "monitor_url");
+  private static final List<String> securePropertyNames = Arrays
+      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -62,12 +69,15 @@ public class QoSMain {
           ++i;
           switch (args[i]) {
             case "insecure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
               server = startServer();
               break argLoop;
             case "secure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
               break argLoop;
             case "both":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               server = startServer();
               secureServer = startSecureServer();
               break argLoop;
@@ -150,9 +160,9 @@ public class QoSMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException("Server CN ( " + serverCN
-                                            + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
-                                            + "end with arrowhead.eu.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
+              + "end with arrowhead.eu.");
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
@@ -171,6 +181,8 @@ public class QoSMain {
           "Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and not in use already)", e);
     }
   }
+
+  //TODO useSRService method when QoS is used
 
   private static void shutdown() {
     if (server != null) {

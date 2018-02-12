@@ -3,9 +3,9 @@ base_uri=http://127.0.0.1:8452/
 base_uri_secured=https://127.0.0.1:8453/
 sr_base_uri=http://127.0.0.1:8442/
 
-# Database parameters
+# Database parameters - should be the SAME as the log4j database parameters in the case of the gateway
 # db_user=Change and use these parameters only
-# db_password=if you dont log on localhost with root/root credentials
+# db_password=if you dont log on localhost with root/root credentials into a "log" database
 # db_address=jdbc:mysql://127.0.0.1:3306/log
 
 # Certificate related paths and passwords

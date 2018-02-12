@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
+import java.util.Set;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.NotAllowedException;
@@ -334,6 +335,20 @@ public final class Utility {
       return "Secure" + baseSD;
     } else {
       return "Insecure" + baseSD;
+    }
+  }
+
+  public static void checkProperties(Set<String> propertyNames, List<String> basic, List<String> secure, boolean isSecure) {
+    if (isSecure) {
+      List<String> properties = new ArrayList<>(basic);
+      properties.addAll(secure);
+      propertyNames.removeAll(properties);
+    } else {
+      propertyNames.removeAll(basic);
+    }
+
+    if (propertyNames.size() > 0) {
+      throw new ServiceConfigurationError("Missing properties: " + propertyNames.toString());
     }
   }
 

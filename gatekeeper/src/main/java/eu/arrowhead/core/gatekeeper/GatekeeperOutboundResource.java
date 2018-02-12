@@ -154,8 +154,8 @@ public class GatekeeperOutboundResource {
     requestForm.getNegotiationFlags().put("useGateway", GatekeeperMain.USE_GATEWAY);
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
-                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(),
-                                              null, GatekeeperMain.timeout, null);
+                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(), null, GatekeeperMain.timeout,
+                                              null);
 
     if (GatekeeperMain.USE_GATEWAY) {
       icnProposal.setPreferredBrokers(dm.getAll(Broker.class, null));

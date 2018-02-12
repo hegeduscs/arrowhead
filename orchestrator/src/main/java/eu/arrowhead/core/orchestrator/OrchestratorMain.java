@@ -28,8 +28,10 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import javax.net.ssl.SSLContext;
@@ -63,6 +65,9 @@ public class OrchestratorMain {
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8440/orchestrator/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8441/orchestrator/");
   private static final Logger log = Logger.getLogger(OrchestratorMain.class.getName());
+  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "sr_base_uri", "db_user", "db_password", "db_address");
+  private static final List<String> securePropertyNames = Arrays
+      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -95,14 +100,17 @@ public class OrchestratorMain {
           ++i;
           switch (args[i]) {
             case "insecure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
               server = startServer();
               useSRService(false, true);
               break;
             case "secure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
               useSRService(true, true);
               break;
             case "both":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               server = startServer();
               secureServer = startSecureServer();
               useSRService(false, true);
@@ -191,10 +199,9 @@ public class OrchestratorMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException("Server CN ( " + serverCN
-                                            + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
-                                            + "end with arrowhead.eu.",
-                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
+              + "end with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);

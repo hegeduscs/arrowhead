@@ -27,14 +27,12 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
-import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response.Status;
@@ -102,14 +100,17 @@ public class AuthorizationMain {
           ++i;
           switch (args[i]) {
             case "insecure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
               server = startServer();
               useSRService(false, true);
               break;
             case "secure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
               useSRService(true, true);
               break;
             case "both":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               server = startServer();
               secureServer = startSecureServer();
               useSRService(false, true);
@@ -277,21 +278,6 @@ public class AuthorizationMain {
       useSRService(true, false);
     }
     System.out.println("Authorization Server(s) stopped");
-  }
-
-  private static void checkProperties(boolean isSecure) {
-    Set<String> propertyNames = getProp().stringPropertyNames();
-    if (isSecure) {
-      List<String> properties = new ArrayList<>(basicPropertyNames);
-      properties.addAll(securePropertyNames);
-      propertyNames.removeAll(properties);
-    } else {
-      propertyNames.removeAll(basicPropertyNames);
-    }
-
-    if (propertyNames.size() > 0) {
-      throw new ServiceConfigurationError("Missing properties: " + propertyNames.toString());
-    }
   }
 
   public static synchronized Properties getProp() {

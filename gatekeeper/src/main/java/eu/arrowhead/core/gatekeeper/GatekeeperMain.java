@@ -26,14 +26,12 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
-import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
@@ -76,7 +74,8 @@ public class GatekeeperMain {
       .asList("internal_base_uri", "external_base_uri", "sr_base_uri", "orch_base_uri", "db_user", "db_password", "db_address", "timeout",
               "use_gateway");
   private static final List<String> securePropertyNames = Arrays
-      .asList("internal_base_uri_secured", "external_base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
+      .asList("internal_base_uri_secured", "external_base_uri_secured", "gatekeeper_keystore", "gatekeeper_keystore_pass", "gatekeeper_keypass",
+              "cloud_keystore", "cloud_keystore_pass", "cloud_keypass", "master_arrowhead_cert");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -115,16 +114,19 @@ public class GatekeeperMain {
           ++i;
           switch (args[i]) {
             case "insecure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
               inboundServer = startServer(INBOUND_BASE_URI, true);
               outboundServer = startServer(OUTBOUND_BASE_URI, false);
               useSRService(false, true);
               break;
             case "secure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true);
               outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false);
               useSRService(true, true);
               break;
             case "both":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               inboundServer = startServer(INBOUND_BASE_URI, true);
               outboundServer = startServer(OUTBOUND_BASE_URI, false);
               inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true);
@@ -362,21 +364,6 @@ public class GatekeeperMain {
       useSRService(true, false);
     }
     System.out.println("Gatekeeper Servers stopped");
-  }
-
-  private static void checkProperties(boolean isSecure) {
-    Set<String> propertyNames = getProp().stringPropertyNames();
-    if (isSecure) {
-      List<String> properties = new ArrayList<>(basicPropertyNames);
-      properties.addAll(securePropertyNames);
-      propertyNames.removeAll(properties);
-    } else {
-      propertyNames.removeAll(basicPropertyNames);
-    }
-
-    if (propertyNames.size() > 0) {
-      throw new ServiceConfigurationError("Missing properties: " + propertyNames.toString());
-    }
   }
 
   private static synchronized Properties getProp() {
