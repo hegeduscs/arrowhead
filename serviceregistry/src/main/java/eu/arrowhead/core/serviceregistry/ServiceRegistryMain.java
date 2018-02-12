@@ -125,16 +125,13 @@ public class ServiceRegistryMain {
     DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        @Override
-        public void run() {
-          System.out.println("Received TERM signal, shutting down...");
-          if (timer != null) {
-            timer.cancel();
-          }
-          shutdown();
+      Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        System.out.println("Received TERM signal, shutting down...");
+        if (timer != null) {
+          timer.cancel();
         }
-      });
+        shutdown();
+      }));
     } else {
       System.out.println("Type \"stop\" to shutdown Service Registry Server(s)...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
