@@ -68,7 +68,7 @@ public class MessageStream {
   }
 
   public MessageStream(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem provider, ResourceReservation qualityOfService,
-      Map<String, String> configuration, String type) {
+                       Map<String, String> configuration, String type) {
     this.service = service;
     this.consumer = consumer;
     this.provider = provider;

@@ -179,7 +179,7 @@ public class OrchestratorMain {
     if (!sslCon.validateConfiguration(true)) {
       log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
       throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!",
-          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
     }
 
     SSLContext sslContext = sslCon.createSSLContext();
@@ -191,10 +191,10 @@ public class OrchestratorMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException(
-          "Server CN ( " + serverCN
-              + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not end with arrowhead.eu.",
-          Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+      throw new AuthenticationException("Server CN ( " + serverCN
+                                            + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
+                                            + "end with arrowhead.eu.",
+                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
@@ -274,7 +274,7 @@ public class OrchestratorMain {
       }
     } catch (FileNotFoundException ex) {
       throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-          + "the config folder can be found)", ex);
+                                              + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

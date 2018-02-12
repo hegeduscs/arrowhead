@@ -16,6 +16,7 @@ public interface IVerifierAlgorithm {
    * Verify if the desired qos is possible
    *
    * @param info Contains provider, consumer systems, the requested service, requested QoS and the all the capabilities.
+   *
    * @return Returns true or false with a rejetction motivation.
    */
   VerificationResponse verifyQoS(VerificationInfo info);

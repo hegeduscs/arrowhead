@@ -73,6 +73,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    * Get one domain pointed to by the given resource record name, searching all computer domains.
    *
    * @param rrName the DNS resource record name.
+   *
    * @return a domain name, the first one found.
    */
   private String getDomain(Name rrName) {
@@ -89,6 +90,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    * Get all domains pointed to by the given resource record name, searching all computer domains.
    *
    * @param rrName the DNS resource record name.
+   *
    * @return a collection of domain names.
    */
 
@@ -104,6 +106,7 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
    * Get all domains pointed to by the given resource record name, looking in a single computer domain.
    *
    * @param rrName the DNS resource record name.
+   *
    * @return a collection of domain names.
    */
 

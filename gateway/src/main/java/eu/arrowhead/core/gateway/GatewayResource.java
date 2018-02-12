@@ -63,16 +63,17 @@ public class GatewayResource {
     String queueName = String.valueOf(System.currentTimeMillis()).concat(String.valueOf(Math.random())).replace(".", "");
     String controlQueueName = queueName.concat("_control");
 
-    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(), connectionRequest.getConsumerCloud(), connectionRequest
-        .getProvider(), connectionRequest.getProviderCloud(),
-        connectionRequest.getService(), connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), null, queueName, controlQueueName,
-        connectionRequest.getIsSecure(), new Date(System.currentTimeMillis()));
+    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(), connectionRequest.getConsumerCloud(),
+                                                    connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
+                                                    connectionRequest.getService(), connectionRequest.getBrokerName(),
+                                                    connectionRequest.getBrokerPort(), null, queueName, controlQueueName,
+                                                    connectionRequest.getIsSecure(), new Date(System.currentTimeMillis()));
     // Add the session to the management queue
     GatewayService.activeSessions.put(queueName, activeSession);
 
     GatewaySession gatewaySession = GatewayService
         .createChannel(connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), queueName, controlQueueName,
-            connectionRequest.getIsSecure());
+                       connectionRequest.getIsSecure());
 
     if (connectionRequest.getIsSecure()) {
       SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
@@ -92,16 +93,17 @@ public class GatewayResource {
     Integer serverSocketPort = GatewayService.getAvailablePort();
 
     ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(), connectionRequest.getConsumerCloud(),
-        connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
-        connectionRequest.getService(), connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), serverSocketPort,
-        connectionRequest.getQueueName(),
-        connectionRequest.getControlQueueName(), connectionRequest.getIsSecure(), new Date(System.currentTimeMillis()));
+                                                    connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
+                                                    connectionRequest.getService(), connectionRequest.getBrokerName(),
+                                                    connectionRequest.getBrokerPort(), serverSocketPort, connectionRequest.getQueueName(),
+                                                    connectionRequest.getControlQueueName(), connectionRequest.getIsSecure(),
+                                                    new Date(System.currentTimeMillis()));
     // Add the session to the management queue
     GatewayService.activeSessions.put(connectionRequest.getQueueName(), activeSession);
 
     GatewaySession gatewaySession = GatewayService
         .createChannel(connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), connectionRequest.getQueueName(),
-            connectionRequest.getControlQueueName(), connectionRequest.getIsSecure());
+                       connectionRequest.getControlQueueName(), connectionRequest.getIsSecure());
 
     if (connectionRequest.getIsSecure()) {
       SecureServerSocketThread secureThread = new SecureServerSocketThread(gatewaySession, serverSocketPort, connectionRequest);

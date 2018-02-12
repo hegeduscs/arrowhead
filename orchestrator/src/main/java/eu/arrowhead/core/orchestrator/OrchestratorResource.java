@@ -60,7 +60,7 @@ public class OrchestratorResource {
     if (!srf.isValid()) {
       log.error("orchestrationProcess BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.", Status.BAD_REQUEST.getStatusCode(),
-          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     if (!srf.getOrchestrationFlags().get("externalServiceRequest") && requestContext.getSecurityContext().isSecure()) {

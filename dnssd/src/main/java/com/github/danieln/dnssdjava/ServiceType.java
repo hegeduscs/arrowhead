@@ -62,7 +62,9 @@ public class ServiceType {
    * #toString()}.
    *
    * @param s the string to be parsed.
+   *
    * @return a ServiceType representing the type specified by the argument.
+   *
    * @throws IllegalArgumentException if the string cannot be parsed as a ServiceType.
    */
 
@@ -95,6 +97,7 @@ public class ServiceType {
    * still {@link #equals(Object)} the base ServiceType and has the same {@link #hashCode()}.
    *
    * @param subtypes the subtypes.
+   *
    * @return a new ServiceType based on this ServiceType but with the given subtypes.
    */
 
@@ -108,6 +111,7 @@ public class ServiceType {
    * #equals(Object)} the base ServiceType and has the same {@link #hashCode()}.
    *
    * @param subtype the subtype.
+   *
    * @return a new ServiceType based on this ServiceType but with the given subtype.
    */
 
@@ -235,6 +239,7 @@ public class ServiceType {
      * Get the Transport corresponding to a DNS label.
      *
      * @param label the DNS label.
+     *
      * @return the corresponding Transport constant.
      */
 

@@ -25,8 +25,8 @@ public class QoSReserve {
   public QoSReserve() {
   }
 
-  public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service, Map<String, String> requestedQoS, Map<String,
-      String> commands) {
+  public QoSReserve(ArrowheadSystem provider, ArrowheadSystem consumer, ArrowheadService service, Map<String, String> requestedQoS,
+                    Map<String, String> commands) {
     this.provider = provider;
     this.consumer = consumer;
     this.service = service;

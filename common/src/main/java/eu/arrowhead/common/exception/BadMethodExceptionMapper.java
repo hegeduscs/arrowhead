@@ -30,7 +30,7 @@ public class BadMethodExceptionMapper implements ExceptionMapper<NotAllowedExcep
       errorMessage = new ErrorMessage(ex.getMessage(), 405, NotAllowedException.class.getName(), null);
     } else {
       errorMessage = new ErrorMessage(requestContext.get().getMethod() + " is not allowed at " + requestContext.get().getPath(true), 405,
-          NotAllowedException.class.getName(), requestContext.get().getBaseUri().toString());
+                                      NotAllowedException.class.getName(), requestContext.get().getBaseUri().toString());
     }
 
     return Response.status(Status.METHOD_NOT_ALLOWED).entity(errorMessage).header("Content-type", "application/json").build();

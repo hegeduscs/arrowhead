@@ -26,10 +26,9 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
     ErrorMessage errorMessage;
     if (responseContext.get() != null) {
       errorMessage = new ErrorMessage(ex.getMessage(), responseContext.get().getStatus(), ex.getClass().getName(),
-          responseContext.get().getRequestContext().getAbsolutePath().toString());
+                                      responseContext.get().getRequestContext().getAbsolutePath().toString());
     } else {
-      errorMessage = new ErrorMessage(ex.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), ex.getClass().getName(),
-          null);
+      errorMessage = new ErrorMessage(ex.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), ex.getClass().getName(), null);
     }
     return Response.status(Status.INTERNAL_SERVER_ERROR).entity(errorMessage).header("Content-type", "application/json").build();
   }

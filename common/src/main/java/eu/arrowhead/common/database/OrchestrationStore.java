@@ -98,7 +98,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-      int priority) {
+                            int priority) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;
@@ -107,8 +107,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-      Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
-      String serviceURI) {
+                            Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
+                            String serviceURI) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;

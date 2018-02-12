@@ -64,6 +64,7 @@ public class AuthorizationResource {
    * Checks whether the consumer System can use a Service from a list of provider Systems.
    *
    * @return IntraCloudAuthResponse
+   *
    * @throws DataNotFoundException, BadPayloadException
    */
   @PUT
@@ -72,8 +73,8 @@ public class AuthorizationResource {
     if (!request.isValid()) {
       log.error("isSystemAuthorized BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.",
-          Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
-          requestContext.getUriInfo().getAbsolutePath().toString());
+                                    Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
+                                    requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
@@ -81,8 +82,8 @@ public class AuthorizationResource {
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
       throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().getSystemName(),
-          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
-          requestContext.getUriInfo().getAbsolutePath().toString());
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+                                      requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     IntraCloudAuthResponse response = new IntraCloudAuthResponse();
@@ -130,6 +131,7 @@ public class AuthorizationResource {
    * Checks whether an external Cloud can use a local Service.
    *
    * @return boolean
+   *
    * @throws DataNotFoundException, BadPayloadException
    */
   @PUT
@@ -138,7 +140,7 @@ public class AuthorizationResource {
     if (!request.isValid()) {
       log.error("isCloudAuthorized BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete cloud or service in the request payload.", Status.BAD_REQUEST.getStatusCode(),
-          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.put("operator", request.getCloud().getOperator());
@@ -147,8 +149,8 @@ public class AuthorizationResource {
     if (cloud == null) {
       log.error("Requester cloud is not in the database. isCloudAuthorized DataNotFoundException");
       throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString(),
-          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
-          requestContext.getUriInfo().getAbsolutePath().toString());
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
+                                      requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.clear();
@@ -185,7 +187,7 @@ public class AuthorizationResource {
     if (!request.isValid()) {
       log.error("tokenGeneration BadPayloadException");
       throw new BadPayloadException("TokenGenerationRequest has missing/incomplete fields.", Status.BAD_REQUEST.getStatusCode(),
-          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     // Get the tokens from the service class (can throw run time exceptions)

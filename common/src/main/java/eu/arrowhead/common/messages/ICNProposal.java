@@ -35,8 +35,8 @@ public class ICNProposal {
   }
 
   public ICNProposal(ArrowheadService requestedService, ArrowheadCloud requesterCloud, ArrowheadSystem requesterSystem,
-      List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo,
-      List<Broker> preferredBrokers, int timeout, String gatewayPublicKey) {
+                     List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo,
+                     List<Broker> preferredBrokers, int timeout, String gatewayPublicKey) {
     this.requestedService = requestedService;
     this.requesterCloud = requesterCloud;
     this.requesterSystem = requesterSystem;

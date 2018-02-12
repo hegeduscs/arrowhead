@@ -16,6 +16,7 @@ public interface IQoSDriver {
    * Configures a stream between a provider and a consumer.
    *
    * @param info Necessary information to the driver.
+   *
    * @return Returns the stream configuration parameters.
    */
   ReservationResponse reserveQoS(ReservationInfo info);

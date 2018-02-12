@@ -25,7 +25,7 @@ public class BadURIExceptionMapper implements ExceptionMapper<NotFoundException>
   public Response toResponse(NotFoundException ex) {
     ex.printStackTrace();
     ErrorMessage errorMessage = new ErrorMessage(requestContext.get().getPath(true) + " is not a valid path!", 404, NotFoundException.class.getName(),
-        requestContext.get().getBaseUri().toString());
+                                                 requestContext.get().getBaseUri().toString());
     return Response.status(Response.Status.NOT_FOUND).entity(errorMessage).header("Content-type", "application/json").build();
   }
 }

@@ -49,16 +49,18 @@ public class DriversFactory {
    * @param service ArrowheadService.
    * @param commands Map of the selected commands from the user.
    * @param requestedQoS Map of the desired requestedQoS.
+   *
    * @return Returns the generatedCommands from the QoSDriver.
+   *
    * @throws ReservationException The StreamConfiguration found an error.
    * @throws DriverNotFoundException The selected type doesnt have an assigned driver.
    */
 
   public Map<String, String> generateCommands(String communicationProtocol, Map<String, String> networkConfiguration, ArrowheadSystem provider,
-      ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands,
-      Map<String, String> requestedQoS)
+                                              ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands,
+                                              Map<String, String> requestedQoS)
       throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+             NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
     // Class Invoking
     Class cls = findClass(communicationProtocol);

@@ -25,8 +25,8 @@ public class QoSReservationCommand {
   public QoSReservationCommand() {
   }
 
-  public QoSReservationCommand(ArrowheadService service, ArrowheadSystem producer, ArrowheadSystem consumer, Map<String, String> commands, Map
-      <String, String> requestedQoS) {
+  public QoSReservationCommand(ArrowheadService service, ArrowheadSystem producer, ArrowheadSystem consumer, Map<String, String> commands,
+                               Map<String, String> requestedQoS) {
     this.service = service;
     this.producer = producer;
     this.consumer = consumer;

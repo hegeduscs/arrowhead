@@ -124,6 +124,7 @@ public class FTTSE implements IQoSDriver {
    * @param elementaryCycle Master paramter.
    * @param mtu Maximum Transmission Unit of the switch.
    * @param requestedQoS Consumer requested QoS.
+   *
    * @return Returns the parameters of the stream to be configured.
    */
 

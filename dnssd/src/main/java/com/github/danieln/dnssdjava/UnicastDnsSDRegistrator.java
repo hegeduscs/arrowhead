@@ -86,6 +86,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
    * Create a UnicastDnsSDRegistrator.
    *
    * @param registrationDomain the registration domain.
+   *
    * @throws UnknownHostException if the DNS server name for the domain failed to resolve.
    */
   UnicastDnsSDRegistrator(Name registrationDomain) throws UnknownHostException {
@@ -103,7 +104,9 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
    * Create a DNS {@link Resolver} to handle updates to the given domain.
    *
    * @param domain the domain for which updates will be generated.
+   *
    * @return a Resolver configured with the DNS server that handles zone for that domain.
+   *
    * @throws UnknownHostException if the DNS server name for the domain failed to resolve.
    */
 
@@ -280,7 +283,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
           break;
         default:
           logger.log(Level.WARNING, "Failed to remove service type {0}, server returned status {1}",
-              new Object[]{typeName, Rcode.string(response.getRcode())});
+                     new Object[]{typeName, Rcode.string(response.getRcode())});
       }
       return true;
     } catch (TextParseException ex) {

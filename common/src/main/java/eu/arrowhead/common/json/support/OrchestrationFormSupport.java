@@ -29,8 +29,8 @@ public class OrchestrationFormSupport {
     this.serviceURI = serviceURI;
   }
 
-  public OrchestrationFormSupport(ArrowheadServiceSupport service, ArrowheadSystemSupport provider, String serviceURI, String instruction, String
-      authorizationToken, String signature) {
+  public OrchestrationFormSupport(ArrowheadServiceSupport service, ArrowheadSystemSupport provider, String serviceURI, String instruction,
+                                  String authorizationToken, String signature) {
     this.service = service;
     this.provider = provider;
     this.serviceURI = serviceURI;

@@ -134,7 +134,7 @@ class TokenGenerationService {
     if (!nonNullTokenExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
       throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-          ArrowheadException.class.getName(), TokenGenerationService.class.getName());
+                                   ArrowheadException.class.getName(), TokenGenerationService.class.getName());
     }
 
     return tokens;
@@ -157,7 +157,7 @@ class TokenGenerationService {
           keys.add(key);
         } catch (InvalidKeySpecException | NullPointerException e) {
           log.error("The stored auth info for the ArrowheadSystem (" + provider.getSystemName()
-              + ") is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
+                        + ") is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
           keys.add(null);
         }
       } else {
@@ -177,7 +177,7 @@ class TokenGenerationService {
     if (!nonNullKeyExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
       throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-          ArrowheadException.class.getName(), TokenGenerationService.class.getName());
+                                   ArrowheadException.class.getName(), TokenGenerationService.class.getName());
     }
 
     return keys;

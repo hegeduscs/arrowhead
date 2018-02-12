@@ -319,14 +319,14 @@ public class GatekeeperMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (inbound && !SecurityUtils.isTrustStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure.");
-      throw new AuthenticationException(
-          "Server CN ( " + serverCN
-              + ") is not compliant with the Arrowhead cert structure, since it does not have 4 parts, or does not end with arrowhead.eu.");
+      throw new AuthenticationException("Server CN ( " + serverCN
+                                            + ") is not compliant with the Arrowhead cert structure, since it does not have 4 parts, or does not "
+                                            + "end with arrowhead.eu.");
     } else if (!inbound && !SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException(
-          "Server CN ( " + serverCN
-              + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not end with arrowhead.eu.");
+      throw new AuthenticationException("Server CN ( " + serverCN
+                                            + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
+                                            + "end with arrowhead.eu.");
     }
 
     log.info("Certificate of the secure server: " + serverCN);
@@ -365,7 +365,7 @@ public class GatekeeperMain {
       }
     } catch (FileNotFoundException ex) {
       throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-          + "the config folder can be found)", ex);
+                                              + "the config folder can be found)", ex);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

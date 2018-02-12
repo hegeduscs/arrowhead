@@ -114,8 +114,8 @@ class BrowserApp extends JFrame {
         layout.createParallelGroup().addComponent(computerDomainLabel).addComponent(computerDomainCombo).addComponent(browsingDomainLabel)
             .addComponent(browsingDomainCombo).addComponent(serviceTypeLabel).addComponent(serviceTypeScroll).addComponent(subtypeLabel)
             .addComponent(subtypeField)).addPreferredGap(ComponentPlacement.UNRELATED)
-        .addGroup(layout.createParallelGroup().addComponent(serviceInstanceLabel).addComponent(serviceInstanceScroll))
-        .addPreferredGap(ComponentPlacement.UNRELATED).addGroup(
+                                  .addGroup(layout.createParallelGroup().addComponent(serviceInstanceLabel).addComponent(serviceInstanceScroll))
+                                  .addPreferredGap(ComponentPlacement.UNRELATED).addGroup(
             layout.createParallelGroup().addComponent(nameLabel).addComponent(nameField).addGroup(
                 layout.createSequentialGroup().addGroup(layout.createParallelGroup().addComponent(hostLabel).addComponent(hostField))
                     .addPreferredGap(ComponentPlacement.RELATED)

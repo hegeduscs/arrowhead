@@ -122,6 +122,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
    * Get the service types from a single domain.
    *
    * @param domainName the domain to browse.
+   *
    * @return a list of service types.
    */
 
@@ -157,6 +158,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
    *
    * @param type the service type.
    * @param domainName the domain to browse.
+   *
    * @return a list of service names.
    */
 

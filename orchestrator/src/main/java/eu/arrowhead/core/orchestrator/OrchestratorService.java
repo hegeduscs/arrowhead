@@ -198,7 +198,7 @@ final class OrchestratorService {
       // If the for-loop finished but we still could not return a result, we throw a DataNotFoundException.
       log.error("orchestrationFromStore throws final DataNotFoundException");
       throw new DataNotFoundException("OrchestrationFromStore failed with all the queried (" + entryList.size() + ") Store entries.",
-          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
     }
   }
 
@@ -282,7 +282,7 @@ final class OrchestratorService {
    * the first provider from the list.
    *
    * @throws DataNotFoundException in case of Store orchestration, and the provider system from the database is not a match according to the remote
-   * cloud
+   *     cloud
    */
   private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, List<ArrowheadSystem> preferredSystems, boolean storeOrchestration) {
     // We first try to find a match between the preferred systems and the received providers from the ICN result.
@@ -301,7 +301,7 @@ final class OrchestratorService {
     if (storeOrchestration) {
       log.error("icnMatchmaking DataNotFoundException");
       throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.",
-          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
     }
     // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
     else {
@@ -315,11 +315,11 @@ final class OrchestratorService {
    *
    * @param srList Service Registry entries, each containing a suitable provider <tt>ArrowheadSystem</tt>.
    * @param srf The <tt>ServiceRequestForm</tt> from the requester <tt>ArrowheadSystem</tt>, which is needed in case of token generation is
-   * requested.
+   *     requested.
    * @param instructions Optional additional information, which can be passed back to the requester <tt>ArrowheadSystem</tt>
    */
   private static OrchestrationResponse compileOrchestrationResponse(List<ServiceRegistryEntry> srList, ServiceRequestForm srf,
-      List<String> instructions) {
+                                                                    List<String> instructions) {
     // Arrange token generation for every provider, if it was requested in the service metadata
     Map<String, String> metadata;
     TokenGenerationResponse tokenResponse = null;
@@ -329,8 +329,8 @@ final class OrchestratorService {
         if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
           // Compiling the request payload
           TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), null,
-              Collections.singletonList(entry.getProvider()), entry.getProvidedService(),
-              0);
+                                                                           Collections.singletonList(entry.getProvider()), entry.getProvidedService(),
+                                                                           0);
           // Sending the token generation request, parsing the response
           Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
           tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
@@ -347,7 +347,7 @@ final class OrchestratorService {
 
         // Compiling the request payload
         TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
-            srf.getRequestedService(), 0);
+                                                                         srf.getRequestedService(), 0);
         // Sending the token generation request, parsing the response
         Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
         tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
@@ -381,7 +381,7 @@ final class OrchestratorService {
 
     for (OrchestrationForm of : ofList) {
       log.debug("Service: " + of.getService().toString() + " System: " + of.getProvider().getSystemName() + " ServiceURI: " + of.getServiceURI()
-          + " Instruction: " + of.getInstruction() + " Token: " + of.getAuthorizationToken() + " Signature: " + of.getSignature());
+                    + " Instruction: " + of.getInstruction() + " Token: " + of.getAuthorizationToken() + " Signature: " + of.getSignature());
     }
     log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");
     return new OrchestrationResponse(ofList);

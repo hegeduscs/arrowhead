@@ -55,7 +55,7 @@ public class ServiceRegistryResource {
     if (!entry.isValid()) {
       log.error("registerService throws BadPayloadException");
       throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
-          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
@@ -104,7 +104,7 @@ public class ServiceRegistryResource {
     if (!queryForm.isValid()) {
       log.error("queryRegistry throws BadPayloadException");
       throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
-          BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
     restrictionMap.put("serviceDefinition", queryForm.getService().getServiceDefinition());
@@ -141,8 +141,8 @@ public class ServiceRegistryResource {
     if (!entry.isValid()) {
       log.error("removeService throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).",
-          Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
-          requestContext.getUriInfo().getAbsolutePath().toString());
+                                    Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
+                                    requestContext.getUriInfo().getAbsolutePath().toString());
     }
     if (requestContext.getSecurityContext().isSecure()) {
       String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();

@@ -31,7 +31,7 @@ public class ICNRequestForm {
   }
 
   public ICNRequestForm(ArrowheadService requestedService, ArrowheadCloud targetCloud, ArrowheadSystem requesterSystem,
-      List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo) {
+                        List<ArrowheadSystem> preferredSystems, Map<String, Boolean> negotiationFlags, String authenticationInfo) {
     this.requestedService = requestedService;
     this.targetCloud = targetCloud;
     this.requesterSystem = requesterSystem;

@@ -29,7 +29,6 @@ import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -45,7 +44,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
@@ -116,8 +114,8 @@ public final class Utility {
       } else {
         log.error("sendRequest() method throws AuthenticationException");
         throw new AuthenticationException(
-            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.", Status
-            .UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), Utility.class.toString());
+            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), Utility.class.toString());
       }
     } else {
       client = ClientBuilder.newClient(configuration);
@@ -145,7 +143,7 @@ public final class Utility {
     } catch (ProcessingException e) {
       log.error("UnavailableServerException occurred at " + uri, e);
       throw new UnavailableServerException("Could not get any response from: " + uri, Status.SERVICE_UNAVAILABLE.getStatusCode(),
-          UnavailableServerException.class.getName(), Utility.class.toString(), e);
+                                           UnavailableServerException.class.getName(), Utility.class.toString(), e);
     }
 
     // If the response status code does not start with 2 the request was not successful
@@ -194,22 +192,22 @@ public final class Utility {
       switch (errorMessage.getExceptionType()) {
         case AUTH_EXCEPTION:
           throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-              errorMessage.getOrigin());
+                                            errorMessage.getOrigin());
         case BAD_PAYLOAD_EXCEPTION:
           throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-              errorMessage.getOrigin());
+                                        errorMessage.getOrigin());
         case NOT_FOUND_EXCEPTION:
           throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-              errorMessage.getOrigin());
+                                          errorMessage.getOrigin());
         case DUPLICATE_EXCEPTION:
           throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-              errorMessage.getOrigin());
+                                            errorMessage.getOrigin());
         case UNAVAILABLE_EXCEPTION:
           throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-              errorMessage.getOrigin());
+                                               errorMessage.getOrigin());
         default:
           throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-              errorMessage.getOrigin());
+                                       errorMessage.getOrigin());
       }
     }
   }
@@ -277,7 +275,7 @@ public final class Utility {
     if (cloudList.isEmpty()) {
       log.error("Utility:getOwnCloud not found in the database.");
       throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.",
-          Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), Utility.class.toString());
+                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), Utility.class.toString());
     }
     if (cloudList.size() > 1) {
       log.warn("own_cloud table should NOT have more than 1 rows.");
@@ -306,7 +304,7 @@ public final class Utility {
       }
       if ((isSecure && "http".equals(uri.getScheme())) || (!isSecure && "https".equals(uri.getScheme()))) {
         throw new ServiceConfigurationError("Secure URIs should use the HTTPS protocol and insecure URIs should use the HTTP protocol. Please fix "
-            + "the following URL accordingly in the properties file: " + url);
+                                                + "the following URL accordingly in the properties file: " + url);
       }
     } catch (URISyntaxException e) {
       throw new ServiceConfigurationError(url + errorMessage);

@@ -56,7 +56,7 @@ public class ArrowheadCloud {
   }
 
   public ArrowheadCloud(String operator, String cloudName, String address, Integer port, String gatekeeperServiceURI, String authenticationInfo,
-      boolean secure) {
+                        boolean secure) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;

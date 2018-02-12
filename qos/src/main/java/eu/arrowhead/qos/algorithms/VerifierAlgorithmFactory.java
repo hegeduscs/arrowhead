@@ -40,11 +40,11 @@ public class VerifierAlgorithmFactory {
   //note: communicationProtocol == network.getNetworkType :/
 
   public QoSVerifierResponse verify(String communicationProtocol, Map<String, String> providerDeviceCapabilities,
-      Map<String, String> consumerDeviceCapabilities, List<ResourceReservation> providerDeviceQoSReservations,
-      List<ResourceReservation> consumerDeviceQoSReservations, Map<String, String> requestedQoS,
-      Map<String, String> commands)
+                                    Map<String, String> consumerDeviceCapabilities, List<ResourceReservation> providerDeviceQoSReservations,
+                                    List<ResourceReservation> consumerDeviceQoSReservations, Map<String, String> requestedQoS,
+                                    Map<String, String> commands)
       throws InstantiationException, ClassNotFoundException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException,
-      InvocationTargetException {
+             InvocationTargetException {
     Class cls;
 
     // Class Invoking
@@ -54,7 +54,7 @@ public class VerifierAlgorithmFactory {
     Method method = cls.getDeclaredMethod("verifyQoS", paramVerificationInfo);
     return (QoSVerifierResponse) method.
         invoke(obj, new VerificationInfo(providerDeviceCapabilities, consumerDeviceCapabilities, providerDeviceQoSReservations,
-            consumerDeviceQoSReservations, requestedQoS, commands));
+                                         consumerDeviceQoSReservations, requestedQoS, commands));
 
   }
 
