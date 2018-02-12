@@ -26,10 +26,14 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
+import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
@@ -68,6 +72,11 @@ public class GatekeeperMain {
   private static final String OUTBOUND_BASE_URI = getProp().getProperty("external_base_uri", "http://127.0.0.1:8448/");
   private static final String OUTBOUND_BASE_URI_SECURED = getProp().getProperty("external_base_uri_secured", "https://127.0.0.1:8449/");
   private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
+  private static final List<String> basicPropertyNames = Arrays
+      .asList("internal_base_uri", "external_base_uri", "sr_base_uri", "orch_base_uri", "db_user", "db_password", "db_address", "timeout",
+              "use_gateway");
+  private static final List<String> securePropertyNames = Arrays
+      .asList("internal_base_uri_secured", "external_base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -319,14 +328,14 @@ public class GatekeeperMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (inbound && !SecurityUtils.isTrustStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure.");
-      throw new AuthenticationException("Server CN ( " + serverCN
-                                            + ") is not compliant with the Arrowhead cert structure, since it does not have 4 parts, or does not "
-                                            + "end with arrowhead.eu.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 4 parts, or does not "
+              + "end with arrowhead.eu.");
     } else if (!inbound && !SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException("Server CN ( " + serverCN
-                                            + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
-                                            + "end with arrowhead.eu.");
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
+              + "end with arrowhead.eu.");
     }
 
     log.info("Certificate of the secure server: " + serverCN);
@@ -353,6 +362,21 @@ public class GatekeeperMain {
       useSRService(true, false);
     }
     System.out.println("Gatekeeper Servers stopped");
+  }
+
+  private static void checkProperties(boolean isSecure) {
+    Set<String> propertyNames = getProp().stringPropertyNames();
+    if (isSecure) {
+      List<String> properties = new ArrayList<>(basicPropertyNames);
+      properties.addAll(securePropertyNames);
+      propertyNames.removeAll(properties);
+    } else {
+      propertyNames.removeAll(basicPropertyNames);
+    }
+
+    if (propertyNames.size() > 0) {
+      throw new ServiceConfigurationError("Missing properties: " + propertyNames.toString());
+    }
   }
 
   private static synchronized Properties getProp() {

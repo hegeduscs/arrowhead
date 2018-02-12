@@ -27,10 +27,14 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
+import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response.Status;
@@ -58,6 +62,10 @@ public class AuthorizationMain {
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8444/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8445/");
   private static final Logger log = Logger.getLogger(AuthorizationMain.class.getName());
+  private static final List<String> basicPropertyNames = Arrays
+      .asList("base_uri", "sr_base_uri", "db_user", "db_password", "db_address", "enable_auth_for_cloud");
+  private static final List<String> securePropertyNames = Arrays
+      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -191,10 +199,9 @@ public class AuthorizationMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException("Server CN ( " + serverCN
-                                            + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
-                                            + "end with arrowhead.eu.",
-                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+      throw new AuthenticationException(
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
+              + "end with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
@@ -270,6 +277,21 @@ public class AuthorizationMain {
       useSRService(true, false);
     }
     System.out.println("Authorization Server(s) stopped");
+  }
+
+  private static void checkProperties(boolean isSecure) {
+    Set<String> propertyNames = getProp().stringPropertyNames();
+    if (isSecure) {
+      List<String> properties = new ArrayList<>(basicPropertyNames);
+      properties.addAll(securePropertyNames);
+      propertyNames.removeAll(properties);
+    } else {
+      propertyNames.removeAll(basicPropertyNames);
+    }
+
+    if (propertyNames.size() > 0) {
+      throw new ServiceConfigurationError("Missing properties: " + propertyNames.toString());
+    }
   }
 
   public static synchronized Properties getProp() {

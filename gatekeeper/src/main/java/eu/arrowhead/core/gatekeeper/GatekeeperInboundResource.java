@@ -209,6 +209,7 @@ public class GatekeeperInboundResource {
                                                                             connectToProviderResponse.getQueueName(),
                                                                             connectToProviderResponse.getControlQueueName(),
                                                                             GatekeeperMain.GATEWAY_PROVIDER_URI[3]);
+    // The AMQP broker can only create 1 channel at the moment, so the gatekeeper have to choose an orchestration form
     ICNEnd icnEnd = new ICNEnd(orchResponse.getResponse().get(0), gatewayConnectionInfo);
     log.info("ICNProposal: returning the first OrchestrationForm and the GatewayConnectionInfo to the requester Cloud.");
     return Response.status(response.getStatus()).entity(icnEnd).build();
