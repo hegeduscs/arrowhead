@@ -162,9 +162,8 @@ public class GatekeeperOutboundResource {
       icnProposal.setAuthenticationInfo(GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
     }
 
-    //NOTE isSecure false constant is temporary
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
-        requestForm.getTargetCloud().getGatekeeperServiceURI(), false);
+                                   requestForm.getTargetCloud().getGatekeeperServiceURI(), requestForm.getTargetCloud().isSecure());
     icnUri = UriBuilder.fromPath(icnUri).path("icn_proposal").toString();
     // Sending the request, the response payload is use_gateway flag dependent
     Response response = Utility.sendRequest(icnUri, "PUT", icnProposal, GatekeeperMain.outboundClientContext);
