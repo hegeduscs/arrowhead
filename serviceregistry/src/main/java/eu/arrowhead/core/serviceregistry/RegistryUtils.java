@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
 
-//NOTE Block comments are here in this class to preserve legacy code without syntax error
 public class RegistryUtils {
 
   private static final Logger log = Logger.getLogger(RegistryUtils.class.getName());
@@ -29,7 +28,6 @@ public class RegistryUtils {
     }
     return registrator;
   }
-
 
   public static String removeLastChar(String host, char charachter) {
     if (host != null && host.length() > 0 && host.charAt(host.length() - 1) == charachter) {
@@ -47,9 +45,6 @@ public class RegistryUtils {
     }
 
     //Arrowhead core-related metadata
-    /*if (registryEntry.getProvider().getSystemGroup() != null) {
-      properties.put("ahsysgrp", registryEntry.getProvider().getSystemGroup());
-    }*/
     if (registryEntry.getProvider().getSystemName() != null) {
       properties.put("ahsysname", registryEntry.getProvider().getSystemName());
     }
@@ -106,10 +101,9 @@ public class RegistryUtils {
     if (serviceNameLength > 3) { //arrowhead service data should not be empty
       serviceName = serviceName.substring(0, serviceNameLength);
       String[] array = serviceName.split("_");
-      if (serviceName.startsWith("_") && array.length == 4) {
+      if (serviceName.startsWith("_") && array.length == 3) {
         List<String> intf = new ArrayList<>();
-        intf.add(array[3]);
-        /*arrowheadService.setServiceGroup(array[2]);*/
+        intf.add(array[2]);
         if (array[1].contains("ahf-")) {
           arrowheadService.setServiceDefinition(array[1].substring(4));
         } else {
@@ -144,37 +138,17 @@ public class RegistryUtils {
       arrowheadSystem.setAuthenticationInfo(properties.get("ahsysauthinfo"));
     }
 
-    //if sysName and sysGrp is present in TXT record
-    if (properties.containsKey("ahsysname") || properties.containsKey("ahsysgrp")) {
-
+    //if sysName is present in TXT record
+    if (properties.containsKey("ahsysname")) {
       arrowheadSystem.setSystemName(properties.get("ahsysname"));
-      /*arrowheadSystem.setSystemGroup(properties.get("ahsysgrp"));*/
 
       //sanity checking if instance equals TXT fields
-      if (providerName.contains("_")) {
-        String[] array = providerName.split("_");
-        if (array.length == 2) {
-          if (!properties.get("ahsysname").equals(array[0]) || !properties.get("ahsysgrp").equals(array[1])) {
-            log.info("Malformed instance name in DNS record:" + providerName + "." + serviceName);
-          }
-        } else {
-          log.info("Malformed instance name in DNS record:" + providerName + "." + serviceName);
-        }
+      if (!properties.get("ahsysname").equals(providerName)) {
+        log.info("Malformed instance name in DNS record:" + providerName + "." + serviceName);
       }
-
     } else {
-      //SysGrp and SysName is not present in TXT record
-      if (providerName.contains("_")) {
-        String[] array = providerName.split("_");
-        if (array.length == 2) {
-          arrowheadSystem.setSystemName(array[0]);
-          /*arrowheadSystem.setSystemGroup(array[1]);*/
-        } else {
-          throw new IllegalArgumentException("Entry cannot be parsed into ArrowheadSystem.");
-        }
-      } else {
-        throw new IllegalArgumentException("Entry cannot be parsed into ArrowheadSystem.");
-      }
+      //SysName is not present in TXT record
+      arrowheadSystem.setSystemName(providerName);
     }
 
     //setting up response

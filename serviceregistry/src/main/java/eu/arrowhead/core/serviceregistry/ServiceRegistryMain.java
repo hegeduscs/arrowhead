@@ -31,9 +31,6 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-/**
- * Main class.
- */
 public class ServiceRegistryMain {
 
   public static boolean DEBUG_MODE;
@@ -170,9 +167,6 @@ public class ServiceRegistryMain {
     return dnsProp;
   }
 
-  /**
-   * @return Grizzly HTTP server.
-   */
   private static HttpServer startServer() throws IOException {
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(ServiceRegistryResource.class);
@@ -193,9 +187,6 @@ public class ServiceRegistryMain {
     }
   }
 
-  /**
-   * @return Grizzly HTTPS server.
-   */
   private static HttpServer startSecureServer() throws IOException {
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(ServiceRegistryResource.class);

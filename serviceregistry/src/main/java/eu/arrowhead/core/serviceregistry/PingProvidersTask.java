@@ -25,8 +25,7 @@ public class PingProvidersTask extends TimerTask {
   }
 
   private void pingAndRemoveServices() {
-    DnsSDDomainEnumerator de;
-    de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);
+    DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);
     DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
 
     Collection<ServiceType> types = browser.getServiceTypes();
@@ -43,7 +42,7 @@ public class PingProvidersTask extends TimerTask {
           int port = serviceInstanceData.getPort();
           RegistryUtils.removeLastChar(hostName, '.');
           boolean toBeRemoved = false;
-          if (hostName.equals("127.0.0.1") || hostName.equals("localhost")) {
+          if (hostName.equals("0.0.0.0")) {
             toBeRemoved = true;
           } else if (!RegistryUtils.pingHost(hostName, port, ServiceRegistryMain.pingTimeout)) {
             toBeRemoved = true;

@@ -9,6 +9,7 @@ import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import com.github.danieln.dnssdjava.ServiceType;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.log4j.Logger;
 
-//NOTE Block comments are here in this class to preserve legacy code without syntax error
 class ServiceRegistry {
 
   private static final Logger log = Logger.getLogger(ServiceRegistry.class.getName());
@@ -25,11 +25,10 @@ class ServiceRegistry {
 
     log.info("Entered SR register method.");
     //creating service name and type based on Arrowhead data
-    /*String serviceGroup = entry.getProvidedService().getServiceGroup();
     String serviceDefinition = entry.getProvidedService().getServiceDefinition();
 
-    //ArrowheadSystem is the instance name with underscores
-    String providerInstance = entry.getProvider().getSystemName() + "_" + entry.getProvider().getSystemGroup();
+    //ArrowheadSystem system name is the instance name
+    String providerInstance = entry.getProvider().getSystemName();
     String address = entry.getProvider().getAddress() + ".";
     int port = entry.getProvider().getPort();
 
@@ -38,7 +37,7 @@ class ServiceRegistry {
     for (String interf : entry.getProvidedService().getInterfaces()) {
 
       //ArrowheadService is encoded in the service type field, interface (IDD) as the protocol
-      String serviceType = "_ahf-" + serviceDefinition + "_" + serviceGroup + "_" + interf;
+      String serviceType = "_ahf-" + serviceDefinition + "_" + interf;
       if (entry.isUDP()) {
         serviceType += ("._udp");
       } else {
@@ -64,29 +63,26 @@ class ServiceRegistry {
           //allRegistered = false;
         }
       } catch (DnsSDException ex) {
-        log.error(ex);
+        log.error(ex.getMessage());
         ex.printStackTrace();
         throw new DnsException(ex.getMessage());
       }
     }
-    return allRegistered;*/
-    return false;
+    return allRegistered;
   }
 
   static boolean unRegister(ServiceRegistryEntry entry) {
-
     log.info("Entered SR unregister method.");
 
     //creating service name and type based on Arrowhead data
-    /*String serviceGroup = entry.getProvidedService().getServiceGroup();
     String serviceDefinition = entry.getProvidedService().getServiceDefinition();
 
-    //ArrowheadSystem is the instance name with underscores
-    String providerInstance = entry.getProvider().getSystemName() + "_" + entry.getProvider().getSystemGroup();
+    //ArrowheadSystem system name is the instance name
+    String providerInstance = entry.getProvider().getSystemName();
 
     boolean allRemoved = true;
     for (String interf : entry.getProvidedService().getInterfaces()) {
-      String serviceType = "_ahf-" + serviceDefinition + "_" + serviceGroup + "_" + interf;
+      String serviceType = "_ahf-" + serviceDefinition + "_" + interf;
 
       if (entry.isUDP()) {
         serviceType += ("._udp");
@@ -99,19 +95,18 @@ class ServiceRegistry {
         ServiceName name = registrator.makeServiceName(providerInstance, ServiceType.valueOf(serviceType));
 
         if (registrator.unregisterService(name)) {
-          log.info("Service unregistered: " + entry.getProvidedService().toString() + "," + interf + entry.getProvider().toStringLog());
+          log.info("Service unregistered: " + entry.getProvidedService().toString() + "," + interf + entry.getProvider().getSystemName());
         } else {
-          log.info("No service to remove: " + entry.getProvidedService().toString() + "," + interf + entry.getProvider().toStringLog());
+          log.info("No service to remove: " + entry.getProvidedService().toString() + "," + interf + entry.getProvider().getSystemName());
           //allRemoved = false;
         }
       } catch (DnsSDException ex) {
-        log.error(ex);
+        log.error(ex.getMessage());
         ex.printStackTrace();
         throw new DnsException(ex.getMessage());
       }
     }
-    return allRemoved;*/
-    return false;
+    return allRemoved;
   }
 
 
@@ -128,13 +123,12 @@ class ServiceRegistry {
     //building look-up service types for query
     for (String interf : queryForm.getService().getInterfaces()) {
 
-      /*String serviceType = "_ahf-" + queryForm.getService().getServiceDefinition() + "_" + queryForm.getService().getServiceGroup() + "_" +
-      interf;*/
+      String serviceType = "_ahf-" + queryForm.getService().getServiceDefinition() + "_" + interf;
 
       //getting the instances for each interface on each transport layer
       Collection<ServiceName> instances = new ArrayList<>();
-      /*instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._tcp")));
-      instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._udp")));*/
+      instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._tcp")));
+      instances.addAll(browser.getServiceInstances(ServiceType.valueOf(serviceType + "._udp")));
 
       for (ServiceName instance : instances) {
         ServiceData serviceInstance = browser.getServiceData(instance);
@@ -176,17 +170,14 @@ class ServiceRegistry {
     Collection<ServiceType> types = browser.getServiceTypes();
 
     List<ServiceRegistryEntry> list = new ArrayList<>();
-    list.clear();
 
     if (types != null) {
-
       for (ServiceType type : types) {
-
         Collection<ServiceName> instances = browser.getServiceInstances(type);
 
         for (ServiceName instance : instances) {
-
           ServiceData serviceInstanceData = browser.getServiceData(instance);
+
           try {
             list.add(RegistryUtils.buildRegistryEntry(serviceInstanceData));
           } catch (IllegalArgumentException e) {
