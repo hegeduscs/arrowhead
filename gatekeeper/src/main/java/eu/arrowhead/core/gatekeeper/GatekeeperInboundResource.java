@@ -205,7 +205,7 @@ public class GatekeeperInboundResource {
     Response gatewayResponse = Utility.sendRequest(GatekeeperMain.GATEWAY_PROVIDER_URI[0], "PUT", connectionRequest);
     ConnectToProviderResponse connectToProviderResponse = gatewayResponse.readEntity(ConnectToProviderResponse.class);
 
-    GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(commonBrokers.get(0).getAddress(), commonBrokers.get(0).getPort(),
+    GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(chosenBroker.getAddress(), chosenBroker.getPort(),
                                                                             connectToProviderResponse.getQueueName(),
                                                                             connectToProviderResponse.getControlQueueName(),
                                                                             GatekeeperMain.GATEWAY_PROVIDER_URI[3]);

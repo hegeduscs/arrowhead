@@ -148,7 +148,7 @@ public class GatewayMain {
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
       log.info("Started server at: " + BASE_URI);
-      System.out.println("Startedinsecure server at: " + BASE_URI);
+      System.out.println("Started insecure server at: " + BASE_URI);
       return server;
     } catch (ProcessingException e) {
       throw new ServiceConfigurationError(
