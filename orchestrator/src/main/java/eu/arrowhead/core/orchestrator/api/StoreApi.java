@@ -119,7 +119,6 @@ public class StoreApi {
    * Returns the Orchestration Store entries from the database specified by the consumer (and the service).
    *
    * @return List<OrchestrationStore>
-   *
    * @throws BadPayloadException, DataNotFoundException
    */
   @PUT
@@ -212,7 +211,6 @@ public class StoreApi {
    * Toggles the <tt>defaultEntry</tt> boolean for the Orchestration Store entry specified by the id field.
    *
    * @return OrchestrationStore
-   *
    * @throws DataNotFoundException, BadPayloadException
    */
   @GET
@@ -240,7 +238,6 @@ public class StoreApi {
    * method in CommonApi.class. (Or delete and then post the modified entry again.)
    *
    * @return OrchestrationStore
-   *
    * @throws BadPayloadException, DataNotFoundException
    */
   @PUT
