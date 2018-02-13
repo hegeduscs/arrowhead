@@ -55,7 +55,7 @@ public class ServiceRegistryMain {
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8443/");
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
   private static final List<String> basicPropertyNames = Arrays
-      .asList("base_uri", "sr_base_uri", "db_user", "db_password", "db_address", "ping.timeout", "ping.scheduled", "ping.interval");
+      .asList("base_uri", "db_user", "db_password", "db_address", "ping.timeout", "ping.scheduled", "ping.interval");
   private static final List<String> securePropertyNames = Arrays
       .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 

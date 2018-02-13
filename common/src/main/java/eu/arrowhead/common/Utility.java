@@ -339,19 +339,14 @@ public final class Utility {
   }
 
   public static void checkProperties(Set<String> propertyNames, List<String> basic, List<String> secure, boolean isSecure) {
+    // Arrays.asList returns an immutable list, so we have to copy it first
+    List<String> properties = new ArrayList<>(basic);
     if (isSecure) {
-      List<String> properties = new ArrayList<>(basic);
       properties.addAll(secure);
-
-      if (!propertyNames.containsAll(properties)) {
-        properties.removeIf(propertyNames::contains);
-        throw new ServiceConfigurationError("Missing fields from app.properties file: " + properties.toString());
-      }
-    } else {
-      if (!propertyNames.containsAll(basic)) {
-        basic.removeIf(propertyNames::contains);
-        throw new ServiceConfigurationError("Missing fields from app.properties file: " + basic.toString());
-      }
+    }
+    if (!propertyNames.containsAll(properties)) {
+      properties.removeIf(propertyNames::contains);
+      throw new ServiceConfigurationError("Missing field(s) from app.properties file: " + properties.toString());
     }
   }
 
