@@ -342,16 +342,15 @@ public final class Utility {
     if (isSecure) {
       List<String> properties = new ArrayList<>(basic);
       properties.addAll(secure);
-      properties.removeAll(propertyNames);
 
-      if (properties.size() > 0) {
-        throw new ServiceConfigurationError("Missing properties: " + properties.toString());
+      if (!propertyNames.containsAll(properties)) {
+        properties.removeIf(propertyNames::contains);
+        throw new ServiceConfigurationError("Missing fields from app.properties file: " + properties.toString());
       }
     } else {
-      basic.removeAll(propertyNames);
-
-      if (basic.size() > 0) {
-        throw new ServiceConfigurationError("Missing properties: " + basic.toString());
+      if (!propertyNames.containsAll(basic)) {
+        basic.removeIf(propertyNames::contains);
+        throw new ServiceConfigurationError("Missing fields from app.properties file: " + basic.toString());
       }
     }
   }
