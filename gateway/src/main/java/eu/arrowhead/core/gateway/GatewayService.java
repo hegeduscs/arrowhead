@@ -70,7 +70,6 @@ public class GatewayService {
    * @param queueName The name of the queue, should be unique
    * @param controlQueueName The name of the queue for control messages, should be unique
    * @param isSecure The type of the channel (secure or insecure)
-   *
    * @return GatewaySession, which contains a connection and a channel object
    */
   public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName, boolean isSecure) {
@@ -81,8 +80,14 @@ public class GatewayService {
       factory.setPort(brokerPort);
 
       if (isSecure) {
-        factory.useSslProtocol(GatewayMain.clientContext);
+        try {
+          factory.useSslProtocol(GatewayMain.clientContext);
+        } catch (RuntimeException e) {
+          throw new ArrowheadException("Gateway is in insecure mode, and can not create a secure channel with the AMQP broker!",
+                                       e.getClass().getName(), e);
+        }
       }
+
       Connection connection = factory.newConnection();
       Channel channel = connection.createChannel();
       channel.queueDeclare(queueName, false, false, false, null);
@@ -91,13 +96,12 @@ public class GatewayService {
       channel.queueDeclare(controlQueueName.concat("_resp"), false, false, false, null);
       gatewaySession.setConnection(connection);
       gatewaySession.setChannel(channel);
-
     } catch (IOException | NullPointerException e) {
       log.error("Creating the channel to the Broker failed");
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
                                    GatewayService.class.toString(), e);
-
     }
+
     return gatewaySession;
   }
 
@@ -222,7 +226,6 @@ public class GatewayService {
    * @param map ConcurrentHashMap which contains the port number and the availability
    * @param portMin The lowest port number from the allowed range
    * @param portMax The highest port number from the allowed range
-   *
    * @return The initialized ConcurrentHashMap
    */
   // Integer: port; Boolean: free (true) or reserved(false)

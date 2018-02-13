@@ -29,6 +29,20 @@ public class ArrowheadException extends RuntimeException {
     this.origin = origin;
   }
 
+  public ArrowheadException(final String msg, final String exceptionType, final Throwable cause) {
+    super(msg, cause);
+    this.errorCode = 0;
+    this.exceptionType = exceptionType;
+    this.origin = null;
+  }
+
+  public ArrowheadException(final String msg, final String exceptionType) {
+    super(msg);
+    this.errorCode = 0;
+    this.exceptionType = exceptionType;
+    this.origin = null;
+  }
+
   public ArrowheadException(final String msg, final Throwable cause) {
     super(msg, cause);
     this.errorCode = 0;
