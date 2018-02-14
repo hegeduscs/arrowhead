@@ -207,21 +207,30 @@ public class ServiceRegistryEntry {
       }
       metadata = sb.toString().substring(0, sb.length() - 1);
     }
+
     if (provider.getPort() != 0 && (port == null || port == 0)) {
       port = provider.getPort();
     }
+
     endOfValidity = new Date(System.currentTimeMillis() + ttl);
   }
 
   @JsonIgnore
   public void fromDatabase() {
+    ArrowheadService temp = providedService;
+    providedService = new ArrowheadService();
+    providedService.setServiceDefinition(temp.getServiceDefinition());
+    providedService.setInterfaces(temp.getInterfaces());
+
     if (metadata != null) {
       String[] parts = metadata.split(",");
+      providedService.getServiceMetadata().clear();
       for (String part : parts) {
         String[] pair = part.split("=");
-        this.providedService.getServiceMetadata().put(pair[0], pair[1]);
+        providedService.getServiceMetadata().put(pair[0], pair[1]);
       }
     }
+
     if (port != null && provider.getPort() == 0) {
       provider.setPort(port);
     }
