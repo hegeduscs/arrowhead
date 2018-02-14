@@ -1,162 +1,132 @@
-query PUT: http://arrowhead.tmit.bme.hu:8442/serviceregistry/query
+query PUT: http://127.0.0.1:8442/serviceregistry/query
 request:
 {
-	"service": {
-		"serviceGroup": "Temperature",
-		"serviceDefinition": "IndoorTemperature",
-		"interfaces": ["json"],
-		"serviceMetadata": {
-                    "entry": [
-                        {
-                            "key": "security",
-                            "value": "token"
-                        },
-                        {
-                            "key": "unit",
-                            "value": "celsius3"
-                        }
-                    ]
-                }
-	},
-	"pingProviders" : false,
-	"metadataSearch" : false
+  "service": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "pingProviders": false,
+  "metadataSearch": true
 }
 response:
 {
-	"serviceQueryData": [{
-		"UDP": false,
-		"providedService": {
-			"interfaces": [
-				"json"
-			],
-			"serviceDefinition": "IndoorTemperature",
-			"serviceGroup": "Temperature",
-			"serviceMetadata": {
-				"entry": [{
-						"key": "security",
-						"value": "token"
-					},
-					{
-						"key": "unit",
-						"value": "celsius"
-					}
-				]
-			}
-		},
-		"provider": {
-			"address": "127.0.0.1",
-			"port": 8454,
-			"systemGroup": "TemperatureSensors",
-			"systemName": "InsecureTemperatureSensor"
-		},
-		"serviceURI": "temperature",
-		"version": 1
-	}]
+  "serviceQueryData": [
+    {
+      "providedService": {
+        "serviceDefinition": "IndoorTemperature",
+        "interfaces": [
+          "json"
+        ],
+        "serviceMetadata": {
+          "unit": "celsius"
+        }
+      },
+      "provider": {
+        "systemName": "InsecureTemperatureSensor",
+        "address": "127.0.0.1",
+        "port": 8454
+      },
+      "port": 8454,
+      "serviceURI": "temperature",
+      "version": 1,
+      "UDP": false,
+      "ttl": 0,
+      "metadata": "unit=celsius",
+      "endOfValidity": "Feb 14, 2018 4:19:31 PM"
+    }
+  ]
 }
 --------------------------------------------------
-register POST: http://arrowhead.tmit.bme.hu:8442/serviceregistry/register
+register POST: http://127.0.0.1.hu:8442/serviceregistry/register
 request:
 {
-	"providedService": {
-		"serviceGroup": "Temperature",
-		"serviceDefinition": "IndoorTemperature",
-		"interfaces": ["json"],
-		"serviceMetadata": {
-			"unit": "celsius"
-		}
-	},
-	"provider": {
-		"systemGroup": "TemperatureSensors",
-		"systemName": "InsecureTemperatureSensor",
-		"address": "127.0.0.1",
-		"port": 8454
-	},
-	"serviceURI": "temperature",
-	"version": 1,
-	"isUDP": false
+  "providedService": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "provider": {
+    "systemName": "InsecureTemperatureSensor",
+    "address": "127.0.0.1",
+    "port": 8454
+  },
+  "serviceURI": "temperature"
 }
 response:
 {
-	"UDP": false,
-	"providedService": {
-		"interfaces": [
-			"json"
-		],
-		"serviceDefinition": "IndoorTemperature",
-		"serviceGroup": "Temperature",
-		"serviceMetadata": {
-			"entry": [{
-					"key": "security",
-					"value": "token"
-				},
-				{
-					"key": "unit",
-					"value": "celsius"
-				}
-			]
-		}
-	},
-	"provider": {
-		"address": "127.0.0.1",
-		"port": 8454,
-		"systemGroup": "TemperatureSensors",
-		"systemName": "InsecureTemperatureSensor"
-	},
-	"serviceURI": "temperature",
-	"version": 1
+  "providedService": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "provider": {
+    "systemName": "InsecureTemperatureSensor",
+    "address": "127.0.0.1",
+    "port": 8454
+  },
+  "port": 8454,
+  "serviceURI": "temperature",
+  "version": 1,
+  "UDP": false,
+  "ttl": 0,
+  "metadata": "unit=celsius",
+  "endOfValidity": "Feb 14, 2018 4:19:31 PM"
 }
-
-
 ---------------------------------------
-remove PUT: http://arrowhead.tmit.bme.hu:8442/serviceregistry/remove
+remove PUT: http://127.0.0.1:8442/serviceregistry/remove
 request:
 {
-	"providedService": {
-		"serviceGroup": "Temperature",
-		"serviceDefinition": "IndoorTemperature",
-		"interfaces": ["json"],
-		"serviceMetadata": {
-			"unit": "celsius"
-		}
-	},
-	"provider": {
-		"systemGroup": "TemperatureSensors",
-		"systemName": "InsecureTemperatureSensor",
-		"address": "127.0.0.1",
-		"port": 8454
-	},
-	"serviceURI": "temperature",
-	"version": 1,
-	"isUDP": false
+  "providedService": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "provider": {
+    "systemName": "InsecureTemperatureSensor",
+    "address": "127.0.0.1",
+    "port": 8454
+  },
+  "serviceURI": "temperature"
 }
 response (200):
 {
-	"UDP": false,
-	"providedService": {
-		"interfaces": [
-			"json"
-		],
-		"serviceDefinition": "IndoorTemperature",
-		"serviceGroup": "Temperature",
-		"serviceMetadata": {
-			"entry": [{
-					"key": "security",
-					"value": "token"
-				},
-				{
-					"key": "unit",
-					"value": "celsius"
-				}
-			]
-		}
-	},
-	"provider": {
-		"address": "127.0.0.1",
-		"port": 8454,
-		"systemGroup": "TemperatureSensors",
-		"systemName": "InsecureTemperatureSensor"
-	},
-	"serviceURI": "temperature",
-	"version": 1
+  "providedService": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "provider": {
+    "systemName": "InsecureTemperatureSensor",
+    "address": "127.0.0.1",
+    "port": 8454
+  },
+  "port": 8454,
+  "serviceURI": "temperature",
+  "version": 1,
+  "UDP": false,
+  "ttl": 0,
+  "metadata": "unit=celsius",
+  "endOfValidity": "Feb 14, 2018 4:19:31 PM"
 }
 OR 204 (No content) when nothing happened due to the request
