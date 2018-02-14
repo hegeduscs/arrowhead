@@ -40,6 +40,7 @@ public class GatewayResource {
 
   private static final Logger log = Logger.getLogger(GatewayResource.class.getName());
 
+  //TODO convert this to a method which returns a List<ActiveSessions>, move gateway POJOs to messages
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
