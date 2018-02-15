@@ -58,6 +58,12 @@
       <artifactId>jersey-container-grizzly2-http</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>1.59</version>
+    </dependency>
+
   </dependencies>
 
   <build>

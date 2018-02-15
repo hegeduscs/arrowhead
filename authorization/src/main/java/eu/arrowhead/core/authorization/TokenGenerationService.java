@@ -20,6 +20,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -28,10 +29,12 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ServiceConfigurationError;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 class TokenGenerationService {
 
@@ -42,28 +45,30 @@ class TokenGenerationService {
     // First get the public key for each provider
     List<PublicKey> publicKeys = getProviderPublicKeys(request.getProviders());
 
-    // Then create the ArrowheadToken for each provider (starting with the variable initializations before the for loop)
-    RawTokenInfo rawTokenInfo = new RawTokenInfo();
-    List<ArrowheadToken> tokens = new ArrayList<>();
+    // Cryptographic object initializations
+    Security.addProvider(new BouncyCastleProvider());
     Cipher cipher;
     try {
       cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
     } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
       log.fatal("Cipher.getInstance(String) throws exception, code needs to be changed!");
-      return tokens;
+      throw new ServiceConfigurationError("Cipher.getInstance(String) throws exception, code needs to be changed!");
     }
     Signature signature;
     try {
-      signature = Signature.getInstance("SHA1withRSA");
+      signature = Signature.getInstance("SHA256withRSA");
       signature.initSign(AuthorizationMain.privateKey);
     } catch (NoSuchAlgorithmException e) {
       log.fatal("Signature.getInstance(String) throws exception, code needs to be changed!");
-      return tokens;
+      throw new ServiceConfigurationError("Signature.getInstance(String) throws exception, code needs to be changed!");
     } catch (InvalidKeyException e) {
       log.fatal("The private key of the Authorization module is invalid, keystore needs to be changed!");
-      return tokens;
+      throw new ServiceConfigurationError("The private key of the Authorization module is invalid, keystore needs to be changed!");
     }
 
+    // Create the ArrowheadToken for each provider
+    RawTokenInfo rawTokenInfo = new RawTokenInfo();
+    List<ArrowheadToken> tokens = new ArrayList<>();
     for (PublicKey key : publicKeys) {
       // Can not generate token without the provider public key
       if (key == null) {
