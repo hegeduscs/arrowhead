@@ -375,6 +375,7 @@ public class CommonApi {
       retrievedCloud.setPort(cloud.getPort());
       retrievedCloud.setGatekeeperServiceURI(cloud.getGatekeeperServiceURI());
       retrievedCloud.setAuthenticationInfo(cloud.getAuthenticationInfo());
+      retrievedCloud.setSecure(cloud.isSecure());
       retrievedCloud = dm.merge(retrievedCloud);
       return Response.status(Status.ACCEPTED).entity(retrievedCloud).build();
     } else {
