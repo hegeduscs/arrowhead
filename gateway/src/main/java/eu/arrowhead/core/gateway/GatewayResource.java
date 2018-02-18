@@ -84,7 +84,7 @@ public class GatewayResource {
       insecureThread.start();
     }
 
-    ConnectToProviderResponse response = new ConnectToProviderResponse(queueName, controlQueueName, null);
+    ConnectToProviderResponse response = new ConnectToProviderResponse(queueName, controlQueueName);
     return Response.status(200).entity(response).build();
   }
 
