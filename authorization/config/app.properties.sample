@@ -6,7 +6,7 @@ sr_base_uri=http://127.0.0.1:8442/
 # Database parameters
 db_user=root
 db_password=root
-db_address=jdbc:mysql://127.0.0.1:3306/arrowhead
+db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud1
 
 # Certificate related paths and passwords
 keystore=config/certificates/authorization.testcloud1.jks
