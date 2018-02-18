@@ -46,7 +46,7 @@ public class ArrowheadCloud {
   @Column(name = "gatekeeper_service_uri")
   private String gatekeeperServiceURI;
 
-  @Column(name = "authentication_info")
+  @Column(name = "authentication_info", length = 2047)
   private String authenticationInfo;
 
   @Column(name = "is_secure")
