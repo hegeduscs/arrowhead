@@ -11,7 +11,11 @@ package eu.arrowhead.core.orchestrator.filter;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.common.security.SecurityUtils;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -36,13 +40,22 @@ public class AccessControlFilter implements ContainerRequestFilter {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
     if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
+      String requestJson = Utility.getRequestPayload(requestContext.getEntityStream());
       String commonName = SecurityUtils.getCertCNFromSubject(sc.getUserPrincipal().getName());
-      if (isClientAuthorized(commonName, requestTarget)) {
+      if (isClientAuthorized(commonName, requestTarget, requestJson)) {
         log.info("SSL identification is successful! Cert: " + commonName);
       } else {
         log.error(commonName + " is unauthorized to access " + requestTarget);
         throw new AuthenticationException(commonName + " is unauthorized to access " + requestTarget, Status.UNAUTHORIZED.getStatusCode(),
                                           AuthenticationException.class.getName(), AccessControlFilter.class.toString());
+      }
+
+      try {
+        InputStream in = new ByteArrayInputStream(requestJson.getBytes("UTF-8"));
+        requestContext.setEntityStream(in);
+      } catch (UnsupportedEncodingException e) {
+        log.fatal("AccessControlFilter String.getBytes() has unsupported charset set!");
+        throw new AssertionError("AccessControlFilter String.getBytes() has unsupported charset set! Code needs to be changed!", e);
       }
     }
   }
@@ -52,7 +65,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
         .endsWith("mgmt/store"));
   }
 
-  private boolean isClientAuthorized(String clientCN, String requestTarget) {
+  private boolean isClientAuthorized(String clientCN, String requestTarget, String requestJson) {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
@@ -66,9 +79,24 @@ public class AccessControlFilter implements ContainerRequestFilter {
       // Only the local HMI can use these methods
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
-      // All requests from the local cloud are allowed
+      ServiceRequestForm srf = Utility.fromJson(requestJson, ServiceRequestForm.class);
       String[] clientFields = clientCN.split("\\.", 2);
-      return serverFields[1].equalsIgnoreCase(clientFields[1]);
+
+      // If this is an external service request, only the local Gatekeeper can send this method
+      if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
+        return clientFields[0].equalsIgnoreCase("gatekeeper") && serverFields[1].equalsIgnoreCase(clientFields[1]);
+      } else {
+        // Otherwise all request from the local cloud allowed
+        if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
+          // BUT the requester system has to be the same as the first part of the common name
+          log.error("Requester system name and cert common name do not match!");
+          throw new AuthenticationException(
+              "Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+              Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), AccessControlFilter.class.toString());
+        }
+
+        return serverFields[1].equalsIgnoreCase(clientFields[1]);
+      }
     }
   }
 

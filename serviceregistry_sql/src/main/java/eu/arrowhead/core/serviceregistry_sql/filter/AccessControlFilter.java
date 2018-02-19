@@ -10,8 +10,12 @@
 package eu.arrowhead.core.serviceregistry_sql.filter;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -36,13 +40,22 @@ public class AccessControlFilter implements ContainerRequestFilter {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
     if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
+      String requestJson = Utility.getRequestPayload(requestContext.getEntityStream());
       String commonName = SecurityUtils.getCertCNFromSubject(sc.getUserPrincipal().getName());
-      if (isClientAuthorized(commonName, requestTarget)) {
+      if (isClientAuthorized(commonName, requestTarget, requestJson)) {
         log.info("SSL identification is successful! Cert: " + commonName);
       } else {
         log.error(commonName + " is unauthorized to access " + requestTarget);
         throw new AuthenticationException(commonName + " is unauthorized to access " + requestTarget, Status.UNAUTHORIZED.getStatusCode(),
                                           AuthenticationException.class.getName(), AccessControlFilter.class.toString());
+      }
+
+      try {
+        InputStream in = new ByteArrayInputStream(requestJson.getBytes("UTF-8"));
+        requestContext.setEntityStream(in);
+      } catch (UnsupportedEncodingException e) {
+        log.fatal("AccessControlFilter String.getBytes() has unsupported charset set!");
+        throw new AssertionError("AccessControlFilter String.getBytes() has unsupported charset set! Code needs to be changed!", e);
       }
     }
   }
@@ -51,7 +64,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     return method.equals("GET") && (requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt"));
   }
 
-  private boolean isClientAuthorized(String clientCN, String requestTarget) {
+  private boolean isClientAuthorized(String clientCN, String requestTarget, String requestJson) {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
@@ -62,13 +75,26 @@ public class AccessControlFilter implements ContainerRequestFilter {
     String[] serverFields = serverCN.split("\\.", 2);
     // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
+
       //Only the local HMI can use these methods
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else if (requestTarget.endsWith("register") || requestTarget.endsWith("remove")) {
+
       // All requests from the local cloud are allowed, so omit the first part of the common names (systemName)
+      ServiceRegistryEntry entry = Utility.fromJson(requestJson, ServiceRegistryEntry.class);
       String[] clientFields = clientCN.split("\\.", 2);
+
+      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
+        // BUT a provider system can only register/remove its own services!
+        log.error("Provider system name and cert common name do not match! SR registering/removing denied!");
+        throw new AuthenticationException(
+            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), AccessControlFilter.class.toString());
+      }
+
       return serverFields[1].equalsIgnoreCase(clientFields[1]);
     } else if (requestTarget.endsWith("query")) {
+
       // Only requests from the local Orchestrator and Gatekeeper are allowed
       return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
     }

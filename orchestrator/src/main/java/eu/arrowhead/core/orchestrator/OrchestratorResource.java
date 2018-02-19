@@ -10,11 +10,9 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.common.messages.ServiceRequestForm;
-import eu.arrowhead.common.security.SecurityUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -61,18 +59,6 @@ public class OrchestratorResource {
       log.error("orchestrationProcess BadPayloadException");
       throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.", Status.BAD_REQUEST.getStatusCode(),
                                     BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
-    }
-
-    if (!srf.getOrchestrationFlags().get("externalServiceRequest") && requestContext.getSecurityContext().isSecure()) {
-      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
-      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
-      String[] clientFields = clientCN.split("\\.", 2);
-      if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
-        log.error("Requester system name and cert common name do not match!");
-        throw new AuthenticationException(
-            "Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
-      }
     }
 
     OrchestrationResponse orchResponse;

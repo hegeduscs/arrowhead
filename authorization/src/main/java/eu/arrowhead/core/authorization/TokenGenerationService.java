@@ -52,7 +52,7 @@ class TokenGenerationService {
       cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
     } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
       log.fatal("Cipher.getInstance(String) throws exception, code needs to be changed!");
-      throw new ServiceConfigurationError("Cipher.getInstance(String) throws exception, code needs to be changed!");
+      throw new AssertionError("Cipher.getInstance(String) throws exception, code needs to be changed!", e);
     }
     Signature signature;
     try {
@@ -60,10 +60,10 @@ class TokenGenerationService {
       signature.initSign(AuthorizationMain.privateKey);
     } catch (NoSuchAlgorithmException e) {
       log.fatal("Signature.getInstance(String) throws exception, code needs to be changed!");
-      throw new ServiceConfigurationError("Signature.getInstance(String) throws exception, code needs to be changed!");
+      throw new AssertionError("Signature.getInstance(String) throws exception, code needs to be changed!", e);
     } catch (InvalidKeyException e) {
       log.fatal("The private key of the Authorization module is invalid, keystore needs to be changed!");
-      throw new ServiceConfigurationError("The private key of the Authorization module is invalid, keystore needs to be changed!");
+      throw new ServiceConfigurationError("The private key of the Authorization module is invalid, keystore needs to be changed!", e);
     }
 
     // Create the ArrowheadToken for each provider
@@ -196,7 +196,7 @@ class TokenGenerationService {
       kf = KeyFactory.getInstance("RSA");
     } catch (NoSuchAlgorithmException e) {
       log.fatal("KeyFactory.getInstance(String) throws NoSuchAlgorithmException, code needs to be changed!");
-      e.printStackTrace();
+      throw new AssertionError("KeyFactory.getInstance(String) throws NoSuchAlgorithmException, code needs to be changed!", e);
     }
 
     //noinspection ConstantConditions

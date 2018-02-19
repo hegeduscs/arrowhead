@@ -29,6 +29,11 @@ import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -67,6 +72,7 @@ public final class Utility {
   public static final String GW_PROVIDER_SERVICE = "ConnectToProvider";
   public static final String GW_SESSION_MGMT = "SessionManagement";
   public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
+  public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
   private static final String AUTH_EXCEPTION = "eu.arrowhead.common.exception.AuthenticationException";
   private static final String BAD_PAYLOAD_EXCEPTION = "eu.arrowhead.common.exception.BadPayloadException";
@@ -79,7 +85,6 @@ public final class Utility {
     // Decide whether to allow the connection...
     return true;
   };
-  public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
   private Utility() throws AssertionError {
     throw new AssertionError("Utility is a non-instantiable class");
@@ -312,6 +317,28 @@ public final class Utility {
     }
   }
 
+  public static String getRequestPayload(InputStream is) {
+    StringBuilder sb = new StringBuilder();
+    String line;
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
+      while ((line = br.readLine()) != null) {
+        sb.append(line);
+      }
+    } catch (UnsupportedEncodingException e) {
+      log.fatal("getRequestPayload ISReader has unsupported charset set!");
+      throw new AssertionError("getRequestPayload ISReader has unsupported charset set! Code needs to be changed!", e);
+    } catch (IOException e) {
+      log.error("IOException while reading the request payload");
+      throw new RuntimeException("IOException occured while reading an incoming request payload", e);
+    }
+
+    if (!sb.toString().isEmpty()) {
+      return toPrettyJson(sb.toString(), null);
+    } else {
+      return "";
+    }
+  }
+
   public static String toPrettyJson(String jsonString, Object obj) {
     if (jsonString != null) {
       jsonString = jsonString.trim();
@@ -328,6 +355,10 @@ public final class Utility {
       return gson.toJson(obj);
     }
     return null;
+  }
+
+  public static <T> T fromJson(String json, Class<T> parsedClass) {
+    return gson.fromJson(json, parsedClass);
   }
 
   public static String createSD(String baseSD, boolean isSecure) {

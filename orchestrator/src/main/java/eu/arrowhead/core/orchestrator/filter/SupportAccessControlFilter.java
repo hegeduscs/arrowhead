@@ -52,6 +52,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
         .endsWith("mgmt/store"));
   }
 
+  //NOTE not updated to parse the SRF and return requesterSystem/common name mismatch (or externalServiceRequest check)
   private boolean isClientAuthorized(String clientCN, String requestTarget) {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
