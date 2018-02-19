@@ -9,7 +9,7 @@ orch_base_uri=http://127.0.0.1:8440/
 # Database parameters
 db_user=root
 db_password=root
-db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud1
+db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud_1
 
 # Certificate related paths and passwords
 gatekeeper_keystore=config/certificates/gatekeeper.testcloud1.jks
