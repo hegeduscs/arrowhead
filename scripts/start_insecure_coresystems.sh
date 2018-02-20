@@ -8,6 +8,7 @@ echo Starting Core Systems - wait 1 minute
 cd serviceregistry_sql/target
 rm nohup.out
 nohup java -jar serviceregistry_sql-M3.jar -d -daemon -m insecure &
+echo Service Registry started
 sleep 10s
 
 cd ../../authorization/target
