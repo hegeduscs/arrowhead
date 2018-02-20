@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #More sleep time between these commands might be needed on slower devices like a Raspberry Pi (because of the database accesses)
 echo Shutting down Core Systems
 pkill -f orchestrator
