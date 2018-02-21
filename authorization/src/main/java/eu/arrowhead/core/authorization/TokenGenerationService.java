@@ -19,6 +19,7 @@ import eu.arrowhead.common.messages.TokenGenerationRequest;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
@@ -49,16 +50,16 @@ class TokenGenerationService {
     Security.addProvider(new BouncyCastleProvider());
     Cipher cipher;
     try {
-      cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+      cipher = Cipher.getInstance("RSA/NONE/PKCS1Padding", "BC");
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
       log.fatal("Cipher.getInstance(String) throws exception, code needs to be changed!");
       throw new AssertionError("Cipher.getInstance(String) throws exception, code needs to be changed!", e);
     }
     Signature signature;
     try {
-      signature = Signature.getInstance("SHA256withRSA");
+      signature = Signature.getInstance("SHA256withRSA", "BC");
       signature.initSign(AuthorizationMain.privateKey);
-    } catch (NoSuchAlgorithmException e) {
+    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
       log.fatal("Signature.getInstance(String) throws exception, code needs to be changed!");
       throw new AssertionError("Signature.getInstance(String) throws exception, code needs to be changed!", e);
     } catch (InvalidKeyException e) {
@@ -112,7 +113,7 @@ class TokenGenerationService {
       // Finally, generate the token and signature strings
       try {
         cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] tokenBytes = cipher.doFinal(json.getBytes("UTF8"));
+        byte[] tokenBytes = cipher.doFinal(json.getBytes("UTF-8"));
         System.out.println("Token bytes: " + Arrays.toString(tokenBytes));
         signature.update(tokenBytes);
         byte[] sigBytes = signature.sign();
