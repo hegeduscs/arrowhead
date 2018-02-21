@@ -21,7 +21,6 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -35,7 +34,6 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 class TokenGenerationService {
 
@@ -47,7 +45,7 @@ class TokenGenerationService {
     List<PublicKey> publicKeys = getProviderPublicKeys(request.getProviders());
 
     // Cryptographic object initializations
-    Security.addProvider(new BouncyCastleProvider());
+    //Security.addProvider(new BouncyCastleProvider());
     Cipher cipher;
     try {
       cipher = Cipher.getInstance("RSA/NONE/PKCS1Padding", "BC");
