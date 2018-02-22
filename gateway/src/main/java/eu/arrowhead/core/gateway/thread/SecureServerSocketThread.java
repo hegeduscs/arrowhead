@@ -25,7 +25,6 @@ import java.io.OutputStream;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import org.apache.log4j.Logger;
 
@@ -65,7 +64,6 @@ public class SecureServerSocketThread extends Thread {
     try {
       // Accept a client connection once Server receives one.
       sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
-      SSLSession consumerSession = sslConsumerSocket.getSession();
       Channel channel = gatewaySession.getChannel();
 
       InputStream inConsumer = sslConsumerSocket.getInputStream();
