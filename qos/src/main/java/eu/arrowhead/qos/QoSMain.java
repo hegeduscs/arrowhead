@@ -83,7 +83,7 @@ public class QoSMain {
               break argLoop;
             default:
               log.fatal("Unknown server mode: " + args[i]);
-              throw new AssertionError("Unknown server mode: " + args[i]);
+              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
           }
       }
     }
