@@ -8,7 +8,8 @@
 
 #Gatekeeeper
   # General
-  timeout=30000
+  # timeout in ms
+  gateway_socket_timeout=30000
   use_gateway=false
 
   # URLs
@@ -31,7 +32,7 @@ orch_base_uri_secured=https://127.0.0.1:8441
   sr_base_uri=http://127.0.0.1:8442/
   sr_base_uri_secured=https://127.0.0.1:8443/
 
-  #Ping providers parameter
+  #Ping providers parameters
   ping.scheduled=false
   ping.timeout=10000
   #interval in minutes

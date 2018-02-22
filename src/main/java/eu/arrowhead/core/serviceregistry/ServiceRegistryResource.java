@@ -13,11 +13,9 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
-import eu.arrowhead.common.security.SecurityUtils;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -57,17 +55,7 @@ public class ServiceRegistryResource {
       throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
                                     BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
-    if (requestContext.getSecurityContext().isSecure()) {
-      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
-      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
-      String[] clientFields = clientCN.split("\\.", 2);
-      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
-        log.error("Provider system name and cert common name do not match! Service registering denied.");
-        throw new AuthenticationException(
-            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
-      }
-    }
+
     entry.toDatabase();
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
@@ -143,17 +131,6 @@ public class ServiceRegistryResource {
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).",
                                     Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
                                     requestContext.getUriInfo().getAbsolutePath().toString());
-    }
-    if (requestContext.getSecurityContext().isSecure()) {
-      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
-      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
-      String[] clientFields = clientCN.split("\\.", 2);
-      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
-        log.error("Provider system name and cert common name do not match! Service removing denied.");
-        throw new AuthenticationException(
-            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
-      }
     }
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());

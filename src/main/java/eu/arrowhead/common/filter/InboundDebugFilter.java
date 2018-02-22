@@ -10,7 +10,7 @@
 package eu.arrowhead.common.filter;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.core.orchestrator.OrchestratorMain;
+import eu.arrowhead.core.ArrowheadMain;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +26,7 @@ public class InboundDebugFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
-    if (OrchestratorMain.DEBUG_MODE) {
+    if (ArrowheadMain.DEBUG_MODE) {
       System.out.println("New " + requestContext.getMethod() + " request at: " + requestContext.getUriInfo().getRequestUri().toString());
       String prettyJson = Utility.getRequestPayload(requestContext.getEntityStream());
       System.out.println(prettyJson);

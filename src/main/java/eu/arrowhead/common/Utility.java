@@ -15,11 +15,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import eu.arrowhead.common.database.ArrowheadCloud;
-import eu.arrowhead.common.database.ArrowheadService;
-import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.database.OwnCloud;
-import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -27,8 +24,6 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
-import eu.arrowhead.common.messages.ServiceQueryForm;
-import eu.arrowhead.common.messages.ServiceQueryResult;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,9 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.Set;
 import javax.net.ssl.HostnameVerifier;
@@ -60,19 +53,9 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
-  private static SSLContext sslContext;
-  private static String SERVICE_REGISTRY_URI;
-
-  public static final String ORCH_SERVICE = "OrchestrationService";
-  public static final String AUTH_CONTROL_SERVICE = "AuthorizationControl";
-  public static final String TOKEN_GEN_SERVICE = "TokenGeneration";
-  public static final String GSD_SERVICE = "GlobalServiceDiscovery";
-  public static final String ICN_SERVICE = "InterCloudNegotiations";
-  public static final String GW_CONSUMER_SERVICE = "ConnectToConsumer";
-  public static final String GW_PROVIDER_SERVICE = "ConnectToProvider";
-  public static final String GW_SESSION_MGMT = "SessionManagement";
-  public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
   public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+  private static SSLContext sslContext;
 
   private static final String AUTH_EXCEPTION = "eu.arrowhead.AuthenticationException";
   private static final String BAD_PAYLOAD_EXCEPTION = "eu.arrowhead.BadPayloadException";
@@ -92,11 +75,6 @@ public final class Utility {
 
   public static void setSSLContext(SSLContext context) {
     sslContext = context;
-  }
-
-  public static void setServiceRegistryUri(String serviceRegistryUri) {
-    SERVICE_REGISTRY_URI = serviceRegistryUri;
-    SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("query").build().toString();
   }
 
   public static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {
@@ -238,32 +216,6 @@ public final class Utility {
     return ub.toString();
   }
 
-  public static String[] getServiceInfo(String serviceId) {
-    ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null)
-        : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
-    ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
-    Response response = sendRequest(SERVICE_REGISTRY_URI, "PUT", sqf, sslContext);
-    ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
-    if (result != null && result.isValid()) {
-      ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
-      ArrowheadSystem coreSystem = entry.getProvider();
-      boolean isSecure = false;
-      if (!entry.getProvidedService().getServiceMetadata().isEmpty()) {
-        isSecure = entry.getProvidedService().getServiceMetadata().containsKey("security");
-      } else if (entry.getMetadata() != null) {
-        isSecure = entry.getMetadata().contains("security");
-      }
-      String serviceUri = getUri(coreSystem.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
-      if (serviceId.equals(GW_CONSUMER_SERVICE) || serviceId.equals(GW_PROVIDER_SERVICE)) {
-        return new String[]{serviceUri, coreSystem.getSystemName(), coreSystem.getAddress(), coreSystem.getAuthenticationInfo()};
-      }
-      return new String[]{serviceUri};
-    } else {
-      log.fatal("getServiceInfo: SR query came back empty for: " + serviceId);
-      throw new ServiceConfigurationError(serviceId + " (service) not found in the Service Registry!");
-    }
-  }
-
   public static List<String> getNeighborCloudURIs() {
     List<NeighborCloud> cloudList = new ArrayList<>(dm.getAll(NeighborCloud.class, null));
 
@@ -359,14 +311,6 @@ public final class Utility {
 
   public static <T> T fromJson(String json, Class<T> parsedClass) {
     return gson.fromJson(json, parsedClass);
-  }
-
-  public static String createSD(String baseSD, boolean isSecure) {
-    if (isSecure) {
-      return "Secure" + baseSD;
-    } else {
-      return "Insecure" + baseSD;
-    }
   }
 
   public static void checkProperties(Set<String> propertyNames, List<String> basic, List<String> secure, boolean isSecure) {

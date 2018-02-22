@@ -10,6 +10,7 @@
 package eu.arrowhead.common.filter;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.common.security.SecurityUtils;
@@ -61,30 +62,36 @@ public class AccessControlFilter implements ContainerRequestFilter {
   }
 
   private boolean isGetItCalled(String method, String requestTarget) {
-    return method.equals("GET") && (requestTarget.endsWith("orchestration") || requestTarget.endsWith("mgmt/common") || requestTarget
+    return method.equals("GET") && (requestTarget.endsWith("orchestration") || requestTarget.endsWith("gatekeeper") || requestTarget
+        .endsWith("serviceregistry") || requestTarget.endsWith("mgmt") || requestTarget.endsWith("mgmt/common") || requestTarget
         .endsWith("mgmt/store"));
   }
 
   private boolean isClientAuthorized(String clientCN, String requestTarget, String requestJson) {
+    //ServerCN is the Local Cloud keystore
     String serverCN = (String) configuration.getProperty("server_common_name");
 
-    if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
+    if (requestTarget.contains("gatekeeper") && !SecurityUtils.isTrustStoreCNArrowheadValid(clientCN)) {
+      log.info("Client cert does not have 4 parts, so the access will be denied. (GK request)");
+      return false;
+    } else if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
       log.info("Client cert does not have 5 parts, so the access will be denied.");
       return false;
     }
 
-    String[] serverFields = serverCN.split("\\.", 2);
-    // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
+    // Only the local HMI can use the local cloud management methods
     if (requestTarget.contains("mgmt")) {
-      // Only the local HMI can use these methods
-      return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
-    } else {
+      return clientCN.equalsIgnoreCase("hmi." + serverCN);
+    }
+    // Request to the Orchestrator
+    else if (requestTarget.contains("orchestrator")) {
+
       ServiceRequestForm srf = Utility.fromJson(requestJson, ServiceRequestForm.class);
       String[] clientFields = clientCN.split("\\.", 2);
 
-      // If this is an external service request, only the local Gatekeeper can send this method
+      // Only the local gatekeeper can send external service request, but the gatekeeper will use the static orch method in this build
       if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
-        return clientFields[0].equalsIgnoreCase("gatekeeper") && serverFields[1].equalsIgnoreCase(clientFields[1]);
+        return false;
       } else {
         // Otherwise all request from the local cloud allowed
         if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
@@ -95,9 +102,34 @@ public class AccessControlFilter implements ContainerRequestFilter {
               Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), AccessControlFilter.class.toString());
         }
 
-        return serverFields[1].equalsIgnoreCase(clientFields[1]);
+        return serverCN.equalsIgnoreCase(clientFields[1]);
       }
     }
+    // Request to the Service Registry
+    else if (requestTarget.contains("serviceregistry")) {
+      // All requests from the local cloud are allowed, so omit the first part of the client common name (systemName)
+      ServiceRegistryEntry entry = Utility.fromJson(requestJson, ServiceRegistryEntry.class);
+      String[] clientFields = clientCN.split("\\.", 2);
+
+      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
+        // BUT a provider system can only register/remove its own services!
+        log.error("Provider system name and cert common name do not match! SR registering/removing denied!");
+        throw new AuthenticationException(
+            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), AccessControlFilter.class.toString());
+      }
+
+      return serverCN.equalsIgnoreCase(clientFields[1]);
+    }
+    // Request to the Gatekeeper
+    else if (requestTarget.contains("gatekeeper")) {
+      // Only requests from other Gatekeepers are allowed
+      String[] clientFields = clientCN.split("\\.", 3);
+      return clientFields.length == 3 && clientFields[2].endsWith("arrowhead.eu");
+    }
+
+    // Invalid URL, request denied.
+    return false;
   }
 
 }
