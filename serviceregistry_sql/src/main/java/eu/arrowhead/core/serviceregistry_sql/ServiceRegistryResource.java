@@ -57,17 +57,7 @@ public class ServiceRegistryResource {
       throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
                                     BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
-    if (requestContext.getSecurityContext().isSecure()) {
-      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
-      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
-      String[] clientFields = clientCN.split("\\.", 2);
-      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
-        log.error("Provider system name and cert common name do not match! Service registering denied.");
-        throw new AuthenticationException(
-            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
-      }
-    }
+
     entry.toDatabase();
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
