@@ -70,6 +70,7 @@ public class GatewayService {
    * @param queueName The name of the queue, should be unique
    * @param controlQueueName The name of the queue for control messages, should be unique
    * @param isSecure The type of the channel (secure or insecure)
+   *
    * @return GatewaySession, which contains a connection and a channel object
    */
   public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName, boolean isSecure) {
@@ -162,7 +163,7 @@ public class GatewayService {
 
     try {
       KeyStore keyStore = SecurityUtils
-          .loadKeyStore(GatewayMain.getProp().getProperty("keystore"), GatewayMain.getProp().getProperty("keystorepass" + ""));
+          .loadKeyStore(GatewayMain.getProp().getProperty("keystore"), GatewayMain.getProp().getProperty("keystorepass"));
       privateKey = SecurityUtils.getPrivateKey(keyStore, GatewayMain.getProp().getProperty("keystorepass"));
       cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
       cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
@@ -226,6 +227,7 @@ public class GatewayService {
    * @param map ConcurrentHashMap which contains the port number and the availability
    * @param portMin The lowest port number from the allowed range
    * @param portMax The highest port number from the allowed range
+   *
    * @return The initialized ConcurrentHashMap
    */
   // Integer: port; Boolean: free (true) or reserved(false)
