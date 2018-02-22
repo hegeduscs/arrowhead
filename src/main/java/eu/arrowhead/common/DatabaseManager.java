@@ -48,7 +48,7 @@ public class DatabaseManager {
       }
     } catch (Exception e) {
       log.fatal("Database connection failed, check the configuration!");
-      throw new ServiceConfigurationError("Database connection could not be established, check app.properties!", e);
+      throw new ServiceConfigurationError("Database connection could not be established, check app.properties.sample!", e);
     }
   }
 
@@ -66,7 +66,7 @@ public class DatabaseManager {
     try {
       if (prop == null) {
         prop = new Properties();
-        File file = new File("config" + File.separator + "app.properties");
+        File file = new File("config" + File.separator + "app.properties.sample");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);
       }

@@ -1,0 +1,47 @@
+#Authorization
+  # General
+  enable_auth_for_cloud=false
+
+  #Certificate properties
+  auth_keystore=config/certificates/authorization.testcloud1.jks
+  auth_keystorepass=12345
+
+#Gatekeeeper
+  # General
+  timeout=30000
+  use_gateway=false
+
+  # URLs
+  gatekeeper_base_uri=http://127.0.0.1:8446/
+  gatekeeper_base_uri_secured=https://127.0.0.1:8447/
+
+  # Certificate properties
+  master_arrowhead_cert=config/certificates/master_arrowhead_cert.crt
+
+#Gateway
+min_port=8000
+max_port=8100
+
+#Orchestrator
+orch_base_uri=http://127.0.0.1:8440
+orch_base_uri_secured=https://127.0.0.1:8441
+
+#Service Registry
+  #URLs
+  sr_base_uri=http://127.0.0.1:8442/
+  sr_base_uri_secured=https://127.0.0.1:8443/
+
+  #Ping providers parameter
+  ping.scheduled=false
+  ping.timeout=10000
+  #interval in minutes
+  ping.interval=60
+
+#Common
+db_user=root
+db_password=root
+db_address=jdbc:mysql://127.0.0.1:3306/arrowhead
+
+cloud_keystore=config/certificates/testcloud1_cert.jks
+cloud_keystore_pass=12345
+cloud_keypass=12345

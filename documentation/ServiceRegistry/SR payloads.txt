@@ -1,0 +1,132 @@
+query PUT: http://127.0.0.1:8442/serviceregistry/query
+request:
+{
+  "service": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "pingProviders": false,
+  "metadataSearch": true
+}
+response:
+{
+  "serviceQueryData": [
+    {
+      "providedService": {
+        "serviceDefinition": "IndoorTemperature",
+        "interfaces": [
+          "json"
+        ],
+        "serviceMetadata": {
+          "unit": "celsius"
+        }
+      },
+      "provider": {
+        "systemName": "InsecureTemperatureSensor",
+        "address": "127.0.0.1",
+        "port": 8454
+      },
+      "port": 8454,
+      "serviceURI": "temperature",
+      "version": 1,
+      "UDP": false,
+      "ttl": 0,
+      "metadata": "unit=celsius",
+      "endOfValidity": "Feb 14, 2018 4:19:31 PM"
+    }
+  ]
+}
+--------------------------------------------------
+register POST: http://127.0.0.1.hu:8442/serviceregistry/register
+request:
+{
+  "providedService": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "provider": {
+    "systemName": "InsecureTemperatureSensor",
+    "address": "127.0.0.1",
+    "port": 8454
+  },
+  "serviceURI": "temperature"
+}
+response:
+{
+  "providedService": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "provider": {
+    "systemName": "InsecureTemperatureSensor",
+    "address": "127.0.0.1",
+    "port": 8454
+  },
+  "port": 8454,
+  "serviceURI": "temperature",
+  "version": 1,
+  "UDP": false,
+  "ttl": 0,
+  "metadata": "unit=celsius",
+  "endOfValidity": "Feb 14, 2018 4:19:31 PM"
+}
+---------------------------------------
+remove PUT: http://127.0.0.1:8442/serviceregistry/remove
+request:
+{
+  "providedService": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "provider": {
+    "systemName": "InsecureTemperatureSensor",
+    "address": "127.0.0.1",
+    "port": 8454
+  },
+  "serviceURI": "temperature"
+}
+response (200):
+{
+  "providedService": {
+    "serviceDefinition": "IndoorTemperature",
+    "interfaces": [
+      "json"
+    ],
+    "serviceMetadata": {
+      "unit": "celsius"
+    }
+  },
+  "provider": {
+    "systemName": "InsecureTemperatureSensor",
+    "address": "127.0.0.1",
+    "port": 8454
+  },
+  "port": 8454,
+  "serviceURI": "temperature",
+  "version": 1,
+  "UDP": false,
+  "ttl": 0,
+  "metadata": "unit=celsius",
+  "endOfValidity": "Feb 14, 2018 4:19:31 PM"
+}
+OR 204 (No content) when nothing happened due to the request

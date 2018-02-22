@@ -377,7 +377,7 @@ public final class Utility {
     }
     if (!propertyNames.containsAll(properties)) {
       properties.removeIf(propertyNames::contains);
-      throw new ServiceConfigurationError("Missing field(s) from app.properties file: " + properties.toString());
+      throw new ServiceConfigurationError("Missing field(s) from app.properties.sample file: " + properties.toString());
     }
   }
 
