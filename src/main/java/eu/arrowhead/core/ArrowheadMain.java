@@ -41,6 +41,8 @@ public class ArrowheadMain {
 
   public static boolean DEBUG_MODE;
 
+  public static final boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
+
   private static PrivateKey privateKey;
   private static HttpServer gkServer;
   private static HttpServer gkSecureServer;
@@ -62,8 +64,8 @@ public class ArrowheadMain {
       .asList("db_user", "db_password", "db_address", "gateway_socket_timeout", "gatekeeper_base_uri", "min_port", "max_port", "orch_base_uri",
               "sr_base_uri");
   private static final List<String> securePropertyNames = Arrays
-      .asList("auth_keystore", "auth_keystorepass", "gatekeeper_base_uri_secured", "master_arrowhead_cert", "orch_base_uri_secured",
-              "sr_base_uri_secured", "cloud_keystore", "cloud_keystore_pass", "cloud_keypass");
+      .asList("auth_keystore", "auth_keystorepass", "gatekeeper_base_uri_secured", "master_arrowhead_cert", "gateway_keystore",
+              "gateway_keystore_pass", "orch_base_uri_secured", "sr_base_uri_secured", "cloud_keystore", "cloud_keystore_pass", "cloud_keypass");
 
   private enum CoreSystemType {GATEKEEPER, ORCHESTRATOR, SERVICE_REGISTRY}
 

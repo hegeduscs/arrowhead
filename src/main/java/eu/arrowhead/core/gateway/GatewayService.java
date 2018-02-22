@@ -15,10 +15,11 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.messages.ActiveSession;
+import eu.arrowhead.common.messages.GatewayEncryption;
+import eu.arrowhead.common.messages.GatewaySession;
 import eu.arrowhead.common.security.SecurityUtils;
-import eu.arrowhead.core.gateway.model.ActiveSession;
-import eu.arrowhead.core.gateway.model.GatewayEncryption;
-import eu.arrowhead.core.gateway.model.GatewaySession;
+import eu.arrowhead.core.ArrowheadMain;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -49,17 +50,35 @@ import org.apache.log4j.Logger;
 
 public class GatewayService {
 
+  protected static final ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
+
+  private static final ConcurrentHashMap<Integer, Boolean> portAllocationMap;
+  private static final SSLContext cloudContext;
+  private static final KeyStore gatewayKeyStore;
   private static final Logger log = Logger.getLogger(GatewayService.class.getName());
   private static final int ivSize = 16;
   private static final int keySize = 16;
-  private static final int minPort = Integer.parseInt(GatewayMain.getProp().getProperty("min_port"));
-  private static final int maxPort = Integer.parseInt(GatewayMain.getProp().getProperty("max_port"));
-  private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
-      .initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);
-  protected static ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
+  private static final int minPort;
+  private static final int maxPort;
 
   private GatewayService() throws AssertionError {
     throw new AssertionError("GatewayService is a non-instantiable class");
+  }
+
+  static {
+    minPort = Integer.parseInt(ArrowheadMain.getProp().getProperty("min_port"));
+    maxPort = Integer.parseInt(ArrowheadMain.getProp().getProperty("max_port"));
+    portAllocationMap = GatewayService.initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);
+
+    String cloudKeystorePath = ArrowheadMain.getProp().getProperty("cloud_keystore");
+    String cloudKeystorePass = ArrowheadMain.getProp().getProperty("cloud_keystore_pass");
+    String cloudKeyPass = ArrowheadMain.getProp().getProperty("cloud_keypass");
+    String masterArrowheadCertPath = ArrowheadMain.getProp().getProperty("master_arrowhead_cert");
+    cloudContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
+
+    String gatewayKeystorePath = ArrowheadMain.getProp().getProperty("gateway_keystore");
+    String gatewayKeystorePass = ArrowheadMain.getProp().getProperty("gateway_keystore_pass");
+    gatewayKeyStore = SecurityUtils.loadKeyStore(gatewayKeystorePath, gatewayKeystorePass);
   }
 
   /**
@@ -82,7 +101,7 @@ public class GatewayService {
 
       if (isSecure) {
         try {
-          factory.useSslProtocol(GatewayMain.clientContext);
+          factory.useSslProtocol(cloudContext);
         } catch (RuntimeException e) {
           throw new ArrowheadException("Gateway is in insecure mode, and can not create a secure channel with the AMQP broker!",
                                        e.getClass().getName(), e);
@@ -162,9 +181,7 @@ public class GatewayService {
     byte[] decryptedMessage;
 
     try {
-      KeyStore keyStore = SecurityUtils
-          .loadKeyStore(GatewayMain.getProp().getProperty("keystore"), GatewayMain.getProp().getProperty("keystorepass" + ""));
-      privateKey = SecurityUtils.getPrivateKey(keyStore, GatewayMain.getProp().getProperty("keystorepass"));
+      privateKey = SecurityUtils.getPrivateKey(gatewayKeyStore, ArrowheadMain.getProp().getProperty("gateway_keystore_pass"));
       cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
       cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
     } catch (GeneralSecurityException e) {
@@ -200,20 +217,18 @@ public class GatewayService {
   }
 
   public static SSLContext createSSLContext() {
-    String keystorePath = GatewayMain.getProp().getProperty("keystore");
-    String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
-    KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-
     SSLContext sslContext;
     KeyManagerFactory kmf;
     try {
       kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-      kmf.init(keyStore, keystorePass.toCharArray());
+      kmf.init(gatewayKeyStore, ArrowheadMain.getProp().getProperty("gateway_keystore_pass").toCharArray());
       sslContext = SSLContext.getInstance("TLS");
       sslContext.init(kmf.getKeyManagers(), SecurityUtils.createTrustManagers(), null);
+
     } catch (NoSuchAlgorithmException | KeyManagementException e) {
       log.fatal("createSSLContext: Initializing the keyManagerFactory failed");
       throw new ServiceConfigurationError("Initializing the keyManagerFactory failed for the SSLContext failed", e);
+
     } catch (KeyStoreException | UnrecoverableKeyException e) {
       log.error("createSSLContext: keystore malformed, factory init failed");
       throw new AuthenticationException("Keystore is malformed, or the password is invalid", e);

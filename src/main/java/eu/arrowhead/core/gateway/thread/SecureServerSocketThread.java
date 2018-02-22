@@ -16,16 +16,15 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
+import eu.arrowhead.common.messages.GatewayEncryption;
+import eu.arrowhead.common.messages.GatewaySession;
 import eu.arrowhead.core.gateway.GatewayService;
-import eu.arrowhead.core.gateway.model.GatewayEncryption;
-import eu.arrowhead.core.gateway.model.GatewaySession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import org.apache.log4j.Logger;
 
@@ -65,7 +64,6 @@ public class SecureServerSocketThread extends Thread {
     try {
       // Accept a client connection once Server receives one.
       sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
-      SSLSession consumerSession = sslConsumerSocket.getSession();
       Channel channel = gatewaySession.getChannel();
 
       InputStream inConsumer = sslConsumerSocket.getInputStream();

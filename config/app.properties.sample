@@ -1,10 +1,6 @@
 #Authorization
-  # General
-  enable_auth_for_cloud=false
-
-  #Certificate properties
-  auth_keystore=config/certificates/authorization.testcloud1.jks
-  auth_keystorepass=12345
+auth_keystore=config/certificates/authorization.testcloud1.jks
+auth_keystorepass=12345
 
 #Gatekeeeper
   # General
@@ -20,8 +16,13 @@
   master_arrowhead_cert=config/certificates/master_arrowhead_cert.crt
 
 #Gateway
-min_port=8000
-max_port=8100
+  # General
+  min_port=8000
+  max_port=8100
+
+  # Certificate properties
+  gateway_keystore=config/certificates/gateway.testcloud1.jks
+  gateway_keystore_pass=12345
 
 #Orchestrator
 orch_base_uri=http://127.0.0.1:8440

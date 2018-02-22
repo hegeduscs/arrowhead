@@ -16,10 +16,14 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.RawTokenInfo;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
+import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.core.ArrowheadMain;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
@@ -40,7 +44,18 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 class TokenGenerationService {
 
   private static final Logger log = Logger.getLogger(TokenGenerationService.class.getName());
+  private static final PrivateKey authPrivateKey;
 
+  private TokenGenerationService() throws AssertionError {
+    throw new AssertionError("TokenGenerationService is a non-instantiable class");
+  }
+
+  static {
+    String keystorePath = ArrowheadMain.getProp().getProperty("auth_keystore");
+    String keystorePass = ArrowheadMain.getProp().getProperty("auth_keystorepass");
+    KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
+    authPrivateKey = SecurityUtils.getPrivateKey(keyStore, keystorePass);
+  }
 
   static List<ArrowheadToken> generateTokens(TokenGenerationRequest request) {
     // First get the public key for each provider
@@ -58,7 +73,7 @@ class TokenGenerationService {
     Signature signature;
     try {
       signature = Signature.getInstance("SHA256withRSA", "BC");
-      signature.initSign(AuthorizationMain.privateKey);
+      signature.initSign(authPrivateKey);
     } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
       log.fatal("Signature.getInstance(String) throws exception, code needs to be changed!");
       throw new AssertionError("Signature.getInstance(String) throws exception, code needs to be changed!", e);
@@ -155,7 +170,7 @@ class TokenGenerationService {
       // Get the provider from the database
       restrictionMap.clear();
       restrictionMap.put("systemName", provider.getSystemName());
-      ArrowheadSystem retrievedProvider = AuthorizationResource.dm.get(ArrowheadSystem.class, restrictionMap);
+      ArrowheadSystem retrievedProvider = AuthorizationService.dm.get(ArrowheadSystem.class, restrictionMap);
 
       if (retrievedProvider != null) {
         try {
@@ -192,7 +207,7 @@ class TokenGenerationService {
   private static PublicKey getPublicKey(String stringKey) throws InvalidKeySpecException {
     byte[] byteKey = Base64.getDecoder().decode(stringKey);
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
-    KeyFactory kf = null;
+    KeyFactory kf;
     try {
       kf = KeyFactory.getInstance("RSA");
     } catch (NoSuchAlgorithmException e) {

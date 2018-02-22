@@ -29,37 +29,23 @@ import eu.arrowhead.common.messages.ICNRequestForm;
 import eu.arrowhead.common.messages.ICNResult;
 import eu.arrowhead.common.messages.OrchestrationForm;
 import eu.arrowhead.common.messages.OrchestrationResponse;
+import eu.arrowhead.core.ArrowheadMain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
-/**
- * This is the REST resource for the Gatekeeper Core System.
- */
-@Path("gatekeeper")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
-public class GatekeeperService {
+public final class GatekeeperService {
 
-  private static final Logger log = Logger.getLogger(GatekeeperService.class.getName());
   private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final Logger log = Logger.getLogger(GatekeeperService.class.getName());
+  private static final int timeout = Integer.valueOf(ArrowheadMain.getProp().getProperty("gateway_socket_timeout"));
 
-  @GET
-  @Produces(MediaType.TEXT_PLAIN)
-  public String getIt() {
-    return "This is the outbound Gatekeeper Resource. Offering resources at: init_gsd, init_icn.";
+  private GatekeeperService() throws AssertionError {
+    throw new AssertionError("GatekeeperService is a non-instantiable class");
   }
 
   /**
@@ -68,13 +54,11 @@ public class GatekeeperService {
    *
    * @return GSDResult
    */
-  @PUT
-  @Path("init_gsd")
-  public Response GSDRequest(GSDRequestForm requestForm, @Context ContainerRequestContext requestContext) {
+  public static Response GSDRequest(GSDRequestForm requestForm) {
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), "GatekeeperService:GSDRequest");
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
@@ -108,7 +92,7 @@ public class GatekeeperService {
     for (String uri : cloudURIs) {
       uri = UriBuilder.fromPath(uri).path("gsd_poll").toString();
       try {
-        response = Utility.sendRequest(uri, "PUT", gsdPoll, GatekeeperMain.outboundClientContext);
+        response = Utility.sendRequest(uri, "PUT", gsdPoll);
       }
       // We skip those that did not respond positively, add the rest to the result list
       catch (ArrowheadException ex) {
@@ -117,7 +101,7 @@ public class GatekeeperService {
           ex.printStackTrace();
           log.error("GSD failed for all potential provider clouds! See stack traces for details in console output.");
           throw new ArrowheadException("GSD failed for all potential provider clouds! The last exception message: " + ex.getMessage(),
-                                       ex.getErrorCode(), ex.getClass().getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                       ex.getErrorCode(), ex.getClass().getName(), "GatekeeperService:GSDRequest");
         } else {
           System.out.println("GSD request failed at: " + uri);
           ex.printStackTrace();
@@ -142,22 +126,19 @@ public class GatekeeperService {
    *
    * @return ICNResult
    */
-  @PUT
-  @Path("init_icn")
-  public Response ICNRequest(ICNRequestForm requestForm, @Context ContainerRequestContext requestContext) {
+  public static Response ICNRequest(ICNRequestForm requestForm) {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                    BadPayloadException.class.getName(), "GatekeeperService:ICNRequest");
     }
 
-    requestForm.getNegotiationFlags().put("useGateway", GatekeeperMain.USE_GATEWAY);
+    requestForm.getNegotiationFlags().put("useGateway", ArrowheadMain.USE_GATEWAY);
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
-                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(), null, GatekeeperMain.timeout,
-                                              null);
+                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(), null, timeout, null);
 
-    if (GatekeeperMain.USE_GATEWAY) {
+    if (ArrowheadMain.USE_GATEWAY) {
       icnProposal.setPreferredBrokers(dm.getAll(Broker.class, null));
       icnProposal.setGatewayPublicKey(GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
     }
@@ -166,10 +147,10 @@ public class GatekeeperService {
                                    requestForm.getTargetCloud().getGatekeeperServiceURI(), requestForm.getTargetCloud().isSecure());
     icnUri = UriBuilder.fromPath(icnUri).path("icn_proposal").toString();
     // Sending the request, the response payload is use_gateway flag dependent
-    Response response = Utility.sendRequest(icnUri, "PUT", icnProposal, GatekeeperMain.outboundClientContext);
+    Response response = Utility.sendRequest(icnUri, "PUT", icnProposal);
 
     // If the gateway services are not requested, then just send back the ICN results to the Orchestrator right away
-    if (!GatekeeperMain.USE_GATEWAY) {
+    if (!ArrowheadMain.USE_GATEWAY) {
       ICNResult icnResult = response.readEntity(ICNResult.class);
       log.info("ICNRequest: returning ICNResult to Orchestrator.");
       return Response.status(response.getStatus()).entity(icnResult).build();
@@ -186,8 +167,9 @@ public class GatekeeperService {
                                                                               requestForm.getRequesterSystem(),
                                                                               icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
                                                                               requestForm.getTargetCloud(), requestForm.getRequestedService(),
-                                                                              isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
+                                                                              isSecure, timeout, gwConnInfo.getGatewayPublicKey());
 
+    //TODO lecserélni static fgv hivásra
     // Sending the gateway request and parsing the response
     Response gatewayResponse = Utility
         .sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest, GatekeeperMain.outboundServerContext);

@@ -10,12 +10,12 @@
 package eu.arrowhead.core.gateway;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.messages.ActiveSession;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.messages.ConnectToConsumerResponse;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.common.messages.ConnectToProviderResponse;
-import eu.arrowhead.core.gateway.model.ActiveSession;
-import eu.arrowhead.core.gateway.model.GatewaySession;
+import eu.arrowhead.common.messages.GatewaySession;
 import eu.arrowhead.core.gateway.thread.InsecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.InsecureSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureServerSocketThread;
@@ -40,6 +40,7 @@ public class GatewayResource {
 
   private static final Logger log = Logger.getLogger(GatewayResource.class.getName());
 
+  //TODO static methods, not REST
   //TODO convert this to a method which returns a List<ActiveSessions>, move gateway POJOs to messages
   @GET
   @Produces(MediaType.TEXT_PLAIN)
