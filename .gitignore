@@ -1,2 +1,5 @@
 /.idea/
 /arrowhead_core.iml
+/config/app.properties
+/config/log.properties
+target/

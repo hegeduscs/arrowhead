@@ -40,6 +40,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class ArrowheadMain {
 
   public static boolean DEBUG_MODE;
+  public static String serverAddress;
 
   public static final boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
 
@@ -69,6 +70,7 @@ public class ArrowheadMain {
 
   private enum CoreSystemType {GATEKEEPER, ORCHESTRATOR, SERVICE_REGISTRY}
 
+  //TODO ADD SR pingprovidertask
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
@@ -162,6 +164,10 @@ public class ArrowheadMain {
     config.packages("eu.arrowhead.common");
 
     URI uri = UriBuilder.fromUri(url).build();
+    if (serverAddress == null) {
+      serverAddress = uri.getHost();
+    }
+
     try {
       final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
@@ -215,6 +221,10 @@ public class ArrowheadMain {
     }
 
     URI uri = UriBuilder.fromUri(url).build();
+    if (serverAddress == null) {
+      serverAddress = uri.getHost();
+    }
+
     try {
       final HttpServer server = GrizzlyHttpServerFactory
           .createHttpServer(uri, config, true, new SSLEngineConfigurator(serverContext).setClientMode(false).setNeedClientAuth(true));

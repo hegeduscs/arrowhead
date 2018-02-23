@@ -16,10 +16,18 @@ import com.rabbitmq.client.ConnectionFactory;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.messages.ActiveSession;
+import eu.arrowhead.common.messages.ConnectToConsumerRequest;
+import eu.arrowhead.common.messages.ConnectToConsumerResponse;
+import eu.arrowhead.common.messages.ConnectToProviderRequest;
+import eu.arrowhead.common.messages.ConnectToProviderResponse;
 import eu.arrowhead.common.messages.GatewayEncryption;
 import eu.arrowhead.common.messages.GatewaySession;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.ArrowheadMain;
+import eu.arrowhead.core.gateway.thread.InsecureServerSocketThread;
+import eu.arrowhead.core.gateway.thread.InsecureSocketThread;
+import eu.arrowhead.core.gateway.thread.SecureServerSocketThread;
+import eu.arrowhead.core.gateway.thread.SecureSocketThread;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,7 +40,10 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,14 +59,16 @@ import org.apache.log4j.Logger;
  * Contains miscellaneous helper functions for the Gateway.
  */
 
-public class GatewayService {
+public final class GatewayService {
 
-  protected static final ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
+  public static final String GATEWAY_PUBLIC_KEY;
 
+  static final ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
+
+  private static final Logger log = Logger.getLogger(GatewayService.class.getName());
   private static final ConcurrentHashMap<Integer, Boolean> portAllocationMap;
   private static final SSLContext cloudContext;
   private static final KeyStore gatewayKeyStore;
-  private static final Logger log = Logger.getLogger(GatewayService.class.getName());
   private static final int ivSize = 16;
   private static final int keySize = 16;
   private static final int minPort;
@@ -79,6 +92,64 @@ public class GatewayService {
     String gatewayKeystorePath = ArrowheadMain.getProp().getProperty("gateway_keystore");
     String gatewayKeystorePass = ArrowheadMain.getProp().getProperty("gateway_keystore_pass");
     gatewayKeyStore = SecurityUtils.loadKeyStore(gatewayKeystorePath, gatewayKeystorePass);
+    X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(gatewayKeyStore);
+    GATEWAY_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
+  }
+
+  public static ConnectToProviderResponse connectToProvider(ConnectToProviderRequest connectionRequest) {
+    String queueName = String.valueOf(System.currentTimeMillis()).concat(String.valueOf(Math.random())).replace(".", "");
+    String controlQueueName = queueName.concat("_control");
+
+    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(), connectionRequest.getConsumerCloud(),
+                                                    connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
+                                                    connectionRequest.getService(), connectionRequest.getBrokerName(),
+                                                    connectionRequest.getBrokerPort(), null, queueName, controlQueueName,
+                                                    connectionRequest.getIsSecure(), new Date(System.currentTimeMillis()));
+    // Add the session to the management queue
+    GatewayService.activeSessions.put(queueName, activeSession);
+
+    GatewaySession gatewaySession = GatewayService
+        .createChannel(connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), queueName, controlQueueName,
+                       connectionRequest.getIsSecure());
+
+    if (connectionRequest.getIsSecure()) {
+      SecureSocketThread secureThread = new SecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
+      secureThread.start();
+    } else {
+      InsecureSocketThread insecureThread = new InsecureSocketThread(gatewaySession, queueName, controlQueueName, connectionRequest);
+      insecureThread.start();
+    }
+
+    log.info("Returning the ConnectToProviderResponse to the Gatekeeper");
+    return new ConnectToProviderResponse(queueName, controlQueueName);
+  }
+
+  public static ConnectToConsumerResponse connectToConsumer(ConnectToConsumerRequest connectionRequest) {
+    Integer serverSocketPort = GatewayService.getAvailablePort();
+
+    ActiveSession activeSession = new ActiveSession(connectionRequest.getConsumer(), connectionRequest.getConsumerCloud(),
+                                                    connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
+                                                    connectionRequest.getService(), connectionRequest.getBrokerName(),
+                                                    connectionRequest.getBrokerPort(), serverSocketPort, connectionRequest.getQueueName(),
+                                                    connectionRequest.getControlQueueName(), connectionRequest.getIsSecure(),
+                                                    new Date(System.currentTimeMillis()));
+    // Add the session to the management queue
+    GatewayService.activeSessions.put(connectionRequest.getQueueName(), activeSession);
+
+    GatewaySession gatewaySession = GatewayService
+        .createChannel(connectionRequest.getBrokerName(), connectionRequest.getBrokerPort(), connectionRequest.getQueueName(),
+                       connectionRequest.getControlQueueName(), connectionRequest.getIsSecure());
+
+    if (connectionRequest.getIsSecure()) {
+      SecureServerSocketThread secureThread = new SecureServerSocketThread(gatewaySession, serverSocketPort, connectionRequest);
+      secureThread.start();
+    } else {
+      InsecureServerSocketThread insecureThread = new InsecureServerSocketThread(gatewaySession, serverSocketPort, connectionRequest);
+      insecureThread.start();
+    }
+
+    log.info("Returning the ConnectToConsumerResponse to the Gatekeeper");
+    return new ConnectToConsumerResponse(serverSocketPort);
   }
 
   /**
@@ -92,7 +163,7 @@ public class GatewayService {
    *
    * @return GatewaySession, which contains a connection and a channel object
    */
-  public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName, boolean isSecure) {
+  private static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName, boolean isSecure) {
     GatewaySession gatewaySession = new GatewaySession();
     try {
       ConnectionFactory factory = new ConnectionFactory();
@@ -258,7 +329,7 @@ public class GatewayService {
    *
    * @return serverSocketPort or null if no available port found
    */
-  public static Integer getAvailablePort() {
+  private static Integer getAvailablePort() {
     Integer serverSocketPort;
     // Check the port range for
     ArrayList<Integer> freePorts = new ArrayList<>();

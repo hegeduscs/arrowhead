@@ -13,6 +13,7 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.messages.ActiveSession;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,12 @@ public class GatewayApi {
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
     return "This is the Gateway API.";
+  }
+
+  @GET
+  @Path("sessions")
+  public static List<ActiveSession> getActiveSessions() {
+    return new ArrayList<>(GatewayService.activeSessions.values());
   }
 
   @GET

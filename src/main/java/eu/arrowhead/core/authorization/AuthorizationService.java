@@ -28,7 +28,6 @@ import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
@@ -50,7 +49,7 @@ public final class AuthorizationService {
    *
    * @throws DataNotFoundException, BadPayloadException
    */
-  public static Response isSystemAuthorized(IntraCloudAuthRequest request) {
+  public static IntraCloudAuthResponse isSystemAuthorized(IntraCloudAuthRequest request) {
     if (!request.isValid()) {
       log.error("isSystemAuthorized BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.",
@@ -78,7 +77,7 @@ public final class AuthorizationService {
         authorizationState.put(provider, false);
       }
       response.setAuthorizationMap(authorizationState);
-      return Response.status(Status.OK).entity(response).build();
+      return response;
     }
 
     IntraCloudAuthorization authRight;
@@ -105,7 +104,7 @@ public final class AuthorizationService {
     log.info(
         "IntraCloud auth check for consumer " + request.getConsumer().getSystemName() + " returns with " + authorizedCount + " possible provider");
     response.setAuthorizationMap(authorizationState);
-    return Response.status(Status.OK).entity(response).build();
+    return response;
   }
 
   /**
@@ -115,7 +114,7 @@ public final class AuthorizationService {
    *
    * @throws DataNotFoundException, BadPayloadException
    */
-  public static Response isCloudAuthorized(InterCloudAuthRequest request) {
+  public static InterCloudAuthResponse isCloudAuthorized(InterCloudAuthRequest request) {
     if (!request.isValid()) {
       log.error("isCloudAuthorized BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete cloud or service in the request payload.", Status.BAD_REQUEST.getStatusCode(),
@@ -137,7 +136,7 @@ public final class AuthorizationService {
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
       log.info("Service " + request.getService().toString() + " is not in the database. Returning NOT AUTHORIZED state for the consumer.");
-      return Response.status(Status.OK).entity(new InterCloudAuthResponse(false)).build();
+      return new InterCloudAuthResponse(false);
     }
 
     InterCloudAuthorization authRight;
@@ -152,7 +151,7 @@ public final class AuthorizationService {
     }
 
     log.info("Consumer Cloud is authorized: " + isAuthorized);
-    return Response.status(Status.OK).entity(new InterCloudAuthResponse(isAuthorized)).build();
+    return new InterCloudAuthResponse(isAuthorized);
   }
 
   /**
@@ -160,7 +159,7 @@ public final class AuthorizationService {
    *
    * @return TokenGenerationResponse
    */
-  public static Response tokenGeneration(TokenGenerationRequest request) {
+  public static TokenGenerationResponse tokenGeneration(TokenGenerationRequest request) {
     if (!request.isValid()) {
       log.error("tokenGeneration BadPayloadException");
       throw new BadPayloadException("TokenGenerationRequest has missing/incomplete fields.", Status.BAD_REQUEST.getStatusCode(),
@@ -180,7 +179,7 @@ public final class AuthorizationService {
     }
 
     log.info("Token generation returns with " + tokenDataList.size() + " arrowhead tokens.");
-    return Response.status(Status.OK).entity(new TokenGenerationResponse(tokenDataList)).build();
+    return new TokenGenerationResponse(tokenDataList);
   }
 
 }

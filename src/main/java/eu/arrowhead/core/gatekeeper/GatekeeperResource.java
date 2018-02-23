@@ -32,6 +32,8 @@ import eu.arrowhead.common.messages.PreferredProvider;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.messages.ServiceRequestForm;
+import eu.arrowhead.core.authorization.AuthorizationService;
+import eu.arrowhead.core.gateway.GatewayService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +61,7 @@ public class GatekeeperResource {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
-    return "This is the inbound Gatekeeper Resource. Offering resources at: gsd_poll, icn_proposal.";
+    return "This is the Gatekeeper Resource. Offering resources at: gsd_poll, icn_proposal.";
   }
 
   /**
@@ -79,11 +81,10 @@ public class GatekeeperResource {
 
     // Polling the Authorization System about the consumer Cloud
     InterCloudAuthRequest authRequest = new InterCloudAuthRequest(gsdPoll.getRequesterCloud(), gsdPoll.getRequestedService());
-    String authUri = UriBuilder.fromPath(GatekeeperMain.AUTH_CONTROL_URI).path("intercloud").toString();
-    Response authResponse = Utility.sendRequest(authUri, "PUT", authRequest);
+    InterCloudAuthResponse authResponse = AuthorizationService.isCloudAuthorized(authRequest);
 
     // If the consumer Cloud is not authorized an error is returned
-    if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
+    if (!authResponse.isAuthorized()) {
       log.info("GSD poll: Requester Cloud is UNAUTHORIZED, sending back error");
       throw new AuthenticationException("Requester Cloud is UNAUTHORIZED to consume this service, GSD poll failed.",
                                         Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
@@ -127,11 +128,10 @@ public class GatekeeperResource {
 
     // Polling the Authorization System about the consumer Cloud
     InterCloudAuthRequest authRequest = new InterCloudAuthRequest(icnProposal.getRequesterCloud(), icnProposal.getRequestedService());
-    String authUri = UriBuilder.fromPath(GatekeeperMain.AUTH_CONTROL_URI).path("intercloud").toString();
-    Response authResponse = Utility.sendRequest(authUri, "PUT", authRequest);
+    InterCloudAuthResponse authResponse = AuthorizationService.isCloudAuthorized(authRequest);
 
     // If the consumer Cloud is not authorized an error is returned
-    if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
+    if (!authResponse.isAuthorized()) {
       log.info("ICNProposal: Requester Cloud is UNAUTHORIZED, sending back error");
       throw new AuthenticationException("Requester Cloud is UNAUTHORIZED to consume this service, ICNProposal failed.",
                                         Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
@@ -148,7 +148,7 @@ public class GatekeeperResource {
 
     // Changing the requesterSystem for the sake of proper token generation
     if (icnProposal.getNegotiationFlags().get("useGateway")) {
-      icnProposal.getRequesterSystem().setSystemName(GatekeeperMain.GATEWAY_PROVIDER_URI[1]);
+      icnProposal.getRequesterSystem().setSystemName("gateway");
     }
     ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
         .requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService()).orchestrationFlags(orchestrationFlags)
@@ -167,7 +167,7 @@ public class GatekeeperResource {
     ArrowheadSystem provider = orchResponse.getResponse().get(0).getProvider();
     Map<String, String> metadata = orchResponse.getResponse().get(0).getService().getServiceMetadata();
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
-    int timeout = icnProposal.getTimeout() > GatekeeperMain.timeout ? GatekeeperMain.timeout : icnProposal.getTimeout();
+    int timeout = icnProposal.getTimeout() > GatekeeperService.timeout ? GatekeeperService.timeout : icnProposal.getTimeout();
 
     // Getting the list of preferred brokers from database
     List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
@@ -201,14 +201,11 @@ public class GatekeeperResource {
                                                                               icnProposal.getRequestedService(), isSecure, timeout,
                                                                               icnProposal.getGatewayPublicKey());
 
-    // Sending request, parsing response
-    Response gatewayResponse = Utility.sendRequest(GatekeeperMain.GATEWAY_PROVIDER_URI[0], "PUT", connectionRequest);
-    ConnectToProviderResponse connectToProviderResponse = gatewayResponse.readEntity(ConnectToProviderResponse.class);
-
+    ConnectToProviderResponse connectToProviderResponse = GatewayService.connectToProvider(connectionRequest);
     GatewayConnectionInfo gatewayConnectionInfo = new GatewayConnectionInfo(chosenBroker.getAddress(), chosenBroker.getPort(),
                                                                             connectToProviderResponse.getQueueName(),
                                                                             connectToProviderResponse.getControlQueueName(),
-                                                                            GatekeeperMain.GATEWAY_PROVIDER_URI[3]);
+                                                                            GatewayService.GATEWAY_PUBLIC_KEY);
     // The AMQP broker can only create 1 channel at the moment, so the gatekeeper have to choose an orchestration form
     ICNEnd icnEnd = new ICNEnd(orchResponse.getResponse().get(0), gatewayConnectionInfo);
     log.info("ICNProposal: returning the first OrchestrationForm and the GatewayConnectionInfo to the requester Cloud.");

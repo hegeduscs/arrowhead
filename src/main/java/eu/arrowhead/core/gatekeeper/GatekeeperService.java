@@ -30,6 +30,7 @@ import eu.arrowhead.common.messages.ICNResult;
 import eu.arrowhead.common.messages.OrchestrationForm;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.core.ArrowheadMain;
+import eu.arrowhead.core.gateway.GatewayService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +41,10 @@ import org.apache.log4j.Logger;
 
 public final class GatekeeperService {
 
+  static final int timeout = Integer.valueOf(ArrowheadMain.getProp().getProperty("gateway_socket_timeout"));
+
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final Logger log = Logger.getLogger(GatekeeperService.class.getName());
-  private static final int timeout = Integer.valueOf(ArrowheadMain.getProp().getProperty("gateway_socket_timeout"));
 
   private GatekeeperService() throws AssertionError {
     throw new AssertionError("GatekeeperService is a non-instantiable class");
@@ -54,7 +56,7 @@ public final class GatekeeperService {
    *
    * @return GSDResult
    */
-  public static Response GSDRequest(GSDRequestForm requestForm) {
+  public static GSDResult GSDRequest(GSDRequestForm requestForm) {
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
@@ -115,9 +117,8 @@ public final class GatekeeperService {
     }
 
     // Sending back the results. The orchestrator will validate the results (result list might be empty) and decide how to proceed.
-    GSDResult gsdResult = new GSDResult(gsdAnswerList);
     log.info("GSDRequest: Sending " + gsdAnswerList.size() + " GSDPoll results to Orchestrator.");
-    return Response.status(Status.OK).entity(gsdResult).build();
+    return new GSDResult(gsdAnswerList);
   }
 
   /**
@@ -126,7 +127,7 @@ public final class GatekeeperService {
    *
    * @return ICNResult
    */
-  public static Response ICNRequest(ICNRequestForm requestForm) {
+  public static ICNResult ICNRequest(ICNRequestForm requestForm) {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
@@ -140,7 +141,7 @@ public final class GatekeeperService {
 
     if (ArrowheadMain.USE_GATEWAY) {
       icnProposal.setPreferredBrokers(dm.getAll(Broker.class, null));
-      icnProposal.setGatewayPublicKey(GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
+      icnProposal.setGatewayPublicKey(GatewayService.GATEWAY_PUBLIC_KEY);
     }
 
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
@@ -151,9 +152,8 @@ public final class GatekeeperService {
 
     // If the gateway services are not requested, then just send back the ICN results to the Orchestrator right away
     if (!ArrowheadMain.USE_GATEWAY) {
-      ICNResult icnResult = response.readEntity(ICNResult.class);
       log.info("ICNRequest: returning ICNResult to Orchestrator.");
-      return Response.status(response.getStatus()).entity(icnResult).build();
+      return response.readEntity(ICNResult.class);
     }
     // The partner Gatekeeper will return an ICNEnd if use_gateway = true
     ICNEnd icnEnd = response.readEntity(ICNEnd.class);
@@ -169,24 +169,19 @@ public final class GatekeeperService {
                                                                               requestForm.getTargetCloud(), requestForm.getRequestedService(),
                                                                               isSecure, timeout, gwConnInfo.getGatewayPublicKey());
 
-    //TODO lecserélni static fgv hivásra
-    // Sending the gateway request and parsing the response
-    Response gatewayResponse = Utility
-        .sendRequest(GatekeeperMain.GATEWAY_CONSUMER_URI[0], "PUT", connectionRequest, GatekeeperMain.outboundServerContext);
-    ConnectToConsumerResponse connectToConsumerResponse = gatewayResponse.readEntity(ConnectToConsumerResponse.class);
+    ConnectToConsumerResponse connectToConsumerResponse = GatewayService.connectToConsumer(connectionRequest);
 
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();
-    gatewaySystem.setSystemName(GatekeeperMain.GATEWAY_CONSUMER_URI[1]);
-    gatewaySystem.setAddress(GatekeeperMain.GATEWAY_CONSUMER_URI[2]);
+    gatewaySystem.setSystemName("gateway");
+    gatewaySystem.setAddress(ArrowheadMain.serverAddress);
     gatewaySystem.setPort(connectToConsumerResponse.getServerSocketPort());
-    gatewaySystem.setAuthenticationInfo(GatekeeperMain.GATEWAY_CONSUMER_URI[3]);
+    gatewaySystem.setAuthenticationInfo(GatewayService.GATEWAY_PUBLIC_KEY);
     icnEnd.getOrchestrationForm().setProvider(gatewaySystem);
     List<OrchestrationForm> orchResponse = new ArrayList<>();
     orchResponse.add(icnEnd.getOrchestrationForm());
-    ICNResult icnResult = new ICNResult(new OrchestrationResponse(orchResponse));
 
     log.info("ICNRequest: returning ICNResult to Orchestrator.");
-    return Response.status(response.getStatus()).entity(icnResult).build();
+    return new ICNResult(new OrchestrationResponse(orchResponse));
   }
 
 }
