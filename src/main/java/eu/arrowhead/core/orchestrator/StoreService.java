@@ -19,7 +19,6 @@ import java.util.List;
 
 public final class StoreService {
 
-
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
@@ -27,12 +26,12 @@ public final class StoreService {
    * This method returns the active Orchestration Store entries for a consumer.
    */
   public static List<OrchestrationStore> getDefaultStoreEntries(ArrowheadSystem consumer) {
-    restrictionMap.clear();
     ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemName());
     if (savedConsumer == null) {
       return new ArrayList<>();
     }
 
+    restrictionMap.clear();
     restrictionMap.put("consumer", savedConsumer);
     restrictionMap.put("defaultEntry", true);
     return dm.getAll(OrchestrationStore.class, restrictionMap);
@@ -42,7 +41,6 @@ public final class StoreService {
    * This method returns a list of Orchestration Store entries specified by the consumer system and the requested service.
    */
   public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service) {
-    restrictionMap.clear();
     ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemName());
     ArrowheadService savedService = getRequestedService(service.getServiceDefinition());
     if (savedConsumer == null || savedService == null) {
@@ -55,13 +53,13 @@ public final class StoreService {
       }
     }
 
+    restrictionMap.clear();
     restrictionMap.put("consumer", savedConsumer);
     restrictionMap.put("service", savedService);
     return dm.getAll(OrchestrationStore.class, restrictionMap);
   }
 
   public static List<OrchestrationStore> getStoreEntries(ArrowheadService service) {
-    restrictionMap.clear();
     ArrowheadService savedService = getRequestedService(service.getServiceDefinition());
 
     if (!savedService.getInterfaces().isEmpty()) {
@@ -70,6 +68,7 @@ public final class StoreService {
       }
     }
 
+    restrictionMap.clear();
     restrictionMap.put("service", savedService);
     return dm.getAll(OrchestrationStore.class, restrictionMap);
   }
@@ -78,18 +77,18 @@ public final class StoreService {
    * This private method returns an ArrowheadSystem from the database.
    */
   private static ArrowheadSystem getConsumerSystem(String systemName) {
-    HashMap<String, Object> rm = new HashMap<>();
-    rm.put("systemName", systemName);
-    return dm.get(ArrowheadSystem.class, rm);
+    restrictionMap.clear();
+    restrictionMap.put("systemName", systemName);
+    return dm.get(ArrowheadSystem.class, restrictionMap);
   }
 
   /**
    * This private method returns an ArrowheadService from the database.
    */
   private static ArrowheadService getRequestedService(String serviceDefinition) {
-    HashMap<String, Object> rm = new HashMap<>();
-    rm.put("serviceDefinition", serviceDefinition);
-    return dm.get(ArrowheadService.class, rm);
+    restrictionMap.clear();
+    restrictionMap.put("serviceDefinition", serviceDefinition);
+    return dm.get(ArrowheadService.class, restrictionMap);
   }
 
   private static boolean hasMatchingInterfaces(ArrowheadService savedService, ArrowheadService givenService) {

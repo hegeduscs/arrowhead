@@ -57,6 +57,7 @@ public final class AuthorizationService {
                                     "AuthorizationService:isSystemAuthorized");
     }
 
+    restrictionMap.clear();
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
@@ -121,6 +122,7 @@ public final class AuthorizationService {
                                     BadPayloadException.class.getName(), "AuthorizationService:isCloudAuthorized");
     }
 
+    restrictionMap.clear();
     restrictionMap.put("operator", request.getCloud().getOperator());
     restrictionMap.put("cloudName", request.getCloud().getCloudName());
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);

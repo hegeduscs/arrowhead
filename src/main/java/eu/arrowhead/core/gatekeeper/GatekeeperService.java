@@ -42,8 +42,8 @@ import org.apache.log4j.Logger;
 public final class GatekeeperService {
 
   static final int timeout = Integer.valueOf(ArrowheadMain.getProp().getProperty("gateway_socket_timeout"));
+  static final DatabaseManager dm = DatabaseManager.getInstance();
 
-  private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final Logger log = Logger.getLogger(GatekeeperService.class.getName());
 
   private GatekeeperService() throws AssertionError {

@@ -41,11 +41,9 @@ import org.apache.log4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 public class StoreApi {
 
-  private static final Logger log = Logger.getLogger(StoreApi.class.getName());
-
-  private final DatabaseManager dm = DatabaseManager.getInstance();
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
-
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final Logger log = Logger.getLogger(StoreApi.class.getName());
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -129,13 +127,13 @@ public class StoreApi {
       throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem or requestedService is/are missing.");
     }
 
-    List<OrchestrationStore> store = new ArrayList<>();
+    List<OrchestrationStore> store;
     if (query.getRequestedService() == null) {
-      StoreService.getDefaultStoreEntries(query.getRequesterSystem());
+      store = StoreService.getDefaultStoreEntries(query.getRequesterSystem());
     } else if (query.getRequesterSystem() == null) {
-      StoreService.getStoreEntries(query.getRequestedService());
+      store = StoreService.getStoreEntries(query.getRequestedService());
     } else {
-      StoreService.getStoreEntries(query.getRequesterSystem(), query.getRequestedService());
+      store = StoreService.getStoreEntries(query.getRequesterSystem(), query.getRequestedService());
     }
 
     Collections.sort(store);

@@ -12,7 +12,6 @@ package eu.arrowhead.common.messages;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.json.support.PreferredProviderSupport;
 
 public class PreferredProvider {
 
@@ -25,11 +24,6 @@ public class PreferredProvider {
   public PreferredProvider(ArrowheadSystem providerSystem, ArrowheadCloud providerCloud) {
     this.providerSystem = providerSystem;
     this.providerCloud = providerCloud;
-  }
-
-  public PreferredProvider(PreferredProviderSupport supportProvider) {
-    this.providerSystem = new ArrowheadSystem(supportProvider.getProviderSystem());
-    this.providerCloud = supportProvider.getProviderCloud();
   }
 
   public ArrowheadSystem getProviderSystem() {

@@ -31,6 +31,7 @@ public final class ServiceRegistryService {
                                     "ServiceRegistryService:queryRegistry");
     }
 
+    restrictionMap.clear();
     restrictionMap.put("serviceDefinition", queryForm.getService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -62,6 +63,7 @@ public final class ServiceRegistryService {
 
     entry.toDatabase();
 
+    restrictionMap.clear();
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -93,6 +95,7 @@ public final class ServiceRegistryService {
   public static ServiceRegistryEntry removeService(ServiceRegistryEntry entry) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
 
+    restrictionMap.clear();
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
 

@@ -9,7 +9,6 @@
 
 package eu.arrowhead.core.gatekeeper;
 
-import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
@@ -56,7 +55,6 @@ import org.apache.log4j.Logger;
 public class GatekeeperResource {
 
   private static final Logger log = Logger.getLogger(GatekeeperResource.class.getName());
-  private static final DatabaseManager dm = DatabaseManager.getInstance();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -167,7 +165,7 @@ public class GatekeeperResource {
     int timeout = icnProposal.getTimeout() > GatekeeperService.timeout ? GatekeeperService.timeout : icnProposal.getTimeout();
 
     // Getting the list of preferred brokers from database
-    List<Broker> preferredBrokers = dm.getAll(Broker.class, null);
+    List<Broker> preferredBrokers = GatekeeperService.dm.getAll(Broker.class, null);
 
     // Filtering common brokers
     List<Broker> commonBrokers = new ArrayList<>(icnProposal.getPreferredBrokers());
