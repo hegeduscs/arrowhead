@@ -104,23 +104,16 @@ public class ServiceRegistryMain {
           }
       }
     }
-
     //if no mode was selected in args, insecure it is
     if (!serverModeSet) {
       server = startServer();
     }
 
     //if scheduled ping is set
-    if (getAppProp().getProperty("ping.scheduled").equals("true")) {
+    if (Boolean.valueOf(getAppProp().getProperty("ping.scheduled", "false"))) {
       TimerTask pingTask = new PingProvidersTask();
       timer = new Timer();
-      int interval = 10;
-      try {
-        interval = Integer.parseInt(getAppProp().getProperty("ping.interval", "10"));
-      } catch (Exception e) {
-        log.error("Invalid 'ping.interval' value in app.properties!");
-      }
-
+      int interval = Integer.parseInt(getAppProp().getProperty("ping.interval", "10"));
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 
