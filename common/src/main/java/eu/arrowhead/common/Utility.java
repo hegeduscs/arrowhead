@@ -182,17 +182,17 @@ public final class Utility {
       log.error("Unknown reason for RuntimeException at the sendRequest() method.", e);
       log.info("Request failed, response status code: " + response.getStatus());
       log.info("Request failed, response body: " + errorMessageBody);
-      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.", e);
+      throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.", e);
     }
     if (errorMessage == null) {
       log.error("Unknown reason for RuntimeException at the sendRequest() method.");
       log.info("Request failed, response status code: " + response.getStatus());
       log.info("Request failed, response body: " + errorMessageBody);
-      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+      throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
     } else if (errorMessage.getExceptionType() == null) {
       log.info("Request failed, response status code: " + response.getStatus());
       log.info("Request failed, response body: " + errorMessageBody);
-      throw new ArrowheadException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
+      throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
     } else {
       log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
       switch (errorMessage.getExceptionType()) {

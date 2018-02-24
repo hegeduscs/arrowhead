@@ -50,8 +50,8 @@ public class AuthorizationResource {
 
   static final DatabaseManager dm = DatabaseManager.getInstance();
 
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(AuthorizationResource.class.getName());
-  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)

@@ -34,9 +34,9 @@ import org.apache.log4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatewayApi {
 
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(GatewayApi.class.getName());
   private static final DatabaseManager dm = DatabaseManager.getInstance();
-  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)

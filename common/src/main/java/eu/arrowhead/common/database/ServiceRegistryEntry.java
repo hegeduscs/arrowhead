@@ -200,7 +200,7 @@ public class ServiceRegistryEntry {
 
   @JsonIgnore
   public void toDatabase() {
-    if (!providedService.getServiceMetadata().isEmpty()) {
+    if (providedService.getServiceMetadata() != null && !providedService.getServiceMetadata().isEmpty()) {
       StringBuilder sb = new StringBuilder();
       for (Map.Entry<String, String> entry : providedService.getServiceMetadata().entrySet()) {
         sb.append(entry.getKey()).append("=").append(entry.getValue()).append(",");

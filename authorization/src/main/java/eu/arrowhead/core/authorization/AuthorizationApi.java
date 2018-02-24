@@ -43,9 +43,9 @@ import org.apache.log4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthorizationApi {
 
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(AuthorizationApi.class.getName());
   private static final DatabaseManager dm = DatabaseManager.getInstance();
-  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)

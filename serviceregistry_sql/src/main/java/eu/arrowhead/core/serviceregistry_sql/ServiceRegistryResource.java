@@ -37,7 +37,8 @@ import org.apache.log4j.Logger;
 public class ServiceRegistryResource {
 
   static final DatabaseManager dm = DatabaseManager.getInstance();
-  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
+
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(ServiceRegistryResource.class.getName());
 
   @GET

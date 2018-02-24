@@ -36,10 +36,9 @@ import org.apache.log4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 public class GatekeeperApi {
 
+  private final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(GatekeeperApi.class.getName());
   private static final DatabaseManager dm = DatabaseManager.getInstance();
-  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
-
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
