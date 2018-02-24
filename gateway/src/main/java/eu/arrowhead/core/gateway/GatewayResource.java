@@ -9,7 +9,6 @@
 
 package eu.arrowhead.core.gateway;
 
-import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.messages.ConnectToConsumerResponse;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
@@ -20,7 +19,9 @@ import eu.arrowhead.core.gateway.thread.InsecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.InsecureSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureSocketThread;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -40,7 +41,6 @@ public class GatewayResource {
 
   private static final Logger log = Logger.getLogger(GatewayResource.class.getName());
 
-  //TODO convert this to a method which returns a List<ActiveSessions>, move gateway POJOs to messages
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
@@ -49,13 +49,8 @@ public class GatewayResource {
 
   @GET
   @Path("management")
-  @Produces(MediaType.TEXT_PLAIN)
-  public String sessionManagement() {
-    if (GatewayService.activeSessions.isEmpty()) {
-      return "There are no active sessions.";
-    } else {
-      return Utility.toPrettyJson(null, GatewayService.activeSessions);
-    }
+  public List<ActiveSession> sessionManagement() {
+    return new ArrayList<>(GatewayService.activeSessions.values());
   }
 
   @PUT

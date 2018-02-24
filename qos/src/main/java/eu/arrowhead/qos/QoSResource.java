@@ -16,7 +16,6 @@ import eu.arrowhead.common.messages.QoSReservationResponse;
 import eu.arrowhead.common.messages.QoSReserve;
 import eu.arrowhead.common.messages.QoSVerificationResponse;
 import eu.arrowhead.common.messages.QoSVerify;
-import java.io.IOException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -30,7 +29,6 @@ import javax.ws.rs.core.Response.Status;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class QoSResource {
-
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -48,7 +46,7 @@ public class QoSResource {
 
   @PUT
   @Path("reserve")
-  public Response qosReservation(QoSReserve qosReservation) throws ReservationException, DriverNotFoundException, IOException {
+  public Response qosReservation(QoSReserve qosReservation) throws ReservationException, DriverNotFoundException {
 
     QoSReservationResponse qosrr = QoSManagerService.qosReserve(qosReservation);
     return Response.status(Status.OK).entity(qosrr).build();

@@ -43,10 +43,8 @@ import org.apache.log4j.Logger;
 public class StoreApi {
 
   private static final Logger log = Logger.getLogger(StoreApi.class.getName());
-
-  private final DatabaseManager dm = DatabaseManager.getInstance();
-  private final HashMap<String, Object> restrictionMap = new HashMap<>();
-
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)

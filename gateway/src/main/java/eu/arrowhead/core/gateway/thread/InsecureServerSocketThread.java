@@ -31,10 +31,10 @@ public class InsecureServerSocketThread extends Thread {
   private ServerSocket serverSocket;
   private Socket consumerSocket;
   private ConnectToConsumerRequest connectionRequest;
+  private GatewaySession gatewaySession;
 
   private static Boolean isFirstMessage = true;
   private static final Logger log = Logger.getLogger(InsecureServerSocketThread.class.getName());
-  private GatewaySession gatewaySession;
 
   public InsecureServerSocketThread(GatewaySession gatewaySession, int port, ConnectToConsumerRequest connectionRequest) {
     this.port = port;

@@ -35,9 +35,8 @@ import org.apache.log4j.Logger;
 public class GatewayApi {
 
   private static final Logger log = Logger.getLogger(GatewayApi.class.getName());
-  private final DatabaseManager dm = DatabaseManager.getInstance();
-  private final HashMap<String, Object> restrictionMap = new HashMap<>();
-
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -48,7 +47,6 @@ public class GatewayApi {
   @GET
   @Path("brokers")
   public List<Broker> getAllBroker() {
-
     List<Broker> brokerList = dm.getAll(Broker.class, restrictionMap);
     if (brokerList.isEmpty()) {
       log.info("getAllBroker throws DataNotFoundException");
