@@ -165,7 +165,7 @@ public class ArrowheadSystem {
       throw new IllegalArgumentException("The string fields can not contain dots!");
     }
     //throws NPE if any of the fields are null
-    return systemName.concat(".").concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
+    return systemName.concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
   }
 
 }
