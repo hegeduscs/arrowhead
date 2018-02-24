@@ -10,7 +10,6 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import eu.arrowhead.common.json.support.ArrowheadServiceSupport;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,12 +62,6 @@ public class ArrowheadService {
     this.serviceMetadata = serviceMetadata;
   }
 
-  public ArrowheadService(ArrowheadServiceSupport service) {
-    this.serviceDefinition = service.getServiceGroup() + "_" + service.getServiceDefinition();
-    this.interfaces = service.getInterfaces();
-    this.serviceMetadata = service.getServiceMetadata();
-  }
-
   @XmlTransient
   public int getId() {
     return id;
@@ -115,18 +108,6 @@ public class ArrowheadService {
   @JsonIgnore
   public boolean isValidForDatabase() {
     return serviceDefinition != null;
-  }
-
-  @JsonIgnore
-  public boolean isValidForDNSSD() {
-    boolean areInterfacesClean = true;
-    for (String interf : interfaces) {
-      if (interf.contains("_")) {
-        areInterfacesClean = false;
-      }
-    }
-
-    return (serviceDefinition != null && !interfaces.isEmpty() && !serviceDefinition.contains("_") && areInterfacesClean);
   }
 
   @Override

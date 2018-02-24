@@ -34,10 +34,10 @@ orch_base_uri_secured=https://127.0.0.1:8441
   sr_base_uri_secured=https://127.0.0.1:8443/
 
   #Ping providers parameters
-  ping.scheduled=false
-  ping.timeout=10000
+  ping_scheduled=false
+  ping_timeout=10000
   #interval in minutes
-  ping.interval=60
+  ping_interval=60
 
 #Common
 db_user=root

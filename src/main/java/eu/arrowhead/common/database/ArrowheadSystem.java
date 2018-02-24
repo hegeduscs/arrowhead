@@ -10,7 +10,6 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import eu.arrowhead.common.json.support.ArrowheadSystemSupport;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -64,13 +63,6 @@ public class ArrowheadSystem {
       this.port = Integer.valueOf(fields[2]);
       this.authenticationInfo = fields[3];
     }
-  }
-
-  public ArrowheadSystem(ArrowheadSystemSupport system) {
-    this.systemName = system.getSystemGroup() + "_" + system.getSystemName();
-    this.address = system.getAddress();
-    this.port = system.getPort();
-    this.authenticationInfo = system.getAuthenticationInfo();
   }
 
   public ArrowheadSystem(ArrowheadSystem system) {
@@ -165,7 +157,7 @@ public class ArrowheadSystem {
       throw new IllegalArgumentException("The string fields can not contain dots!");
     }
     //throws NPE if any of the fields are null
-    return systemName.concat(".").concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
+    return systemName.concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
   }
 
 }

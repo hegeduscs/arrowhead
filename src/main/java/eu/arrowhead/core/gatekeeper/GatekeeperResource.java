@@ -34,6 +34,7 @@ import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.core.authorization.AuthorizationService;
 import eu.arrowhead.core.gateway.GatewayService;
+import eu.arrowhead.core.serviceregistry.ServiceRegistryService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
 @Path("gatekeeper")
@@ -92,13 +92,10 @@ public class GatekeeperResource {
     }
     // If it is authorized, poll the Service Registry for the requested Service
     else {
-      // Compiling the URI and the request payload
-      String srUri = UriBuilder.fromPath(GatekeeperMain.SERVICE_REGISTRY_URI).path("query").toString();
       ServiceQueryForm queryForm = new ServiceQueryForm(gsdPoll.getRequestedService(), false, false);
+      ServiceQueryResult result = ServiceRegistryService.queryRegistry(queryForm);
 
       // Sending back provider Cloud information if the SR poll has results
-      Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);
-      ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
       if (!result.isValid()) {
         log.info("GSD poll: SR query came back empty, sending back error");
         throw new DataNotFoundException("Service not found in the Service Registry, GSD poll failed.", Status.NOT_FOUND.getStatusCode(),

@@ -28,14 +28,14 @@ public class PingProvidersTask extends TimerTask {
 
   //Removes Service Registry entries with offline/inactive providers
   private int pingAndRemoveServices() {
-    List<ServiceRegistryEntry> srEntries = ServiceRegistryResource.dm.getAll(ServiceRegistryEntry.class, null);
+    List<ServiceRegistryEntry> srEntries = ServiceRegistryService.dm.getAll(ServiceRegistryEntry.class, null);
 
     boolean connectionIsAlive;
     int deleteCount = 0;
     for (ServiceRegistryEntry entry : srEntries) {
-      connectionIsAlive = RegistryUtils.pingHost(entry.getProvider().getAddress(), entry.getProvider().getPort(), 10);
+      connectionIsAlive = RegistryUtils.pingHost(entry.getProvider().getAddress(), entry.getProvider().getPort(), ServiceRegistryService.timeout);
       if (!connectionIsAlive) {
-        ServiceRegistryResource.dm.delete(entry);
+        ServiceRegistryService.dm.delete(entry);
         deleteCount++;
       }
     }

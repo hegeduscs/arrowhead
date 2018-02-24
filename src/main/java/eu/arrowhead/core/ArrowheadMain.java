@@ -1,5 +1,6 @@
 package eu.arrowhead.core;
 
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
@@ -10,6 +11,7 @@ import eu.arrowhead.core.gateway.GatewayApi;
 import eu.arrowhead.core.orchestrator.CommonApi;
 import eu.arrowhead.core.orchestrator.OrchestratorResource;
 import eu.arrowhead.core.orchestrator.StoreApi;
+import eu.arrowhead.core.serviceregistry.PingProvidersTask;
 import eu.arrowhead.core.serviceregistry.ServiceRegistryApi;
 import eu.arrowhead.core.serviceregistry.ServiceRegistryResource;
 import java.io.BufferedReader;
@@ -20,12 +22,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
@@ -44,7 +47,6 @@ public class ArrowheadMain {
 
   public static final boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
 
-  private static PrivateKey privateKey;
   private static HttpServer gkServer;
   private static HttpServer gkSecureServer;
   private static HttpServer orchServer;
@@ -52,6 +54,7 @@ public class ArrowheadMain {
   private static HttpServer srServer;
   private static HttpServer srSecureServer;
   private static Properties prop;
+  private static Timer timer;
 
   private static final String GK_BASE_URI = getProp().getProperty("gatekeeper_base_uri", "http://127.0.0.1:8446/");
   private static final String GK_BASE_URI_SECURED = getProp().getProperty("gatekeeper_base_uri_secured", "https://127.0.0.1:8447/");
@@ -60,6 +63,7 @@ public class ArrowheadMain {
   private static final String SR_BASE_URI = getProp().getProperty("sr_base_uri", "http://127.0.0.1:8442/");
   private static final String SR_BASE_URI_SECURED = getProp().getProperty("sr_base_uri_secured", "https://127.0.0.1:8443/");
   private static final Logger log = Logger.getLogger(ArrowheadMain.class.getName());
+
   // The mandatory property fields
   private static final List<String> basicPropertyNames = Arrays
       .asList("db_user", "db_password", "db_address", "gateway_socket_timeout", "gatekeeper_base_uri", "min_port", "max_port", "orch_base_uri",
@@ -68,9 +72,9 @@ public class ArrowheadMain {
       .asList("auth_keystore", "auth_keystorepass", "gatekeeper_base_uri_secured", "master_arrowhead_cert", "gateway_keystore",
               "gateway_keystore_pass", "orch_base_uri_secured", "sr_base_uri_secured", "cloud_keystore", "cloud_keystore_pass", "cloud_keypass");
 
+  // Types of core systems enum
   private enum CoreSystemType {GATEKEEPER, ORCHESTRATOR, SERVICE_REGISTRY}
 
-  //TODO ADD SR pingprovidertask
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
@@ -130,10 +134,22 @@ public class ArrowheadMain {
       srServer = startServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
     }
 
+    if (Boolean.valueOf(getProp().getProperty("ping_scheduled", "false"))) {
+      TimerTask pingTask = new PingProvidersTask();
+      timer = new Timer();
+      int interval = Integer.parseInt(getProp().getProperty("ping_interval", "10"));
+      timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
+    }
+
+    //This is here to initialize the database connection before the REST resources are initiated
+    DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
         System.out.println("Received TERM signal, shutting down...");
+        if (timer != null) {
+          timer.cancel();
+        }
         shutdown();
       }));
     } else {
@@ -144,6 +160,9 @@ public class ArrowheadMain {
         input = br.readLine();
       }
       br.close();
+      if (timer != null) {
+        timer.cancel();
+      }
       shutdown();
     }
   }
