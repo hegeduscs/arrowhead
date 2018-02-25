@@ -33,6 +33,7 @@ import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.core.authorization.AuthorizationService;
 import eu.arrowhead.core.gateway.GatewayService;
+import eu.arrowhead.core.orchestrator.OrchestratorService;
 import eu.arrowhead.core.serviceregistry.ServiceRegistryService;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,13 +150,12 @@ public class GatekeeperResource {
         .requesterCloud(icnProposal.getRequesterCloud()).requestedService(icnProposal.getRequestedService()).orchestrationFlags(orchestrationFlags)
         .preferredProviders(preferredProviders).build();
 
-    Response response = Utility.sendRequest(GatekeeperMain.ORCHESTRATOR_URI, "POST", serviceRequestForm);
-    OrchestrationResponse orchResponse = response.readEntity(OrchestrationResponse.class);
+    OrchestrationResponse orchResponse = OrchestratorService.startOrchestrationProcess(serviceRequestForm);
     // If the gateway service is not requested, then return the full orchestration response
     if (!icnProposal.getNegotiationFlags().get("useGateway")) {
       ICNResult icnResult = new ICNResult(orchResponse);
       log.info("ICNProposal: returning the OrchestrationResponse to the requester Cloud.");
-      return Response.status(response.getStatus()).entity(icnResult).build();
+      return Response.status(Status.OK).entity(icnResult).build();
     }
 
     // Compiling the gateway request payload
@@ -204,7 +204,7 @@ public class GatekeeperResource {
     // The AMQP broker can only create 1 channel at the moment, so the gatekeeper have to choose an orchestration form
     ICNEnd icnEnd = new ICNEnd(orchResponse.getResponse().get(0), gatewayConnectionInfo);
     log.info("ICNProposal: returning the first OrchestrationForm and the GatewayConnectionInfo to the requester Cloud.");
-    return Response.status(response.getStatus()).entity(icnEnd).build();
+    return Response.status(Status.OK).entity(icnEnd).build();
   }
 
 }

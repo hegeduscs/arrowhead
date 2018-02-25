@@ -9,7 +9,6 @@
 
 package eu.arrowhead.core.orchestrator;
 
-import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.OrchestrationStore;
@@ -25,13 +24,13 @@ import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.common.messages.TokenData;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
 import eu.arrowhead.common.messages.TokenGenerationResponse;
+import eu.arrowhead.core.authorization.AuthorizationService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
@@ -41,12 +40,32 @@ import org.apache.log4j.Logger;
  *
  * @author Umlauf Zoltán
  */
-final class OrchestratorService {
+public final class OrchestratorService {
 
   private static final Logger log = Logger.getLogger(OrchestratorService.class.getName());
 
   private OrchestratorService() throws AssertionError {
     throw new AssertionError("OrchestratorService is a non-instantiable class");
+  }
+
+  public static OrchestrationResponse startOrchestrationProcess(ServiceRequestForm srf) {
+    OrchestrationResponse orchResponse;
+    if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
+      log.info("Received an externalServiceRequest.");
+      orchResponse = OrchestratorService.externalServiceRequest(srf);
+    } else if (srf.getOrchestrationFlags().get("triggerInterCloud")) {
+      log.info("Received a triggerInterCloud request.");
+      orchResponse = OrchestratorService.triggerInterCloud(srf);
+    } else if (!srf.getOrchestrationFlags().get("overrideStore")) { //overrideStore == false
+      log.info("Received an orchestrationFromStore request.");
+      orchResponse = OrchestratorService.orchestrationFromStore(srf);
+    } else {
+      log.info("Received a dynamicOrchestration request.");
+      orchResponse = OrchestratorService.dynamicOrchestration(srf);
+    }
+
+    log.info("The orchestration process returned with " + orchResponse.getResponse().size() + " orchestration forms.");
+    return orchResponse;
   }
 
   /**
@@ -56,7 +75,7 @@ final class OrchestratorService {
    *
    * @throws DataNotFoundException if no local provider <tt>ArrowheadSystem</tt> is found and <i>enableInterCloud</i> is false
    */
-  static OrchestrationResponse dynamicOrchestration(ServiceRequestForm srf) {
+  private static OrchestrationResponse dynamicOrchestration(ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     try {
@@ -144,7 +163,7 @@ final class OrchestratorService {
    * @throws DataNotFoundException if all the queried Orchestration Store entry options were exhausted and none were found operational
    */
 
-  static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf) {
+  private static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf) {
     // Querying the Orchestration Store for matching entries
     List<OrchestrationStore> entryList = OrchestratorDriver.queryOrchestrationStore(srf.getRequesterSystem(), srf.getRequestedService());
 
@@ -205,7 +224,7 @@ final class OrchestratorService {
   /**
    * Represents the orchestration process where the requester System only asked for Inter-Cloud servicing.
    */
-  static OrchestrationResponse triggerInterCloud(ServiceRequestForm srf) {
+  private static OrchestrationResponse triggerInterCloud(ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     // Extracting the valid and unique ArrowheadClouds from the preferred providers
@@ -252,7 +271,7 @@ final class OrchestratorService {
    * that this request from the remote Orchestrator can be satisfied in this Cloud. (Gatekeeper polled the Service Registry and Authorization
    * Systems.)
    */
-  static OrchestrationResponse externalServiceRequest(ServiceRequestForm srf) {
+  private static OrchestrationResponse externalServiceRequest(ServiceRequestForm srf) {
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     // Querying the Service Registry to get the list of Provider Systems
@@ -324,6 +343,7 @@ final class OrchestratorService {
     Map<String, String> metadata;
     TokenGenerationResponse tokenResponse = null;
     if (srf.getRequestedService() == null) {
+      tokenResponse = new TokenGenerationResponse();
       for (ServiceRegistryEntry entry : srList) {
         metadata = entry.getProvidedService().getServiceMetadata();
         if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
@@ -331,9 +351,8 @@ final class OrchestratorService {
           TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), null,
                                                                            Collections.singletonList(entry.getProvider()), entry.getProvidedService(),
                                                                            0);
-          // Sending the token generation request, parsing the response
-          Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-          tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
+          TokenGenerationResponse oneResponse = AuthorizationService.tokenGeneration(tokenRequest);
+          tokenResponse.getTokenData().add(oneResponse.getTokenData().get(0));
         }
       }
     } else {
@@ -348,9 +367,7 @@ final class OrchestratorService {
         // Compiling the request payload
         TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
                                                                          srf.getRequestedService(), 0);
-        // Sending the token generation request, parsing the response
-        Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-        tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
+        tokenResponse = AuthorizationService.tokenGeneration(tokenRequest);
       }
     }
 
@@ -368,7 +385,7 @@ final class OrchestratorService {
       }
     }
     // Adding the tokens and signatures, if token generation happened
-    if (tokenResponse != null) {
+    if (tokenResponse != null && tokenResponse.getTokenData().size() > 0) {
       for (TokenData data : tokenResponse.getTokenData()) {
         for (OrchestrationForm of : ofList) {
           if (data.getSystem().equals(of.getProvider())) {

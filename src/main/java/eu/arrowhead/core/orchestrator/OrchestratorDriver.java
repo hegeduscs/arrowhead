@@ -9,7 +9,6 @@
 
 package eu.arrowhead.core.orchestrator;
 
-import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -28,6 +27,9 @@ import eu.arrowhead.common.messages.PreferredProvider;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.messages.ServiceRequestForm;
+import eu.arrowhead.core.authorization.AuthorizationService;
+import eu.arrowhead.core.gatekeeper.GatekeeperService;
+import eu.arrowhead.core.serviceregistry.ServiceRegistryService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,9 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
 /**
@@ -68,14 +68,9 @@ final class OrchestratorDriver {
    * @throws DataNotFoundException if the Service Registry response list is empty
    */
   static List<ServiceRegistryEntry> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
-    // Compiling the URI and the request payload
-    String srUri = UriBuilder.fromPath(OrchestratorMain.SERVICE_REGISTRY_URI).path("query").toString();
     ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch);
-
-    // Sending the request, parsing the returned result
-    Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);
-    ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
-    if (serviceQueryResult == null || !serviceQueryResult.isValid()) {
+    ServiceQueryResult serviceQueryResult = ServiceRegistryService.queryRegistry(queryForm);
+    if (!serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");
       throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString(), Status.NOT_FOUND.getStatusCode(),
                                       DataNotFoundException.class.getName(), OrchestratorDriver.class.toString());
@@ -108,13 +103,8 @@ final class OrchestratorDriver {
    */
 
   static Set<ArrowheadSystem> queryAuthorization(ArrowheadSystem consumer, ArrowheadService service, Set<ArrowheadSystem> providerSet) {
-    // Compiling the URI and the request payload
-    String uri = UriBuilder.fromPath(OrchestratorMain.AUTH_CONTROL_URI).path("intracloud").toString();
     IntraCloudAuthRequest request = new IntraCloudAuthRequest(consumer, providerSet, service);
-
-    // Sending the request, parsing the returned result
-    Response response = Utility.sendRequest(uri, "PUT", request);
-    IntraCloudAuthResponse authResponse = response.readEntity(IntraCloudAuthResponse.class);
+    IntraCloudAuthResponse authResponse = AuthorizationService.isSystemAuthorized(request);
     Set<ArrowheadSystem> authorizedSystems = new HashSet<>();
     // Set view of HashMap ensures there are no duplicates between the keys (systems)
     for (Map.Entry<ArrowheadSystem, Boolean> entry : authResponse.getAuthorizationMap().entrySet()) {
@@ -378,9 +368,7 @@ final class OrchestratorDriver {
     // Compiling the request payload
     GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds);
 
-    // Sending the request, sanity check on the returned result
-    Response response = Utility.sendRequest(OrchestratorMain.GSD_SERVICE_URI, "PUT", requestForm);
-    GSDResult result = response.readEntity(GSDResult.class);
+    GSDResult result = GatekeeperService.GSDRequest(requestForm);
     if (!result.isValid()) {
       log.error("doGlobalServiceDiscovery DataNotFoundException");
       throw new DataNotFoundException("GlobalServiceDiscovery yielded no result.", Status.NOT_FOUND.getStatusCode(),
@@ -471,9 +459,7 @@ final class OrchestratorDriver {
     ICNRequestForm requestForm = new ICNRequestForm(srf.getRequestedService(), targetCloud, srf.getRequesterSystem(), preferredSystems,
                                                     negotiationFlags);
 
-    // Sending the request, doing sanity check on the returned result
-    Response response = Utility.sendRequest(OrchestratorMain.ICN_SERVICE_URI, "PUT", requestForm);
-    ICNResult result = response.readEntity(ICNResult.class);
+    ICNResult result = GatekeeperService.ICNRequest(requestForm);
     if (!result.isValid()) {
       log.error("doInterCloudNegotiations DataNotFoundException");
       throw new DataNotFoundException("ICN failed with the remote cloud.", Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),

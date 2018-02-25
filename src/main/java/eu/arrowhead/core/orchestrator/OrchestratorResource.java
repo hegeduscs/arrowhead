@@ -61,23 +61,7 @@ public class OrchestratorResource {
                                     BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
     }
 
-    OrchestrationResponse orchResponse;
-    if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
-      log.info("Received an externalServiceRequest.");
-      orchResponse = OrchestratorService.externalServiceRequest(srf);
-    } else if (srf.getOrchestrationFlags().get("triggerInterCloud")) {
-      log.info("Received a triggerInterCloud request.");
-      orchResponse = OrchestratorService.triggerInterCloud(srf);
-    } else if (!srf.getOrchestrationFlags().get("overrideStore")) { //overrideStore == false
-      log.info("Received an orchestrationFromStore request.");
-      orchResponse = OrchestratorService.orchestrationFromStore(srf);
-    } else {
-      log.info("Received a dynamicOrchestration request.");
-      orchResponse = OrchestratorService.dynamicOrchestration(srf);
-    }
-
-    log.info("The orchestration process returned with " + orchResponse.getResponse().size() + " orchestration forms.");
-    return Response.status(Status.OK).entity(orchResponse).build();
+    return Response.status(Status.OK).entity(OrchestratorService.startOrchestrationProcess(srf)).build();
   }
 
   /**
@@ -90,7 +74,7 @@ public class OrchestratorResource {
     log.info("Received a GET Store orchestration from: " + request.getRemoteAddr() + " " + requesterSystem.getSystemName());
 
     ServiceRequestForm srf = new ServiceRequestForm.Builder(requesterSystem).build();
-    OrchestrationResponse orchResponse = OrchestratorService.orchestrationFromStore(srf);
+    OrchestrationResponse orchResponse = OrchestratorService.startOrchestrationProcess(srf);
 
     log.info("Default store orchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
     return Response.status(Status.OK).entity(orchResponse).build();
