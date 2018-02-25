@@ -324,6 +324,7 @@ final class OrchestratorService {
     Map<String, String> metadata;
     TokenGenerationResponse tokenResponse = null;
     if (srf.getRequestedService() == null) {
+      tokenResponse = new TokenGenerationResponse();
       for (ServiceRegistryEntry entry : srList) {
         metadata = entry.getProvidedService().getServiceMetadata();
         if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
@@ -333,7 +334,8 @@ final class OrchestratorService {
                                                                            0);
           // Sending the token generation request, parsing the response
           Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-          tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
+          TokenGenerationResponse oneResponse = authResponse.readEntity(TokenGenerationResponse.class);
+          tokenResponse.getTokenData().add(oneResponse.getTokenData().get(0));
         }
       }
     } else {
