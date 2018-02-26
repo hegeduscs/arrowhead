@@ -1,6 +1,5 @@
 package eu.arrowhead.core;
 
-import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthenticationException;
 import eu.arrowhead.common.security.SecurityUtils;
@@ -76,8 +75,8 @@ public class ArrowheadMain {
   private enum CoreSystemType {GATEKEEPER, ORCHESTRATOR, SERVICE_REGISTRY}
 
   public static void main(String[] args) throws IOException {
-    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
+    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     Utility.isUrlValid(GK_BASE_URI, false);
     Utility.isUrlValid(GK_BASE_URI_SECURED, true);
     Utility.isUrlValid(ORCH_BASE_URI, false);
@@ -141,8 +140,6 @@ public class ArrowheadMain {
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 
-    //This is here to initialize the database connection before the REST resources are initiated
-    DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {

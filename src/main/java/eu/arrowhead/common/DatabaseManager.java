@@ -10,13 +10,10 @@
 package eu.arrowhead.common;
 
 import eu.arrowhead.common.exception.DuplicateEntryException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import eu.arrowhead.core.ArrowheadMain;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
@@ -34,10 +31,9 @@ public class DatabaseManager {
 
   private static DatabaseManager instance;
   private static SessionFactory sessionFactory;
-  private static Properties prop;
-  private static final String dbAddress = getProp().getProperty("db_address", "jdbc:mysql://127.0.0.1:3306/log");
-  private static final String dbUser = getProp().getProperty("db_user", "root");
-  private static final String dbPassword = getProp().getProperty("db_password", "root");
+  private static final String dbAddress = ArrowheadMain.getProp().getProperty("db_address", "jdbc:mysql://127.0.0.1:3306/log");
+  private static final String dbUser = ArrowheadMain.getProp().getProperty("db_user", "root");
+  private static final String dbPassword = ArrowheadMain.getProp().getProperty("db_password", "root");
   private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
 
   static {
@@ -60,24 +56,6 @@ public class DatabaseManager {
       instance = new DatabaseManager();
     }
     return instance;
-  }
-
-  private synchronized static Properties getProp() {
-    try {
-      if (prop == null) {
-        prop = new Properties();
-        File file = new File("config" + File.separator + "app.properties.sample");
-        FileInputStream inputStream = new FileInputStream(file);
-        prop.load(inputStream);
-      }
-    } catch (FileNotFoundException ex) {
-      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
-    return prop;
   }
 
   public <T> T get(Class<T> queryClass, int id) {
