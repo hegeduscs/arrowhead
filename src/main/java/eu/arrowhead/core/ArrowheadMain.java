@@ -227,6 +227,8 @@ public class ArrowheadMain {
     }
     if (type != CoreSystemType.GATEKEEPER) {
       SSLContextConfigurator serverConfig = new SSLContextConfigurator();
+      serverConfig.setKeyStoreFile(cloudKeystorePath);
+      serverConfig.setKeyStorePass(cloudKeystorePass);
       serverConfig.setTrustStoreFile(cloudKeystorePath);
       serverConfig.setTrustStorePass(cloudKeystorePass);
       if (!serverConfig.validateConfiguration(false)) {
