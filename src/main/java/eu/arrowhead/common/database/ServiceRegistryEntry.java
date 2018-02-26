@@ -195,7 +195,11 @@ public class ServiceRegistryEntry {
 
   @Override
   public String toString() {
-    return providedService.getServiceDefinition() + ":" + provider.getSystemName();
+    if (providedService != null && providedService.getServiceDefinition() != null && provider != null && provider.getSystemName() != null) {
+      return providedService.getServiceDefinition() + ":" + provider.getSystemName();
+    } else {
+      return "ServiceRegistryEntry not initialized yet";
+    }
   }
 
   @JsonIgnore
