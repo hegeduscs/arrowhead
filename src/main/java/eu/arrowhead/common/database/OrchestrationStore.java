@@ -44,7 +44,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "orchestration_store", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
-@Check(constraints = "priority >= 1 AND (provider_cloud_id IS NULL OR is_default = 0)")
+@Check(constraints = "priority >= 1 AND (provider_cloud_id IS NULL OR is_default = false)")
 public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @Column(name = "id")
