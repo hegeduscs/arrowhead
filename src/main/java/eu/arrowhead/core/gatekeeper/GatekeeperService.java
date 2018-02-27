@@ -76,7 +76,7 @@ public final class GatekeeperService {
       String uri;
       for (ArrowheadCloud cloud : requestForm.getSearchPerimeter()) {
         try {
-          uri = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), false);
+          uri = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), cloud.isSecure());
         }
         // We skip the clouds with missing information
         catch (NullPointerException ex) {

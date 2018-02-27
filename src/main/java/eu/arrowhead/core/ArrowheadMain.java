@@ -55,28 +55,30 @@ public class ArrowheadMain {
   private static Properties prop;
   private static Timer timer;
 
-  private static final String GK_BASE_URI = getProp().getProperty("gatekeeper_base_uri", "http://127.0.0.1:8446/");
-  private static final String GK_BASE_URI_SECURED = getProp().getProperty("gatekeeper_base_uri_secured", "https://127.0.0.1:8447/");
-  private static final String ORCH_BASE_URI = getProp().getProperty("orch_base_uri", "http://127.0.0.1:8440/");
-  private static final String ORCH_BASE_URI_SECURED = getProp().getProperty("orch_base_uri_secured", "https://127.0.0.1:8441/");
-  private static final String SR_BASE_URI = getProp().getProperty("sr_base_uri", "http://127.0.0.1:8442/");
-  private static final String SR_BASE_URI_SECURED = getProp().getProperty("sr_base_uri_secured", "https://127.0.0.1:8443/");
+  private static final String SERVER_ADDRESS = getProp().getProperty("server_address", "127.0.0.1");
   private static final Logger log = Logger.getLogger(ArrowheadMain.class.getName());
-
   // The mandatory property fields
   private static final List<String> basicPropertyNames = Arrays
-      .asList("db_user", "db_password", "db_address", "gateway_socket_timeout", "gatekeeper_base_uri", "min_port", "max_port", "orch_base_uri",
-              "sr_base_uri");
+      .asList("server_address", "db_user", "db_password", "db_address", "gateway_socket_timeout", "min_port", "max_port");
   private static final List<String> securePropertyNames = Arrays
-      .asList("auth_keystore", "auth_keystorepass", "gatekeeper_base_uri_secured", "master_arrowhead_cert", "gateway_keystore",
-              "gateway_keystore_pass", "orch_base_uri_secured", "sr_base_uri_secured", "cloud_keystore", "cloud_keystore_pass", "cloud_keypass");
+      .asList("auth_keystore", "auth_keystorepass", "master_arrowhead_cert", "gateway_keystore", "gateway_keystore_pass", "cloud_keystore",
+              "cloud_keystore_pass", "cloud_keypass");
 
   // Types of core systems enum
-  private enum CoreSystemType {GATEKEEPER, ORCHESTRATOR, SERVICE_REGISTRY}
+  private enum CoreSystemType {
+    GATEKEEPER, ORCHESTRATOR, SERVICE_REGISTRY
+  }
 
   public static void main(String[] args) throws IOException {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+
+    final String GK_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8446, "", false);
+    final String GK_BASE_URI_SECURED = Utility.getUri(SERVER_ADDRESS, 8447, "", true);
+    final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8440, "", false);
+    final String ORCH_BASE_URI_SECURED = Utility.getUri(SERVER_ADDRESS, 8441, "", true);
+    final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8442, "", false);
+    final String SR_BASE_URI_SECURED = Utility.getUri(SERVER_ADDRESS, 8443, "", true);
     Utility.isUrlValid(GK_BASE_URI, false);
     Utility.isUrlValid(GK_BASE_URI_SECURED, true);
     Utility.isUrlValid(ORCH_BASE_URI, false);
