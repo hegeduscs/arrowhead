@@ -74,6 +74,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${bouncy.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.rabbitmq</groupId>
       <artifactId>amqp-client</artifactId>
       <version>${rabbit.mq.version}</version>
