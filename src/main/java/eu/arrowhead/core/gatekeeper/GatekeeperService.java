@@ -173,7 +173,7 @@ public final class GatekeeperService {
 
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();
     gatewaySystem.setSystemName("gateway");
-    gatewaySystem.setAddress(ArrowheadMain.serverAddress);
+    gatewaySystem.setAddress("192.168.42.1");
     gatewaySystem.setPort(connectToConsumerResponse.getServerSocketPort());
     gatewaySystem.setAuthenticationInfo(GatewayService.GATEWAY_PUBLIC_KEY);
     icnEnd.getOrchestrationForm().setProvider(gatewaySystem);
