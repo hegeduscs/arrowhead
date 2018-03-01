@@ -42,10 +42,10 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class ArrowheadMain {
 
   public static boolean DEBUG_MODE;
-  public static String serverAddress;
 
   public static final boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
 
+  private static String serverAddress;
   private static HttpServer gkServer;
   private static HttpServer gkSecureServer;
   private static HttpServer orchServer;
