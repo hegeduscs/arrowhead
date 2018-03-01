@@ -11,25 +11,31 @@ package eu.arrowhead.common.exception;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.ContainerResponse;
 
+@Provider
 public class GenericExceptionMapper implements ExceptionMapper<Exception> {
 
+  @Inject
+  private javax.inject.Provider<ContainerRequest> requestContext;
   @Inject
   private javax.inject.Provider<ContainerResponse> responseContext;
 
   @Override
   public Response toResponse(Exception ex) {
     ex.printStackTrace();
-    ErrorMessage errorMessage;
-    if (responseContext.get() != null) {
-      errorMessage = new ErrorMessage(ex.getMessage(), responseContext.get().getStatus(), ex.getClass().getName(),
-                                      responseContext.get().getRequestContext().getAbsolutePath().toString());
-    } else {
-      errorMessage = new ErrorMessage(ex.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), ex.getClass().getName(), null);
+    int errorCode = 500; //Internal Server Error
+    String origin = null;
+    if (requestContext.get() != null) {
+      origin = requestContext.get().getAbsolutePath().toString();
     }
-    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(errorMessage).header("Content-type", "application/json").build();
+    if (responseContext.get() != null) {
+      errorCode = responseContext.get().getStatus();
+    }
+    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), errorCode, ex.getClass().getName(), origin);
+    return Response.status(errorCode).entity(errorMessage).header("Content-type", "application/json").build();
   }
 }
