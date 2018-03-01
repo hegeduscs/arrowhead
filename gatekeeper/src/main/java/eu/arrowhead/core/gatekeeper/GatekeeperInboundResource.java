@@ -148,6 +148,9 @@ public class GatekeeperInboundResource {
 
     // Changing the requesterSystem for the sake of proper token generation
     if (icnProposal.getNegotiationFlags().get("useGateway")) {
+      if (!GatekeeperMain.USE_GATEWAY) {
+        throw new ArrowheadException("The remote Gatekeeper is configured to use the Gateway Core System!");
+      }
       icnProposal.getRequesterSystem().setSystemName(GatekeeperMain.GATEWAY_PROVIDER_URI[1]);
     }
     ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
