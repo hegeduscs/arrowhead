@@ -152,7 +152,7 @@ public final class OrchestratorService {
      * If the code reaches this part, that means the Intra-Cloud orchestration failed, but the Inter-Cloud orchestration is allowed, so we try that
      * too.
      */
-    log.info("dynamicOrchestration: Intra-Cloud orchestration failed, moving to Inter-Cloud orchestration.");
+    log.info("dynamicOrchestration: moving to Inter-Cloud orchestration.");
     return triggerInterCloud(srf);
   }
 
@@ -169,6 +169,7 @@ public final class OrchestratorService {
 
     // Cross-checking the results with the Service Registry and Authorization
     entryList = OrchestratorDriver.crossCheckStoreEntries(srf, entryList);
+    log.debug("orchestrationFromStore: SR-Auth cross-check is done");
 
     // In case of default store orchestration, we return all the remaining Store entries (all intra-cloud, 1 provider/service)
     if (srf.getRequestedService() == null) {
@@ -237,12 +238,14 @@ public final class OrchestratorService {
 
     // Telling the Gatekeeper to do a Global Service Discovery
     GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(srf.getRequestedService(), preferredClouds);
+    log.debug("triggerInterCloud: GSD results arrived back to the Orchestrator");
 
     // Picking a target Cloud from the ones that responded to the GSD poll
     ArrowheadCloud targetCloud = OrchestratorDriver.interCloudMatchmaking(result, preferredClouds, orchestrationFlags.get("onlyPreferred"));
 
     // Telling the Gatekeeper to start the Inter-Cloud Negotiations process
     ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(srf, targetCloud);
+    log.debug("triggerInterCloud: ICN results arrived back to the Orchestrator");
     for (OrchestrationForm of : icnResult.getOrchResponse().getResponse()) {
       of.setInstruction("This provider is from another cloud!");
     }
@@ -277,6 +280,7 @@ public final class OrchestratorService {
     // Querying the Service Registry to get the list of Provider Systems
     List<ServiceRegistryEntry> srList = OrchestratorDriver
         .queryServiceRegistry(srf.getRequestedService(), orchestrationFlags.get("metadataSearch"), orchestrationFlags.get("pingProviders"));
+    log.debug("externalServiceRequest: SR query done");
 
     // If needed, removing the non-preferred providers from the SR response. (If needed, matchmaking is done after this at the request sender Cloud.)
     if (orchestrationFlags.get("onlyPreferred")) {
@@ -370,6 +374,8 @@ public final class OrchestratorService {
         tokenResponse = AuthorizationService.tokenGeneration(tokenRequest);
       }
     }
+    int instances = (tokenResponse != null && tokenResponse.getTokenData() != null) ? tokenResponse.getTokenData().size() : 0;
+    log.debug("Generated tokens for " + instances + " instances.");
 
     // Create an OrchestrationForm for every provider
     List<OrchestrationForm> ofList = new ArrayList<>();
@@ -396,10 +402,6 @@ public final class OrchestratorService {
       }
     }
 
-    for (OrchestrationForm of : ofList) {
-      log.debug("Service: " + of.getService().toString() + " System: " + of.getProvider().getSystemName() + " ServiceURI: " + of.getServiceURI()
-                    + " Instruction: " + of.getInstruction() + " Token: " + of.getAuthorizationToken() + " Signature: " + of.getSignature());
-    }
     log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");
     return new OrchestrationResponse(ofList);
   }

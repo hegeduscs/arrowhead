@@ -191,6 +191,7 @@ public final class GatewayService {
       throw new ArrowheadException(e.getClass().getName() + ": " + e.getMessage(), 500, "GatewayService:createChannel", e);
     }
 
+    log.info("Created a channel for broker: " + brokerHost + ":" + brokerPort);
     return gatewaySession;
   }
 
@@ -335,7 +336,7 @@ public final class GatewayService {
 
     if (freePorts.isEmpty()) {
       log.error("No available port found in port range");
-      throw new RuntimeException("No available port found in port range");
+      throw new ArrowheadException("No available port found in port range", 500, "GatewayService:getAvailablePort");
     } else {
       serverSocketPort = freePorts.get(0);
       portAllocationMap.put(serverSocketPort, false);
@@ -358,7 +359,7 @@ public final class GatewayService {
       serverSocket.close();
       log.info("ConsumerSocket closed");
     } catch (AlreadyClosedException | IOException e) {
-      log.info("Channel already closed");
+      log.error("Channel already closed");
     }
   }
 
@@ -372,7 +373,7 @@ public final class GatewayService {
       gatewaySession.getConnection().close();
       log.info("ProviderSocket closed");
     } catch (AlreadyClosedException | IOException e) {
-      log.info("Channel already closed");
+      log.error("Channel already closed");
     }
   }
 

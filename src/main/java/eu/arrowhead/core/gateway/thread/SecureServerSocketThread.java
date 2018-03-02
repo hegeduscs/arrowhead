@@ -55,7 +55,7 @@ public class SecureServerSocketThread extends Thread {
       sslServerSocket.setNeedClientAuth(true);
       sslServerSocket.setSoTimeout(connectionRequest.getTimeout());
       System.out.println("Secure serverSocket is now running at port: " + port + "\n");
-      log.info("Create SSLserverSocket for Provider");
+      log.info("Create SSLserverSocket for Consumer");
     } catch (IOException e) {
       e.printStackTrace();
       log.error("Creating secure serverSocket failed.");

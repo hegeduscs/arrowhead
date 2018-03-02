@@ -181,7 +181,7 @@ public final class GatekeeperService {
     List<OrchestrationForm> orchResponse = new ArrayList<>();
     orchResponse.add(icnEnd.getOrchestrationForm());
 
-    log.info("ICNRequest: returning ICNResult to Orchestrator.");
+    log.info("ICNRequest: returning ICNResult (with gateway address) to Orchestrator.");
     return new ICNResult(new OrchestrationResponse(orchResponse));
   }
 
