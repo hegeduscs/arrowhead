@@ -173,6 +173,7 @@ public final class GatekeeperService {
 
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();
     gatewaySystem.setSystemName("gateway");
+    //NOTE Hard-wired (for now) the static IP address of the WiFi AP of the Raspberries (0.0.0.0 works too)
     gatewaySystem.setAddress("192.168.42.1");
     gatewaySystem.setPort(connectToConsumerResponse.getServerSocketPort());
     gatewaySystem.setAuthenticationInfo(GatewayService.GATEWAY_PUBLIC_KEY);

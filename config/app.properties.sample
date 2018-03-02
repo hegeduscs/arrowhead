@@ -1,6 +1,6 @@
 #Common
-# Web-server address (local network)
-server_address=127.0.0.1
+# Web-server address (0.0.0.0 binds to the eth0 and wifi AP address too at the same time)
+server_address=0.0.0.0
 
 db_user=root
 db_password=root
