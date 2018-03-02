@@ -43,6 +43,7 @@ public class InsecureServerSocketThread extends Thread {
   }
 
   public void run() {
+    log.debug("InsecureServerSocket thread started");
 
     try {
       serverSocket = new ServerSocket(port);

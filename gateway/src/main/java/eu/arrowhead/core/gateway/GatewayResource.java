@@ -80,6 +80,7 @@ public class GatewayResource {
     }
 
     ConnectToProviderResponse response = new ConnectToProviderResponse(queueName, controlQueueName);
+    log.info("Returning the ConnectToProviderResponse to the Gatekeeper");
     return Response.status(200).entity(response).build();
   }
 

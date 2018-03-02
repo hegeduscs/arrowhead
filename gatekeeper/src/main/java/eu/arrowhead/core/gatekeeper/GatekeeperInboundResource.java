@@ -190,6 +190,7 @@ public class GatekeeperInboundResource {
       String security = isSecure ? "secure" : "insecure";
       throw new ArrowheadException("Could not find a common " + security + " broker, data path creation failed.");
     }
+    log.debug("Common broker was chosen: " + chosenBroker.getBrokerName() + "@" + chosenBroker.getAddress());
 
     ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(), chosenBroker.getPort(), consumer, provider,
                                                                               icnProposal.getRequesterCloud(), Utility.getOwnCloud(),

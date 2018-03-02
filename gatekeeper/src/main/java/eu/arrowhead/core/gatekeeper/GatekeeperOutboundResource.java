@@ -199,7 +199,7 @@ public class GatekeeperOutboundResource {
     orchResponse.add(icnEnd.getOrchestrationForm());
     ICNResult icnResult = new ICNResult(new OrchestrationResponse(orchResponse));
 
-    log.info("ICNRequest: returning ICNResult to Orchestrator.");
+    log.info("ICNRequest: returning ICNResult (with gateway address) to Orchestrator.");
     return Response.status(response.getStatus()).entity(icnResult).build();
   }
 

@@ -14,7 +14,6 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.gateway.model.ActiveSession;
 import eu.arrowhead.core.gateway.model.GatewayEncryption;
@@ -102,9 +101,11 @@ public class GatewayService {
       throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e);
     }
 
+    log.info("Created a channel for broker: " + brokerHost + ":" + brokerPort);
     return gatewaySession;
   }
 
+  //NOTE exception handling too general right now for payload encyption/decryption
   public static GatewayEncryption encryptMessage(byte[] message, String publicKeyString) {
     Cipher cipherRSA;
     Cipher cipherAES;
@@ -207,11 +208,11 @@ public class GatewayService {
       sslContext = SSLContext.getInstance("TLS");
       sslContext.init(kmf.getKeyManagers(), SecurityUtils.createTrustManagers(), null);
     } catch (NoSuchAlgorithmException | KeyManagementException e) {
-      log.fatal("createSSLContext: Initializing the keyManagerFactory failed");
-      throw new ServiceConfigurationError("Initializing the keyManagerFactory failed for the SSLContext failed", e);
+      log.fatal("createSSLContext: failed one of the object initializations");
+      throw new AssertionError("SSL related object initialization failed", e);
     } catch (KeyStoreException | UnrecoverableKeyException e) {
       log.error("createSSLContext: keystore malformed, factory init failed");
-      throw new AuthException("Keystore is malformed, or the password is invalid", e);
+      throw new ServiceConfigurationError("Keystore is malformed, or the password is invalid", e);
     }
     return sslContext;
   }
@@ -250,7 +251,7 @@ public class GatewayService {
 
     if (freePorts.isEmpty()) {
       log.error("No available port found in port range");
-      throw new RuntimeException("No available port found in port range");
+      throw new ArrowheadException("No available port found in port range", 500, "GatewayService:getAvailablePort");
     } else {
       serverSocketPort = freePorts.get(0);
       portAllocationMap.put(serverSocketPort, false);
@@ -273,7 +274,7 @@ public class GatewayService {
       serverSocket.close();
       log.info("ConsumerSocket closed");
     } catch (AlreadyClosedException | IOException e) {
-      log.info("Channel already closed");
+      log.error("Channel already closed");
     }
   }
 
@@ -287,7 +288,7 @@ public class GatewayService {
       gatewaySession.getConnection().close();
       log.info("ProviderSocket closed");
     } catch (AlreadyClosedException | IOException e) {
-      log.info("Channel already closed");
+      log.error("Channel already closed");
     }
   }
 

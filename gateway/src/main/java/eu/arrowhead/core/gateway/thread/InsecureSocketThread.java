@@ -43,6 +43,7 @@ public class InsecureSocketThread extends Thread {
   }
 
   public void run() {
+    log.debug("InsecureSocket thread started");
 
     try {
       // Creating socket for Provider
@@ -51,7 +52,7 @@ public class InsecureSocketThread extends Thread {
       providerSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = providerSocket.getInputStream();
       OutputStream outProvider = providerSocket.getOutputStream();
-      log.info("Create socket for Provider");
+      log.info("Created socket for Provider");
 
       // Receiving messages through AMQP Broker
 

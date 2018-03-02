@@ -87,6 +87,7 @@ public class ServiceRegistryResource {
   @PUT
   @Path("query")
   public Response queryRegistry(ServiceQueryForm queryForm) {
+    log.debug("SR query for this service: " + queryForm.getService());
     if (!queryForm.isValid()) {
       log.error("queryRegistry throws BadPayloadException");
       throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode());

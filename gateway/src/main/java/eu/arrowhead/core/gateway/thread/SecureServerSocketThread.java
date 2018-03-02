@@ -47,6 +47,7 @@ public class SecureServerSocketThread extends Thread {
   }
 
   public void run() {
+    log.debug("SecureServerSocket thread started");
     SSLContext sslContext = GatewayService.createSSLContext();
     // Socket for server to listen at.
     SSLServerSocketFactory serverFactory = sslContext.getServerSocketFactory();
@@ -55,7 +56,7 @@ public class SecureServerSocketThread extends Thread {
       sslServerSocket.setNeedClientAuth(true);
       sslServerSocket.setSoTimeout(connectionRequest.getTimeout());
       System.out.println("Secure serverSocket is now running at port: " + port + "\n");
-      log.info("Create SSLserverSocket for Provider");
+      log.info("Create SSL ServerSocket for Consumer");
     } catch (IOException e) {
       e.printStackTrace();
       log.error("Creating secure serverSocket failed.");
