@@ -15,21 +15,36 @@ package eu.arrowhead.common.exception;
  * a certificate file. Runtime example can be when a system tries to access an existing resource which is not allowed by the
  * <i>AccessControlFilter</i> of the core system.
  */
-public class AuthenticationException extends ArrowheadException {
+public class AuthException extends ArrowheadException {
 
-  public AuthenticationException(String msg, int errorCode, String exceptionType, String origin, Throwable cause) {
-    super(msg, errorCode, exceptionType, origin, cause);
+  public AuthException(final String msg, final int errorCode, final String origin, final Throwable cause) {
+    super(msg, errorCode, origin, cause);
+    this.setExceptionType(ExceptionType.AUTH);
   }
 
-  public AuthenticationException(String msg, int errorCode, String exceptionType, String origin) {
-    super(msg, errorCode, exceptionType, origin);
+  public AuthException(final String msg, final int errorCode, final String origin) {
+    super(msg, errorCode, origin);
+    this.setExceptionType(ExceptionType.AUTH);
   }
 
-  public AuthenticationException(String msg, Throwable cause) {
+  public AuthException(String msg, int errorCode, Throwable cause) {
+    super(msg, errorCode, cause);
+    this.setExceptionType(ExceptionType.AUTH);
+  }
+
+  public AuthException(String msg, int errorCode) {
+    super(msg, errorCode);
+    this.setExceptionType(ExceptionType.AUTH);
+  }
+
+  public AuthException(String msg, Throwable cause) {
     super(msg, cause);
+    this.setExceptionType(ExceptionType.AUTH);
   }
 
-  public AuthenticationException(String msg) {
+  public AuthException(String msg) {
     super(msg);
+    this.setExceptionType(ExceptionType.AUTH);
   }
+
 }

@@ -19,8 +19,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -31,26 +29,26 @@ public class OldServiceRegResource {
 
   @POST
   @Path("register")
-  public Response registerServiceSupport(ServiceRegistryEntrySupport supportEntry, @Context ContainerRequestContext requestContext) {
+  public Response registerServiceSupport(ServiceRegistryEntrySupport supportEntry) {
     ArrowheadService service = new ArrowheadService(supportEntry.getProvidedService());
     ArrowheadSystem system = new ArrowheadSystem(supportEntry.getProvider());
     ServiceRegistryEntry entry = new ServiceRegistryEntry(service, system, system.getPort(), supportEntry.getServiceURI());
 
     ServiceRegistryResource serviceRegResource = new ServiceRegistryResource();
-    Response response = serviceRegResource.registerService(entry, requestContext);
+    Response response = serviceRegResource.registerService(entry);
     ServiceRegistryEntrySupport savedSupportEntry = new ServiceRegistryEntrySupport((ServiceRegistryEntry) response.getEntity());
     return Response.status(response.getStatus()).entity(savedSupportEntry).build();
   }
 
   @PUT
   @Path("remove")
-  public Response removeServiceSupport(ServiceRegistryEntrySupport supportEntry, @Context ContainerRequestContext requestContext) {
+  public Response removeServiceSupport(ServiceRegistryEntrySupport supportEntry) {
     ArrowheadService service = new ArrowheadService(supportEntry.getProvidedService());
     ArrowheadSystem system = new ArrowheadSystem(supportEntry.getProvider());
     ServiceRegistryEntry entry = new ServiceRegistryEntry(service, system, system.getPort(), supportEntry.getServiceURI());
 
     ServiceRegistryResource serviceRegResource = new ServiceRegistryResource();
-    Response response = serviceRegResource.removeService(entry, requestContext);
+    Response response = serviceRegResource.removeService(entry);
     ServiceRegistryEntrySupport savedSupportEntry = new ServiceRegistryEntrySupport((ServiceRegistryEntry) response.getEntity());
     return Response.status(response.getStatus()).entity(savedSupportEntry).build();
   }

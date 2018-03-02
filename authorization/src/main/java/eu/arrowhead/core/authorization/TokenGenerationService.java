@@ -138,8 +138,7 @@ class TokenGenerationService {
     }
     if (!nonNullTokenExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
-      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                   ArrowheadException.class.getName(), TokenGenerationService.class.getName());
+      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     return tokens;
@@ -181,8 +180,7 @@ class TokenGenerationService {
     }
     if (!nonNullKeyExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
-      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                   ArrowheadException.class.getName(), TokenGenerationService.class.getName());
+      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     return keys;
@@ -191,7 +189,7 @@ class TokenGenerationService {
   private static PublicKey getPublicKey(String stringKey) throws InvalidKeySpecException {
     byte[] byteKey = Base64.getDecoder().decode(stringKey);
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
-    KeyFactory kf = null;
+    KeyFactory kf;
     try {
       kf = KeyFactory.getInstance("RSA");
     } catch (NoSuchAlgorithmException e) {

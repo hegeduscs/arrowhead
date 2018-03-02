@@ -24,8 +24,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -49,12 +47,11 @@ public class ServiceRegistryResource {
 
   @POST
   @Path("register")
-  public Response registerService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
+  public Response registerService(ServiceRegistryEntry entry) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValid()) {
       log.error("registerService throws BadPayloadException");
-      throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode());
     }
 
     entry.toDatabase();
@@ -89,11 +86,10 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("query")
-  public Response queryRegistry(ServiceQueryForm queryForm, @Context ContainerRequestContext requestContext) {
+  public Response queryRegistry(ServiceQueryForm queryForm) {
     if (!queryForm.isValid()) {
       log.error("queryRegistry throws BadPayloadException");
-      throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode());
     }
 
     restrictionMap.put("serviceDefinition", queryForm.getService().getServiceDefinition());
@@ -125,13 +121,12 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("remove")
-  public Response removeService(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
+  public Response removeService(ServiceRegistryEntry entry) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
     if (!entry.isValid()) {
       log.error("removeService throws BadPayloadException");
       throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).",
-                                    Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
-                                    requestContext.getUriInfo().getAbsolutePath().toString());
+                                    Status.BAD_REQUEST.getStatusCode());
     }
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());

@@ -37,8 +37,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -70,11 +68,10 @@ public class GatekeeperOutboundResource {
    */
   @PUT
   @Path("init_gsd")
-  public Response GSDRequest(GSDRequestForm requestForm, @Context ContainerRequestContext requestContext) {
+  public Response GSDRequest(GSDRequestForm requestForm) {
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode());
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
@@ -117,7 +114,7 @@ public class GatekeeperOutboundResource {
           ex.printStackTrace();
           log.error("GSD failed for all potential provider clouds! See stack traces for details in console output.");
           throw new ArrowheadException("GSD failed for all potential provider clouds! The last exception message: " + ex.getMessage(),
-                                       ex.getErrorCode(), ex.getClass().getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+                                       ex.getErrorCode());
         } else {
           System.out.println("GSD request failed at: " + uri);
           ex.printStackTrace();
@@ -144,11 +141,10 @@ public class GatekeeperOutboundResource {
    */
   @PUT
   @Path("init_icn")
-  public Response ICNRequest(ICNRequestForm requestForm, @Context ContainerRequestContext requestContext) {
+  public Response ICNRequest(ICNRequestForm requestForm) {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode());
     }
 
     requestForm.getNegotiationFlags().put("useGateway", GatekeeperMain.USE_GATEWAY);

@@ -15,7 +15,8 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -226,7 +227,7 @@ public class GatekeeperMain {
       clientConfig.setTrustStorePass(cloudKeystorePass);
       if (!clientConfig.validateConfiguration(true)) {
         log.fatal("Internal client SSL Context is not valid, check the certificate files or app.properties!");
-        throw new AuthenticationException("Internal client SSL Context is not valid, check the certificate files or app.properties!");
+        throw new AuthException("Internal client SSL Context is not valid, check the certificate files or app.properties!");
       }
       SSLContext clientContext = clientConfig.createSSLContext();
       Utility.setSSLContext(clientContext);
@@ -239,7 +240,7 @@ public class GatekeeperMain {
       serverConfig.setTrustStorePass(cloudKeystorePass);
       if (!serverConfig.validateConfiguration(true)) {
         log.fatal("External server SSL Context is not valid, check the certificate files or app.properties!");
-        throw new AuthenticationException("External server SSL Context is not valid, check the certificate files or app.properties!");
+        throw new AuthException("External server SSL Context is not valid, check the certificate files or app.properties!");
       }
       serverContext = serverConfig.createSSLContext();
       outboundServerContext = serverContext;
@@ -286,7 +287,7 @@ public class GatekeeperMain {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", gsdEntry);
       } catch (ArrowheadException e) {
-        if (e.getExceptionType().contains("DuplicateEntryException")) {
+        if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", gsdEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", gsdEntry);
         } else {
@@ -296,7 +297,7 @@ public class GatekeeperMain {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", icnEntry);
       } catch (ArrowheadException e) {
-        if (e.getExceptionType().contains("DuplicateEntryException")) {
+        if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", icnEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", icnEntry);
         } else {
@@ -330,12 +331,12 @@ public class GatekeeperMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (inbound && !SecurityUtils.isTrustStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure.");
-      throw new AuthenticationException(
+      throw new AuthException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 4 parts, or does not "
               + "end with arrowhead.eu.");
     } else if (!inbound && !SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException(
+      throw new AuthException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
               + "end with arrowhead.eu.");
     }

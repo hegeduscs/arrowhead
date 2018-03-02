@@ -14,7 +14,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
@@ -40,8 +40,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -70,11 +68,11 @@ public class GatekeeperInboundResource {
    */
   @PUT
   @Path("gsd_poll")
-  public Response GSDPoll(GSDPoll gsdPoll, @Context ContainerRequestContext requestContext) {
+  public Response GSDPoll(GSDPoll gsdPoll) {
     if (!gsdPoll.isValid()) {
       log.error("GSDPoll BadPayloadException");
-      throw new BadPayloadException("Bad payload: requestedService/requesterCloud is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: requestedService/requesterCloud is missing or it is not valid.",
+                                    Status.BAD_REQUEST.getStatusCode());
     }
 
     // Polling the Authorization System about the consumer Cloud
@@ -85,9 +83,7 @@ public class GatekeeperInboundResource {
     // If the consumer Cloud is not authorized an error is returned
     if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
       log.info("GSD poll: Requester Cloud is UNAUTHORIZED, sending back error");
-      throw new AuthenticationException("Requester Cloud is UNAUTHORIZED to consume this service, GSD poll failed.",
-                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
-                                        requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new AuthException("Requester Cloud is UNAUTHORIZED to consume this service, GSD poll failed.", Status.UNAUTHORIZED.getStatusCode());
     }
     // If it is authorized, poll the Service Registry for the requested Service
     else {
@@ -100,8 +96,7 @@ public class GatekeeperInboundResource {
       ServiceQueryResult result = srResponse.readEntity(ServiceQueryResult.class);
       if (!result.isValid()) {
         log.info("GSD poll: SR query came back empty, sending back error");
-        throw new DataNotFoundException("Service not found in the Service Registry, GSD poll failed.", Status.NOT_FOUND.getStatusCode(),
-                                        DataNotFoundException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+        throw new DataNotFoundException("Service not found in the Service Registry, GSD poll failed.", Status.NOT_FOUND.getStatusCode());
       }
 
       log.info("GSDPoll successful, sending back GSDAnswer");
@@ -118,11 +113,10 @@ public class GatekeeperInboundResource {
    */
   @PUT
   @Path("icn_proposal")
-  public Response ICNProposal(ICNProposal icnProposal, @Context ContainerRequestContext requestContext) {
+  public Response ICNProposal(ICNProposal icnProposal) {
     if (!icnProposal.isValid()) {
       log.error("ICNProposal BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNProposal.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: missing/incomplete ICNProposal.", Status.BAD_REQUEST.getStatusCode());
     }
 
     // Polling the Authorization System about the consumer Cloud
@@ -133,9 +127,7 @@ public class GatekeeperInboundResource {
     // If the consumer Cloud is not authorized an error is returned
     if (!authResponse.readEntity(InterCloudAuthResponse.class).isAuthorized()) {
       log.info("ICNProposal: Requester Cloud is UNAUTHORIZED, sending back error");
-      throw new AuthenticationException("Requester Cloud is UNAUTHORIZED to consume this service, ICNProposal failed.",
-                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(),
-                                        requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new AuthException("Requester Cloud is UNAUTHORIZED to consume this service, ICNProposal failed.", Status.UNAUTHORIZED.getStatusCode());
     }
     // If it is authorized, send a ServiceRequestForm to the Orchestrator and return the OrchestrationResponse
     Map<String, Boolean> orchestrationFlags = icnProposal.getNegotiationFlags();

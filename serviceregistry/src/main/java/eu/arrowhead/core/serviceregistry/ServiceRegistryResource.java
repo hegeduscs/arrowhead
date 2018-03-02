@@ -2,7 +2,7 @@ package eu.arrowhead.core.serviceregistry;
 
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
@@ -39,9 +39,9 @@ public class ServiceRegistryResource {
   @POST
   @Path("register")
   public Response publishEntriesToRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
-    log.debug("SR reg service: " + entry.getProvidedService().getServiceDefinition() +
-                  " provider: " + entry.getProvider().getSystemName() +
-                  " serviceURI: " + entry.getServiceURI());
+    log.debug(
+        "SR reg service: " + entry.getProvidedService().getServiceDefinition() + " provider: " + entry.getProvider().getSystemName() + " serviceURI: "
+            + entry.getServiceURI());
 
     if (!entry.isValid()) {
       log.info("publishEntriesToRegistry throws BadPayloadException");
@@ -54,9 +54,8 @@ public class ServiceRegistryResource {
       String[] clientFields = clientCN.split("\\.", 2);
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
         log.error("Provider system name and cert common name do not match! Service registering denied.");
-        throw new AuthenticationException(
-            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+        throw new AuthException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+                                Status.UNAUTHORIZED.getStatusCode());
       }
     }
 
@@ -75,9 +74,8 @@ public class ServiceRegistryResource {
   @PUT
   @Path("remove")
   public Response removeEntriesFromRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
-    log.debug("SR remove service: " + entry.getProvidedService().getServiceDefinition() +
-                  " provider: " + entry.getProvider().getSystemName() +
-                  " serviceURI: " + entry.getServiceURI());
+    log.debug("SR remove service: " + entry.getProvidedService().getServiceDefinition() + " provider: " + entry.getProvider().getSystemName()
+                  + " serviceURI: " + entry.getServiceURI());
 
     if (!entry.isValid()) {
       log.info("removeEntriesFromRegistry throws BadPayloadException");
@@ -90,9 +88,8 @@ public class ServiceRegistryResource {
       String[] clientFields = clientCN.split("\\.", 2);
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
         log.error("Provider system name and cert common name do not match! Service registering denied.");
-        throw new AuthenticationException(
-            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+        throw new AuthException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+                                Status.UNAUTHORIZED.getStatusCode());
       }
     }
 

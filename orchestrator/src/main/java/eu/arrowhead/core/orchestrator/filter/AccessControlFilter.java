@@ -10,7 +10,7 @@
 package eu.arrowhead.core.orchestrator.filter;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.ByteArrayInputStream;
@@ -46,8 +46,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
         log.info("SSL identification is successful! Cert: " + commonName);
       } else {
         log.error(commonName + " is unauthorized to access " + requestTarget);
-        throw new AuthenticationException(commonName + " is unauthorized to access " + requestTarget, Status.UNAUTHORIZED.getStatusCode(),
-                                          AuthenticationException.class.getName(), AccessControlFilter.class.toString());
+        throw new AuthException(commonName + " is unauthorized to access " + requestTarget, Status.UNAUTHORIZED.getStatusCode());
       }
 
       try {
@@ -90,9 +89,9 @@ public class AccessControlFilter implements ContainerRequestFilter {
         if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
           // BUT the requester system has to be the same as the first part of the common name
           log.error("Requester system name and cert common name do not match!");
-          throw new AuthenticationException(
+          throw new AuthException(
               "Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-              Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), AccessControlFilter.class.toString());
+              Status.UNAUTHORIZED.getStatusCode());
         }
 
         return serverFields[1].equalsIgnoreCase(clientFields[1]);

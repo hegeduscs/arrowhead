@@ -15,7 +15,8 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -186,8 +187,7 @@ public class AuthorizationMain {
     sslCon.setTrustStorePass(truststorePass);
     if (!sslCon.validateConfiguration(true)) {
       log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
-      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!",
-                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+      throw new AuthException("SSL Context is not valid, check the certificate files or app.properties!", Status.UNAUTHORIZED.getStatusCode());
     }
 
     SSLContext sslContext = sslCon.createSSLContext();
@@ -200,9 +200,9 @@ public class AuthorizationMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException(
+      throw new AuthException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
-              + "end with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+              + "end with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode());
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
@@ -242,7 +242,7 @@ public class AuthorizationMain {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
       } catch (ArrowheadException e) {
-        if (e.getExceptionType().contains("DuplicateEntryException")) {
+        if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", authControlEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
         } else {
@@ -252,7 +252,7 @@ public class AuthorizationMain {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
       } catch (ArrowheadException e) {
-        if (e.getExceptionType().contains("DuplicateEntryException")) {
+        if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
         } else {

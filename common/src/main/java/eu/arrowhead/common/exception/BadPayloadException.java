@@ -14,19 +14,34 @@ package eu.arrowhead.common.exception;
  */
 public class BadPayloadException extends ArrowheadException {
 
-  public BadPayloadException(String msg, int errorCode, String exceptionType, String origin, Throwable cause) {
-    super(msg, errorCode, exceptionType, origin, cause);
+  public BadPayloadException(final String msg, final int errorCode, final String origin, final Throwable cause) {
+    super(msg, errorCode, origin, cause);
+    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
   }
 
-  public BadPayloadException(String msg, int errorCode, String exceptionType, String origin) {
-    super(msg, errorCode, exceptionType, origin);
+  public BadPayloadException(final String msg, final int errorCode, final String origin) {
+    super(msg, errorCode, origin);
+    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
+  }
+
+  public BadPayloadException(String msg, int errorCode, Throwable cause) {
+    super(msg, errorCode, cause);
+    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
+  }
+
+  public BadPayloadException(String msg, int errorCode) {
+    super(msg, errorCode);
+    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
   }
 
   public BadPayloadException(String msg, Throwable cause) {
     super(msg, cause);
+    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
   }
 
   public BadPayloadException(String msg) {
     super(msg);
+    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
   }
+
 }

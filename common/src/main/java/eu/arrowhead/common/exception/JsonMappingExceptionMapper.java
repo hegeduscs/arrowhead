@@ -29,15 +29,13 @@ public class JsonMappingExceptionMapper implements ExceptionMapper<JsonMappingEx
   public Response toResponse(JsonMappingException ex) {
     ex.printStackTrace();
     int errorCode = 404; //Bad Request
-    String origin = null;
-    if (requestContext.get() != null) {
-      origin = requestContext.get().getAbsolutePath().toString();
-    }
-    if (responseContext.get() != null) {
+    String origin = requestContext.get() != null ? requestContext.get().getAbsolutePath().toString() : "unknown";
+    if (responseContext.get() != null && responseContext.get().getStatus() > 100 && responseContext.get().getStatus() < 599) {
       errorCode = responseContext.get().getStatus();
     }
-    ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), errorCode, ex.getClass().getName(), origin);
-    return Response.status(errorCode).entity(errorMessage).build();
+
+    ErrorMessage errorMessage = new ErrorMessage("JsonMappingException: " + ex.getMessage(), errorCode, ExceptionType.JSON_MAPPING, origin);
+    return Response.status(errorCode).entity(errorMessage).header("Content-type", "application/json").build();
   }
 
 }

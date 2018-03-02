@@ -202,7 +202,7 @@ public class DatabaseManager {
       log.error("DatabaseManager:save throws DuplicateEntryException");
       throw new DuplicateEntryException(
           "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
-          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+          Status.BAD_REQUEST.getStatusCode(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -228,7 +228,7 @@ public class DatabaseManager {
       log.error("DatabaseManager:merge throws DuplicateEntryException");
       throw new DuplicateEntryException(
           "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
-          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+          Status.BAD_REQUEST.getStatusCode(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -253,7 +253,7 @@ public class DatabaseManager {
       log.error("DatabaseManager:delete throws ConstraintViolationException");
       throw new DuplicateEntryException(
           "There is a reference to this object in another table, which prevents the delete operation. (" + object.getClass() + ")",
-          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+          Status.BAD_REQUEST.getStatusCode(), e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();

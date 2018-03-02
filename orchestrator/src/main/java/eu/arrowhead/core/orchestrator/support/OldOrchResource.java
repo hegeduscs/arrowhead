@@ -24,8 +24,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -35,7 +33,7 @@ import javax.ws.rs.core.Response;
 public class OldOrchResource {
 
   @POST
-  public Response supportOrchestrationProcess(ServiceRequestFormSupport srfSupport, @Context ContainerRequestContext requestContext) {
+  public Response supportOrchestrationProcess(ServiceRequestFormSupport srfSupport) {
     ArrowheadSystem system = new ArrowheadSystem(srfSupport.getRequesterSystem());
     ArrowheadService service = new ArrowheadService(srfSupport.getRequestedService());
     List<PreferredProvider> preferredProviders = new ArrayList<>();
@@ -46,7 +44,7 @@ public class OldOrchResource {
         .orchestrationFlags(srfSupport.getOrchestrationFlags()).preferredProviders(preferredProviders).build();
 
     OrchestratorResource orchResource = new OrchestratorResource();
-    Response response = orchResource.orchestrationProcess(srf, requestContext);
+    Response response = orchResource.orchestrationProcess(srf);
     OrchestrationResponseSupport orchResponseSupport = new OrchestrationResponseSupport((OrchestrationResponse) response.getEntity());
     return Response.status(response.getStatus()).entity(orchResponseSupport).build();
   }

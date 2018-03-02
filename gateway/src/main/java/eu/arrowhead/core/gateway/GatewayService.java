@@ -14,7 +14,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.gateway.model.ActiveSession;
 import eu.arrowhead.core.gateway.model.GatewayEncryption;
@@ -85,8 +85,7 @@ public class GatewayService {
         try {
           factory.useSslProtocol(GatewayMain.clientContext);
         } catch (RuntimeException e) {
-          throw new ArrowheadException("Gateway is in insecure mode, and can not create a secure channel with the AMQP broker!",
-                                       e.getClass().getName(), e);
+          throw new ArrowheadException("Gateway is in insecure mode, and can not create a secure channel with the AMQP broker!", e);
         }
       }
 
@@ -100,8 +99,7 @@ public class GatewayService {
       gatewaySession.setChannel(channel);
     } catch (IOException | NullPointerException e) {
       log.error("Creating the channel to the Broker failed");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e);
     }
 
     return gatewaySession;
@@ -120,8 +118,7 @@ public class GatewayService {
       cipherRSA.init(Cipher.ENCRYPT_MODE, publicKey);
     } catch (GeneralSecurityException e) {
       log.fatal("The initialization of the RSA cipher failed.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e);
     }
 
     // Creating the random IV (Initialization vector)
@@ -151,8 +148,7 @@ public class GatewayService {
 
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES encryption.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e);
     }
   }
 
@@ -170,8 +166,7 @@ public class GatewayService {
       cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
     } catch (GeneralSecurityException e) {
       log.fatal("The initialization of the RSA cipher failed.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e);
     }
 
     try {
@@ -193,8 +188,7 @@ public class GatewayService {
       decryptedMessage = cipherAES.doFinal(encryptedBytes);
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES decryption.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e);
     }
 
     return decryptedMessage;
@@ -217,7 +211,7 @@ public class GatewayService {
       throw new ServiceConfigurationError("Initializing the keyManagerFactory failed for the SSLContext failed", e);
     } catch (KeyStoreException | UnrecoverableKeyException e) {
       log.error("createSSLContext: keystore malformed, factory init failed");
-      throw new AuthenticationException("Keystore is malformed, or the password is invalid", e);
+      throw new AuthException("Keystore is malformed, or the password is invalid", e);
     }
     return sslContext;
   }

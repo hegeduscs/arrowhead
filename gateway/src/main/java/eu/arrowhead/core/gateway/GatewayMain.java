@@ -14,7 +14,8 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -177,7 +178,7 @@ public class GatewayMain {
     sslCon.setTrustStorePass(truststorePass);
     if (!sslCon.validateConfiguration(true)) {
       log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
-      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
+      throw new AuthException("SSL Context is not valid, check the certificate files or app.properties!");
     }
 
     Utility.setSSLContext(sslCon.createSSLContext());
@@ -189,7 +190,7 @@ public class GatewayMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException(
+      throw new AuthException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
               + "end with arrowhead.eu.");
     }
@@ -234,7 +235,7 @@ public class GatewayMain {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", providerEntry);
       } catch (ArrowheadException e) {
-        if (e.getExceptionType().contains("DuplicateEntryException")) {
+        if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", providerEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", providerEntry);
         } else {
@@ -244,7 +245,7 @@ public class GatewayMain {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", consumerEntry);
       } catch (ArrowheadException e) {
-        if (e.getExceptionType().contains("DuplicateEntryException")) {
+        if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", consumerEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", consumerEntry);
         } else {
@@ -254,7 +255,7 @@ public class GatewayMain {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", mgmtEntry);
       } catch (ArrowheadException e) {
-        if (e.getExceptionType().contains("DuplicateEntryException")) {
+        if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", mgmtEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", mgmtEntry);
         } else {

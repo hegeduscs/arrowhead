@@ -11,7 +11,7 @@ package eu.arrowhead.core.serviceregistry_sql;
 
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.serviceregistry_sql.support.OldServiceRegResource;
 import java.io.BufferedReader;
@@ -175,7 +175,7 @@ public class ServiceRegistryMain {
     sslCon.setTrustStorePass(truststorePass);
     if (!sslCon.validateConfiguration(true)) {
       log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
-      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!");
+      throw new AuthException("SSL Context is not valid, check the certificate files or app.properties!");
     }
 
     SSLContext sslContext = sslCon.createSSLContext();
@@ -186,7 +186,7 @@ public class ServiceRegistryMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException(
+      throw new AuthException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
               + "end with arrowhead.eu.");
     }

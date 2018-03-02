@@ -14,7 +14,8 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.orchestrator.api.CommonApi;
 import eu.arrowhead.core.orchestrator.api.StoreApi;
@@ -186,8 +187,7 @@ public class OrchestratorMain {
     sslCon.setTrustStorePass(truststorePass);
     if (!sslCon.validateConfiguration(true)) {
       log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
-      throw new AuthenticationException("SSL Context is not valid, check the certificate files or app.properties!",
-                                        Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+      throw new AuthException("SSL Context is not valid, check the certificate files or app.properties!", Status.UNAUTHORIZED.getStatusCode());
     }
 
     SSLContext sslContext = sslCon.createSSLContext();
@@ -199,9 +199,9 @@ public class OrchestratorMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthenticationException(
+      throw new AuthException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
-              + "end with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), BASE_URI_SECURED);
+              + "end with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode());
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
@@ -236,7 +236,7 @@ public class OrchestratorMain {
       try {
         Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", orchEntry);
       } catch (ArrowheadException e) {
-        if (e.getExceptionType().contains("DuplicateEntryException")) {
+        if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", orchEntry);
           Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", orchEntry);
         } else {

@@ -10,7 +10,7 @@
 package eu.arrowhead.core.orchestrator.filter;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.SecurityUtils;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -41,8 +41,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
         log.info("SSL identification is successful! Cert: " + commonName);
       } else {
         log.error(commonName + " is unauthorized to access " + requestTarget);
-        throw new AuthenticationException(commonName + " is unauthorized to access " + requestTarget, Status.UNAUTHORIZED.getStatusCode(),
-                                          AuthenticationException.class.getName(), SupportAccessControlFilter.class.toString());
+        throw new AuthException(commonName + " is unauthorized to access " + requestTarget, Status.UNAUTHORIZED.getStatusCode());
       }
     }
   }

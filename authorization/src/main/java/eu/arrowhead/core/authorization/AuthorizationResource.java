@@ -33,8 +33,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -69,12 +67,11 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("intracloud")
-  public Response isSystemAuthorized(IntraCloudAuthRequest request, @Context ContainerRequestContext requestContext) {
+  public Response isSystemAuthorized(IntraCloudAuthRequest request) {
     if (!request.isValid()) {
       log.error("isSystemAuthorized BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.",
-                                    Status.BAD_REQUEST.getStatusCode(), BadPayloadException.class.getName(),
-                                    requestContext.getUriInfo().getAbsolutePath().toString());
+                                    Status.BAD_REQUEST.getStatusCode());
     }
 
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
@@ -82,8 +79,7 @@ public class AuthorizationResource {
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
       throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().getSystemName(),
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
-                                      requestContext.getUriInfo().getAbsolutePath().toString());
+                                      Status.NOT_FOUND.getStatusCode());
     }
 
     IntraCloudAuthResponse response = new IntraCloudAuthResponse();
@@ -136,11 +132,10 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("intercloud")
-  public Response isCloudAuthorized(InterCloudAuthRequest request, @Context ContainerRequestContext requestContext) {
+  public Response isCloudAuthorized(InterCloudAuthRequest request) {
     if (!request.isValid()) {
       log.error("isCloudAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete cloud or service in the request payload.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("Bad payload: missing/incomplete cloud or service in the request payload.", Status.BAD_REQUEST.getStatusCode());
     }
 
     restrictionMap.put("operator", request.getCloud().getOperator());
@@ -149,8 +144,7 @@ public class AuthorizationResource {
     if (cloud == null) {
       log.error("Requester cloud is not in the database. isCloudAuthorized DataNotFoundException");
       throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString(),
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(),
-                                      requestContext.getUriInfo().getAbsolutePath().toString());
+                                      Status.NOT_FOUND.getStatusCode());
     }
 
     restrictionMap.clear();
@@ -183,11 +177,10 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("token")
-  public Response tokenGeneration(TokenGenerationRequest request, @Context ContainerRequestContext requestContext) {
+  public Response tokenGeneration(TokenGenerationRequest request) {
     if (!request.isValid()) {
       log.error("tokenGeneration BadPayloadException");
-      throw new BadPayloadException("TokenGenerationRequest has missing/incomplete fields.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), requestContext.getUriInfo().getAbsolutePath().toString());
+      throw new BadPayloadException("TokenGenerationRequest has missing/incomplete fields.", Status.BAD_REQUEST.getStatusCode());
     }
 
     // Get the tokens from the service class (can throw run time exceptions)
