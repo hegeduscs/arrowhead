@@ -18,7 +18,7 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.database.OwnCloud;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
@@ -57,11 +57,6 @@ public final class Utility {
 
   private static SSLContext sslContext;
 
-  private static final String AUTH_EXCEPTION = "eu.arrowhead.AuthenticationException";
-  private static final String BAD_PAYLOAD_EXCEPTION = "eu.arrowhead.BadPayloadException";
-  private static final String NOT_FOUND_EXCEPTION = "eu.arrowhead.DataNotFoundException";
-  private static final String DUPLICATE_EXCEPTION = "eu.arrowhead.DuplicateEntryException";
-  private static final String UNAVAILABLE_EXCEPTION = "eu.arrowhead.UnavailableServerException";
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final Logger log = Logger.getLogger(Utility.class.getName());
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
@@ -96,10 +91,10 @@ public final class Utility {
       } else if (Utility.sslContext != null) {
         client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
       } else {
-        log.error("sendRequest() method throws AuthenticationException");
-        throw new AuthenticationException(
+        log.error("sendRequest() method throws AuthException");
+        throw new AuthException(
             "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
-            Status.UNAUTHORIZED.getStatusCode(), AuthenticationException.class.getName(), Utility.class.toString());
+            Status.UNAUTHORIZED.getStatusCode());
       }
     } else {
       client = ClientBuilder.newClient(configuration);
@@ -126,8 +121,7 @@ public final class Utility {
       }
     } catch (ProcessingException e) {
       log.error("UnavailableServerException occurred at " + uri, e);
-      throw new UnavailableServerException("Could not get any response from: " + uri, Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                                           UnavailableServerException.class.getName(), Utility.class.toString(), e);
+      throw new UnavailableServerException("Could not get any response from: " + uri, Status.SERVICE_UNAVAILABLE.getStatusCode(), e);
     }
 
     // If the response status code does not start with 2 the request was not successful
@@ -174,24 +168,26 @@ public final class Utility {
     } else {
       log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
       switch (errorMessage.getExceptionType()) {
-        case AUTH_EXCEPTION:
-          throw new AuthenticationException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                            errorMessage.getOrigin());
-        case BAD_PAYLOAD_EXCEPTION:
-          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                        errorMessage.getOrigin());
-        case NOT_FOUND_EXCEPTION:
-          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                          errorMessage.getOrigin());
-        case DUPLICATE_EXCEPTION:
-          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                            errorMessage.getOrigin());
-        case UNAVAILABLE_EXCEPTION:
-          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                               errorMessage.getOrigin());
-        default:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getExceptionType(),
-                                       errorMessage.getOrigin());
+        case ARROWHEAD:
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case AUTH:
+          throw new AuthException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case BAD_METHOD:
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case BAD_PAYLOAD:
+          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case BAD_URI:
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case DATA_NOT_FOUND:
+          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case DUPLICATE_ENTRY:
+          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case GENERIC:
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case JSON_MAPPING:
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+        case UNAVAILABLE:
+          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
       }
     }
   }
@@ -233,7 +229,7 @@ public final class Utility {
     if (cloudList.isEmpty()) {
       log.error("Utility:getOwnCloud not found in the database.");
       throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.",
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), Utility.class.toString());
+                                      Status.NOT_FOUND.getStatusCode());
     }
     if (cloudList.size() > 1) {
       log.warn("own_cloud table should NOT have more than 1 rows.");

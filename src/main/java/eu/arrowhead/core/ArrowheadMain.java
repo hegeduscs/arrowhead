@@ -1,7 +1,7 @@
 package eu.arrowhead.core;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.authorization.AuthorizationApi;
 import eu.arrowhead.core.gatekeeper.GatekeeperApi;
@@ -235,7 +235,7 @@ public class ArrowheadMain {
       serverConfig.setTrustStorePass(cloudKeystorePass);
       if (!serverConfig.validateConfiguration(false)) {
         log.fatal("Server SSL Context is not valid, check the certificate files or app.properties!");
-        throw new AuthenticationException("Server SSL Context is not valid, check the certificate files or app.properties!");
+        throw new AuthException("Server SSL Context is not valid, check the certificate files or app.properties!");
       }
       serverContext = serverConfig.createSSLContext();
     }
@@ -289,7 +289,7 @@ public class ArrowheadMain {
     String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
     if (!SecurityUtils.isTrustStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure.");
-      throw new AuthenticationException(
+      throw new AuthException(
           "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 4 parts, or does not "
               + "end with arrowhead.eu.");
     }

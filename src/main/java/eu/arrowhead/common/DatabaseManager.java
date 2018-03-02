@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
-import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -179,8 +178,8 @@ public class DatabaseManager {
       }
       log.error("DatabaseManager:save throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
-          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+          "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(), 404,
+          "DatabaseManager:save", e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -205,8 +204,8 @@ public class DatabaseManager {
       }
       log.error("DatabaseManager:merge throws DuplicateEntryException");
       throw new DuplicateEntryException(
-          "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(),
-          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+          "There is already an entry in the database with these parameters. Please check the unique fields of the " + object.getClass(), 404,
+          "DatabaseManager:merge", e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();
@@ -230,8 +229,8 @@ public class DatabaseManager {
       }
       log.error("DatabaseManager:delete throws ConstraintViolationException");
       throw new DuplicateEntryException(
-          "There is a reference to this object in another table, which prevents the delete operation. (" + object.getClass() + ")",
-          Status.BAD_REQUEST.getStatusCode(), DuplicateEntryException.class.getName(), DatabaseManager.class.toString(), e);
+          "There is a reference to this object in another table, which prevents the delete operation. (" + object.getClass() + ")", 404,
+          "DatabaseManager:delete", e);
     } catch (Exception e) {
       if (transaction != null) {
         transaction.rollback();

@@ -217,7 +217,7 @@ public final class OrchestratorService {
       // If the for-loop finished but we still could not return a result, we throw a DataNotFoundException.
       log.error("orchestrationFromStore throws final DataNotFoundException");
       throw new DataNotFoundException("OrchestrationFromStore failed with all the queried (" + entryList.size() + ") Store entries.",
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
+                                      Status.NOT_FOUND.getStatusCode());
     }
   }
 
@@ -320,7 +320,7 @@ public final class OrchestratorService {
     if (storeOrchestration) {
       log.error("icnMatchmaking DataNotFoundException");
       throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.",
-                                      Status.NOT_FOUND.getStatusCode(), DataNotFoundException.class.getName(), OrchestratorService.class.toString());
+                                      Status.NOT_FOUND.getStatusCode());
     }
     // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
     else {

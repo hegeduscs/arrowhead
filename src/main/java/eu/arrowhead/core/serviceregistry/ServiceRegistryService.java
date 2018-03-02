@@ -27,8 +27,7 @@ public final class ServiceRegistryService {
   public static ServiceQueryResult queryRegistry(ServiceQueryForm queryForm) {
     if (!queryForm.isValid()) {
       log.error("queryRegistry throws BadPayloadException");
-      throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", 404, BadPayloadException.class.getName(),
-                                    "ServiceRegistryService:queryRegistry");
+      throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", 400, "ServiceRegistryService:queryRegistry");
     }
 
     restrictionMap.clear();

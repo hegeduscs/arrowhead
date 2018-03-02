@@ -14,19 +14,34 @@ package eu.arrowhead.common.exception;
  */
 public class UnavailableServerException extends ArrowheadException {
 
-  public UnavailableServerException(String msg, int errorCode, String exceptionType, String origin, Throwable cause) {
-    super(msg, errorCode, exceptionType, origin, cause);
+  public UnavailableServerException(final String msg, final int errorCode, final String origin, final Throwable cause) {
+    super(msg, errorCode, origin, cause);
+    this.setExceptionType(ExceptionType.UNAVAILABLE);
   }
 
-  public UnavailableServerException(String msg, int errorCode, String exceptionType, String origin) {
-    super(msg, errorCode, exceptionType, origin);
+  public UnavailableServerException(final String msg, final int errorCode, final String origin) {
+    super(msg, errorCode, origin);
+    this.setExceptionType(ExceptionType.UNAVAILABLE);
+  }
+
+  public UnavailableServerException(String msg, int errorCode, Throwable cause) {
+    super(msg, errorCode, cause);
+    this.setExceptionType(ExceptionType.UNAVAILABLE);
+  }
+
+  public UnavailableServerException(String msg, int errorCode) {
+    super(msg, errorCode);
+    this.setExceptionType(ExceptionType.UNAVAILABLE);
   }
 
   public UnavailableServerException(String msg, Throwable cause) {
     super(msg, cause);
+    this.setExceptionType(ExceptionType.UNAVAILABLE);
   }
 
   public UnavailableServerException(String msg) {
     super(msg);
+    this.setExceptionType(ExceptionType.UNAVAILABLE);
   }
+
 }

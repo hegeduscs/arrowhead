@@ -14,7 +14,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthenticationException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.messages.ActiveSession;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.messages.ConnectToConsumerResponse;
@@ -52,7 +52,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
 /**
@@ -174,8 +173,8 @@ public final class GatewayService {
         try {
           factory.useSslProtocol(cloudContext);
         } catch (RuntimeException e) {
-          throw new ArrowheadException("Gateway is in insecure mode, and can not create a secure channel with the AMQP broker!",
-                                       e.getClass().getName(), e);
+          throw new ArrowheadException("Gateway is in insecure mode, and can not create a secure channel with the AMQP broker!", 500,
+                                       "GatewayService:createChannel", e);
         }
       }
 
@@ -189,8 +188,7 @@ public final class GatewayService {
       gatewaySession.setChannel(channel);
     } catch (IOException | NullPointerException e) {
       log.error("Creating the channel to the Broker failed");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getClass().getName() + ": " + e.getMessage(), 500, "GatewayService:createChannel", e);
     }
 
     return gatewaySession;
@@ -209,8 +207,7 @@ public final class GatewayService {
       cipherRSA.init(Cipher.ENCRYPT_MODE, publicKey);
     } catch (GeneralSecurityException e) {
       log.fatal("The initialization of the RSA cipher failed.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getClass().getName() + ": " + e.getMessage(), 500, "GatewayService:encryptMessage", e);
     }
 
     // Creating the random IV (Initialization vector)
@@ -240,8 +237,7 @@ public final class GatewayService {
 
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES encryption.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getClass().getName() + ": " + e.getMessage(), 500, "GatewayService:encryptMessage", e);
     }
   }
 
@@ -257,8 +253,7 @@ public final class GatewayService {
       cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
     } catch (GeneralSecurityException e) {
       log.fatal("The initialization of the RSA cipher failed.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getClass().getName() + ": " + e.getMessage(), 500, "GatewayService:decryptMessage", e);
     }
 
     try {
@@ -280,8 +275,7 @@ public final class GatewayService {
       decryptedMessage = cipherAES.doFinal(encryptedBytes);
     } catch (GeneralSecurityException e) {
       log.fatal("Something goes wrong while AES decryption.");
-      throw new ArrowheadException(e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getClass().getName(),
-                                   GatewayService.class.toString(), e);
+      throw new ArrowheadException(e.getClass().getName() + ": " + e.getMessage(), 500, "GatewayService:decryptMessage", e);
     }
 
     return decryptedMessage;
@@ -302,7 +296,7 @@ public final class GatewayService {
 
     } catch (KeyStoreException | UnrecoverableKeyException e) {
       log.error("createSSLContext: keystore malformed, factory init failed");
-      throw new AuthenticationException("Keystore is malformed, or the password is invalid", e);
+      throw new AuthException("Keystore is malformed, or the password is invalid", e);
     }
     return sslContext;
   }

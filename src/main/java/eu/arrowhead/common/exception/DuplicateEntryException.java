@@ -16,19 +16,34 @@ package eu.arrowhead.common.exception;
  */
 public class DuplicateEntryException extends ArrowheadException {
 
-  public DuplicateEntryException(String msg, int errorCode, String exceptionType, String origin, Throwable cause) {
-    super(msg, errorCode, exceptionType, origin, cause);
+  public DuplicateEntryException(final String msg, final int errorCode, final String origin, final Throwable cause) {
+    super(msg, errorCode, origin, cause);
+    this.setExceptionType(ExceptionType.DUPLICATE_ENTRY);
   }
 
-  public DuplicateEntryException(String msg, int errorCode, String exceptionType, String origin) {
-    super(msg, errorCode, exceptionType, origin);
+  public DuplicateEntryException(final String msg, final int errorCode, final String origin) {
+    super(msg, errorCode, origin);
+    this.setExceptionType(ExceptionType.DUPLICATE_ENTRY);
+  }
+
+  public DuplicateEntryException(String msg, int errorCode, Throwable cause) {
+    super(msg, errorCode, cause);
+    this.setExceptionType(ExceptionType.DUPLICATE_ENTRY);
+  }
+
+  public DuplicateEntryException(String msg, int errorCode) {
+    super(msg, errorCode);
+    this.setExceptionType(ExceptionType.DUPLICATE_ENTRY);
   }
 
   public DuplicateEntryException(String msg, Throwable cause) {
     super(msg, cause);
+    this.setExceptionType(ExceptionType.DUPLICATE_ENTRY);
   }
 
   public DuplicateEntryException(String msg) {
     super(msg);
+    this.setExceptionType(ExceptionType.DUPLICATE_ENTRY);
   }
+
 }

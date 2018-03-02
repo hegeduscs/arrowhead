@@ -10,6 +10,7 @@
 package eu.arrowhead.common.filter;
 
 import eu.arrowhead.common.exception.ErrorMessage;
+import eu.arrowhead.common.exception.ExceptionType;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
@@ -26,7 +27,7 @@ public class EmptyPayloadFilter implements ContainerRequestFilter {
       if (contentLength == 0) {
         ErrorMessage em = new ErrorMessage(
             "Payload is null (unusual for POST/PUT request)! If you want to send an empty payload, try sending empty brackets ({})", 400,
-            RuntimeException.class.getName(), EmptyPayloadFilter.class.toString());
+            ExceptionType.GENERIC, requestContext.getUriInfo().getAbsolutePath().toString());
         requestContext.abortWith(Response.status(Response.Status.BAD_REQUEST).entity(em).build());
       }
     }

@@ -60,7 +60,7 @@ public final class GatekeeperService {
     if (!requestForm.isValid()) {
       log.error("GSDRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), "GatekeeperService:GSDRequest");
+                                    "GatekeeperService:GSDRequest");
     }
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
@@ -103,7 +103,7 @@ public final class GatekeeperService {
           ex.printStackTrace();
           log.error("GSD failed for all potential provider clouds! See stack traces for details in console output.");
           throw new ArrowheadException("GSD failed for all potential provider clouds! The last exception message: " + ex.getMessage(),
-                                       ex.getErrorCode(), ex.getClass().getName(), "GatekeeperService:GSDRequest");
+                                       ex.getErrorCode(), "GatekeeperService:GSDRequest");
         } else {
           System.out.println("GSD request failed at: " + uri);
           ex.printStackTrace();
@@ -131,7 +131,7 @@ public final class GatekeeperService {
     if (!requestForm.isValid()) {
       log.error("ICNRequest BadPayloadException");
       throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
-                                    BadPayloadException.class.getName(), "GatekeeperService:ICNRequest");
+                                    "GatekeeperService:ICNRequest");
     }
 
     requestForm.getNegotiationFlags().put("useGateway", ArrowheadMain.USE_GATEWAY);

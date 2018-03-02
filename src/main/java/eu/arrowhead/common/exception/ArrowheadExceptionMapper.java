@@ -13,11 +13,14 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.ContainerResponse;
 
 @Provider
 public class ArrowheadExceptionMapper implements ExceptionMapper<ArrowheadException> {
 
+  @Inject
+  private javax.inject.Provider<ContainerRequest> requestContext;
   @Inject
   private javax.inject.Provider<ContainerResponse> responseContext;
 
@@ -25,10 +28,13 @@ public class ArrowheadExceptionMapper implements ExceptionMapper<ArrowheadExcept
   public Response toResponse(ArrowheadException ex) {
     ex.printStackTrace();
     int errorCode = (ex.getErrorCode() == 0 && responseContext.get() != null) ? responseContext.get().getStatus() : ex.getErrorCode();
-    String origin = (ex.getOrigin() == null && responseContext.get() != null) ? responseContext.get().getRequestContext().getAbsolutePath().toString()
-        : ex.getOrigin();
+    String origin = (ex.getOrigin() == null && requestContext.get() != null) ? requestContext.get().getAbsolutePath().toString() : ex.getOrigin();
+
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), errorCode, ex.getExceptionType(), origin);
-    return Response.status(ex.getErrorCode()).entity(errorMessage).header("Content-type", "application/json").build();
+    if (errorCode < 100 | errorCode > 599) {
+      errorCode = 500;
+    }
+    return Response.status(errorCode).entity(errorMessage).header("Content-type", "application/json").build();
   }
 
 }

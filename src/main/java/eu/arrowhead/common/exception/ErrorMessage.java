@@ -11,16 +11,16 @@ package eu.arrowhead.common.exception;
 
 public class ErrorMessage {
 
-  private int errorCode;
   private String errorMessage;
-  private String exceptionType;
+  private int errorCode;
+  private ExceptionType exceptionType;
   private String origin;
-  private String documentation = "https://github.com/hegeduscs/arrowhead/tree/master/documentation";
+  private String documentation = "https://github.com/hegeduscs/arrowhead/tree/M3/documentation";
 
   public ErrorMessage() {
   }
 
-  public ErrorMessage(String errorMessage, int errorCode, String exceptionType, String origin) {
+  public ErrorMessage(String errorMessage, int errorCode, ExceptionType exceptionType, String origin) {
     this.errorMessage = errorMessage;
     this.errorCode = errorCode;
     this.exceptionType = exceptionType;
@@ -43,11 +43,11 @@ public class ErrorMessage {
     this.errorCode = errorCode;
   }
 
-  public String getExceptionType() {
+  public ExceptionType getExceptionType() {
     return exceptionType;
   }
 
-  public void setExceptionType(String exceptionType) {
+  public void setExceptionType(ExceptionType exceptionType) {
     this.exceptionType = exceptionType;
   }
 
