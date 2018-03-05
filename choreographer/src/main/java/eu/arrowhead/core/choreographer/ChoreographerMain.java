@@ -23,6 +23,8 @@ public class ChoreographerMain {
 
   public static boolean DEBUG_MODE;
 
+  private static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
+  private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
   private static HttpServer secureServer;
   private static Properties prop;
@@ -30,7 +32,7 @@ public class ChoreographerMain {
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8456/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8457/");
   private static final Logger log = Logger.getLogger(ChoreographerMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "db_user", "db_password");
+  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "sr_base_uri", "db_user", "db_password");
   private static final List<String> securePropertyNames = Arrays
       .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
@@ -47,7 +49,7 @@ public class ChoreographerMain {
       log.info("Stopping server at: " + BASE_URI_SECURED);
       secureServer.shutdownNow();
     }
-    System.out.println("Service Registry Server(s) stopped");
+    System.out.println("Choreographer Server(s) stopped");
   }
 
   private static synchronized Properties getProp() {

@@ -7,12 +7,8 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.core.eventhandler;
+package eu.arrowhead.core.choreographer;
 
-public final class EventHandlerService {
-
-  static void doSomething() {
-    System.out.println("something");
-  }
+public class ChoreographerResource {
 
 }

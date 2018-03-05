@@ -1,0 +1,16 @@
+# URLs
+base_uri=http://127.0.0.1:8454/
+base_uri_secured=https://127.0.0.1:8455/
+sr_base_uri=http://127.0.0.1:8442/
+
+# Database parameters
+db_user=root
+db_password=root
+db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud_1
+
+# Certificate related paths and passwords
+keystore=config/certificates/eventhandler.testcloud1.jks
+keystorepass=12345
+keypass=12345
+truststore=config/certificates/testcloud1_cert.jks
+truststorepass=12345
