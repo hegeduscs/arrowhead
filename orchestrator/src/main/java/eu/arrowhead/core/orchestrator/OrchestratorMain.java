@@ -63,8 +63,8 @@ public class OrchestratorMain {
   private static HttpServer secureServer;
   private static Properties prop;
 
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8440/orchestrator/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8441/orchestrator/");
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8440");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8441");
   private static final Logger log = Logger.getLogger(OrchestratorMain.class.getName());
   private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "sr_base_uri", "db_user", "db_password", "db_address");
   private static final List<String> securePropertyNames = Arrays
