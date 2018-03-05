@@ -17,6 +17,7 @@
     <module>qos</module>
     <module>serviceregistry</module>
     <module>serviceregistry_sql</module>
+    <module>choreographer</module>
   </modules>
 
   <properties>

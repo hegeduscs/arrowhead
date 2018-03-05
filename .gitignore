@@ -7,6 +7,13 @@
 /authorization/config/log4j.properties
 /authorization/target/
 /authorization/authorization.iml
+/choreographer/.settings/
+/choreographer/.classpath
+/choreographer/.project
+/choreographer/config/app.properties
+/choreographer/config/log4j.properties
+/choreographer/target/
+/choreographer/choreographer.iml
 /common/.settings/
 /common/.classpath
 /common/.project
@@ -17,6 +24,13 @@
 /dnssd/.project
 /dnssd/target/
 /dnssd/dnssd.iml
+/eventhandler/.settings/
+/eventhandler/.classpath
+/eventhandler/.project
+/eventhandler/config/app.properties
+/eventhandler/config/log4j.properties
+/eventhandler/target/
+/eventhandler/eventhandler.iml
 /gatekeeper/.settings/
 /gatekeeper/.classpath
 /gatekeeper/.project
