@@ -9,10 +9,62 @@
 
 package eu.arrowhead.core.eventhandler;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.ServiceConfigurationError;
+import org.apache.log4j.Logger;
+import org.glassfish.grizzly.http.server.HttpServer;
+
 public class EventHandlerMain {
+
+  public static boolean DEBUG_MODE;
+
+  private static HttpServer server;
+  private static HttpServer secureServer;
+  private static Properties prop;
+
+  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8454/");
+  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8455/");
+  private static final Logger log = Logger.getLogger(EventHandlerMain.class.getName());
+  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "db_user", "db_password", "db_address");
+  private static final List<String> securePropertyNames = Arrays
+      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) {
 
+  }
+
+  private static void shutdown() {
+    if (server != null) {
+      log.info("Stopping server at: " + BASE_URI);
+      server.shutdownNow();
+    }
+    if (secureServer != null) {
+      log.info("Stopping server at: " + BASE_URI_SECURED);
+      secureServer.shutdownNow();
+    }
+    System.out.println("Service Registry Server(s) stopped");
+  }
+
+  private static synchronized Properties getProp() {
+    try {
+      if (prop == null) {
+        prop = new Properties();
+        File file = new File("config" + File.separator + "app.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+        prop.load(inputStream);
+      }
+    } catch (FileNotFoundException ex) {
+      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
+                                              + "the config folder can be found)", ex);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return prop;
   }
 
 }
