@@ -15,7 +15,7 @@
   <parent>
     <artifactId>arrowhead</artifactId>
     <groupId>eu.arrowhead</groupId>
-    <version>M3</version>
+    <version>M4</version>
   </parent>
 
   <artifactId>serviceregistry_sql</artifactId>

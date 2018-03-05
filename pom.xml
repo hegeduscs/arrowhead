@@ -4,20 +4,21 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>eu.arrowhead</groupId>
   <artifactId>arrowhead</artifactId>
-  <version>M3</version>
+  <version>M4</version>
   <packaging>pom</packaging>
 
   <modules>
     <module>authorization</module>
+    <module>choreographer</module>
     <module>common</module>
     <module>dnssd</module>
+    <module>eventhandler</module>
     <module>gatekeeper</module>
     <module>gateway</module>
     <module>orchestrator</module>
     <module>qos</module>
     <module>serviceregistry</module>
     <module>serviceregistry_sql</module>
-    <module>choreographer</module>
   </modules>
 
   <properties>

@@ -15,7 +15,7 @@
   <parent>
     <groupId>eu.arrowhead</groupId>
     <artifactId>arrowhead</artifactId>
-    <version>M3</version>
+    <version>M4</version>
   </parent>
 
   <artifactId>orchestrator</artifactId>

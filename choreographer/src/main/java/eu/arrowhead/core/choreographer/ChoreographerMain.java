@@ -7,6 +7,8 @@
  * national funding authorities from involved countries.
  */
 
+package eu.arrowhead.core.choreographer;
+
 public class ChoreographerMain {
 
   public static void main(String[] args) {

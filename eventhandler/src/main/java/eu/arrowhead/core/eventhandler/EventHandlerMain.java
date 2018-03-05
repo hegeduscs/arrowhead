@@ -7,6 +7,8 @@
  * national funding authorities from involved countries.
  */
 
+package eu.arrowhead.core.eventhandler;
+
 public class EventHandlerMain {
 
   public static void main(String[] args) {
