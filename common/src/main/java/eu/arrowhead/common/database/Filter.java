@@ -33,7 +33,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "filter", uniqueConstraints = {@UniqueConstraint(columnNames = {"event_type", "consumer_system_id"})})
+@Table(name = "event_filter", uniqueConstraints = {@UniqueConstraint(columnNames = {"event_type", "consumer_system_id"})})
 public class Filter {
 
   @Column(name = "id")
@@ -48,7 +48,9 @@ public class Filter {
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
   private ArrowheadSystem consumer;
 
-  //todo guglizni ehhez a megfelelő annotáció setupot
+  @ElementCollection(fetch = FetchType.LAZY)
+  @LazyCollection(LazyCollectionOption.FALSE)
+  @CollectionTable(name = "event_filter_sources_list", joinColumns = @JoinColumn(name = "filter_id"))
   private List<ArrowheadSystem> sources = new ArrayList<>();
 
   @Column(name = "start_date")
@@ -63,7 +65,7 @@ public class Filter {
   @LazyCollection(LazyCollectionOption.FALSE)
   @MapKeyColumn(name = "metadata_key")
   @Column(name = "metadata_value", length = 2047)
-  @CollectionTable(name = "filter_metadata", joinColumns = @JoinColumn(name = "filter_id"))
+  @CollectionTable(name = "event_filter_metadata", joinColumns = @JoinColumn(name = "filter_id"))
   private Map<String, String> filterMetadata = new HashMap<>();
 
   public Filter() {

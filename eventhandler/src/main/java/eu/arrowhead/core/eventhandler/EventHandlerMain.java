@@ -125,7 +125,7 @@ public class EventHandlerMain {
         shutdown();
       }));
     } else {
-      System.out.println("Type \"stop\" to shutdown Authorization Server(s)...");
+      System.out.println("Type \"stop\" to shutdown Event Handler Server(s)...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       String input = "";
       while (!input.equals("stop")) {
