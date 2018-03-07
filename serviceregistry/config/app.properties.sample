@@ -15,7 +15,7 @@ truststore=config/certificates/testcloud1_cert.jks
 truststorepass=12345
 
 # scheduled ping for remove unaccessible services
-ping.timeout=10000
-ping.scheduled=false
+ping_timeout=10000
+ping_scheduled=false
 # interval in minutes
-ping.interval=60
+ping_interval=60

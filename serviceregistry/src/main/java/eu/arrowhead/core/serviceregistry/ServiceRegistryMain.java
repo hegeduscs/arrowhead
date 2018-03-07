@@ -35,7 +35,7 @@ public class ServiceRegistryMain {
 
   public static boolean DEBUG_MODE;
 
-  static final int pingTimeout = new Integer(getAppProp().getProperty("ping.timeout", "10000"));
+  static final int pingTimeout = new Integer(getAppProp().getProperty("ping_timeout", "10000"));
   //DNS-SD global settings
   static final String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
   static final String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
@@ -54,7 +54,7 @@ public class ServiceRegistryMain {
   private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://127.0.0.1:8443/");
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
   private static final List<String> basicPropertyNames = Arrays
-      .asList("base_uri", "db_user", "db_password", "db_address", "ping.timeout", "ping.scheduled", "ping.interval");
+      .asList("base_uri", "db_user", "db_password", "db_address", "ping_timeout", "ping_scheduled", "ping_interval");
   private static final List<String> securePropertyNames = Arrays
       .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
@@ -110,10 +110,10 @@ public class ServiceRegistryMain {
     }
 
     //if scheduled ping is set
-    if (Boolean.valueOf(getAppProp().getProperty("ping.scheduled", "false"))) {
+    if (Boolean.valueOf(getAppProp().getProperty("ping_scheduled", "false"))) {
       TimerTask pingTask = new PingProvidersTask();
       timer = new Timer();
-      int interval = Integer.parseInt(getAppProp().getProperty("ping.interval", "10"));
+      int interval = Integer.parseInt(getAppProp().getProperty("ping_interval", "10"));
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 

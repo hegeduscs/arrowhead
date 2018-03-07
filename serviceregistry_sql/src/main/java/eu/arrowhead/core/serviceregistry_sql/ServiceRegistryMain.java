@@ -44,7 +44,7 @@ public class ServiceRegistryMain {
 
   public static boolean DEBUG_MODE;
 
-  static final int pingTimeout = new Integer(getProp().getProperty("ping.timeout", "10000"));
+  static final int pingTimeout = new Integer(getProp().getProperty("ping_timeout", "10000"));
 
   private static HttpServer server;
   private static HttpServer secureServer;
@@ -55,7 +55,7 @@ public class ServiceRegistryMain {
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8443/");
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
   private static final List<String> basicPropertyNames = Arrays
-      .asList("base_uri", "db_user", "db_password", "db_address", "ping.timeout", "ping.scheduled", "ping.interval");
+      .asList("base_uri", "db_user", "db_password", "db_address", "ping_timeout", "ping_scheduled", "ping_interval");
   private static final List<String> securePropertyNames = Arrays
       .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
@@ -105,10 +105,10 @@ public class ServiceRegistryMain {
     }
 
     //if scheduled ping is set, start the TimerTask that provides it
-    if (Boolean.valueOf(getProp().getProperty("ping.scheduled", "false"))) {
+    if (Boolean.valueOf(getProp().getProperty("ping_scheduled", "false"))) {
       TimerTask pingTask = new PingProvidersTask();
       timer = new Timer();
-      int interval = Integer.parseInt(getProp().getProperty("ping.interval", "10"));
+      int interval = Integer.parseInt(getProp().getProperty("ping_interval", "10"));
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 
