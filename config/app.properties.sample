@@ -1,6 +1,9 @@
 #Common
+
 # Web-server address (0.0.0.0 binds to the eth0 and wifi AP address too at the same time)
 server_address=0.0.0.0
+# Network address where Arrowhead Clients can reach the Core Systems
+gateway_address=192.168.42.1
 
 db_user=root
 db_password=root

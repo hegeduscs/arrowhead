@@ -59,7 +59,7 @@ public class ArrowheadMain {
   private static final Logger log = Logger.getLogger(ArrowheadMain.class.getName());
   // The mandatory property fields
   private static final List<String> basicPropertyNames = Arrays
-      .asList("server_address", "db_user", "db_password", "db_address", "gateway_socket_timeout", "min_port", "max_port");
+      .asList("server_address", "gateway_address", "db_user", "db_password", "db_address", "gateway_socket_timeout", "min_port", "max_port");
   private static final List<String> securePropertyNames = Arrays
       .asList("auth_keystore", "auth_keystorepass", "master_arrowhead_cert", "gateway_keystore", "gateway_keystore_pass", "cloud_keystore",
               "cloud_keystore_pass", "cloud_keypass");

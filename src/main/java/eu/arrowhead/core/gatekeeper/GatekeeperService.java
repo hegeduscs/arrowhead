@@ -44,6 +44,7 @@ public final class GatekeeperService {
   static final int timeout = Integer.valueOf(ArrowheadMain.getProp().getProperty("gateway_socket_timeout"));
   static final DatabaseManager dm = DatabaseManager.getInstance();
 
+  private static final String GATEWAY_ADDRESS = ArrowheadMain.getProp().getProperty("gateway_address");
   private static final Logger log = Logger.getLogger(GatekeeperService.class.getName());
 
   private GatekeeperService() throws AssertionError {
@@ -173,8 +174,7 @@ public final class GatekeeperService {
 
     ArrowheadSystem gatewaySystem = new ArrowheadSystem();
     gatewaySystem.setSystemName("gateway");
-    //NOTE Hard-wired (for now) the static IP address of the WiFi AP of the Raspberries (0.0.0.0 works too)
-    gatewaySystem.setAddress("192.168.42.1");
+    gatewaySystem.setAddress(GATEWAY_ADDRESS);
     gatewaySystem.setPort(connectToConsumerResponse.getServerSocketPort());
     gatewaySystem.setAuthenticationInfo(GatewayService.GATEWAY_PUBLIC_KEY);
     icnEnd.getOrchestrationForm().setProvider(gatewaySystem);
