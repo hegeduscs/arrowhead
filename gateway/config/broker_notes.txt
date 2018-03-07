@@ -15,6 +15,9 @@ If creating channel failed while the rabbitmq server running:
     7. Check: service --status-all or rabbitmqctl status
     
     -In case of: "Stopping and halting node <NODENAME>" - Step 6.-7. above
+
+    -In case the service is not starting, make sure every process run by rabbit-mq is killed before trying to start it.
+     Specially the "epmd" process (ps-ef | grep epmd)
     
   Default insecure port: 5672
   Default secure port: 5671
