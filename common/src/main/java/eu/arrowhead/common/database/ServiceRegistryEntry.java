@@ -9,7 +9,9 @@
 
 package eu.arrowhead.common.database;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import java.util.Date;
 import java.util.Map;
 import javax.persistence.CascadeType;
@@ -156,19 +158,34 @@ public class ServiceRegistryEntry {
     this.version = version;
   }
 
+  @JsonGetter("UDP")
   public boolean isUDP() {
     return UDP;
   }
 
+  //We have 2 Setters, so Jackson can parse both upper- and lowercase forms without a problem
+  @JsonSetter("UDP")
   public void setUDP(boolean UDP) {
     this.UDP = UDP;
   }
 
+  @JsonSetter("udp")
+  private void setUdp(boolean UDP) {
+    this.UDP = UDP;
+  }
+
+  @JsonGetter("ttl")
   public int getTtl() {
     return ttl;
   }
 
+  @JsonSetter("ttl")
   public void setTtl(int ttl) {
+    this.ttl = ttl;
+  }
+
+  @JsonSetter("TTL")
+  private void setTTL(int ttl) {
     this.ttl = ttl;
   }
 
