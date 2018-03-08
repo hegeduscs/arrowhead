@@ -9,8 +9,8 @@
 
 package eu.arrowhead.common.database;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,11 +55,11 @@ public class Filter {
 
   @Column(name = "start_date")
   @Type(type = "timestamp")
-  private Date startDate;
+  private LocalDateTime startDate;
 
   @Column(name = "end_date")
   @Type(type = "timestamp")
-  private Date endDate;
+  private LocalDateTime endDate;
 
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
@@ -71,7 +71,7 @@ public class Filter {
   public Filter() {
   }
 
-  public Filter(String eventType, ArrowheadSystem consumer, List<ArrowheadSystem> sources, Date startDate, Date endDate,
+  public Filter(String eventType, ArrowheadSystem consumer, List<ArrowheadSystem> sources, LocalDateTime startDate, LocalDateTime endDate,
                 Map<String, String> filterMetadata) {
     this.eventType = eventType;
     this.consumer = consumer;
@@ -113,19 +113,19 @@ public class Filter {
     this.sources = sources;
   }
 
-  public Date getStartDate() {
+  public LocalDateTime getStartDate() {
     return startDate;
   }
 
-  public void setStartDate(Date startDate) {
+  public void setStartDate(LocalDateTime startDate) {
     this.startDate = startDate;
   }
 
-  public Date getEndDate() {
+  public LocalDateTime getEndDate() {
     return endDate;
   }
 
-  public void setEndDate(Date endDate) {
+  public void setEndDate(LocalDateTime endDate) {
     this.endDate = endDate;
   }
 

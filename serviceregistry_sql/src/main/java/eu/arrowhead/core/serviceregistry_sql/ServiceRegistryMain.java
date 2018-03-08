@@ -44,18 +44,18 @@ public class ServiceRegistryMain {
 
   public static boolean DEBUG_MODE;
 
-  static final int pingTimeout = new Integer(getProp().getProperty("ping_timeout", "10000"));
+  static final int pingTimeout = new Integer(getProp().getProperty("ping_timeout", "5000"));
 
   private static HttpServer server;
   private static HttpServer secureServer;
   private static Properties prop;
-  private static Timer timer;
+  private static Timer pingTimer;
+  private static Timer ttlTimer;
 
   private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8442/");
   private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8443/");
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays
-      .asList("base_uri", "db_user", "db_password", "db_address", "ping_timeout", "ping_scheduled", "ping_interval");
+  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "db_user", "db_password", "db_address");
   private static final List<String> securePropertyNames = Arrays
       .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
@@ -104,12 +104,19 @@ public class ServiceRegistryMain {
       server = startServer();
     }
 
-    //if scheduled ping is set, start the TimerTask that provides it
+    //if provider ping is scheduled, start the TimerTask that provides it
     if (Boolean.valueOf(getProp().getProperty("ping_scheduled", "false"))) {
       TimerTask pingTask = new PingProvidersTask();
-      timer = new Timer();
-      int interval = Integer.parseInt(getProp().getProperty("ping_interval", "10"));
-      timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
+      pingTimer = new Timer();
+      int interval = Integer.parseInt(getProp().getProperty("ping_interval", "60"));
+      pingTimer.schedule(pingTask, 60L * 1000L, interval * 60L * 1000L);
+    }
+    //if TTL based service removing is scheduled, start the TimerTask that provides it
+    if (Boolean.valueOf(getProp().getProperty("ttl_scheduled", "false"))) {
+      TimerTask removeTask = new RemoveExpiredServicesTask();
+      ttlTimer = new Timer();
+      int interval = Integer.parseInt(getProp().getProperty("ttl_interval", "10"));
+      ttlTimer.schedule(removeTask, 45L * 1000L, interval * 60L * 1000L);
     }
 
     //This is here to initialize the database connection before the REST resources are initiated
@@ -118,9 +125,6 @@ public class ServiceRegistryMain {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
         System.out.println("Received TERM signal, shutting down...");
-        if (timer != null) {
-          timer.cancel();
-        }
         shutdown();
       }));
     } else {
@@ -131,13 +135,9 @@ public class ServiceRegistryMain {
         input = br.readLine();
       }
       br.close();
-      if (timer != null) {
-        timer.cancel();
-      }
       shutdown();
     }
   }
-
 
   private static HttpServer startServer() throws IOException {
     final ResourceConfig config = new ResourceConfig();
@@ -209,6 +209,12 @@ public class ServiceRegistryMain {
   }
 
   private static void shutdown() {
+    if (pingTimer != null) {
+      pingTimer.cancel();
+    }
+    if (ttlTimer != null) {
+      ttlTimer.cancel();
+    }
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();

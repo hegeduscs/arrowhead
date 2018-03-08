@@ -23,11 +23,15 @@ import eu.arrowhead.common.messages.ICNRequestForm;
 import eu.arrowhead.common.messages.ICNResult;
 import eu.arrowhead.common.messages.IntraCloudAuthRequest;
 import eu.arrowhead.common.messages.IntraCloudAuthResponse;
+import eu.arrowhead.common.messages.OrchestrationForm;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.common.messages.PreferredProvider;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.messages.ServiceRequestForm;
+import eu.arrowhead.common.messages.TokenData;
+import eu.arrowhead.common.messages.TokenGenerationRequest;
+import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -479,6 +483,115 @@ final class OrchestratorDriver {
 
     log.info("doInterCloudNegotiations returns with " + result.getOrchResponse().getResponse().size() + " possible providers");
     return result;
+  }
+
+  /**
+   * Matchmaking method for ICN results. As the last step of the inter-cloud orchestration process (if requested) we pick out 1 provider from the ICN
+   * result list. Providers preferred by the consumer have higher priority. Custom matchmaking algorithm can be implemented, as of now it just returns
+   * the first provider from the list.
+   *
+   * @throws DataNotFoundException in case of Store orchestration, and the provider system from the database is not a match according to the remote
+   *     cloud
+   */
+  static OrchestrationResponse icnMatchmaking(ICNResult icnResult, List<ArrowheadSystem> preferredSystems, boolean storeOrchestration) {
+    // We first try to find a match between the preferred systems and the received providers from the ICN result.
+    if (preferredSystems != null && !preferredSystems.isEmpty()) {
+      for (ArrowheadSystem preferredProvider : preferredSystems) {
+        for (OrchestrationForm of : icnResult.getOrchResponse().getResponse()) {
+          if (preferredProvider.equals(of.getProvider())) {
+            log.info("icnMatchmaking returns with a preferred System");
+            return new OrchestrationResponse(Collections.singletonList(of));
+          }
+        }
+      }
+    }
+
+    // Store based orchestration is "hard-wired", meaning only the stored provider System is acceptable
+    if (storeOrchestration) {
+      log.error("icnMatchmaking DataNotFoundException");
+      throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.",
+                                      Status.NOT_FOUND.getStatusCode());
+    }
+    // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
+    else {
+      log.info("icnMatchmaking returns with a not preferred System");
+      return new OrchestrationResponse(Collections.singletonList(icnResult.getOrchResponse().getResponse().get(0)));
+    }
+  }
+
+  /**
+   * Requests <tt>ArrowheadToken</tt> generation from the Authorization Core System for <tt>ArrowheadService</tt>s, where the metadata contains the
+   * "security-token" key-pair. The consumer <tt>ArrowheadSystem</tt>s will use these credentials to contact the provider <tt>ArrowheadSystem</tt>s
+   * (if the providers are operating in a secure manner).
+   *
+   * @param srf The <tt>ServiceRequestForm</tt> sent in by the requester <tt>ArrowheadSystem</tt>. 3 different fields of it is used in this method.
+   * @param ofList The <tt>OrchestrationForm</tt> list the Orchestrator will send back.
+   *
+   * @return the same <tt>OrchestrationForm</tt> list supplemented with the generated <tt>ArrowheadToken</tt>s for providers
+   */
+  //TODO test if this method works as intended for multiple generated tokens!
+  static List<OrchestrationForm> generateAuthTokens(ServiceRequestForm srf, List<OrchestrationForm> ofList) {
+    // Arrange token generation for every provider, if it was requested in the service metadata
+    Map<String, String> metadata;
+    TokenGenerationResponse tokenResponse = null;
+    int tokenCount = 0;
+
+    // It is a default Store orchestration, if the requested service was not specified, with possibly more than 1 service
+    if (srf.getRequestedService() == null) {
+      tokenResponse = new TokenGenerationResponse();
+      for (OrchestrationForm form : ofList) {
+        metadata = form.getService().getServiceMetadata();
+        if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
+          // Compiling the request payload
+          TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), null,
+                                                                           Collections.singletonList(form.getProvider()), form.getService(), 0);
+          // Sending the token generation request, parsing the response
+          Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
+          tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
+          if (tokenResponse != null && tokenResponse.getTokenData() != null && tokenResponse.getTokenData().size() == 1) {
+            form.setAuthorizationToken(tokenResponse.getTokenData().get(0).getToken());
+            form.setSignature(tokenResponse.getTokenData().get(0).getSignature());
+            tokenCount++;
+          }
+        }
+      }
+    } else {
+      /* NOTE a refactor might be necessary in the future, to look at the metadata of each service from the SR individually, cause the provider
+         might not implement the token-based authorization */
+
+      // Otherwise we look at the metadata of the requested service
+      metadata = srf.getRequestedService().getServiceMetadata();
+      if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
+        // Getting all the provider Systems from the Service Registry entries
+        List<ArrowheadSystem> providerList = new ArrayList<>();
+        for (OrchestrationForm form : ofList) {
+          providerList.add(form.getProvider());
+        }
+
+        // Compiling the request payload
+        TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
+                                                                         srf.getRequestedService(), 0);
+        // Sending the token generation request
+        Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
+        tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
+
+        // Parsing the response
+        if (tokenResponse != null && tokenResponse.getTokenData() != null && tokenResponse.getTokenData().size() > 0) {
+          for (TokenData data : tokenResponse.getTokenData()) {
+            for (OrchestrationForm form : ofList) {
+              if (data.getSystem().equals(form.getProvider())) {
+                form.setAuthorizationToken(data.getToken());
+                form.setSignature(data.getSignature());
+              }
+            }
+          }
+          tokenCount = tokenResponse.getTokenData().size();
+        }
+      }
+    }
+
+    log.info("generateAuthTokens successfully returns with " + tokenCount + " tokens");
+    return ofList;
   }
 
 }

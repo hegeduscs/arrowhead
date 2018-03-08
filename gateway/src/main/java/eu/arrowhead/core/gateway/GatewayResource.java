@@ -19,8 +19,8 @@ import eu.arrowhead.core.gateway.thread.InsecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.InsecureSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.SecureSocketThread;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -63,7 +63,7 @@ public class GatewayResource {
                                                     connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
                                                     connectionRequest.getService(), connectionRequest.getBrokerName(),
                                                     connectionRequest.getBrokerPort(), null, queueName, controlQueueName,
-                                                    connectionRequest.getIsSecure(), new Date(System.currentTimeMillis()));
+                                                    connectionRequest.getIsSecure(), LocalDateTime.now());
     // Add the session to the management queue
     GatewayService.activeSessions.put(queueName, activeSession);
 
@@ -93,8 +93,7 @@ public class GatewayResource {
                                                     connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
                                                     connectionRequest.getService(), connectionRequest.getBrokerName(),
                                                     connectionRequest.getBrokerPort(), serverSocketPort, connectionRequest.getQueueName(),
-                                                    connectionRequest.getControlQueueName(), connectionRequest.getIsSecure(),
-                                                    new Date(System.currentTimeMillis()));
+                                                    connectionRequest.getControlQueueName(), connectionRequest.getIsSecure(), LocalDateTime.now());
     // Add the session to the management queue
     GatewayService.activeSessions.put(connectionRequest.getQueueName(), activeSession);
 

@@ -12,7 +12,8 @@ package eu.arrowhead.common.database;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -60,7 +61,7 @@ public class ServiceRegistryEntry {
   @Column(name = "udp")
   private boolean UDP = false;
 
-  //Time to live in seconds - endOfValidity is calculated from this
+  //Time to live in seconds - endOfValidity is calculated from this upon registering and TTL is calculated from endOfValidity when queried
   @Transient
   private int ttl;
 
@@ -72,7 +73,7 @@ public class ServiceRegistryEntry {
   @JsonIgnore
   @Column(name = "end_of_validity")
   @Type(type = "timestamp")
-  private Date endOfValidity;
+  private LocalDateTime endOfValidity;
 
   public ServiceRegistryEntry() {
   }
@@ -97,7 +98,7 @@ public class ServiceRegistryEntry {
   }
 
   public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, Integer version,
-                              boolean UDP, int ttl, String metadata, Date endOfValidity) {
+                              boolean UDP, int ttl, String metadata, LocalDateTime endOfValidity) {
     this.providedService = providedService;
     this.provider = provider;
     this.port = port;
@@ -197,11 +198,11 @@ public class ServiceRegistryEntry {
     this.metadata = metadata;
   }
 
-  public Date getEndOfValidity() {
+  public LocalDateTime getEndOfValidity() {
     return endOfValidity;
   }
 
-  public void setEndOfValidity(Date endOfValidity) {
+  public void setEndOfValidity(LocalDateTime endOfValidity) {
     this.endOfValidity = endOfValidity;
   }
 
@@ -229,7 +230,7 @@ public class ServiceRegistryEntry {
       port = provider.getPort();
     }
 
-    endOfValidity = new Date(System.currentTimeMillis() + ttl);
+    endOfValidity = ttl > 0 ? LocalDateTime.now().plusSeconds(ttl) : null;
   }
 
   @JsonIgnore
@@ -251,5 +252,17 @@ public class ServiceRegistryEntry {
     if (port != null && provider.getPort() == 0) {
       provider.setPort(port);
     }
+
+    //TODO test all TTL related code
+    if (endOfValidity != null) {
+      if (LocalDateTime.now().isAfter(endOfValidity)) {
+        ttl = 0;
+      } else {
+        ttl = (int) Duration.between(endOfValidity, LocalDateTime.now()).toMillis() / 1000;
+      }
+    } else {
+      ttl = 0;
+    }
   }
+
 }

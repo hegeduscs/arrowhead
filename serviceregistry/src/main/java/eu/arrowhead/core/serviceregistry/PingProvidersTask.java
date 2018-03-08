@@ -9,8 +9,8 @@ import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import com.github.danieln.dnssdjava.ServiceType;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.TimerTask;
 import org.apache.log4j.Logger;
 
@@ -20,7 +20,7 @@ public class PingProvidersTask extends TimerTask {
 
   @Override
   public void run() {
-    log.debug("Cleaning up DNS at " + new Date().toString());
+    log.debug("Cleaning up DNS at " + LocalDateTime.now());
     pingAndRemoveServices();
   }
 

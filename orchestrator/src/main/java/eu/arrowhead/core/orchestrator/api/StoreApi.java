@@ -18,9 +18,9 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.OrchestrationStoreQuery;
 import eu.arrowhead.core.orchestrator.StoreService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -196,7 +196,7 @@ public class StoreApi {
         entry.setService(service);
         entry.setProviderSystem(providerSystem);
         entry.setProviderCloud(providerCloud);
-        entry.setLastUpdated(new Date());
+        entry.setLastUpdated(LocalDateTime.now());
         dm.merge(entry);
         store.add(entry);
       }
@@ -262,7 +262,7 @@ public class StoreApi {
       storeEntry.setPriority(payload.getPriority());
       storeEntry.setDefaultEntry(payload.isDefaultEntry());
       storeEntry.setName(payload.getName());
-      storeEntry.setLastUpdated(new Date());
+      storeEntry.setLastUpdated(LocalDateTime.now());
       storeEntry.setInstruction(payload.getInstruction());
       storeEntry.setAttributes(payload.getAttributes());
       storeEntry = dm.merge(storeEntry);

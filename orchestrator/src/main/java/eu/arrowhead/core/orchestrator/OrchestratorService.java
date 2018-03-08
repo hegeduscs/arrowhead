@@ -9,7 +9,6 @@
 
 package eu.arrowhead.core.orchestrator;
 
-import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.OrchestrationStore;
@@ -20,18 +19,15 @@ import eu.arrowhead.common.messages.GSDResult;
 import eu.arrowhead.common.messages.ICNResult;
 import eu.arrowhead.common.messages.OrchestrationForm;
 import eu.arrowhead.common.messages.OrchestrationResponse;
+import eu.arrowhead.common.messages.OrchestratorWarnings;
 import eu.arrowhead.common.messages.PreferredProvider;
 import eu.arrowhead.common.messages.ServiceRequestForm;
-import eu.arrowhead.common.messages.TokenData;
-import eu.arrowhead.common.messages.TokenGenerationRequest;
-import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
@@ -185,7 +181,7 @@ final class OrchestratorService {
 
             // Use matchmaking on the ICN result. (Non-default Store orchestration will always only return 1 provider.)
             log.info("orchestrationFromStore returns with an inter-cloud Store entry");
-            return icnMatchmaking(icnResult, Collections.singletonList(entry.getProviderSystem()), true);
+            return OrchestratorDriver.icnMatchmaking(icnResult, Collections.singletonList(entry.getProviderSystem()), true);
           }
           // If the ICN process failed on this store entry, we catch the exception and go to the next Store entry in the for-loop.
           catch (ArrowheadException ex) {
@@ -229,7 +225,7 @@ final class OrchestratorService {
     ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(srf, targetCloud);
     log.debug("triggerInterCloud: ICN results arrived back to the Orchestrator");
     for (OrchestrationForm of : icnResult.getOrchResponse().getResponse()) {
-      of.setInstruction("This provider is from another cloud!");
+      of.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
     }
 
     // If matchmaking is requested, we pick one provider from the ICN result
@@ -244,7 +240,7 @@ final class OrchestratorService {
       }
 
       log.info("triggerInterCloud returns with 1 OrchestrationForm due to icnMatchmaking");
-      return icnMatchmaking(icnResult, preferredSystems, false);
+      return OrchestratorDriver.icnMatchmaking(icnResult, preferredSystems, false);
     } else {
       log.info("triggerInterCloud returns " + icnResult.getOrchResponse().getResponse().size() + " forms without icnMatchmaking");
       return icnResult.getOrchResponse();
@@ -282,40 +278,6 @@ final class OrchestratorService {
   }
 
   /**
-   * Matchmaking method for ICN results. As the last step of the inter-cloud orchestration process (if requested) we pick out 1 provider from the ICN
-   * result list. Providers preferred by the consumer have higher priority. Custom matchmaking algorithm can be implemented, as of now it just returns
-   * the first provider from the list.
-   *
-   * @throws DataNotFoundException in case of Store orchestration, and the provider system from the database is not a match according to the remote
-   *     cloud
-   */
-  private static OrchestrationResponse icnMatchmaking(ICNResult icnResult, List<ArrowheadSystem> preferredSystems, boolean storeOrchestration) {
-    // We first try to find a match between the preferred systems and the received providers from the ICN result.
-    if (preferredSystems != null && !preferredSystems.isEmpty()) {
-      for (ArrowheadSystem preferredProvider : preferredSystems) {
-        for (OrchestrationForm of : icnResult.getOrchResponse().getResponse()) {
-          if (preferredProvider.equals(of.getProvider())) {
-            log.info("icnMatchmaking returns with a preferred System");
-            return new OrchestrationResponse(Collections.singletonList(of));
-          }
-        }
-      }
-    }
-
-    // Store based orchestration is "hard-wired", meaning only the stored provider System is acceptable
-    if (storeOrchestration) {
-      log.error("icnMatchmaking DataNotFoundException");
-      throw new DataNotFoundException("The provider ArrowheadSystem from the Store entry was not found in the ICN result.",
-                                      Status.NOT_FOUND.getStatusCode());
-    }
-    // If it's not Store based, we just select the first OrchestrationForm, custom matchmaking algorithm can be implemented here
-    else {
-      log.info("icnMatchmaking returns with a not preferred System");
-      return new OrchestrationResponse(Collections.singletonList(icnResult.getOrchResponse().getResponse().get(0)));
-    }
-  }
-
-  /**
    * Compiles the OrchestrationResponse object and returns it. Potentially includes token generation for authorization purposes.
    *
    * @param srList Service Registry entries, each containing a suitable provider <tt>ArrowheadSystem</tt>.
@@ -325,48 +287,19 @@ final class OrchestratorService {
    */
   private static OrchestrationResponse compileOrchestrationResponse(List<ServiceRegistryEntry> srList, ServiceRequestForm srf,
                                                                     List<String> instructions) {
-    // Arrange token generation for every provider, if it was requested in the service metadata
-    Map<String, String> metadata;
-    TokenGenerationResponse tokenResponse = null;
-    if (srf.getRequestedService() == null) {
-      tokenResponse = new TokenGenerationResponse();
-      for (ServiceRegistryEntry entry : srList) {
-        metadata = entry.getProvidedService().getServiceMetadata();
-        if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
-          // Compiling the request payload
-          TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), null,
-                                                                           Collections.singletonList(entry.getProvider()), entry.getProvidedService(),
-                                                                           0);
-          // Sending the token generation request, parsing the response
-          Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-          TokenGenerationResponse oneResponse = authResponse.readEntity(TokenGenerationResponse.class);
-          tokenResponse.getTokenData().add(oneResponse.getTokenData().get(0));
-        }
-      }
-    } else {
-      metadata = srf.getRequestedService().getServiceMetadata();
-      if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
-        // Getting all the provider Systems from the Service Registry entries
-        List<ArrowheadSystem> providerList = new ArrayList<>();
-        for (ServiceRegistryEntry entry : srList) {
-          providerList.add(entry.getProvider());
-        }
-
-        // Compiling the request payload
-        TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
-                                                                         srf.getRequestedService(), 0);
-        // Sending the token generation request, parsing the response
-        Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-        tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
-      }
-    }
-    int instances = (tokenResponse != null && tokenResponse.getTokenData() != null) ? tokenResponse.getTokenData().size() : 0;
-    log.debug("Generated tokens for " + instances + " instances.");
-
     // Create an OrchestrationForm for every provider
     List<OrchestrationForm> ofList = new ArrayList<>();
     for (ServiceRegistryEntry entry : srList) {
       OrchestrationForm of = new OrchestrationForm(entry.getProvidedService(), entry.getProvider(), entry.getServiceURI());
+
+      if (entry.getTtl() == 0) {
+        of.getWarnings().add(OrchestratorWarnings.TTL_UNKNOWN);
+      } else if (entry.getTtl() < 120) {
+        /* 2 minutes is an arbitrarily chosen value for the Time To Live measure, which got its value when the SR was queried. The provider
+           presumably will stop offering this service in somewhat less than 2 minutes. */
+        of.getWarnings().add(OrchestratorWarnings.TTL_EXPIRING);
+      }
+
       ofList.add(of);
     }
 
@@ -376,17 +309,9 @@ final class OrchestratorService {
         ofList.get(i).setInstruction(instructions.get(i));
       }
     }
-    // Adding the tokens and signatures, if token generation happened
-    if (tokenResponse != null && tokenResponse.getTokenData() != null) {
-      for (TokenData data : tokenResponse.getTokenData()) {
-        for (OrchestrationForm of : ofList) {
-          if (data.getSystem().equals(of.getProvider())) {
-            of.setAuthorizationToken(data.getToken());
-            of.setSignature(data.getSignature());
-          }
-        }
-      }
-    }
+
+    // Generate the ArrowheadTokens if it is requested based on the service metadata
+    ofList = OrchestratorDriver.generateAuthTokens(srf, ofList);
 
     log.info("compileOrchestrationResponse creates " + ofList.size() + " orchestration form");
     return new OrchestrationResponse(ofList);

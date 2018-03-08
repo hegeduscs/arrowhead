@@ -10,7 +10,7 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.CascadeType;
@@ -79,7 +79,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
 
   @Column(name = "last_updated")
   @Type(type = "timestamp")
-  private Date lastUpdated;
+  private LocalDateTime lastUpdated;
 
   @Column(name = "instruction")
   private String instruction;
@@ -107,7 +107,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
+                            Integer priority, boolean defaultEntry, String name, LocalDateTime lastUpdated, String instruction,
+                            Map<String, String> attributes,
                             String serviceURI) {
     this.service = service;
     this.consumer = consumer;
@@ -187,11 +188,11 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.name = name;
   }
 
-  public Date getLastUpdated() {
+  public LocalDateTime getLastUpdated() {
     return lastUpdated;
   }
 
-  public void setLastUpdated(Date lastUpdated) {
+  public void setLastUpdated(LocalDateTime lastUpdated) {
     this.lastUpdated = lastUpdated;
   }
 
