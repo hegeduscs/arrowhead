@@ -48,8 +48,13 @@ public class ServiceRegistryApi {
   @GET
   @Path("all")
   public Response getAllServices() {
-    List<ServiceRegistryEntry> serviceRegistry = dm.getAll(ServiceRegistryEntry.class, null);
-    ServiceQueryResult result = new ServiceQueryResult(serviceRegistry);
+    List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, null);
+
+    for (ServiceRegistryEntry entry : providedServices) {
+      entry.fromDatabase();
+    }
+
+    ServiceQueryResult result = new ServiceQueryResult(providedServices);
     log.info("getAllServices returns " + result.getServiceQueryData().size() + " entries");
     if (result.getServiceQueryData().isEmpty()) {
       return Response.status(Status.NO_CONTENT).entity(result).build();
@@ -61,12 +66,12 @@ public class ServiceRegistryApi {
   @DELETE
   @Path("all")
   public Response removeAllServices() {
-    List<ServiceRegistryEntry> serviceRegistry = dm.getAll(ServiceRegistryEntry.class, null);
-    if (serviceRegistry.isEmpty()) {
+    List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, null);
+    if (providedServices.isEmpty()) {
       log.info("removeAllServices had no effect");
       return Response.status(Status.NO_CONTENT).build();
     }
-    for (ServiceRegistryEntry entry : serviceRegistry) {
+    for (ServiceRegistryEntry entry : providedServices) {
       dm.delete(entry);
     }
     log.info("removeAllServices returns successfully");
@@ -91,6 +96,10 @@ public class ServiceRegistryApi {
       throw new DataNotFoundException("There are no Service Registry entries with the requested ArrowheadSystem in the database.");
     }
 
+    for (ServiceRegistryEntry entry : srList) {
+      entry.fromDatabase();
+    }
+
     log.info("getAllByProvider returns " + srList.size() + " entries");
     return srList;
   }
@@ -111,6 +120,10 @@ public class ServiceRegistryApi {
     if (srList.isEmpty()) {
       log.info("getAllByService throws DataNotFoundException");
       throw new DataNotFoundException("There are no Service Registry entries with the requested ArrowheadService in the database.");
+    }
+
+    for (ServiceRegistryEntry entry : srList) {
+      entry.fromDatabase();
     }
 
     log.info("getAllByService returns " + srList.size() + " entries");

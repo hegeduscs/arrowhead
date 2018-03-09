@@ -191,25 +191,25 @@ public final class Utility {
       log.error("Request returned with " + errorMessage.getExceptionType().toString() + ": " + errorMessage.getErrorMessage());
       switch (errorMessage.getExceptionType()) {
         case ARROWHEAD:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case AUTH:
-          throw new AuthException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new AuthException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case BAD_METHOD:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case BAD_PAYLOAD:
-          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case BAD_URI:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case DATA_NOT_FOUND:
-          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case DUPLICATE_ENTRY:
-          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case GENERIC:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case JSON_MAPPING:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case UNAVAILABLE:
-          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
       }
     }
   }

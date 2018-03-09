@@ -45,6 +45,7 @@ public class ServiceRegistryMain {
   public static boolean DEBUG_MODE;
 
   static final int pingTimeout = new Integer(getProp().getProperty("ping_timeout", "5000"));
+  static final int ttlInterval = new Integer(getProp().getProperty("ttl_interval", "10"));
 
   private static HttpServer server;
   private static HttpServer secureServer;
@@ -115,8 +116,7 @@ public class ServiceRegistryMain {
     if (Boolean.valueOf(getProp().getProperty("ttl_scheduled", "false"))) {
       TimerTask removeTask = new RemoveExpiredServicesTask();
       ttlTimer = new Timer();
-      int interval = Integer.parseInt(getProp().getProperty("ttl_interval", "10"));
-      ttlTimer.schedule(removeTask, 45L * 1000L, interval * 60L * 1000L);
+      ttlTimer.schedule(removeTask, 10L * 1000L, ttlInterval * 60L * 1000L);
     }
 
     //This is here to initialize the database connection before the REST resources are initiated

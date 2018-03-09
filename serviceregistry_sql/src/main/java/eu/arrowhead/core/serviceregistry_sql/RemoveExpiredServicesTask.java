@@ -30,15 +30,17 @@ class RemoveExpiredServicesTask extends TimerTask {
       List<ServiceRegistryEntry> srList = dm.getAll(ServiceRegistryEntry.class, null);
 
       for (ServiceRegistryEntry entry : srList) {
-        if (LocalDateTime.now().isAfter(entry.getEndOfValidity())) {
-          dm.delete(entry);
-          deleteCount++;
-        } else {
-          int ttl = (int) Duration.between(entry.getEndOfValidity(), LocalDateTime.now()).toMillis();
-          if (ttl < 300 * 1000) { // Time to Live < 5 minutes
-            TimerTask removeTask = new RemoveExpiredServicesTask(entry);
-            Timer timer = new Timer();
-            timer.schedule(removeTask, 0L, ttl);
+        if (entry.getEndOfValidity() != null) {
+          if (LocalDateTime.now().isAfter(entry.getEndOfValidity())) {
+            dm.delete(entry);
+            deleteCount++;
+          } else {
+            long ttl = Duration.between(LocalDateTime.now(), entry.getEndOfValidity()).toMillis();
+            if (ttl < ServiceRegistryMain.ttlInterval * 60 * 1000) { // minutes -> milliseconds
+              TimerTask removeTask = new RemoveExpiredServicesTask(entry);
+              Timer timer = new Timer();
+              timer.schedule(removeTask, ttl);
+            }
           }
         }
       }

@@ -529,7 +529,6 @@ final class OrchestratorDriver {
    *
    * @return the same <tt>OrchestrationForm</tt> list supplemented with the generated <tt>ArrowheadToken</tt>s for providers
    */
-  //TODO test if this method works as intended for multiple generated tokens!
   static List<OrchestrationForm> generateAuthTokens(ServiceRequestForm srf, List<OrchestrationForm> ofList) {
     // Arrange token generation for every provider, if it was requested in the service metadata
     Map<String, String> metadata;

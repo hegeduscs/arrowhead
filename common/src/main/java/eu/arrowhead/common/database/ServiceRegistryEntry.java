@@ -11,6 +11,7 @@ package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -27,10 +28,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
-import org.hibernate.annotations.Type;
 
 @Entity
+@JsonIgnoreProperties({"id", "metadata", "endOfValidity"})
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
 public class ServiceRegistryEntry {
 
@@ -66,13 +66,10 @@ public class ServiceRegistryEntry {
   private int ttl;
 
   //only for database
-  @JsonIgnore
   @Column(name = "metadata")
   private String metadata;
 
-  @JsonIgnore
   @Column(name = "end_of_validity")
-  @Type(type = "timestamp")
   private LocalDateTime endOfValidity;
 
   public ServiceRegistryEntry() {
@@ -110,7 +107,6 @@ public class ServiceRegistryEntry {
     this.endOfValidity = endOfValidity;
   }
 
-  @XmlTransient
   public int getId() {
     return id;
   }
@@ -258,7 +254,7 @@ public class ServiceRegistryEntry {
       if (LocalDateTime.now().isAfter(endOfValidity)) {
         ttl = 0;
       } else {
-        ttl = (int) Duration.between(endOfValidity, LocalDateTime.now()).toMillis() / 1000;
+        ttl = (int) Duration.between(LocalDateTime.now(), endOfValidity).toMillis() / 1000;
       }
     } else {
       ttl = 0;

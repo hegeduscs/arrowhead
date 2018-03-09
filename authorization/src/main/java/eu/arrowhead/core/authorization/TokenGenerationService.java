@@ -13,6 +13,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.RawTokenInfo;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
@@ -187,7 +188,14 @@ class TokenGenerationService {
   }
 
   private static PublicKey getPublicKey(String stringKey) throws InvalidKeySpecException {
-    byte[] byteKey = Base64.getDecoder().decode(stringKey);
+    byte[] byteKey = new byte[0];
+    try {
+      byteKey = Base64.getDecoder().decode(stringKey);
+    } catch (IllegalArgumentException e) {
+      throw new AuthException(
+          "Provider public key decoding failed during token generation! Make sure the database only has valid, base-64 coded provider public "
+              + "keys! Caused by: " + e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e);
+    }
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
     KeyFactory kf;
     try {
