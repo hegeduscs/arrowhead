@@ -249,7 +249,6 @@ public class ServiceRegistryEntry {
       provider.setPort(port);
     }
 
-    //TODO test all TTL related code
     if (endOfValidity != null) {
       if (LocalDateTime.now().isAfter(endOfValidity)) {
         ttl = 0;

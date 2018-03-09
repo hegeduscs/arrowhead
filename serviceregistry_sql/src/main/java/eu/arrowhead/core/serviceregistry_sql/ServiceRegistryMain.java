@@ -116,7 +116,7 @@ public class ServiceRegistryMain {
     if (Boolean.valueOf(getProp().getProperty("ttl_scheduled", "false"))) {
       TimerTask removeTask = new RemoveExpiredServicesTask();
       ttlTimer = new Timer();
-      ttlTimer.schedule(removeTask, 10L * 1000L, ttlInterval * 60L * 1000L);
+      ttlTimer.schedule(removeTask, 45L * 1000L, ttlInterval * 60L * 1000L);
     }
 
     //This is here to initialize the database connection before the REST resources are initiated

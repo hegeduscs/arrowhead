@@ -33,7 +33,7 @@ class PingProvidersTask extends TimerTask {
     boolean connectionIsAlive;
     int deleteCount = 0;
     for (ServiceRegistryEntry entry : srEntries) {
-      connectionIsAlive = RegistryUtils.pingHost(entry.getProvider().getAddress(), entry.getProvider().getPort(), ServiceRegistryMain.pingTimeout);
+      connectionIsAlive = RegistryUtils.pingHost(entry.getProvider().getAddress(), entry.getPort(), ServiceRegistryMain.pingTimeout);
       if (!connectionIsAlive) {
         ServiceRegistryResource.dm.delete(entry);
         deleteCount++;
