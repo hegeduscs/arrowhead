@@ -30,7 +30,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@JsonIgnoreProperties({"id", "metadata", "endOfValidity"})
+@JsonIgnoreProperties({"id", "port", "metadata", "endOfValidity"})
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
 public class ServiceRegistryEntry {
 
