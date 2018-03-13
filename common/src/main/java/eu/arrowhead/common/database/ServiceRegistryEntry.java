@@ -9,12 +9,8 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -28,9 +24,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlTransient;
+import org.hibernate.annotations.Type;
 
 @Entity
-@JsonIgnoreProperties({"id", "port", "metadata", "endOfValidity"})
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
 public class ServiceRegistryEntry {
 
@@ -61,16 +58,19 @@ public class ServiceRegistryEntry {
   @Column(name = "udp")
   private boolean UDP = false;
 
-  //Time to live in seconds - endOfValidity is calculated from this upon registering and TTL is calculated from endOfValidity when queried
+  //Time to live in seconds - endOfValidity is calculated from this
   @Transient
   private int ttl;
 
   //only for database
+  @JsonIgnore
   @Column(name = "metadata")
   private String metadata;
 
+  @JsonIgnore
   @Column(name = "end_of_validity")
-  private LocalDateTime endOfValidity;
+  @Type(type = "timestamp")
+  private Date endOfValidity;
 
   public ServiceRegistryEntry() {
   }
@@ -95,7 +95,7 @@ public class ServiceRegistryEntry {
   }
 
   public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, Integer version,
-                              boolean UDP, int ttl, String metadata, LocalDateTime endOfValidity) {
+                              boolean UDP, int ttl, String metadata, Date endOfValidity) {
     this.providedService = providedService;
     this.provider = provider;
     this.port = port;
@@ -107,6 +107,7 @@ public class ServiceRegistryEntry {
     this.endOfValidity = endOfValidity;
   }
 
+  @XmlTransient
   public int getId() {
     return id;
   }
@@ -155,34 +156,19 @@ public class ServiceRegistryEntry {
     this.version = version;
   }
 
-  @JsonGetter("UDP")
   public boolean isUDP() {
     return UDP;
   }
 
-  //We have 2 Setters, so Jackson can parse both upper- and lowercase forms without a problem
-  @JsonSetter("UDP")
   public void setUDP(boolean UDP) {
     this.UDP = UDP;
   }
 
-  @JsonSetter("udp")
-  private void setUdp(boolean UDP) {
-    this.UDP = UDP;
-  }
-
-  @JsonGetter("ttl")
   public int getTtl() {
     return ttl;
   }
 
-  @JsonSetter("ttl")
   public void setTtl(int ttl) {
-    this.ttl = ttl;
-  }
-
-  @JsonSetter("TTL")
-  private void setTTL(int ttl) {
     this.ttl = ttl;
   }
 
@@ -194,11 +180,11 @@ public class ServiceRegistryEntry {
     this.metadata = metadata;
   }
 
-  public LocalDateTime getEndOfValidity() {
+  public Date getEndOfValidity() {
     return endOfValidity;
   }
 
-  public void setEndOfValidity(LocalDateTime endOfValidity) {
+  public void setEndOfValidity(Date endOfValidity) {
     this.endOfValidity = endOfValidity;
   }
 
@@ -226,7 +212,7 @@ public class ServiceRegistryEntry {
       port = provider.getPort();
     }
 
-    endOfValidity = ttl > 0 ? LocalDateTime.now().plusSeconds(ttl) : null;
+    endOfValidity = new Date(System.currentTimeMillis() + ttl);
   }
 
   @JsonIgnore
@@ -247,16 +233,6 @@ public class ServiceRegistryEntry {
 
     if (port != null && provider.getPort() == 0) {
       provider.setPort(port);
-    }
-
-    if (endOfValidity != null) {
-      if (LocalDateTime.now().isAfter(endOfValidity)) {
-        ttl = 0;
-      } else {
-        ttl = (int) Duration.between(LocalDateTime.now(), endOfValidity).toMillis() / 1000;
-      }
-    } else {
-      ttl = 0;
     }
   }
 
