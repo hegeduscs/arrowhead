@@ -18,6 +18,9 @@ If creating channel failed while the rabbitmq server running:
 
     -In case the service is not starting, make sure every process run by rabbit-mq is killed before trying to start it.
      Specially the "epmd" process (ps -ef | grep epmd)
+     Firewalls may also block one of the underlying process of the rabbitmq process. If the service is not starting, and
+     you see the following error message in "journal -xe": "Protocol 'inet_tcp': register/listen error: etimedout", then
+     most likely it is a problem caused by the firewall.
     
   Default insecure port: 5672
   Default secure port: 5671
