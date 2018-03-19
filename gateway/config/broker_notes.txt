@@ -4,7 +4,7 @@ http://www.rabbitmq.com/download.html   http://www.rabbitmq.com/getstarted.html
 
 If creating channel failed while the rabbitmq server running:
 
- Try: rabbitmqctl stop
+ Enter superuser to type these following commands:
     - In case of:  "Error: unable to connect to node <NODENAME>: nodedown"
     1. systemctl stop rabbitmq-server
     2. ps -ef | grep rabbit
@@ -17,7 +17,7 @@ If creating channel failed while the rabbitmq server running:
     -In case of: "Stopping and halting node <NODENAME>" - Step 6.-7. above
 
     -In case the service is not starting, make sure every process run by rabbit-mq is killed before trying to start it.
-     Specially the "epmd" process (ps-ef | grep epmd)
+     Specially the "epmd" process (ps -ef | grep epmd)
     
   Default insecure port: 5672
   Default secure port: 5671
