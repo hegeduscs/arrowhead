@@ -249,7 +249,7 @@ public final class Utility {
       } else if (entry.getMetadata() != null) {
         isSecure = entry.getMetadata().contains("security");
       }
-      String serviceUri = getUri(coreSystem.getAddress(), entry.getPort(), entry.getServiceURI(), isSecure);
+      String serviceUri = getUri(coreSystem.getAddress(), coreSystem.getPort(), entry.getServiceURI(), isSecure);
       if (serviceId.equals(GW_CONSUMER_SERVICE) || serviceId.equals(GW_PROVIDER_SERVICE)) {
         return new String[]{serviceUri, coreSystem.getSystemName(), coreSystem.getAddress(), coreSystem.getAuthenticationInfo()};
       }

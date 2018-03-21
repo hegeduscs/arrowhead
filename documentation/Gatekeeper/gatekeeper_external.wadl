@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<application xmlns="http://wadl.dev.java.net/2009/02">
+  <doc xmlns:jersey="http://jersey.java.net/" jersey:generatedBy="Jersey: 2.23.1 2016-06-09 18:05:47"/>
+  <doc xmlns:jersey="http://jersey.java.net/"
+    jersey:hint="This is simplified WADL with user and core resources only. To get full WADL with extended resources use the query parameter detail. Link: http://10.0.0.82:8448/application.wadl?detail=true"/>
+  <grammars/>
+  <resources base="http://10.0.0.82:8448/">
+    <resource path="gatekeeper">
+      <method id="getIt" name="GET">
+        <response>
+          <representation mediaType="text/plain"/>
+        </response>
+      </method>
+      <resource path="init_icn">
+        <method id="ICNRequest" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="init_gsd">
+        <method id="GSDRequest" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+    </resource>
+  </resources>
+</application>

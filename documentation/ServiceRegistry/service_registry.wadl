@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<application xmlns="http://wadl.dev.java.net/2009/02">
+  <doc xmlns:jersey="http://jersey.java.net/" jersey:generatedBy="Jersey: 2.23.1 2016-06-09 18:05:47"/>
+  <doc xmlns:jersey="http://jersey.java.net/"
+    jersey:hint="This is simplified WADL with user and core resources only. To get full WADL with extended resources use the query parameter detail. Link: http://10.0.0.82:8442/application.wadl?detail=true"/>
+  <grammars>
+    <include href="application.wadl/xsd0.xsd">
+      <doc title="Generated" xml:lang="en"/>
+    </include>
+  </grammars>
+  <resources base="http://10.0.0.82:8442/">
+    <resource path="serviceregistry/support">
+      <resource path="register">
+        <method id="registerServiceSupport" name="POST">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="remove">
+        <method id="removeServiceSupport" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+    </resource>
+    <resource path="serviceregistry">
+      <method id="getIt" name="GET">
+        <response>
+          <representation mediaType="text/plain"/>
+        </response>
+      </method>
+      <resource path="remove">
+        <method id="removeService" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="register">
+        <method id="registerService" name="POST">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="query">
+        <method id="queryRegistry" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+    </resource>
+    <resource path="serviceregistry/mgmt">
+      <method id="getIt" name="GET">
+        <response>
+          <representation mediaType="text/plain"/>
+        </response>
+      </method>
+      <resource path="update">
+        <method id="updateServiceRegistryEntry" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="all">
+        <method id="removeAllServices" name="DELETE">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+        <method id="getAllServices" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="systemname/{systemName}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
+        <method id="getAllByProvider" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="servicedef/{serviceDefinition}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="serviceDefinition" style="template" type="xs:string"/>
+        <method id="getAllByService" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+    </resource>
+  </resources>
+</application>
