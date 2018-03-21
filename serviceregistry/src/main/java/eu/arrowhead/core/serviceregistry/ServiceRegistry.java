@@ -46,6 +46,9 @@ class ServiceRegistry {
 
       try {
         DnsSDRegistrator registrator = RegistryUtils.createRegistrator();
+        if (entry.getTtl() > 0) {
+          registrator.setTimeToLive(entry.getTtl());
+        }
         ServiceName name = registrator.makeServiceName(providerInstance, ServiceType.valueOf(serviceType));
 
         //create  service data object

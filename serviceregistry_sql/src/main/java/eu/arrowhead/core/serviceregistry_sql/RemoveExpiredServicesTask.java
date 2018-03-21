@@ -36,7 +36,7 @@ class RemoveExpiredServicesTask extends TimerTask {
             deleteCount++;
           } else {
             long ttl = Duration.between(LocalDateTime.now(), entry.getEndOfValidity()).toMillis();
-            if (ttl < ServiceRegistryMain.ttlInterval * 60 * 1000) { // minutes -> milliseconds
+            if (ttl < (ServiceRegistryMain.ttlInterval * 60 * 1000 + 200)) { // minutes -> milliseconds conversion + 200 extra ms
               TimerTask removeTask = new RemoveExpiredServicesTask(entry);
               Timer timer = new Timer();
               timer.schedule(removeTask, ttl);
