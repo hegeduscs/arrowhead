@@ -363,9 +363,11 @@ public final class Utility {
   }
 
   public static void checkProperties(Set<String> propertyNames, List<String> basic, List<String> secure, boolean isSecure) {
-    // Arrays.asList returns an immutable list, so we have to copy it first
-    List<String> properties = new ArrayList<>(basic);
-    if (isSecure) {
+    List<String> properties = new ArrayList<>();
+    if (basic != null && !basic.isEmpty()) {
+      properties.addAll(basic);
+    }
+    if (isSecure && secure != null && !secure.isEmpty()) {
       properties.addAll(secure);
     }
     if (!propertyNames.containsAll(properties)) {

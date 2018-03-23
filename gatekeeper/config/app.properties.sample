@@ -1,15 +1,11 @@
-# URLs
-internal_base_uri=http://127.0.0.1:8446/
-internal_base_uri_secured=https://127.0.0.1:8447/
-external_base_uri=http://127.0.0.1:8448/
-external_base_uri_secured=https://127.0.0.1:8449/
-sr_base_uri=http://127.0.0.1:8442/
-orch_base_uri=http://127.0.0.1:8440/
-
 # Database parameters
 db_user=root
 db_password=root
 db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud_1
+
+##########################################
+# MANDATORY PARAMETERS ONLY IN SECURE MODE
+##########################################
 
 # Certificate related paths and passwords
 gatekeeper_keystore=config/certificates/gatekeeper.testcloud1.jks
@@ -19,6 +15,27 @@ cloud_keystore=config/certificates/testcloud1_cert.jks
 cloud_keystore_pass=12345
 cloud_keypass=12345
 master_arrowhead_cert=config/certificates/master_arrowhead_cert.crt
+
+################################################
+# NON-MANDATORY PARAMETERS (defaults are showed)
+################################################
+
+# Webserver parameters
+address=0.0.0.0
+internal_insecure_port=8446
+internal_secure_port=8447
+external_insecure_port=8448
+external_secure_port=8449
+
+# Service Registry
+sr_address=0.0.0.0
+sr_insecure_port=8442
+sr_secure_port=8443
+
+# Orchestrator
+orch_address=0.0.0.0
+
+orch_base_uri=http://127.0.0.1:8440/
 
 # Other
 timeout=30000

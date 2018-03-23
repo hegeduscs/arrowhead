@@ -16,6 +16,7 @@ import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,7 +31,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
@@ -48,32 +48,34 @@ public class GatewayMain {
   public static boolean DEBUG_MODE;
   public static SSLContext clientContext;
 
-  private static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
+  private static String BASE_URI;
+  private static String BASE_URI_SECURED;
+  private static String SR_BASE_URI;
+  private static String SR_BASE_URI_SECURED;
   private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
   private static HttpServer secureServer;
-  private static Properties prop;
+  private static TypeSafeProperties prop;
 
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8452/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8453/");
   private static final Logger log = Logger.getLogger(GatewayMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "sr_base_uri", "min_port", "max_port");
   private static final List<String> securePropertyNames = Arrays
-      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass", "trustpass", "master_arrowhead_cert");
+      .asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass", "trustpass", "master_arrowhead_cert");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    Utility.createServerUrl(BASE_URI, false);
-    Utility.createServerUrl(BASE_URI_SECURED, true);
-    if (SERVICE_REGISTRY_URI.startsWith("https")) {
-      Utility.createServerUrl(SERVICE_REGISTRY_URI, true);
-    } else {
-      Utility.createServerUrl(SERVICE_REGISTRY_URI, false);
-    }
-    if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
-      SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
-    }
+
+    String address = getProp().getProperty("address", "0.0.0.0");
+    int insecurePort = getProp().getIntProperty("insecure_port", 8452);
+    int securePort = getProp().getIntProperty("secure_port", 8453);
+    BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
+    BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
+
+    String sr_address = getProp().getProperty("sr_address", "0.0.0.0");
+    int srInsecurePort = getProp().getIntProperty("sr_insecure_port", 8442);
+    int srSecurePort = getProp().getIntProperty("secure_port", 8443);
+    SR_BASE_URI = Utility.getUri(sr_address, srInsecurePort, "serviceregistry", false, true);
+    SR_BASE_URI_SECURED = Utility.getUri(sr_address, srSecurePort, "serviceregistry", true, true);
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -88,21 +90,21 @@ public class GatewayMain {
           System.out.println("Starting server in debug mode!");
           break;
         case "-m":
-          serverModeSet = true;
           ++i;
+          serverModeSet = true;
           switch (args[i]) {
             case "insecure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
+              Utility.checkProperties(getProp().stringPropertyNames(), null, securePropertyNames, false);
               server = startServer();
               useSRService(false, true);
               break;
             case "secure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
+              Utility.checkProperties(getProp().stringPropertyNames(), null, securePropertyNames, true);
               secureServer = startSecureServer();
               useSRService(true, true);
               break;
             case "both":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
+              Utility.checkProperties(getProp().stringPropertyNames(), null, securePropertyNames, true);
               server = startServer();
               secureServer = startSecureServer();
               useSRService(false, true);
@@ -115,10 +117,10 @@ public class GatewayMain {
       }
     }
     if (!serverModeSet) {
+      Utility.checkProperties(getProp().stringPropertyNames(), null, securePropertyNames, false);
       server = startServer();
       useSRService(false, true);
     }
-    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
 
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
@@ -213,6 +215,7 @@ public class GatewayMain {
   }
 
   private static void useSRService(boolean isSecure, boolean registering) {
+    String SRU = isSecure ? SR_BASE_URI_SECURED : SR_BASE_URI;
     URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
     ArrowheadSystem gatewaySystem = new ArrowheadSystem("gateway", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     ArrowheadService providerService = new ArrowheadService(Utility.createSD(Utility.GW_PROVIDER_SERVICE, isSecure),
@@ -233,39 +236,39 @@ public class GatewayMain {
 
     if (registering) {
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", providerEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", providerEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", providerEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", providerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", providerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", providerEntry);
         } else {
           throw new ArrowheadException("Gateway CTP service registration failed.", e);
         }
       }
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", consumerEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", consumerEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", consumerEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", consumerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", consumerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", consumerEntry);
         } else {
           throw new ArrowheadException("Gateway CTC service registration failed.", e);
         }
       }
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", mgmtEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", mgmtEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", mgmtEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", mgmtEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", mgmtEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", mgmtEntry);
         } else {
           throw new ArrowheadException("Gateway management service registration failed.", e);
         }
       }
     } else {
-      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", providerEntry);
-      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", consumerEntry);
-      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", mgmtEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", providerEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", consumerEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", mgmtEntry);
       System.out.println("Gateway services deregistered.");
     }
   }
@@ -282,12 +285,13 @@ public class GatewayMain {
       useSRService(true, false);
     }
     System.out.println("Gateway Server(s) stopped");
+    System.exit(0);
   }
 
-  static synchronized Properties getProp() {
+  static synchronized TypeSafeProperties getProp() {
     try {
       if (prop == null) {
-        prop = new Properties();
+        prop = new TypeSafeProperties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);

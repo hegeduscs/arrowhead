@@ -9,6 +9,7 @@
 
 package eu.arrowhead.core.orchestrator;
 
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -87,6 +88,7 @@ public class OrchestratorMain {
     SR_BASE_URI_SECURED = Utility.getUri(sr_address, srSecurePort, "serviceregistry", true, true);
 
     boolean daemon = false;
+    boolean serverModeSet = false;
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -99,7 +101,13 @@ public class OrchestratorMain {
           break;
         case "-m":
           ++i;
+          serverModeSet = true;
           switch (args[i]) {
+            case "insecure":
+              Utility.checkProperties(getProp().stringPropertyNames(), null, securePropertyNames, false);
+              server = startServer();
+              useSRService(false, true);
+              break;
             case "secure":
               Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
@@ -113,18 +121,22 @@ public class OrchestratorMain {
               useSRService(true, true);
               break;
             default:
-              if (!args[i].equals("insecure")) {
-                System.out.println("Unknown server mode, starting insecure server!");
-              }
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              server = startServer();
-              useSRService(false, true);
+              log.fatal("Unknown server mode: " + args[i]);
+              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
           }
       }
+    }
+    if (!serverModeSet) {
+      Utility.checkProperties(getProp().stringPropertyNames(), null, securePropertyNames, false);
+      server = startServer();
+      useSRService(false, true);
     }
     Utility.setServiceRegistryUri(SR_BASE_URI, SR_BASE_URI_SECURED);
     getCoreSystemServiceUris();
 
+    //This is here to initialize the database connection before the REST resources are initiated
+    //NOTE only necessary until store does not have its own server (?)
+    DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {

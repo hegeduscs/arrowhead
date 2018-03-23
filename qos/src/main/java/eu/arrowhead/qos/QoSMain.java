@@ -55,6 +55,7 @@ public class QoSMain {
     BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
 
     boolean daemon = false;
+    boolean serverModeSet = false;
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -67,7 +68,12 @@ public class QoSMain {
           break;
         case "-m":
           ++i;
+          serverModeSet = true;
           switch (args[i]) {
+            case "insecure":
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
+              server = startServer();
+              break;
             case "secure":
               Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
@@ -78,13 +84,14 @@ public class QoSMain {
               secureServer = startSecureServer();
               break;
             default:
-              if (!args[i].equals("insecure")) {
-                System.out.println("Unknown server mode, starting insecure server!");
-              }
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              server = startServer();
+              log.fatal("Unknown server mode: " + args[i]);
+              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
           }
       }
+    }
+    if (!serverModeSet) {
+      Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
+      server = startServer();
     }
 
     //This is here to initialize the database connection before the REST resources are initiated
