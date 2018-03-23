@@ -62,7 +62,6 @@ public final class Utility {
 
   private static SSLContext sslContext;
   private static String SR_QUERY_URI;
-  private static String SR_SECURE_QUERY_URI;
 
   public static final String ORCH_SERVICE = "OrchestrationService";
   public static final String AUTH_CONTROL_SERVICE = "AuthorizationControl";
@@ -83,7 +82,7 @@ public final class Utility {
   };
 
   private Utility() throws AssertionError {
-    throw new AssertionError("Utility is a non-instantiable class");
+    throw new AssertionError("Arrowhead Common:Utility is a non-instantiable class");
   }
 
   public static void setSSLContext(SSLContext context) {
@@ -91,8 +90,11 @@ public final class Utility {
   }
 
   public static void setServiceRegistryUri(String insecure, String secure) {
-    SR_QUERY_URI = insecure != null ? UriBuilder.fromUri(insecure).path("query").build().toString() : null;
-    SR_SECURE_QUERY_URI = secure != null ? UriBuilder.fromUri(secure).path("query").build().toString() : null;
+    if (insecure == null && secure == null) {
+      throw new AssertionError("Arrowhead Common:Utility has no Service Registry URL.");
+    }
+    SR_QUERY_URI = insecure != null ? UriBuilder.fromUri(insecure).path("query").build().toString()
+        : UriBuilder.fromUri(secure).path("query").build().toString();
   }
 
   public static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {
@@ -362,15 +364,13 @@ public final class Utility {
     }
   }
 
-  public static void checkProperties(Set<String> propertyNames, List<String> basic, List<String> secure, boolean isSecure) {
-    List<String> properties = new ArrayList<>();
-    if (basic != null && !basic.isEmpty()) {
-      properties.addAll(basic);
+  public static void checkProperties(Set<String> propertyNames, List<String> mandatoryProperties) {
+    if (mandatoryProperties == null || mandatoryProperties.isEmpty()) {
+      return;
     }
-    if (isSecure && secure != null && !secure.isEmpty()) {
-      properties.addAll(secure);
-    }
-    if (!propertyNames.containsAll(properties)) {
+    //Arrays.asList() returns immutable lists, so we have to copy it first
+    List<String> properties = new ArrayList<>(mandatoryProperties);
+    if (!propertyNames.containsAll(mandatoryProperties)) {
       properties.removeIf(propertyNames::contains);
       throw new ServiceConfigurationError("Missing field(s) from app.properties file: " + properties.toString());
     }

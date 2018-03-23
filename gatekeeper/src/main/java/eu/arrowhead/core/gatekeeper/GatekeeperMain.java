@@ -17,6 +17,7 @@ import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,7 +32,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
@@ -50,53 +50,35 @@ public class GatekeeperMain {
   public static SSLContext outboundClientContext;
   public static SSLContext outboundServerContext;
 
+  static String ORCHESTRATOR_URI;
+  static String SERVICE_REGISTRY_URI;
   static String AUTH_CONTROL_URI;
   static String[] GATEWAY_CONSUMER_URI;
   static String[] GATEWAY_PROVIDER_URI;
-  static String ORCHESTRATOR_URI = getProp().getProperty("orch_base_uri");
-  static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
   static boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
-  static final int timeout = Integer.valueOf(getProp().getProperty("timeout", "30000"));
+  static final int timeout = getProp().getIntProperty("timeout", 30000);
 
+  private static String INBOUND_BASE_URI;
+  private static String INBOUND_BASE_URI_SECURED;
+  private static String OUTBOUND_BASE_URI;
+  private static String OUTBOUND_BASE_URI_SECURED;
   private static String BASE64_PUBLIC_KEY;
   private static boolean FIRST_SR_QUERY = true;
   private static HttpServer inboundServer;
   private static HttpServer inboundSecureServer;
   private static HttpServer outboundServer;
   private static HttpServer outboundSecureServer;
-  private static Properties prop;
+  private static TypeSafeProperties prop;
 
-  private static final String INBOUND_BASE_URI = getProp().getProperty("internal_base_uri", "http://127.0.0.1:8446/");
-  private static final String INBOUND_BASE_URI_SECURED = getProp().getProperty("internal_base_uri_secured", "https://127.0.0.1:8447/");
-  private static final String OUTBOUND_BASE_URI = getProp().getProperty("external_base_uri", "http://127.0.0.1:8448/");
-  private static final String OUTBOUND_BASE_URI_SECURED = getProp().getProperty("external_base_uri_secured", "https://127.0.0.1:8449/");
   private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays
-      .asList("internal_base_uri", "external_base_uri", "sr_base_uri", "orch_base_uri", "db_user", "db_password", "db_address", "timeout",
-              "use_gateway");
+  private static final List<String> basicPropertyNames = Arrays.asList("db_user", "db_password", "db_address");
   private static final List<String> securePropertyNames = Arrays
-      .asList("internal_base_uri_secured", "external_base_uri_secured", "gatekeeper_keystore", "gatekeeper_keystore_pass", "gatekeeper_keypass",
-              "cloud_keystore", "cloud_keystore_pass", "cloud_keypass", "master_arrowhead_cert");
+      .asList("gatekeeper_keystore", "gatekeeper_keystore_pass", "gatekeeper_keypass", "cloud_keystore", "cloud_keystore_pass", "cloud_keypass",
+              "master_arrowhead_cert");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    Utility.createServerUrl(INBOUND_BASE_URI, false);
-    Utility.createServerUrl(INBOUND_BASE_URI_SECURED, true);
-    Utility.createServerUrl(OUTBOUND_BASE_URI, false);
-    Utility.createServerUrl(OUTBOUND_BASE_URI_SECURED, true);
-    if (SERVICE_REGISTRY_URI.startsWith("https")) {
-      Utility.createServerUrl(SERVICE_REGISTRY_URI, true);
-    } else {
-      Utility.createServerUrl(SERVICE_REGISTRY_URI, false);
-    }
-    if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
-      SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
-    }
-    ORCHESTRATOR_URI = Utility.stripEndSlash(ORCHESTRATOR_URI);
-    if (!ORCHESTRATOR_URI.endsWith("orchestrator/orchestration")) {
-      ORCHESTRATOR_URI = UriBuilder.fromUri(ORCHESTRATOR_URI).path("orchestrator").path("orchestration").build().toString();
-    }
 
     boolean daemon = false;
     boolean serverModeSet = false;
@@ -367,10 +349,10 @@ public class GatekeeperMain {
     System.out.println("Gatekeeper Servers stopped");
   }
 
-  private static synchronized Properties getProp() {
+  private static synchronized TypeSafeProperties getProp() {
     try {
       if (prop == null) {
-        prop = new Properties();
+        prop = new TypeSafeProperties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);

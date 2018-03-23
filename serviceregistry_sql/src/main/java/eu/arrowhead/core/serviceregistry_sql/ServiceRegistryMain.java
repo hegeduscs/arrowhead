@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ServiceConfigurationError;
@@ -56,8 +57,6 @@ public class ServiceRegistryMain {
   private static Timer ttlTimer;
 
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays.asList("db_user", "db_password", "db_address");
-  private static final List<String> securePropertyNames = Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
@@ -66,13 +65,11 @@ public class ServiceRegistryMain {
     String address = getProp().getProperty("address", "0.0.0.0");
     int insecurePort = getProp().getIntProperty("insecure_port", 8442);
     int securePort = getProp().getIntProperty("secure_port", 8443);
-    BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
-    BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
 
     boolean daemon = false;
-    boolean serverModeSet = false;
-    for (int i = 0; i < args.length; ++i) {
-      switch (args[i]) {
+    List<String> alwaysMandatoryProperties = Arrays.asList("db_user", "db_password", "db_address");
+    for (String arg : args) {
+      switch (arg) {
         case "-daemon":
           daemon = true;
           System.out.println("Starting Service Registry as daemon!");
@@ -81,31 +78,17 @@ public class ServiceRegistryMain {
           DEBUG_MODE = true;
           System.out.println("Starting server in debug mode!");
           break;
-        case "-m":
-          ++i;
-          serverModeSet = true;
-          switch (args[i]) {
-            case "insecure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              server = startServer();
-              break;
-            case "secure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
-              secureServer = startSecureServer();
-              break;
-            case "both":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
-              server = startServer();
-              secureServer = startSecureServer();
-              break;
-            default:
-              log.fatal("Unknown server mode: " + args[i]);
-              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
-          }
+        case "-tls":
+          List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
+          allMandatoryProperties.addAll(Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass"));
+          Utility.checkProperties(getProp().stringPropertyNames(), allMandatoryProperties);
+          BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
+          secureServer = startSecureServer();
       }
     }
-    if (!serverModeSet) {
-      Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
+    if (secureServer == null) {
+      Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
+      BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
       server = startServer();
     }
 
