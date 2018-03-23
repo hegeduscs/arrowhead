@@ -20,3 +20,35 @@ master_arrowhead_cert=config/certificates/master_arrowhead_cert.crt
 # Other
 min_port=8000
 max_port=8100
+
+# Database parameters
+db_user=root
+db_password=root
+db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud_1
+
+##########################################
+# MANDATORY PARAMETERS ONLY IN SECURE MODE
+##########################################
+
+# Certificate related paths and passwords
+keystore=config/certificates/gateway.testcloud1.jks
+keystorepass=12345
+keypass=12345
+truststore=config/certificates/testcloud1_cert.jks
+truststorepass=12345
+trustpass=12345
+master_arrowhead_cert=config/certificates/master_arrowhead_cert.crt
+
+################################################
+# NON-MANDATORY PARAMETERS (defaults are showed)
+################################################
+
+# Webserver parameters
+address=0.0.0.0
+insecure_port=8452
+secure_port=8453
+
+# Service Registry
+sr_address=0.0.0.0
+sr_insecure_port=8442
+sr_secure_port=8443

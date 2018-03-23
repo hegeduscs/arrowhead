@@ -69,12 +69,12 @@ public class AuthorizationMain {
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    Utility.isUrlValid(BASE_URI, false);
-    Utility.isUrlValid(BASE_URI_SECURED, true);
+    Utility.createServerUrl(BASE_URI, false);
+    Utility.createServerUrl(BASE_URI_SECURED, true);
     if (SERVICE_REGISTRY_URI.startsWith("https")) {
-      Utility.isUrlValid(SERVICE_REGISTRY_URI, true);
+      Utility.createServerUrl(SERVICE_REGISTRY_URI, true);
     } else {
-      Utility.isUrlValid(SERVICE_REGISTRY_URI, false);
+      Utility.createServerUrl(SERVICE_REGISTRY_URI, false);
     }
     if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
       SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();

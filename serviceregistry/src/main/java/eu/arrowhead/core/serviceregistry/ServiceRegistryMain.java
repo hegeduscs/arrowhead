@@ -4,6 +4,7 @@ import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +17,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,42 +35,45 @@ public class ServiceRegistryMain {
 
   public static boolean DEBUG_MODE;
 
-  static final int pingTimeout = new Integer(getAppProp().getProperty("ping_timeout", "10000"));
+  static final int PING_TIMEOUT = getAppProp().getIntProperty("ping_timeout", 10000);
   //DNS-SD global settings
-  static final String tsigKeyName = getDnsProp().getProperty("tsig.name", "key.arrowhead.tmit.bme.hu");
-  static final String tsigAlgorithm = getDnsProp().getProperty("tsig.algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
-  static final String tsigKeyValue = getDnsProp().getProperty("tsig.key", "RM/jKKEPYB83peT0DQnYGg==");
-  static final String dnsIpAddress = getDnsProp().getProperty("dns.ip", "152.66.246.237");
-  static final String dnsDomain = getDnsProp().getProperty("dns.registerDomain", "srv.arrowhead.tmit.bme.hu.");
-  static final String computerDomain = getDnsProp().getProperty("dns.domain", "arrowhead.tmit.bme.hu");
-  static final int dnsPort = new Integer(getDnsProp().getProperty("dns.port", "53"));
+  static final String TSIG_NAME = getDnsProp().getProperty("tsig_name", "key.arrowhead.tmit.bme.hu");
+  static final String TSIG_KEY = getDnsProp().getProperty("tsig_key", "RM/jKKEPYB83peT0DQnYGg==");
+  static final String TSIG_ALGORITHM = getDnsProp().getProperty("tsig_algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
+  static final String DNS_ADDRESS = getDnsProp().getProperty("dns_address", "152.66.246.237");
+  static final String DNS_DOMAIN = getDnsProp().getProperty("dns_domain", "arrowhead.tmit.bme.hu");
+  static final int DNS_PORT = getDnsProp().getIntProperty("dns_port", 53);
+  static String DNS_REGISTRATOR_DOMAIN = getDnsProp().getProperty("dns_registrator_domain", "srv.arrowhead.tmit.bme.hu.");
 
+  private static String BASE_URI;
+  private static String BASE_URI_SECURED;
   private static HttpServer server;
   private static HttpServer secureServer;
-  private static Properties appProp, dnsProp;
+  private static TypeSafeProperties appProp, dnsProp;
   private static Timer timer;
 
-  private static final String BASE_URI = getAppProp().getProperty("base_uri", "http://127.0.0.1:8442/");
-  private static final String BASE_URI_SECURED = getAppProp().getProperty("base_uri_secured", "https://127.0.0.1:8443/");
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays
-      .asList("base_uri", "db_user", "db_password", "db_address", "ping_timeout", "ping_scheduled", "ping_interval");
-  private static final List<String> securePropertyNames = Arrays
-      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
+  private static final List<String> basicPropertyNames = Arrays.asList("db_user", "db_password", "db_address");
+  private static final List<String> securePropertyNames = Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    Utility.isUrlValid(BASE_URI, false);
-    Utility.isUrlValid(BASE_URI_SECURED, true);
 
     //Setting up DNS
-    System.setProperty("dns.server", getDnsProp().getProperty("dns.ip"));
-    System.setProperty("dnssd.domain", getDnsProp().getProperty("dns.domain"));
-    System.setProperty("dnssd.hostname", getDnsProp().getProperty("dns.host"));
+    System.setProperty("dnssd.domain", DNS_DOMAIN);
+    System.setProperty("dnssd.hostname", getDnsProp().getProperty("dns_host", "localhost"));
+    if (!DNS_REGISTRATOR_DOMAIN.endsWith(".")) {
+      DNS_REGISTRATOR_DOMAIN = DNS_REGISTRATOR_DOMAIN.concat(".");
+    }
+
+    String address = getAppProp().getProperty("address", "0.0.0.0");
+    int insecurePort = getAppProp().getIntProperty("insecure_port", 8442);
+    int securePort = getAppProp().getIntProperty("secure_port", 8443);
+    BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
+    BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
 
     boolean daemon = false;
-    boolean serverModeSet = false;
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -82,13 +85,8 @@ public class ServiceRegistryMain {
           System.out.println("Starting server in debug mode!");
           break;
         case "-m":
-          serverModeSet = true;
           ++i;
           switch (args[i]) {
-            case "insecure":
-              Utility.checkProperties(getAppProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              server = startServer();
-              break;
             case "secure":
               Utility.checkProperties(getAppProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
@@ -99,21 +97,20 @@ public class ServiceRegistryMain {
               secureServer = startSecureServer();
               break;
             default:
-              log.fatal("Unknown server mode: " + args[i]);
-              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
+              if (!args[i].equals("insecure")) {
+                System.out.println("Unknown server mode, starting insecure server!");
+              }
+              Utility.checkProperties(getAppProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
+              server = startServer();
           }
       }
     }
-    //if no mode was selected in args, insecure it is
-    if (!serverModeSet) {
-      server = startServer();
-    }
 
-    //if scheduled ping is set
+    //if provider ping is scheduled, start the TimerTask that provides it
     if (Boolean.valueOf(getAppProp().getProperty("ping_scheduled", "false"))) {
       TimerTask pingTask = new PingProvidersTask();
       timer = new Timer();
-      int interval = Integer.parseInt(getAppProp().getProperty("ping_interval", "10"));
+      int interval = getAppProp().getIntProperty("ping_interval", 60);
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 
@@ -141,23 +138,6 @@ public class ServiceRegistryMain {
       }
       shutdown();
     }
-  }
-
-  private static synchronized Properties getDnsProp() {
-    try {
-      if (dnsProp == null) {
-        dnsProp = new Properties();
-        File file = new File("config" + File.separator + "dns.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        dnsProp.load(inputStream);
-      }
-    } catch (FileNotFoundException ex) {
-      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    return dnsProp;
   }
 
   private static HttpServer startServer() throws IOException {
@@ -231,23 +211,6 @@ public class ServiceRegistryMain {
     }
   }
 
-  private static synchronized Properties getAppProp() {
-    try {
-      if (appProp == null) {
-        appProp = new Properties();
-        File file = new File("config" + File.separator + "app.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        appProp.load(inputStream);
-      }
-    } catch (FileNotFoundException ex) {
-      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    return appProp;
-  }
-
   private static void shutdown() {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
@@ -258,5 +221,41 @@ public class ServiceRegistryMain {
       secureServer.shutdownNow();
     }
     System.out.println("Service Registry Server(s) stopped");
+    System.exit(0);
   }
+
+  private static synchronized TypeSafeProperties getAppProp() {
+    try {
+      if (appProp == null) {
+        appProp = new TypeSafeProperties();
+        File file = new File("config" + File.separator + "app.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+        appProp.load(inputStream);
+      }
+    } catch (FileNotFoundException ex) {
+      throw new ServiceConfigurationError("app.properties file not found, make sure you have the correct working directory set! (directory where "
+                                              + "the config folder can be found)", ex);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return appProp;
+  }
+
+  private static synchronized TypeSafeProperties getDnsProp() {
+    try {
+      if (dnsProp == null) {
+        dnsProp = new TypeSafeProperties();
+        File file = new File("config" + File.separator + "dns.properties");
+        FileInputStream inputStream = new FileInputStream(file);
+        dnsProp.load(inputStream);
+      }
+    } catch (FileNotFoundException ex) {
+      throw new ServiceConfigurationError("dns.properties file not found, make sure you have the correct working directory set! (directory where "
+                                              + "the config folder can be found)", ex);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return dnsProp;
+  }
+
 }

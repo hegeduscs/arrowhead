@@ -21,10 +21,10 @@ public class RegistryUtils {
 
   static DnsSDRegistrator createRegistrator() throws DnsSDException {
     // Get the DNS specific settings from global static variables (from prop files) and then set up Registrator
-    InetSocketAddress dnsServerAddress = new InetSocketAddress(ServiceRegistryMain.dnsIpAddress, ServiceRegistryMain.dnsPort);
-    DnsSDRegistrator registrator = DnsSDFactory.getInstance().createRegistrator(ServiceRegistryMain.dnsDomain, dnsServerAddress);
-    if (!ServiceRegistryMain.tsigKeyName.isEmpty()) {
-      registrator.setTSIGKey(ServiceRegistryMain.tsigKeyName, ServiceRegistryMain.tsigAlgorithm, ServiceRegistryMain.tsigKeyValue);
+    InetSocketAddress dnsServerAddress = new InetSocketAddress(ServiceRegistryMain.DNS_ADDRESS, ServiceRegistryMain.DNS_PORT);
+    DnsSDRegistrator registrator = DnsSDFactory.getInstance().createRegistrator(ServiceRegistryMain.DNS_REGISTRATOR_DOMAIN, dnsServerAddress);
+    if (!ServiceRegistryMain.TSIG_NAME.isEmpty()) {
+      registrator.setTSIGKey(ServiceRegistryMain.TSIG_NAME, ServiceRegistryMain.TSIG_ALGORITHM, ServiceRegistryMain.TSIG_KEY);
     }
     return registrator;
   }
@@ -190,7 +190,7 @@ public class RegistryUtils {
       ServiceRegistryEntry current = iterator.next();
       if (current.getProvider().getAddress().equals("0.0.0.0")) {
         iterator.remove();
-      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
+      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.PING_TIMEOUT)) {
         iterator.remove();
       }
     }

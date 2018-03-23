@@ -3,6 +3,7 @@ package eu.arrowhead.qos;
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,7 +16,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
@@ -32,28 +32,29 @@ public class QoSMain {
 
   public static boolean DEBUG_MODE;
 
-  static final String MONITOR_URL = getProp().getProperty("monitor_url", "");
+  static final String MONITOR_URL = getProp().getProperty("monitor_url");
 
+  private static String BASE_URI;
+  private static String BASE_URI_SECURED;
   private static HttpServer server;
   private static HttpServer secureServer;
-  private static Properties prop;
+  private static TypeSafeProperties prop;
 
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8448/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8449/");
   private static final Logger log = Logger.getLogger(QoSMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "db_user", "db_password", "db_address", "monitor_url");
-  private static final List<String> securePropertyNames = Arrays
-      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
+  private static final List<String> basicPropertyNames = Arrays.asList("db_user", "db_password", "db_address", "monitor_url");
+  private static final List<String> securePropertyNames = Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    Utility.isUrlValid(BASE_URI, false);
-    Utility.isUrlValid(BASE_URI_SECURED, true);
+
+    String address = getProp().getProperty("address", "0.0.0.0");
+    int insecurePort = getProp().getIntProperty("insecure_port", 8450);
+    int securePort = getProp().getIntProperty("secure_port", 8451);
+    BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
+    BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
 
     boolean daemon = false;
-    boolean serverModeSet = false;
-    argLoop:
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -65,30 +66,25 @@ public class QoSMain {
           System.out.println("Starting server in debug mode!");
           break;
         case "-m":
-          serverModeSet = true;
           ++i;
           switch (args[i]) {
-            case "insecure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              server = startServer();
-              break argLoop;
             case "secure":
               Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
-              break argLoop;
+              break;
             case "both":
               Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               server = startServer();
               secureServer = startSecureServer();
-              break argLoop;
+              break;
             default:
-              log.fatal("Unknown server mode: " + args[i]);
-              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
+              if (!args[i].equals("insecure")) {
+                System.out.println("Unknown server mode, starting insecure server!");
+              }
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
+              server = startServer();
           }
       }
-    }
-    if (!serverModeSet) {
-      server = startServer();
     }
 
     //This is here to initialize the database connection before the REST resources are initiated
@@ -194,12 +190,13 @@ public class QoSMain {
       secureServer.shutdownNow();
     }
     System.out.println("QoS Server(s) stopped");
+    System.exit(0);
   }
 
-  private static synchronized Properties getProp() {
+  private static synchronized TypeSafeProperties getProp() {
     try {
       if (prop == null) {
-        prop = new Properties();
+        prop = new TypeSafeProperties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);

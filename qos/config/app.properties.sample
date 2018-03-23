@@ -1,12 +1,12 @@
-# URLs
-base_uri=http://127.0.0.1:8450/
-base_uri_secured=https://127.0.0.1:8451/
-
 # Database parameters
 db_user=root
 db_password=root
 db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud1
 monitor_url=http://192.168.60.144:8144/Monitor/QoSRule
+
+##########################################
+# MANDATORY PARAMETERS ONLY IN SECURE MODE
+##########################################
 
 #Certificate properties
 keystore=config/certificates/qosmgr.testcloud1.jks
@@ -14,3 +14,12 @@ keystorepass=12345
 keypass=12345
 truststore=config/certificates/testcloud1_cert.jks
 truststorepass=12345
+
+################################################
+# NON-MANDATORY PARAMETERS (defaults are showed)
+################################################
+
+# Webserver parameters
+address=0.0.0.0
+insecure_port=8450
+secure_port=8451

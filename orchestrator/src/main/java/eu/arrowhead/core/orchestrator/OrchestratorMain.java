@@ -16,6 +16,7 @@ import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.orchestrator.api.CommonApi;
 import eu.arrowhead.core.orchestrator.api.StoreApi;
@@ -33,7 +34,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
@@ -52,40 +52,41 @@ public class OrchestratorMain {
 
   public static boolean DEBUG_MODE;
 
-  static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
   static String AUTH_CONTROL_URI;
   static String TOKEN_GEN_URI;
   static String GSD_SERVICE_URI;
   static String ICN_SERVICE_URI;
 
+  private static String BASE_URI;
+  private static String BASE_URI_SECURED;
+  private static String SR_BASE_URI;
+  private static String SR_BASE_URI_SECURED;
   private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
   private static HttpServer secureServer;
-  private static Properties prop;
+  private static TypeSafeProperties prop;
 
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8440");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8441");
   private static final Logger log = Logger.getLogger(OrchestratorMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "sr_base_uri", "db_user", "db_password", "db_address");
-  private static final List<String> securePropertyNames = Arrays
-      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
+  private static final List<String> basicPropertyNames = Arrays.asList("db_user", "db_password", "db_address");
+  private static final List<String> securePropertyNames = Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    Utility.isUrlValid(BASE_URI, false);
-    Utility.isUrlValid(BASE_URI_SECURED, true);
-    if (SERVICE_REGISTRY_URI.startsWith("https")) {
-      Utility.isUrlValid(SERVICE_REGISTRY_URI, true);
-    } else {
-      Utility.isUrlValid(SERVICE_REGISTRY_URI, false);
-    }
-    if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
-      SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
-    }
+
+    String address = getProp().getProperty("address", "0.0.0.0");
+    int insecurePort = getProp().getIntProperty("insecure_port", 8440);
+    int securePort = getProp().getIntProperty("secure_port", 8441);
+    BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
+    BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
+
+    String sr_address = getProp().getProperty("sr_address", "0.0.0.0");
+    int srInsecurePort = getProp().getIntProperty("sr_insecure_port", 8442);
+    int srSecurePort = getProp().getIntProperty("secure_port", 8443);
+    SR_BASE_URI = Utility.getUri(sr_address, srInsecurePort, "serviceregistry", false, true);
+    SR_BASE_URI_SECURED = Utility.getUri(sr_address, srSecurePort, "serviceregistry", true, true);
 
     boolean daemon = false;
-    boolean serverModeSet = false;
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -97,14 +98,8 @@ public class OrchestratorMain {
           System.out.println("Starting server in debug mode!");
           break;
         case "-m":
-          serverModeSet = true;
           ++i;
           switch (args[i]) {
-            case "insecure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              server = startServer();
-              useSRService(false, true);
-              break;
             case "secure":
               Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
@@ -118,16 +113,16 @@ public class OrchestratorMain {
               useSRService(true, true);
               break;
             default:
-              log.fatal("Unknown server mode: " + args[i]);
-              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
+              if (!args[i].equals("insecure")) {
+                System.out.println("Unknown server mode, starting insecure server!");
+              }
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
+              server = startServer();
+              useSRService(false, true);
           }
       }
     }
-    if (!serverModeSet) {
-      server = startServer();
-      useSRService(false, true);
-    }
-    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
+    Utility.setServiceRegistryUri(SR_BASE_URI, SR_BASE_URI_SECURED);
     getCoreSystemServiceUris();
 
     if (daemon) {
@@ -222,6 +217,7 @@ public class OrchestratorMain {
   }
 
   private static void useSRService(boolean isSecure, boolean registering) {
+    String SRU = isSecure ? SR_BASE_URI_SECURED : SR_BASE_URI;
     URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
     ArrowheadSystem orchSystem = new ArrowheadSystem("orchestrator", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     ArrowheadService orchService = new ArrowheadService(Utility.createSD(Utility.ORCH_SERVICE, isSecure), Collections.singletonList("JSON"), null);
@@ -234,17 +230,17 @@ public class OrchestratorMain {
 
     if (registering) {
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", orchEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", orchEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", orchEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", orchEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", orchEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", orchEntry);
         } else {
           throw new ArrowheadException("Orchestration service registration failed.", e);
         }
       }
     } else {
-      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", orchEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", orchEntry);
       System.out.println("Orchestration service deregistered.");
     }
   }
@@ -269,12 +265,13 @@ public class OrchestratorMain {
       useSRService(true, false);
     }
     System.out.println("Orchestrator Server(s) stopped");
+    System.exit(0);
   }
 
-  private static synchronized Properties getProp() {
+  private static synchronized TypeSafeProperties getProp() {
     try {
       if (prop == null) {
-        prop = new Properties();
+        prop = new TypeSafeProperties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);

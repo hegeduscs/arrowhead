@@ -51,8 +51,8 @@ public class GatewayService {
   private static final Logger log = Logger.getLogger(GatewayService.class.getName());
   private static final int ivSize = 16;
   private static final int keySize = 16;
-  private static final int minPort = Integer.parseInt(GatewayMain.getProp().getProperty("min_port"));
-  private static final int maxPort = Integer.parseInt(GatewayMain.getProp().getProperty("max_port"));
+  private static final int minPort = Integer.parseInt(GatewayMain.getProp().getProperty("min_port", "8000"));
+  private static final int maxPort = Integer.parseInt(GatewayMain.getProp().getProperty("max_port", "8100"));
 
   private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
       .initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);

@@ -7,7 +7,7 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.common.filter;
+package eu.arrowhead.common.misc;
 
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.ExceptionType;

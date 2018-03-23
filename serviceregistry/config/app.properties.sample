@@ -1,11 +1,11 @@
-# URLs
-base_uri=http://127.0.0.1:8442/
-base_uri_secured=https://127.0.0.1:8443/
-
 # Database parameters
 db_user=root
 db_password=root
 db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud_1
+
+##########################################
+# MANDATORY PARAMETERS ONLY IN SECURE MODE
+##########################################
 
 # Certificate related paths and passwords
 keystore=config/certificates/serviceregistry.testcloud1.jks
@@ -13,6 +13,15 @@ keystorepass=12345
 keypass=12345
 truststore=config/certificates/testcloud1_cert.jks
 truststorepass=12345
+
+################################################
+# NON-MANDATORY PARAMETERS (defaults are showed)
+################################################
+
+# Webserver parameters
+address=0.0.0.0
+insecure_port=8442
+secure_port=8443
 
 # scheduled ping for remove unaccessible services
 ping_timeout=10000

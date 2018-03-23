@@ -12,6 +12,7 @@ package eu.arrowhead.core.serviceregistry_sql;
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.serviceregistry_sql.support.OldServiceRegResource;
 import java.io.BufferedReader;
@@ -25,7 +26,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -44,30 +44,32 @@ public class ServiceRegistryMain {
 
   public static boolean DEBUG_MODE;
 
-  static final int pingTimeout = new Integer(getProp().getProperty("ping_timeout", "5000"));
-  static final int ttlInterval = new Integer(getProp().getProperty("ttl_interval", "10"));
+  static final int PING_TIMEOUT = getProp().getIntProperty("ping_timeout", 5000);
+  static final int TTL_INTERVAL = getProp().getIntProperty("ttl_interval", 10);
 
+  private static String BASE_URI;
+  private static String BASE_URI_SECURED;
   private static HttpServer server;
   private static HttpServer secureServer;
-  private static Properties prop;
+  private static TypeSafeProperties prop;
   private static Timer pingTimer;
   private static Timer ttlTimer;
 
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8442/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8443/");
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays.asList("base_uri", "db_user", "db_password", "db_address");
-  private static final List<String> securePropertyNames = Arrays
-      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
+  private static final List<String> basicPropertyNames = Arrays.asList("db_user", "db_password", "db_address");
+  private static final List<String> securePropertyNames = Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    Utility.isUrlValid(BASE_URI, false);
-    Utility.isUrlValid(BASE_URI_SECURED, true);
+
+    String address = getProp().getProperty("address", "0.0.0.0");
+    int insecurePort = getProp().getIntProperty("insecure_port", 8442);
+    int securePort = getProp().getIntProperty("secure_port", 8443);
+    BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
+    BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
 
     boolean daemon = false;
-    boolean serverModeSet = false;
     for (int i = 0; i < args.length; ++i) {
       switch (args[i]) {
         case "-daemon":
@@ -79,13 +81,8 @@ public class ServiceRegistryMain {
           System.out.println("Starting server in debug mode!");
           break;
         case "-m":
-          serverModeSet = true;
           ++i;
           switch (args[i]) {
-            case "insecure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              server = startServer();
-              break;
             case "secure":
               Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
               secureServer = startSecureServer();
@@ -96,27 +93,27 @@ public class ServiceRegistryMain {
               secureServer = startSecureServer();
               break;
             default:
-              log.fatal("Unknown server mode: " + args[i]);
-              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
+              if (!args[i].equals("insecure")) {
+                System.out.println("Unknown server mode, starting insecure server!");
+              }
+              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
+              server = startServer();
           }
       }
-    }
-    if (!serverModeSet) {
-      server = startServer();
     }
 
     //if provider ping is scheduled, start the TimerTask that provides it
     if (Boolean.valueOf(getProp().getProperty("ping_scheduled", "false"))) {
       TimerTask pingTask = new PingProvidersTask();
       pingTimer = new Timer();
-      int interval = Integer.parseInt(getProp().getProperty("ping_interval", "60"));
+      int interval = getProp().getIntProperty("ping_interval", 60);
       pingTimer.schedule(pingTask, 60L * 1000L, interval * 60L * 1000L);
     }
     //if TTL based service removing is scheduled, start the TimerTask that provides it
     if (Boolean.valueOf(getProp().getProperty("ttl_scheduled", "false"))) {
       TimerTask removeTask = new RemoveExpiredServicesTask();
       ttlTimer = new Timer();
-      ttlTimer.schedule(removeTask, 45L * 1000L, ttlInterval * 60L * 1000L);
+      ttlTimer.schedule(removeTask, 45L * 1000L, TTL_INTERVAL * 60L * 1000L);
     }
 
     //This is here to initialize the database connection before the REST resources are initiated
@@ -224,12 +221,13 @@ public class ServiceRegistryMain {
       secureServer.shutdownNow();
     }
     System.out.println("Service Registry Server(s) stopped");
+    System.exit(0);
   }
 
-  private static synchronized Properties getProp() {
+  private static synchronized TypeSafeProperties getProp() {
     try {
       if (prop == null) {
-        prop = new Properties();
+        prop = new TypeSafeProperties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);

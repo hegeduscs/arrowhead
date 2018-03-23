@@ -116,7 +116,7 @@ class ServiceRegistry {
   static ServiceQueryResult provideServices(ServiceQueryForm queryForm) {
 
     //creating DNS browser
-    DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);
+    DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.DNS_DOMAIN);
     DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
 
     //this list will contain all instances corresponding to the given interfaces
@@ -168,7 +168,7 @@ class ServiceRegistry {
 
   static ServiceQueryResult provideAllServices() {
     //Preparing DNS-SD
-    DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);
+    DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.DNS_DOMAIN);
     DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
     Collection<ServiceType> types = browser.getServiceTypes();
 
@@ -198,7 +198,7 @@ class ServiceRegistry {
   }
 
   static boolean removeAllServices() {
-    DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.computerDomain);
+    DnsSDDomainEnumerator de = DnsSDFactory.getInstance().createDomainEnumerator(ServiceRegistryMain.DNS_DOMAIN);
     DnsSDBrowser browser = DnsSDFactory.getInstance().createBrowser(de.getBrowsingDomains());
     Collection<ServiceType> types = browser.getServiceTypes();
 

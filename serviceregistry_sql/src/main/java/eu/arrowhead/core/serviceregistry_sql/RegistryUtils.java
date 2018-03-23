@@ -41,7 +41,7 @@ class RegistryUtils {
       ServiceRegistryEntry current = iterator.next();
       if (current.getProvider().getAddress().equals("0.0.0.0")) {
         iterator.remove();
-      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.pingTimeout)) {
+      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.PING_TIMEOUT)) {
         iterator.remove();
       }
     }
