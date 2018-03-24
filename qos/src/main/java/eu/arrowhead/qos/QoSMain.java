@@ -36,9 +36,7 @@ public class QoSMain {
   static final String MONITOR_URL = getProp().getProperty("monitor_url");
 
   private static String BASE_URI;
-  private static String BASE_URI_SECURED;
   private static HttpServer server;
-  private static HttpServer secureServer;
   private static TypeSafeProperties prop;
 
   private static final Logger log = Logger.getLogger(QoSMain.class.getName());
@@ -68,11 +66,11 @@ public class QoSMain {
           List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
           allMandatoryProperties.addAll(Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass"));
           Utility.checkProperties(getProp().stringPropertyNames(), allMandatoryProperties);
-          BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
-          secureServer = startSecureServer();
+          BASE_URI = Utility.getUri(address, securePort, null, true, true);
+          server = startSecureServer();
       }
     }
-    if (secureServer == null) {
+    if (server == null) {
       Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
       BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
       server = startServer();
@@ -87,7 +85,7 @@ public class QoSMain {
         shutdown();
       }));
     } else {
-      System.out.println("Type \"stop\" to shutdown QoS Server(s)...");
+      System.out.println("Type \"stop\" to shutdown QoS Server...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       String input = "";
       while (!input.equals("stop")) {
@@ -154,14 +152,14 @@ public class QoSMain {
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
-    URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
     try {
       final HttpServer server = GrizzlyHttpServerFactory
           .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
-      log.info("Started server at: " + BASE_URI_SECURED);
-      System.out.println("Started secure server at: " + BASE_URI_SECURED);
+      log.info("Started server at: " + BASE_URI);
+      System.out.println("Started secure server at: " + BASE_URI);
       return server;
     } catch (ProcessingException e) {
       throw new ServiceConfigurationError(
@@ -176,11 +174,7 @@ public class QoSMain {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
     }
-    if (secureServer != null) {
-      log.info("Stopping server at: " + BASE_URI_SECURED);
-      secureServer.shutdownNow();
-    }
-    System.out.println("QoS Server(s) stopped");
+    System.out.println("QoS Server stopped");
     System.exit(0);
   }
 

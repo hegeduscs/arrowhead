@@ -17,6 +17,7 @@ import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,11 +29,11 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
@@ -52,42 +53,30 @@ public class AuthorizationMain {
 
   static PrivateKey privateKey;
 
-  private static String SERVICE_REGISTRY_URI = getProp().getProperty("sr_base_uri");
+  private static String BASE_URI;
+  private static String SR_BASE_URI;
   private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
-  private static HttpServer secureServer;
-  private static Properties prop;
+  private static TypeSafeProperties prop;
 
-  private static final String BASE_URI = getProp().getProperty("base_uri", "http://127.0.0.1:8444/");
-  private static final String BASE_URI_SECURED = getProp().getProperty("base_uri_secured", "https://127.0.0.1:8445/");
   private static final Logger log = Logger.getLogger(AuthorizationMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays
-      .asList("base_uri", "sr_base_uri", "db_user", "db_password", "db_address", "enable_auth_for_cloud");
-  private static final List<String> securePropertyNames = Arrays
-      .asList("base_uri_secured", "keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
-    Utility.createServerUrl(BASE_URI, false);
-    Utility.createServerUrl(BASE_URI_SECURED, true);
-    if (SERVICE_REGISTRY_URI.startsWith("https")) {
-      Utility.createServerUrl(SERVICE_REGISTRY_URI, true);
-    } else {
-      Utility.createServerUrl(SERVICE_REGISTRY_URI, false);
-    }
-    if (!SERVICE_REGISTRY_URI.contains("serviceregistry")) {
-      SERVICE_REGISTRY_URI = UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("serviceregistry").build().toString();
-    }
 
-    KeyStore keyStore = SecurityUtils.loadKeyStore(getProp().getProperty("keystore"), getProp().getProperty("keystorepass"));
-    privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("keystorepass"));
-    //System.out.println("private key: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
+    String address = getProp().getProperty("address", "0.0.0.0");
+    int insecurePort = getProp().getIntProperty("insecure_port", 8444);
+    int securePort = getProp().getIntProperty("secure_port", 8445);
+
+    String srAddress = getProp().getProperty("sr_address", "0.0.0.0");
+    int srInsecurePort = getProp().getIntProperty("sr_insecure_port", 8442);
+    int srSecurePort = getProp().getIntProperty("sr_secure_port", 8443);
 
     boolean daemon = false;
-    boolean serverModeSet = false;
-    for (int i = 0; i < args.length; ++i) {
-      switch (args[i]) {
+    List<String> alwaysMandatoryProperties = Arrays.asList("db_user", "db_password", "db_address", "keystore", "keystorepass");
+    for (String arg : args) {
+      switch (arg) {
         case "-daemon":
           daemon = true;
           System.out.println("Starting server as daemon!");
@@ -96,38 +85,27 @@ public class AuthorizationMain {
           DEBUG_MODE = true;
           System.out.println("Starting server in debug mode!");
           break;
-        case "-m":
-          serverModeSet = true;
-          ++i;
-          switch (args[i]) {
-            case "insecure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              server = startServer();
-              useSRService(false, true);
-              break;
-            case "secure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
-              secureServer = startSecureServer();
-              useSRService(true, true);
-              break;
-            case "both":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
-              server = startServer();
-              secureServer = startSecureServer();
-              useSRService(false, true);
-              useSRService(true, true);
-              break;
-            default:
-              log.fatal("Unknown server mode: " + args[i]);
-              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
-          }
+        case "-tls":
+          List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
+          allMandatoryProperties.addAll(Arrays.asList("keypass", "truststore", "truststorepass"));
+          Utility.checkProperties(getProp().stringPropertyNames(), allMandatoryProperties);
+          BASE_URI = Utility.getUri(address, securePort, null, true, true);
+          SR_BASE_URI = Utility.getUri(srAddress, srSecurePort, "serviceregistry", true, true);
+          server = startSecureServer();
+          useSRService(true);
       }
     }
-    if (!serverModeSet) {
+    if (server == null) {
+      Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
+      BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
+      SR_BASE_URI = Utility.getUri(srAddress, srInsecurePort, "serviceregistry", false, true);
       server = startServer();
-      useSRService(false, true);
+      useSRService(true);
     }
-    Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
+
+    KeyStore keyStore = SecurityUtils.loadKeyStore(getProp().getProperty("keystore"), getProp().getProperty("keystorepass"));
+    privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("keystorepass"));
+    //System.out.println("private key: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
 
     //This is here to initialize the database connection before the REST resources are initiated
     DatabaseManager dm = DatabaseManager.getInstance();
@@ -138,7 +116,7 @@ public class AuthorizationMain {
         shutdown();
       }));
     } else {
-      System.out.println("Type \"stop\" to shutdown Authorization Server(s)...");
+      System.out.println("Type \"stop\" to shutdown Authorization Server...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       String input = "";
       while (!input.equals("stop")) {
@@ -207,14 +185,14 @@ public class AuthorizationMain {
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
-    URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
     try {
       final HttpServer server = GrizzlyHttpServerFactory
           .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
-      log.info("Started server at: " + BASE_URI_SECURED);
-      System.out.println("Started secure server at: " + BASE_URI_SECURED);
+      log.info("Started server at: " + BASE_URI);
+      System.out.println("Started secure server at: " + BASE_URI);
       return server;
     } catch (ProcessingException e) {
       throw new ServiceConfigurationError(
@@ -222,8 +200,9 @@ public class AuthorizationMain {
     }
   }
 
-  private static void useSRService(boolean isSecure, boolean registering) {
-    URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
+  private static void useSRService(boolean registering) {
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
+    boolean isSecure = uri.getScheme().equals("https");
     ArrowheadSystem authSystem = new ArrowheadSystem("authorization", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     ArrowheadService authControlService = new ArrowheadService(Utility.createSD(Utility.AUTH_CONTROL_SERVICE, isSecure),
                                                                Collections.singletonList("JSON"), null);
@@ -240,28 +219,28 @@ public class AuthorizationMain {
 
     if (registering) {
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", authControlEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", authControlEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", authControlEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", authControlEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", authControlEntry);
         } else {
           throw new ArrowheadException("Authorization control service registration failed.", e);
         }
       }
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", tokenGenEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("register").build().toString(), "POST", tokenGenEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", tokenGenEntry);
         } else {
           throw new ArrowheadException("Token generation service registration failed.", e);
         }
       }
     } else {
-      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", authControlEntry);
-      Utility.sendRequest(UriBuilder.fromUri(SERVICE_REGISTRY_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", authControlEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", tokenGenEntry);
       System.out.println("Authorization services deregistered.");
     }
   }
@@ -270,20 +249,16 @@ public class AuthorizationMain {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
-      useSRService(false, false);
+      useSRService(false);
     }
-    if (secureServer != null) {
-      log.info("Stopping server at: " + BASE_URI_SECURED);
-      secureServer.shutdownNow();
-      useSRService(true, false);
-    }
-    System.out.println("Authorization Server(s) stopped");
+    System.out.println("Authorization Server stopped");
+    System.exit(0);
   }
 
-  public static synchronized Properties getProp() {
+  public static synchronized TypeSafeProperties getProp() {
     try {
       if (prop == null) {
-        prop = new Properties();
+        prop = new TypeSafeProperties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);

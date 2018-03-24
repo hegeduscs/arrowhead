@@ -49,9 +49,7 @@ public class ServiceRegistryMain {
   static final int TTL_INTERVAL = getProp().getIntProperty("ttl_interval", 10);
 
   private static String BASE_URI;
-  private static String BASE_URI_SECURED;
   private static HttpServer server;
-  private static HttpServer secureServer;
   private static TypeSafeProperties prop;
   private static Timer pingTimer;
   private static Timer ttlTimer;
@@ -82,11 +80,11 @@ public class ServiceRegistryMain {
           List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
           allMandatoryProperties.addAll(Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass"));
           Utility.checkProperties(getProp().stringPropertyNames(), allMandatoryProperties);
-          BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
-          secureServer = startSecureServer();
+          BASE_URI = Utility.getUri(address, securePort, null, true, true);
+          server = startSecureServer();
       }
     }
-    if (secureServer == null) {
+    if (server == null) {
       Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
       BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
       server = startServer();
@@ -115,7 +113,7 @@ public class ServiceRegistryMain {
         shutdown();
       }));
     } else {
-      System.out.println("Type \"stop\" to shutdown Service Registry Server(s)...");
+      System.out.println("Type \"stop\" to shutdown Service Registry Server...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       String input = "";
       while (!input.equals("stop")) {
@@ -180,14 +178,14 @@ public class ServiceRegistryMain {
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
-    URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
     try {
       final HttpServer server = GrizzlyHttpServerFactory
           .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
-      log.info("Started server at: " + BASE_URI_SECURED);
-      System.out.println("Started secure server at: " + BASE_URI_SECURED);
+      log.info("Started server at: " + BASE_URI);
+      System.out.println("Started secure server at: " + BASE_URI);
       return server;
     } catch (ProcessingException e) {
       throw new ServiceConfigurationError(
@@ -206,11 +204,7 @@ public class ServiceRegistryMain {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
     }
-    if (secureServer != null) {
-      log.info("Stopping server at: " + BASE_URI_SECURED);
-      secureServer.shutdownNow();
-    }
-    System.out.println("Service Registry Server(s) stopped");
+    System.out.println("Service Registry Server stopped");
     System.exit(0);
   }
 

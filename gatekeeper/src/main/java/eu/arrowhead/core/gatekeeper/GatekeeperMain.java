@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
@@ -59,31 +60,37 @@ public class GatekeeperMain {
   static final int timeout = getProp().getIntProperty("timeout", 30000);
 
   private static String INBOUND_BASE_URI;
-  private static String INBOUND_BASE_URI_SECURED;
   private static String OUTBOUND_BASE_URI;
-  private static String OUTBOUND_BASE_URI_SECURED;
   private static String BASE64_PUBLIC_KEY;
   private static boolean FIRST_SR_QUERY = true;
   private static HttpServer inboundServer;
-  private static HttpServer inboundSecureServer;
   private static HttpServer outboundServer;
-  private static HttpServer outboundSecureServer;
   private static TypeSafeProperties prop;
 
   private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
-  private static final List<String> basicPropertyNames = Arrays.asList("db_user", "db_password", "db_address");
-  private static final List<String> securePropertyNames = Arrays
-      .asList("gatekeeper_keystore", "gatekeeper_keystore_pass", "gatekeeper_keypass", "cloud_keystore", "cloud_keystore_pass", "cloud_keypass",
-              "master_arrowhead_cert");
 
   public static void main(String[] args) throws IOException {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
 
+    String address = getProp().getProperty("address", "0.0.0.0");
+    int internalInsecurePort = getProp().getIntProperty("internal_insecure_port", 8446);
+    int internalSecurePort = getProp().getIntProperty("internal_secure_port", 8447);
+    int externalInsecurePort = getProp().getIntProperty("external_insecure_port", 8448);
+    int externalSecurePort = getProp().getIntProperty("external_secure_port", 8449);
+
+    String srAddress = getProp().getProperty("sr_address", "0.0.0.0");
+    int srInsecurePort = getProp().getIntProperty("sr_insecure_port", 8442);
+    int srSecurePort = getProp().getIntProperty("sr_secure_port", 8443);
+
+    String orchAddress = getProp().getProperty("orch_address", "0.0.0.0");
+    int orchInsecurePort = getProp().getIntProperty("orch_insecure_port", 8440);
+    int orchSecurePort = getProp().getIntProperty("orch_secure_port", 8441);
+
     boolean daemon = false;
-    boolean serverModeSet = false;
-    for (int i = 0; i < args.length; ++i) {
-      switch (args[i]) {
+    List<String> alwaysMandatoryProperties = Arrays.asList("db_user", "db_password", "db_address");
+    for (String arg : args) {
+      switch (arg) {
         case "-daemon":
           daemon = true;
           System.out.println("Starting server as daemon!");
@@ -92,41 +99,29 @@ public class GatekeeperMain {
           DEBUG_MODE = true;
           System.out.println("Starting server in debug mode!");
           break;
-        case "-m":
-          serverModeSet = true;
-          ++i;
-          switch (args[i]) {
-            case "insecure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              inboundServer = startServer(INBOUND_BASE_URI, true);
-              outboundServer = startServer(OUTBOUND_BASE_URI, false);
-              useSRService(false, true);
-              break;
-            case "secure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
-              inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true);
-              outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false);
-              useSRService(true, true);
-              break;
-            case "both":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
-              inboundServer = startServer(INBOUND_BASE_URI, true);
-              outboundServer = startServer(OUTBOUND_BASE_URI, false);
-              inboundSecureServer = startSecureServer(INBOUND_BASE_URI_SECURED, true);
-              outboundSecureServer = startSecureServer(OUTBOUND_BASE_URI_SECURED, false);
-              useSRService(false, true);
-              useSRService(true, true);
-              break;
-            default:
-              log.fatal("Unknown server mode: " + args[i]);
-              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
-          }
+        case "-tls":
+          List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
+          allMandatoryProperties.addAll(Arrays.asList("gatekeeper_keystore", "gatekeeper_keystore_pass", "gatekeeper_keypass", "cloud_keystore",
+                                                      "cloud_keystore_pass", "cloud_keypass", "master_arrowhead_cert"));
+          Utility.checkProperties(getProp().stringPropertyNames(), allMandatoryProperties);
+          INBOUND_BASE_URI = Utility.getUri(address, internalSecurePort, null, true, true);
+          OUTBOUND_BASE_URI = Utility.getUri(address, externalSecurePort, null, true, true);
+          SERVICE_REGISTRY_URI = Utility.getUri(srAddress, srSecurePort, "serviceregistry", true, true);
+          ORCHESTRATOR_URI = Utility.getUri(orchAddress, orchSecurePort, "orchestrator/orchestration", true, true);
+          inboundServer = startSecureServer(INBOUND_BASE_URI, true);
+          outboundServer = startSecureServer(OUTBOUND_BASE_URI, false);
+          useSRService(true);
       }
     }
-    if (!serverModeSet) {
+    if (inboundServer == null) {
+      Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
+      INBOUND_BASE_URI = Utility.getUri(address, internalInsecurePort, null, false, true);
+      OUTBOUND_BASE_URI = Utility.getUri(address, externalInsecurePort, null, false, true);
+      SERVICE_REGISTRY_URI = Utility.getUri(srAddress, srInsecurePort, "serviceregistry", false, true);
+      ORCHESTRATOR_URI = Utility.getUri(orchAddress, orchInsecurePort, "orchestrator/orchestration", false, true);
       inboundServer = startServer(INBOUND_BASE_URI, true);
       outboundServer = startServer(OUTBOUND_BASE_URI, false);
-      useSRService(false, true);
+      useSRService(true);
     }
     Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
     getCoreSystemServiceUris();
@@ -140,7 +135,7 @@ public class GatekeeperMain {
         shutdown();
       }));
     } else {
-      System.out.println("Type \"stop\" to shutdown Gatekeeper Server(s)...");
+      System.out.println("Type \"stop\" to shutdown Gatekeeper Server...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       String input = "";
       while (!input.equals("stop")) {
@@ -251,8 +246,9 @@ public class GatekeeperMain {
     }
   }
 
-  private static void useSRService(boolean isSecure, boolean registering) {
-    URI uri = isSecure ? UriBuilder.fromUri(OUTBOUND_BASE_URI_SECURED).build() : UriBuilder.fromUri(OUTBOUND_BASE_URI).build();
+  private static void useSRService(boolean registering) {
+    URI uri = UriBuilder.fromUri(OUTBOUND_BASE_URI).build();
+    boolean isSecure = uri.getScheme().equals("https");
     ArrowheadSystem gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     ArrowheadService gsdService = new ArrowheadService(Utility.createSD(Utility.GSD_SERVICE, isSecure), Collections.singletonList("JSON"), null);
     ArrowheadService icnService = new ArrowheadService(Utility.createSD(Utility.ICN_SERVICE, isSecure), Collections.singletonList("JSON"), null);
@@ -332,21 +328,13 @@ public class GatekeeperMain {
       log.info("Stopping server at: " + INBOUND_BASE_URI);
       inboundServer.shutdownNow();
     }
-    if (inboundSecureServer != null) {
-      log.info("Stopping server at: " + INBOUND_BASE_URI_SECURED);
-      inboundSecureServer.shutdownNow();
-    }
     if (outboundServer != null) {
       log.info("Stopping server at: " + OUTBOUND_BASE_URI);
       outboundServer.shutdown();
-      useSRService(false, false);
+      useSRService(false);
     }
-    if (outboundSecureServer != null) {
-      log.info("Stopping server at: " + OUTBOUND_BASE_URI_SECURED);
-      outboundSecureServer.shutdown();
-      useSRService(true, false);
-    }
-    System.out.println("Gatekeeper Servers stopped");
+    System.out.println("Gatekeeper Server stopped");
+    System.exit(0);
   }
 
   private static synchronized TypeSafeProperties getProp() {

@@ -89,12 +89,11 @@ public final class Utility {
     sslContext = context;
   }
 
-  public static void setServiceRegistryUri(String insecure, String secure) {
-    if (insecure == null && secure == null) {
+  public static void setServiceRegistryUri(String uri) {
+    if (uri == null) {
       throw new AssertionError("Arrowhead Common:Utility has no Service Registry URL.");
     }
-    SR_QUERY_URI = insecure != null ? UriBuilder.fromUri(insecure).path("query").build().toString()
-        : UriBuilder.fromUri(secure).path("query").build().toString();
+    SR_QUERY_URI = UriBuilder.fromUri(uri).path("query").build().toString();
   }
 
   public static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {

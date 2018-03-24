@@ -49,12 +49,9 @@ public class GatewayMain {
   public static SSLContext clientContext;
 
   private static String BASE_URI;
-  private static String BASE_URI_SECURED;
   private static String SR_BASE_URI;
-  private static String SR_BASE_URI_SECURED;
   private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
-  private static HttpServer secureServer;
   private static TypeSafeProperties prop;
 
   private static final Logger log = Logger.getLogger(GatewayMain.class.getName());
@@ -67,9 +64,9 @@ public class GatewayMain {
     int insecurePort = getProp().getIntProperty("insecure_port", 8452);
     int securePort = getProp().getIntProperty("secure_port", 8453);
 
-    String sr_address = getProp().getProperty("sr_address", "0.0.0.0");
+    String srAddress = getProp().getProperty("sr_address", "0.0.0.0");
     int srInsecurePort = getProp().getIntProperty("sr_insecure_port", 8442);
-    int srSecurePort = getProp().getIntProperty("secure_port", 8443);
+    int srSecurePort = getProp().getIntProperty("sr_secure_port", 8443);
 
     boolean daemon = false;
     for (String arg : args) {
@@ -86,17 +83,17 @@ public class GatewayMain {
           List<String> secureMandatoryProperties = Arrays
               .asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass", "trustpass", "master_arrowhead_cert");
           Utility.checkProperties(getProp().stringPropertyNames(), secureMandatoryProperties);
-          BASE_URI_SECURED = Utility.getUri(address, securePort, null, true, true);
-          SR_BASE_URI_SECURED = Utility.getUri(sr_address, srSecurePort, "serviceregistry", true, true);
-          secureServer = startSecureServer();
-          useSRService(true, true);
+          BASE_URI = Utility.getUri(address, securePort, null, true, true);
+          SR_BASE_URI = Utility.getUri(srAddress, srSecurePort, "serviceregistry", true, true);
+          server = startSecureServer();
+          useSRService(true);
       }
     }
-    if (secureServer == null) {
+    if (server == null) {
       BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
-      SR_BASE_URI = Utility.getUri(sr_address, srInsecurePort, "serviceregistry", false, true);
+      SR_BASE_URI = Utility.getUri(srAddress, srInsecurePort, "serviceregistry", false, true);
       server = startServer();
-      useSRService(false, true);
+      useSRService(true);
     }
 
     if (daemon) {
@@ -106,7 +103,7 @@ public class GatewayMain {
         shutdown();
       }));
     } else {
-      System.out.println("Type \"stop\" to shutdown Gateway Server(s)...");
+      System.out.println("Type \"stop\" to shutdown Gateway Server...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       String input = "";
       while (!input.equals("stop")) {
@@ -176,14 +173,14 @@ public class GatewayMain {
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
-    URI uri = UriBuilder.fromUri(BASE_URI_SECURED).build();
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
     try {
       final HttpServer server = GrizzlyHttpServerFactory
           .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
-      log.info("Started server at: " + BASE_URI_SECURED);
-      System.out.println("Started secure server at: " + BASE_URI_SECURED);
+      log.info("Started server at: " + BASE_URI);
+      System.out.println("Started secure server at: " + BASE_URI);
       return server;
     } catch (ProcessingException e) {
       throw new ServiceConfigurationError(
@@ -191,9 +188,9 @@ public class GatewayMain {
     }
   }
 
-  private static void useSRService(boolean isSecure, boolean registering) {
-    String SRU = isSecure ? SR_BASE_URI_SECURED : SR_BASE_URI;
-    URI uri = isSecure ? UriBuilder.fromUri(BASE_URI_SECURED).build() : UriBuilder.fromUri(BASE_URI).build();
+  private static void useSRService(boolean registering) {
+    URI uri = UriBuilder.fromUri(BASE_URI).build();
+    boolean isSecure = uri.getScheme().equals("https");
     ArrowheadSystem gatewaySystem = new ArrowheadSystem("gateway", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     ArrowheadService providerService = new ArrowheadService(Utility.createSD(Utility.GW_PROVIDER_SERVICE, isSecure),
                                                             Collections.singletonList("JSON"), null);
@@ -213,39 +210,39 @@ public class GatewayMain {
 
     if (registering) {
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", providerEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", providerEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", providerEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", providerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", providerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", providerEntry);
         } else {
           throw new ArrowheadException("Gateway CTP service registration failed.", e);
         }
       }
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", consumerEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", consumerEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", consumerEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", consumerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", consumerEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", consumerEntry);
         } else {
           throw new ArrowheadException("Gateway CTC service registration failed.", e);
         }
       }
       try {
-        Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", mgmtEntry);
+        Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", mgmtEntry);
       } catch (ArrowheadException e) {
         if (e.getExceptionType() == ExceptionType.DUPLICATE_ENTRY) {
-          Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", mgmtEntry);
-          Utility.sendRequest(UriBuilder.fromUri(SRU).path("register").build().toString(), "POST", mgmtEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", mgmtEntry);
+          Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("register").build().toString(), "POST", mgmtEntry);
         } else {
           throw new ArrowheadException("Gateway management service registration failed.", e);
         }
       }
     } else {
-      Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", providerEntry);
-      Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", consumerEntry);
-      Utility.sendRequest(UriBuilder.fromUri(SRU).path("remove").build().toString(), "PUT", mgmtEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", providerEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", consumerEntry);
+      Utility.sendRequest(UriBuilder.fromUri(SR_BASE_URI).path("remove").build().toString(), "PUT", mgmtEntry);
       System.out.println("Gateway services deregistered.");
     }
   }
@@ -254,14 +251,9 @@ public class GatewayMain {
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
-      useSRService(false, false);
+      useSRService(false);
     }
-    if (secureServer != null) {
-      log.info("Stopping server at: " + BASE_URI_SECURED);
-      secureServer.shutdownNow();
-      useSRService(true, false);
-    }
-    System.out.println("Gateway Server(s) stopped");
+    System.out.println("Gateway Server stopped");
     System.exit(0);
   }
 

@@ -66,7 +66,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
       // If this property is true, then every system from the local cloud can use the auth services
-      if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud"))) {
+      if (Boolean.valueOf(AuthorizationMain.getProp().getProperty("enable_auth_for_cloud", "false"))) {
         String[] clientFields = clientCN.split("\\.", 2);
         return serverFields[1].equalsIgnoreCase(clientFields[1]);
       }
