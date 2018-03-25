@@ -12,7 +12,6 @@ package eu.arrowhead.core.serviceregistry_sql;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,15 +35,7 @@ class RegistryUtils {
   }
 
   static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
-    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
-    while (iterator.hasNext()) {
-      ServiceRegistryEntry current = iterator.next();
-      if (current.getProvider().getAddress().equals("0.0.0.0")) {
-        iterator.remove();
-      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.PING_TIMEOUT)) {
-        iterator.remove();
-      }
-    }
+    fetchedList.removeIf(current -> !pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryMain.PING_TIMEOUT));
   }
 
 }

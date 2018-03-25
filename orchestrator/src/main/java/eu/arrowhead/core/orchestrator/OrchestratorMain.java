@@ -54,13 +54,13 @@ public class OrchestratorMain {
 
   public static boolean DEBUG_MODE;
 
+  static String SR_BASE_URI;
   static String AUTH_CONTROL_URI;
   static String TOKEN_GEN_URI;
   static String GSD_SERVICE_URI;
   static String ICN_SERVICE_URI;
 
   private static String BASE_URI;
-  private static String SR_BASE_URI;
   private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
   private static TypeSafeProperties prop;

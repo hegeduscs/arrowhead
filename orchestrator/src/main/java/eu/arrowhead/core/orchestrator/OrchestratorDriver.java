@@ -73,7 +73,7 @@ final class OrchestratorDriver {
    */
   static List<ServiceRegistryEntry> queryServiceRegistry(ArrowheadService service, boolean metadataSearch, boolean pingProviders) {
     // Compiling the URI and the request payload
-    String srUri = UriBuilder.fromPath(OrchestratorMain.SERVICE_REGISTRY_URI).path("query").toString();
+    String srUri = UriBuilder.fromPath(OrchestratorMain.SR_BASE_URI).path("query").toString();
     ServiceQueryForm queryForm = new ServiceQueryForm(service, pingProviders, metadataSearch);
 
     // Sending the request, parsing the returned result
@@ -532,12 +532,11 @@ final class OrchestratorDriver {
   static List<OrchestrationForm> generateAuthTokens(ServiceRequestForm srf, List<OrchestrationForm> ofList) {
     // Arrange token generation for every provider, if it was requested in the service metadata
     Map<String, String> metadata;
-    TokenGenerationResponse tokenResponse = null;
+    TokenGenerationResponse tokenResponse;
     int tokenCount = 0;
 
     // It is a default Store orchestration, if the requested service was not specified, with possibly more than 1 service
     if (srf.getRequestedService() == null) {
-      tokenResponse = new TokenGenerationResponse();
       for (OrchestrationForm form : ofList) {
         metadata = form.getService().getServiceMetadata();
         if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
