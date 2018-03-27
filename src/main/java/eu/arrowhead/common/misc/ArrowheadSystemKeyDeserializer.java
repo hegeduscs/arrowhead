@@ -7,7 +7,7 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.common.json;
+package eu.arrowhead.common.misc;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.KeyDeserializer;

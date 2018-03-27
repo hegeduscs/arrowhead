@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
 
 public final class GatekeeperService {
 
-  static final int timeout = Integer.valueOf(ArrowheadMain.getProp().getProperty("gateway_socket_timeout"));
+  static final int timeout = ArrowheadMain.getProp().getIntProperty("gateway_socket_timeout", 30000);
   static final DatabaseManager dm = DatabaseManager.getInstance();
 
   private static final String GATEWAY_ADDRESS = ArrowheadMain.getProp().getProperty("gateway_address");
@@ -77,7 +77,7 @@ public final class GatekeeperService {
       String uri;
       for (ArrowheadCloud cloud : requestForm.getSearchPerimeter()) {
         try {
-          uri = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), cloud.isSecure());
+          uri = Utility.getUri(cloud.getAddress(), cloud.getPort(), cloud.getGatekeeperServiceURI(), cloud.isSecure(), false);
         }
         // We skip the clouds with missing information
         catch (NullPointerException ex) {
@@ -146,7 +146,7 @@ public final class GatekeeperService {
     }
 
     String icnUri = Utility.getUri(requestForm.getTargetCloud().getAddress(), requestForm.getTargetCloud().getPort(),
-                                   requestForm.getTargetCloud().getGatekeeperServiceURI(), requestForm.getTargetCloud().isSecure());
+                                   requestForm.getTargetCloud().getGatekeeperServiceURI(), requestForm.getTargetCloud().isSecure(), false);
     icnUri = UriBuilder.fromPath(icnUri).path("icn_proposal").toString();
     // Sending the request, the response payload is use_gateway flag dependent
     Response response = Utility.sendRequest(icnUri, "PUT", icnProposal);

@@ -78,8 +78,8 @@ public final class GatewayService {
   }
 
   static {
-    minPort = Integer.parseInt(ArrowheadMain.getProp().getProperty("min_port"));
-    maxPort = Integer.parseInt(ArrowheadMain.getProp().getProperty("max_port"));
+    minPort = ArrowheadMain.getProp().getIntProperty("min_port", 8000);
+    maxPort = ArrowheadMain.getProp().getIntProperty("max_port", 8100);
     portAllocationMap = GatewayService.initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);
 
     String cloudKeystorePath = ArrowheadMain.getProp().getProperty("cloud_keystore");

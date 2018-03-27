@@ -2,6 +2,7 @@ package eu.arrowhead.core;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.authorization.AuthorizationApi;
 import eu.arrowhead.core.gatekeeper.GatekeeperApi;
@@ -22,9 +23,9 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,24 +46,14 @@ public class ArrowheadMain {
 
   public static final boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
 
-  private static String serverAddress;
   private static HttpServer gkServer;
-  private static HttpServer gkSecureServer;
   private static HttpServer orchServer;
-  private static HttpServer orchSecureServer;
   private static HttpServer srServer;
-  private static HttpServer srSecureServer;
-  private static Properties prop;
+  private static TypeSafeProperties prop;
   private static Timer timer;
 
-  private static final String SERVER_ADDRESS = getProp().getProperty("server_address", "127.0.0.1");
+  private static final String SERVER_ADDRESS = getProp().getProperty("server_address", "0.0.0.0");
   private static final Logger log = Logger.getLogger(ArrowheadMain.class.getName());
-  // The mandatory property fields
-  private static final List<String> basicPropertyNames = Arrays
-      .asList("server_address", "gateway_address", "db_user", "db_password", "db_address", "gateway_socket_timeout", "min_port", "max_port");
-  private static final List<String> securePropertyNames = Arrays
-      .asList("auth_keystore", "auth_keystorepass", "master_arrowhead_cert", "gateway_keystore", "gateway_keystore_pass", "cloud_keystore",
-              "cloud_keystore_pass", "cloud_keypass");
 
   // Types of core systems enum
   private enum CoreSystemType {
@@ -73,23 +64,10 @@ public class ArrowheadMain {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
 
-    final String GK_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8446, "", false);
-    final String GK_BASE_URI_SECURED = Utility.getUri(SERVER_ADDRESS, 8447, "", true);
-    final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8440, "", false);
-    final String ORCH_BASE_URI_SECURED = Utility.getUri(SERVER_ADDRESS, 8441, "", true);
-    final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8442, "", false);
-    final String SR_BASE_URI_SECURED = Utility.getUri(SERVER_ADDRESS, 8443, "", true);
-    Utility.isUrlValid(GK_BASE_URI, false);
-    Utility.isUrlValid(GK_BASE_URI_SECURED, true);
-    Utility.isUrlValid(ORCH_BASE_URI, false);
-    Utility.isUrlValid(ORCH_BASE_URI_SECURED, true);
-    Utility.isUrlValid(SR_BASE_URI, false);
-    Utility.isUrlValid(SR_BASE_URI_SECURED, true);
-
     boolean daemon = false;
-    boolean serverModeSet = false;
-    for (int i = 0; i < args.length; ++i) {
-      switch (args[i]) {
+    List<String> alwaysMandatoryProperties = Arrays.asList("gateway_address", "db_user", "db_password", "db_address");
+    for (String arg : args) {
+      switch (arg) {
         case "-daemon":
           daemon = true;
           System.out.println("Starting servers as daemon!");
@@ -98,38 +76,28 @@ public class ArrowheadMain {
           DEBUG_MODE = true;
           System.out.println("Starting servers in debug mode!");
           break;
-        case "-m":
-          serverModeSet = true;
-          ++i;
-          switch (args[i]) {
-            case "insecure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, false);
-              gkServer = startServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
-              orchServer = startServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
-              srServer = startServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
-              break;
-            case "secure":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
-              gkSecureServer = startSecureServer(GK_BASE_URI_SECURED, CoreSystemType.GATEKEEPER);
-              orchSecureServer = startSecureServer(ORCH_BASE_URI_SECURED, CoreSystemType.ORCHESTRATOR);
-              srSecureServer = startSecureServer(SR_BASE_URI_SECURED, CoreSystemType.SERVICE_REGISTRY);
-              break;
-            case "both":
-              Utility.checkProperties(getProp().stringPropertyNames(), basicPropertyNames, securePropertyNames, true);
-              gkServer = startServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
-              orchServer = startServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
-              srServer = startServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
-              gkSecureServer = startSecureServer(GK_BASE_URI_SECURED, CoreSystemType.GATEKEEPER);
-              orchSecureServer = startSecureServer(ORCH_BASE_URI_SECURED, CoreSystemType.ORCHESTRATOR);
-              srSecureServer = startSecureServer(SR_BASE_URI_SECURED, CoreSystemType.SERVICE_REGISTRY);
-              break;
-            default:
-              log.fatal("Unknown server mode: " + args[i]);
-              throw new ServiceConfigurationError("Unknown server mode: " + args[i]);
-          }
+        case "-tls":
+          List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
+          allMandatoryProperties.addAll(Arrays.asList("cloud_keystore", "cloud_keystore_pass", "cloud_keypass", "auth_keystore", "auth_keystorepass",
+                                                      "master_arrowhead_cert", "gateway_keystore", "gateway_keystore_pass"));
+          Utility.checkProperties(getProp().stringPropertyNames(), allMandatoryProperties);
+
+          final String GK_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8447, "", true, true);
+          final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8441, "", true, true);
+          final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8443, "", true, true);
+
+          gkServer = startServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
+          orchServer = startServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
+          srServer = startServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
       }
     }
-    if (!serverModeSet) {
+    if (srServer == null) {
+      Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
+
+      final String GK_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8447, "", false, true);
+      final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8441, "", false, true);
+      final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8443, "", false, true);
+
       gkServer = startServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
       orchServer = startServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
       srServer = startServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
@@ -138,7 +106,7 @@ public class ArrowheadMain {
     if (Boolean.valueOf(getProp().getProperty("ping_scheduled", "false"))) {
       TimerTask pingTask = new PingProvidersTask();
       timer = new Timer();
-      int interval = Integer.parseInt(getProp().getProperty("ping_interval", "10"));
+      int interval = getProp().getIntProperty("ping_interval", 10);
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 
@@ -152,7 +120,7 @@ public class ArrowheadMain {
         shutdown();
       }));
     } else {
-      System.out.println("Type \"stop\" to shutdown Core System Server(s)...");
+      System.out.println("Type \"stop\" to shutdown Core System Servers...");
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       String input = "";
       while (!input.equals("stop")) {
@@ -182,10 +150,6 @@ public class ArrowheadMain {
     config.packages("eu.arrowhead.common");
 
     URI uri = UriBuilder.fromUri(url).build();
-    if (serverAddress == null) {
-      serverAddress = uri.getHost();
-    }
-
     try {
       final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
@@ -218,11 +182,9 @@ public class ArrowheadMain {
         serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
         Utility.setSSLContext(serverContext);
         break;
-
       case ORCHESTRATOR:
         config.registerClasses(AuthorizationApi.class, GatewayApi.class, CommonApi.class, OrchestratorResource.class, StoreApi.class);
         break;
-
       case SERVICE_REGISTRY:
         config.registerClasses(ServiceRegistryApi.class, ServiceRegistryResource.class);
         break;
@@ -241,10 +203,6 @@ public class ArrowheadMain {
     }
 
     URI uri = UriBuilder.fromUri(url).build();
-    if (serverAddress == null) {
-      serverAddress = uri.getHost();
-    }
-
     try {
       final HttpServer server = GrizzlyHttpServerFactory
           .createHttpServer(uri, config, true, new SSLEngineConfigurator(serverContext).setClientMode(false).setNeedClientAuth(true));
@@ -270,17 +228,10 @@ public class ArrowheadMain {
     if (srServer != null) {
       srServer.shutdownNow();
     }
-    if (gkSecureServer != null) {
-      gkSecureServer.shutdownNow();
-    }
-    if (orchSecureServer != null) {
-      orchSecureServer.shutdownNow();
-    }
-    if (srSecureServer != null) {
-      srSecureServer.shutdownNow();
-    }
-    log.info("Core System Server(s) stopped");
-    System.out.println("Core System Server(s) stopped");
+
+    log.info("Core System Servers stopped");
+    System.out.println("Core System Servers stopped");
+    System.exit(0);
   }
 
   private static String getServerCN(String certPath, String certPass) {
@@ -298,10 +249,10 @@ public class ArrowheadMain {
     return serverCN;
   }
 
-  public static synchronized Properties getProp() {
+  public static synchronized TypeSafeProperties getProp() {
     try {
       if (prop == null) {
-        prop = new Properties();
+        prop = new TypeSafeProperties();
         File file = new File("config" + File.separator + "app.properties");
         FileInputStream inputStream = new FileInputStream(file);
         prop.load(inputStream);

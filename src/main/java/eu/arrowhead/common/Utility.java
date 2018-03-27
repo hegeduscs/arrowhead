@@ -72,7 +72,7 @@ public final class Utility {
     sslContext = context;
   }
 
-  public static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {
+  private static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {
     log.info("Sending " + method + " request to: " + uri);
 
     boolean isSecure = false;
@@ -133,7 +133,7 @@ public final class Utility {
   }
 
   public static <T> Response sendRequest(String uri, String method, T payload) {
-    return sendRequest(uri, method, payload, null);
+    return sendRequest(uri, method, payload, sslContext);
   }
 
   private static void handleException(Response response, String uri) {
@@ -192,25 +192,41 @@ public final class Utility {
     }
   }
 
-  public static String getUri(String address, int port, String serviceUri, boolean isSecure) {
-    if (address == null || serviceUri == null) {
-      log.error("Address and serviceUri can not be null (Utility:getUri throws NPE)");
-      throw new NullPointerException("Address and serviceUri can not be null (Utility:getUri throws NPE)");
+  public static String getUri(String address, int port, String serviceUri, boolean isSecure, boolean serverStart) {
+    if (address == null) {
+      log.error("Address can not be null (Utility:getUri throws NPE)");
+      throw new NullPointerException("Address can not be null (Utility:getUri throws NPE)");
     }
 
-    UriBuilder ub = UriBuilder.fromPath("").host(address).path(serviceUri);
-    if (port > 0) {
-      ub.port(port);
-    }
+    UriBuilder ub = UriBuilder.fromPath("").host(address);
     if (isSecure) {
       ub.scheme("https");
     } else {
       ub.scheme("http");
     }
+    if (port > 0) {
+      ub.port(port);
+    }
+    if (serviceUri != null) {
+      ub.path(serviceUri);
+    }
 
-    log.info("Utility:getUri returning this: " + ub.toString());
-    return ub.toString();
+    String url = ub.toString();
+    try {
+      new URI(url);
+    } catch (URISyntaxException e) {
+      if (serverStart) {
+        throw new ServiceConfigurationError(url + " is not a valid URL to start a HTTP server! Please fix the address field in the properties file.");
+      } else {
+        log.error("Bad URL components passed to getUri() method");
+        throw new ArrowheadException(url + " is not a valid URL!");
+      }
+    }
+
+    log.info("Utility:getUri returning this: " + url);
+    return url;
   }
+
 
   public static List<String> getNeighborCloudURIs() {
     List<NeighborCloud> cloudList = new ArrayList<>(dm.getAll(NeighborCloud.class, null));
@@ -218,7 +234,8 @@ public final class Utility {
     List<String> uriList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
       uriList.add(
-          getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), cloud.getCloud().isSecure()));
+          getUri(cloud.getCloud().getAddress(), cloud.getCloud().getPort(), cloud.getCloud().getGatekeeperServiceURI(), cloud.getCloud().isSecure(),
+                 false));
     }
 
     return uriList;
@@ -243,26 +260,6 @@ public final class Utility {
       return uri.substring(0, uri.length() - 1);
     }
     return uri;
-  }
-
-  public static void isUrlValid(String url, boolean isSecure) {
-    String errorMessage = " is not a valid URL to start a HTTP server! Please fix the URL in the properties file.";
-    try {
-      URI uri = new URI(url);
-
-      if ("mailto".equals(uri.getScheme())) {
-        throw new ServiceConfigurationError(url + errorMessage);
-      }
-      if (uri.getHost() == null) {
-        throw new ServiceConfigurationError(url + errorMessage);
-      }
-      if ((isSecure && "http".equals(uri.getScheme())) || (!isSecure && "https".equals(uri.getScheme()))) {
-        throw new ServiceConfigurationError("Secure URIs should use the HTTPS protocol and insecure URIs should use the HTTP protocol. Please fix "
-                                                + "the following URL accordingly in the properties file: " + url);
-      }
-    } catch (URISyntaxException e) {
-      throw new ServiceConfigurationError(url + errorMessage);
-    }
   }
 
   public static String getRequestPayload(InputStream is) {
@@ -309,15 +306,15 @@ public final class Utility {
     return gson.fromJson(json, parsedClass);
   }
 
-  public static void checkProperties(Set<String> propertyNames, List<String> basic, List<String> secure, boolean isSecure) {
-    // Arrays.asList returns an immutable list, so we have to copy it first
-    List<String> properties = new ArrayList<>(basic);
-    if (isSecure) {
-      properties.addAll(secure);
+  public static void checkProperties(Set<String> propertyNames, List<String> mandatoryProperties) {
+    if (mandatoryProperties == null || mandatoryProperties.isEmpty()) {
+      return;
     }
-    if (!propertyNames.containsAll(properties)) {
+    //Arrays.asList() returns immutable lists, so we have to copy it first
+    List<String> properties = new ArrayList<>(mandatoryProperties);
+    if (!propertyNames.containsAll(mandatoryProperties)) {
       properties.removeIf(propertyNames::contains);
-      throw new ServiceConfigurationError("Missing field(s) from app.properties.sample file: " + properties.toString());
+      throw new ServiceConfigurationError("Missing field(s) from app.properties file: " + properties.toString());
     }
   }
 

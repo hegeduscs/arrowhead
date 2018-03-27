@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 public final class ServiceRegistryService {
 
   static final DatabaseManager dm = DatabaseManager.getInstance();
-  static final int timeout = Integer.valueOf(ArrowheadMain.getProp().getProperty("ping_timeout", "10000"));
+  static final int timeout = ArrowheadMain.getProp().getIntProperty("ping_timeout", 10000);
 
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(ServiceRegistryService.class.getName());
