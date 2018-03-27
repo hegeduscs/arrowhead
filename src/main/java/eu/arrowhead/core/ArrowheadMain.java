@@ -94,9 +94,9 @@ public class ArrowheadMain {
     if (srServer == null) {
       Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
 
-      final String GK_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8447, "", false, true);
-      final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8441, "", false, true);
-      final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8443, "", false, true);
+      final String GK_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8446, "", false, true);
+      final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8440, "", false, true);
+      final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8442, "", false, true);
 
       gkServer = startServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
       orchServer = startServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
