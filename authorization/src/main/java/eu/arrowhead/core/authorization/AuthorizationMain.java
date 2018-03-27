@@ -108,7 +108,7 @@ public class AuthorizationMain {
     //System.out.println("private key: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
 
     //This is here to initialize the database connection before the REST resources are initiated
-    DatabaseManager dm = DatabaseManager.getInstance();
+    @SuppressWarnings("unused") DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {

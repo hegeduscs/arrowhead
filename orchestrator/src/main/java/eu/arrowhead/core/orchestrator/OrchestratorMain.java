@@ -60,6 +60,7 @@ public class OrchestratorMain {
   static String GSD_SERVICE_URI;
   static String ICN_SERVICE_URI;
 
+  private static boolean USE_GATEKEEPER = true;
   private static String BASE_URI;
   private static String BASE64_PUBLIC_KEY;
   private static HttpServer server;
@@ -99,6 +100,8 @@ public class OrchestratorMain {
           SR_BASE_URI = Utility.getUri(srAddress, srSecurePort, "serviceregistry", true, true);
           server = startSecureServer();
           useSRService(true);
+        case "-nogk":
+          USE_GATEKEEPER = false;
       }
     }
     if (server == null) {
@@ -112,8 +115,7 @@ public class OrchestratorMain {
     getCoreSystemServiceUris();
 
     //This is here to initialize the database connection before the REST resources are initiated
-    //NOTE only necessary until store does not have its own server (?)
-    DatabaseManager dm = DatabaseManager.getInstance();
+    @SuppressWarnings("unused") DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -237,8 +239,10 @@ public class OrchestratorMain {
   public static void getCoreSystemServiceUris() {
     AUTH_CONTROL_URI = Utility.getServiceInfo(Utility.AUTH_CONTROL_SERVICE)[0];
     TOKEN_GEN_URI = Utility.getServiceInfo(Utility.TOKEN_GEN_SERVICE)[0];
-    GSD_SERVICE_URI = Utility.getServiceInfo(Utility.GSD_SERVICE)[0];
-    ICN_SERVICE_URI = Utility.getServiceInfo(Utility.ICN_SERVICE)[0];
+    if (USE_GATEKEEPER) {
+      GSD_SERVICE_URI = Utility.getServiceInfo(Utility.GSD_SERVICE)[0];
+      ICN_SERVICE_URI = Utility.getServiceInfo(Utility.ICN_SERVICE)[0];
+    }
     System.out.println("Core system URLs acquired.");
   }
 

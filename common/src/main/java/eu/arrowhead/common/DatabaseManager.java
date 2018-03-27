@@ -53,8 +53,9 @@ public class DatabaseManager {
 
     try {
       if (sessionFactory == null) {
-        sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
-            .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+        Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
+            .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword);
+        sessionFactory = configuration.buildSessionFactory();
       }
     } catch (Exception e) {
       log.fatal("Database connection failed, check the configuration!");
@@ -116,8 +117,9 @@ public class DatabaseManager {
 
   private SessionFactory getSessionFactory() {
     if (sessionFactory == null) {
-      sessionFactory = new Configuration().configure().setProperty("hibernate.connection.url", dbAddress)
-          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword).buildSessionFactory();
+      Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
+          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword);
+      sessionFactory = configuration.buildSessionFactory();
     }
     return sessionFactory;
   }
@@ -279,10 +281,12 @@ public class DatabaseManager {
   }
 
   // NOTE this only works well on tables which dont have any connection to any other tables (HQL does not do cascading)
+  @SuppressWarnings("unused")
   public void deleteAll(String tableName) {
     Session session = getSessionFactory().openSession();
     String stringQuery = "DELETE FROM " + tableName;
     Query query = session.createQuery(stringQuery);
     query.executeUpdate();
   }
+
 }

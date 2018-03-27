@@ -77,7 +77,7 @@ public class QoSMain {
     }
 
     //This is here to initialize the database connection before the REST resources are initiated
-    DatabaseManager dm = DatabaseManager.getInstance();
+    @SuppressWarnings("unused") DatabaseManager dm = DatabaseManager.getInstance();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {

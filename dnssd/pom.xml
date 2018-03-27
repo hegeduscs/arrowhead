@@ -12,10 +12,12 @@
   <artifactId>dnssd</artifactId>
 
   <dependencies>
+
     <dependency>
       <groupId>dnsjava</groupId>
       <artifactId>dnsjava</artifactId>
     </dependency>
+
   </dependencies>
 
 </project>

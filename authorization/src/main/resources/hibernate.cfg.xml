@@ -15,6 +15,23 @@
   <session-factory>
     <property name="show_sql">true</property>
     <property name="hibernate.hbm2ddl.auto">update</property>
+
+    <property name="connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
+    <property name="hikari.maximumPoolSize">10</property>
+    <property name="hikari.dataSource.cachePrepStmts">true</property>
+    <property name="hikari.dataSource.prepStmtCacheSize">250</property>
+    <property name="hikari.dataSource.prepStmtCacheSqlLimit">2048</property>
+    <property name="hikari.dataSource.useServerPrepStmts">true</property>
+    <property name="hikari.dataSource.useLocalSessionState">true</property>
+    <property name="hikari.dataSource.useLocalTransactionState">true</property>
+    <property name="hikari.dataSource.rewriteBatchedStatements">true</property>
+    <property name="hikari.dataSource.cacheResultSetMetadata">true</property>
+    <property name="hikari.dataSource.cacheServerConfiguration">true</property>
+    <property name="hikari.dataSource.elideSetAutoCommits">true</property>
+    <property name="hikari.dataSource.maintainTimeStats">false</property>
+    <property name="hikari.poolName">Authorization</property>
+    <property name="hikari.registerMbeans">true</property>
+
     <mapping class="eu.arrowhead.common.database.ArrowheadCloud"/>
     <mapping class="eu.arrowhead.common.database.ArrowheadSystem"/>
     <mapping class="eu.arrowhead.common.database.ArrowheadService"/>
