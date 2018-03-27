@@ -10,7 +10,7 @@ then
     rm nohup.out
 fi
 
-nohup java -jar arrowhead_core-M3-lightweight.jar -d -daemon -m secure &
+nohup java -jar arrowhead_core-M3-lightweight.jar -d -daemon -tls &
 sleep 20s
 
 echo Arrowhead is running... Check nohup.out to make sure exceptions did not occur!
