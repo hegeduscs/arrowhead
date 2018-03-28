@@ -86,9 +86,9 @@ public class ArrowheadMain {
           final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8441, "", true, true);
           final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8443, "", true, true);
 
-          gkServer = startServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
-          orchServer = startServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
-          srServer = startServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
+          gkServer = startSecureServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
+          orchServer = startSecureServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
+          srServer = startSecureServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
       }
     }
     if (srServer == null) {
