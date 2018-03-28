@@ -100,9 +100,10 @@ class TokenGenerationService {
       }
 
       // There is an upper limit for the size of the token info, skip providers which exceeds this limit
-      String json = Utility.gson.toJson(rawTokenInfo);
+      String json = Utility.toPrettyJson(null, rawTokenInfo);
       System.out.println("Raw token info: ");
       System.out.println(json);
+      //noinspection ConstantConditions
       if (json.length() > 244) {
         tokens.add(null);
         log.error("ArrowheadToken exceeded the size limit. Skipped provider.");
