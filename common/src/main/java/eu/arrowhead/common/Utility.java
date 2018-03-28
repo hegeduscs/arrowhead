@@ -9,11 +9,7 @@
 
 package eu.arrowhead.common;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -72,8 +68,8 @@ public final class Utility {
   public static final String GW_PROVIDER_SERVICE = "ConnectToProvider";
   public static final String GW_SESSION_MGMT = "SessionManagement";
   public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
-  public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+  private static final ObjectMapper mapper = new ObjectMapper();
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final Logger log = Logger.getLogger(Utility.class.getName());
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
@@ -334,25 +330,32 @@ public final class Utility {
   }
 
   public static String toPrettyJson(String jsonString, Object obj) {
-    if (jsonString != null) {
-      jsonString = jsonString.trim();
-      JsonParser parser = new JsonParser();
-      if (jsonString.startsWith("{")) {
-        JsonObject json = parser.parse(jsonString).getAsJsonObject();
-        return gson.toJson(json);
-      } else {
-        JsonArray json = parser.parse(jsonString).getAsJsonArray();
-        return gson.toJson(json);
+    try {
+      if (jsonString != null) {
+        jsonString = jsonString.trim();
+        if (jsonString.startsWith("{")) {
+          Object tempObj = mapper.readValue(jsonString, Object.class);
+          return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tempObj);
+        } else {
+          Object[] tempObj = mapper.readValue(jsonString, Object[].class);
+          return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tempObj);
+        }
       }
-    }
-    if (obj != null) {
-      return gson.toJson(obj);
+      if (obj != null) {
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+      }
+    } catch (IOException e) {
+      throw new ArrowheadException("Jackson library threw exception during JSON serialization!", e);
     }
     return null;
   }
 
   public static <T> T fromJson(String json, Class<T> parsedClass) {
-    return gson.fromJson(json, parsedClass);
+    try {
+      return mapper.readValue(json, parsedClass);
+    } catch (IOException e) {
+      throw new ArrowheadException("Jackson library threw exception during JSON parsing!", e);
+    }
   }
 
   public static String createSD(String baseSD, boolean isSecure) {
