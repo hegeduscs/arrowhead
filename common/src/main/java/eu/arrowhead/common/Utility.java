@@ -10,6 +10,7 @@
 package eu.arrowhead.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -76,6 +77,10 @@ public final class Utility {
     // Decide whether to allow the connection...
     return true;
   };
+
+  static {
+    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+  }
 
   private Utility() throws AssertionError {
     throw new AssertionError("Arrowhead Common:Utility is a non-instantiable class");
