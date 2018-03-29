@@ -23,8 +23,16 @@ address=0.0.0.0
 insecure_port=8442
 secure_port=8443
 
-# scheduled ping for remove unaccessible services
-ping_timeout=10000
+# Ping providers background task parameters to remove offline ArrowheadSystems from the Service Registry
+# use this feature or not
 ping_scheduled=false
-# interval in minutes
+# timeout in milliseconds
+ping_timeout=10000
+# how frequently should the ping happen, in minutes
 ping_interval=60
+
+# Remove expired services background task parameters (where the TTL parameter is 0 or less)
+# use this feature or not
+ttl_scheduled=false
+# how frequently the database should be checked for expired services, in minutes
+ttl_interval=10
