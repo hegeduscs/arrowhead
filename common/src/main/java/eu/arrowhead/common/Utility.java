@@ -209,7 +209,7 @@ public final class Utility {
           throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case GENERIC:
           throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
-        case JSON_MAPPING:
+        case JSON_PROCESSING:
           throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case UNAVAILABLE:
           throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
@@ -350,7 +350,8 @@ public final class Utility {
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
       }
     } catch (IOException e) {
-      throw new ArrowheadException("Jackson library threw exception during JSON serialization!", e);
+      throw new ArrowheadException(
+          "Jackson library threw IOException during JSON serialization! Wrapping it in RuntimeException. Exception message: " + e.getMessage(), e);
     }
     return null;
   }

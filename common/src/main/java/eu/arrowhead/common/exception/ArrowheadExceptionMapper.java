@@ -31,9 +31,6 @@ public class ArrowheadExceptionMapper implements ExceptionMapper<ArrowheadExcept
     String origin = (ex.getOrigin() == null && requestContext.get() != null) ? requestContext.get().getAbsolutePath().toString() : ex.getOrigin();
 
     ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), errorCode, ex.getExceptionType(), origin);
-    if (errorCode < 100 | errorCode > 599) {
-      errorCode = 500;
-    }
     return Response.status(errorCode).entity(errorMessage).header("Content-type", "application/json").build();
   }
 
