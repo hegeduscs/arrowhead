@@ -9,6 +9,7 @@
 
 package eu.arrowhead.core.gateway;
 
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -253,6 +254,7 @@ public class GatewayMain {
       server.shutdownNow();
       useSRService(false);
     }
+    DatabaseManager.closeSessionFactory();
     System.out.println("Gateway Server stopped");
     System.exit(0);
   }

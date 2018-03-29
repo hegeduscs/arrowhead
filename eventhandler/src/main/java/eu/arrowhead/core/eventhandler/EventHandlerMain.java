@@ -95,8 +95,7 @@ public class EventHandlerMain {
       useSRService(true);
     }
 
-    //This is here to initialize the database connection before the REST resources are initiated
-    @SuppressWarnings("unused") DatabaseManager dm = DatabaseManager.getInstance();
+    DatabaseManager.init();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -201,6 +200,7 @@ public class EventHandlerMain {
       server.shutdownNow();
       useSRService(false);
     }
+    DatabaseManager.closeSessionFactory();
     System.out.println("Event Handler Server stopped");
     System.exit(0);
   }

@@ -76,8 +76,7 @@ public class QoSMain {
       server = startServer();
     }
 
-    //This is here to initialize the database connection before the REST resources are initiated
-    @SuppressWarnings("unused") DatabaseManager dm = DatabaseManager.getInstance();
+    DatabaseManager.init();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -174,6 +173,7 @@ public class QoSMain {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
     }
+    DatabaseManager.closeSessionFactory();
     System.out.println("QoS Server stopped");
     System.exit(0);
   }

@@ -9,6 +9,7 @@
 
 package eu.arrowhead.core.choreographer;
 
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.misc.TypeSafeProperties;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +40,7 @@ public class ChoreographerMain {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
     }
+    DatabaseManager.closeSessionFactory();
     System.out.println("Choreographer Server stopped");
     System.exit(0);
   }

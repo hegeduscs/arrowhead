@@ -102,8 +102,7 @@ public class ServiceRegistryMain {
       timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
 
-    //This is here to initialize the database connection before the REST resources are initiated
-    DatabaseManager dm = DatabaseManager.getInstance();
+    DatabaseManager.init();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -204,6 +203,7 @@ public class ServiceRegistryMain {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();
     }
+    DatabaseManager.closeSessionFactory();
     System.out.println("Service Registry Server stopped");
     System.exit(0);
   }

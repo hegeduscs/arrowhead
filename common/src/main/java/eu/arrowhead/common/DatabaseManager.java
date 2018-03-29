@@ -66,11 +66,24 @@ public class DatabaseManager {
   private DatabaseManager() {
   }
 
+  public static void init() {
+    if (instance == null) {
+      instance = new DatabaseManager();
+    }
+  }
+
   public static DatabaseManager getInstance() {
     if (instance == null) {
       instance = new DatabaseManager();
     }
     return instance;
+  }
+
+  public static void closeSessionFactory() {
+    if (sessionFactory != null) {
+      sessionFactory.close();
+    }
+    instance = null;
   }
 
   private synchronized static TypeSafeProperties getProp() {

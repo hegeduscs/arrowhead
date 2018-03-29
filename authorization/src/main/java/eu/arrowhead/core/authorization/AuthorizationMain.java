@@ -107,8 +107,7 @@ public class AuthorizationMain {
     privateKey = SecurityUtils.getPrivateKey(keyStore, getProp().getProperty("keystorepass"));
     //System.out.println("private key: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
 
-    //This is here to initialize the database connection before the REST resources are initiated
-    @SuppressWarnings("unused") DatabaseManager dm = DatabaseManager.getInstance();
+    DatabaseManager.init();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -251,6 +250,7 @@ public class AuthorizationMain {
       server.shutdownNow();
       useSRService(false);
     }
+    DatabaseManager.closeSessionFactory();
     System.out.println("Authorization Server stopped");
     System.exit(0);
   }
