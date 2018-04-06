@@ -15,7 +15,6 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.messages.ConnectToConsumerResponse;
 import eu.arrowhead.common.messages.GSDAnswer;
@@ -30,8 +29,11 @@ import eu.arrowhead.common.messages.ICNResult;
 import eu.arrowhead.common.messages.OrchestrationForm;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -69,11 +71,7 @@ public class GatekeeperOutboundResource {
   @PUT
   @Path("init_gsd")
   public Response GSDRequest(GSDRequestForm requestForm) {
-    if (!requestForm.isValid()) {
-      log.error("GSDRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode());
-    }
-
+    requestForm.missingFields(true, null);
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
     GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
 
@@ -116,7 +114,7 @@ public class GatekeeperOutboundResource {
           throw new ArrowheadException("GSD failed for all potential provider clouds! The last exception message: " + ex.getMessage(),
                                        ex.getErrorCode());
         } else {
-          System.out.println("GSD request failed at: " + uri);
+          log.info("GSD request failed at: " + uri + " (moving to next cloud)");
           ex.printStackTrace();
           System.out.println("Continuing the GSD with the next cloud!");
           continue;
@@ -124,7 +122,21 @@ public class GatekeeperOutboundResource {
       } finally {
         i++;
       }
-      gsdAnswerList.add(response.readEntity(GSDAnswer.class));
+
+      //Response validation
+      Set<String> mandatoryFields = new HashSet<>(Arrays.asList("address", "port", "gatekeeperServiceURI"));
+      if (GatekeeperMain.IS_SECURE) {
+        mandatoryFields.add("authenticationInfo");
+      }
+      GSDAnswer answer = response.readEntity(GSDAnswer.class);
+      mandatoryFields = answer.missingFields(false, mandatoryFields);
+
+      if (!mandatoryFields.isEmpty()) {
+        log.info("GSDAnswer from " + uri + " missing fields:" + String.join(", ", mandatoryFields) + " (skipping it from GSDResult)");
+        continue;
+      }
+      //All is good, add the answer to the result list
+      gsdAnswerList.add(answer);
     }
 
     // Sending back the results. The orchestrator will validate the results (result list might be empty) and decide how to proceed.
@@ -142,11 +154,7 @@ public class GatekeeperOutboundResource {
   @PUT
   @Path("init_icn")
   public Response ICNRequest(ICNRequestForm requestForm) {
-    if (!requestForm.isValid()) {
-      log.error("ICNRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode());
-    }
-
+    requestForm.missingFields(true, new HashSet<>(Arrays.asList("ArrowheadCloud:address", "ArrowheadCloud:port", "gatekeeperServiceURI")));
     requestForm.getNegotiationFlags().put("useGateway", GatekeeperMain.USE_GATEWAY);
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),

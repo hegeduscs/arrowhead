@@ -13,7 +13,6 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import java.util.HashMap;
@@ -133,10 +132,7 @@ public class ServiceRegistryApi {
   @PUT
   @Path("update")
   public Response updateServiceRegistryEntry(ServiceRegistryEntry entry) {
-    if (!entry.isValid()) {
-      log.info("updateServiceRegistryEntry throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).");
-    }
+    entry.missingFields(true, false, null);
     entry.toDatabase();
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());

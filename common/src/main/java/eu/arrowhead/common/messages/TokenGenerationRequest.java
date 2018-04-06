@@ -9,14 +9,21 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class TokenGenerationRequest {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class TokenGenerationRequest extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("service", "consumer", "providers"));
 
   private ArrowheadSystem consumer;
   private ArrowheadCloud consumerCloud;
@@ -76,16 +83,31 @@ public class TokenGenerationRequest {
     this.duration = duration;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    boolean areProvidersValid = true;
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+
+    if (consumer != null) {
+      mandatoryFields = consumer.missingFields(false, mandatoryFields);
+    }
+    if (service != null) {
+      mandatoryFields = service.missingFields(false, false, mandatoryFields);
+    }
     for (ArrowheadSystem provider : providers) {
-      if (!provider.isValidForDatabase()) {
-        areProvidersValid = false;
+      Set<String> fields = provider.missingFields(false, null);
+      if (!fields.isEmpty()) {
+        mandatoryFields.add("Provider is missing mandatory field(s): " + String.join(", ", fields));
       }
     }
 
-    return !providers.isEmpty() && areProvidersValid && consumer != null && consumer.isValidForDatabase() && service != null && service.isValid();
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

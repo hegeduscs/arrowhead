@@ -10,9 +10,10 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.common.messages.ServiceRequestForm;
+import java.util.Collections;
+import java.util.HashSet;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -54,10 +55,7 @@ public class OrchestratorResource {
    */
   @POST
   public Response orchestrationProcess(ServiceRequestForm srf) {
-    if (!srf.isValid()) {
-      log.error("orchestrationProcess BadPayloadException");
-      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.", Status.BAD_REQUEST.getStatusCode());
-    }
+    srf.missingFields(true, new HashSet<>(Collections.singleton("interfaces")));
 
     OrchestrationResponse orchResponse;
     if (srf.getOrchestrationFlags().get("externalServiceRequest")) {

@@ -27,6 +27,7 @@
     <dnsjava.version>2.1.0</dnsjava.version>
     <hibernate.version>5.1.0.Final</hibernate.version>
     <hikari.cp.version>2.6.1</hikari.cp.version>
+    <jackson.version>2.9.5</jackson.version>
     <javax.servlet.version>3.1.0</javax.servlet.version>
     <jersey.version>2.23.1</jersey.version>
     <log4j.version>1.2.17</log4j.version>
@@ -37,6 +38,12 @@
 
   <dependencyManagement>
     <dependencies>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+        <artifactId>jackson-jaxrs-json-provider</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>com.zaxxer</groupId>

@@ -9,8 +9,10 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.exception.BadPayloadException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ServiceQueryForm {
 
@@ -66,9 +68,22 @@ public class ServiceQueryForm {
     this.version = version;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return service != null && service.isValid();
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>();
+    }
+    if (service == null) {
+      mandatoryFields.add("service");
+    } else {
+      if (metadataSearch) {
+        mandatoryFields.add("serviceMetadata");
+      }
+      mandatoryFields = service.missingFields(false, false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

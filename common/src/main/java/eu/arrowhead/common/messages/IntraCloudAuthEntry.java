@@ -9,12 +9,19 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-public class IntraCloudAuthEntry {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class IntraCloudAuthEntry extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("serviceList", "consumer", "providerList"));
 
   private ArrowheadSystem consumer;
   private ArrayList<ArrowheadSystem> providerList = new ArrayList<>();
@@ -53,22 +60,36 @@ public class IntraCloudAuthEntry {
     this.serviceList = serviceList;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    if (consumer == null || serviceList.isEmpty() || providerList.isEmpty() || !consumer.isValidForDatabase()) {
-      return false;
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
     }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+
+    if (consumer != null) {
+      mandatoryFields = consumer.missingFields(false, mandatoryFields);
+    }
+
     for (ArrowheadSystem provider : providerList) {
-      if (!provider.isValidForDatabase()) {
-        return false;
+      Set<String> fields = provider.missingFields(false, null);
+      if (!fields.isEmpty()) {
+        mandatoryFields.add("Provider is missing mandatory field(s): " + String.join(", ", fields));
       }
     }
+
     for (ArrowheadService service : serviceList) {
-      if (!service.isValidForDatabase()) {
-        return false;
+      Set<String> fields = service.missingFields(false, false, null);
+      if (!fields.isEmpty()) {
+        mandatoryFields.add("Service is missing mandatory field(s): " + String.join(", ", fields));
       }
     }
-    return true;
+
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

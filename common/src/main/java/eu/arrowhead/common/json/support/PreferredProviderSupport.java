@@ -9,7 +9,6 @@
 
 package eu.arrowhead.common.json.support;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.messages.PreferredProvider;
 
@@ -45,21 +44,6 @@ public class PreferredProviderSupport {
 
   public void setProviderCloud(ArrowheadCloud providerCloud) {
     this.providerCloud = providerCloud;
-  }
-
-  @JsonIgnore
-  public boolean isValid() {
-    return isLocal() || isGlobal();
-  }
-
-  @JsonIgnore
-  public boolean isLocal() {
-    return providerSystem != null && providerSystem.isValid() && providerCloud == null;
-  }
-
-  @JsonIgnore
-  public boolean isGlobal() {
-    return providerCloud != null && providerCloud.isValid();
   }
 
 }

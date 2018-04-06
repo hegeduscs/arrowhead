@@ -47,7 +47,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class GatewayMain {
 
   public static boolean DEBUG_MODE;
-  public static SSLContext clientContext;
+
+  static SSLContext clientContext;
 
   private static String BASE_URI;
   private static String SR_BASE_URI;
@@ -117,7 +118,7 @@ public class GatewayMain {
 
   private static HttpServer startServer() throws IOException {
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(GatewayApi.class, GatewayResource.class);
+    config.registerClasses(GatewayResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.gateway.filter");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
@@ -136,7 +137,7 @@ public class GatewayMain {
 
   private static HttpServer startSecureServer() throws IOException {
     final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(GatewayApi.class, GatewayResource.class);
+    config.registerClasses(GatewayResource.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.gateway.filter");
 
     String keystorePath = getProp().getProperty("keystore");

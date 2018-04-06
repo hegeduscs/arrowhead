@@ -9,8 +9,6 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class ICNResult {
 
   private OrchestrationResponse orchResponse;
@@ -30,7 +28,6 @@ public class ICNResult {
     this.orchResponse = orchResponse;
   }
 
-  @JsonIgnore
   public boolean isValid() {
     return orchResponse != null && orchResponse.getResponse() != null && !orchResponse.getResponse().isEmpty();
   }

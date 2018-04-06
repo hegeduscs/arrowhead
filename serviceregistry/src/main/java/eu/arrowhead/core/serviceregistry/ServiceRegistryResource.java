@@ -2,12 +2,12 @@ package eu.arrowhead.core.serviceregistry;
 
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
-import eu.arrowhead.common.security.SecurityUtils;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -42,22 +42,7 @@ public class ServiceRegistryResource {
     log.debug(
         "SR reg service: " + entry.getProvidedService().getServiceDefinition() + " provider: " + entry.getProvider().getSystemName() + " serviceURI: "
             + entry.getServiceURI());
-
-    if (!entry.isValid()) {
-      log.info("publishEntriesToRegistry throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service registration form has missing/incomplete mandatory fields.");
-    }
-
-    if (requestContext.getSecurityContext().isSecure()) {
-      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
-      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
-      String[] clientFields = clientCN.split("\\.", 2);
-      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
-        log.error("Provider system name and cert common name do not match! Service registering denied.");
-        throw new AuthException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-                                Status.UNAUTHORIZED.getStatusCode());
-      }
-    }
+    entry.missingFields(true, true, new HashSet<>(Arrays.asList("interfaces", "address")));
 
     try {
       if (ServiceRegistry.register(entry)) {
@@ -76,22 +61,7 @@ public class ServiceRegistryResource {
   public Response removeEntriesFromRegistry(ServiceRegistryEntry entry, @Context ContainerRequestContext requestContext) {
     log.debug("SR remove service: " + entry.getProvidedService().getServiceDefinition() + " provider: " + entry.getProvider().getSystemName()
                   + " serviceURI: " + entry.getServiceURI());
-
-    if (!entry.isValid()) {
-      log.info("removeEntriesFromRegistry throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: service de-registration form has missing/incomplete mandatory fields.");
-    }
-
-    if (requestContext.getSecurityContext().isSecure()) {
-      String subjectName = requestContext.getSecurityContext().getUserPrincipal().getName();
-      String clientCN = SecurityUtils.getCertCNFromSubject(subjectName);
-      String[] clientFields = clientCN.split("\\.", 2);
-      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
-        log.error("Provider system name and cert common name do not match! Service registering denied.");
-        throw new AuthException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-                                Status.UNAUTHORIZED.getStatusCode());
-      }
-    }
+    entry.missingFields(true, true, null);
 
     if (ServiceRegistry.unRegister(entry)) {
       return Response.status(Response.Status.OK).build();
@@ -148,10 +118,7 @@ public class ServiceRegistryResource {
   @PUT
   @Path("query")
   public Response getServiceQueryForm(ServiceQueryForm queryForm) {
-    if (queryForm == null || !queryForm.isValid()) {
-      log.info("getServiceQueryForm throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: the request form has missing/incomplete mandatory fields.");
-    }
+    queryForm.missingFields(true, null);
 
     ServiceQueryResult sqr = ServiceRegistry.provideServices(queryForm);
     if (!sqr.getServiceQueryData().isEmpty()) {

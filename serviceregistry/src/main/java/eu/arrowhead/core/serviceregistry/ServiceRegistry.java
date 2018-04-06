@@ -38,7 +38,7 @@ class ServiceRegistry {
 
       //ArrowheadService is encoded in the service type field, interface (IDD) as the protocol
       String serviceType = "_ahf-" + serviceDefinition + "_" + interf;
-      if (entry.isUDP()) {
+      if (entry.isUdp()) {
         serviceType += ("._udp");
       } else {
         serviceType += ("._tcp");
@@ -87,7 +87,7 @@ class ServiceRegistry {
     for (String interf : entry.getProvidedService().getInterfaces()) {
       String serviceType = "_ahf-" + serviceDefinition + "_" + interf;
 
-      if (entry.isUDP()) {
+      if (entry.isUdp()) {
         serviceType += ("._udp");
       } else {
         serviceType += ("._tcp");

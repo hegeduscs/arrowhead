@@ -130,6 +130,7 @@ public class AuthorizationMain {
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(AuthorizationResource.class, AuthorizationApi.class);
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.authorization.filter");
+    //config.addProperties(Collections.singletonMap(CommonProperties.FEATURE_AUTO_DISCOVERY_DISABLE, true));
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
     try {

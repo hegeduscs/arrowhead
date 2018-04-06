@@ -10,7 +10,6 @@
 package eu.arrowhead.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -24,6 +23,7 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.common.json.JacksonJsonProviderAtRest;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import java.io.BufferedReader;
@@ -70,17 +70,13 @@ public final class Utility {
   public static final String GW_SESSION_MGMT = "SessionManagement";
   public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
 
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final ObjectMapper mapper = JacksonJsonProviderAtRest.getMapper();
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final Logger log = Logger.getLogger(Utility.class.getName());
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
     // Decide whether to allow the connection...
     return true;
   };
-
-  static {
-    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-  }
 
   private Utility() throws AssertionError {
     throw new AssertionError("Arrowhead Common:Utility is a non-instantiable class");
@@ -97,10 +93,14 @@ public final class Utility {
     SR_QUERY_URI = UriBuilder.fromUri(uri).path("query").build().toString();
   }
 
-  public static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {
+  public static <T> Response sendRequest(String uri, String method, T payload, SSLContext givenContext) {
     log.info("Sending " + method + " request to: " + uri);
 
     boolean isSecure = false;
+    if (uri == null) {
+      log.error("sendRequest received null uri");
+      throw new NullPointerException("send (HTTP) request method received null URL");
+    }
     if (uri.startsWith("https")) {
       isSecure = true;
     }
@@ -111,10 +111,9 @@ public final class Utility {
 
     Client client;
     if (isSecure) {
-      if (context != null) {
-        client = ClientBuilder.newBuilder().sslContext(context).withConfig(configuration).hostnameVerifier(allHostsValid).build();
-      } else if (Utility.sslContext != null) {
-        client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
+      SSLContext usedContext = givenContext != null ? givenContext : sslContext;
+      if (usedContext != null) {
+        client = ClientBuilder.newBuilder().sslContext(usedContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
       } else {
         log.error("sendRequest() method throws AuthException");
         throw new AuthException(
@@ -124,6 +123,7 @@ public final class Utility {
     } else {
       client = ClientBuilder.newClient(configuration);
     }
+    client.register(JacksonJsonProviderAtRest.class);
 
     Builder request = client.target(UriBuilder.fromUri(uri).build()).request().header("Content-type", "application/json");
     Response response; // will not be null after the switch-case
@@ -340,14 +340,14 @@ public final class Utility {
         jsonString = jsonString.trim();
         if (jsonString.startsWith("{")) {
           Object tempObj = mapper.readValue(jsonString, Object.class);
-          return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tempObj);
+          return mapper.writeValueAsString(tempObj);
         } else {
           Object[] tempObj = mapper.readValue(jsonString, Object[].class);
-          return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tempObj);
+          return mapper.writeValueAsString(tempObj);
         }
       }
       if (obj != null) {
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        return mapper.writeValueAsString(obj);
       }
     } catch (IOException e) {
       throw new ArrowheadException(

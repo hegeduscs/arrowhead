@@ -48,8 +48,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class GatekeeperMain {
 
   public static boolean DEBUG_MODE;
-  public static SSLContext outboundClientContext;
-  public static SSLContext outboundServerContext;
+  public static boolean IS_SECURE;
 
   static String ORCHESTRATOR_URI;
   static String SERVICE_REGISTRY_URI;
@@ -58,6 +57,8 @@ public class GatekeeperMain {
   static String[] GATEWAY_PROVIDER_URI;
   static boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
   static final int timeout = getProp().getIntProperty("timeout", 30000);
+  static SSLContext outboundClientContext;
+  static SSLContext outboundServerContext;
 
   private static String INBOUND_BASE_URI;
   private static String OUTBOUND_BASE_URI;
@@ -111,6 +112,7 @@ public class GatekeeperMain {
           inboundServer = startSecureServer(INBOUND_BASE_URI, true);
           outboundServer = startSecureServer(OUTBOUND_BASE_URI, false);
           useSRService(true);
+          IS_SECURE = true;
       }
     }
     if (inboundServer == null) {

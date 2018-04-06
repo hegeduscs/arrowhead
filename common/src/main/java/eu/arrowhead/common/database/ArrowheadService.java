@@ -9,12 +9,17 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.json.support.ArrowheadServiceSupport;
+import eu.arrowhead.common.messages.ArrowheadBase;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -27,7 +32,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -35,8 +39,12 @@ import org.hibernate.annotations.LazyCollectionOption;
  * Entity class for storing Arrowhead Services in the database. The "service_definition" column must be unique.
  */
 @Entity
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
 @Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_definition"})})
-public class ArrowheadService {
+public class ArrowheadService extends ArrowheadBase {
+
+  @Transient
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("serviceDefinition"));
 
   @Column(name = "id")
   @Id
@@ -69,7 +77,6 @@ public class ArrowheadService {
     this.serviceMetadata = service.getServiceMetadata();
   }
 
-  @XmlTransient
   public int getId() {
     return id;
   }
@@ -107,26 +114,27 @@ public class ArrowheadService {
     this.serviceMetadata = metaData;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return (serviceDefinition != null && !interfaces.isEmpty());
-  }
+  public Set<String> missingFields(boolean throwException, boolean forDNSSD, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
 
-  @JsonIgnore
-  public boolean isValidForDatabase() {
-    return serviceDefinition != null;
-  }
-
-  @JsonIgnore
-  public boolean isValidForDNSSD() {
-    boolean areInterfacesClean = true;
-    for (String interf : interfaces) {
-      if (interf.contains("_")) {
-        areInterfacesClean = false;
+    if (forDNSSD) {
+      for (String interf : interfaces) {
+        if (interf.contains("_")) {
+          mandatoryFields.add("Interfaces Can't Have Underscores!");
+        }
       }
     }
 
-    return (serviceDefinition != null && !interfaces.isEmpty() && !serviceDefinition.contains("_") && areInterfacesClean);
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+
+    return mandatoryFields;
   }
 
   @Override

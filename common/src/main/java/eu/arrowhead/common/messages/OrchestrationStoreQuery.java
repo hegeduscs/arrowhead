@@ -10,11 +10,18 @@
 package eu.arrowhead.common.messages;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.BadPayloadException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-public class OrchestrationStoreQuery {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class OrchestrationStoreQuery extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("requestedService", "requesterSystem"));
 
   private ArrowheadService requestedService;
   private ArrowheadSystem requesterSystem;
@@ -43,15 +50,23 @@ public class OrchestrationStoreQuery {
     this.requesterSystem = requesterSystem;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    if (requesterSystem == null && requestedService == null) {
-      return false;
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
     }
-    if (requestedService != null && !requestedService.isValid()) {
-      return false;
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+    if (requestedService != null) {
+      mandatoryFields = requestedService.missingFields(false, false, mandatoryFields);
     }
-    return requesterSystem == null || requesterSystem.isValid();
+    if (requesterSystem != null) {
+      mandatoryFields = requesterSystem.missingFields(false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

@@ -15,7 +15,6 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.InterCloudAuthorization;
 import eu.arrowhead.common.database.IntraCloudAuthorization;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.InterCloudAuthRequest;
@@ -68,11 +67,7 @@ public class AuthorizationResource {
   @PUT
   @Path("intracloud")
   public Response isSystemAuthorized(IntraCloudAuthRequest request) {
-    if (!request.isValid()) {
-      log.error("isSystemAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.",
-                                    Status.BAD_REQUEST.getStatusCode());
-    }
+    request.missingFields(true, null);
 
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
@@ -133,10 +128,7 @@ public class AuthorizationResource {
   @PUT
   @Path("intercloud")
   public Response isCloudAuthorized(InterCloudAuthRequest request) {
-    if (!request.isValid()) {
-      log.error("isCloudAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete cloud or service in the request payload.", Status.BAD_REQUEST.getStatusCode());
-    }
+    request.missingFields(true, null);
 
     restrictionMap.put("operator", request.getCloud().getOperator());
     restrictionMap.put("cloudName", request.getCloud().getCloudName());
@@ -178,10 +170,7 @@ public class AuthorizationResource {
   @PUT
   @Path("token")
   public Response tokenGeneration(TokenGenerationRequest request) {
-    if (!request.isValid()) {
-      log.error("tokenGeneration BadPayloadException");
-      throw new BadPayloadException("TokenGenerationRequest has missing/incomplete fields.", Status.BAD_REQUEST.getStatusCode());
-    }
+    request.missingFields(true, null);
 
     // Get the tokens from the service class (can throw run time exceptions)
     List<ArrowheadToken> tokens = TokenGenerationService.generateTokens(request);

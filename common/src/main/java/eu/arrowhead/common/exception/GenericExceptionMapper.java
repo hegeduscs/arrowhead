@@ -30,7 +30,6 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
     ex.printStackTrace();
     int errorCode = 500; //Internal Server Error
     String origin = requestContext.get() != null ? requestContext.get().getAbsolutePath().toString() : "unknown";
-    responseContext.get().getStatusInfo().getFamily();
     if (responseContext.get() != null && responseContext.get().getStatusInfo().getFamily() != Family.OTHER) {
       errorCode = responseContext.get().getStatus();
     }

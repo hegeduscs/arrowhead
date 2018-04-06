@@ -34,7 +34,7 @@ response:
       "port": 8454,
       "serviceURI": "temperature",
       "version": 1,
-      "UDP": false,
+      "udp": false,
       "ttl": 0,
       "metadata": "unit=celsius",
       "endOfValidity": "Feb 14, 2018 4:19:31 PM"
@@ -80,7 +80,7 @@ response:
   "port": 8454,
   "serviceURI": "temperature",
   "version": 1,
-  "UDP": false,
+  "udp": false,
   "ttl": 0,
   "metadata": "unit=celsius",
   "endOfValidity": "Feb 14, 2018 4:19:31 PM"
@@ -124,7 +124,7 @@ response (200):
   "port": 8454,
   "serviceURI": "temperature",
   "version": 1,
-  "UDP": false,
+  "udp": false,
   "ttl": 0,
   "metadata": "unit=celsius",
   "endOfValidity": "Feb 14, 2018 4:19:31 PM"

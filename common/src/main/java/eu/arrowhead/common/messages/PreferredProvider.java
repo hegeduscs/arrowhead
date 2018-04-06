@@ -9,10 +9,13 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.json.support.PreferredProviderSupport;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PreferredProvider {
 
@@ -48,23 +51,28 @@ public class PreferredProvider {
     this.providerCloud = providerCloud;
   }
 
-  @JsonIgnore
   public boolean isValid() {
     return isLocal() || isGlobal();
   }
 
-  @JsonIgnore
   public boolean isLocal() {
-    return providerSystem != null && providerSystem.isValid() && providerCloud == null;
+    if (providerSystem != null) {
+      providerSystem.missingFields(true, new HashSet<>(Collections.singleton("address")));
+    }
+    return providerCloud == null;
   }
 
-  @JsonIgnore
   public boolean isGlobal() {
-    return providerCloud != null && providerCloud.isValid();
+    if (providerCloud != null) {
+      Set<String> mandatoryFields = new HashSet<>(Arrays.asList("address", "gatekeeperServiceURI"));
+      providerCloud.missingFields(true, mandatoryFields);
+    }
+    return true;
   }
 
   @Override
   public String toString() {
     return "PreferredProvider{" + "providerSystem=" + providerSystem + ", providerCloud=" + providerCloud + '}';
   }
+
 }

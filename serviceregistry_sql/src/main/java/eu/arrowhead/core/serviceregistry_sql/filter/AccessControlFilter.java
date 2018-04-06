@@ -67,7 +67,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
-      log.info("Client cert does not have 5 parts, so the access will be denied.");
+      log.info("Client cert does not have 5 parts, so the access will be denied. Make sure the field values do not contain dots!");
       return false;
     }
 
@@ -79,7 +79,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else if (requestTarget.endsWith("register") || requestTarget.endsWith("remove")) {
 
-      // All requests from the local cloud are allowed, so omit the first part of the common names (systemName)
+      // All requests from the local cloud are allowed
       ServiceRegistryEntry entry = Utility.fromJson(requestJson, ServiceRegistryEntry.class);
       String[] clientFields = clientCN.split("\\.", 2);
 

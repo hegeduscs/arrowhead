@@ -9,13 +9,15 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.messages.ArrowheadBase;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,9 +32,12 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@JsonIgnoreProperties({"id", "port", "metadata", "endOfValidity"})
+@JsonIgnoreProperties({"alwaysMandatoryFields", "id", "port", "metadata", "endOfValidity"})
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
-public class ServiceRegistryEntry {
+public class ServiceRegistryEntry extends ArrowheadBase {
+
+  @Transient
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("providedService", "provider"));
 
   @Column(name = "id")
   @Id
@@ -59,7 +64,7 @@ public class ServiceRegistryEntry {
   private Integer version = 1;
 
   @Column(name = "udp")
-  private boolean UDP = false;
+  private boolean udp = false;
 
   //Time to live in seconds - endOfValidity is calculated from this upon registering and TTL is calculated from endOfValidity when queried
   @Transient
@@ -95,13 +100,13 @@ public class ServiceRegistryEntry {
   }
 
   public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, Integer version,
-                              boolean UDP, int ttl, String metadata, LocalDateTime endOfValidity) {
+                              boolean udp, int ttl, String metadata, LocalDateTime endOfValidity) {
     this.providedService = providedService;
     this.provider = provider;
     this.port = port;
     this.serviceURI = serviceURI;
     this.version = version;
-    this.UDP = UDP;
+    this.udp = udp;
     this.ttl = ttl;
     this.metadata = metadata;
     this.endOfValidity = endOfValidity;
@@ -155,34 +160,19 @@ public class ServiceRegistryEntry {
     this.version = version;
   }
 
-  @JsonGetter("UDP")
-  public boolean isUDP() {
-    return UDP;
+  public boolean isUdp() {
+    return udp;
   }
 
-  //We have 2 Setters, so Jackson can parse both upper- and lowercase forms without a problem
-  @JsonSetter("UDP")
-  public void setUDP(boolean UDP) {
-    this.UDP = UDP;
+  public void setUdp(boolean udp) {
+    this.udp = udp;
   }
 
-  @JsonSetter("udp")
-  private void setUdp(boolean UDP) {
-    this.UDP = UDP;
-  }
-
-  @JsonGetter("ttl")
   public int getTtl() {
     return ttl;
   }
 
-  @JsonSetter("ttl")
   public void setTtl(int ttl) {
-    this.ttl = ttl;
-  }
-
-  @JsonSetter("TTL")
-  private void setTTL(int ttl) {
     this.ttl = ttl;
   }
 
@@ -202,17 +192,25 @@ public class ServiceRegistryEntry {
     this.endOfValidity = endOfValidity;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return provider != null && provider.isValid() && providedService != null && providedService.isValid();
+  public Set<String> missingFields(boolean throwException, boolean forDNSSD, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+    if (providedService != null) {
+      mandatoryFields = providedService.missingFields(false, forDNSSD, mandatoryFields);
+    }
+    if (provider != null) {
+      mandatoryFields = provider.missingFields(false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
-  @Override
-  public String toString() {
-    return providedService.getServiceDefinition() + ":" + provider.getSystemName();
-  }
-
-  @JsonIgnore
   public void toDatabase() {
     if (providedService.getServiceMetadata() != null && !providedService.getServiceMetadata().isEmpty()) {
       StringBuilder sb = new StringBuilder();
@@ -229,7 +227,6 @@ public class ServiceRegistryEntry {
     endOfValidity = ttl > 0 ? LocalDateTime.now().plusSeconds(ttl) : null;
   }
 
-  @JsonIgnore
   public void fromDatabase() {
     ArrowheadService temp = providedService;
     providedService = new ArrowheadService();
@@ -258,6 +255,11 @@ public class ServiceRegistryEntry {
     } else {
       ttl = 0;
     }
+  }
+
+  @Override
+  public String toString() {
+    return provider.getSystemName() + ":" + providedService.getServiceDefinition();
   }
 
 }

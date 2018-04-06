@@ -13,10 +13,12 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -95,14 +97,13 @@ public class CommonApi {
 
     List<ArrowheadService> savedServices = new ArrayList<>();
     for (ArrowheadService service : serviceList) {
-      if (service.isValidForDatabase()) {
-        restrictionMap.clear();
-        restrictionMap.put("serviceDefinition", service.getServiceDefinition());
-        ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
-        if (retrievedService == null) {
-          dm.save(service);
-          savedServices.add(service);
-        }
+      service.missingFields(true, false, null);
+      restrictionMap.clear();
+      restrictionMap.put("serviceDefinition", service.getServiceDefinition());
+      ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
+      if (retrievedService == null) {
+        dm.save(service);
+        savedServices.add(service);
       }
     }
 
@@ -119,17 +120,12 @@ public class CommonApi {
   @PUT
   @Path("services")
   public Response updateService(ArrowheadService service) {
-
-    if (!service.isValidForDatabase()) {
-      log.info("updateService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing service definition in the entry payload.");
-    }
+    service.missingFields(true, false, null);
 
     restrictionMap.put("serviceDefinition", service.getServiceDefinition());
     ArrowheadService retrievedService = dm.get(ArrowheadService.class, restrictionMap);
     if (retrievedService != null) {
       retrievedService.setInterfaces(service.getInterfaces());
-      retrievedService.setServiceMetadata(service.getServiceMetadata());
       retrievedService = dm.merge(retrievedService);
       return Response.status(Status.ACCEPTED).entity(retrievedService).build();
     } else {
@@ -204,15 +200,14 @@ public class CommonApi {
 
     List<ArrowheadSystem> savedSystems = new ArrayList<>();
     for (ArrowheadSystem system : systemList) {
-      if (system.isValid()) {
-        restrictionMap.clear();
-        restrictionMap.put("systemName", system.getSystemName());
-        ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
-        restrictionMap.clear();
-        if (retrievedSystem == null) {
-          dm.save(system);
-          savedSystems.add(system);
-        }
+      system.missingFields(true, new HashSet<>(Collections.singleton("address")));
+      restrictionMap.clear();
+      restrictionMap.put("systemName", system.getSystemName());
+      ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
+      restrictionMap.clear();
+      if (retrievedSystem == null) {
+        dm.save(system);
+        savedSystems.add(system);
       }
     }
 
@@ -229,17 +224,12 @@ public class CommonApi {
   @PUT
   @Path("systems")
   public Response updateSystem(ArrowheadSystem system) {
-
-    if (!system.isValid()) {
-      log.info("updateSystem throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing system name or address in the entry payload.");
-    }
-
+    system.missingFields(true, new HashSet<>(Collections.singleton("address")));
     restrictionMap.put("systemName", system.getSystemName());
     ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
+
     if (retrievedSystem != null) {
       retrievedSystem.setAddress(system.getAddress());
-      retrievedSystem.setPort(system.getPort());
       retrievedSystem.setAuthenticationInfo(system.getAuthenticationInfo());
       retrievedSystem = dm.merge(retrievedSystem);
       return Response.status(Status.ACCEPTED).entity(retrievedSystem).build();
@@ -335,16 +325,15 @@ public class CommonApi {
 
     List<ArrowheadCloud> savedClouds = new ArrayList<>();
     for (ArrowheadCloud cloud : cloudList) {
-      if (cloud.isValid()) {
-        restrictionMap.clear();
-        restrictionMap.put("operator", cloud.getOperator());
-        restrictionMap.put("cloudName", cloud.getCloudName());
-        ArrowheadCloud retrievedCloud = dm.get(ArrowheadCloud.class, restrictionMap);
-        restrictionMap.clear();
-        if (retrievedCloud == null) {
-          dm.save(cloud);
-          savedClouds.add(cloud);
-        }
+      cloud.missingFields(true, new HashSet<>(Arrays.asList("address", "gatekeeperServiceURI")));
+      restrictionMap.clear();
+      restrictionMap.put("operator", cloud.getOperator());
+      restrictionMap.put("cloudName", cloud.getCloudName());
+      ArrowheadCloud retrievedCloud = dm.get(ArrowheadCloud.class, restrictionMap);
+      restrictionMap.clear();
+      if (retrievedCloud == null) {
+        dm.save(cloud);
+        savedClouds.add(cloud);
       }
     }
 
@@ -361,14 +350,10 @@ public class CommonApi {
   @PUT
   @Path("clouds")
   public Response updateCloud(ArrowheadCloud cloud) {
-
-    if (!cloud.isValid()) {
-      log.info("CommonApi:updateCloud throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing operator, cloudName, address or serviceURI in the entry payload.");
-    }
-
+    cloud.missingFields(true, new HashSet<>(Arrays.asList("address", "gatekeeperServiceURI")));
     restrictionMap.put("operator", cloud.getOperator());
     restrictionMap.put("cloudName", cloud.getCloudName());
+
     ArrowheadCloud retrievedCloud = dm.get(ArrowheadCloud.class, restrictionMap);
     if (retrievedCloud != null) {
       retrievedCloud.setAddress(cloud.getAddress());

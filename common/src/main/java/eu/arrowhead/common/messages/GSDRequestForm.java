@@ -9,11 +9,13 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GSDRequestForm {
 
@@ -44,9 +46,19 @@ public class GSDRequestForm {
     this.searchPerimeter = searchPerimeter;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return requestedService != null && requestedService.isValid();
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>();
+    }
+    if (requestedService == null) {
+      mandatoryFields.add("requestedService");
+    } else {
+      mandatoryFields = requestedService.missingFields(false, false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

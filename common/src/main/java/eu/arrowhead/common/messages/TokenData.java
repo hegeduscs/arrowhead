@@ -50,6 +50,4 @@ public class TokenData {
     this.signature = signature;
   }
 
-  //Because of Csaba :P
-
 }

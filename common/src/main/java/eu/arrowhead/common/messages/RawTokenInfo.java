@@ -42,9 +42,9 @@ public class RawTokenInfo {
     this.e = e;
   }
 
-
   @Override
   public String toString() {
     return "ClassPojo [s = " + s + ", c = " + c + ", e = " + e + "]";
   }
+
 }

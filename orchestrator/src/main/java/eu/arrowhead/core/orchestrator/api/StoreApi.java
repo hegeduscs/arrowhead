@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -122,12 +123,7 @@ public class StoreApi {
    */
   @PUT
   public Response getStoreEntries(OrchestrationStoreQuery query) {
-
-    if (!query.isValid()) {
-      log.info("getStoreEntries throws BadPayloadException.");
-      throw new BadPayloadException("Bad payload: mandatory field(s) of requesterSystem or requestedService is/are missing.");
-    }
-
+    query.missingFields(true, new HashSet<>(Collections.singleton("address")));
     List<OrchestrationStore> store;
     if (query.getRequestedService() == null) {
       store = StoreService.getDefaultStoreEntries(query.getRequesterSystem());
@@ -156,50 +152,43 @@ public class StoreApi {
 
     List<OrchestrationStore> store = new ArrayList<>();
     for (OrchestrationStore entry : storeEntries) {
-      if (entry.isValid()) {
-        restrictionMap.clear();
-        restrictionMap.put("systemName", entry.getConsumer().getSystemName());
-        ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
-        if (consumer == null) {
-          consumer = dm.save(entry.getConsumer());
-        }
-
-        restrictionMap.clear();
-        restrictionMap.put("serviceDefinition", entry.getService().getServiceDefinition());
-        ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
-        if (service == null) {
-          service = dm.save(entry.getService());
-        }
-
-        ArrowheadCloud providerCloud = null;
-        if (entry.getProviderCloud() != null && entry.getProviderCloud().isValid()) {
-          restrictionMap.clear();
-          restrictionMap.put("operator", entry.getProviderCloud().getOperator());
-          restrictionMap.put("cloudName", entry.getProviderCloud().getCloudName());
-          providerCloud = dm.get(ArrowheadCloud.class, restrictionMap);
-          if (providerCloud == null) {
-            providerCloud = dm.save(entry.getProviderCloud());
-          }
-        }
-
-        ArrowheadSystem providerSystem = null;
-        if (entry.getProviderSystem() != null && entry.getProviderSystem().isValid()) {
-          restrictionMap.clear();
-          restrictionMap.put("systemName", entry.getProviderSystem().getSystemName());
-          providerSystem = dm.get(ArrowheadSystem.class, restrictionMap);
-          if (providerSystem == null) {
-            providerSystem = dm.save(entry.getProviderSystem());
-          }
-        }
-
-        entry.setConsumer(consumer);
-        entry.setService(service);
-        entry.setProviderSystem(providerSystem);
-        entry.setProviderCloud(providerCloud);
-        entry.setLastUpdated(LocalDateTime.now());
-        dm.merge(entry);
-        store.add(entry);
+      entry.missingFields(true, new HashSet<>(Collections.singleton("address")));
+      restrictionMap.clear();
+      restrictionMap.put("systemName", entry.getConsumer().getSystemName());
+      ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
+      if (consumer == null) {
+        consumer = dm.save(entry.getConsumer());
       }
+
+      restrictionMap.clear();
+      restrictionMap.put("serviceDefinition", entry.getService().getServiceDefinition());
+      ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
+      if (service == null) {
+        service = dm.save(entry.getService());
+      }
+
+      restrictionMap.clear();
+      restrictionMap.put("operator", entry.getProviderCloud().getOperator());
+      restrictionMap.put("cloudName", entry.getProviderCloud().getCloudName());
+      ArrowheadCloud providerCloud = dm.get(ArrowheadCloud.class, restrictionMap);
+      if (providerCloud == null) {
+        providerCloud = dm.save(entry.getProviderCloud());
+      }
+
+      restrictionMap.clear();
+      restrictionMap.put("systemName", entry.getProviderSystem().getSystemName());
+      ArrowheadSystem providerSystem = dm.get(ArrowheadSystem.class, restrictionMap);
+      if (providerSystem == null) {
+        providerSystem = dm.save(entry.getProviderSystem());
+      }
+
+      entry.setConsumer(consumer);
+      entry.setService(service);
+      entry.setProviderSystem(providerSystem);
+      entry.setProviderCloud(providerCloud);
+      entry.setLastUpdated(LocalDateTime.now());
+      dm.merge(entry);
+      store.add(entry);
     }
 
     log.info("addStoreEntries successfully returns. Arraylist size: " + store.size());

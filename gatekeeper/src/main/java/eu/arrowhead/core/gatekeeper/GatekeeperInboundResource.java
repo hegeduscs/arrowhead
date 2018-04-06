@@ -15,7 +15,6 @@ import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.common.messages.ConnectToProviderResponse;
@@ -69,11 +68,7 @@ public class GatekeeperInboundResource {
   @PUT
   @Path("gsd_poll")
   public Response GSDPoll(GSDPoll gsdPoll) {
-    if (!gsdPoll.isValid()) {
-      log.error("GSDPoll BadPayloadException");
-      throw new BadPayloadException("Bad payload: requestedService/requesterCloud is missing or it is not valid.",
-                                    Status.BAD_REQUEST.getStatusCode());
-    }
+    gsdPoll.missingFields(true, null);
 
     // Polling the Authorization System about the consumer Cloud
     InterCloudAuthRequest authRequest = new InterCloudAuthRequest(gsdPoll.getRequesterCloud(), gsdPoll.getRequestedService());
@@ -114,10 +109,7 @@ public class GatekeeperInboundResource {
   @PUT
   @Path("icn_proposal")
   public Response ICNProposal(ICNProposal icnProposal) {
-    if (!icnProposal.isValid()) {
-      log.error("ICNProposal BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNProposal.", Status.BAD_REQUEST.getStatusCode());
-    }
+    icnProposal.missingFields(true, null);
 
     // Polling the Authorization System about the consumer Cloud
     InterCloudAuthRequest authRequest = new InterCloudAuthRequest(icnProposal.getRequesterCloud(), icnProposal.getRequestedService());

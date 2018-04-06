@@ -157,7 +157,7 @@ public class RegistryUtils {
     providerService.setProvider(arrowheadSystem);
 
     if (isUDP) {
-      providerService.setUDP(true);
+      providerService.setUdp(true);
     }
 
     if (properties.containsKey("path")) {

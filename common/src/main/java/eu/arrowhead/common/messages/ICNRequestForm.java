@@ -9,16 +9,23 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class ICNRequestForm {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class ICNRequestForm extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("requestedService", "targetCloud", "requesterSystem"));
 
   private ArrowheadService requestedService;
   private ArrowheadCloud targetCloud;
@@ -78,10 +85,26 @@ public class ICNRequestForm {
     this.negotiationFlags = negotiationFlags;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return requestedService != null && targetCloud != null && requesterSystem != null && requestedService.isValid() && targetCloud.isValid()
-        && requesterSystem.isValid();
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+    if (requestedService != null) {
+      mandatoryFields = requestedService.missingFields(false, false, mandatoryFields);
+    }
+    if (targetCloud != null) {
+      mandatoryFields = targetCloud.missingFields(false, mandatoryFields);
+    }
+    if (requesterSystem != null) {
+      mandatoryFields = requesterSystem.missingFields(false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

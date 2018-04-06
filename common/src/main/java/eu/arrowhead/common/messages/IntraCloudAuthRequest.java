@@ -9,13 +9,18 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.BadPayloadException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class IntraCloudAuthRequest {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class IntraCloudAuthRequest extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("service", "consumer", "providers"));
 
   private ArrowheadSystem consumer;
   private Set<ArrowheadSystem> providers = new HashSet<>();
@@ -54,17 +59,31 @@ public class IntraCloudAuthRequest {
     this.service = service;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    if (consumer == null || service == null || providers.isEmpty() || !consumer.isValidForDatabase() || !service.isValidForDatabase()) {
-      return false;
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
     }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+    if (service != null) {
+      mandatoryFields = service.missingFields(false, false, mandatoryFields);
+    }
+    if (consumer != null) {
+      mandatoryFields = consumer.missingFields(false, mandatoryFields);
+    }
+
     for (ArrowheadSystem provider : providers) {
-      if (!provider.isValidForDatabase()) {
-        return false;
+      Set<String> fields = provider.missingFields(false, null);
+      if (!fields.isEmpty()) {
+        mandatoryFields.add("Provider is missing mandatory field(s): " + String.join(", ", fields));
       }
     }
-    return true;
+
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

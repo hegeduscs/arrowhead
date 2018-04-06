@@ -9,21 +9,28 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class InterCloudAuthEntry {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class InterCloudAuthEntry extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("serviceList", "cloud"));
 
   private ArrowheadCloud cloud;
-  private Collection<ArrowheadService> serviceList = new ArrayList<>();
+  private List<ArrowheadService> serviceList = new ArrayList<>();
 
   public InterCloudAuthEntry() {
   }
 
-  public InterCloudAuthEntry(ArrowheadCloud cloud, Collection<ArrowheadService> serviceList) {
+  public InterCloudAuthEntry(ArrowheadCloud cloud, List<ArrowheadService> serviceList) {
     this.cloud = cloud;
     this.serviceList = serviceList;
   }
@@ -36,26 +43,37 @@ public class InterCloudAuthEntry {
     this.cloud = cloud;
   }
 
-  public Collection<ArrowheadService> getServiceList() {
+  public List<ArrowheadService> getServiceList() {
     return serviceList;
   }
 
-  public void setServiceList(Collection<ArrowheadService> serviceList) {
+  public void setServiceList(List<ArrowheadService> serviceList) {
     this.serviceList = serviceList;
   }
 
-  @JsonIgnore
-  public boolean isPayloadUsable() {
-    if (cloud == null || serviceList.isEmpty() || !cloud.isValidForDatabase()) {
-      return false;
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
     }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+
+    if (cloud != null) {
+      mandatoryFields = cloud.missingFields(false, mandatoryFields);
+    }
+
     for (ArrowheadService service : serviceList) {
-      if (!service.isValidForDatabase()) {
-        return false;
+      Set<String> fields = service.missingFields(false, false, null);
+      if (!fields.isEmpty()) {
+        mandatoryFields.add("Service is missing mandatory field(s): " + String.join(", ", fields));
       }
     }
-    return true;
-  }
 
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
+  }
 
 }

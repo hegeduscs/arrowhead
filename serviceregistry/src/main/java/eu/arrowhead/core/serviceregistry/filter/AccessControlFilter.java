@@ -1,6 +1,7 @@
 package eu.arrowhead.core.serviceregistry.filter;
 
 import eu.arrowhead.common.Utility;
+import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.SecurityUtils;
 import javax.annotation.Priority;
@@ -27,8 +28,9 @@ public class AccessControlFilter implements ContainerRequestFilter {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
     if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
+      String requestJson = Utility.getRequestPayload(requestContext.getEntityStream());
       String commonName = SecurityUtils.getCertCNFromSubject(sc.getUserPrincipal().getName());
-      if (isClientAuthorized(commonName, requestTarget, requestContext.getMethod())) {
+      if (isClientAuthorized(commonName, requestTarget, requestContext.getMethod(), requestJson)) {
         log.info("SSL identification is successful! Cert: " + commonName);
       } else {
         log.error(commonName + " is unauthorized to access " + requestTarget);
@@ -41,11 +43,11 @@ public class AccessControlFilter implements ContainerRequestFilter {
     return method.equals("GET") && (requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt"));
   }
 
-  private boolean isClientAuthorized(String clientCN, String requestTarget, String methodType) {
+  private boolean isClientAuthorized(String clientCN, String requestTarget, String methodType, String requestJson) {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
-      log.info("Client cert does not have 5 parts, so the access will be denied.");
+      log.info("Client cert does not have 5 parts, so the access will be denied. Make sure the field values do not contain dots!");
       return false;
     }
 
@@ -53,14 +55,22 @@ public class AccessControlFilter implements ContainerRequestFilter {
     String[] clientFields = clientCN.split("\\.", 2);
     // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.endsWith("register") || requestTarget.endsWith("remove")) {
-      // All requests from the local cloud are allowed, so omit the first part of the common names (systemName)
+      // All requests from the local cloud are allowed
+      ServiceRegistryEntry entry = Utility.fromJson(requestJson, ServiceRegistryEntry.class);
+
+      if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
+        // BUT a provider system can only register/remove its own services!
+        log.error("Provider system name and cert common name do not match! SR registering/removing denied!");
+        throw new AuthException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+                                Status.UNAUTHORIZED.getStatusCode());
+      }
       return serverFields[1].equalsIgnoreCase(clientFields[1]);
     } else if (requestTarget.endsWith("query")) {
       // Only requests from the Orchestrator and Gatekeeper are allowed
       return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
     } //maps legacy register and remove functions, if-else order is important
     else if (methodType.equals("POST") || methodType.equals("PUT")) {
-      // All requests from the local cloud are allowed, so omit the first 2 parts of the common names (systemName)
+      // All requests from the local cloud are allowed, so omit the first part of the common names (systemName)
       return serverFields[1].equalsIgnoreCase(clientFields[1]);
     }
 

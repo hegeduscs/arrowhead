@@ -78,6 +78,10 @@ final class OrchestratorService {
         }
       }
       srList.removeAll(temp);
+      if (srList.isEmpty()) {
+        log.error("None of the providers from the SRlist are authorized!");
+        throw new DataNotFoundException("None of the providers from the Service Registry query are authorized!", Status.NOT_FOUND.getStatusCode());
+      }
       log.debug("dynamicOrchestration SR query and Auth cross-check is done");
 
       // If needed, remove the non-preferred providers from the remaining list
@@ -117,9 +121,14 @@ final class OrchestratorService {
      * orchestration might be allowed. If not, we throw the same exception again.
      */ catch (DataNotFoundException ex) {
       if (!orchestrationFlags.get("enableInterCloud")) {
-        log.error("dynamicOrchestration: Intra-Cloud orchestration failed with DataNotFoundException, Inter-Cloud is not allowed.");
+        log.error("dynamicOrchestration: Intra-Cloud orchestration failed with DataNotFoundException, Inter-Cloud is not requested.");
         throw ex;
       } else {
+        if (!OrchestratorMain.USE_GATEKEEPER) {
+          log.error("dynamicOrchestration: Intra-Cloud orchestration failed with DataNotFoundException, USE_GATEKEEPER = false.");
+          throw new ArrowheadException("Intra-Cloud orchestration failed with DataNotFoundException and the Orchestrator is in NO GATEKEEPER mode",
+                                       Status.NOT_FOUND.getStatusCode(), ex);
+        }
         log.info("Intra-Cloud dynamicOrchestration failed with: " + ex.getMessage());
         ex.printStackTrace();
         System.out.println("Intra-Cloud orchestration failed, moving to Inter-Cloud options.");
@@ -204,6 +213,9 @@ final class OrchestratorService {
    * Represents the orchestration process where the requester System only asked for Inter-Cloud servicing.
    */
   static OrchestrationResponse triggerInterCloud(ServiceRequestForm srf) {
+    if (!OrchestratorMain.USE_GATEKEEPER) {
+      throw new ArrowheadException("Orchestrator can not service inter-cloud request in NO GATEKEEPER mode");
+    }
     Map<String, Boolean> orchestrationFlags = srf.getOrchestrationFlags();
 
     // Extracting the valid and unique ArrowheadClouds from the preferred providers
@@ -233,8 +245,8 @@ final class OrchestratorService {
       // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
       List<ArrowheadSystem> preferredSystems = new ArrayList<>();
       for (PreferredProvider provider : srf.getPreferredProviders()) {
-        if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
-            .getProviderSystem().isValid()) {
+        boolean validProviderSystem = provider.getProviderSystem().missingFields(false, new HashSet<>(Collections.singleton("address"))).isEmpty();
+        if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && validProviderSystem) {
           preferredSystems.add(provider.getProviderSystem());
         }
       }

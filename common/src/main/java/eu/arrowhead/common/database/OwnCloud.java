@@ -9,10 +9,12 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.GSDPoll;
 import eu.arrowhead.common.messages.ICNProposal;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -56,9 +58,19 @@ public class OwnCloud implements Serializable {
     this.cloud = cloud;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return cloud != null && cloud.isValid();
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>();
+    }
+    if (cloud == null) {
+      mandatoryFields.add("cloud");
+    } else {
+      mandatoryFields = cloud.missingFields(false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

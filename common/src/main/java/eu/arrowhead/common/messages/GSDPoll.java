@@ -9,11 +9,18 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.exception.BadPayloadException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-public class GSDPoll {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class GSDPoll extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("requestedService", "requesterCloud"));
 
   private ArrowheadService requestedService;
   private ArrowheadCloud requesterCloud;
@@ -42,9 +49,23 @@ public class GSDPoll {
     this.requesterCloud = requesterCloud;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return requestedService != null && requestedService.isValid() && requesterCloud != null && requesterCloud.isValidForDatabase();
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+    if (requestedService != null) {
+      mandatoryFields = requestedService.missingFields(false, false, mandatoryFields);
+    }
+    if (requesterCloud != null) {
+      mandatoryFields = requesterCloud.missingFields(false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

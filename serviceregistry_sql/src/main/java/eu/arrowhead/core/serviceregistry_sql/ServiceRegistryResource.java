@@ -13,10 +13,11 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -48,11 +49,7 @@ public class ServiceRegistryResource {
   @POST
   @Path("register")
   public Response registerService(ServiceRegistryEntry entry) {
-    if (!entry.isValid()) {
-      log.error("registerService throws BadPayloadException");
-      throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode());
-    }
-
+    entry.missingFields(true, false, new HashSet<>(Arrays.asList("interfaces", "address")));
     entry.toDatabase();
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
@@ -86,10 +83,7 @@ public class ServiceRegistryResource {
   @PUT
   @Path("query")
   public Response queryRegistry(ServiceQueryForm queryForm) {
-    if (!queryForm.isValid()) {
-      log.error("queryRegistry throws BadPayloadException");
-      throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode());
-    }
+    queryForm.missingFields(true, null);
 
     restrictionMap.put("serviceDefinition", queryForm.getService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
@@ -121,11 +115,7 @@ public class ServiceRegistryResource {
   @PUT
   @Path("remove")
   public Response removeService(ServiceRegistryEntry entry) {
-    if (!entry.isValid()) {
-      log.error("removeService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).",
-                                    Status.BAD_REQUEST.getStatusCode());
-    }
+    entry.missingFields(true, false, null);
 
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);

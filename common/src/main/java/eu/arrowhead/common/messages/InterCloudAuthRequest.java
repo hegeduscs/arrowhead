@@ -9,11 +9,18 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.exception.BadPayloadException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-public class InterCloudAuthRequest {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class InterCloudAuthRequest extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("service", "cloud"));
 
   private ArrowheadCloud cloud;
   private ArrowheadService service;
@@ -42,9 +49,23 @@ public class InterCloudAuthRequest {
     this.service = service;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return cloud != null && service != null && cloud.isValidForDatabase() && service.isValidForDatabase();
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+    if (service != null) {
+      mandatoryFields = service.missingFields(false, false, mandatoryFields);
+    }
+    if (cloud != null) {
+      mandatoryFields = cloud.missingFields(false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
 }

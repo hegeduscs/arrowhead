@@ -9,8 +9,13 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.json.support.ArrowheadSystemSupport;
+import eu.arrowhead.common.messages.ArrowheadBase;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,14 +24,17 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class for storing Arrowhead Systems in the database. The "system_name" column must be unique.
  */
 @Entity
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
 @Table(name = "arrowhead_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_name"})})
-public class ArrowheadSystem {
+public class ArrowheadSystem extends ArrowheadBase {
+
+  @Transient
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("systemName"));
 
   @Column(name = "id")
   @Id
@@ -57,12 +65,12 @@ public class ArrowheadSystem {
 
   public ArrowheadSystem(String json) {
     String[] fields = json.split(",");
-    this.systemName = fields[0];
+    this.systemName = fields[0].equals("null") ? null : fields[0];
 
     if (fields.length == 4) {
-      this.address = fields[1];
+      this.address = fields[1].equals("null") ? null : fields[1];
       this.port = Integer.valueOf(fields[2]);
-      this.authenticationInfo = fields[3];
+      this.authenticationInfo = fields[3].equals("null") ? null : fields[3];
     }
   }
 
@@ -73,6 +81,7 @@ public class ArrowheadSystem {
     this.authenticationInfo = system.getAuthenticationInfo();
   }
 
+  @SuppressWarnings("CopyConstructorMissesField")
   public ArrowheadSystem(ArrowheadSystem system) {
     this.systemName = system.systemName;
     this.address = system.address;
@@ -80,7 +89,6 @@ public class ArrowheadSystem {
     this.authenticationInfo = system.authenticationInfo;
   }
 
-  @XmlTransient
   public int getId() {
     return id;
   }
@@ -121,14 +129,32 @@ public class ArrowheadSystem {
     this.authenticationInfo = authenticationInfo;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return systemName != null && address != null;
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    for (final String field : mandatoryFields) {
+      if (field.startsWith(getClass().getSimpleName())) {
+        nonNullFields = prefixFieldNames(nonNullFields);
+        break;
+      }
+    }
+    mandatoryFields.removeAll(nonNullFields);
+
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
-  @JsonIgnore
-  public boolean isValidForDatabase() {
-    return systemName != null;
+  public String toArrowheadCommonName(String operator, String cloudName) {
+    if (systemName.contains(".") || operator.contains(".") || cloudName.contains(".")) {
+      throw new IllegalArgumentException("The string fields can not contain dots!");
+    }
+    //throws NPE if any of the fields are null
+    return systemName.concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
   }
 
   @Override
@@ -145,27 +171,24 @@ public class ArrowheadSystem {
     if (!systemName.equals(that.systemName)) {
       return false;
     }
-    return address.equals(that.address);
+    if (address != null ? !address.equals(that.address) : that.address != null) {
+      return false;
+    }
+    return authenticationInfo != null ? authenticationInfo.equals(that.authenticationInfo) : that.authenticationInfo == null;
   }
 
   @Override
   public int hashCode() {
     int result = systemName.hashCode();
-    result = 31 * result + address.hashCode();
+    result = 31 * result + (address != null ? address.hashCode() : 0);
+    result = 31 * result + (authenticationInfo != null ? authenticationInfo.hashCode() : 0);
     return result;
   }
 
+  //NOTE ArrowheadSystemKeyDeserializer relies on this implementation, do not change it without changing the (String json) constructor
   @Override
   public String toString() {
     return systemName + "," + address + "," + port + "," + authenticationInfo;
-  }
-
-  public String toArrowheadCommonName(String operator, String cloudName) {
-    if (systemName.contains(".") || operator.contains(".") || cloudName.contains(".")) {
-      throw new IllegalArgumentException("The string fields can not contain dots!");
-    }
-    //throws NPE if any of the fields are null
-    return systemName.concat(".").concat(cloudName).concat(".").concat(operator).concat(".").concat("arrowhead.eu");
   }
 
 }

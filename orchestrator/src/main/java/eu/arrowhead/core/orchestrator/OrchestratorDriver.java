@@ -33,6 +33,7 @@ import eu.arrowhead.common.messages.TokenData;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
 import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,19 +80,22 @@ final class OrchestratorDriver {
     // Sending the request, parsing the returned result
     Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);
     ServiceQueryResult serviceQueryResult = srResponse.readEntity(ServiceQueryResult.class);
-    if (serviceQueryResult == null || !serviceQueryResult.isValid()) {
-      log.error("queryServiceRegistry DataNotFoundException");
-      throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString(), Status.NOT_FOUND.getStatusCode());
-    }
 
     // If there are non-valid entries in the Service Registry response, we filter those out
     List<ServiceRegistryEntry> temp = new ArrayList<>();
     for (ServiceRegistryEntry entry : serviceQueryResult.getServiceQueryData()) {
-      if (!entry.isValid()) {
+      if (!entry.missingFields(false, false, new HashSet<>(Arrays.asList("interfaces", "address"))).isEmpty()) {
         temp.add(entry);
       }
     }
     serviceQueryResult.getServiceQueryData().removeAll(temp);
+    if (temp.size() > 0) {
+      log.info(temp.size() + " not valid SR entries removed from the response");
+    }
+    if (!serviceQueryResult.isValid()) {
+      log.error("queryServiceRegistry DataNotFoundException");
+      throw new DataNotFoundException("ServiceRegistry query came back empty for " + service.toString(), Status.NOT_FOUND.getStatusCode());
+    }
 
     log.info("queryServiceRegistry was successful, number of potential providers for" + service.toString() + " is " + serviceQueryResult
         .getServiceQueryData().size());
@@ -246,7 +250,7 @@ final class OrchestratorDriver {
       // Removing non-valid Store entries from the results
       List<OrchestrationStore> temp = new ArrayList<>();
       for (OrchestrationStore entry : retrievedList) {
-        if (!entry.isValid()) {
+        if (!entry.missingFields(false, new HashSet<>(Collections.singleton("address"))).isEmpty()) {
           temp.add(entry);
         }
       }
@@ -410,13 +414,11 @@ final class OrchestratorDriver {
     // Extracting the valid ArrowheadClouds from the GSDResult
     List<ArrowheadCloud> partnerClouds = new ArrayList<>();
     for (GSDAnswer answer : result.getResponse()) {
-      if (answer.getProviderCloud().isValid()) {
-        partnerClouds.add(answer.getProviderCloud());
-      }
+      // Gatekeeper verified that the providerCloud payload is valid
+      partnerClouds.add(answer.getProviderCloud());
     }
 
-    // partnerClouds.isEmpty() can only be true here if the other Gatekeepers returned not valid ArrowheadCloud objects
-    if (!partnerClouds.isEmpty() && !preferredClouds.isEmpty()) {
+    if (!preferredClouds.isEmpty()) {
       // We iterate through both ArrowheadCloud list, and return with 1 if we find a match.
       for (ArrowheadCloud preferredCloud : preferredClouds) {
         for (ArrowheadCloud partnerCloud : partnerClouds) {
@@ -456,8 +458,8 @@ final class OrchestratorDriver {
     // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
     List<ArrowheadSystem> preferredSystems = new ArrayList<>();
     for (PreferredProvider provider : srf.getPreferredProviders()) {
-      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
-          .getProviderSystem().isValid()) {
+      boolean validProviderSystem = provider.getProviderSystem().missingFields(false, new HashSet<>(Collections.singleton("address"))).isEmpty();
+      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && validProviderSystem) {
         preferredSystems.add(provider.getProviderSystem());
       }
     }

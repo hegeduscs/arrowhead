@@ -15,7 +15,6 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.InterCloudAuthorization;
 import eu.arrowhead.common.database.IntraCloudAuthorization;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.InterCloudAuthEntry;
 import eu.arrowhead.common.messages.IntraCloudAuthEntry;
@@ -164,11 +163,7 @@ public class AuthorizationApi {
   @POST
   @Path("intracloud")
   public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
-
-    if (!entry.isValid()) {
-      log.info("addSystemToAuthorized throws BadPayloadException.");
-      throw new BadPayloadException("Bad payload: Missing/incomplete consumer, serviceList or providerList in the entry payload.");
-    }
+    entry.missingFields(true, null);
 
     restrictionMap.put("systemName", entry.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
@@ -372,11 +367,7 @@ public class AuthorizationApi {
   @POST
   @Path("intercloud")
   public Response addCloudToAuthorized(InterCloudAuthEntry entry) {
-
-    if (!entry.isPayloadUsable()) {
-      log.info("addCloudToAuthorized throws BadPayloadException.");
-      throw new BadPayloadException("Bad payload: Missing/incomplete cloud or serviceList in the entry payload.");
-    }
+    entry.missingFields(true, null);
 
     restrictionMap.put("operator", entry.getCloud().getOperator());
     restrictionMap.put("cloudName", entry.getCloud().getCloudName());

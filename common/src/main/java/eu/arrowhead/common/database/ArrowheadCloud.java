@@ -9,22 +9,31 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.messages.ArrowheadBase;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class for storing Arrowhead Clouds in the database. The "operator" and "cloud_name" columns must be unique together.
  */
 @Entity
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
 @Table(name = "arrowhead_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
-public class ArrowheadCloud {
+public class ArrowheadCloud extends ArrowheadBase {
+
+  @Transient
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("operator", "cloudName"));
 
   @Column(name = "id")
   @Id
@@ -50,13 +59,13 @@ public class ArrowheadCloud {
   private String authenticationInfo;
 
   @Column(name = "is_secure")
-  private boolean secure;
+  private Boolean secure;
 
   public ArrowheadCloud() {
   }
 
   public ArrowheadCloud(String operator, String cloudName, String address, Integer port, String gatekeeperServiceURI, String authenticationInfo,
-                        boolean secure) {
+                        Boolean secure) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;
@@ -66,7 +75,6 @@ public class ArrowheadCloud {
     this.secure = secure;
   }
 
-  @XmlTransient
   public int getId() {
     return id;
   }
@@ -123,22 +131,32 @@ public class ArrowheadCloud {
     this.authenticationInfo = authenticationInfo;
   }
 
-  public boolean isSecure() {
+  public Boolean isSecure() {
     return secure;
   }
 
-  public void setSecure(boolean secure) {
+  public void setSecure(Boolean secure) {
     this.secure = secure;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return operator != null && cloudName != null && address != null && gatekeeperServiceURI != null;
-  }
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    for (final String field : mandatoryFields) {
+      if (field.startsWith(getClass().getSimpleName())) {
+        nonNullFields = prefixFieldNames(nonNullFields);
+        break;
+      }
+    }
+    mandatoryFields.removeAll(nonNullFields);
 
-  @JsonIgnore
-  public boolean isValidForDatabase() {
-    return operator != null && cloudName != null;
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
   }
 
   @Override
@@ -158,22 +176,30 @@ public class ArrowheadCloud {
     if (!cloudName.equals(that.cloudName)) {
       return false;
     }
-    if (!address.equals(that.address)) {
+    if (address != null ? !address.equals(that.address) : that.address != null) {
       return false;
     }
-    if (!port.equals(that.port)) {
+    if (port != null ? !port.equals(that.port) : that.port != null) {
       return false;
     }
-    return gatekeeperServiceURI.equals(that.gatekeeperServiceURI);
+    if (gatekeeperServiceURI != null ? !gatekeeperServiceURI.equals(that.gatekeeperServiceURI) : that.gatekeeperServiceURI != null) {
+      return false;
+    }
+    if (authenticationInfo != null ? !authenticationInfo.equals(that.authenticationInfo) : that.authenticationInfo != null) {
+      return false;
+    }
+    return secure != null ? secure.equals(that.secure) : that.secure == null;
   }
 
   @Override
   public int hashCode() {
     int result = operator.hashCode();
     result = 31 * result + cloudName.hashCode();
-    result = 31 * result + address.hashCode();
-    result = 31 * result + port.hashCode();
-    result = 31 * result + gatekeeperServiceURI.hashCode();
+    result = 31 * result + (address != null ? address.hashCode() : 0);
+    result = 31 * result + (port != null ? port.hashCode() : 0);
+    result = 31 * result + (gatekeeperServiceURI != null ? gatekeeperServiceURI.hashCode() : 0);
+    result = 31 * result + (authenticationInfo != null ? authenticationInfo.hashCode() : 0);
+    result = 31 * result + (secure != null ? secure.hashCode() : 0);
     return result;
   }
 
