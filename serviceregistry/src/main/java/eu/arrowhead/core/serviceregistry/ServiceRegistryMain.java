@@ -37,6 +37,7 @@ public class ServiceRegistryMain {
   public static boolean DEBUG_MODE;
 
   static final int PING_TIMEOUT = getAppProp().getIntProperty("ping_timeout", 10000);
+
   //DNS-SD global settings
   static final String TSIG_NAME = getDnsProp().getProperty("tsig_name", "key.arrowhead.tmit.bme.hu");
   static final String TSIG_KEY = getDnsProp().getProperty("tsig_key", "RM/jKKEPYB83peT0DQnYGg==");
@@ -49,8 +50,10 @@ public class ServiceRegistryMain {
   private static String BASE_URI;
   private static HttpServer server;
   private static TypeSafeProperties appProp, dnsProp;
-  private static Timer timer;
+  private static Timer pingTimer;
+  private static Timer ttlTimer;
 
+  private static final int TTL_INTERVAL = getAppProp().getIntProperty("ttl_interval", 10);
   private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
 
   public static void main(String[] args) throws IOException {
@@ -97,18 +100,25 @@ public class ServiceRegistryMain {
     //if provider ping is scheduled, start the TimerTask that provides it
     if (Boolean.valueOf(getAppProp().getProperty("ping_scheduled", "false"))) {
       TimerTask pingTask = new PingProvidersTask();
-      timer = new Timer();
+      pingTimer = new Timer();
       int interval = getAppProp().getIntProperty("ping_interval", 60);
-      timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
+      pingTimer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
     }
+    //if TTL based service removing is scheduled, start the TimerTask that provides it
+    if (Boolean.valueOf(getAppProp().getProperty("ttl_scheduled", "false"))) {
+      TimerTask removeTask = new RemoveExpiredServicesTask();
+      ttlTimer = new Timer();
+      ttlTimer.schedule(removeTask, 45L * 1000L, TTL_INTERVAL * 60L * 1000L);
+    }
+
 
     DatabaseManager.init();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
         System.out.println("Received TERM signal, shutting down...");
-        if (timer != null) {
-          timer.cancel();
+        if (pingTimer != null) {
+          pingTimer.cancel();
         }
         shutdown();
       }));
@@ -120,8 +130,8 @@ public class ServiceRegistryMain {
         input = br.readLine();
       }
       br.close();
-      if (timer != null) {
-        timer.cancel();
+      if (pingTimer != null) {
+        pingTimer.cancel();
       }
       shutdown();
     }
@@ -199,6 +209,12 @@ public class ServiceRegistryMain {
   }
 
   private static void shutdown() {
+    if (pingTimer != null) {
+      pingTimer.cancel();
+    }
+    if (ttlTimer != null) {
+      ttlTimer.cancel();
+    }
     if (server != null) {
       log.info("Stopping server at: " + BASE_URI);
       server.shutdownNow();

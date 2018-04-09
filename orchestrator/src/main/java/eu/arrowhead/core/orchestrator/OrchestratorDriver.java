@@ -590,7 +590,9 @@ final class OrchestratorDriver {
       }
     }
 
-    log.info("generateAuthTokens successfully returns with " + tokenCount + " tokens");
+    if (tokenCount > 0) {
+      log.info("generateAuthTokens successfully returns with " + tokenCount + " tokens");
+    }
     return ofList;
   }
 

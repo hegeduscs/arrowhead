@@ -31,7 +31,8 @@ public class ArrowheadExceptionMapper implements ExceptionMapper<ArrowheadExcept
   @Override
   public Response toResponse(ArrowheadException ex) {
     ex.printStackTrace();
-    String origin = (ex.getOrigin() == null && requestContext.get() != null) ? requestContext.get().getAbsolutePath().toString() : ex.getOrigin();
+    String origin =
+        ex.getOrigin() != null ? ex.getOrigin() : (requestContext.get() != null ? requestContext.get().getAbsolutePath().toString() : "unknown");
     int errorCode = (ex.getErrorCode() == 0 && responseContext.get() != null) ? responseContext.get().getStatus() : ex.getErrorCode();
     if (errorCode == 0) {
       switch (ex.getExceptionType()) {

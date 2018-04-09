@@ -220,4 +220,5 @@ class ServiceRegistry {
     log.info("Deleted all services from DNS-SD!");
     return true;
   }
+
 }

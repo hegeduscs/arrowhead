@@ -43,6 +43,7 @@ public class ServiceRegistryResource {
         "SR reg service: " + entry.getProvidedService().getServiceDefinition() + " provider: " + entry.getProvider().getSystemName() + " serviceURI: "
             + entry.getServiceURI());
     entry.missingFields(true, true, new HashSet<>(Arrays.asList("interfaces", "address")));
+    entry.toDatabase();
 
     try {
       if (ServiceRegistry.register(entry)) {
@@ -62,6 +63,7 @@ public class ServiceRegistryResource {
     log.debug("SR remove service: " + entry.getProvidedService().getServiceDefinition() + " provider: " + entry.getProvider().getSystemName()
                   + " serviceURI: " + entry.getServiceURI());
     entry.missingFields(true, true, null);
+    entry.toDatabase();
 
     if (ServiceRegistry.unRegister(entry)) {
       return Response.status(Response.Status.OK).build();
@@ -83,6 +85,7 @@ public class ServiceRegistryResource {
     }
 
     entry.setProvidedService(new ArrowheadService(service, Collections.singletonList(interf), null));
+    entry.toDatabase();
 
     if (ServiceRegistry.register(entry)) {
       return Response.status(Response.Status.OK).build();
@@ -104,6 +107,7 @@ public class ServiceRegistryResource {
     }
 
     entry.setProvidedService(new ArrowheadService(service, Collections.singletonList(interf), null));
+    entry.toDatabase();
 
     if (ServiceRegistry.unRegister(entry)) {
       return Response.status(Response.Status.OK).build();
@@ -121,6 +125,10 @@ public class ServiceRegistryResource {
     queryForm.missingFields(true, null);
 
     ServiceQueryResult sqr = ServiceRegistry.provideServices(queryForm);
+    for (ServiceRegistryEntry entry : sqr.getServiceQueryData()) {
+      entry.fromDatabase();
+    }
+
     if (!sqr.getServiceQueryData().isEmpty()) {
       return Response.status(Response.Status.OK).entity(sqr).build();
     } else {
@@ -136,11 +144,14 @@ public class ServiceRegistryResource {
   @GET
   @Path("all")
   public Response getAllServices() {
-    ServiceQueryResult result = ServiceRegistry.provideAllServices();
-    if (result.getServiceQueryData().isEmpty()) {
-      return Response.status(Status.NO_CONTENT).entity(result).build();
+    ServiceQueryResult sqr = ServiceRegistry.provideAllServices();
+    for (ServiceRegistryEntry entry : sqr.getServiceQueryData()) {
+      entry.fromDatabase();
+    }
+    if (sqr.getServiceQueryData().isEmpty()) {
+      return Response.status(Status.NO_CONTENT).entity(sqr).build();
     } else {
-      return Response.status(Response.Status.OK).entity(result).build();
+      return Response.status(Response.Status.OK).entity(sqr).build();
     }
   }
 

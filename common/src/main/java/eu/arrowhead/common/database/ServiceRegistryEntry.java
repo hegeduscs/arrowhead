@@ -224,7 +224,7 @@ public class ServiceRegistryEntry extends ArrowheadBase {
       port = provider.getPort();
     }
 
-    endOfValidity = ttl > 0 ? LocalDateTime.now().plusSeconds(ttl) : null;
+    endOfValidity = ttl > 0 ? LocalDateTime.now().plusSeconds(ttl) : LocalDateTime.now();
   }
 
   public void fromDatabase() {

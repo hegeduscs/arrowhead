@@ -7,8 +7,10 @@ import com.github.danieln.dnssdjava.ServiceData;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.DnsException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +56,12 @@ public class RegistryUtils {
     if (registryEntry.getServiceURI() != null) {
       properties.put("path", registryEntry.getServiceURI());
     }
+
+    LocalDateTime date = registryEntry.getEndOfValidity();
+    String encodedDate = String.valueOf(date.getYear()).concat(".").concat(String.valueOf(date.getMonthValue())).concat(".")
+        .concat(String.valueOf(date.getDayOfMonth())).concat(".").concat(String.valueOf(date.getHour())).concat(".")
+        .concat(String.valueOf(date.getMinute())).concat(".").concat(String.valueOf(date.getSecond()));
+    properties.put("eovdate", encodedDate);
 
     //additional user metadata
     if (!registryEntry.getProvidedService().getServiceMetadata().isEmpty()) {
@@ -168,6 +176,19 @@ public class RegistryUtils {
       providerService.setVersion(new Integer(properties.get("txtvers")));
     } else {
       providerService.setVersion(1);
+    }
+
+    if (properties.containsKey("eovdate")) {
+      String encodedDate = properties.get("eovdate");
+      String[] dateFields = encodedDate.split("\\.");
+      if (dateFields.length != 6) {
+        log.error("End of validity date string decoding error");
+        throw new DnsException("End of validity date string decoding error");
+      }
+      LocalDateTime endOfValidity = LocalDateTime
+          .of(Integer.valueOf(dateFields[0]), Integer.valueOf(dateFields[1]), Integer.valueOf(dateFields[2]), Integer.valueOf(dateFields[3]),
+              Integer.valueOf(dateFields[4]), Integer.valueOf(dateFields[5]));
+      providerService.setEndOfValidity(endOfValidity);
     }
 
     return providerService;
