@@ -72,7 +72,6 @@ public class ServiceRegistryMain {
     int securePort = getAppProp().getIntProperty("secure_port", 8443);
 
     boolean daemon = false;
-    List<String> alwaysMandatoryProperties = Arrays.asList("db_user", "db_password", "db_address");
     for (String arg : args) {
       switch (arg) {
         case "-daemon":
@@ -84,15 +83,14 @@ public class ServiceRegistryMain {
           System.out.println("Starting server in debug mode!");
           break;
         case "-tls":
-          List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
-          allMandatoryProperties.addAll(Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass"));
-          Utility.checkProperties(getAppProp().stringPropertyNames(), allMandatoryProperties);
+          List<String> secureMandatoryProperties = new ArrayList<>(
+              Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass"));
+          Utility.checkProperties(getAppProp().stringPropertyNames(), secureMandatoryProperties);
           BASE_URI = Utility.getUri(address, securePort, null, true, true);
           server = startSecureServer();
       }
     }
     if (server == null) {
-      Utility.checkProperties(getAppProp().stringPropertyNames(), alwaysMandatoryProperties);
       BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
       server = startServer();
     }
@@ -110,7 +108,6 @@ public class ServiceRegistryMain {
       ttlTimer = new Timer();
       ttlTimer.schedule(removeTask, 45L * 1000L, TTL_INTERVAL * 60L * 1000L);
     }
-
 
     DatabaseManager.init();
     if (daemon) {

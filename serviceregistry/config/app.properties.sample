@@ -1,8 +1,3 @@
-# Database parameters
-db_user=root
-db_password=root
-db_address=jdbc:mysql://127.0.0.1:3306/arrowhead_test_cloud_1
-
 ##########################################
 # MANDATORY PARAMETERS ONLY IN SECURE MODE
 ##########################################
