@@ -179,7 +179,8 @@ public class AuthorizationResource {
     // Only add the successfully created tokens to the response, with the matching provider System
     for (int i = 0; i < tokens.size(); i++) {
       if (tokens.get(i) != null) {
-        TokenData tokenData = new TokenData(request.getProviders().get(i), tokens.get(i).getToken(), tokens.get(i).getSignature());
+        TokenData tokenData = new TokenData(request.getProviders().get(i), request.getService(), tokens.get(i).getToken(),
+                                            tokens.get(i).getSignature());
         tokenDataList.add(tokenData);
       }
     }

@@ -153,6 +153,7 @@ final class OrchestratorService {
   static OrchestrationResponse orchestrationFromStore(ServiceRequestForm srf) {
     // Querying the Orchestration Store for matching entries
     List<OrchestrationStore> entryList = OrchestratorDriver.queryOrchestrationStore(srf.getRequesterSystem(), srf.getRequestedService());
+    int storeSize = entryList.size();
 
     // Cross-checking the results with the Service Registry and Authorization
     entryList = OrchestratorDriver.crossCheckStoreEntries(srf, entryList);
@@ -204,7 +205,7 @@ final class OrchestratorService {
 
       // If the for-loop finished but we still could not return a result, we throw a DataNotFoundException.
       log.error("orchestrationFromStore throws final DataNotFoundException");
-      throw new DataNotFoundException("OrchestrationFromStore failed with all the queried (" + entryList.size() + ") Store entries.",
+      throw new DataNotFoundException("OrchestrationFromStore failed with all the queried (" + storeSize + ") Store entries.",
                                       Status.NOT_FOUND.getStatusCode());
     }
   }

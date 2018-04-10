@@ -29,7 +29,7 @@ import eu.arrowhead.common.messages.PreferredProvider;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.messages.ServiceRequestForm;
-import eu.arrowhead.common.messages.TokenData;
+import eu.arrowhead.common.messages.TokenGenHelper;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
 import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
@@ -535,61 +535,21 @@ final class OrchestratorDriver {
    * @return the same <tt>OrchestrationForm</tt> list supplemented with the generated <tt>ArrowheadToken</tt>s for providers
    */
   static List<OrchestrationForm> generateAuthTokens(ServiceRequestForm srf, List<OrchestrationForm> ofList) {
-    // Arrange token generation for every provider, if it was requested in the service metadata
-    Map<String, String> metadata;
-    TokenGenerationResponse tokenResponse;
     int tokenCount = 0;
+    /* Getting a list of service - providers pairs, where the service contains the security - token metadata. This ensures that token generation is
+       invoked the minimum amount of times */
+    List<TokenGenHelper> tokenGenHelpers = TokenGenHelper.convertOfList(ofList);
+    for (TokenGenHelper helper : tokenGenHelpers) {
+      // Compiling the request payload
+      TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), helper.getProviders(),
+                                                                       helper.getService(), 0);
+      // Sending the token generation request, parsing the response
+      Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
+      TokenGenerationResponse tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
 
-    // It is a default Store orchestration, if the requested service was not specified, with possibly more than 1 service
-    if (srf.getRequestedService() == null) {
-      for (OrchestrationForm form : ofList) {
-        metadata = form.getService().getServiceMetadata();
-        if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
-          // Compiling the request payload
-          TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), null,
-                                                                           Collections.singletonList(form.getProvider()), form.getService(), 0);
-          // Sending the token generation request, parsing the response
-          Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-          tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
-          if (tokenResponse != null && tokenResponse.getTokenData() != null && tokenResponse.getTokenData().size() == 1) {
-            form.setAuthorizationToken(tokenResponse.getTokenData().get(0).getToken());
-            form.setSignature(tokenResponse.getTokenData().get(0).getSignature());
-            tokenCount++;
-          }
-        }
-      }
-    } else {
-      /* NOTE a refactor might be necessary in the future, to look at the metadata of each service from the SR individually, cause the provider
-         might not implement the token-based authorization */
-
-      // Otherwise we look at the metadata of the requested service
-      metadata = srf.getRequestedService().getServiceMetadata();
-      if (metadata.containsKey("security") && metadata.get("security").equals("token")) {
-        // Getting all the provider Systems from the Service Registry entries
-        List<ArrowheadSystem> providerList = new ArrayList<>();
-        for (OrchestrationForm form : ofList) {
-          providerList.add(form.getProvider());
-        }
-
-        // Compiling the request payload
-        TokenGenerationRequest tokenRequest = new TokenGenerationRequest(srf.getRequesterSystem(), srf.getRequesterCloud(), providerList,
-                                                                         srf.getRequestedService(), 0);
-        // Sending the token generation request
-        Response authResponse = Utility.sendRequest(OrchestratorMain.TOKEN_GEN_URI, "PUT", tokenRequest);
-        tokenResponse = authResponse.readEntity(TokenGenerationResponse.class);
-
-        // Parsing the response
-        if (tokenResponse != null && tokenResponse.getTokenData() != null && tokenResponse.getTokenData().size() > 0) {
-          for (TokenData data : tokenResponse.getTokenData()) {
-            for (OrchestrationForm form : ofList) {
-              if (data.getSystem().equals(form.getProvider())) {
-                form.setAuthorizationToken(data.getToken());
-                form.setSignature(data.getSignature());
-              }
-            }
-          }
-          tokenCount = tokenResponse.getTokenData().size();
-        }
+      if (tokenResponse != null && tokenResponse.getTokenData() != null && tokenResponse.getTokenData().size() > 0) {
+        TokenGenHelper.updateFormsWithTokens(ofList, tokenResponse.getTokenData());
+        tokenCount = tokenResponse.getTokenData().size();
       }
     }
 

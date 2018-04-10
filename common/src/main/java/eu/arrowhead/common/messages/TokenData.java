@@ -9,19 +9,22 @@
 
 package eu.arrowhead.common.messages;
 
+import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 
 public class TokenData {
 
   private ArrowheadSystem system;
+  private ArrowheadService service;
   private String token;
   private String signature;
 
   public TokenData() {
   }
 
-  public TokenData(ArrowheadSystem system, String token, String signature) {
+  public TokenData(ArrowheadSystem system, ArrowheadService service, String token, String signature) {
     this.system = system;
+    this.service = service;
     this.token = token;
     this.signature = signature;
   }
@@ -32,6 +35,14 @@ public class TokenData {
 
   public void setSystem(ArrowheadSystem system) {
     this.system = system;
+  }
+
+  public ArrowheadService getService() {
+    return service;
+  }
+
+  public void setService(ArrowheadService service) {
+    this.service = service;
   }
 
   public String getToken() {

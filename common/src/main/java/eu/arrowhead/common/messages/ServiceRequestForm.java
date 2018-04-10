@@ -118,6 +118,7 @@ public class ServiceRequestForm {
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    setOrchestrationFlags(getOrchestrationFlags());
     if (mandatoryFields == null) {
       mandatoryFields = new HashSet<>();
     }
