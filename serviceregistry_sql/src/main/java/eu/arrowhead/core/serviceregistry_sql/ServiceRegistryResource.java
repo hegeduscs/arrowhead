@@ -89,7 +89,7 @@ public class ServiceRegistryResource {
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
       log.info("Service " + queryForm.getService().toString() + " is not in the registry.");
-      return Response.status(Status.NO_CONTENT).entity(new ServiceQueryResult()).build();
+      return Response.status(Status.PARTIAL_CONTENT).entity(new ServiceQueryResult()).build();
     }
 
     restrictionMap.clear();
