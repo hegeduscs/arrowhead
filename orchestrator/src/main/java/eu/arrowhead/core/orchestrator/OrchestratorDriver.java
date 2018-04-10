@@ -87,10 +87,13 @@ final class OrchestratorDriver {
       if (!entry.missingFields(false, false, new HashSet<>(Arrays.asList("interfaces", "address"))).isEmpty()) {
         temp.add(entry);
       }
+      if (!StoreService.hasMatchingInterfaces(service, entry.getProvidedService())) {
+        temp.add(entry);
+      }
     }
     serviceQueryResult.getServiceQueryData().removeAll(temp);
     if (temp.size() > 0) {
-      log.info(temp.size() + " not valid SR entries removed from the response");
+      log.info(temp.size() + " not valid OR incompatible (0 common service interface) SR entries removed from the response");
     }
     if (!serviceQueryResult.isValid()) {
       log.error("queryServiceRegistry DataNotFoundException");

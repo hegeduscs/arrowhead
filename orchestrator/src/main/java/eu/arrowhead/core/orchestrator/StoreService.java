@@ -92,13 +92,14 @@ public final class StoreService {
     return dm.get(ArrowheadService.class, rm);
   }
 
-  private static boolean hasMatchingInterfaces(ArrowheadService savedService, ArrowheadService givenService) {
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  static boolean hasMatchingInterfaces(ArrowheadService savedService, ArrowheadService givenService) {
     if (givenService.getInterfaces().isEmpty()) {
-      return true;
+      return savedService.getInterfaces().isEmpty();
     }
     for (String givenInterface : givenService.getInterfaces()) {
       for (String savedInterface : savedService.getInterfaces()) {
-        if (givenInterface.equals(savedInterface)) {
+        if (givenInterface.equalsIgnoreCase(savedInterface)) {
           return true;
         }
       }
@@ -109,6 +110,7 @@ public final class StoreService {
   /**
    * This method returns all the entries of the Orchestration Store.
    */
+  @SuppressWarnings("unused")
   public static List<OrchestrationStore> getAllStoreEntries() {
     restrictionMap.clear();
     return dm.getAll(OrchestrationStore.class, restrictionMap);
