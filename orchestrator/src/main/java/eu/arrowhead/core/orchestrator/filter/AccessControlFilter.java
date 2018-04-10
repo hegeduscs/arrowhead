@@ -73,25 +73,27 @@ public class AccessControlFilter implements ContainerRequestFilter {
     }
 
     String[] serverFields = serverCN.split("\\.", 2);
+    String[] clientFields = clientCN.split("\\.", 2);
     // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
       // Only the local HMI can use these methods
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
+    } else if (requestTarget.contains("store")) {
+      // Only requests from the local cloud are allowed
+      return serverFields[1].equalsIgnoreCase(clientFields[1]);
     } else {
       ServiceRequestForm srf = Utility.fromJson(requestJson, ServiceRequestForm.class);
-      String[] clientFields = clientCN.split("\\.", 2);
 
       // If this is an external service request, only the local Gatekeeper can send this method
       if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
         return clientFields[0].equalsIgnoreCase("gatekeeper") && serverFields[1].equalsIgnoreCase(clientFields[1]);
       } else {
-        // Otherwise all request from the local cloud allowed
+        // Otherwise all request from the local cloud are allowed
         if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
           // BUT the requester system has to be the same as the first part of the common name
           log.error("Requester system name and cert common name do not match!");
-          throw new AuthException(
-              "Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-              Status.UNAUTHORIZED.getStatusCode());
+          throw new AuthException("Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+                                  Status.UNAUTHORIZED.getStatusCode());
         }
 
         return serverFields[1].equalsIgnoreCase(clientFields[1]);

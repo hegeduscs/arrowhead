@@ -136,7 +136,7 @@ public class OrchestratorMain {
   private static HttpServer startServer() throws IOException {
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class, OldOrchResource.class);
-    config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.filter");
+    config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.api", "eu.arrowhead.core.orchestrator.filter");
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
     final HttpServer server;
@@ -156,7 +156,7 @@ public class OrchestratorMain {
   private static HttpServer startSecureServer() throws IOException {
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(OrchestratorResource.class, CommonApi.class, StoreApi.class, OldOrchResource.class);
-    config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.filter");
+    config.packages("eu.arrowhead.common", "eu.arrowhead.core.orchestrator.api", "eu.arrowhead.core.orchestrator.filter");
 
     String keystorePath = getProp().getProperty("keystore");
     String keystorePass = getProp().getProperty("keystorepass");

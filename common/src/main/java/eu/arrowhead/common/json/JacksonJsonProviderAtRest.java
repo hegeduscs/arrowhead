@@ -1,6 +1,8 @@
 package eu.arrowhead.common.json;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +22,8 @@ public class JacksonJsonProviderAtRest extends JacksonJaxbJsonProvider {
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+    mapper.setDefaultPropertyInclusion(JsonInclude.Value.construct(Include.ALWAYS, Include.NON_NULL));
+    mapper.setSerializationInclusion(Include.NON_NULL);
     mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
     mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
   }

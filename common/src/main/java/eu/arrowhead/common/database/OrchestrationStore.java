@@ -36,7 +36,6 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.annotations.Type;
 
 /**
  * JPA entity class for storing <tt>OrchestrationStore</tt> information in the database. The <i>arrowhead_service_id</i>, <i>consumer_system_id</i>,
@@ -87,7 +86,6 @@ public class OrchestrationStore extends ArrowheadBase implements Comparable<Orch
   private String name;
 
   @Column(name = "last_updated")
-  @Type(type = "timestamp")
   private LocalDateTime lastUpdated;
 
   @Column(name = "instruction")

@@ -38,7 +38,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Logger;
 
-@Path("mgmt/store")
+@Path("orchestrator/mgmt/store")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class StoreApi {
@@ -101,7 +101,6 @@ public class StoreApi {
   @GET
   @Path("all_default")
   public List<OrchestrationStore> getDefaultStoreEntries() {
-
     restrictionMap.put("defaultEntry", true);
     List<OrchestrationStore> store = dm.getAll(OrchestrationStore.class, restrictionMap);
     if (store.isEmpty()) {
