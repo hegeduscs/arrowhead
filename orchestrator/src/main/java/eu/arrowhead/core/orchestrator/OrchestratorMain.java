@@ -100,6 +100,7 @@ public class OrchestratorMain {
           SR_BASE_URI = Utility.getUri(srAddress, srSecurePort, "serviceregistry", true, true);
           server = startSecureServer();
           useSRService(true);
+          break;
         case "-nogk":
           USE_GATEKEEPER = false;
       }
