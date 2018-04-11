@@ -13,21 +13,25 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class GSDRequestForm {
 
   private ArrowheadService requestedService;
   private List<ArrowheadCloud> searchPerimeter = new ArrayList<>();
+  private Map<String, Boolean> registryFlags = new HashMap<>();
 
   public GSDRequestForm() {
   }
 
-  public GSDRequestForm(ArrowheadService requestedService, List<ArrowheadCloud> searchPerimeter) {
+  public GSDRequestForm(ArrowheadService requestedService, List<ArrowheadCloud> searchPerimeter, Map<String, Boolean> registryFlags) {
     this.requestedService = requestedService;
     this.searchPerimeter = searchPerimeter;
+    this.registryFlags = registryFlags;
   }
 
   public ArrowheadService getRequestedService() {
@@ -44,6 +48,14 @@ public class GSDRequestForm {
 
   public void setSearchPerimeter(List<ArrowheadCloud> searchPerimeter) {
     this.searchPerimeter = searchPerimeter;
+  }
+
+  public Map<String, Boolean> getRegistryFlags() {
+    return registryFlags;
+  }
+
+  public void setRegistryFlags(Map<String, Boolean> registryFlags) {
+    this.registryFlags = registryFlags;
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {

@@ -73,7 +73,7 @@ public class GatekeeperOutboundResource {
   public Response GSDRequest(GSDRequestForm requestForm) {
     requestForm.missingFields(true, null);
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
-    GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
+    GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud, requestForm.getRegistryFlags());
 
     // If no preferred Clouds were given, send GSD poll requests to the neighbor Clouds
     List<String> cloudURIs = new ArrayList<>();

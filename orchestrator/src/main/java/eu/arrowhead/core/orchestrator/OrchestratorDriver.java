@@ -384,9 +384,10 @@ final class OrchestratorDriver {
    *
    * @throws DataNotFoundException if none of the discovered <tt>ArrowheadCloud</tt>s returned back positive result
    */
-  static GSDResult doGlobalServiceDiscovery(ArrowheadService requestedService, List<ArrowheadCloud> preferredClouds) {
+  static GSDResult doGlobalServiceDiscovery(ArrowheadService requestedService, List<ArrowheadCloud> preferredClouds,
+                                            Map<String, Boolean> registryFlags) {
     // Compiling the request payload
-    GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds);
+    GSDRequestForm requestForm = new GSDRequestForm(requestedService, preferredClouds, registryFlags);
 
     // Sending the request, sanity check on the returned result
     Response response = Utility.sendRequest(OrchestratorMain.GSD_SERVICE_URI, "PUT", requestForm);

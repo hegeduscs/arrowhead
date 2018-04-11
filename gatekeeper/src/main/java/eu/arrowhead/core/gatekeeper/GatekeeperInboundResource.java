@@ -84,7 +84,9 @@ public class GatekeeperInboundResource {
     else {
       // Compiling the URI and the request payload
       String srUri = UriBuilder.fromPath(GatekeeperMain.SERVICE_REGISTRY_URI).path("query").toString();
-      ServiceQueryForm queryForm = new ServiceQueryForm(gsdPoll.getRequestedService(), false, false);
+      Map<String, Boolean> registryFlags = gsdPoll.getRegistryFlags();
+      ServiceQueryForm queryForm = new ServiceQueryForm(gsdPoll.getRequestedService(), registryFlags.get("pingProviders"),
+                                                        registryFlags.get("metadataSearch"));
 
       // Sending back provider Cloud information if the SR poll has results
       Response srResponse = Utility.sendRequest(srUri, "PUT", queryForm);

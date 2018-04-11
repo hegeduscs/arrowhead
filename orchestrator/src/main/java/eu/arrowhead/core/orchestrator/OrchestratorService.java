@@ -24,6 +24,7 @@ import eu.arrowhead.common.messages.PreferredProvider;
 import eu.arrowhead.common.messages.ServiceRequestForm;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -227,8 +228,11 @@ final class OrchestratorService {
       }
     }
 
+    Map<String, Boolean> registryFlags = new HashMap<>();
+    registryFlags.put("metadataSearch", orchestrationFlags.get("metadataSearch"));
+    registryFlags.put("pingProviders", orchestrationFlags.get("pingProviders"));
     // Telling the Gatekeeper to do a Global Service Discovery
-    GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(srf.getRequestedService(), preferredClouds);
+    GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(srf.getRequestedService(), preferredClouds, registryFlags);
     log.debug("triggerInterCloud: GSD results arrived back to the Orchestrator");
 
     // Picking a target Cloud from the ones that responded to the GSD poll

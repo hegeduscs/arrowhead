@@ -14,7 +14,9 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @JsonIgnoreProperties({"alwaysMandatoryFields"})
@@ -24,13 +26,15 @@ public class GSDPoll extends ArrowheadBase {
 
   private ArrowheadService requestedService;
   private ArrowheadCloud requesterCloud;
+  private Map<String, Boolean> registryFlags = new HashMap<>();
 
   public GSDPoll() {
   }
 
-  public GSDPoll(ArrowheadService requestedService, ArrowheadCloud requesterCloud) {
+  public GSDPoll(ArrowheadService requestedService, ArrowheadCloud requesterCloud, Map<String, Boolean> registryFlags) {
     this.requestedService = requestedService;
     this.requesterCloud = requesterCloud;
+    this.registryFlags = registryFlags;
   }
 
   public ArrowheadService getRequestedService() {
@@ -47,6 +51,14 @@ public class GSDPoll extends ArrowheadBase {
 
   public void setRequesterCloud(ArrowheadCloud requesterCloud) {
     this.requesterCloud = requesterCloud;
+  }
+
+  public Map<String, Boolean> getRegistryFlags() {
+    return registryFlags;
+  }
+
+  public void setRegistryFlags(Map<String, Boolean> registryFlags) {
+    this.registryFlags = registryFlags;
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
