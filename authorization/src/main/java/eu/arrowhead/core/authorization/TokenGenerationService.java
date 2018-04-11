@@ -29,7 +29,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ServiceConfigurationError;
 import javax.crypto.Cipher;
@@ -102,6 +101,10 @@ class TokenGenerationService {
 
       // There is an upper limit for the size of the token info, skip providers which exceeds this limit
       String json = Utility.toPrettyJson(null, rawTokenInfo);
+      if (json == null) {
+        log.error("RawTokenInfo serialization failed. Skipped provider.");
+        continue;
+      }
       System.out.println("Raw token info: ");
       System.out.println(json);
       if (json.length() > 244) {
@@ -147,26 +150,15 @@ class TokenGenerationService {
 
 
   private static List<PublicKey> getProviderPublicKeys(List<ArrowheadSystem> providers) {
-    HashMap<String, Object> restrictionMap = new HashMap<>();
     List<PublicKey> keys = new ArrayList<>();
 
     for (ArrowheadSystem provider : providers) {
-      // Get the provider from the database
-      restrictionMap.clear();
-      restrictionMap.put("systemName", provider.getSystemName());
-      ArrowheadSystem retrievedProvider = AuthorizationResource.dm.get(ArrowheadSystem.class, restrictionMap);
-
-      if (retrievedProvider != null) {
-        try {
-          PublicKey key = getPublicKey(retrievedProvider.getAuthenticationInfo());
-          keys.add(key);
-        } catch (InvalidKeySpecException | NullPointerException e) {
-          log.error("The stored auth info for the ArrowheadSystem (" + provider.getSystemName()
-                        + ") is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
-          keys.add(null);
-        }
-      } else {
-        // In theory this branch will not get called, since the Orchestrator will filter out systems not in the database.
+      try {
+        PublicKey key = getPublicKey(provider.getAuthenticationInfo());
+        keys.add(key);
+      } catch (InvalidKeySpecException | NullPointerException e) {
+        log.error("The stored auth info for the ArrowheadSystem (" + provider.getSystemName()
+                      + ") is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
         keys.add(null);
       }
     }

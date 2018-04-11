@@ -10,6 +10,8 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ArrowheadBase;
 import java.time.LocalDateTime;
@@ -91,6 +93,7 @@ public class OrchestrationStore extends ArrowheadBase implements Comparable<Orch
   @Column(name = "instruction")
   private String instruction;
 
+  @JsonInclude(Include.NON_EMPTY)
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
   @MapKeyColumn(name = "attribute_key")

@@ -10,11 +10,13 @@
 package eu.arrowhead.common.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.json.support.ArrowheadServiceSupport;
 import eu.arrowhead.common.messages.ArrowheadBase;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +46,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 public class ArrowheadService extends ArrowheadBase {
 
   @Transient
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("serviceDefinition"));
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("serviceDefinition"));
 
   @Column(name = "id")
   @Id
@@ -60,6 +62,7 @@ public class ArrowheadService extends ArrowheadBase {
   private List<String> interfaces = new ArrayList<>();
 
   @Transient
+  @JsonInclude(Include.NON_EMPTY)
   private Map<String, String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {
