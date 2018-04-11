@@ -68,7 +68,7 @@ public class ServiceRegistryResource {
     if (ServiceRegistry.unRegister(entry)) {
       return Response.status(Response.Status.OK).build();
     } else {
-      return Response.status(Response.Status.NO_CONTENT).build();
+      return Response.status(Response.Status.PARTIAL_CONTENT).build();
     }
   }
 
@@ -112,7 +112,7 @@ public class ServiceRegistryResource {
     if (ServiceRegistry.unRegister(entry)) {
       return Response.status(Response.Status.OK).build();
     } else {
-      return Response.status(Response.Status.NO_CONTENT).build();
+      return Response.status(Response.Status.PARTIAL_CONTENT).build();
     }
   }
 
@@ -132,7 +132,7 @@ public class ServiceRegistryResource {
     if (!sqr.getServiceQueryData().isEmpty()) {
       return Response.status(Response.Status.OK).entity(sqr).build();
     } else {
-      return Response.status(Response.Status.NO_CONTENT).entity(sqr).build();
+      return Response.status(Response.Status.PARTIAL_CONTENT).entity(sqr).build();
     }
   }
 
@@ -149,7 +149,7 @@ public class ServiceRegistryResource {
       entry.fromDatabase();
     }
     if (sqr.getServiceQueryData().isEmpty()) {
-      return Response.status(Status.NO_CONTENT).entity(sqr).build();
+      return Response.status(Status.PARTIAL_CONTENT).entity(sqr).build();
     } else {
       return Response.status(Response.Status.OK).entity(sqr).build();
     }
