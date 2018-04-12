@@ -129,6 +129,7 @@ public class ServiceRequestForm {
       mandatoryFields = requesterSystem.missingFields(false, mandatoryFields);
     }
     if (requestedService != null) {
+      mandatoryFields.add("interfaces");
       mandatoryFields = requestedService.missingFields(false, false, mandatoryFields);
     }
     if (orchestrationFlags.get("onlyPreferred")) {
