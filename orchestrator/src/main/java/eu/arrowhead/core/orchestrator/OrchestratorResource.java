@@ -82,6 +82,7 @@ public class OrchestratorResource {
     log.info("Received a GET Store orchestration from: " + requesterSystem.getSystemName());
 
     ServiceRequestForm srf = new ServiceRequestForm.Builder(requesterSystem).build();
+    srf.missingFields(true, null);
     OrchestrationResponse orchResponse = OrchestratorService.orchestrationFromStore(srf);
 
     log.info("Default store orchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");
