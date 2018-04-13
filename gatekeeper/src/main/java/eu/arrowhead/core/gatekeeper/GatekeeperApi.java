@@ -120,7 +120,7 @@ public class GatekeeperApi {
         restrictionMap.put("cloud", cloud);
         NeighborCloud neighborCloud = dm.get(NeighborCloud.class, restrictionMap);
         if (neighborCloud == null) {
-          dm.merge(nc);
+          dm.save(nc);
           savedNeighborClouds.add(nc);
         }
       }
