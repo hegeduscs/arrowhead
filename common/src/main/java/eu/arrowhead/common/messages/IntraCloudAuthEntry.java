@@ -16,6 +16,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @JsonIgnoreProperties({"alwaysMandatoryFields"})
@@ -24,13 +25,13 @@ public class IntraCloudAuthEntry extends ArrowheadBase {
   private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("serviceList", "consumer", "providerList"));
 
   private ArrowheadSystem consumer;
-  private ArrayList<ArrowheadSystem> providerList = new ArrayList<>();
-  private ArrayList<ArrowheadService> serviceList = new ArrayList<>();
+  private List<ArrowheadSystem> providerList = new ArrayList<>();
+  private List<ArrowheadService> serviceList = new ArrayList<>();
 
   public IntraCloudAuthEntry() {
   }
 
-  public IntraCloudAuthEntry(ArrowheadSystem consumer, ArrayList<ArrowheadSystem> providerList, ArrayList<ArrowheadService> serviceList) {
+  public IntraCloudAuthEntry(ArrowheadSystem consumer, List<ArrowheadSystem> providerList, List<ArrowheadService> serviceList) {
     this.consumer = consumer;
     this.providerList = providerList;
     this.serviceList = serviceList;
@@ -44,19 +45,19 @@ public class IntraCloudAuthEntry extends ArrowheadBase {
     this.consumer = consumer;
   }
 
-  public ArrayList<ArrowheadSystem> getProviderList() {
+  public List<ArrowheadSystem> getProviderList() {
     return providerList;
   }
 
-  public void setProviderList(ArrayList<ArrowheadSystem> providerList) {
+  public void setProviderList(List<ArrowheadSystem> providerList) {
     this.providerList = providerList;
   }
 
-  public ArrayList<ArrowheadService> getServiceList() {
+  public List<ArrowheadService> getServiceList() {
     return serviceList;
   }
 
-  public void setServiceList(ArrayList<ArrowheadService> serviceList) {
+  public void setServiceList(List<ArrowheadService> serviceList) {
     this.serviceList = serviceList;
   }
 

@@ -167,30 +167,39 @@ public class StoreApi {
       }
 
       restrictionMap.clear();
-      restrictionMap.put("operator", entry.getProviderCloud().getOperator());
-      restrictionMap.put("cloudName", entry.getProviderCloud().getCloudName());
-      ArrowheadCloud providerCloud = dm.get(ArrowheadCloud.class, restrictionMap);
-      if (providerCloud == null) {
-        providerCloud = dm.save(entry.getProviderCloud());
-      }
-
-      restrictionMap.clear();
       restrictionMap.put("systemName", entry.getProviderSystem().getSystemName());
       ArrowheadSystem providerSystem = dm.get(ArrowheadSystem.class, restrictionMap);
       if (providerSystem == null) {
         providerSystem = dm.save(entry.getProviderSystem());
       }
 
-      entry.setConsumer(consumer);
-      entry.setService(service);
-      entry.setProviderSystem(providerSystem);
-      entry.setProviderCloud(providerCloud);
-      entry.setLastUpdated(LocalDateTime.now());
-      dm.merge(entry);
-      store.add(entry);
+      ArrowheadCloud providerCloud = null;
+      if (entry.getProviderCloud() != null) {
+        entry.getProviderCloud().missingFields(true, null);
+        restrictionMap.clear();
+        restrictionMap.put("operator", entry.getProviderCloud().getOperator());
+        restrictionMap.put("cloudName", entry.getProviderCloud().getCloudName());
+        providerCloud = dm.get(ArrowheadCloud.class, restrictionMap);
+        if (providerCloud == null) {
+          providerCloud = dm.save(entry.getProviderCloud());
+        }
+      }
+
+      restrictionMap.clear();
+      restrictionMap.put("consumer", consumer);
+      restrictionMap.put("service", service);
+      restrictionMap.put("priority", entry.getPriority());
+      restrictionMap.put("defaultEntry", entry.isDefaultEntry());
+      OrchestrationStore storeEntry = dm.get(OrchestrationStore.class, restrictionMap);
+      if (storeEntry == null) {
+        storeEntry = new OrchestrationStore(service, consumer, providerSystem, providerCloud, entry.getPriority(), entry.isDefaultEntry(),
+                                            entry.getName(), LocalDateTime.now(), entry.getInstruction(), entry.getAttributes(), null);
+        storeEntry = dm.save(storeEntry);
+        store.add(storeEntry);
+      }
     }
 
-    log.info("addStoreEntries successfully returns. Arraylist size: " + store.size());
+    log.info("addStoreEntries successfully returns. List size: " + store.size());
     return store;
   }
 
