@@ -163,7 +163,7 @@ public class GatekeeperApi {
 
   /**
    * Deletes the NeighborCloud from the database specified by the operator and cloud name. Returns 200 if the delete is successful, 204 (no content)
-   * if the system was not in the database to begin with.
+   * if the cloud was not in the database to begin with.
    */
   @DELETE
   @Path("neighborhood/operator/{operator}/cloudname/{cloudName}")
