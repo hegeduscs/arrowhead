@@ -37,7 +37,7 @@ public class StoreResource {
   }
 
   @GET
-  @Path("systemname/{systemName}")
+  @Path("consumername/{systemName}")
   public List<OrchestrationStore> getDefaultEntriesForConsumer(@PathParam("systemName") String systemName) {
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
@@ -57,7 +57,7 @@ public class StoreResource {
   }
 
   @GET
-  @Path("systemname/{systemName}/servicedef/{serviceDef}")
+  @Path("consumername/{systemName}/servicedef/{serviceDef}")
   public List<OrchestrationStore> getStoreEntries(@PathParam("systemName") String systemName, @PathParam("serviceDef") String serviceDef) {
     restrictionMap.put("systemName", systemName);
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
