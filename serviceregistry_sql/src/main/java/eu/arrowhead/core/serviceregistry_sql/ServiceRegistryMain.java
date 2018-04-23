@@ -130,7 +130,7 @@ public class ServiceRegistryMain {
 
     URI uri = UriBuilder.fromUri(BASE_URI).build();
     try {
-      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, false);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
       log.info("Started server at: " + BASE_URI);
@@ -180,7 +180,7 @@ public class ServiceRegistryMain {
     URI uri = UriBuilder.fromUri(BASE_URI).build();
     try {
       final HttpServer server = GrizzlyHttpServerFactory
-          .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true));
+          .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true), false);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
       log.info("Started server at: " + BASE_URI);

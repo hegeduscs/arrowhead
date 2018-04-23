@@ -158,7 +158,7 @@ public class GatekeeperMain {
 
     URI uri = UriBuilder.fromUri(url).build();
     try {
-      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, false);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
       if (inbound) {
@@ -230,7 +230,7 @@ public class GatekeeperMain {
     URI uri = UriBuilder.fromUri(url).build();
     try {
       final HttpServer server = GrizzlyHttpServerFactory
-          .createHttpServer(uri, config, true, new SSLEngineConfigurator(serverContext).setClientMode(false).setNeedClientAuth(true));
+          .createHttpServer(uri, config, true, new SSLEngineConfigurator(serverContext).setClientMode(false).setNeedClientAuth(true), false);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
       if (inbound) {
