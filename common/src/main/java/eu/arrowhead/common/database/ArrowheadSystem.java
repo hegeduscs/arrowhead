@@ -48,7 +48,7 @@ public class ArrowheadSystem extends ArrowheadBase {
   private String address;
 
   @Transient
-  private int port;
+  private Integer port;
 
   @Column(name = "authentication_info", length = 2047)
   private String authenticationInfo;
@@ -56,7 +56,7 @@ public class ArrowheadSystem extends ArrowheadBase {
   public ArrowheadSystem() {
   }
 
-  public ArrowheadSystem(String systemName, String address, int port, String authenticationInfo) {
+  public ArrowheadSystem(String systemName, String address, Integer port, String authenticationInfo) {
     this.systemName = systemName;
     this.address = address;
     this.port = port;
@@ -113,11 +113,11 @@ public class ArrowheadSystem extends ArrowheadBase {
     this.address = address;
   }
 
-  public int getPort() {
+  public Integer getPort() {
     return port;
   }
 
-  public void setPort(int port) {
+  public void setPort(Integer port) {
     this.port = port;
   }
 
