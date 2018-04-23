@@ -128,7 +128,9 @@ public class ServiceRequestForm {
     } else {
       mandatoryFields = requesterSystem.missingFields(false, mandatoryFields);
     }
-    if (requestedService != null) {
+    if (requestedService == null && orchestrationFlags.get("overrideStore")) {
+      mandatoryFields.add("requestedService can not be null when overrideStore is TRUE");
+    } else {
       mandatoryFields.add("interfaces");
       mandatoryFields = requestedService.missingFields(false, false, mandatoryFields);
     }
