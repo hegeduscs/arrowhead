@@ -130,7 +130,7 @@ public class ServiceRequestForm {
     }
     if (requestedService == null && orchestrationFlags.get("overrideStore")) {
       mandatoryFields.add("requestedService can not be null when overrideStore is TRUE");
-    } else {
+    } else if (requestedService != null) {
       mandatoryFields.add("interfaces");
       mandatoryFields = requestedService.missingFields(false, false, mandatoryFields);
     }
