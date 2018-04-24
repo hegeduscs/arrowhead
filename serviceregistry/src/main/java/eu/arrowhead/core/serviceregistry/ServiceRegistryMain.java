@@ -61,6 +61,7 @@ public class ServiceRegistryMain {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
 
     //Setting up DNS
+    System.setProperty("dns.server", DNS_ADDRESS);
     System.setProperty("dnssd.domain", DNS_DOMAIN);
     System.setProperty("dnssd.hostname", getDnsProp().getProperty("dns_host", "localhost"));
     if (!DNS_REGISTRATOR_DOMAIN.endsWith(".")) {
