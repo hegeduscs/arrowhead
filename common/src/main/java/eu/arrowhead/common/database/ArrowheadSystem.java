@@ -69,7 +69,7 @@ public class ArrowheadSystem extends ArrowheadBase {
 
     if (fields.length == 4) {
       this.address = fields[1].equals("null") ? null : fields[1];
-      this.port = Integer.valueOf(fields[2]);
+      this.port = fields[2].equals("null") ? null : Integer.valueOf(fields[2]);
       this.authenticationInfo = fields[3].equals("null") ? null : fields[3];
     }
   }
