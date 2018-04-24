@@ -32,7 +32,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@JsonIgnoreProperties({"alwaysMandatoryFields", "id", "port", "metadata", "endOfValidity"})
+@JsonIgnoreProperties({"alwaysMandatoryFields", "id", "metadata", "endOfValidity"})
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
 public class ServiceRegistryEntry extends ArrowheadBase {
 
@@ -220,7 +220,7 @@ public class ServiceRegistryEntry extends ArrowheadBase {
       metadata = sb.toString().substring(0, sb.length() - 1);
     }
 
-    if (provider.getPort() != 0 && (port == null || port == 0)) {
+    if (provider.getPort() != null && (port == null || port == 0)) {
       port = provider.getPort();
     }
 
@@ -242,7 +242,7 @@ public class ServiceRegistryEntry extends ArrowheadBase {
       }
     }
 
-    if (port != null && provider.getPort() == 0) {
+    if (port != null && provider.getPort() == null) {
       provider.setPort(port);
     }
 

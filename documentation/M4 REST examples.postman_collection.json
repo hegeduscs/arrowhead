@@ -1,0 +1,2470 @@
+{
+  "info": {
+    "_postman_id": "832c4597-f148-45d1-b066-083606bf61cb",
+    "name": "M4 REST examples",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authorization",
+      "description": "",
+      "item": [
+        {
+          "name": "Management",
+          "description": "",
+          "item": [
+            {
+              "name": "Authorization Management GetIt()",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt"
+                  ]
+                },
+                "description": "Tests if the Authorization Management REST resource is available."
+              },
+              "response": []
+            },
+            {
+              "name": "Get All IntraCloud Auth Rights",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud"
+                  ]
+                },
+                "description": "IntraCloud authorization rights consist of a consumer ArrowheadSystem, a provider ArrowheadSystem and an ArrowheadService."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Authorized Services For Provider System",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud/systemname/test_system/services?provider_side=true",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud",
+                    "systemname",
+                    "test_system",
+                    "services"
+                  ],
+                  "query": [
+                    {
+                      "key": "provider_side",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Returns all the ArrowheadServices from IntraCloud authorization rights where the given System is the provider."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Authorized Services For Consumer System",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud/systemname/test_system/services?provider_side=false",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud",
+                    "systemname",
+                    "test_system",
+                    "services"
+                  ],
+                  "query": [
+                    {
+                      "key": "provider_side",
+                      "value": "false"
+                    }
+                  ]
+                },
+                "description": "Returns all the ArrowheadServices from IntraCloud authorization rights where the given System is the consumer."
+              },
+              "response": []
+            },
+            {
+              "name": "Get IntraCloud Auth Rights For System",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud/systemname/test_system",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud",
+                    "systemname",
+                    "test_system"
+                  ]
+                },
+                "description": "Returns all the IntraCloud authorization rights where the given System is a provider OR consumer."
+              },
+              "response": []
+            },
+            {
+              "name": "Get IntraCloud Auth Rights For Service",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud/servicedef/test_service",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud",
+                    "servicedef",
+                    "test_service"
+                  ]
+                },
+                "description": "Returns all the IntraCloud authorization rights beloging to the given Service"
+              },
+              "response": []
+            },
+            {
+              "name": "Save IntraCloud Auth Rights",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\t\"consumer\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"authenticationInfo\": \"auth info\"\r\n\t},\r\n\t\"providerList\": [{\r\n\t\t\t\"systemName\": \"test_system2\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"authenticationInfo\": \"auth info\"\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"systemName\": \"test_system3\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"authenticationInfo\": \"auth info\"\r\n\t\t}\r\n\t],\r\n\t\"serviceList\": [{\r\n\t\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\t\"interfaces\": [\"test_interface\", \"test_interface2\"]\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"serviceDefinition\": \"test_service2\",\r\n\t\t\t\"interfaces\": [\"test_interface3\", \"test_interface4\"]\r\n\t\t}\r\n\t]\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud"
+                  ]
+                },
+                "description": "Multiple provider Systems and Services can be listed at once. For example if there are 3 providers in the list and 4 services, then 12 (3*4) different IntraCloud authorization rights will be saved for the given consumer. AuthenticationInfo should contain the Base64 coded public key of the System, if the System will be used securely with TLS, otherwise it is optional. Only the saved authorization rights are returned. Already existing rules or rules with missing mandatory fields will be skipped."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete IntraCloud Auth Right By ID",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud",
+                    "1"
+                  ]
+                },
+                "description": "The ID can be acquired with a getAllIntraCloud() request for example. Returns 204 if the request had no effect."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete IntraCloud Auth Rights For Provider System",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud/systemname/test_system?provider_side=true",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud",
+                    "systemname",
+                    "test_system"
+                  ],
+                  "query": [
+                    {
+                      "key": "provider_side",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Deletes every IntraCloud authorization right where the given System is the provider. Returns 204 if the request had no effect."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete IntraCloud Auth Rights For Consumer System",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intracloud/systemname/test_system?provider_side=false",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intracloud",
+                    "systemname",
+                    "test_system"
+                  ],
+                  "query": [
+                    {
+                      "key": "provider_side",
+                      "value": "false"
+                    }
+                  ]
+                },
+                "description": "Deletes every IntraCloud authorization right where the given System is the consumer. Returns 204 if the request had no effect."
+              },
+              "response": []
+            },
+            {
+              "name": "Get All InterCloud Auth Rights",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intercloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intercloud"
+                  ]
+                },
+                "description": "InterCloud authorization rights consist of a consumer ArrowheadCloud and an ArrowheadSerivce. The provider System can be any System registered in the Service Registry with the right Service."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Authorized Services For Cloud",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intercloud/operator/test_operator/cloudname/test_cloud/services",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intercloud",
+                    "operator",
+                    "test_operator",
+                    "cloudname",
+                    "test_cloud",
+                    "services"
+                  ]
+                },
+                "description": "Returns all the Services the Cloud is authorized to consume from this Local Cloud (but the Services might not be available)."
+              },
+              "response": []
+            },
+            {
+              "name": "Get InterCloud Auth Rights For Cloud",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intercloud/operator/test_operator/cloudname/test_cloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intercloud",
+                    "operator",
+                    "test_operator",
+                    "cloudname",
+                    "test_cloud"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get InterCloud Auth Rights For Service",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intercloud/servicedef/test_service",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intercloud",
+                    "servicedef",
+                    "test_service"
+                  ]
+                },
+                "description": "Returns all the InterCloud authorization rights with the given Service."
+              },
+              "response": []
+            },
+            {
+              "name": "Save InterCloud Auth Rights",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\t\"cloud\": {\r\n\t\t\"operator\": \"test_operator\",\r\n\t\t\"cloudName\": \"test_cloud\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"port\": 8446,\r\n\t\t\"gatekeeperServiceURI\": \"gatekeeper\",\r\n\t\t\"authenticationInfo\": \"auth info\",\r\n\t\t\"secure\": false\r\n\t},\r\n\t\"serviceList\": [{\r\n\t\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\t\"interfaces\": [\"test_interface\", \"test_interface2\"]\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"serviceDefinition\": \"test_service2\",\r\n\t\t\t\"interfaces\": [\"test_interface3\", \"test_interface4\"]\r\n\t\t}\r\n\t]\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intercloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intercloud"
+                  ]
+                },
+                "description": "Multiple Services can be listed at once, adding a new InterCloud authorization right for each Cloud-Service pair. Only the saved authorization rights are returned. Already existing rules or rules with missing mandatory fields will be skipped."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete InterCloud Auth Right By ID",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intercloud/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intercloud",
+                    "1"
+                  ]
+                },
+                "description": "The ID can be acquired with a getAllInterCloud() request for example. Returns 204 if the request had no effect."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete InterCloud Auth Rights For Cloud",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8444/authorization/mgmt/intercloud/operator/test_operator/cloudname/test_cloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8444",
+                  "path": [
+                    "authorization",
+                    "mgmt",
+                    "intercloud",
+                    "operator",
+                    "test_operator",
+                    "cloudname",
+                    "test_cloud"
+                  ]
+                },
+                "description": "Returns 204 if the request had no effect."
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "Authorization GetIt()",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "url": {
+              "raw": "http://localhost:8444/authorization",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8444",
+              "path": [
+                "authorization"
+              ]
+            },
+            "description": "Tests if the Authorization REST resource is available."
+          },
+          "response": []
+        },
+        {
+          "name": "Query IntraCloud Auth Rights",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\t\"consumer\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"authenticationInfo\": \"auth info\"\r\n\t},\r\n\t\"providers\": [{\r\n\t\t\t\"systemName\": \"test_system2\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"authenticationInfo\": \"auth info\"\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"systemName\": \"test_system3\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"authenticationInfo\": \"auth info\"\r\n\t\t}\r\n\t],\r\n\t\"service\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"test_interface\", \"test_interface2\"]\r\n\t}\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8444/authorization/intracloud",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8444",
+              "path": [
+                "authorization",
+                "intracloud"
+              ]
+            },
+            "description": "Multiple providers can be given, the response will be a HashMap<ProviderSystem, boolean>"
+          },
+          "response": []
+        },
+        {
+          "name": "Query InterCloud Auth Rights",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\t\"cloud\": {\r\n\t\t\"operator\": \"test_operator\",\r\n\t\t\"cloudName\": \"test_cloud\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"port\": 8446,\r\n\t\t\"gatekeeperServiceURI\": \"gatekeeper\",\r\n\t\t\"authenticationInfo\": \"auth info\",\r\n\t\t\"secure\": false\r\n\t},\r\n\t\"service\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"test_interface\", \"test_interface2\"]\r\n\t}\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8444/authorization/intercloud",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8444",
+              "path": [
+                "authorization",
+                "intercloud"
+              ]
+            },
+            "description": "Returns true or false"
+          },
+          "response": []
+        },
+        {
+          "name": "Token Generation Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\t\"consumer\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"authenticationInfo\": \"auth info\"\r\n\t},\r\n\t\"consumerCloud\": {\r\n\t\t\"operator\": \"test_operator\",\r\n\t\t\"cloudName\": \"test_cloud\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"port\": 8446,\r\n\t\t\"gatekeeperServiceURI\": \"gatekeeper\",\r\n\t\t\"authenticationInfo\": \"auth info\",\r\n\t\t\"secure\": false\r\n\t},\r\n\t\"providers\": [{\r\n\t\t\t\"systemName\": \"test_system2\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"authenticationInfo\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyzDRU+P6h8Jwp9eiGYqqlgoAmPLo6M/PTZX+pkKr2MIg7VLdnjUeXzKFljwJKjYGG3nus53F4RFnymT7VoIQT+SmkuLy90Ir6O3XRWiD74XlOIkthT8/fq5FP9sJIusaRc9jkx3Y8jC3yCz1BPJDa+0A+heWarN+K7W7985aBFiJ1ycsB7yJFYAt7wVRc2fkgGpmp4l34Ta4J7QVwzYBOx5w5hIE29EzXOhl0GB6c/licclhisOnN31OWizoWJWAdexmjR9ugHgFSv4eUbjQ3/Qc0tM3ljmbnMMmj54fKZHtpesLXrCi44aQ88e7UOd/xplAbntEPvz168oie4IzFQIDAQAB\"\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"systemName\": \"test_system3\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"authenticationInfo\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyzDRU+P6h8Jwp9eiGYqqlgoAmPLo6M/PTZX+pkKr2MIg7VLdnjUeXzKFljwJKjYGG3nus53F4RFnymT7VoIQT+SmkuLy90Ir6O3XRWiD74XlOIkthT8/fq5FP9sJIusaRc9jkx3Y8jC3yCz1BPJDa+0A+heWarN+K7W7985aBFiJ1ycsB7yJFYAt7wVRc2fkgGpmp4l34Ta4J7QVwzYBOx5w5hIE29EzXOhl0GB6c/licclhisOnN31OWizoWJWAdexmjR9ugHgFSv4eUbjQ3/Qc0tM3ljmbnMMmj54fKZHtpesLXrCi44aQ88e7UOd/xplAbntEPvz168oie4IzFQIDAQAB\"\r\n\t\t}\r\n\t],\r\n\t\"service\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"test_interface\", \"test_interface2\"]\r\n\t},\r\n\t\"duration\": 0\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8444/authorization/token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8444",
+              "path": [
+                "authorization",
+                "token"
+              ]
+            },
+            "description": "The token is generated from the RawTokenInfo POJO for each Provider, which includes the first interface of each Service. Token generation is skipped for a Provider, if its authentication info does not hold a valid Base64 coded (RSA 2048-bit) public key."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Gatekeeper",
+      "description": "",
+      "item": [
+        {
+          "name": "Management",
+          "description": "",
+          "item": [
+            {
+              "name": "Gatekeeper Management GetIt()",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt"
+                  ]
+                },
+                "description": "Tests if the Gatekeeper Management REST resource is available."
+              },
+              "response": [
+                {
+                  "id": "43b597be-4b2d-4a9f-816a-9b6b12e2823c",
+                  "name": "Gatekeeper Management GetIt()",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "body": {},
+                    "url": {
+                      "raw": "http://localhost:8446/gatekeeper/mgmt",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "8446",
+                      "path": [
+                        "gatekeeper",
+                        "mgmt"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "plain",
+                  "header": [
+                    {
+                      "key": "Content-Length",
+                      "value": "22",
+                      "name": "Content-Length",
+                      "description": "The length of the response body in octets (8-bit bytes)"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "text/plain",
+                      "name": "Content-Type",
+                      "description": "The mime type of this content"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Fri, 13 Apr 2018 08:19:05 GMT",
+                      "name": "Date",
+                      "description": "The date and time that the message was sent"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "gatekeeper/mgmt got it"
+                }
+              ]
+            },
+            {
+              "name": "Get All Neighboring Clouds",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/neighborhood",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "neighborhood"
+                  ]
+                },
+                "description": "The Gatekeeper will turn to these Clouds during a Global Service Discovery, if none were given by the Consumer System."
+              },
+              "response": []
+            },
+            {
+              "name": "Get a Neighboring Cloud",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/neighborhood/operator/test_operator/cloudname/test_cloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "neighborhood",
+                    "operator",
+                    "test_operator",
+                    "cloudname",
+                    "test_cloud"
+                  ]
+                },
+                "description": "The Cloud is identified by the path parameters: operator and cloud name."
+              },
+              "response": []
+            },
+            {
+              "name": "Save Neighboring Clouds",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[{\r\n\t\t\"cloud\": {\r\n\t\t\t\"operator\": \"test_operator\",\r\n\t\t\t\"cloudName\": \"test_cloud\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"port\": 8446,\r\n\t\t\t\"gatekeeperServiceURI\": \"gatekeeper\",\r\n\t\t\t\"authenticationInfo\": \"auth info\",\r\n\t\t\t\"secure\": false\r\n\t\t}\r\n\t},\r\n\t{\r\n\t\t\"cloud\": {\r\n\t\t\t\"operator\": \"test_operator2\",\r\n\t\t\t\"cloudName\": \"test_cloud2\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"port\": 8446,\r\n\t\t\t\"gatekeeperServiceURI\": \"gatekeeper\",\r\n\t\t\t\"authenticationInfo\": \"auth info\",\r\n\t\t\t\"secure\": false\r\n\t\t}\r\n\t}\r\n]"
+                },
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/neighborhood",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "neighborhood"
+                  ]
+                },
+                "description": "Only the saved neighboring clouds are returned. Already existing clouds or clouds with missing mandatory fields will be skipped."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Neighboring Cloud",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\t\"cloud\": {\r\n\t\t\"operator\": \"test_operator\",\r\n\t\t\"cloudName\": \"test_cloud\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"port\": 8446,\r\n\t\t\"gatekeeperServiceURI\": \"new_gatekeeper\",\r\n\t\t\"authenticationInfo\": \"UPDATED auth info\",\r\n\t\t\"secure\": false\r\n\t}\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/neighborhood",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "neighborhood"
+                  ]
+                },
+                "description": "Updates an existing Neighboring Cloud identifed by the cloud name and operator fields (this 2 fields together has to be unique). If the cloud name or operator field needs to be changed, delete the Neighboring Cloud first and post the new one with the modified fields."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete a Neighboring Cloud",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/neighborhood/operator/test_operator/cloudname/test_cloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "neighborhood",
+                    "operator",
+                    "test_operator",
+                    "cloudname",
+                    "test_cloud"
+                  ]
+                },
+                "description": "Neighboring Cloud is identified by the operator and cloud name path parameters."
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Brokers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/brokers",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "brokers"
+                  ]
+                },
+                "description": "Brokers handle the communication between the Gateway core systems, usually using AMQP or MQTT protocol."
+              },
+              "response": []
+            },
+            {
+              "name": "Get One Broker Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/brokers/brokername/test_broker",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "brokers",
+                    "brokername",
+                    "test_broker"
+                  ]
+                },
+                "description": "The Broker is identified by the broker name path parameter."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Brokers By Address",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/brokers/address/test_address",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "brokers",
+                    "address",
+                    "test_address"
+                  ]
+                },
+                "description": "The Brokers are identified by the address path parameter."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Brokers By Address And Port",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/brokers/address/test_address/port/8080",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "brokers",
+                    "address",
+                    "test_address",
+                    "port",
+                    "8080"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Save Brokers",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[{\r\n\t\t\"brokerName\": \"test_broker\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"port\": 8080,\r\n\t\t\"secure\": false,\r\n\t\t\"authenticationInfo\": \"auth info\"\r\n\t},\r\n\t{\r\n\t\t\"brokerName\": \"test_broker2\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"port\": 8080,\r\n\t\t\"secure\": true,\r\n\t\t\"authenticationInfo\": \"MIIC+DCCAeCgAwIBAgIEWlYfrjANBgkqhkiG9w0BAQsFADBHMSEwHwYDVQQKDBhBSVRJQSBJbnRlcm5hdGlvbmFsIEluYy4xCzAJBgNVBAYTAkhVMRUwEwYDVQQDDAxhcnJvd2hlYWQuZXUwHhcNMTgwMTEwMTQxNDA2WhcNMjgwMTEwMTQxNDA2WjA1MQswCQYDVQQGEwJIVTEmMCQGA1UEAwwddGVzdGJyb2tlci5haXRpYS5hcnJvd2hlYWQuZXUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDRkYEc6KdAXmy1gvuSu4u6MIJbS9JlkdtXnsP4G/HWFx3LuObIAMzbBw3NOYCIhhFwVxjvf0ME0gTA+llw7zdY+7dUj+TJ3EBtfgvajfHm2IO71S1kZTCCTfFdbbtXMj8uf7hCEFLvKM4GUNe6i368xkVh5eBihCbm/F77jKt/tV/K73NB91dJBC290RJjrkq0mj5Hs4+WY1ezX/B1XR1iOzjs6ZmL5gxh1A7PqQHkbL7/Qotos3qzHUIqzUR1QlpJYgS/fjZfrLoJvrfqWvKsQ8sD0y5wxdO1QXOt2EDA0SUUjkJDkePujUsU5ljoXEOgYLGVQJoz+MGVrH4rSFepAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAEJUFWWWMMNnogOYiWdH4rUNVESw8rj1oczkZg+h+oQV4Qg6GxXFr9qL5LUOlcDRalJbWjd8yJBtQDIT7A2AuCQjLocgF1FZDa8nWcPkYNr7h4QX7E/7PNqAghjARSVaycMDtqaVCB0RlmcYMjreFjM71kRfHNcMOKLpdIMPhpfr2MC8E7EG6zfK0zsN3+qgZizqfR7Q8f6S0T8srIMuvBjk2h1aiM13ftu1/cn/d2RMAom46Mh1Z3qwhucO58BMwHzHJX24UE9xGWgOW3u/OrHNMmhzmNvlTNpbu3hZWoVMKnkWM3PVgGJSSJ2LlMBqO3uaOo1rdQ9WwPORST/Urgc=\"\r\n\t}\r\n]"
+                },
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/brokers",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "brokers"
+                  ]
+                },
+                "description": "Only the saved brokers are returned. Already existing brokers or brokers with missing mandatory fields (name, address, port) will be skipped"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Broker",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\t\"brokerName\": \"test_broker\",\r\n\t\"address\": \"new_address\",\r\n\t\"port\": 4040,\r\n\t\"secure\": false,\r\n\t\"authenticationInfo\": \"updated auth info\"\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/brokers",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "brokers"
+                  ]
+                },
+                "description": "Use delete+save request if you wish to change the broker name (it is used as an ID). Other fields can be changed with this request."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete a Broker",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/mgmt/brokers/brokername/test_broker",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "mgmt",
+                    "brokers",
+                    "brokername",
+                    "test_broker"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "Internal",
+          "description": "",
+          "item": [
+            {
+              "name": "Gatekeeper Inbound GetIt()",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Global Service Discovery Poll Request",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n\t\"requestedService\":{\n\t\t\"serviceDefinition\": \"test_service\",\n\t\t\"interfaces\": [\"test_interface\", \"test_interface2\"],\n\t\t\"serviceMetadata\": {\n\t\t\t\"test_key\": \"test_value\"\n\t\t}\n\t},\n\t\"requesterCloud\": {\n\t\t\"operator\": \"test_operator\",\n\t\t\"cloudName\": \"test_cloud\",\n\t\t\"address\": \"localhost\",\n\t\t\"port\": 8446,\n\t\t\"gatekeeperServiceURI\": \"gatekeeper\",\n\t\t\"authenticationInfo\": \"auth info\",\n\t\t\"secure\": false\n\t},\n\t\"registryFlags\": {\n\t\t\"metadataSearch\": false,\n\t\t\"pingProviders\": false\n\t}\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/gsd_poll",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "gsd_poll"
+                  ]
+                },
+                "description": "This is the \"provider side\" of the Global Service Discovery process, where the receiver Gatekeeper will check if the requester Cloud is authorized to consume the requested Service AND it can be found in the local Service Registry at the moment."
+              },
+              "response": []
+            },
+            {
+              "name": "Inter-Cloud Negotiations Proposal",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\t\"requestedService\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"test_interface\", \"test_interface2\"],\r\n\t\t\"serviceMetadata\": {\r\n\t\t\t\"test_key\": \"test_value\"\r\n\t\t}\r\n\t},\r\n\t\"requesterCloud\": {\r\n\t\t\"operator\": \"test_operator\",\r\n\t\t\"cloudName\": \"test_cloud\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"port\": 8446,\r\n\t\t\"gatekeeperServiceURI\": \"gatekeeper\",\r\n\t\t\"authenticationInfo\": \"auth info\",\r\n\t\t\"secure\": false\r\n\t},\r\n\t\"requesterSystem\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"authenticationInfo\": \"auth info\"\r\n\t},\r\n\t\"preferredSystems\": [{\r\n\t\t\t\"systemName\": \"test_system2\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"authenticationInfo\": \"auth info\"\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"systemName\": \"test_system3\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"authenticationInfo\": \"auth info\"\r\n\t\t}\r\n\t],\r\n\t\"negotiationFlags\": {\r\n\t\t\"metadataSearch\": false,\r\n\t\t\"pingProviders\": false,\r\n\t\t\"onlyPreferred\": false,\r\n\t\t\"externalServiceRequest\": true\r\n\t},\r\n\t\"preferredBrokers\": [\r\n\r\n\t\t{\r\n\t\t\t\"brokerName\": \"test_broker\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"port\": 8080,\r\n\t\t\t\"secure\": false,\r\n\t\t\t\"authenticationInfo\": \"auth info\"\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"brokerName\": \"test_broker2\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"port\": 8081,\r\n\t\t\t\"secure\": false,\r\n\t\t\t\"authenticationInfo\": \"auth info\"\r\n\t\t}\r\n\t],\r\n\t\"timeout\": 0,\r\n\t\"gatewayPublicKey\": \"sample public key\"\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8446/gatekeeper/icn_proposal",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8446",
+                  "path": [
+                    "gatekeeper",
+                    "icn_proposal"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "External",
+          "description": "",
+          "item": [
+            {
+              "name": "Gatekeeper Outbound GetIt()",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8448/gatekeeper",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8448",
+                  "path": [
+                    "gatekeeper"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Global Service Discovery Init",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"requestedService\": {\r\n    \"serviceDefinition\": \"test_service\",\r\n    \"interfaces\": [\"test_interface\", \"test_interface2\"],\r\n    \"serviceMetadata\": {\r\n      \"test_key\": \"test_value\"\r\n    }\r\n  },\r\n  \"searchPerimeter\": [{\r\n      \"operator\": \"test_operator2\",\r\n      \"cloudName\": \"test_cloud2\",\r\n      \"address\": \"localhost\",\r\n      \"port\": 8446,\r\n      \"gatekeeperServiceURI\": \"gatekeeper\",\r\n      \"authenticationInfo\": \"auth info\",\r\n      \"secure\": false\r\n    },\r\n    {\r\n      \"operator\": \"test_operator3\",\r\n      \"cloudName\": \"test_cloud3\",\r\n      \"address\": \"localhost\",\r\n      \"port\": 8446,\r\n      \"gatekeeperServiceURI\": \"gatekeeper\",\r\n      \"authenticationInfo\": \"auth info\",\r\n      \"secure\": false\r\n    }\r\n  ],\r\n  \"registryFlags\": {\r\n    \"metadataSearch\": false,\r\n    \"pingProviders\": false\r\n  }\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8448/gatekeeper/init_gsd",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8448",
+                  "path": [
+                    "gatekeeper",
+                    "init_gsd"
+                  ]
+                },
+                "description": "This is the \"consumer side\" of the Global Service Discovery process, where the local Gatekeeper will receive this request from the local Orchestrator to start the GSD process with the given Clouds"
+              },
+              "response": []
+            },
+            {
+              "name": "Inter-Cloud Negotiations Init",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"requestedService\": {\r\n    \"serviceDefinition\": \"test_service\",\r\n    \"interfaces\": [\"test_interface\", \"test_interface2\"],\r\n    \"serviceMetadata\": {\r\n      \"test_key\": \"test_value\"\r\n    }\r\n  },\r\n  \"targetCloud\": {\r\n    \"operator\": \"test_operator2\",\r\n    \"cloudName\": \"test_cloud2\",\r\n    \"address\": \"localhost\",\r\n    \"port\": 8446,\r\n    \"gatekeeperServiceURI\": \"gatekeeper\",\r\n    \"authenticationInfo\": \"auth info\",\r\n    \"secure\": false\r\n  },\r\n  \"requesterSystem\": {\r\n    \"systemName\": \"test_system\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth info\"\r\n  },\r\n  \"preferredSystems\": [{\r\n      \"systemName\": \"test_system2\",\r\n      \"address\": \"localhost\",\r\n      \"authenticationInfo\": \"auth info\"\r\n    },\r\n    {\r\n      \"systemName\": \"test_system3\",\r\n      \"address\": \"localhost\",\r\n      \"authenticationInfo\": \"auth info\"\r\n    }\r\n  ],\r\n  \"negotiationFlags\": {\r\n    \"metadataSearch\": false,\r\n    \"pingProviders\": false,\r\n    \"onlyPreferred\": false,\r\n    \"externalServiceRequest\": true\r\n  }\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8448/gatekeeper/init_icn",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8448",
+                  "path": [
+                    "gatekeeper",
+                    "init_icn"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        }
+      ]
+    },
+    {
+      "name": "Gateway",
+      "description": "",
+      "item": [
+        {
+          "name": "Gateway GetIt()",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "url": {
+              "raw": "http://localhost:8452/gateway",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8452",
+              "path": [
+                "gateway"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "url": {
+              "raw": "http://localhost:8452/gateway/management",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8452",
+              "path": [
+                "gateway",
+                "management"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Session To Broker (Provider Side)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"brokerName\": \"test_broker\",\r\n  \"brokerPort\": 5000,\r\n  \"consumer\": {\r\n    \"systemName\": \"test_system\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth info\"\r\n  },\r\n  \"provider\": {\r\n    \"systemName\": \"test_system2\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth info\"\r\n  },\r\n  \"consumerCloud\": {\r\n    \"operator\": \"test_operator\",\r\n    \"cloudName\": \"test_cloud\",\r\n    \"address\": \"localhost\",\r\n    \"port\": 8446,\r\n    \"gatekeeperServiceURI\": \"gatekeeper\",\r\n    \"authenticationInfo\": \"auth info\",\r\n    \"secure\": false\r\n  },\r\n  \"providerCloud\": {\r\n    \"operator\": \"test_operator2\",\r\n    \"cloudName\": \"test_cloud2\",\r\n    \"address\": \"localhost\",\r\n    \"port\": 8446,\r\n    \"gatekeeperServiceURI\": \"gatekeeper\",\r\n    \"authenticationInfo\": \"auth info\",\r\n    \"secure\": false\r\n  },\r\n  \"service\": {\r\n    \"serviceDefinition\": \"test_service\",\r\n    \"interfaces\": [\"test_interface\", \"test_interface2\"],\r\n    \"serviceMetadata\": {\r\n      \"test_key\": \"test_value\"\r\n    }\r\n  },\r\n  \"isSecure\": false,\r\n  \"timeout\": 0,\r\n  \"consumerGWPublicKey\": \"fake public key\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8452/gateway/connectToProvider",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8452",
+              "path": [
+                "gateway",
+                "connectToProvider"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Session To Broker (Consumer Side)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"brokerName\": \"test_broker\",\r\n  \"brokerPort\": 5000,\r\n  \"queueName\": \"test_queue\",\r\n  \"controlQueueName\": \"test_control_queue\",\r\n  \"consumer\": {\r\n    \"systemName\": \"test_system\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth info\"\r\n  },\r\n  \"provider\": {\r\n    \"systemName\": \"test_system2\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth info\"\r\n  },\r\n  \"consumerCloud\": {\r\n    \"operator\": \"test_operator\",\r\n    \"cloudName\": \"test_cloud\",\r\n    \"address\": \"localhost\",\r\n    \"port\": 8446,\r\n    \"gatekeeperServiceURI\": \"gatekeeper\",\r\n    \"authenticationInfo\": \"auth info\",\r\n    \"secure\": false\r\n  },\r\n  \"providerCloud\": {\r\n    \"operator\": \"test_operator2\",\r\n    \"cloudName\": \"test_cloud2\",\r\n    \"address\": \"localhost\",\r\n    \"port\": 8446,\r\n    \"gatekeeperServiceURI\": \"gatekeeper\",\r\n    \"authenticationInfo\": \"auth info\",\r\n    \"secure\": false\r\n  },\r\n  \"service\": {\r\n    \"serviceDefinition\": \"test_service\",\r\n    \"interfaces\": [\"test_interface\", \"test_interface2\"],\r\n    \"serviceMetadata\": {\r\n      \"test_key\": \"test_value\"\r\n    }\r\n  },\r\n  \"isSecure\": false,\r\n  \"timeout\": 0,\r\n  \"providerGWPublicKey\": \"fake public key\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8452/gateway/connectToConsumer",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8452",
+              "path": [
+                "gateway",
+                "connectToConsumer"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orchestrator",
+      "description": "",
+      "item": [
+        {
+          "name": "Common Management",
+          "description": "",
+          "item": [
+            {
+              "name": "Common Descriptors API GetIt()",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common"
+                  ]
+                },
+                "description": "This REST resource providers CRUD methods to ArrowheadSystems, ArrowheadServices and ArrowheadClouds."
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Services",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/services",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "services"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Service By Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/services/servicedef/test_service",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "services",
+                    "servicedef",
+                    "test_service"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Save Services",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[{\r\n    \"serviceDefinition\": \"test_service\",\r\n    \"interfaces\": [\"test_interface\", \"test_interface2\"]\r\n  },\r\n  {\r\n    \"serviceDefinition\": \"test_service2\",\r\n    \"interfaces\": [\"test_interface3\", \"test_interface4\"]\r\n  }\r\n]"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/services",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "services"
+                  ]
+                },
+                "description": "Save Services"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Service",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"serviceDefinition\": \"test_service\",\r\n  \"interfaces\": [\"updated_interface\", \"updated_interface2\"]\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/services",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "services"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Service",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/services/servicedef/test_service",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "services",
+                    "servicedef",
+                    "test_service"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Systems",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/systems",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "systems"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get System By Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/systems/systemname/test_system",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "systems",
+                    "systemname",
+                    "test_system"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Save Systems",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[{\r\n    \"systemName\": \"test_system2\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth info\"\r\n  },\r\n  {\r\n    \"systemName\": \"test_system3\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth info\"\r\n  }\r\n]"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/systems",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "systems"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update System",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"systemName\": \"test_system2\",\r\n  \"address\": \"updated address\",\r\n  \"authenticationInfo\": \"updated auth info\"\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/systems",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "systems"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete System",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": ""
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/systems/systemname/test_system2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "systems",
+                    "systemname",
+                    "test_system2"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Clouds",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/clouds",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "clouds"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Cloud By Operator",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/clouds/operator/test_operator",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "clouds",
+                    "operator",
+                    "test_operator"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Cloud By Operator And Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/clouds/operator/test_operator/cloudname/test_cloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "clouds",
+                    "operator",
+                    "test_operator",
+                    "cloudname",
+                    "test_cloud"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Save Clouds",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[{\r\n    \"operator\": \"test_operator\",\r\n    \"cloudName\": \"test_cloud\",\r\n    \"address\": \"localhost\",\r\n    \"port\": 8446,\r\n    \"gatekeeperServiceURI\": \"gatekeeper\",\r\n    \"authenticationInfo\": \"auth info\",\r\n    \"secure\": false\r\n  },\r\n  {\r\n    \"operator\": \"test_operator2\",\r\n    \"cloudName\": \"test_cloud2\",\r\n    \"address\": \"localhost\",\r\n    \"port\": 8446,\r\n    \"gatekeeperServiceURI\": \"gatekeeper\",\r\n    \"authenticationInfo\": \"auth info\",\r\n    \"secure\": false\r\n  }\r\n]"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/clouds",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "clouds"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Cloud",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"operator\": \"test_operator\",\r\n  \"cloudName\": \"test_cloud\",\r\n  \"address\": \"updated address\",\r\n  \"port\": 8080,\r\n  \"gatekeeperServiceURI\": \"updated service uri\",\r\n  \"authenticationInfo\": \"updated auth info\",\r\n  \"secure\": false\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/clouds",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "clouds"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Cloud",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/common/clouds/operator/test_operator/cloudname/test_cloud",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "common",
+                    "clouds",
+                    "operator",
+                    "test_operator",
+                    "cloudname",
+                    "test_cloud"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "Store Management",
+          "description": "",
+          "item": [
+            {
+              "name": "Store API GetIt()",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Store Entry By ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store",
+                    "1"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Store Entries",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store/all",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store",
+                    "all"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Default Store Entries",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store/all_default",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store",
+                    "all_default"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Query Store w/ Consumer And Service",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"requestedService\": {\n    \"serviceDefinition\": \"test_service\",\n    \"interfaces\": [\"test_interface\", \"test_interface2\"]\n  },\n  \"requesterSystem\": {\n    \"systemName\": \"test_system\",\n    \"address\": \"localhost\",\n    \"authenticationInfo\": \"auth info\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Save Store Entry",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[{\r\n  \"service\": {\r\n    \"serviceDefinition\": \"test_service\",\r\n    \"interfaces\": [\r\n      \"test_interface1\", \"test_interface2\"\r\n    ],\r\n    \"serviceMetadata\": {\r\n      \"test_key\": \"test_value\",\r\n      \"test_key2\": \"test_value2\"\r\n    }\r\n  },\r\n  \"consumer\": {\r\n    \"systemName\": \"test_system\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth_info\"\r\n  },\r\n  \"providerSystem\": {\r\n    \"systemName\": \"test_system2\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth_info\"\r\n  },\r\n  \"providerCloud\": {\r\n    \"operator\": \"test_operator\",\r\n    \"cloudName\": \"test_cloud\",\r\n    \"address\": \"localhost\",\r\n    \"port\": 8446,\r\n    \"gatekeeperServiceURI\": \"gatekeeper\",\r\n    \"authenticationInfo\": \"auth info\",\r\n    \"secure\": false\r\n  },\r\n  \"priority\": 0,\r\n  \"defaultEntry\": false,\r\n  \"name\": \"test_name\",\r\n  \"instruction\": \"test_instruction\",\r\n  \"attributes\": {\r\n    \"test_key\": \"test_value3\"\r\n  }\r\n}]"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Flip DefaultEntry Flag",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store/default/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store",
+                    "default",
+                    "1"
+                  ]
+                },
+                "description": "Store entry where the flag should be flipped is identified by the ID pathparameter."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Store Entry",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n        \"id\": 946,\n        \"priority\": 9000,\n        \"defaultEntry\": false,\n        \"name\": \"updated name\",\n        \"instruction\": \"updated instruction\",\n        \"attributes\": {\n            \"test_key\": \"new value1, new value2\",\n            \"test_key2\": \"new value3\"\n        }\n    }"
+                },
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store/update",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store",
+                    "update"
+                  ]
+                },
+                "description": "To update the service, consumer, providerSystem or providerClouds fields too, use the Common API resources."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Store Entry By ID",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store",
+                    "1"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Store Entry By Consumer Name",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/mgmt/store/consumername/test_system",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "mgmt",
+                    "store",
+                    "consumername",
+                    "test_system"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "Store Interface",
+          "description": "",
+          "item": [
+            {
+              "name": "Store Interface GetIt()",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/store",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "store"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Default Store Entries For Consumer",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/store/consumername/test_system",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "store",
+                    "consumername",
+                    "test_system"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Store Entries For Given Consumer/Service Pair",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/store/consumername/test_system/servicedef/test_service",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "store",
+                    "consumername",
+                    "test_system",
+                    "servicedef",
+                    "test_service"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Store Entries For Consumer (TLS)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/store/query",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "store",
+                    "query"
+                  ]
+                },
+                "description": "This REST resource can only be used in secure mode, where the client certificate Common Name containts the Consumer System Name, which identifies the store entries."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Store Entries For Consumer/Service Pair (TLS)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8440/orchestrator/store/query/servicedef/test_service",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8440",
+                  "path": [
+                    "orchestrator",
+                    "store",
+                    "query",
+                    "servicedef",
+                    "test_service"
+                  ]
+                },
+                "description": "This REST resource can only be used in secure mode, where the client certificate Common Name containts the Consumer System Name, which (along with the Service Definition path parameter) identifies the store entries ."
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "Orchestrator GetIt()",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "url": {
+              "raw": "http://localhost:8440/orchestrator/orchestration",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8440",
+              "path": [
+                "orchestrator",
+                "orchestration"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Store Orchestration Process For Given System",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "url": {
+              "raw": "http://localhost:8440/orchestrator/orchestration/test_system",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8440",
+              "path": [
+                "orchestrator",
+                "orchestration",
+                "test_system"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Orchestration Process",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"requesterSystem\": {\r\n    \"systemName\": \"test_system\",\r\n    \"address\": \"localhost\",\r\n    \"authenticationInfo\": \"auth info\"\r\n  },\r\n  \"requestedService\": {\r\n    \"serviceDefinition\": \"test_service\",\r\n    \"interfaces\": [\"test_interface1\"],\r\n    \"serviceMetadata\": {\r\n      \"test_key\": \"test_value\"\r\n    }\r\n  },\r\n  \"orchestrationFlags\": {\r\n    \"onlyPreferred\": false,\r\n    \"overrideStore\": true,\r\n    \"externalServiceRequest\": false,\r\n    \"enableInterCloud\": true,\r\n    \"enableQoS\": false,\r\n    \"matchmaking\": false,\r\n    \"metadataSearch\": true,\r\n    \"triggerInterCloud\": false,\r\n    \"pingProviders\": false\r\n  },\r\n  \"preferredProviders\": [{\r\n      \"providerSystem\": {\r\n        \"systemName\": \"test_system2\",\r\n        \"address\": \"localhost\",\r\n        \"authenticationInfo\": \"auth info\"\r\n      }\r\n    },\r\n    {\r\n      \"providerCloud\": {\r\n        \"operator\": \"test_operator\",\r\n        \"cloudName\": \"test_cloud\",\r\n        \"address\": \"localhost\",\r\n        \"port\": 8446,\r\n        \"gatekeeperServiceURI\": \"gatekeeper\",\r\n        \"authenticationInfo\": \"auth info\",\r\n        \"secure\": false\r\n      }\r\n    },\r\n    {\r\n      \"providerSystem\": {\r\n        \"systemName\": \"test_system2\",\r\n        \"address\": \"localhost\",\r\n        \"authenticationInfo\": \"auth info\"\r\n      },\r\n      \"providerCloud\": {\r\n        \"operator\": \"test_operator2\",\r\n        \"cloudName\": \"test_cloud2\",\r\n        \"address\": \"localhost\",\r\n        \"port\": 8446,\r\n        \"gatekeeperServiceURI\": \"gatekeeper\",\r\n        \"authenticationInfo\": \"auth info\",\r\n        \"secure\": false\r\n      }\r\n    }\r\n  ]\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8440/orchestrator/orchestration",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8440",
+              "path": [
+                "orchestrator",
+                "orchestration"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service Registry",
+      "description": "",
+      "item": [
+        {
+          "name": "Management",
+          "description": "",
+          "item": [
+            {
+              "name": "ServiceRegistry Management GetIt()",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8442/serviceregistry/mgmt",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8442",
+                  "path": [
+                    "serviceregistry",
+                    "mgmt"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Service Registry Entries",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8442/serviceregistry/mgmt/all",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8442",
+                  "path": [
+                    "serviceregistry",
+                    "mgmt",
+                    "all"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete All Service Registry Entries",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8442/serviceregistry/mgmt/all",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8442",
+                  "path": [
+                    "serviceregistry",
+                    "mgmt",
+                    "all"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Service Registry Entry By Provider Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8442/serviceregistry/mgmt/systemname/test_system",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8442",
+                  "path": [
+                    "serviceregistry",
+                    "mgmt",
+                    "systemname",
+                    "test_system"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Service Registry Entry By Service Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "url": {
+                  "raw": "http://localhost:8442/serviceregistry/mgmt/servicedef/test_service",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8442",
+                  "path": [
+                    "serviceregistry",
+                    "mgmt",
+                    "servicedef",
+                    "test_service"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Service Registry Entry",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\t\"providedService\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"new interface1\", \"new interface2\"],\r\n\t\t\"serviceMetadata\": {\r\n\t\t\t\"test_key\": \"new value\"\r\n\t\t}\r\n\t},\r\n\t\"provider\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"updated address\",\r\n\t\t\"authenticationInfo\": \"new auth info\"\r\n\t},\r\n\t\"port\": 4040,\r\n\t\"version\": 2,\r\n\t\"UDP\": true,\r\n\t\"ttl\": 500\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8442/serviceregistry/mgmt/update",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8442",
+                  "path": [
+                    "serviceregistry",
+                    "mgmt",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "Service Registry GetIt()",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "url": {
+              "raw": "http://localhost:8442/serviceregistry",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8442",
+              "path": [
+                "serviceregistry"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save Service Registry Entry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\t\"providedService\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"test_interface1\", \"test_interface2\"],\r\n\t\t\"serviceMetadata\": {\r\n\t\t\t\"test_key\": \"test_value\"\r\n\t\t}\r\n\t},\r\n\t\"provider\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"authenticationInfo\": \"auth info\"\r\n\t},\r\n\t\"port\": 8080,\r\n\t\"version\": 1,\r\n\t\"UDP\": false,\r\n\t\"ttl\": 0\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8442/serviceregistry/mgmt/update",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8442",
+              "path": [
+                "serviceregistry",
+                "mgmt",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Service Registry Entry",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\t\"providedService\": {\r\n\t\t\"serviceDefinition\": \"test_service\"\r\n\t},\r\n\t\"provider\": {\r\n\t\t\"systemName\": \"test_system\"\r\n\t}\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8442/serviceregistry/remove",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8442",
+              "path": [
+                "serviceregistry",
+                "remove"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Query Service Registry For Service",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"service\" : {\r\n    \"serviceDefinition\" : \"test_service\",\r\n    \"interfaces\" : [ \"test_interface1\" ],\r\n    \"serviceMetadata\" : {\r\n      \"test_key\" : \"test_value\"\r\n    }\r\n  },\r\n  \"pingProviders\" : false,\r\n  \"metadataSearch\" : true,\r\n  \"version\" : 1\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8442/serviceregistry/query",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8442",
+              "path": [
+                "serviceregistry",
+                "query"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

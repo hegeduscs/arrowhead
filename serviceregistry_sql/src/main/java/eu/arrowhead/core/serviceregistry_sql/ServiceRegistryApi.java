@@ -165,6 +165,7 @@ public class ServiceRegistryApi {
     retreivedEntry.setMetadata(entry.getMetadata());
     retreivedEntry.setEndOfValidity(entry.getEndOfValidity());
     retreivedEntry = dm.merge(retreivedEntry);
+    retreivedEntry.fromDatabase();
 
     log.info("updateServiceRegistryEntry successfully returns.");
     return Response.status(Status.ACCEPTED).entity(retreivedEntry).build();
