@@ -8,7 +8,6 @@ import com.github.danieln.dnssdjava.DnsSDRegistrator;
 import com.github.danieln.dnssdjava.ServiceData;
 import com.github.danieln.dnssdjava.ServiceName;
 import com.github.danieln.dnssdjava.ServiceType;
-import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.DnsException;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -20,13 +19,7 @@ class RemoveExpiredServicesTask extends TimerTask {
 
   private static final Logger log = Logger.getLogger(RemoveExpiredServicesTask.class.getName());
 
-  private ServiceRegistryEntry entry;
-
   RemoveExpiredServicesTask() {
-  }
-
-  private RemoveExpiredServicesTask(ServiceRegistryEntry entry) {
-    this.entry = entry;
   }
 
   @Override
@@ -55,7 +48,7 @@ class RemoveExpiredServicesTask extends TimerTask {
             LocalDateTime endOfValidity = LocalDateTime
                 .of(Integer.valueOf(dateFields[0]), Integer.valueOf(dateFields[1]), Integer.valueOf(dateFields[2]), Integer.valueOf(dateFields[3]),
                     Integer.valueOf(dateFields[4]), Integer.valueOf(dateFields[5]));
-            if (LocalDateTime.now().isAfter(entry.getEndOfValidity())) {
+            if (LocalDateTime.now().isAfter(endOfValidity)) {
               try {
                 DnsSDRegistrator registrator = RegistryUtils.createRegistrator();
                 registrator.unregisterService(instance);
