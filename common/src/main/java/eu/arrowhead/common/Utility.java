@@ -26,6 +26,7 @@ import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.json.JacksonJsonProviderAtRest;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
+import eu.arrowhead.common.misc.CoreSystemService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +37,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.Set;
 import javax.net.ssl.HostnameVerifier;
@@ -59,16 +59,6 @@ public final class Utility {
 
   private static SSLContext sslContext;
   private static String SR_QUERY_URI;
-
-  public static final String ORCH_SERVICE = "OrchestrationService";
-  public static final String AUTH_CONTROL_SERVICE = "AuthorizationControl";
-  public static final String TOKEN_GEN_SERVICE = "TokenGeneration";
-  public static final String GSD_SERVICE = "GlobalServiceDiscovery";
-  public static final String ICN_SERVICE = "InterCloudNegotiations";
-  public static final String GW_CONSUMER_SERVICE = "ConnectToConsumer";
-  public static final String GW_PROVIDER_SERVICE = "ConnectToProvider";
-  public static final String GW_SESSION_MGMT = "SessionManagement";
-  public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
 
   private static final ObjectMapper mapper = JacksonJsonProviderAtRest.getMapper();
   private static final DatabaseManager dm = DatabaseManager.getInstance();
@@ -254,7 +244,8 @@ public final class Utility {
 
   public static String[] getServiceInfo(String serviceId) {
     ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null)
-        : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"), secureServerMetadata);
+                                                  : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"),
+                                                                         ArrowheadMain.secureServerMetadata);
     ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
     Response response = sendRequest(SR_QUERY_URI, "PUT", sqf, sslContext);
     ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
@@ -268,7 +259,8 @@ public final class Utility {
         isSecure = entry.getMetadata().contains("security");
       }
       String serviceUri = getUri(coreSystem.getAddress(), coreSystem.getPort(), entry.getServiceURI(), isSecure, false);
-      if (serviceId.equals(GW_CONSUMER_SERVICE) || serviceId.equals(GW_PROVIDER_SERVICE)) {
+      if (serviceId.equals(CoreSystemService.GW_CONSUMER_SERVICE.getServiceDef()) || serviceId
+          .equals(CoreSystemService.GW_PROVIDER_SERVICE.getServiceDef())) {
         return new String[]{serviceUri, coreSystem.getSystemName(), coreSystem.getAddress(), coreSystem.getAuthenticationInfo()};
       }
       return new String[]{serviceUri};
