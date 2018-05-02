@@ -11,7 +11,7 @@ package eu.arrowhead.core.serviceregistry.filter;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;

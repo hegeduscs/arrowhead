@@ -163,7 +163,7 @@ class TokenGenerationService {
       }
     }
 
-    // Throw an exception if none of the public kezs could be acquired from the specs
+    // Throw an exception if none of the public keys could be acquired from the specs
     boolean nonNullKeyExists = false;
     for (PublicKey key : keys) {
       if (key != null) {
@@ -180,7 +180,7 @@ class TokenGenerationService {
   }
 
   private static PublicKey getPublicKey(String stringKey) throws InvalidKeySpecException {
-    byte[] byteKey = new byte[0];
+    byte[] byteKey;
     try {
       byteKey = Base64.getDecoder().decode(stringKey);
     } catch (IllegalArgumentException e) {

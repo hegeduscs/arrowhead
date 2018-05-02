@@ -7,10 +7,9 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.core.orchestrator.filter;
+package eu.arrowhead.common.filter;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.core.orchestrator.OrchestratorMain;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -24,7 +23,7 @@ public class OutboundDebugFilter implements ContainerResponseFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
-    if (OrchestratorMain.DEBUG_MODE) {
+    if (Boolean.valueOf(System.getProperty("debug_mode", "false"))) {
       if (responseContext.getEntity() != null) {
         System.out.println("Response to the request at: " + requestContext.getUriInfo().getRequestUri().toString());
         System.out.println(Utility.toPrettyJson(null, responseContext.getEntity()));

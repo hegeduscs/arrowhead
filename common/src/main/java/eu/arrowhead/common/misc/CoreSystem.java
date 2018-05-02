@@ -1,6 +1,7 @@
 package eu.arrowhead.common.misc;
 
 import eu.arrowhead.common.ArrowheadMain;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,9 +35,21 @@ public enum CoreSystem {
   CoreSystem(int insecPort, int secPort, List<String> awf, List<String> smf, List<CoreSystemService> cs) {
     insecurePort = insecPort;
     securePort = secPort;
-    alwaysMandatoryFields = awf;
-    secureMandatoryFields = smf;
-    services = cs;
+    if (awf == null) {
+      alwaysMandatoryFields = new ArrayList<>();
+    } else {
+      alwaysMandatoryFields = awf;
+    }
+    if (smf == null) {
+      secureMandatoryFields = new ArrayList<>();
+    } else {
+      secureMandatoryFields = smf;
+    }
+    if (cs == null) {
+      services = new ArrayList<>();
+    } else {
+      services = cs;
+    }
   }
 
   public int getInsecurePort() {

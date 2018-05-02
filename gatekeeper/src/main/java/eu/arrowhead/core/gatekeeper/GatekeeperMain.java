@@ -9,6 +9,7 @@
 
 package eu.arrowhead.core.gatekeeper;
 
+import eu.arrowhead.common.ArrowheadMain;
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadService;
@@ -17,8 +18,9 @@ import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.misc.CoreSystemService;
+import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.common.misc.TypeSafeProperties;
-import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +47,7 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-public class GatekeeperMain {
+public class GatekeeperMain extends ArrowheadMain {
 
   public static boolean DEBUG_MODE;
   public static boolean IS_SECURE;
@@ -251,11 +253,13 @@ public class GatekeeperMain {
     URI uri = UriBuilder.fromUri(OUTBOUND_BASE_URI).build();
     boolean isSecure = uri.getScheme().equals("https");
     ArrowheadSystem gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
-    ArrowheadService gsdService = new ArrowheadService(Utility.createSD(Utility.GSD_SERVICE, isSecure), Collections.singletonList("JSON"), null);
-    ArrowheadService icnService = new ArrowheadService(Utility.createSD(Utility.ICN_SERVICE, isSecure), Collections.singletonList("JSON"), null);
+    ArrowheadService gsdService = new ArrowheadService(Utility.createSD(CoreSystemService.GSD_SERVICE.getServiceDef(), isSecure),
+                                                       Collections.singletonList("JSON"), null);
+    ArrowheadService icnService = new ArrowheadService(Utility.createSD(CoreSystemService.GSD_SERVICE.getServiceDef(), isSecure),
+                                                       Collections.singletonList("JSON"), null);
     if (isSecure) {
-      gsdService.setServiceMetadata(Utility.secureServerMetadata);
-      icnService.setServiceMetadata(Utility.secureServerMetadata);
+      gsdService.setServiceMetadata(ArrowheadMain.secureServerMetadata);
+      icnService.setServiceMetadata(ArrowheadMain.secureServerMetadata);
     }
 
     //Preparing the payload
@@ -291,13 +295,13 @@ public class GatekeeperMain {
   }
 
   public static void getCoreSystemServiceUris() {
-    AUTH_CONTROL_URI = Utility.getServiceInfo(Utility.AUTH_CONTROL_SERVICE)[0];
+    AUTH_CONTROL_URI = Utility.getServiceInfo(CoreSystemService.AUTH_CONTROL_SERVICE.getServiceDef())[0];
     if (USE_GATEWAY) {
-      GATEWAY_CONSUMER_URI = Utility.getServiceInfo(Utility.GW_CONSUMER_SERVICE);
-      GATEWAY_PROVIDER_URI = Utility.getServiceInfo(Utility.GW_PROVIDER_SERVICE);
+      GATEWAY_CONSUMER_URI = Utility.getServiceInfo(CoreSystemService.GW_CONSUMER_SERVICE.getServiceDef());
+      GATEWAY_PROVIDER_URI = Utility.getServiceInfo(CoreSystemService.GW_PROVIDER_SERVICE.getServiceDef());
     }
     if (!FIRST_SR_QUERY) {
-      ORCHESTRATOR_URI = Utility.getServiceInfo(Utility.ORCH_SERVICE)[0];
+      ORCHESTRATOR_URI = Utility.getServiceInfo(CoreSystemService.ORCH_SERVICE.getServiceDef())[0];
     }
     System.out.println("Core system URLs acquired.");
     FIRST_SR_QUERY = false;

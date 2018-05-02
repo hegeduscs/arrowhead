@@ -11,7 +11,7 @@ package eu.arrowhead.core.authorization.filter;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.core.authorization.AuthorizationMain;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -66,7 +66,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
       return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
     } else {
       // If this property is true, then every system from the local cloud can use the auth services
-      if (Boolean.valueOf(AuthorizationMain.props.getProperty("enable_auth_for_cloud", "false"))) {
+      if (AuthorizationMain.enableAuthForCloud) {
         String[] clientFields = clientCN.split("\\.", 2);
         return serverFields[1].equalsIgnoreCase(clientFields[1]);
       }

@@ -14,7 +14,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.core.gateway.model.ActiveSession;
 import eu.arrowhead.core.gateway.model.GatewayEncryption;
 import eu.arrowhead.core.gateway.model.GatewaySession;

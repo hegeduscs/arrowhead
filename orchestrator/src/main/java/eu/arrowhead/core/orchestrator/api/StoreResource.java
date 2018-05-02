@@ -6,7 +6,7 @@ import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.OrchestrationStore;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

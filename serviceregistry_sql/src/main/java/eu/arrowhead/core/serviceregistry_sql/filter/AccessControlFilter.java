@@ -12,7 +12,7 @@ package eu.arrowhead.core.serviceregistry_sql.filter;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;

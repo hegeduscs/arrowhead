@@ -15,6 +15,11 @@ public class TypeSafeProperties extends Properties {
     }
   }
 
+  public boolean getBooleanProperty(String key, boolean defaultValue) {
+    String val = getProperty(key);
+    return (val == null) ? defaultValue : Boolean.valueOf(val);
+  }
+
   //NOTE add more data types later if needed
 
 }

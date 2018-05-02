@@ -12,7 +12,7 @@ package eu.arrowhead.core.orchestrator.filter;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.messages.ServiceRequestForm;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;

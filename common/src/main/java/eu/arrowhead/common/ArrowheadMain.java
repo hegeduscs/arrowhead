@@ -8,8 +8,8 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.misc.CoreSystem;
 import eu.arrowhead.common.misc.CoreSystemService;
+import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.common.misc.TypeSafeProperties;
-import eu.arrowhead.common.security.SecurityUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,10 +44,9 @@ public abstract class ArrowheadMain {
   public static final List<String> dbFields = Arrays.asList("db_user", "db_password", "db_address");
   public static final List<String> certFields = Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass");
 
-  static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
+  protected static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
 
-  protected boolean debugMode;
-
+  private boolean daemon = false;
   private CoreSystem coreSystem;
   private HttpServer server;
   private String baseUri;
@@ -61,7 +60,6 @@ public abstract class ArrowheadMain {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
 
-    boolean daemon = false;
     boolean isSecure = false;
     for (String arg : args) {
       switch (arg) {
@@ -70,7 +68,7 @@ public abstract class ArrowheadMain {
           System.out.println("Starting server as daemon!");
           break;
         case "-d":
-          debugMode = true;
+          System.setProperty("debug_mode", "true");
           System.out.println("Starting server in debug mode!");
           break;
         case "-tls":
@@ -79,8 +77,7 @@ public abstract class ArrowheadMain {
     }
 
     String address = props.getProperty("address", "0.0.0.0");
-    int port = isSecure ? props.getIntProperty("secure_port", coreSystem.getSecurePort())
-                        : props.getIntProperty("insecure_port", coreSystem.getInsecurePort());
+    int port = isSecure ? props.getIntProperty("secure_port", coreSystem.getSecurePort()) : props.getIntProperty("insecure_port", coreSystem.getInsecurePort());
     baseUri = Utility.getUri(address, port, null, isSecure, true);
 
     if (!coreSystem.equals(CoreSystem.SERVICE_REGISTRY_DNS) && !coreSystem.equals(CoreSystem.SERVICE_REGISTRY_SQL)) {
@@ -102,6 +99,9 @@ public abstract class ArrowheadMain {
     }
 
     DatabaseManager.init();
+  }
+
+  protected void listenForInput() {
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -142,7 +142,7 @@ public abstract class ArrowheadMain {
     }
   }
 
-  private void startSecureServer(Set<Class<?>> classes, String[] packages) {
+  protected void startSecureServer(Set<Class<?>> classes, String[] packages) {
     final ResourceConfig config = new ResourceConfig();
     config.registerClasses(classes);
     config.packages(packages);

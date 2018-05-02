@@ -7,7 +7,7 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.common.security;
+package eu.arrowhead.common.misc;
 
 import java.io.FileInputStream;
 import java.io.IOException;

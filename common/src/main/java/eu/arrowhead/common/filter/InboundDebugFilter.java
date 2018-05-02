@@ -7,10 +7,9 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.core.gatekeeper.filter;
+package eu.arrowhead.common.filter;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.core.gatekeeper.GatekeeperMain;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +25,7 @@ public class InboundDebugFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
-    if (GatekeeperMain.DEBUG_MODE) {
+    if (Boolean.valueOf(System.getProperty("debug_mode", "false"))) {
       System.out.println("New " + requestContext.getMethod() + " request at: " + requestContext.getUriInfo().getRequestUri().toString());
       String prettyJson = Utility.getRequestPayload(requestContext.getEntityStream());
       System.out.println(prettyJson);

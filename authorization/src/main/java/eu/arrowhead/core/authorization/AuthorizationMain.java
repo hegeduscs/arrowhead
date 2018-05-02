@@ -11,8 +11,7 @@ package eu.arrowhead.core.authorization;
 
 import eu.arrowhead.common.ArrowheadMain;
 import eu.arrowhead.common.misc.CoreSystem;
-import eu.arrowhead.common.misc.TypeSafeProperties;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.util.Arrays;
@@ -21,8 +20,7 @@ import java.util.Set;
 
 public class AuthorizationMain extends ArrowheadMain {
 
-  public static boolean DEBUG_MODE;
-  public static TypeSafeProperties props;
+  public static boolean enableAuthForCloud;
 
   static PrivateKey privateKey;
 
@@ -33,9 +31,10 @@ public class AuthorizationMain extends ArrowheadMain {
 
     Set<Class<?>> classes = new HashSet<>(Arrays.asList(AuthorizationResource.class, AuthorizationApi.class));
     String[] packages = {"eu.arrowhead.common", "eu.arrowhead.core.authorization.filter"};
-    this.init(CoreSystem.AUTHORIZATION, args, classes, packages);
-    DEBUG_MODE = debugMode;
-    props = getProps();
+    init(CoreSystem.AUTHORIZATION, args, classes, packages);
+
+    enableAuthForCloud = getProps().getBooleanProperty("enable_auth_for_cloud", false);
+    listenForInput();
   }
 
   public static void main(String[] args) {

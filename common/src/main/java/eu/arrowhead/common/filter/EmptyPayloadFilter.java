@@ -7,10 +7,12 @@
  * national funding authorities from involved countries.
  */
 
-package eu.arrowhead.common.misc;
+package eu.arrowhead.common.filter;
 
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.ExceptionType;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
@@ -18,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 @Provider
+@Priority(Priorities.ENTITY_CODER)
 public class EmptyPayloadFilter implements ContainerRequestFilter {
 
   @Override

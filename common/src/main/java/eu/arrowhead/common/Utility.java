@@ -320,7 +320,8 @@ public final class Utility {
     }
 
     if (!sb.toString().isEmpty()) {
-      return toPrettyJson(sb.toString(), null);
+      String payload = toPrettyJson(sb.toString(), null);
+      return payload != null ? payload : "";
     } else {
       return "";
     }
