@@ -106,7 +106,7 @@ public class InsecureServerSocketThread extends Thread {
       GatewayService.consumerSideClose(gatewaySession, port, consumerSocket, serverSocket, connectionRequest.getQueueName());
       if (isFirstMessage) {
         log.error("Communication failed (Error occurred or remote peer closed the socket)");
-        throw new ArrowheadException(e.getMessage());
+        throw new ArrowheadException(e.getMessage(), e);
       }
     }
   }
