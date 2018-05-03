@@ -258,7 +258,7 @@ public class GatekeeperMain {
     ArrowheadSystem gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     ArrowheadService gsdService = new ArrowheadService(Utility.createSD(CoreSystemService.GSD_SERVICE.getServiceDef(), isSecure),
                                                        Collections.singletonList("JSON"), null);
-    ArrowheadService icnService = new ArrowheadService(Utility.createSD(CoreSystemService.GSD_SERVICE.getServiceDef(), isSecure),
+    ArrowheadService icnService = new ArrowheadService(Utility.createSD(CoreSystemService.ICN_SERVICE.getServiceDef(), isSecure),
                                                        Collections.singletonList("JSON"), null);
     if (isSecure) {
       gsdService.setServiceMetadata(ArrowheadMain.secureServerMetadata);
