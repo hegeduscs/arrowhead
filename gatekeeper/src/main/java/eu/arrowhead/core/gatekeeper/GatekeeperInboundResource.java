@@ -156,7 +156,7 @@ public class GatekeeperInboundResource {
     ArrowheadSystem provider = orchResponse.getResponse().get(0).getProvider();
     Map<String, String> metadata = orchResponse.getResponse().get(0).getService().getServiceMetadata();
     boolean isSecure = metadata.containsKey("security") && !metadata.get("security").equals("none");
-    int timeout = icnProposal.getTimeout() > GatekeeperMain.timeout ? GatekeeperMain.timeout : icnProposal.getTimeout();
+    int timeout = icnProposal.getTimeout() > GatekeeperMain.TIMEOUT ? GatekeeperMain.TIMEOUT : icnProposal.getTimeout();
 
     // Getting the list of preferred brokers from database
     List<Broker> preferredBrokers = dm.getAll(Broker.class, null);

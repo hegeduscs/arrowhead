@@ -19,12 +19,21 @@ import javax.net.ssl.SSLContext;
 
 public class GatewayMain extends ArrowheadMain {
 
+  static int minPort;
+  static int maxPort;
+  static String keystore;
+  static String keystorePass;
   static SSLContext clientContext;
 
   private GatewayMain(String[] args) {
     Set<Class<?>> classes = new HashSet<>(Collections.singleton(GatewayResource.class));
     String[] packages = {"eu.arrowhead.common", "eu.arrowhead.core.gateway.filter"};
     init(CoreSystem.GATEWAY, args, classes, packages);
+
+    minPort = props.getIntProperty("min_port", 8000);
+    maxPort = props.getIntProperty("max_port", 8100);
+    keystore = props.getProperty("keystore");
+    keystorePass = props.getProperty("keystorepass");
     listenForInput();
   }
 
@@ -34,10 +43,10 @@ public class GatewayMain extends ArrowheadMain {
 
   @Override
   protected void startSecureServer(Set<Class<?>> classes, String[] packages) {
-    String truststorePath = getProps().getProperty("truststore");
-    String truststorePass = getProps().getProperty("truststorepass");
-    String trustPass = getProps().getProperty("trustpass");
-    String masterArrowheadCertPath = getProps().getProperty("master_arrowhead_cert");
+    String truststorePath = props.getProperty("truststore");
+    String truststorePass = props.getProperty("truststorepass");
+    String trustPass = props.getProperty("trustpass");
+    String masterArrowheadCertPath = props.getProperty("master_arrowhead_cert");
 
     clientContext = SecurityUtils.createMasterSSLContext(truststorePath, truststorePass, trustPass, masterArrowheadCertPath);
     super.startSecureServer(classes, packages);

@@ -12,8 +12,6 @@ import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.common.misc.TypeSafeProperties;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -43,22 +41,26 @@ public abstract class ArrowheadMain {
 
   public static final List<String> dbFields = Arrays.asList("db_user", "db_password", "db_address");
   public static final List<String> certFields = Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass");
+  public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
 
-  protected static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
+  protected String srBaseUri;
+  protected final TypeSafeProperties props = Utility.getProp("app.properties");
 
   private boolean daemon = false;
   private CoreSystem coreSystem;
   private HttpServer server;
   private String baseUri;
-  private String srBaseUri;
   private String base64PublicKey;
-  private TypeSafeProperties props = getProps();
-  private final Logger log = Logger.getLogger(getClass().getName());
+
+  private static final Logger log = Logger.getLogger(ArrowheadMain.class.getName());
+
+  static {
+    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+  }
 
   protected void init(CoreSystem coreSystem, String[] args, Set<Class<?>> classes, String[] packages) {
-    this.coreSystem = coreSystem;
-    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
     System.out.println("Working directory: " + System.getProperty("user.dir"));
+    this.coreSystem = coreSystem;
 
     boolean isSecure = false;
     for (String arg : args) {
@@ -73,6 +75,7 @@ public abstract class ArrowheadMain {
           break;
         case "-tls":
           isSecure = true;
+          break;
       }
     }
 
@@ -85,6 +88,7 @@ public abstract class ArrowheadMain {
       int srPort = isSecure ? props.getIntProperty("sr_secure_port", CoreSystem.SERVICE_REGISTRY_SQL.getSecurePort())
                             : props.getIntProperty("sr_insecure_port", CoreSystem.SERVICE_REGISTRY_SQL.getInsecurePort());
       srBaseUri = Utility.getUri(srAddress, srPort, "serviceregistry", isSecure, true);
+      Utility.setServiceRegistryUri(srBaseUri);
       useSRService(true);
     }
 
@@ -235,24 +239,6 @@ public abstract class ArrowheadMain {
         Utility.sendRequest(UriBuilder.fromUri(srBaseUri).path("remove").build().toString(), "PUT", srEntry);
       }
     }
-  }
-
-  protected TypeSafeProperties getProps() {
-    try {
-      if (props == null) {
-        props = new TypeSafeProperties();
-        File file = new File("config" + File.separator + "app.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        props.load(inputStream);
-      }
-    } catch (FileNotFoundException ex) {
-      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
-    return props;
   }
 
 }

@@ -23,8 +23,6 @@ import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.common.misc.TypeSafeProperties;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -47,48 +45,52 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-public class GatekeeperMain extends ArrowheadMain {
+public class GatekeeperMain {
 
-  public static boolean DEBUG_MODE;
-  public static boolean IS_SECURE;
-
+  static boolean IS_SECURE;
+  static boolean USE_GATEWAY;
   static String ORCHESTRATOR_URI;
   static String SERVICE_REGISTRY_URI;
   static String AUTH_CONTROL_URI;
   static String[] GATEWAY_CONSUMER_URI;
   static String[] GATEWAY_PROVIDER_URI;
-  static boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
-  static final int timeout = getProp().getIntProperty("timeout", 30000);
   static SSLContext outboundClientContext;
   static SSLContext outboundServerContext;
+  static final int TIMEOUT;
 
+  private static boolean FIRST_SR_QUERY = true;
   private static String INBOUND_BASE_URI;
   private static String OUTBOUND_BASE_URI;
   private static String BASE64_PUBLIC_KEY;
-  private static boolean FIRST_SR_QUERY = true;
   private static HttpServer inboundServer;
   private static HttpServer outboundServer;
-  private static TypeSafeProperties prop;
 
+  private static final TypeSafeProperties props;
   private static final Logger log = Logger.getLogger(GatekeeperMain.class.getName());
 
-  public static void main(String[] args) throws IOException {
+  static {
     PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
+    props = Utility.getProp("app.properties");
+    USE_GATEWAY = props.getBooleanProperty("use_gateway", false);
+    TIMEOUT = props.getIntProperty("timeout", 30000);
+  }
+
+  public static void main(String[] args) throws IOException {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
 
-    String address = getProp().getProperty("address", "0.0.0.0");
-    int internalInsecurePort = getProp().getIntProperty("internal_insecure_port", 8446);
-    int internalSecurePort = getProp().getIntProperty("internal_secure_port", 8447);
-    int externalInsecurePort = getProp().getIntProperty("external_insecure_port", 8448);
-    int externalSecurePort = getProp().getIntProperty("external_secure_port", 8449);
+    String address = props.getProperty("address", "0.0.0.0");
+    int internalInsecurePort = props.getIntProperty("internal_insecure_port", 8446);
+    int internalSecurePort = props.getIntProperty("internal_secure_port", 8447);
+    int externalInsecurePort = props.getIntProperty("external_insecure_port", 8448);
+    int externalSecurePort = props.getIntProperty("external_secure_port", 8449);
 
-    String srAddress = getProp().getProperty("sr_address", "0.0.0.0");
-    int srInsecurePort = getProp().getIntProperty("sr_insecure_port", 8442);
-    int srSecurePort = getProp().getIntProperty("sr_secure_port", 8443);
+    String srAddress = props.getProperty("sr_address", "0.0.0.0");
+    int srInsecurePort = props.getIntProperty("sr_insecure_port", 8442);
+    int srSecurePort = props.getIntProperty("sr_secure_port", 8443);
 
-    String orchAddress = getProp().getProperty("orch_address", "0.0.0.0");
-    int orchInsecurePort = getProp().getIntProperty("orch_insecure_port", 8440);
-    int orchSecurePort = getProp().getIntProperty("orch_secure_port", 8441);
+    String orchAddress = props.getProperty("orch_address", "0.0.0.0");
+    int orchInsecurePort = props.getIntProperty("orch_insecure_port", 8440);
+    int orchSecurePort = props.getIntProperty("orch_secure_port", 8441);
 
     boolean daemon = false;
     List<String> alwaysMandatoryProperties = Arrays.asList("db_user", "db_password", "db_address");
@@ -99,14 +101,14 @@ public class GatekeeperMain extends ArrowheadMain {
           System.out.println("Starting server as daemon!");
           break;
         case "-d":
-          DEBUG_MODE = true;
+          System.setProperty("debug_mode", "true");
           System.out.println("Starting server in debug mode!");
           break;
         case "-tls":
           List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
           allMandatoryProperties.addAll(Arrays.asList("gatekeeper_keystore", "gatekeeper_keystore_pass", "gatekeeper_keypass", "cloud_keystore",
                                                       "cloud_keystore_pass", "cloud_keypass", "master_arrowhead_cert"));
-          Utility.checkProperties(getProp().stringPropertyNames(), allMandatoryProperties);
+          Utility.checkProperties(props.stringPropertyNames(), allMandatoryProperties);
           INBOUND_BASE_URI = Utility.getUri(address, internalSecurePort, null, true, true);
           OUTBOUND_BASE_URI = Utility.getUri(address, externalSecurePort, null, true, true);
           SERVICE_REGISTRY_URI = Utility.getUri(srAddress, srSecurePort, "serviceregistry", true, true);
@@ -115,10 +117,11 @@ public class GatekeeperMain extends ArrowheadMain {
           outboundServer = startSecureServer(OUTBOUND_BASE_URI, false);
           useSRService(true);
           IS_SECURE = true;
+          break;
       }
     }
     if (inboundServer == null) {
-      Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
+      Utility.checkProperties(props.stringPropertyNames(), alwaysMandatoryProperties);
       INBOUND_BASE_URI = Utility.getUri(address, internalInsecurePort, null, false, true);
       OUTBOUND_BASE_URI = Utility.getUri(address, externalInsecurePort, null, false, true);
       SERVICE_REGISTRY_URI = Utility.getUri(srAddress, srInsecurePort, "serviceregistry", false, true);
@@ -149,7 +152,7 @@ public class GatekeeperMain extends ArrowheadMain {
     }
   }
 
-  private static HttpServer startServer(final String url, final boolean inbound) throws IOException {
+  private static HttpServer startServer(final String url, final boolean inbound) {
     final ResourceConfig config = new ResourceConfig();
     if (inbound) {
       config.registerClasses(GatekeeperApi.class, GatekeeperInboundResource.class);
@@ -171,13 +174,13 @@ public class GatekeeperMain extends ArrowheadMain {
         System.out.println("Started insecure outbound server at: " + url);
       }
       return server;
-    } catch (ProcessingException e) {
+    } catch (IOException | ProcessingException e) {
       throw new ServiceConfigurationError(
           "Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and not in use already)", e);
     }
   }
 
-  private static HttpServer startSecureServer(final String url, final boolean inbound) throws IOException {
+  private static HttpServer startSecureServer(final String url, final boolean inbound) {
     final ResourceConfig config = new ResourceConfig();
     if (inbound) {
       config.registerClasses(GatekeeperInboundResource.class);
@@ -186,13 +189,13 @@ public class GatekeeperMain extends ArrowheadMain {
     }
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.gatekeeper.filter");
 
-    String gatekeeperKeystorePath = getProp().getProperty("gatekeeper_keystore");
-    String gatekeeperKeystorePass = getProp().getProperty("gatekeeper_keystore_pass");
-    String gatekeeperKeyPass = getProp().getProperty("gatekeeper_keypass");
-    String cloudKeystorePath = getProp().getProperty("cloud_keystore");
-    String cloudKeystorePass = getProp().getProperty("cloud_keystore_pass");
-    String cloudKeyPass = getProp().getProperty("cloud_keypass");
-    String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
+    String gatekeeperKeystorePath = props.getProperty("gatekeeper_keystore");
+    String gatekeeperKeystorePass = props.getProperty("gatekeeper_keystore_pass");
+    String gatekeeperKeyPass = props.getProperty("gatekeeper_keypass");
+    String cloudKeystorePath = props.getProperty("cloud_keystore");
+    String cloudKeystorePass = props.getProperty("cloud_keystore_pass");
+    String cloudKeyPass = props.getProperty("cloud_keypass");
+    String masterArrowheadCertPath = props.getProperty("master_arrowhead_cert");
 
     SSLContext serverContext;
     if (inbound) {
@@ -243,7 +246,7 @@ public class GatekeeperMain extends ArrowheadMain {
         System.out.println("Started secure outbound server at: " + url);
       }
       return server;
-    } catch (ProcessingException e) {
+    } catch (IOException | ProcessingException e) {
       throw new ServiceConfigurationError(
           "Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and not in use already)", e);
     }
@@ -341,23 +344,6 @@ public class GatekeeperMain extends ArrowheadMain {
     DatabaseManager.closeSessionFactory();
     System.out.println("Gatekeeper Server stopped");
     System.exit(0);
-  }
-
-  private static synchronized TypeSafeProperties getProp() {
-    try {
-      if (prop == null) {
-        prop = new TypeSafeProperties();
-        File file = new File("config" + File.separator + "app.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        prop.load(inputStream);
-      }
-    } catch (FileNotFoundException ex) {
-      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    return prop;
   }
 
 }

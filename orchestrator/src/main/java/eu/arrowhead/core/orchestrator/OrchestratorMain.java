@@ -41,6 +41,7 @@ public class OrchestratorMain extends ArrowheadMain {
 
   @Override
   protected void init(CoreSystem coreSystem, String[] args, Set<Class<?>> classes, String[] packages) {
+    super.init(coreSystem, args, classes, packages);
     argLoop:
     for (String arg : args) {
       switch (arg) {
@@ -49,8 +50,9 @@ public class OrchestratorMain extends ArrowheadMain {
           break argLoop;
       }
     }
+    SR_BASE_URI = srBaseUri;
     getCoreSystemServiceUris();
-    super.init(coreSystem, args, classes, packages);
+    listenForInput();
   }
 
   public static void getCoreSystemServiceUris() {

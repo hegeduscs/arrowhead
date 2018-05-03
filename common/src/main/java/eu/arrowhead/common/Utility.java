@@ -27,7 +27,11 @@ import eu.arrowhead.common.json.JacksonJsonProviderAtRest;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.misc.CoreSystemService;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -363,6 +367,21 @@ public final class Utility {
     } else {
       return "Insecure" + baseSD;
     }
+  }
+
+  public static TypeSafeProperties getProp(String fileName) {
+    TypeSafeProperties prop = new TypeSafeProperties();
+    try {
+      File file = new File("config" + File.separator + fileName);
+      FileInputStream inputStream = new FileInputStream(file);
+      prop.load(inputStream);
+    } catch (FileNotFoundException ex) {
+      throw new ServiceConfigurationError(
+          fileName + " file not found, make sure you have the correct working directory set! (directory where the config folder can be found)", ex);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return prop;
   }
 
   public static void checkProperties(Set<String> propertyNames, List<String> mandatoryProperties) {

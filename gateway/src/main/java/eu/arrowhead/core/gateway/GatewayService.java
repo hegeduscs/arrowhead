@@ -48,15 +48,13 @@ import org.apache.log4j.Logger;
 
 public class GatewayService {
 
-  private static final Logger log = Logger.getLogger(GatewayService.class.getName());
+  static ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
+
   private static final int ivSize = 16;
   private static final int keySize = 16;
-  private static final int minPort = Integer.parseInt(GatewayMain.getProp().getProperty("min_port", "8000"));
-  private static final int maxPort = Integer.parseInt(GatewayMain.getProp().getProperty("max_port", "8100"));
-
-  private static ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
-      .initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);
-  protected static ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<Integer, Boolean> portAllocationMap = GatewayService
+      .initPortAllocationMap(new ConcurrentHashMap<>(), GatewayMain.minPort, GatewayMain.maxPort);
+  private static final Logger log = Logger.getLogger(GatewayService.class.getName());
 
   private GatewayService() throws AssertionError {
     throw new AssertionError("GatewayService is a non-instantiable class");
@@ -73,7 +71,7 @@ public class GatewayService {
    *
    * @return GatewaySession, which contains a connection and a channel object
    */
-  public static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName, boolean isSecure) {
+  static GatewaySession createChannel(String brokerHost, int brokerPort, String queueName, String controlQueueName, boolean isSecure) {
     GatewaySession gatewaySession = new GatewaySession();
     try {
       ConnectionFactory factory = new ConnectionFactory();
@@ -160,9 +158,8 @@ public class GatewayService {
     byte[] decryptedMessage;
 
     try {
-      KeyStore keyStore = SecurityUtils
-          .loadKeyStore(GatewayMain.getProp().getProperty("keystore"), GatewayMain.getProp().getProperty("keystorepass"));
-      privateKey = SecurityUtils.getPrivateKey(keyStore, GatewayMain.getProp().getProperty("keystorepass"));
+      KeyStore keyStore = SecurityUtils.loadKeyStore(GatewayMain.keystore, GatewayMain.keystorePass);
+      privateKey = SecurityUtils.getPrivateKey(keyStore, GatewayMain.keystorePass);
       cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
       cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
     } catch (GeneralSecurityException e) {
@@ -196,8 +193,8 @@ public class GatewayService {
   }
 
   public static SSLContext createSSLContext() {
-    String keystorePath = GatewayMain.getProp().getProperty("keystore");
-    String keystorePass = GatewayMain.getProp().getProperty("keystorepass");
+    String keystorePath = GatewayMain.keystore;
+    String keystorePass = GatewayMain.keystorePass;
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
 
     SSLContext sslContext;
@@ -239,7 +236,7 @@ public class GatewayService {
    *
    * @return serverSocketPort or null if no available port found
    */
-  public static Integer getAvailablePort() {
+  static Integer getAvailablePort() {
     Integer serverSocketPort;
     // Check the port range for
     ArrayList<Integer> freePorts = new ArrayList<>();

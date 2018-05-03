@@ -158,7 +158,7 @@ public class GatekeeperOutboundResource {
     requestForm.getNegotiationFlags().put("useGateway", GatekeeperMain.USE_GATEWAY);
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),
-                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(), null, GatekeeperMain.timeout,
+                                              requestForm.getPreferredSystems(), requestForm.getNegotiationFlags(), null, GatekeeperMain.TIMEOUT,
                                               null);
 
     if (GatekeeperMain.USE_GATEWAY) {
@@ -190,7 +190,7 @@ public class GatekeeperOutboundResource {
                                                                               requestForm.getRequesterSystem(),
                                                                               icnEnd.getOrchestrationForm().getProvider(), Utility.getOwnCloud(),
                                                                               requestForm.getTargetCloud(), requestForm.getRequestedService(),
-                                                                              isSecure, GatekeeperMain.timeout, gwConnInfo.getGatewayPublicKey());
+                                                                              isSecure, GatekeeperMain.TIMEOUT, gwConnInfo.getGatewayPublicKey());
 
     // Sending the gateway request and parsing the response
     Response gatewayResponse = Utility

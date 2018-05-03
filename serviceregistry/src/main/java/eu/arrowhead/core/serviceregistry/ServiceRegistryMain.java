@@ -1,259 +1,76 @@
 package eu.arrowhead.core.serviceregistry;
 
 import com.github.danieln.dnssdjava.DnsSDRegistrator;
-import eu.arrowhead.common.DatabaseManager;
+import eu.arrowhead.common.ArrowheadMain;
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.misc.SecurityUtils;
+import eu.arrowhead.common.misc.CoreSystem;
 import eu.arrowhead.common.misc.TypeSafeProperties;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ServiceConfigurationError;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.net.ssl.SSLContext;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.UriBuilder;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.ssl.SSLContextConfigurator;
-import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
-import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
 
-public class ServiceRegistryMain {
+public class ServiceRegistryMain extends ArrowheadMain {
 
-  public static boolean DEBUG_MODE;
-
-  static final int PING_TIMEOUT = getAppProp().getIntProperty("ping_timeout", 10000);
-
+  static int PING_TIMEOUT;
   //DNS-SD global settings
-  static final String TSIG_NAME = getDnsProp().getProperty("tsig_name", "key.arrowhead.tmit.bme.hu");
-  static final String TSIG_KEY = getDnsProp().getProperty("tsig_key", "RM/jKKEPYB83peT0DQnYGg==");
-  static final String TSIG_ALGORITHM = getDnsProp().getProperty("tsig_algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
-  static final String DNS_ADDRESS = getDnsProp().getProperty("dns_address", "152.66.246.237");
-  static final String DNS_DOMAIN = getDnsProp().getProperty("dns_domain", "arrowhead.tmit.bme.hu");
-  static final int DNS_PORT = getDnsProp().getIntProperty("dns_port", 53);
-  static String DNS_REGISTRATOR_DOMAIN = getDnsProp().getProperty("dns_registrator_domain", "srv.arrowhead.tmit.bme.hu.");
+  static final String TSIG_NAME;
+  static final String TSIG_KEY;
+  static final String TSIG_ALGORITHM;
+  static final String DNS_ADDRESS;
+  static final String DNS_DOMAIN;
+  static final int DNS_PORT;
+  static String DNS_REGISTRATOR_DOMAIN;
 
-  private static String BASE_URI;
-  private static HttpServer server;
-  private static TypeSafeProperties appProp, dnsProp;
-  private static Timer pingTimer;
-  private static Timer ttlTimer;
+  private static final TypeSafeProperties dnsProp = Utility.getProp("dns.properties");
 
-  private static final int TTL_INTERVAL = getAppProp().getIntProperty("ttl_interval", 10);
-  private static final Logger log = Logger.getLogger(ServiceRegistryMain.class.getName());
+  static {
+    TSIG_NAME = dnsProp.getProperty("tsig_name", "key.arrowhead.tmit.bme.hu");
+    TSIG_KEY = dnsProp.getProperty("tsig_key", "RM/jKKEPYB83peT0DQnYGg==");
+    TSIG_ALGORITHM = dnsProp.getProperty("tsig_algorithm", DnsSDRegistrator.TSIG_ALGORITHM_HMAC_MD5);
+    DNS_ADDRESS = dnsProp.getProperty("dns_address", "152.66.246.237");
+    DNS_DOMAIN = dnsProp.getProperty("dns_domain", "arrowhead.tmit.bme.hu");
+    DNS_PORT = dnsProp.getIntProperty("dns_port", 53);
+    DNS_REGISTRATOR_DOMAIN = dnsProp.getProperty("dns_registrator_domain", "srv.arrowhead.tmit.bme.hu.");
+  }
 
-  public static void main(String[] args) throws IOException {
-    PropertyConfigurator.configure("config" + File.separator + "log4j.properties");
-    System.out.println("Working directory: " + System.getProperty("user.dir"));
+  {
+    PING_TIMEOUT = props.getIntProperty("ping_timeout", 10000);
+  }
 
-    //Setting up DNS
+  private ServiceRegistryMain(String[] args) {
+    Set<Class<?>> classes = new HashSet<>(Collections.singleton(ServiceRegistryResource.class));
+    String[] packages = {"eu.arrowhead.common", "eu.arrowhead.core.serviceregistry.filter"};
+    init(CoreSystem.SERVICE_REGISTRY_DNS, args, classes, packages);
+
     System.setProperty("dns.server", DNS_ADDRESS);
     System.setProperty("dnssd.domain", DNS_DOMAIN);
-    System.setProperty("dnssd.hostname", getDnsProp().getProperty("dns_host", "localhost"));
+    System.setProperty("dnssd.hostname", dnsProp.getProperty("dns_host", "localhost"));
     if (!DNS_REGISTRATOR_DOMAIN.endsWith(".")) {
       DNS_REGISTRATOR_DOMAIN = DNS_REGISTRATOR_DOMAIN.concat(".");
     }
 
-    String address = getAppProp().getProperty("address", "0.0.0.0");
-    int insecurePort = getAppProp().getIntProperty("insecure_port", 8442);
-    int securePort = getAppProp().getIntProperty("secure_port", 8443);
-
-    boolean daemon = false;
-    for (String arg : args) {
-      switch (arg) {
-        case "-daemon":
-          daemon = true;
-          System.out.println("Starting SR bridge as daemon!");
-          break;
-        case "-d":
-          DEBUG_MODE = true;
-          System.out.println("Starting server in debug mode!");
-          break;
-        case "-tls":
-          List<String> secureMandatoryProperties = new ArrayList<>(
-              Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass"));
-          Utility.checkProperties(getAppProp().stringPropertyNames(), secureMandatoryProperties);
-          BASE_URI = Utility.getUri(address, securePort, null, true, true);
-          server = startSecureServer();
-      }
-    }
-    if (server == null) {
-      BASE_URI = Utility.getUri(address, insecurePort, null, false, true);
-      server = startServer();
-    }
-
     //if provider ping is scheduled, start the TimerTask that provides it
-    if (Boolean.valueOf(getAppProp().getProperty("ping_scheduled", "false"))) {
+    if (props.getBooleanProperty("ping_scheduled", false)) {
       TimerTask pingTask = new PingProvidersTask();
-      pingTimer = new Timer();
-      int interval = getAppProp().getIntProperty("ping_interval", 60);
-      pingTimer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
+      Timer pingTimer = new Timer();
+      int interval = props.getIntProperty("ping_interval", 60);
+      pingTimer.schedule(pingTask, 60L * 1000L, (interval * 60L * 1000L));
     }
     //if TTL based service removing is scheduled, start the TimerTask that provides it
-    if (Boolean.valueOf(getAppProp().getProperty("ttl_scheduled", "false"))) {
+    if (props.getBooleanProperty("ttl_scheduled", false)) {
       TimerTask removeTask = new RemoveExpiredServicesTask();
-      ttlTimer = new Timer();
-      ttlTimer.schedule(removeTask, 45L * 1000L, TTL_INTERVAL * 60L * 1000L);
+      Timer ttlTimer = new Timer();
+      int interval = props.getIntProperty("ttl_interval", 10);
+      ttlTimer.schedule(removeTask, 45L * 1000L, interval * 60L * 1000L);
     }
 
-    DatabaseManager.init();
-    if (daemon) {
-      System.out.println("In daemon mode, process will terminate for TERM signal...");
-      Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-        System.out.println("Received TERM signal, shutting down...");
-        if (pingTimer != null) {
-          pingTimer.cancel();
-        }
-        shutdown();
-      }));
-    } else {
-      System.out.println("Type \"stop\" to shutdown Service Registry Server...");
-      BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-      String input = "";
-      while (!input.equals("stop")) {
-        input = br.readLine();
-      }
-      br.close();
-      if (pingTimer != null) {
-        pingTimer.cancel();
-      }
-      shutdown();
-    }
+    listenForInput();
   }
 
-  private static HttpServer startServer() throws IOException {
-    final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(ServiceRegistryResource.class);
-    config.packages("eu.arrowhead.common", "eu.arrowhead.core.serviceregistry.filter");
-
-    URI uri = UriBuilder.fromUri(BASE_URI).build();
-    try {
-      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, false);
-      server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-      server.start();
-      log.info("Started server at: " + BASE_URI);
-      System.out.println("Started  insecure server at: " + BASE_URI);
-      //TODO register the SR service into the DNS-SD
-      return server;
-    } catch (ProcessingException e) {
-      throw new ServiceConfigurationError(
-          "Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and not in use already)", e);
-    }
-  }
-
-  private static HttpServer startSecureServer() throws IOException {
-    final ResourceConfig config = new ResourceConfig();
-    config.registerClasses(ServiceRegistryResource.class);
-    config.packages("eu.arrowhead.common", "eu.arrowhead.core.serviceregistry.filter");
-
-    String keystorePath = getAppProp().getProperty("keystore", "/home/arrowhead_test.jks");
-    String keystorePass = getAppProp().getProperty("keystorepass", "arrowhead");
-    String truststorePath = getAppProp().getProperty("truststore", "/home/arrowhead_test.jks");
-    String truststorePass = getAppProp().getProperty("truststorepass", "arrowhead");
-
-    SSLContextConfigurator sslCon = new SSLContextConfigurator();
-    sslCon.setKeyStoreFile(keystorePath);
-    sslCon.setKeyStorePass(keystorePass);
-    sslCon.setTrustStoreFile(truststorePath);
-    sslCon.setTrustStorePass(truststorePass);
-    if (!sslCon.validateConfiguration(true)) {
-      log.fatal("SSL Context is not valid, check the certificate files or app.properties!");
-      throw new AuthException("SSL Context is not valid, check the certificate files or app.properties!");
-    }
-
-    SSLContext sslContext = sslCon.createSSLContext();
-    Utility.setSSLContext(sslContext);
-
-    KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
-    X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(keyStore);
-    String serverCN = SecurityUtils.getCertCNFromSubject(serverCert.getSubjectDN().getName());
-    if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
-      log.fatal("Server CN is not compliant with the Arrowhead cert structure");
-      throw new AuthException(
-          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
-              + "end with arrowhead.eu.");
-    }
-    log.info("Certificate of the secure server: " + serverCN);
-    config.property("server_common_name", serverCN);
-
-    URI uri = UriBuilder.fromUri(BASE_URI).build();
-    try {
-      final HttpServer server = GrizzlyHttpServerFactory
-          .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true), false);
-      server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
-      server.start();
-      log.info("Started server at: " + BASE_URI);
-      System.out.println("Started secure server at: " + BASE_URI);
-      //TODO register the SR service into the DNS-SD
-      return server;
-    } catch (ProcessingException e) {
-      throw new ServiceConfigurationError(
-          "Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and not in use already)", e);
-    }
-  }
-
-  private static void shutdown() {
-    if (pingTimer != null) {
-      pingTimer.cancel();
-    }
-    if (ttlTimer != null) {
-      ttlTimer.cancel();
-    }
-    if (server != null) {
-      log.info("Stopping server at: " + BASE_URI);
-      server.shutdownNow();
-    }
-    DatabaseManager.closeSessionFactory();
-    System.out.println("Service Registry Server stopped");
-    System.exit(0);
-  }
-
-  private static synchronized TypeSafeProperties getAppProp() {
-    try {
-      if (appProp == null) {
-        appProp = new TypeSafeProperties();
-        File file = new File("config" + File.separator + "app.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        appProp.load(inputStream);
-      }
-    } catch (FileNotFoundException ex) {
-      throw new ServiceConfigurationError("app.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    return appProp;
-  }
-
-  private static synchronized TypeSafeProperties getDnsProp() {
-    try {
-      if (dnsProp == null) {
-        dnsProp = new TypeSafeProperties();
-        File file = new File("config" + File.separator + "dns.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        dnsProp.load(inputStream);
-      }
-    } catch (FileNotFoundException ex) {
-      throw new ServiceConfigurationError("dns.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    return dnsProp;
+  public static void main(String[] args) {
+    new ServiceRegistryMain(args);
   }
 
 }
