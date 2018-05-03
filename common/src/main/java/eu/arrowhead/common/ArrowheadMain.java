@@ -83,15 +83,6 @@ public abstract class ArrowheadMain {
     int port = isSecure ? props.getIntProperty("secure_port", coreSystem.getSecurePort()) : props.getIntProperty("insecure_port", coreSystem.getInsecurePort());
     baseUri = Utility.getUri(address, port, null, isSecure, true);
 
-    if (!coreSystem.equals(CoreSystem.SERVICE_REGISTRY_DNS) && !coreSystem.equals(CoreSystem.SERVICE_REGISTRY_SQL)) {
-      String srAddress = props.getProperty("sr_address", "0.0.0.0");
-      int srPort = isSecure ? props.getIntProperty("sr_secure_port", CoreSystem.SERVICE_REGISTRY_SQL.getSecurePort())
-                            : props.getIntProperty("sr_insecure_port", CoreSystem.SERVICE_REGISTRY_SQL.getInsecurePort());
-      srBaseUri = Utility.getUri(srAddress, srPort, "serviceregistry", isSecure, true);
-      Utility.setServiceRegistryUri(srBaseUri);
-      useSRService(true);
-    }
-
     if (isSecure) {
       List<String> allMandatoryProperties = new ArrayList<>(coreSystem.getAlwaysMandatoryFields());
       allMandatoryProperties.addAll(coreSystem.getSecureMandatoryFields());
@@ -100,6 +91,15 @@ public abstract class ArrowheadMain {
     } else {
       Utility.checkProperties(props.stringPropertyNames(), coreSystem.getAlwaysMandatoryFields());
       startServer(classes, packages);
+    }
+
+    if (!coreSystem.equals(CoreSystem.SERVICE_REGISTRY_DNS) && !coreSystem.equals(CoreSystem.SERVICE_REGISTRY_SQL)) {
+      String srAddress = props.getProperty("sr_address", "0.0.0.0");
+      int srPort = isSecure ? props.getIntProperty("sr_secure_port", CoreSystem.SERVICE_REGISTRY_SQL.getSecurePort())
+                            : props.getIntProperty("sr_insecure_port", CoreSystem.SERVICE_REGISTRY_SQL.getInsecurePort());
+      srBaseUri = Utility.getUri(srAddress, srPort, "serviceregistry", isSecure, true);
+      Utility.setServiceRegistryUri(srBaseUri);
+      useSRService(true);
     }
 
     DatabaseManager.init();
