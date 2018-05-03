@@ -62,7 +62,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
       //Only the local HMI can use these methods
       String[] serverFields = serverCN.split("\\.", 2);
       // serverFields contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
-      return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
+      return clientCN.equalsIgnoreCase("sysop." + serverFields[1]);
     } else if (requestTarget.endsWith("register") || requestTarget.endsWith("remove")) {
       // All requests from the local cloud are allowed, so omit the first 2 parts of the common names (systemName.systemGroup)
       String[] serverFields = serverCN.split("\\.", 3);

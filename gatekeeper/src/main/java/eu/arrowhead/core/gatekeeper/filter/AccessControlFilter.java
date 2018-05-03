@@ -63,7 +63,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     // serverFields (when considered) contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
       //Only the local HMI can use these methods
-      return clientCN.equalsIgnoreCase("hmi." + serverFields[1]);
+      return clientCN.equalsIgnoreCase("sysop." + serverFields[1]);
     } else {
       if (requestTarget.endsWith("init_gsd") || requestTarget.endsWith("init_icn")) {
         // Only requests from the local Orchestrator are allowed
