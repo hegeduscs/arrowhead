@@ -5,8 +5,8 @@ public enum CoreSystemService {
   TOKEN_GEN_SERVICE("TokenGeneration", "authorization/token"),
   GSD_SERVICE("GlobalServiceDiscovery", "gatekeeper/init_gsd"),
   ICN_SERVICE("InterCloudNegotiations", "gatekeeper/init_icn"),
-  GW_CONSUMER_SERVICE("ConnectToConsumer", "gateway/connectToProvider"),
-  GW_PROVIDER_SERVICE("ConnectToProvider", "gateway/connectToConsumer"),
+  GW_CONSUMER_SERVICE("ConnectToConsumer", "gateway/connectToConsumer"),
+  GW_PROVIDER_SERVICE("ConnectToProvider", "gateway/connectToProvider"),
   GW_SESSION_MGMT("SessionManagement", "gateway/management"),
   ORCH_SERVICE("OrchestrationService", "orchestrator/orchestration");
 
