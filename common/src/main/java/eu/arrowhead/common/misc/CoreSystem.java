@@ -11,7 +11,8 @@ public enum CoreSystem {
                 Arrays.asList("keypass", "truststore", "truststorepass"),
                 Arrays.asList(CoreSystemService.AUTH_CONTROL_SERVICE, CoreSystemService.TOKEN_GEN_SERVICE)),
   CHOREOGRAPHER(8456, 8457, null, null, null),
-  EVENT_HANDLER(8454, 8455, ArrowheadMain.dbFields, ArrowheadMain.certFields, null),
+  EVENT_HANDLER(8454, 8455, ArrowheadMain.dbFields, ArrowheadMain.certFields,
+                Arrays.asList(CoreSystemService.EVENT_PUBLISH, CoreSystemService.EVENT_SUBSCRIPTION)),
   GATEKEEPER_INTERNAL(8446, 8447, ArrowheadMain.dbFields, Arrays
       .asList("gatekeeper_keystore", "gatekeeper_keystore_pass", "gatekeeper_keypass", "cloud_keystore", "cloud_keystore_pass", "cloud_keypass",
               "master_arrowhead_cert"), null),

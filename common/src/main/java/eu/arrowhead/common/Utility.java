@@ -87,7 +87,7 @@ public final class Utility {
     SR_QUERY_URI = UriBuilder.fromUri(uri).path("query").build().toString();
   }
 
-  public static <T> Response sendRequest(String uri, String method, T payload, SSLContext givenContext) {
+  public static synchronized <T> Response sendRequest(String uri, String method, T payload, SSLContext givenContext) {
     log.info("Sending " + method + " request to: " + uri);
 
     boolean isSecure = false;
@@ -151,7 +151,7 @@ public final class Utility {
     return response;
   }
 
-  public static <T> Response sendRequest(String uri, String method, T payload) {
+  public static synchronized <T> Response sendRequest(String uri, String method, T payload) {
     return sendRequest(uri, method, payload, null);
   }
 

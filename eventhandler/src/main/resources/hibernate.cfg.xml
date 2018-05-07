@@ -33,7 +33,6 @@
     <property name="hikari.registerMbeans">true</property>
 
     <mapping class="eu.arrowhead.common.database.ArrowheadSystem"/>
-    <mapping class="eu.arrowhead.common.database.Event"/>
-    <mapping class="eu.arrowhead.common.database.Filter"/>
+    <mapping class="eu.arrowhead.common.database.EventFilter"/>
   </session-factory>
 </hibernate-configuration>

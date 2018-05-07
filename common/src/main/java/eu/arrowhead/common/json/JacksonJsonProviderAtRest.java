@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
@@ -20,6 +21,7 @@ public class JacksonJsonProviderAtRest extends JacksonJaxbJsonProvider {
 
   static {
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
     mapper.setDefaultPropertyInclusion(JsonInclude.Value.construct(Include.ALWAYS, Include.NON_NULL));

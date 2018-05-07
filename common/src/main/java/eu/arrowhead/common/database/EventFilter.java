@@ -9,11 +9,17 @@
 
 package eu.arrowhead.common.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.messages.ArrowheadBase;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -27,14 +33,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 
 @Entity
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
 @Table(name = "event_filter", uniqueConstraints = {@UniqueConstraint(columnNames = {"event_type", "consumer_system_id"})})
-public class Filter {
+public class EventFilter extends ArrowheadBase {
+
+  @Transient
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("eventType", "consumer", "notifyUri"));
 
   @Column(name = "id")
   @Id
@@ -54,11 +65,9 @@ public class Filter {
   private List<ArrowheadSystem> sources = new ArrayList<>();
 
   @Column(name = "start_date")
-  @Type(type = "timestamp")
   private LocalDateTime startDate;
 
   @Column(name = "end_date")
-  @Type(type = "timestamp")
   private LocalDateTime endDate;
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -68,25 +77,30 @@ public class Filter {
   @CollectionTable(name = "event_filter_metadata", joinColumns = @JoinColumn(name = "filter_id"))
   private Map<String, String> filterMetadata = new HashMap<>();
 
-  public Filter() {
+  @Column(name = "port")
+  private Integer port;
+
+  @Column(name = "notify_uri")
+  private String notifyUri;
+
+  @Column(name = "match_metadata")
+  @Type(type = "yes_no")
+  private Boolean matchMetadata;
+
+  public EventFilter() {
   }
 
-  public Filter(String eventType, ArrowheadSystem consumer, List<ArrowheadSystem> sources, LocalDateTime startDate, LocalDateTime endDate,
-                Map<String, String> filterMetadata) {
+  public EventFilter(String eventType, ArrowheadSystem consumer, List<ArrowheadSystem> sources, LocalDateTime startDate, LocalDateTime endDate,
+                     Map<String, String> filterMetadata, Integer port, String notifyUri, Boolean matchMetadata) {
     this.eventType = eventType;
     this.consumer = consumer;
     this.sources = sources;
     this.startDate = startDate;
     this.endDate = endDate;
     this.filterMetadata = filterMetadata;
-  }
-
-  public int getId() {
-    return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
+    this.port = port;
+    this.notifyUri = notifyUri;
+    this.matchMetadata = matchMetadata;
   }
 
   public String getEventType() {
@@ -137,6 +151,58 @@ public class Filter {
     this.filterMetadata = filterMetadata;
   }
 
+  public Integer getPort() {
+    return port;
+  }
+
+  public void setPort(Integer port) {
+    this.port = port;
+  }
+
+  public String getNotifyUri() {
+    return notifyUri;
+  }
+
+  public void setNotifyUri(String notifyUri) {
+    this.notifyUri = notifyUri;
+  }
+
+  public Boolean getMatchMetadata() {
+    return matchMetadata;
+  }
+
+  public void setMatchMetadata(Boolean matchMetadata) {
+    this.matchMetadata = matchMetadata;
+  }
+
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    if (mandatoryFields == null) {
+      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    }
+    mandatoryFields.addAll(alwaysMandatoryFields);
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mandatoryFields.removeAll(nonNullFields);
+    if (consumer != null) {
+      mandatoryFields = consumer.missingFields(false, mandatoryFields);
+    }
+    if (throwException && !mandatoryFields.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    }
+    return mandatoryFields;
+  }
+
+  public void toDatabase() {
+    if (consumer.getPort() != null && (port == null || port == 0)) {
+      port = consumer.getPort();
+    }
+  }
+
+  public void fromDatabase() {
+    if (port != null && consumer.getPort() == null) {
+      consumer.setPort(port);
+    }
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -146,18 +212,18 @@ public class Filter {
       return false;
     }
 
-    Filter filter = (Filter) o;
+    EventFilter eventFilter = (EventFilter) o;
 
-    if (eventType != null ? !eventType.equals(filter.eventType) : filter.eventType != null) {
+    if (eventType != null ? !eventType.equals(eventFilter.eventType) : eventFilter.eventType != null) {
       return false;
     }
-    if (consumer != null ? !consumer.equals(filter.consumer) : filter.consumer != null) {
+    if (consumer != null ? !consumer.equals(eventFilter.consumer) : eventFilter.consumer != null) {
       return false;
     }
-    if (startDate != null ? !startDate.equals(filter.startDate) : filter.startDate != null) {
+    if (startDate != null ? !startDate.equals(eventFilter.startDate) : eventFilter.startDate != null) {
       return false;
     }
-    return endDate != null ? endDate.equals(filter.endDate) : filter.endDate == null;
+    return endDate != null ? endDate.equals(eventFilter.endDate) : eventFilter.endDate == null;
   }
 
   @Override
@@ -171,7 +237,7 @@ public class Filter {
 
   @Override
   public String toString() {
-    final StringBuffer sb = new StringBuffer("Filter{");
+    final StringBuffer sb = new StringBuffer("EventFilter{");
     sb.append("eventType='").append(eventType).append('\'');
     sb.append(", consumer=").append(consumer);
     sb.append('}');

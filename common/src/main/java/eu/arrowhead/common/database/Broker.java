@@ -23,6 +23,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import org.hibernate.annotations.Type;
 
 @Entity
 @JsonIgnoreProperties({"alwaysMandatoryFields"})
@@ -47,6 +48,7 @@ public class Broker extends ArrowheadBase {
   private Integer port;
 
   @Column(name = "is_secure")
+  @Type(type = "yes_no")
   private boolean secure;
 
   @Column(name = "authentication_info", length = 2047)

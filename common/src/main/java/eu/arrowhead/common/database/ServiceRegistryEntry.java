@@ -30,6 +30,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import org.hibernate.annotations.Type;
 
 @Entity
 @JsonIgnoreProperties({"alwaysMandatoryFields", "id", "metadata", "endOfValidity"})
@@ -64,6 +65,7 @@ public class ServiceRegistryEntry extends ArrowheadBase {
   private Integer version = 1;
 
   @Column(name = "udp")
+  @Type(type = "yes_no")
   private boolean udp = false;
 
   //Time to live in seconds - endOfValidity is calculated from this upon registering and TTL is calculated from endOfValidity when queried

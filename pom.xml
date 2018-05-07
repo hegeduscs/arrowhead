@@ -113,6 +113,7 @@
         <version>${hibernate.version}</version>
       </dependency>
 
+      <!-- Only used by the HikariCP DB connection pool manager dependency -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>

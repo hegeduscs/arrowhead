@@ -23,6 +23,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import org.hibernate.annotations.Type;
 
 /**
  * Entity class for storing Arrowhead Clouds in the database. The "operator" and "cloud_name" columns must be unique together.
@@ -59,6 +60,7 @@ public class ArrowheadCloud extends ArrowheadBase {
   private String authenticationInfo;
 
   @Column(name = "is_secure")
+  @Type(type = "yes_no")
   private Boolean secure;
 
   public ArrowheadCloud() {
