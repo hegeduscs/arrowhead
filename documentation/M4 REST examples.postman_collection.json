@@ -619,7 +619,7 @@
               },
               "response": [
                 {
-                  "id": "43b597be-4b2d-4a9f-816a-9b6b12e2823c",
+                  "id": "18af6076-6b2f-45bd-be82-a97b6afeb13b",
                   "name": "Gatekeeper Management GetIt()",
                   "originalRequest": {
                     "method": "GET",
@@ -2335,7 +2335,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n\t\"providedService\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"new interface1\", \"new interface2\"],\r\n\t\t\"serviceMetadata\": {\r\n\t\t\t\"test_key\": \"new value\"\r\n\t\t}\r\n\t},\r\n\t\"provider\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"updated address\",\r\n\t\t\"authenticationInfo\": \"new auth info\"\r\n\t},\r\n\t\"port\": 4040,\r\n\t\"version\": 2,\r\n\t\"UDP\": true,\r\n\t\"ttl\": 500\r\n}"
+                  "raw": "{\r\n\t\"providedService\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"new interface1\", \"new interface2\"],\r\n\t\t\"serviceMetadata\": {\r\n\t\t\t\"test_key\": \"new value\"\r\n\t\t}\r\n\t},\r\n\t\"provider\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"updated address\",\r\n\t\t\"authenticationInfo\": \"new auth info\"\r\n\t},\r\n\t\"serviceURI\": \"updated_uri\",\r\n\t\"port\": 4040,\r\n\t\"version\": 2,\r\n\t\"UDP\": true,\r\n\t\"ttl\": 500\r\n}"
                 },
                 "url": {
                   "raw": "http://localhost:8442/serviceregistry/mgmt/update",
@@ -2388,10 +2388,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n\t\"providedService\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"test_interface1\", \"test_interface2\"],\r\n\t\t\"serviceMetadata\": {\r\n\t\t\t\"test_key\": \"test_value\"\r\n\t\t}\r\n\t},\r\n\t\"provider\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"authenticationInfo\": \"auth info\"\r\n\t},\r\n\t\"port\": 8080,\r\n\t\"version\": 1,\r\n\t\"UDP\": false,\r\n\t\"ttl\": 0\r\n}"
+              "raw": "{\r\n\t\"providedService\": {\r\n\t\t\"serviceDefinition\": \"test_service\",\r\n\t\t\"interfaces\": [\"test_interface1\", \"test_interface2\"],\r\n\t\t\"serviceMetadata\": {\r\n\t\t\t\"test_key\": \"test_value\"\r\n\t\t}\r\n\t},\r\n\t\"provider\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"authenticationInfo\": \"auth info\"\r\n\t},\r\n\t\"serviceURI\": \"test_uri\",\r\n\t\"port\": 8080,\r\n\t\"version\": 1,\r\n\t\"UDP\": false,\r\n\t\"ttl\": 0\r\n}"
             },
             "url": {
-              "raw": "http://localhost:8442/serviceregistry/mgmt/update",
+              "raw": "http://localhost:8442/serviceregistry/register",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2399,8 +2399,7 @@
               "port": "8442",
               "path": [
                 "serviceregistry",
-                "mgmt",
-                "update"
+                "register"
               ]
             }
           },
