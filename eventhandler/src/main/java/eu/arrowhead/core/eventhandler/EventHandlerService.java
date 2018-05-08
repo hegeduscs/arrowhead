@@ -32,8 +32,8 @@ final class EventHandlerService {
     restrictionMap.clear();
     restrictionMap.put("eventType", event.getType());
     List<EventFilter> filters = dm.getAll(EventFilter.class, restrictionMap);
-    // Remove the filter if the event source is not in the filter's source list
-    filters.removeIf(current -> !current.getSources().contains(event.getSource()));
+    // Remove the filter if the event source is not in the filter's source list (every source is accepted, if the filter has no sources)
+    filters.removeIf(current -> !current.getSources().isEmpty() && !current.getSources().contains(event.getSource()));
     // Remove the filter if the event timestamp is not between the filter's startDate and endDate
     filters.removeIf(current -> current.getStartDate() != null && event.getTimestamp().isBefore(current.getStartDate()));
     filters.removeIf(current -> current.getEndDate() != null && event.getTimestamp().isAfter(current.getEndDate()));
@@ -72,11 +72,11 @@ final class EventHandlerService {
     }
 
     Map<String, Boolean> result = new HashMap<>();
-    for (String url : urls) {
+    /*for (String url : urls) {
       CompletableFuture.supplyAsync(() -> sendRequest(url, event)).thenAcceptAsync(successfulPublish -> result.put(url, successfulPublish));
-    }
+    }*/
 
-    CompletableFuture.allOf((CompletableFuture[]) urls.stream().map(
+    CompletableFuture.allOf((CompletableFuture[]) urls.parallelStream().map(
         url -> CompletableFuture.supplyAsync(() -> sendRequest(url, event)).thenAcceptAsync(successfulPublish -> result.put(url, successfulPublish)))
                                                       .toArray()).join();
 
