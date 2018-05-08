@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2018 AITIA International Inc.
+ *
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.core.serviceregistry;
 
 import com.github.danieln.dnssdjava.DnsSDException;
@@ -58,9 +67,8 @@ public class RegistryUtils {
     }
 
     LocalDateTime date = registryEntry.getEndOfValidity();
-    String encodedDate = String.valueOf(date.getYear()).concat(".").concat(String.valueOf(date.getMonthValue())).concat(".")
-        .concat(String.valueOf(date.getDayOfMonth())).concat(".").concat(String.valueOf(date.getHour())).concat(".")
-        .concat(String.valueOf(date.getMinute())).concat(".").concat(String.valueOf(date.getSecond()));
+    String encodedDate = String.valueOf(date.getYear()).concat(".").concat(String.valueOf(date.getMonthValue())).concat(".").concat(String.valueOf(date.getDayOfMonth())).concat(".").concat(String.valueOf(date.getHour())).concat(".")
+                               .concat(String.valueOf(date.getMinute())).concat(".").concat(String.valueOf(date.getSecond()));
     properties.put("eovdate", encodedDate);
 
     //additional user metadata

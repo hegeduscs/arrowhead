@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2018 AITIA International Inc.
+ *
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
+ */
+
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
@@ -57,10 +66,9 @@ public class DriversFactory {
    */
 
   public Map<String, String> generateCommands(String communicationProtocol, Map<String, String> networkConfiguration, ArrowheadSystem provider,
-                                              ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands,
-                                              Map<String, String> requestedQoS)
-      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-             NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+                                              ArrowheadSystem consumer, ArrowheadService service, Map<String, String> commands, Map<String, String>
+                                                  requestedQoS)
+      throws ReservationException, DriverNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
     // Class Invoking
     Class cls = findClass(communicationProtocol);
@@ -69,7 +77,7 @@ public class DriversFactory {
     Method method = findMethod(cls);
 
     Map<String, String> streamConfiguration = (Map<String, String>) method.
-        invoke(obj, new ReservationInfo(networkConfiguration, provider, consumer, service, commands, requestedQoS));
+                                                                              invoke(obj, new ReservationInfo(networkConfiguration, provider, consumer, service, commands, requestedQoS));
 
     if (streamConfiguration == null) {
       throw new ReservationException();

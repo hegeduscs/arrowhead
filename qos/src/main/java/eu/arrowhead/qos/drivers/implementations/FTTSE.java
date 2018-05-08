@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2018 AITIA International Inc.
+ *
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
+ */
+
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
@@ -85,8 +94,7 @@ public class FTTSE implements IQoSDriver {
     URI uri = UriBuilder.fromPath(url + "/configure").build();
 
     WebTarget target = client.target(uri);
-    Response response = target.request().header("Content-type", "application/json")
-        .post(Entity.json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
+    Response response = target.request().header("Content-type", "application/json").post(Entity.json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
 
     if (response.getStatus() > 199 && response.getStatus() < 300) {
       return new ReservationResponse(true, null, commands);
@@ -101,7 +109,8 @@ public class FTTSE implements IQoSDriver {
    */
   private boolean validateNetworkCOnfiguration(Map<String, String> networkConfiguration) {
     if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.
-        containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration
+                                                                                  containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration
+
         .containsKey(NETWORK_MTU)) {
       return false;
     }
@@ -141,7 +150,7 @@ public class FTTSE implements IQoSDriver {
     if (requestedQoS == null || requestedQoS.isEmpty()) {
       String STREAM_PARAMETERS_BEST_EFFORT = "3";
       commands.
-          put(STREAM_PARAMETERS_SYNCHRONOUS_TYPE, STREAM_PARAMETERS_BEST_EFFORT);
+                  put(STREAM_PARAMETERS_SYNCHRONOUS_TYPE, STREAM_PARAMETERS_BEST_EFFORT);
       commands.put(STREAM_PARAMETERS_PERIOD, period.toString());
       commands.put(STREAM_PARAMETERS_SIZE, size.toString());
       return commands;
@@ -176,7 +185,7 @@ public class FTTSE implements IQoSDriver {
     commands.put(STREAM_PARAMETERS_SIZE, size.toString());
     String STREAM_PARAMETERS_SYNCHRONOUS = "0";
     commands.
-        put(STREAM_PARAMETERS_SYNCHRONOUS_TYPE, STREAM_PARAMETERS_SYNCHRONOUS);
+                put(STREAM_PARAMETERS_SYNCHRONOUS_TYPE, STREAM_PARAMETERS_SYNCHRONOUS);
 
     return commands;
   }

@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2018 AITIA International Inc.
+ *
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.core.orchestrator.api;
 
 import eu.arrowhead.common.DatabaseManager;
@@ -109,8 +118,8 @@ public class StoreResource {
 
   @GET
   @Path("query/servicedef/{serviceDef}")
-  public List<OrchestrationStore> getEntriesForSecureConsumer(@PathParam("serviceDef") String serviceDef,
-                                                              @Context ContainerRequestContext requestContext) {
+  public List<OrchestrationStore> getEntriesForSecureConsumer(@PathParam("serviceDef") String serviceDef, @Context ContainerRequestContext
+      requestContext) {
     if (!requestContext.getSecurityContext().isSecure()) {
       log.error("getEntriesForSecureConsumer called in insecure mode");
       throw new ArrowheadException("This endpoint can only be called in secure mode!", Status.UNAUTHORIZED.getStatusCode());

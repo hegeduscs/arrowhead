@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2018 AITIA International Inc.
+ *
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
+ */
+
 package eu.arrowhead.common;
 
 import eu.arrowhead.common.database.ArrowheadService;
@@ -179,16 +188,15 @@ public abstract class ArrowheadMain {
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
       throw new AuthException(
-          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not "
-              + "end with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode());
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not " + "end "
+              + "with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode());
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(baseUri).build();
     try {
-      server = GrizzlyHttpServerFactory
-          .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true), false);
+      server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true), false);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
       log.info("Started server at: " + baseUri);
