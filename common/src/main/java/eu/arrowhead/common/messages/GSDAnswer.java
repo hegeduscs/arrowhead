@@ -45,18 +45,19 @@ public class GSDAnswer {
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    if (mandatoryFields == null) {
-      mandatoryFields = new HashSet<>();
+    Set<String> mf = new HashSet<>();
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
     if (providerCloud == null) {
-      mandatoryFields.add("providerCloud");
+      mf.add("providerCloud");
     } else {
-      mandatoryFields = providerCloud.missingFields(false, mandatoryFields);
+      mf = providerCloud.missingFields(false, mf);
     }
-    if (throwException && !mandatoryFields.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
-    return mandatoryFields;
+    return mf;
   }
 
 }

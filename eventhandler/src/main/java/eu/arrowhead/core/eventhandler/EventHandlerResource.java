@@ -11,6 +11,7 @@ package eu.arrowhead.core.eventhandler;
 
 import eu.arrowhead.common.database.EventFilter;
 import eu.arrowhead.common.messages.PublishEvent;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.Consumes;
@@ -45,6 +46,9 @@ public class EventHandlerResource {
   @Path("publish")
   public Response publishEvent(PublishEvent event) {
     event.missingFields(true, null);
+    if (event.getTimestamp() == null) {
+      event.setTimestamp(LocalDateTime.now());
+    }
     CompletableFuture future = CompletableFuture.runAsync(() -> EventHandlerService.getSubscriberUrls(event));
 
     //return OK while the event publishing happens in async

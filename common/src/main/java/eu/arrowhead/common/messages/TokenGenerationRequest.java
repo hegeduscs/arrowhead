@@ -84,30 +84,30 @@ public class TokenGenerationRequest extends ArrowheadBase {
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    if (mandatoryFields == null) {
-      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
-    mandatoryFields.addAll(alwaysMandatoryFields);
     Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mandatoryFields.removeAll(nonNullFields);
+    mf.removeAll(nonNullFields);
 
     if (consumer != null) {
-      mandatoryFields = consumer.missingFields(false, mandatoryFields);
+      mf = consumer.missingFields(false, mf);
     }
     if (service != null) {
-      mandatoryFields = service.missingFields(false, false, mandatoryFields);
+      mf = service.missingFields(false, false, mf);
     }
     for (ArrowheadSystem provider : providers) {
       Set<String> fields = provider.missingFields(false, null);
       if (!fields.isEmpty()) {
-        mandatoryFields.add("Provider is missing mandatory field(s): " + String.join(", ", fields));
+        mf.add("Provider is missing mandatory field(s): " + String.join(", ", fields));
       }
     }
 
-    if (throwException && !mandatoryFields.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
-    return mandatoryFields;
+    return mf;
   }
 
 }

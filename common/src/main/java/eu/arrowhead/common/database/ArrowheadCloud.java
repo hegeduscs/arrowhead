@@ -142,23 +142,23 @@ public class ArrowheadCloud extends ArrowheadBase {
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    if (mandatoryFields == null) {
-      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
-    mandatoryFields.addAll(alwaysMandatoryFields);
     Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    for (final String field : mandatoryFields) {
+    for (final String field : mf) {
       if (field.startsWith(getClass().getSimpleName())) {
         nonNullFields = prefixFieldNames(nonNullFields);
         break;
       }
     }
-    mandatoryFields.removeAll(nonNullFields);
+    mf.removeAll(nonNullFields);
 
-    if (throwException && !mandatoryFields.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
-    return mandatoryFields;
+    return mf;
   }
 
   @Override

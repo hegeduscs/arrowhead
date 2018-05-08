@@ -231,44 +231,44 @@ public class OrchestrationStore extends ArrowheadBase implements Comparable<Orch
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    if (mandatoryFields == null) {
-      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
-    mandatoryFields.addAll(alwaysMandatoryFields);
     Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mandatoryFields.removeAll(nonNullFields);
+    mf.removeAll(nonNullFields);
     if (service != null) {
-      mandatoryFields = service.missingFields(false, false, mandatoryFields);
+      mf = service.missingFields(false, false, mf);
     }
 
     Set<String> fromConsumer = new HashSet<>();
     Set<String> fromProvider = new HashSet<>();
     if (consumer != null) {
-      fromConsumer = consumer.missingFields(false, mandatoryFields);
+      fromConsumer = consumer.missingFields(false, mf);
     }
     if (providerSystem != null) {
-      fromProvider = providerSystem.missingFields(false, mandatoryFields);
+      fromProvider = providerSystem.missingFields(false, mf);
     }
-    mandatoryFields = new HashSet<>(fromConsumer);
-    mandatoryFields.addAll(fromProvider);
+    mf = new HashSet<>(fromConsumer);
+    mf.addAll(fromProvider);
 
     if (priority < 0) {
-      mandatoryFields.add("Priority can not be negative!");
+      mf.add("Priority can not be negative!");
     }
 
     if (providerCloud != null) {
       if (defaultEntry) {
-        mandatoryFields.add("Default store entries can only have intra-cloud providers!");
+        mf.add("Default store entries can only have intra-cloud providers!");
       } else {
         Set<String> fromCloud = providerCloud.missingFields(false, new HashSet<>(Arrays.asList("ArrowheadCloud:address", "gatekeeperServiceURI")));
-        mandatoryFields.addAll(fromCloud);
+        mf.addAll(fromCloud);
       }
     }
 
-    if (throwException && !mandatoryFields.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
-    return mandatoryFields;
+    return mf;
   }
 
   /**

@@ -69,21 +69,22 @@ public class ServiceQueryForm {
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    if (mandatoryFields == null) {
-      mandatoryFields = new HashSet<>();
+    Set<String> mf = new HashSet<>();
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
     if (service == null) {
-      mandatoryFields.add("service");
+      mf.add("service");
     } else {
       if (metadataSearch) {
-        mandatoryFields.add("serviceMetadata");
+        mf.add("serviceMetadata");
       }
-      mandatoryFields = service.missingFields(false, false, mandatoryFields);
+      mf = service.missingFields(false, false, mf);
     }
-    if (throwException && !mandatoryFields.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
-    return mandatoryFields;
+    return mf;
   }
 
 }

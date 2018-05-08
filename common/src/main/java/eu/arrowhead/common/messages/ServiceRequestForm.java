@@ -9,12 +9,14 @@
 
 package eu.arrowhead.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,11 +26,14 @@ import java.util.Set;
 /**
  * This is what the Orchestrator Core System receives from Arrowhead Systems trying to request services.
  */
+@JsonIgnoreProperties({"flagKeys", "alwaysMandatoryFields"})
 public class ServiceRequestForm {
 
   private static final List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
                                                                              "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
                                                                              "onlyPreferred", "enableQoS"));
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("requesterSystem"));
+
   private ArrowheadSystem requesterSystem;
   private ArrowheadCloud requesterCloud;
   private ArrowheadService requestedService;
@@ -119,20 +124,21 @@ public class ServiceRequestForm {
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
     setOrchestrationFlags(getOrchestrationFlags());
-    if (mandatoryFields == null) {
-      mandatoryFields = new HashSet<>();
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
 
     if (requesterSystem == null) {
-      mandatoryFields.add("requesterSystem");
+      mf.add("requesterSystem");
     } else {
-      mandatoryFields = requesterSystem.missingFields(false, mandatoryFields);
+      mf = requesterSystem.missingFields(false, mf);
     }
     if (requestedService == null && orchestrationFlags.get("overrideStore")) {
-      mandatoryFields.add("requestedService can not be null when overrideStore is TRUE");
+      mf.add("requestedService can not be null when overrideStore is TRUE");
     } else if (requestedService != null) {
-      mandatoryFields.add("interfaces");
-      mandatoryFields = requestedService.missingFields(false, false, mandatoryFields);
+      mf.add("interfaces");
+      mf = requestedService.missingFields(false, false, mf);
     }
     if (orchestrationFlags.get("onlyPreferred")) {
       List<PreferredProvider> tmp = new ArrayList<>();
@@ -143,17 +149,17 @@ public class ServiceRequestForm {
       }
       preferredProviders.removeAll(tmp);
       if (preferredProviders.isEmpty()) {
-        mandatoryFields.add("There is no valid PreferredProvider, but \"onlyPreferred\" is set to true");
+        mf.add("There is no valid PreferredProvider, but \"onlyPreferred\" is set to true");
       }
     }
     if (orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty() || commands.isEmpty())) {
-      mandatoryFields.add("RequestedQoS or commands hashmap is empty while \"enableQoS\" is set to true");
+      mf.add("RequestedQoS or commands hashmap is empty while \"enableQoS\" is set to true");
     }
 
-    if (throwException && !mandatoryFields.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
-    return mandatoryFields;
+    return mf;
   }
 
   public static class Builder {

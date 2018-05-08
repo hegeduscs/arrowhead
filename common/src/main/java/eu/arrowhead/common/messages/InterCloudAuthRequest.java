@@ -50,22 +50,22 @@ public class InterCloudAuthRequest extends ArrowheadBase {
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    if (mandatoryFields == null) {
-      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
-    mandatoryFields.addAll(alwaysMandatoryFields);
     Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mandatoryFields.removeAll(nonNullFields);
+    mf.removeAll(nonNullFields);
     if (service != null) {
-      mandatoryFields = service.missingFields(false, false, mandatoryFields);
+      mf = service.missingFields(false, false, mf);
     }
     if (cloud != null) {
-      mandatoryFields = cloud.missingFields(false, mandatoryFields);
+      mf = cloud.missingFields(false, mf);
     }
-    if (throwException && !mandatoryFields.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
-    return mandatoryFields;
+    return mf;
   }
 
 }

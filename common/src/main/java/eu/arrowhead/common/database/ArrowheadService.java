@@ -118,26 +118,26 @@ public class ArrowheadService extends ArrowheadBase {
   }
 
   public Set<String> missingFields(boolean throwException, boolean forDNSSD, Set<String> mandatoryFields) {
-    if (mandatoryFields == null) {
-      mandatoryFields = new HashSet<>(alwaysMandatoryFields);
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
-    mandatoryFields.addAll(alwaysMandatoryFields);
     Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mandatoryFields.removeAll(nonNullFields);
+    mf.removeAll(nonNullFields);
 
     if (forDNSSD) {
       for (String interf : interfaces) {
         if (interf.contains("_")) {
-          mandatoryFields.add("Interfaces Can't Have Underscores!");
+          mf.add("Interfaces Can't Have Underscores!");
         }
       }
     }
 
-    if (throwException && !mandatoryFields.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mandatoryFields));
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
 
-    return mandatoryFields;
+    return mf;
   }
 
   @Override

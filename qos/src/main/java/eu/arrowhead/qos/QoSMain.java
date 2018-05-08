@@ -24,7 +24,7 @@ public class QoSMain extends ArrowheadMain {
     String[] packages = {"eu.arrowhead.common"};
     init(CoreSystem.QOS, args, classes, packages);
 
-    MONITOR_URL = getProps().getProperty("monitor_url");
+    MONITOR_URL = props.getProperty("monitor_url");
     listenForInput();
   }
 

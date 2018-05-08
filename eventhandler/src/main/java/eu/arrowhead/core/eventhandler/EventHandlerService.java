@@ -35,7 +35,8 @@ final class EventHandlerService {
     // Remove the filter if the event source is not in the filter's source list
     filters.removeIf(current -> !current.getSources().contains(event.getSource()));
     // Remove the filter if the event timestamp is not between the filter's startDate and endDate
-    filters.removeIf(current -> !(event.getTimestamp().isAfter(current.getStartDate()) && event.getTimestamp().isBefore(current.getEndDate())));
+    filters.removeIf(current -> current.getStartDate() != null && event.getTimestamp().isBefore(current.getStartDate()));
+    filters.removeIf(current -> current.getEndDate() != null && event.getTimestamp().isAfter(current.getEndDate()));
     // Remove the filter if MatchMetadata = true and the event and filter metadata do not match perfectly
     filters.removeIf(current -> current.getMatchMetadata() && !event.getEventMetadata().equals(current.getFilterMetadata()));
 
@@ -97,6 +98,8 @@ final class EventHandlerService {
     restrictionMap.put("consumer", consumer);
     EventFilter retrievedFilter = dm.get(EventFilter.class, restrictionMap);
     if (retrievedFilter == null) {
+      filter.setConsumer(consumer);
+      //TODO test what happens when producers are not null (will it get saved correctly?)
       return dm.save(filter);
     }
     return null;
