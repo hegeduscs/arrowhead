@@ -18,6 +18,8 @@ import eu.arrowhead.common.messages.PublishEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.apache.log4j.Logger;
 
 final class EventHandlerService {
@@ -26,7 +28,7 @@ final class EventHandlerService {
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
-  static List<EventFilter> getMatchingEventFilters(PublishEvent event) {
+  private static synchronized List<EventFilter> getMatchingEventFilters(PublishEvent event) {
     restrictionMap.clear();
     restrictionMap.put("eventType", event.getType());
     List<EventFilter> filters = dm.getAll(EventFilter.class, restrictionMap);
@@ -40,7 +42,20 @@ final class EventHandlerService {
     return filters;
   }
 
-  static List<String> getSubscriberUrls(List<EventFilter> filters) {
+  private static synchronized boolean sendRequest(String url, PublishEvent event) {
+    event.setDeliveryCompleteUri(null);
+    try {
+      Utility.sendRequest(url, "POST", event);
+    } catch (Exception e) {
+      System.out.println("Publishing event to " + url + " failed.");
+      e.printStackTrace();
+      return false;
+    }
+    return true;
+  }
+
+  static synchronized Map<String, Boolean> getSubscriberUrls(PublishEvent event) {
+    List<EventFilter> filters = getMatchingEventFilters(event);
     List<String> urls = new ArrayList<>();
     for (EventFilter filter : filters) {
       //NOTE hogyan kéne egyszerre támogatni isSecure true és false állapotot a consumereknél?
@@ -55,7 +70,17 @@ final class EventHandlerService {
       urls.add(url);
     }
 
-    return urls;
+    Map<String, Boolean> result = new HashMap<>();
+    for (String url : urls) {
+      CompletableFuture.supplyAsync(() -> sendRequest(url, event)).thenAcceptAsync(successfulPublish -> result.put(url, successfulPublish));
+    }
+
+    CompletableFuture.allOf((CompletableFuture[]) urls.stream().map(
+        url -> CompletableFuture.supplyAsync(() -> sendRequest(url, event)).thenAcceptAsync(successfulPublish -> result.put(url, successfulPublish)))
+                                                      .toArray()).join();
+
+    System.out.println(result);
+    return result;
   }
 
   static EventFilter saveEventFilter(EventFilter filter) {

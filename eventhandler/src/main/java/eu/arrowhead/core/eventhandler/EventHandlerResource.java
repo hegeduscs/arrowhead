@@ -9,11 +9,10 @@
 
 package eu.arrowhead.core.eventhandler;
 
-import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.EventFilter;
 import eu.arrowhead.common.messages.PublishEvent;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -34,9 +33,7 @@ import org.apache.log4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class EventHandlerResource {
 
-  private final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(EventHandlerResource.class.getName());
-  private static final DatabaseManager dm = DatabaseManager.getInstance();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -48,64 +45,10 @@ public class EventHandlerResource {
   @Path("publish")
   public Response publishEvent(PublishEvent event) {
     event.missingFields(true, null);
+    CompletableFuture future = CompletableFuture.runAsync(() -> EventHandlerService.getSubscriberUrls(event));
 
-    //start async process
-
-    //return OK
-
-    /*ExecutorService executorService = Executors.newFixedThreadPool(20);
-    CompletableFuture.supplyAsync(() -> MyFileService.resize(myfile), executorService)*/
-
-    /*  async process steps:
-        1) query DB for event type
-        2) filter out filters where the source is not in the sourcelist
-        3) more filtering based on the dates + metadata alapján
-        4) for the rest, put together the notifying URL and send request to them
-        5) if all finished, optionally send a deliveryComplete ack to source
-
-        getMatchingEventFilters
-        getSubscriberUrls
-        Task with sendRequest()
-     */
-
-    /*ExecutorService executor = Executors.newWorkStealingPool();
-
-    List<Callable<String>> callables = Arrays.asList(
-        () -> "task1",
-        () -> "task2",
-        () -> "task3");
-
-    executor.invokeAll(callables)
-            .stream()
-            .map(future -> {
-              try {
-                return future.get();
-              }
-              catch (Exception e) {
-                throw new IllegalStateException(e);
-              }
-            })
-            .forEach(System.out::println);*/
-
-    //TODO kéne majd valami számon tartja a pozitív/negatív válaszok számát a notifyokra, synchronized változó valahol pl, ami a publishEventtel
-    // jön létre, és lelogoljuk az értékét, illetve a deliverycompletba is visszaadhatjuk akár
-
-    /*try {
-      System.out.println("attempt to shutdown executor");
-      executor.shutdown();
-      executor.awaitTermination(5, TimeUnit.SECONDS);
-    }
-    catch (InterruptedException e) {
-      System.err.println("tasks interrupted");
-    }
-    finally {
-      if (!executor.isTerminated()) {
-        System.err.println("cancel non-finished tasks");
-      }
-      executor.shutdownNow();
-      System.out.println("shutdown finished");
-    }*/
-    return null;
+    //return OK while the event publishing happens in async
+    return Response.status(Status.OK).build();
   }
 
   //TODO legyen egy Task, ami azokat a filtereket törli, aminek a stopDate-je is a múltban van már, opcionális működés mint SR-nél
