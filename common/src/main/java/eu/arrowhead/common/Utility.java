@@ -62,6 +62,8 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
+  private static Client client = createClient(null);
+  private static Client sslClient;
   private static SSLContext sslContext;
   private static String SR_QUERY_URI;
 
@@ -73,12 +75,29 @@ public final class Utility {
     return true;
   };
 
+
   private Utility() throws AssertionError {
     throw new AssertionError("Arrowhead Common:Utility is a non-instantiable class");
   }
 
+  private static Client createClient(SSLContext context) {
+    ClientConfig configuration = new ClientConfig();
+    configuration.property(ClientProperties.CONNECT_TIMEOUT, 30000);
+    configuration.property(ClientProperties.READ_TIMEOUT, 30000);
+
+    Client client;
+    if (context != null) {
+      client = ClientBuilder.newBuilder().sslContext(context).withConfig(configuration).hostnameVerifier(allHostsValid).build();
+    } else {
+      client = ClientBuilder.newClient(configuration);
+    }
+    client.register(JacksonJsonProviderAtRest.class);
+    return client;
+  }
+
   public static void setSSLContext(SSLContext context) {
     sslContext = context;
+    sslClient = createClient(sslContext);
   }
 
   public static void setServiceRegistryUri(String uri) {
@@ -100,27 +119,14 @@ public final class Utility {
       isSecure = true;
     }
 
-    ClientConfig configuration = new ClientConfig();
-    configuration.property(ClientProperties.CONNECT_TIMEOUT, 30000);
-    configuration.property(ClientProperties.READ_TIMEOUT, 30000);
-
-    Client client;
-    if (isSecure) {
-      SSLContext usedContext = givenContext != null ? givenContext : sslContext;
-      if (usedContext != null) {
-        client = ClientBuilder.newBuilder().sslContext(usedContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
-      } else {
-        log.error("sendRequest() method throws AuthException");
-        throw new AuthException(
-            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
-            Status.UNAUTHORIZED.getStatusCode());
-      }
-    } else {
-      client = ClientBuilder.newClient(configuration);
+    if (isSecure && sslClient == null) {
+      throw new AuthException(
+          "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
+          Status.UNAUTHORIZED.getStatusCode());
     }
-    client.register(JacksonJsonProviderAtRest.class);
+    Client usedClient = isSecure ? givenContext != null ? createClient(givenContext) : sslClient : client;
 
-    Builder request = client.target(UriBuilder.fromUri(uri).build()).request().header("Content-type", "application/json");
+    Builder request = usedClient.target(UriBuilder.fromUri(uri).build()).request().header("Content-type", "application/json");
     Response response; // will not be null after the switch-case
     try {
       switch (method) {
@@ -254,7 +260,7 @@ public final class Utility {
                                                   : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"),
                                                                          ArrowheadMain.secureServerMetadata);
     ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
-    Response response = sendRequest(SR_QUERY_URI, "PUT", sqf, sslContext);
+    Response response = sendRequest(SR_QUERY_URI, "PUT", sqf);
     ServiceQueryResult result = response.readEntity(ServiceQueryResult.class);
     if (result != null && result.isValid()) {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);

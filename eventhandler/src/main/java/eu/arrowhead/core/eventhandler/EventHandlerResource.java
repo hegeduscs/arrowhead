@@ -9,7 +9,9 @@
 
 package eu.arrowhead.core.eventhandler;
 
+import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.EventFilter;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.PublishEvent;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -21,6 +23,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -44,19 +48,28 @@ public class EventHandlerResource {
 
   @POST
   @Path("publish")
-  public Response publishEvent(PublishEvent event) {
+  public Response publishEvent(PublishEvent event, @Context ContainerRequestContext requestContext) {
     event.missingFields(true, null);
     if (event.getTimestamp() == null) {
       event.setTimestamp(LocalDateTime.now());
     }
-    CompletableFuture future = CompletableFuture.runAsync(() -> EventHandlerService.getSubscriberUrls(event));
+
+    /* First the event will be propagated to consumers, then the results will be sent back to the publisher, summarizing which consumers received the
+       event without an error. */
+    CompletableFuture.supplyAsync(() -> EventHandlerService.getSubscriberUrls(event)).thenAcceptAsync(map -> {
+      String callbackUrl = Utility.getUri(event.getSource().getAddress(), event.getSource().getPort(), event.getDeliveryCompleteUri(),
+                                          requestContext.getSecurityContext().isSecure(), false);
+      try {
+        Utility.sendRequest(callbackUrl, "POST", map);
+      } catch (ArrowheadException e) {
+        log.error("Callback after event publishing failed at: " + callbackUrl);
+        e.printStackTrace();
+      }
+    });
 
     //return OK while the event publishing happens in async
     return Response.status(Status.OK).build();
   }
-
-  //TODO legyen egy Task, ami azokat a filtereket törli, aminek a stopDate-je is a múltban van már, opcionális működés mint SR-nél
-  // + publish eventnél mennyivel régibb timestamp legyen még megengedhető
 
   @POST
   @Path("subscription")

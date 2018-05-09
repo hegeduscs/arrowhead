@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 
 final class EventHandlerService {
@@ -28,7 +30,7 @@ final class EventHandlerService {
   private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
 
-  private static synchronized List<EventFilter> getMatchingEventFilters(PublishEvent event) {
+  private static List<EventFilter> getMatchingEventFilters(PublishEvent event) {
     restrictionMap.clear();
     restrictionMap.put("eventType", event.getType());
     List<EventFilter> filters = dm.getAll(EventFilter.class, restrictionMap);
@@ -43,27 +45,26 @@ final class EventHandlerService {
     return filters;
   }
 
-  private static synchronized boolean sendRequest(String url, PublishEvent event) {
+  private static boolean sendRequest(String url, PublishEvent event) {
     event.setDeliveryCompleteUri(null);
     try {
       Utility.sendRequest(url, "POST", event);
     } catch (Exception e) {
-      System.out.println("Publishing event to " + url + " failed.");
+      log.error("Publishing event to " + url + " failed.");
       e.printStackTrace();
       return false;
     }
     return true;
   }
 
-  static synchronized Map<String, Boolean> getSubscriberUrls(PublishEvent event) {
+  static Map<String, Boolean> getSubscriberUrls(PublishEvent event) {
     List<EventFilter> filters = getMatchingEventFilters(event);
     List<String> urls = new ArrayList<>();
     for (EventFilter filter : filters) {
-      //NOTE hogyan kéne egyszerre támogatni isSecure true és false állapotot a consumereknél?
-      // Utilitynek meg lehet adni security contextet, amivel a kérést lehet küldeni (eventhandler cert), de egy extra mező kell hozzá a filterben
       String url;
       try {
-        url = Utility.getUri(filter.getConsumer().getAddress(), filter.getPort(), filter.getNotifyUri(), false, false);
+        boolean isSecure = filter.getConsumer().getAuthenticationInfo() != null;
+        url = Utility.getUri(filter.getConsumer().getAddress(), filter.getPort(), filter.getNotifyUri(), isSecure, false);
       } catch (ArrowheadException | NullPointerException e) {
         e.printStackTrace();
         continue;
@@ -71,16 +72,11 @@ final class EventHandlerService {
       urls.add(url);
     }
 
-    Map<String, Boolean> result = new HashMap<>();
-    /*for (String url : urls) {
-      CompletableFuture.supplyAsync(() -> sendRequest(url, event)).thenAcceptAsync(successfulPublish -> result.put(url, successfulPublish));
-    }*/
+    Map<String, Boolean> result = new ConcurrentHashMap<>();
+    Stream<CompletableFuture> futureStream = urls.stream().map(
+        url -> CompletableFuture.supplyAsync(() -> sendRequest(url, event)).thenAcceptAsync(successfulPublish -> result.put(url, successfulPublish)));
+    CompletableFuture.allOf(futureStream.toArray(CompletableFuture[]::new)).join();
 
-    CompletableFuture.allOf((CompletableFuture[]) urls.parallelStream().map(
-        url -> CompletableFuture.supplyAsync(() -> sendRequest(url, event)).thenAcceptAsync(successfulPublish -> result.put(url, successfulPublish)))
-                                                      .toArray()).join();
-
-    System.out.println(result);
     return result;
   }
 
