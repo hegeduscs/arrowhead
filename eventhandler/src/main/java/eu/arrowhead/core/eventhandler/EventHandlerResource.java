@@ -12,6 +12,7 @@ package eu.arrowhead.core.eventhandler;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.EventFilter;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.PublishEvent;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -52,6 +53,10 @@ public class EventHandlerResource {
     event.missingFields(true, null);
     if (event.getTimestamp() == null) {
       event.setTimestamp(LocalDateTime.now());
+    }
+    if (event.getTimestamp().isBefore(LocalDateTime.now().minusMinutes(EventHandlerMain.PUBLISH_EVENTS_DELAY))) {
+      throw new BadPayloadException(
+          "This event is too old to publish. Maximum allowed delay before publishing the event: " + EventHandlerMain.PUBLISH_EVENTS_DELAY);
     }
 
     /* First the event will be propagated to consumers, then the results will be sent back to the publisher, summarizing which consumers received the

@@ -9,7 +9,27 @@
 
 package eu.arrowhead.core.eventhandler;
 
-public class DeleteExpiredFiltersTask {
-  //TODO legyen egy Task, ami azokat a filtereket törli, aminek a stopDate-je is a múltban van már, opcionális működés mint SR-nél
-  // + publish eventnél mennyivel régibb timestamp legyen még megengedhető
+import eu.arrowhead.common.DatabaseManager;
+import eu.arrowhead.common.database.EventFilter;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.TimerTask;
+import org.apache.log4j.Logger;
+
+public class DeleteExpiredFiltersTask extends TimerTask {
+
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final Logger log = Logger.getLogger(DeleteExpiredFiltersTask.class.getName());
+
+  @Override
+  public void run() {
+    List<EventFilter> filterList = dm.getAll(EventFilter.class, null);
+    for (EventFilter filter : filterList) {
+      if (filter.getEndDate() != null && filter.getEndDate().isBefore(LocalDateTime.now())) {
+        dm.delete(filter);
+        log.debug(filter.toString() + " removed do to expired end date.");
+      }
+    }
+  }
+
 }
