@@ -11,7 +11,6 @@ package eu.arrowhead.core.eventhandler;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.EventFilter;
-import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.PublishEvent;
 import java.time.LocalDateTime;
@@ -49,26 +48,30 @@ public class EventHandlerResource {
 
   @POST
   @Path("publish")
-  public Response publishEvent(PublishEvent event, @Context ContainerRequestContext requestContext) {
-    event.missingFields(true, null);
-    if (event.getTimestamp() == null) {
-      event.setTimestamp(LocalDateTime.now());
+  public Response publishEvent(PublishEvent eventPublished, @Context ContainerRequestContext requestContext) {
+    eventPublished.missingFields(true, null);
+    if (eventPublished.getEvent().getTimestamp() == null) {
+      eventPublished.getEvent().setTimestamp(LocalDateTime.now());
     }
-    if (event.getTimestamp().isBefore(LocalDateTime.now().minusMinutes(EventHandlerMain.PUBLISH_EVENTS_DELAY))) {
+    if (eventPublished.getEvent().getTimestamp().isBefore(LocalDateTime.now().minusMinutes(EventHandlerMain.PUBLISH_EVENTS_DELAY))) {
       throw new BadPayloadException(
           "This event is too old to publish. Maximum allowed delay before publishing the event: " + EventHandlerMain.PUBLISH_EVENTS_DELAY);
     }
+    boolean isSecure = requestContext.getSecurityContext().isSecure();
 
     /* First the event will be propagated to consumers, then the results will be sent back to the publisher, summarizing which consumers received the
        event without an error. */
-    CompletableFuture.supplyAsync(() -> EventHandlerService.getSubscriberUrls(event)).thenAcceptAsync(map -> {
-      String callbackUrl = Utility.getUri(event.getSource().getAddress(), event.getSource().getPort(), event.getDeliveryCompleteUri(),
-                                          requestContext.getSecurityContext().isSecure(), false);
-      try {
-        Utility.sendRequest(callbackUrl, "POST", map);
-      } catch (ArrowheadException e) {
-        log.error("Callback after event publishing failed at: " + callbackUrl);
-        e.printStackTrace();
+    CompletableFuture.supplyAsync(() -> EventHandlerService.getSubscriberUrls(eventPublished)).thenAccept(map -> {
+      if (eventPublished.getDeliveryCompleteUri() != null) {
+        String callbackUrl = Utility
+            .getUri(eventPublished.getSource().getAddress(), eventPublished.getSource().getPort(), eventPublished.getDeliveryCompleteUri(), isSecure,
+                    false);
+        try {
+          Utility.sendRequest(callbackUrl, "POST", map);
+        } catch (RuntimeException e) {
+          log.error("Callback after event publishing failed at: " + callbackUrl);
+          e.printStackTrace();
+        }
       }
     });
 

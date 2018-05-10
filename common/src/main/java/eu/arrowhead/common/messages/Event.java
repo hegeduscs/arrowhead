@@ -10,52 +10,64 @@
 package eu.arrowhead.common.messages;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.exception.BadPayloadException;
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @JsonIgnoreProperties({"alwaysMandatoryFields"})
-public class PublishEvent extends ArrowheadBase {
+public class Event extends ArrowheadBase {
 
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("source", "event"));
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("type"));
 
-  private ArrowheadSystem source;
-  private Event event;
-  private String deliveryCompleteUri;
+  private String type;
+  private String payload;
+  private LocalDateTime timestamp;
+  private Map<String, String> eventMetadata = new HashMap<>();
 
-  public PublishEvent() {
+  public Event() {
   }
 
-  public PublishEvent(ArrowheadSystem source, Event event, String deliveryCompleteUri) {
-    this.source = source;
-    this.event = event;
-    this.deliveryCompleteUri = deliveryCompleteUri;
+  public Event(String type, String payload, LocalDateTime timestamp, Map<String, String> eventMetadata) {
+    this.type = type;
+    this.payload = payload;
+    this.timestamp = timestamp;
+    this.eventMetadata = eventMetadata;
   }
 
-  public ArrowheadSystem getSource() {
-    return source;
+  public String getType() {
+    return type;
   }
 
-  public void setSource(ArrowheadSystem source) {
-    this.source = source;
+  public void setType(String type) {
+    this.type = type;
   }
 
-  public Event getEvent() {
-    return event;
+  public String getPayload() {
+    return payload;
   }
 
-  public void setEvent(Event event) {
-    this.event = event;
+  public void setPayload(String payload) {
+    this.payload = payload;
   }
 
-  public String getDeliveryCompleteUri() {
-    return deliveryCompleteUri;
+  public LocalDateTime getTimestamp() {
+    return timestamp;
   }
 
-  public void setDeliveryCompleteUri(String deliveryCompleteUri) {
-    this.deliveryCompleteUri = deliveryCompleteUri;
+  public void setTimestamp(LocalDateTime timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  public Map<String, String> getEventMetadata() {
+    return eventMetadata;
+  }
+
+  public void setEventMetadata(Map<String, String> eventMetadata) {
+    this.eventMetadata = eventMetadata;
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
@@ -65,12 +77,7 @@ public class PublishEvent extends ArrowheadBase {
     }
     Set<String> nonNullFields = getFieldNamesWithNonNullValue();
     mf.removeAll(nonNullFields);
-    if (source != null) {
-      mf = source.missingFields(false, mf);
-    }
-    if (event != null) {
-      mf = event.missingFields(false, mf);
-    }
+
     if (throwException && !mf.isEmpty()) {
       throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }
