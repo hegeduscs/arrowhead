@@ -22,9 +22,13 @@
   <packaging>jar</packaging>
 
   <properties>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.source>1.8</maven.compiler.source>
     <bouncy.castle.version>1.59</bouncy.castle.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.version>3.1</maven.compiler.version>
+    <maven.dependency.version>2.5.1</maven.dependency.version>
+    <maven.jar.version>3.0.2</maven.jar.version>
+    <maven.resources.version>2.7</maven.resources.version>
   </properties>
 
   <dependencies>
@@ -47,7 +51,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>${maven.compiler.version}</version>
         <executions>
           <execution>
             <id>default-compile</id>
@@ -70,7 +74,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>${maven.jar.version}</version>
         <configuration>
           <!-- MainClass in mainfest make a executable jar -->
           <archive>
@@ -89,7 +93,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.5.1</version>
+        <version>${maven.dependency.version}</version>
         <executions>
           <execution>
             <id>copy-dependencies</id>
@@ -106,7 +110,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.7</version>
+        <version>${maven.resources.version}</version>
         <executions>
           <execution>
             <id>copy-resources</id>
