@@ -57,8 +57,10 @@ final class EventHandlerService {
     return true;
   }
 
-  static Map<String, Boolean> getSubscriberUrls(PublishEvent eventPublished) {
+  static Map<String, Boolean> propagateEvent(PublishEvent eventPublished) {
+    // Get the event relevant filters from the DB
     List<EventFilter> filters = getMatchingEventFilters(eventPublished);
+    // Create the URLs from the filters
     List<String> urls = new ArrayList<>();
     for (EventFilter filter : filters) {
       String url;

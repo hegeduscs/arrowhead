@@ -61,7 +61,7 @@ public class EventHandlerResource {
 
     /* First the event will be propagated to consumers, then the results will be sent back to the publisher, summarizing which consumers received the
        event without an error. */
-    CompletableFuture.supplyAsync(() -> EventHandlerService.getSubscriberUrls(eventPublished)).thenAccept(map -> {
+    CompletableFuture.supplyAsync(() -> EventHandlerService.propagateEvent(eventPublished)).thenAccept(map -> {
       if (eventPublished.getDeliveryCompleteUri() != null) {
         String callbackUrl = Utility
             .getUri(eventPublished.getSource().getAddress(), eventPublished.getSource().getPort(), eventPublished.getDeliveryCompleteUri(), isSecure,
