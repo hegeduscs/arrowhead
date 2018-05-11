@@ -27,13 +27,12 @@ public class AuthorizationMain extends ArrowheadMain {
   private AuthorizationMain(String[] args) {
     KeyStore keyStore = SecurityUtils.loadKeyStore(props.getProperty("keystore"), props.getProperty("keystorepass"));
     privateKey = SecurityUtils.getPrivateKey(keyStore, props.getProperty("keystorepass"));
-    //System.out.println("private key: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
+    enableAuthForCloud = props.getBooleanProperty("enable_auth_for_cloud", false);
 
     Set<Class<?>> classes = new HashSet<>(Arrays.asList(AuthorizationResource.class, AuthorizationApi.class));
     String[] packages = {"eu.arrowhead.common", "eu.arrowhead.core.authorization.filter"};
     init(CoreSystem.AUTHORIZATION, args, classes, packages);
 
-    enableAuthForCloud = props.getBooleanProperty("enable_auth_for_cloud", false);
     listenForInput();
   }
 
