@@ -590,6 +590,144 @@
       ]
     },
     {
+      "name": "Event Handler",
+      "description": "",
+      "item": [
+        {
+          "name": "Event Handler GetIt()",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "url": {
+              "raw": "http://localhost:8454/eventhandler",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8454",
+              "path": [
+                "eventhandler"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscribe To An Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\t\"eventType\": \"test_type\",\r\n\t\"consumer\": {\r\n\t\t\"systemName\": \"test_system\",\r\n\t\t\"address\": \"localhost\",\r\n\t\t\"port\": 8464\r\n\t},\r\n\t\"sources\": [{\r\n\t\t\t\"systemName\": \"test_system2\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"port\": 8465\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"systemName\": \"test_system3\",\r\n\t\t\t\"address\": \"localhost\",\r\n\t\t\t\"port\": 8466\r\n\t\t}\r\n\t],\r\n\t\"startDate\": \"2000-01-01T00:00:00.000\",\r\n\t\"endDate\": \"2100-01-01T00:00:00.000\",\r\n\t\"filterMetadata\": {\r\n\t\t\"test_key\": \"test_value\"\r\n\t},\r\n\t\"notifyUri\": \"test_uri\",\r\n\t\"matchMetadata\": false\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8454/eventhandler/subscription",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8454",
+              "path": [
+                "eventhandler",
+                "subscription"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unsubscribe From An Event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\t\"eventType\": \"test_type\",\r\n\t\"consumer\": {\r\n\t\t\"systemName\": \"test_system\"\r\n\t}\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8454/eventhandler/subscription",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8454",
+              "path": [
+                "eventhandler",
+                "subscription"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unsubscribe From An Event",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {},
+            "url": {
+              "raw": "http://localhost:8454/eventhandler/subscription/type/test_type/consumer/test_system",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8454",
+              "path": [
+                "eventhandler",
+                "subscription",
+                "type",
+                "test_type",
+                "consumer",
+                "test_system"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish An Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"source\" : {\r\n    \"systemName\" : \"test_system\",\r\n    \"address\" : \"localhost\",\r\n    \"port\" : 8462\r\n  },\r\n  \"event\" : {\r\n    \"type\" : \"test_type\",\r\n    \"payload\" : \"test payload\",\r\n    \"timestamp\" : \"2018-05-14T15:35:18.194\"\r\n  },\r\n  \"deliveryCompleteUri\" : \"test_uri\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8454/eventhandler/publish",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8454",
+              "path": [
+                "eventhandler",
+                "publish"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Gatekeeper",
       "description": "",
       "item": [
@@ -619,7 +757,7 @@
               },
               "response": [
                 {
-                  "id": "18af6076-6b2f-45bd-be82-a97b6afeb13b",
+                  "id": "9b6bfe27-7502-4fad-bc8b-b7f4f70ea6d6",
                   "name": "Gatekeeper Management GetIt()",
                   "originalRequest": {
                     "method": "GET",

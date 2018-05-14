@@ -14,7 +14,8 @@ import eu.arrowhead.common.database.EventFilter;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.PublishEvent;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -85,7 +86,7 @@ public class EventHandlerResource {
   @POST
   @Path("subscription")
   public Response subscribe(EventFilter filter) {
-    filter.missingFields(true, Collections.singleton("ArrowheadSystem:port"));
+    filter.missingFields(true, new HashSet<>(Arrays.asList("ArrowheadSystem:port", "notifyUri")));
     filter.toDatabase();
     EventFilter savedFilter = EventHandlerService.saveEventFilter(filter);
     if (savedFilter != null) {
@@ -109,6 +110,7 @@ public class EventHandlerResource {
   @PUT
   @Path("subscription")
   public Response unsubscribe(EventFilter filter) {
+    filter.missingFields(true, null);
     int statusCode = EventHandlerService.deleteEventFilter(filter.getEventType(), filter.getConsumer().getSystemName());
     log.info("deleteEventFilter returned with status code: " + statusCode);
     return Response.status(statusCode).build();

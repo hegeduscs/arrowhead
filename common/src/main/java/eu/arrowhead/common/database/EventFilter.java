@@ -45,7 +45,7 @@ import org.hibernate.annotations.Type;
 public class EventFilter extends ArrowheadBase {
 
   @Transient
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("eventType", "consumer", "notifyUri"));
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("eventType", "consumer"));
 
   @Column(name = "id")
   @Id
