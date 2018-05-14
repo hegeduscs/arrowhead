@@ -326,7 +326,7 @@ public final class Utility {
       }
     } catch (UnsupportedEncodingException e) {
       log.fatal("getRequestPayload ISReader has unsupported charset set!");
-      throw new AssertionError("getRequestPayload ISReader has unsupported charset set! Code needs to be changed!", e);
+      throw new AssertionError("getRequestPayload InputStreamReader has unsupported character set! Code needs to be changed!", e);
     } catch (IOException e) {
       log.error("IOException while reading the request payload");
       throw new RuntimeException("IOException occured while reading an incoming request payload", e);
