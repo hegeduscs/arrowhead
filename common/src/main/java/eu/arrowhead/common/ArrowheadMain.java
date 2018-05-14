@@ -89,7 +89,8 @@ public abstract class ArrowheadMain {
     }
 
     String address = props.getProperty("address", "0.0.0.0");
-    int port = isSecure ? props.getIntProperty("secure_port", coreSystem.getSecurePort()) : props.getIntProperty("insecure_port", coreSystem.getInsecurePort());
+    int port = isSecure ? props.getIntProperty("secure_port", coreSystem.getSecurePort())
+                        : props.getIntProperty("insecure_port", coreSystem.getInsecurePort());
     baseUri = Utility.getUri(address, port, null, isSecure, true);
 
     if (isSecure) {
@@ -188,15 +189,16 @@ public abstract class ArrowheadMain {
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(serverCN)) {
       log.fatal("Server CN is not compliant with the Arrowhead cert structure");
       throw new AuthException(
-          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not " + "end "
-              + "with arrowhead.eu.", Status.UNAUTHORIZED.getStatusCode());
+          "Server CN ( " + serverCN + ") is not compliant with the Arrowhead cert structure, since it does not have 5 parts, or does not end with"
+              + " \"arrowhead.eu.\"", Status.UNAUTHORIZED.getStatusCode());
     }
     log.info("Certificate of the secure server: " + serverCN);
     config.property("server_common_name", serverCN);
 
     URI uri = UriBuilder.fromUri(baseUri).build();
     try {
-      server = GrizzlyHttpServerFactory.createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true), false);
+      server = GrizzlyHttpServerFactory
+          .createHttpServer(uri, config, true, new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(true), false);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
       log.info("Started server at: " + baseUri);
