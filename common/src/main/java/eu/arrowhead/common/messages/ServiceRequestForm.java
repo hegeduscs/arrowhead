@@ -27,7 +27,7 @@ import java.util.Set;
  * This is what the Orchestrator Core System receives from Arrowhead Systems trying to request services.
  */
 @JsonIgnoreProperties({"flagKeys", "alwaysMandatoryFields"})
-public class ServiceRequestForm {
+public class ServiceRequestForm extends ArrowheadBase {
 
   private static final List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
                                                                              "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
@@ -129,6 +129,8 @@ public class ServiceRequestForm {
       mf.addAll(mandatoryFields);
     }
 
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mf.removeAll(nonNullFields);
     if (requesterSystem == null) {
       mf.add("requesterSystem");
     } else {
@@ -179,18 +181,15 @@ public class ServiceRequestForm {
       this.requesterSystem = requesterSystem;
     }
 
-
     public Builder requesterCloud(ArrowheadCloud cloud) {
       requesterCloud = cloud;
       return this;
     }
 
-
     public Builder requestedService(ArrowheadService service) {
       requestedService = service;
       return this;
     }
-
 
     public Builder orchestrationFlags(Map<String, Boolean> flags) {
       for (String key : flagKeys) {
@@ -202,24 +201,20 @@ public class ServiceRequestForm {
       return this;
     }
 
-
     public Builder preferredProviders(List<PreferredProvider> providers) {
       preferredProviders = providers;
       return this;
     }
-
 
     public Builder requestedQoS(Map<String, String> qos) {
       requestedQoS = qos;
       return this;
     }
 
-
     public Builder commands(Map<String, String> commands) {
       this.commands = commands;
       return this;
     }
-
 
     public ServiceRequestForm build() {
       return new ServiceRequestForm(this);
