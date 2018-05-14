@@ -61,7 +61,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
     String[] serverFields = serverCN.split("\\.", 2);
     // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
-      // Only the local HMI can use the API methods
+      // Only the local System Operator can use the API methods
       return clientCN.equalsIgnoreCase("sysop." + serverFields[1]);
     } else {
       // Only the local Gatekeeper can use the resource methods

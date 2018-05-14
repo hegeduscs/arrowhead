@@ -62,7 +62,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     String[] serverFields = serverCN.split("\\.", 2);
     // serverFields (when considered) contains: coreSystemName, cloudName.operator.arrowhead.eu
     if (requestTarget.contains("mgmt")) {
-      //Only the local HMI can use these methods
+      //Only the local System Operator can use these methods
       return clientCN.equalsIgnoreCase("sysop." + serverFields[1]);
     } else {
       if (requestTarget.endsWith("init_gsd") || requestTarget.endsWith("init_icn")) {
@@ -71,7 +71,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
       } else {
         // Only requests from other Gatekeepers are allowed
         String[] clientFields = clientCN.split("\\.", 3);
-        return clientFields.length == 3 && clientFields[2].endsWith("arrowhead.eu");
+        return clientFields.length == 3 && clientFields[0].equals("gatekeeper") && clientFields[2].endsWith("arrowhead.eu");
       }
     }
   }

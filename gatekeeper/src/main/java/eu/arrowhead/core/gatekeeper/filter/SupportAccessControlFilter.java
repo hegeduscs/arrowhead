@@ -58,7 +58,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
       return false;
     }
     if (requestTarget.contains("mgmt")) {
-      //Only the local HMI can use these methods
+      //Only the local System Operator can use these methods
       String[] serverFields = serverCN.split("\\.", 2);
       // serverFields (when considered) contains: coreSystemName, coresystems.cloudName.operator.arrowhead.eu
       return clientCN.equalsIgnoreCase("sysop." + serverFields[1]);
@@ -73,7 +73,7 @@ public class SupportAccessControlFilter implements ContainerRequestFilter {
       } else {
         // Only requests from other Gatekeepers are allowed
         String[] clientFields = clientCN.split("\\.", 3);
-        return clientFields.length == 3 && clientFields[2].endsWith("arrowhead.eu");
+        return clientFields.length == 3 && clientFields[0].equals("gatekeeper") && clientFields[2].endsWith("arrowhead.eu");
       }
     }
   }
