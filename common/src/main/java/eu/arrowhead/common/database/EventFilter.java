@@ -185,6 +185,11 @@ public class EventFilter extends ArrowheadBase {
     if (consumer != null) {
       mf = consumer.missingFields(false, mf);
     }
+    if (sources != null && !sources.isEmpty()) {
+      for (ArrowheadSystem source : sources) {
+        mf.addAll(source.missingFields(false, null));
+      }
+    }
     if (throwException && !mf.isEmpty()) {
       throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
     }

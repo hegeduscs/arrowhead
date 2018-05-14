@@ -10,5 +10,5 @@
 package eu.arrowhead.core.eventhandler.filter;
 
 public class AccessControlFilter {
-  //TODO cert generálással együtt
+  //TODO with cert generation
 }

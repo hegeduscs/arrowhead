@@ -75,6 +75,7 @@ final class EventHandlerService {
     }
 
     Map<String, Boolean> result = new ConcurrentHashMap<>();
+    //Note: ForkJoinPool.commonPool (used by CompletableFuture as default) has a default size equal to one less than the number of cores of your CPU.
     Stream<CompletableFuture> stream = urls.stream().map(url -> CompletableFuture.supplyAsync(() -> sendRequest(url, eventPublished.getEvent()))
                                                                                  .thenAcceptAsync(published -> result.put(url, published)));
     CompletableFuture.allOf(stream.toArray(CompletableFuture[]::new)).join();
@@ -97,9 +98,22 @@ final class EventHandlerService {
     EventFilter retrievedFilter = dm.get(EventFilter.class, restrictionMap);
     if (retrievedFilter == null) {
       filter.setConsumer(consumer);
-      //TODO test what happens when producers are not null (will it get saved correctly?)
+
+      List<ArrowheadSystem> sources = new ArrayList<>();
+      for (ArrowheadSystem source : filter.getSources()) {
+        restrictionMap.clear();
+        restrictionMap.put("systemName", source.getSystemName());
+        ArrowheadSystem retrievedSource = dm.get(ArrowheadSystem.class, restrictionMap);
+        if (retrievedSource == null) {
+          retrievedSource = dm.save(source);
+        }
+        sources.add(retrievedSource);
+      }
+
+      filter.setSources(sources);
       return dm.save(filter);
     }
+
     return null;
   }
 
