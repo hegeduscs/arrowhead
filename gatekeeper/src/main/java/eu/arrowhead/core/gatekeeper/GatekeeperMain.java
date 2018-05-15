@@ -77,6 +77,7 @@ public class GatekeeperMain {
 
   public static void main(String[] args) throws IOException {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
+    DatabaseManager.init();
 
     String address = props.getProperty("address", "0.0.0.0");
     int internalInsecurePort = props.getIntProperty("internal_insecure_port", 8446);
@@ -133,7 +134,6 @@ public class GatekeeperMain {
     Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
     getCoreSystemServiceUris();
 
-    DatabaseManager.init();
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {

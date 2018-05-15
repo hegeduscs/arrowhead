@@ -70,6 +70,7 @@ public abstract class ArrowheadMain {
   protected void init(CoreSystem coreSystem, String[] args, Set<Class<?>> classes, String[] packages) {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     this.coreSystem = coreSystem;
+    DatabaseManager.init();
 
     boolean isSecure = false;
     for (String arg : args) {
@@ -111,8 +112,6 @@ public abstract class ArrowheadMain {
       Utility.setServiceRegistryUri(srBaseUri);
       useSRService(true);
     }
-
-    DatabaseManager.init();
   }
 
   protected void listenForInput() {

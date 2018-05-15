@@ -68,7 +68,6 @@ public final class Utility {
   private static String SR_QUERY_URI;
 
   private static final ObjectMapper mapper = JacksonJsonProviderAtRest.getMapper();
-  private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final Logger log = Logger.getLogger(Utility.class.getName());
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
     // Decide whether to allow the connection...
@@ -284,7 +283,7 @@ public final class Utility {
   }
 
   public static List<String> getNeighborCloudURIs() {
-    List<NeighborCloud> cloudList = new ArrayList<>(dm.getAll(NeighborCloud.class, null));
+    List<NeighborCloud> cloudList = new ArrayList<>(DatabaseManager.getInstance().getAll(NeighborCloud.class, null));
 
     List<String> uriList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
@@ -297,7 +296,7 @@ public final class Utility {
   }
 
   public static ArrowheadCloud getOwnCloud() {
-    List<OwnCloud> cloudList = dm.getAll(OwnCloud.class, null);
+    List<OwnCloud> cloudList = DatabaseManager.getInstance().getAll(OwnCloud.class, null);
     if (cloudList.isEmpty()) {
       log.error("Utility:getOwnCloud not found in the database.");
       throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.",

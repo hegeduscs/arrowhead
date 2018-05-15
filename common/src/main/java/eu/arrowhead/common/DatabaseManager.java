@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
 import javax.ws.rs.core.Response.Status;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -41,25 +42,33 @@ public class DatabaseManager {
   private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
 
   static {
-    if (getProp().containsKey("db_address")) {
-      dbAddress = getProp().getProperty("db_address");
-      dbUser = getProp().getProperty("db_user");
-      dbPassword = getProp().getProperty("db_password");
-    } else {
-      dbAddress = getProp().getProperty("log4j.appender.DB.URL", "jdbc:mysql://127.0.0.1:3306/log");
-      dbUser = getProp().getProperty("log4j.appender.DB.user", "root");
-      dbPassword = getProp().getProperty("log4j.appender.DB.password", "root");
-    }
-
-    try {
-      if (sessionFactory == null) {
-        Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
-            .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword);
-        sessionFactory = configuration.buildSessionFactory();
+    if (getProp().containsKey("db_address") || getProp().containsKey("log4j.appender.DB.URL")) {
+      if (getProp().containsKey("db_address")) {
+        dbAddress = getProp().getProperty("db_address");
+        dbUser = getProp().getProperty("db_user");
+        dbPassword = getProp().getProperty("db_password");
+      } else {
+        dbAddress = getProp().getProperty("log4j.appender.DB.URL", "jdbc:mysql://127.0.0.1:3306/log");
+        dbUser = getProp().getProperty("log4j.appender.DB.user", "root");
+        dbPassword = getProp().getProperty("log4j.appender.DB.password", "root");
       }
-    } catch (Exception e) {
-      log.fatal("Database connection failed, check the configuration!");
-      throw new ServiceConfigurationError("Database connection could not be established, check app.properties!", e);
+
+      try {
+        if (sessionFactory == null) {
+          Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
+                                                           .setProperty("hibernate.connection.username", dbUser)
+                                                           .setProperty("hibernate.connection.password", dbPassword);
+          sessionFactory = configuration.buildSessionFactory();
+        }
+      } catch (Exception e) {
+        if (!prop.containsKey("db_address")) {
+          e.printStackTrace();
+          System.out.println("Database connection could not be established, logging may not work! Check log4j.properties!");
+          Logger.getRootLogger().setLevel(Level.OFF);
+        } else {
+          throw new ServiceConfigurationError("Database connection could not be established, check app.properties!", e);
+        }
+      }
     }
   }
 
@@ -131,7 +140,8 @@ public class DatabaseManager {
   private SessionFactory getSessionFactory() {
     if (sessionFactory == null) {
       Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
-          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword);
+                                                       .setProperty("hibernate.connection.username", dbUser)
+                                                       .setProperty("hibernate.connection.password", dbPassword);
       sessionFactory = configuration.buildSessionFactory();
     }
     return sessionFactory;
