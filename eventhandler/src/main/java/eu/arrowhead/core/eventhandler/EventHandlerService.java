@@ -75,7 +75,9 @@ final class EventHandlerService {
     }
 
     Map<String, Boolean> result = new ConcurrentHashMap<>();
-    //Note: ForkJoinPool.commonPool (used by CompletableFuture as default) has a default size equal to one less than the number of cores of your CPU.
+    /*Note: ForkJoinPool.commonPool (used by CompletableFuture as default) has a default size equal to one less than the number of cores of your CPU.
+      For faster execution (when there is a large number of urls), use custom thread pool manager:
+      Executor myThreadPool = Executors.newFixedThreadPool(numberOfThreads);*/
     Stream<CompletableFuture> stream = urls.stream().map(url -> CompletableFuture.supplyAsync(() -> sendRequest(url, eventPublished.getEvent()))
                                                                                  .thenAcceptAsync(published -> result.put(url, published)));
     CompletableFuture.allOf(stream.toArray(CompletableFuture[]::new)).join();
