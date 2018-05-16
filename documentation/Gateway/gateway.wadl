@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!--
-  ~  Copyright (c) 2018 AITIA International Inc.
-  ~
-  ~  This work is part of the Productive 4.0 innovation project, which receives grants from the
-  ~  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
-  ~  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
-  ~  national funding authorities from involved countries.
-  -->
-
 <application xmlns="http://wadl.dev.java.net/2009/02">
   <doc xmlns:jersey="http://jersey.java.net/" jersey:generatedBy="Jersey: 2.23.1 2016-06-09 18:05:47"/>
   <doc xmlns:jersey="http://jersey.java.net/"
@@ -18,49 +9,6 @@
     </include>
   </grammars>
   <resources base="http://10.0.0.82:8452/">
-    <resource path="gateway/mgmt">
-      <method id="getIt" name="GET">
-        <response>
-          <representation mediaType="text/plain"/>
-        </response>
-      </method>
-      <resource path="brokers">
-        <method id="updateBroker" name="PUT">
-          <request>
-            <representation mediaType="application/json"/>
-          </request>
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-        <method id="getAllBroker" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-        <method id="addBrokers" name="POST">
-          <request>
-            <representation mediaType="application/json"/>
-          </request>
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="brokers/brokername/{brokerName}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="brokerName" style="template" type="xs:string"/>
-        <method id="getBroker" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-        <method id="deleteBroker" name="DELETE">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-    </resource>
     <resource path="gateway">
       <method id="getIt" name="GET">
         <response>
@@ -74,8 +22,8 @@
           </response>
         </method>
       </resource>
-      <resource path="connectToConsumer">
-        <method id="connectToConsumer" name="PUT">
+      <resource path="connectToProvider">
+        <method id="connectToProvider" name="PUT">
           <request>
             <representation mediaType="application/json"/>
           </request>
@@ -84,8 +32,8 @@
           </response>
         </method>
       </resource>
-      <resource path="connectToProvider">
-        <method id="connectToProvider" name="PUT">
+      <resource path="connectToConsumer">
+        <method id="connectToConsumer" name="PUT">
           <request>
             <representation mediaType="application/json"/>
           </request>

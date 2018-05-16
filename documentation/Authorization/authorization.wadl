@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!--
-  ~  Copyright (c) 2018 AITIA International Inc.
-  ~
-  ~  This work is part of the Productive 4.0 innovation project, which receives grants from the
-  ~  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
-  ~  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
-  ~  national funding authorities from involved countries.
-  -->
-
 <application xmlns="http://wadl.dev.java.net/2009/02">
   <doc xmlns:jersey="http://jersey.java.net/" jersey:generatedBy="Jersey: 2.23.1 2016-06-09 18:05:47"/>
   <doc xmlns:jersey="http://jersey.java.net/"
@@ -24,6 +15,16 @@
           <representation mediaType="text/plain"/>
         </response>
       </method>
+      <resource path="token">
+        <method id="tokenGeneration" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
       <resource path="intercloud">
         <method id="isCloudAuthorized" name="PUT">
           <request>
@@ -44,16 +45,6 @@
           </response>
         </method>
       </resource>
-      <resource path="token">
-        <method id="tokenGeneration" name="PUT">
-          <request>
-            <representation mediaType="application/json"/>
-          </request>
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
     </resource>
     <resource path="authorization/mgmt">
       <method id="getIt" name="GET">
@@ -61,6 +52,31 @@
           <representation mediaType="text/plain"/>
         </response>
       </method>
+      <resource path="intracloud/{id}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <method id="deleteIntraEntry" name="DELETE">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="intercloud/operator/{operator}/cloudname/{cloudName}/services">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="cloudName" style="template" type="xs:string"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="operator" style="template" type="xs:string"/>
+        <method id="getCloudServices" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="intercloud/{id}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <method id="deleteInterEntry" name="DELETE">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
       <resource path="intracloud">
         <method id="getIntraCloudAuthRights" name="GET">
           <response>
@@ -71,55 +87,6 @@
           <request>
             <representation mediaType="application/json"/>
           </request>
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="intracloud/systemname/{systemName}/services">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
-        <method id="getSystemServices" name="GET">
-          <request>
-            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="provider_side" style="query" type="xs:boolean"/>
-          </request>
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="intracloud/servicedef/{serviceDefinition}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="serviceDefinition" style="template" type="xs:string"/>
-        <method id="getServiceIntraAuthRights" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="intracloud/systemname/{systemName}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
-        <method id="deleteSystemRelations" name="DELETE">
-          <request>
-            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="provider_side" style="query" type="xs:boolean"/>
-          </request>
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-        <method id="getSystemAuthRights" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="intercloud/operator/{operator}/cloudname/{cloudName}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="cloudName" style="template" type="xs:string"/>
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="operator" style="template" type="xs:string"/>
-        <method id="deleteCloudRelations" name="DELETE">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-        <method id="getCloudAuthRights" name="GET">
           <response>
             <representation mediaType="application/json"/>
           </response>
@@ -140,6 +107,36 @@
           </response>
         </method>
       </resource>
+      <resource path="intercloud/operator/{operator}/cloudname/{cloudName}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="cloudName" style="template" type="xs:string"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="operator" style="template" type="xs:string"/>
+        <method id="deleteCloudRelations" name="DELETE">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+        <method id="getCloudAuthRights" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="intracloud/systemname/{systemName}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
+        <method id="getSystemAuthRights" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+        <method id="deleteSystemRelations" name="DELETE">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="provider_side" style="query" type="xs:boolean"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
       <resource path="intercloud/servicedef/{serviceDefinition}">
         <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="serviceDefinition" style="template" type="xs:string"/>
         <method id="getServiceInterAuthRights" name="GET">
@@ -148,26 +145,20 @@
           </response>
         </method>
       </resource>
-      <resource path="intracloud/{id}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
-        <method id="deleteIntraEntry" name="DELETE">
+      <resource path="intracloud/servicedef/{serviceDefinition}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="serviceDefinition" style="template" type="xs:string"/>
+        <method id="getServiceIntraAuthRights" name="GET">
           <response>
             <representation mediaType="application/json"/>
           </response>
         </method>
       </resource>
-      <resource path="intercloud/{id}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
-        <method id="deleteInterEntry" name="DELETE">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="intercloud/operator/{operator}/cloudname/{cloudName}/services">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="cloudName" style="template" type="xs:string"/>
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="operator" style="template" type="xs:string"/>
-        <method id="getCloudServices" name="GET">
+      <resource path="intracloud/systemname/{systemName}/services">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
+        <method id="getSystemServices" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="provider_side" style="query" type="xs:boolean"/>
+          </request>
           <response>
             <representation mediaType="application/json"/>
           </response>

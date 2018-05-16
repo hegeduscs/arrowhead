@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!--
-  ~  Copyright (c) 2018 AITIA International Inc.
-  ~
-  ~  This work is part of the Productive 4.0 innovation project, which receives grants from the
-  ~  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
-  ~  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
-  ~  national funding authorities from involved countries.
-  -->
-
 <application xmlns="http://wadl.dev.java.net/2009/02">
   <doc xmlns:jersey="http://jersey.java.net/" jersey:generatedBy="Jersey: 2.23.1 2016-06-09 18:05:47"/>
   <doc xmlns:jersey="http://jersey.java.net/"
@@ -19,6 +10,11 @@
   </grammars>
   <resources base="http://10.0.0.82:8440/">
     <resource path="orchestrator/orchestration">
+      <method id="getIt" name="GET">
+        <response>
+          <representation mediaType="text/plain"/>
+        </response>
+      </method>
       <method id="orchestrationProcess" name="POST">
         <request>
           <representation mediaType="application/json"/>
@@ -27,14 +23,85 @@
           <representation mediaType="application/json"/>
         </response>
       </method>
+      <resource path="{systemName}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
+        <method id="storeOrchestrationProcess" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+    </resource>
+    <resource path="orchestrator/mgmt/store">
       <method id="getIt" name="GET">
         <response>
           <representation mediaType="text/plain"/>
         </response>
       </method>
-      <resource path="{systemName}">
+      <method id="addStoreEntries" name="POST">
+        <request>
+          <representation mediaType="application/json"/>
+        </request>
+        <response>
+          <representation mediaType="application/json"/>
+        </response>
+      </method>
+      <method id="getStoreEntries" name="PUT">
+        <request>
+          <representation mediaType="application/json"/>
+        </request>
+        <response>
+          <representation mediaType="application/json"/>
+        </response>
+      </method>
+      <resource path="{id}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <method id="deleteEntry" name="DELETE">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+        <method id="getStoreEntry" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="default/{id}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <method id="toggleIsDefault" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="consumername/{systemName}">
         <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
-        <method id="storeOrchestrationProcess" name="GET">
+        <method id="deleteEntries" name="DELETE">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="update">
+        <method id="updateEntry" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="all">
+        <method id="getAllStoreEntries" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="all_default">
+        <method id="getDefaultStoreEntries" name="GET">
           <response>
             <representation mediaType="application/json"/>
           </response>
@@ -110,6 +177,37 @@
           </response>
         </method>
       </resource>
+      <resource path="clouds/operator/{operator}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="operator" style="template" type="xs:string"/>
+        <method id="getCloudList" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="systems">
+        <method id="getAllSystems" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+        <method id="addSystems" name="POST">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+        <method id="updateSystem" name="PUT">
+          <request>
+            <representation mediaType="application/json"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
       <resource path="clouds">
         <method id="getAllClouds" name="GET">
           <response>
@@ -133,108 +231,40 @@
           </response>
         </method>
       </resource>
-      <resource path="clouds/operator/{operator}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="operator" style="template" type="xs:string"/>
-        <method id="getCloudList" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="systems">
-        <method id="updateSystem" name="PUT">
-          <request>
-            <representation mediaType="application/json"/>
-          </request>
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-        <method id="getAllSystems" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-        <method id="addSystems" name="POST">
-          <request>
-            <representation mediaType="application/json"/>
-          </request>
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
     </resource>
-    <resource path="mgmt/store">
-      <method id="getStoreEntries" name="PUT">
-        <request>
-          <representation mediaType="application/json"/>
-        </request>
-        <response>
-          <representation mediaType="application/json"/>
-        </response>
-      </method>
-      <method id="addStoreEntries" name="POST">
-        <request>
-          <representation mediaType="application/json"/>
-        </request>
-        <response>
-          <representation mediaType="application/json"/>
-        </response>
-      </method>
+    <resource path="orchestrator/store">
       <method id="getIt" name="GET">
         <response>
           <representation mediaType="text/plain"/>
         </response>
       </method>
-      <resource path="{id}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
-        <method id="deleteEntry" name="DELETE">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-        <method id="getStoreEntry" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="all_default">
-        <method id="getDefaultStoreEntries" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="all">
-        <method id="getAllStoreEntries" name="GET">
-          <response>
-            <representation mediaType="application/json"/>
-          </response>
-        </method>
-      </resource>
-      <resource path="systemname/{systemName}">
+      <resource path="consumername/{systemName}/servicedef/{serviceDef}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="serviceDef" style="template" type="xs:string"/>
         <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
-        <method id="deleteEntries" name="DELETE">
+        <method id="getStoreEntries" name="GET">
           <response>
             <representation mediaType="application/json"/>
           </response>
         </method>
       </resource>
-      <resource path="update">
-        <method id="updateEntry" name="PUT">
-          <request>
-            <representation mediaType="application/json"/>
-          </request>
+      <resource path="query/servicedef/{serviceDef}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="serviceDef" style="template" type="xs:string"/>
+        <method id="getEntriesForSecureConsumer" name="GET">
           <response>
             <representation mediaType="application/json"/>
           </response>
         </method>
       </resource>
-      <resource path="default/{id}">
-        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
-        <method id="toggleIsDefault" name="GET">
+      <resource path="query">
+        <method id="getEntriesForSecureConsumer" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="consumername/{systemName}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="systemName" style="template" type="xs:string"/>
+        <method id="getDefaultEntriesForConsumer" name="GET">
           <response>
             <representation mediaType="application/json"/>
           </response>
