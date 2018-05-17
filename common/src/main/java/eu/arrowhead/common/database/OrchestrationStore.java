@@ -103,6 +103,7 @@ public class OrchestrationStore extends ArrowheadBase implements Comparable<Orch
   @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "store_entry_id"))
   private Map<String, String> attributes = new HashMap<>();
 
+  //Only to convert ServiceRegistryEntries to Store entries without data loss
   @Transient
   private String serviceURI;
 

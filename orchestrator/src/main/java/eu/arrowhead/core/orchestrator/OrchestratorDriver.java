@@ -365,6 +365,7 @@ final class OrchestratorDriver {
           storeEntry.setService(srEntry.getProvidedService());
           storeEntry.setProviderSystem(srEntry.getProvider());
           storeEntry.setServiceURI(srEntry.getServiceURI());
+          //TODO transient setTTL call here?
         }
       }
     }
