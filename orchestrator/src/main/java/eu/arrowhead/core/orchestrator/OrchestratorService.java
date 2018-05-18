@@ -309,12 +309,14 @@ final class OrchestratorService {
     for (ServiceRegistryEntry entry : srList) {
       OrchestrationForm of = new OrchestrationForm(entry.getProvidedService(), entry.getProvider(), entry.getServiceURI());
 
-      if (entry.getTtl() == 0 && srf.getOrchestrationFlags().get("overrideStore")) {
-        of.getWarnings().add(OrchestratorWarnings.TTL_UNKNOWN);
-      } else if (entry.getTtl() < 120) {
+      if (srf.getOrchestrationFlags().get("overrideStore")) {
+        if (entry.getTtl() == 0) {
+          of.getWarnings().add(OrchestratorWarnings.TTL_UNKNOWN);
+        } else if (entry.getTtl() < 120) {
         /* 2 minutes is an arbitrarily chosen value for the Time To Live measure, which got its value when the SR was queried. The provider
            presumably will stop offering this service in somewhat less than 2 minutes. */
-        of.getWarnings().add(OrchestratorWarnings.TTL_EXPIRING);
+          of.getWarnings().add(OrchestratorWarnings.TTL_EXPIRING);
+        }
       }
 
       ofList.add(of);
