@@ -15,7 +15,7 @@
   <parent>
     <groupId>eu.arrowhead</groupId>
     <artifactId>arrowhead</artifactId>
-    <version>M4</version>
+    <version>4.0</version>
   </parent>
 
   <artifactId>common</artifactId>

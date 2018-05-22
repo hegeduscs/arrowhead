@@ -16,7 +16,7 @@
   <parent>
     <artifactId>arrowhead</artifactId>
     <groupId>eu.arrowhead</groupId>
-    <version>M4</version>
+    <version>4.0</version>
   </parent>
 
   <artifactId>choreographer</artifactId>

@@ -10,7 +10,7 @@ How to create Arrowhead-compliant certificates
 3. Edit settings for the new certificate:
   - validity period: e.g. set to 10 years
   - Name --> There is a book icon with '@': set CN fields
-    CN: <systemName>.<systemGroup>.<cloudName>.<operator>.arrowhead.eu format
+    CN: <systemName>.<cloudName>.<operator>.arrowhead.eu format
     Other fields can be filled out arbitrarily.
 
 4. Move the newly created certificate to a new tab within the app
@@ -31,7 +31,7 @@ How to create Arrowhead-compliant certificates
 
 +1. Don't forget to delete the new certificate from the old one's keystore!
 
----------------
+---------------------------------------------------------------------------
 How to extract crt and key files from jks files: (run as sudo/administrator)
 
 1. Get the alias from .jks file
@@ -49,20 +49,20 @@ keytool -importkeystore -srckeystore my.jks -destkeystore keystore.p12 -deststor
 5.Convert the .p12 file to unencrypted PEM (key file)
 openssl pkcs12 -in keystore.p12 -nodes -nocerts -out server.key
  
---------------
+---------------------------------------------------------------------------
 How to export certificate public key in Base64 with the ArrowheadProvider client skeleton:
 1. Edit the app.properties with the proper client and trust store keystores
-2. Start the skeleton with "-m secure" command line arguments.
+2. Start the skeleton with "-tls" command line arguments.
 3. The skeleton will print out the Base64 encoded string on the console during start. (This is the 2nd print, which starts as: "Server PublicKey Base64: ")
 
----------------
+---------------------------------------------------------------------------
 How to export certificate public key in Base64 for the database manually:
 1. Open the jks in Keystore Explorer
 2. Right click on certificate
 3. Export -> Export Public Key
 4. Remove --BEGIN-- and --END-- from .openssl file
 5. Insert into Auth_info field in Arrowhead database
--------------
+---------------------------------------------------------------------------
 
 How to add our root certificate to the JDK
 1. Go to the ~/jdk1.8.0_92/jre/bin
