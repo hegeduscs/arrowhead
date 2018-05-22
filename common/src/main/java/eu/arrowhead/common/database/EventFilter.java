@@ -85,6 +85,7 @@ public class EventFilter extends ArrowheadBase {
 
   @Column(name = "match_metadata")
   @Type(type = "yes_no")
+  //TODO provide a REST interface to easily switch this
   private boolean matchMetadata;
 
   public EventFilter() {
