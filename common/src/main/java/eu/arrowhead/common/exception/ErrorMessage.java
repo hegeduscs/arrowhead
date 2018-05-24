@@ -15,7 +15,7 @@ public class ErrorMessage {
   private int errorCode;
   private ExceptionType exceptionType;
   private String origin;
-  private String documentation = "https://github.com/hegeduscs/arrowhead/tree/M3/documentation";
+  private String documentation = "https://github.com/hegeduscs/arrowhead/tree/4.0/documentation";
 
   public ErrorMessage() {
   }
