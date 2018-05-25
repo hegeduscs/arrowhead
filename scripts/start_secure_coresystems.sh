@@ -1,6 +1,8 @@
 #!/bin/bash
 
-cd ..
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+cd "$parent_path"
 
 echo Starting Core Systems - wait 1 minute
 #More sleep time between core systems might be needed on slower devices like a Raspberry Pi
