@@ -19,7 +19,9 @@ public enum CoreSystemService {
   GW_CONSUMER_SERVICE("ConnectToConsumer", "gateway/connectToConsumer"),
   GW_PROVIDER_SERVICE("ConnectToProvider", "gateway/connectToProvider"),
   GW_SESSION_MGMT("SessionManagement", "gateway/management"),
-  ORCH_SERVICE("OrchestrationService", "orchestrator/orchestration");
+  ORCH_SERVICE("OrchestrationService", "orchestrator/orchestration"),
+  SYS_REG_SERVICE("PlaceHolder", "systemregistry/placeholder"),
+  DEVICE_REG_SERVICE("Placeholder2", "deviceregistry/placeholder");
 
   private final String serviceDef;
   private final String serviceUri;

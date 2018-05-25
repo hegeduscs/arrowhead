@@ -20,6 +20,13 @@
 /common/target/
 /common/common.iml
 /config/
+/deviceregistry/.settings/
+/deviceregistry/.classpath
+/deviceregistry/.project
+/deviceregistry/config/app.properties
+/deviceregistry/config/log4j.properties
+/deviceregistry/target/
+/deviceregistry/deviceregistry.iml
 /dnssd/.settings/
 /dnssd/.classpath
 /dnssd/.project
@@ -75,5 +82,12 @@
 /serviceregistry_sql/config/log4j.properties
 /serviceregistry_sql/target/
 /serviceregistry_sql/serviceregistry_sql.iml
+/systemregistry/.settings/
+/systemregistry/.classpath
+/systemregistry/.project
+/systemregistry/config/app.properties
+/systemregistry/config/log4j.properties
+/systemregistry/target/
+/systemregistry/systemregistry.iml
 /arrowhead.iml
 /.project

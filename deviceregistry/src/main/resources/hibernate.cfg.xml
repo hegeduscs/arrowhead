@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  Copyright (c) 2018 AITIA International Inc.
+  ~
+  ~  This work is part of the Productive 4.0 innovation project, which receives grants from the
+  ~  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+  ~  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+  ~  national funding authorities from involved countries.
+  -->
+
+<!DOCTYPE hibernate-configuration PUBLIC
+  "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="show_sql">true</property>
+    <property name="hbm2ddl.auto">update</property>
+
+    <property name="connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
+    <property name="hikari.maximumPoolSize">10</property>
+    <property name="hikari.dataSource.cachePrepStmts">true</property>
+    <property name="hikari.dataSource.prepStmtCacheSize">250</property>
+    <property name="hikari.dataSource.prepStmtCacheSqlLimit">2048</property>
+    <property name="hikari.dataSource.useServerPrepStmts">true</property>
+    <property name="hikari.dataSource.useLocalSessionState">true</property>
+    <property name="hikari.dataSource.useLocalTransactionState">true</property>
+    <property name="hikari.dataSource.rewriteBatchedStatements">true</property>
+    <property name="hikari.dataSource.cacheResultSetMetadata">true</property>
+    <property name="hikari.dataSource.cacheServerConfiguration">true</property>
+    <property name="hikari.dataSource.elideSetAutoCommits">true</property>
+    <property name="hikari.dataSource.maintainTimeStats">false</property>
+    <property name="hikari.poolName">ServiceRegistry</property>
+    <property name="hikari.registerMbeans">true</property>
+
+  </session-factory>
+</hibernate-configuration>
