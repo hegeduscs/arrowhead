@@ -37,13 +37,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.NotAllowedException;
@@ -402,6 +407,34 @@ public final class Utility {
       properties.removeIf(propertyNames::contains);
       throw new ServiceConfigurationError("Missing field(s) from app.properties file: " + properties.toString());
     }
+  }
+
+  /* If needed, this method can be used to get the IPv4 address of the host machine. Public point-to-point IP addresses are prioritized over private
+    (site local) IP addresses */
+  public static String getIpAddress() throws SocketException {
+    List<InetAddress> addresses = new ArrayList<>();
+
+    Enumeration e = NetworkInterface.getNetworkInterfaces();
+    while (e.hasMoreElements()) {
+      NetworkInterface inf = (NetworkInterface) e.nextElement();
+      Enumeration ee = inf.getInetAddresses();
+      while (ee.hasMoreElements()) {
+        addresses.add((InetAddress) ee.nextElement());
+      }
+    }
+
+    addresses = addresses.stream().filter(current -> !current.getHostAddress().contains(":")).filter(current -> !current.isLoopbackAddress())
+                         .filter(current -> !current.isMulticastAddress()).filter(current -> !current.isLinkLocalAddress())
+                         .collect(Collectors.toList());
+    if (addresses.isEmpty()) {
+      throw new SocketException("No valid addresses left after filtering");
+    }
+    for (InetAddress address : addresses) {
+      if (!address.isSiteLocalAddress()) {
+        return address.getHostAddress();
+      }
+    }
+    return addresses.get(0).getHostAddress();
   }
 
 }
