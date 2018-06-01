@@ -155,9 +155,9 @@ public class GatekeeperMain {
   private static HttpServer startServer(final String url, final boolean inbound) {
     final ResourceConfig config = new ResourceConfig();
     if (inbound) {
-      config.registerClasses(GatekeeperApi.class, GatekeeperInboundResource.class);
+      config.registerClasses(GatekeeperInboundResource.class);
     } else {
-      config.registerClasses(GatekeeperOutboundResource.class);
+      config.registerClasses(GatekeeperApi.class, GatekeeperOutboundResource.class);
     }
     config.packages("eu.arrowhead.common", "eu.arrowhead.core.gatekeeper.filter");
 
