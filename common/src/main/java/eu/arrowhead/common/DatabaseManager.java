@@ -54,12 +54,10 @@ public class DatabaseManager {
       }
 
       try {
-        if (sessionFactory == null) {
-          Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
-                                                           .setProperty("hibernate.connection.username", dbUser)
-                                                           .setProperty("hibernate.connection.password", dbPassword);
-          sessionFactory = configuration.buildSessionFactory();
-        }
+        Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
+                                                         .setProperty("hibernate.connection.username", dbUser)
+                                                         .setProperty("hibernate.connection.password", dbPassword);
+        sessionFactory = configuration.buildSessionFactory();
       } catch (Exception e) {
         if (!prop.containsKey("db_address")) {
           e.printStackTrace();
@@ -86,6 +84,16 @@ public class DatabaseManager {
       instance = new DatabaseManager();
     }
     return instance;
+  }
+
+  private SessionFactory getSessionFactory() {
+    if (sessionFactory == null) {
+      Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
+                                                       .setProperty("hibernate.connection.username", dbUser)
+                                                       .setProperty("hibernate.connection.password", dbPassword);
+      sessionFactory = configuration.buildSessionFactory();
+    }
+    return sessionFactory;
   }
 
   public static void closeSessionFactory() {
@@ -135,16 +143,6 @@ public class DatabaseManager {
     }
 
     return object;
-  }
-
-  private SessionFactory getSessionFactory() {
-    if (sessionFactory == null) {
-      Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
-                                                       .setProperty("hibernate.connection.username", dbUser)
-                                                       .setProperty("hibernate.connection.password", dbPassword);
-      sessionFactory = configuration.buildSessionFactory();
-    }
-    return sessionFactory;
   }
 
   @SuppressWarnings("unchecked")
