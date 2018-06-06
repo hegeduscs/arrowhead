@@ -6,30 +6,45 @@
 
   <groupId>eu.arrowhead</groupId>
   <artifactId>arrowhead_core</artifactId>
-  <version>M3-lightweight</version>
+  <version>4.0-lw</version>
   <packaging>jar</packaging>
 
   <properties>
-    <bouncy.version>1.59</bouncy.version>
+    <mvn.compiler.version>3.1</mvn.compiler.version>
+    <mvn.compile.target>1.8</mvn.compile.target>
+    <mvn.resources.version>2.7</mvn.resources.version>
+    <mvn.shade.version>3.1.0</mvn.shade.version>
+    <bouncy.castle.version>1.59</bouncy.castle.version>
     <hibernate.version>5.1.0.Final</hibernate.version>
     <hikari.cp.version>2.6.1</hikari.cp.version>
-    <mvn.compiler.version>3.1</mvn.compiler.version>
-    <java.version>1.8</java.version>
+    <jackson.version>2.9.5</jackson.version>
     <javax.servlet.version>3.1.0</javax.servlet.version>
     <jersey.version>2.23.1</jersey.version>
     <log4j.version>1.2.17</log4j.version>
     <mysql.connector.version>5.1.6</mysql.connector.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <rabbit.mq.version>3.0.4</rabbit.mq.version>
+    <rabbitmq.version>3.0.4</rabbitmq.version>
     <slf4j.version>1.7.21</slf4j.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
 
     <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.rabbitmq</groupId>
       <artifactId>amqp-client</artifactId>
-      <version>${rabbit.mq.version}</version>
+      <version>${rabbitmq.version}</version>
     </dependency>
 
     <dependency>
@@ -59,7 +74,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
-      <version>${bouncy.version}</version>
+      <version>${bouncy.castle.version}</version>
     </dependency>
 
     <dependency>
@@ -71,12 +86,6 @@
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-servlet-core</artifactId>
-      <version>${jersey.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-json-jackson</artifactId>
       <version>${jersey.version}</version>
     </dependency>
 
@@ -98,6 +107,7 @@
       <version>${hibernate.version}</version>
     </dependency>
 
+    <!-- Only used by the HikariCP DB connection pool manager dependency -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
@@ -136,7 +146,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>${mvn.shade.version}</version>
 
         <configuration>
           <filters>
@@ -174,7 +184,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.7</version>
+        <version>${mvn.resources.version}</version>
         <executions>
           <execution>
             <id>copy-resources</id>

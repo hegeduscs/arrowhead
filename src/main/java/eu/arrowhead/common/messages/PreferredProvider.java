@@ -1,17 +1,21 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.json.support.PreferredProviderSupport;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PreferredProvider {
 
@@ -24,6 +28,11 @@ public class PreferredProvider {
   public PreferredProvider(ArrowheadSystem providerSystem, ArrowheadCloud providerCloud) {
     this.providerSystem = providerSystem;
     this.providerCloud = providerCloud;
+  }
+
+  public PreferredProvider(PreferredProviderSupport supportProvider) {
+    this.providerSystem = new ArrowheadSystem(supportProvider.getProviderSystem());
+    this.providerCloud = supportProvider.getProviderCloud();
   }
 
   public ArrowheadSystem getProviderSystem() {
@@ -42,23 +51,28 @@ public class PreferredProvider {
     this.providerCloud = providerCloud;
   }
 
-  @JsonIgnore
   public boolean isValid() {
     return isLocal() || isGlobal();
   }
 
-  @JsonIgnore
   public boolean isLocal() {
-    return providerSystem != null && providerSystem.isValid() && providerCloud == null;
+    if (providerSystem != null) {
+      providerSystem.missingFields(true, new HashSet<>(Collections.singleton("address")));
+    }
+    return providerCloud == null;
   }
 
-  @JsonIgnore
   public boolean isGlobal() {
-    return providerCloud != null && providerCloud.isValid();
+    if (providerCloud != null) {
+      Set<String> mandatoryFields = new HashSet<>(Arrays.asList("address", "gatekeeperServiceURI"));
+      providerCloud.missingFields(true, mandatoryFields);
+    }
+    return true;
   }
 
   @Override
   public String toString() {
     return "PreferredProvider{" + "providerSystem=" + providerSystem + ", providerCloud=" + providerCloud + '}';
   }
+
 }

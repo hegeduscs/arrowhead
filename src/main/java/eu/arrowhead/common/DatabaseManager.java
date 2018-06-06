@@ -37,14 +37,13 @@ public class DatabaseManager {
 
   static {
     try {
-      if (sessionFactory == null) {
-        Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
-            .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword);
-        sessionFactory = configuration.buildSessionFactory();
-      }
+      Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
+                                                       .setProperty("hibernate.connection.username", dbUser)
+                                                       .setProperty("hibernate.connection.password", dbPassword);
+      sessionFactory = configuration.buildSessionFactory();
     } catch (Exception e) {
       log.fatal("Database connection failed, check the configuration!");
-      throw new ServiceConfigurationError("Database connection could not be established, check app.properties.sample!", e);
+      throw new ServiceConfigurationError("Database connection could not be established, check app.properties!", e);
     }
   }
 
@@ -56,6 +55,23 @@ public class DatabaseManager {
       instance = new DatabaseManager();
     }
     return instance;
+  }
+
+  private SessionFactory getSessionFactory() {
+    if (sessionFactory == null) {
+      Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
+                                                       .setProperty("hibernate.connection.username", dbUser)
+                                                       .setProperty("hibernate.connection.password", dbPassword);
+      sessionFactory = configuration.buildSessionFactory();
+    }
+    return sessionFactory;
+  }
+
+  public static void closeSessionFactory() {
+    if (sessionFactory != null) {
+      sessionFactory.close();
+    }
+    instance = null;
   }
 
   public <T> T get(Class<T> queryClass, int id) {
@@ -74,15 +90,6 @@ public class DatabaseManager {
     }
 
     return object;
-  }
-
-  private SessionFactory getSessionFactory() {
-    if (sessionFactory == null) {
-      Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
-          .setProperty("hibernate.connection.username", dbUser).setProperty("hibernate.connection.password", dbPassword);
-      sessionFactory = configuration.buildSessionFactory();
-    }
-    return sessionFactory;
   }
 
   @SuppressWarnings("unchecked")

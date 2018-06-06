@@ -10,43 +10,52 @@
 package eu.arrowhead.common.messages;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import eu.arrowhead.common.database.ArrowheadCloud;
-import eu.arrowhead.common.database.ArrowheadService;
+import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 @JsonIgnoreProperties({"alwaysMandatoryFields"})
-public class InterCloudAuthRequest extends ArrowheadBase {
+public class PublishEvent extends ArrowheadBase {
 
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("service", "cloud"));
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("source", "event"));
 
-  private ArrowheadCloud cloud;
-  private ArrowheadService service;
+  private ArrowheadSystem source;
+  private Event event;
+  private String deliveryCompleteUri;
 
-  public InterCloudAuthRequest() {
+  public PublishEvent() {
   }
 
-  public InterCloudAuthRequest(ArrowheadCloud cloud, ArrowheadService service) {
-    this.cloud = cloud;
-    this.service = service;
+  public PublishEvent(ArrowheadSystem source, Event event, String deliveryCompleteUri) {
+    this.source = source;
+    this.event = event;
+    this.deliveryCompleteUri = deliveryCompleteUri;
   }
 
-  public ArrowheadCloud getCloud() {
-    return cloud;
+  public ArrowheadSystem getSource() {
+    return source;
   }
 
-  public void setCloud(ArrowheadCloud cloud) {
-    this.cloud = cloud;
+  public void setSource(ArrowheadSystem source) {
+    this.source = source;
   }
 
-  public ArrowheadService getService() {
-    return service;
+  public Event getEvent() {
+    return event;
   }
 
-  public void setService(ArrowheadService service) {
-    this.service = service;
+  public void setEvent(Event event) {
+    this.event = event;
+  }
+
+  public String getDeliveryCompleteUri() {
+    return deliveryCompleteUri;
+  }
+
+  public void setDeliveryCompleteUri(String deliveryCompleteUri) {
+    this.deliveryCompleteUri = deliveryCompleteUri;
   }
 
   public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
@@ -56,11 +65,11 @@ public class InterCloudAuthRequest extends ArrowheadBase {
     }
     Set<String> nonNullFields = getFieldNamesWithNonNullValue();
     mf.removeAll(nonNullFields);
-    if (service != null) {
-      mf = service.missingFields(false, false, mf);
+    if (source != null) {
+      mf = source.missingFields(false, mf);
     }
-    if (cloud != null) {
-      mf = cloud.missingFields(false, mf);
+    if (event != null) {
+      mf = event.missingFields(false, mf);
     }
     if (throwException && !mf.isEmpty()) {
       throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));

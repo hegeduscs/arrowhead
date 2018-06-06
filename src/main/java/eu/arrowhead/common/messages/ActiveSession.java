@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common.messages;
@@ -12,7 +12,7 @@ package eu.arrowhead.common.messages;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class ActiveSession {
 
@@ -27,14 +27,14 @@ public class ActiveSession {
   private String queueName;
   private String controlQueueName;
   private Boolean isSecure;
-  private Date startSession;
+  private LocalDateTime sessionStartedAt;
 
   public ActiveSession() {
   }
 
   public ActiveSession(ArrowheadSystem consumer, ArrowheadCloud consumerCloud, ArrowheadSystem provider, ArrowheadCloud providerCloud,
                        ArrowheadService service, String brokerName, Integer brokerPort, Integer serverSocketPort, String queueName,
-                       String controlQueueName, Boolean isSecure, Date startSession) {
+                       String controlQueueName, Boolean isSecure, LocalDateTime sessionStartedAt) {
     this.consumer = consumer;
     this.consumerCloud = consumerCloud;
     this.provider = provider;
@@ -46,7 +46,7 @@ public class ActiveSession {
     this.queueName = queueName;
     this.controlQueueName = controlQueueName;
     this.isSecure = isSecure;
-    this.startSession = startSession;
+    this.sessionStartedAt = sessionStartedAt;
   }
 
   public ArrowheadSystem getConsumer() {
@@ -137,12 +137,12 @@ public class ActiveSession {
     this.isSecure = isSecure;
   }
 
-  public Date getStartSession() {
-    return startSession;
+  public LocalDateTime getSessionStartedAt() {
+    return sessionStartedAt;
   }
 
-  public void setStartSession(Date startSession) {
-    this.startSession = startSession;
+  public void setSessionStartedAt(LocalDateTime sessionStartedAt) {
+    this.sessionStartedAt = sessionStartedAt;
   }
 
 }

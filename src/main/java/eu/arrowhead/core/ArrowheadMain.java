@@ -2,8 +2,8 @@ package eu.arrowhead.core;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.common.misc.TypeSafeProperties;
-import eu.arrowhead.common.security.SecurityUtils;
 import eu.arrowhead.core.authorization.AuthorizationApi;
 import eu.arrowhead.core.gatekeeper.GatekeeperApi;
 import eu.arrowhead.core.gatekeeper.GatekeeperResource;

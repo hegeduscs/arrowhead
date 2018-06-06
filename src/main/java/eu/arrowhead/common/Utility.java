@@ -1,16 +1,15 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.database.OwnCloud;
@@ -21,17 +20,27 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.exception.ErrorMessage;
 import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.common.misc.JacksonJsonProviderAtRest;
+import eu.arrowhead.common.misc.TypeSafeProperties;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.NotAllowedException;
@@ -50,57 +59,60 @@ import org.glassfish.jersey.client.ClientProperties;
 
 public final class Utility {
 
-  private static SSLContext sslContext;
+  private static Client client = createClient(null);
+  private static Client sslClient;
 
-  private static final ObjectMapper mapper = new ObjectMapper();
-  private static final DatabaseManager dm = DatabaseManager.getInstance();
+  private static final ObjectMapper mapper = JacksonJsonProviderAtRest.getMapper();
   private static final Logger log = Logger.getLogger(Utility.class.getName());
   private static final HostnameVerifier allHostsValid = (hostname, session) -> {
     // Decide whether to allow the connection...
     return true;
   };
 
-  static {
-    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-  }
 
   private Utility() throws AssertionError {
-    throw new AssertionError("Utility is a non-instantiable class");
+    throw new AssertionError("Arrowhead Common:Utility is a non-instantiable class");
   }
 
-  public static void setSSLContext(SSLContext context) {
-    sslContext = context;
-  }
-
-  private static <T> Response sendRequest(String uri, String method, T payload, SSLContext context) {
-    log.info("Sending " + method + " request to: " + uri);
-
-    boolean isSecure = false;
-    if (uri.startsWith("https")) {
-      isSecure = true;
-    }
-
+  private static Client createClient(SSLContext context) {
     ClientConfig configuration = new ClientConfig();
     configuration.property(ClientProperties.CONNECT_TIMEOUT, 30000);
     configuration.property(ClientProperties.READ_TIMEOUT, 30000);
 
     Client client;
-    if (isSecure) {
-      if (context != null) {
-        client = ClientBuilder.newBuilder().sslContext(context).withConfig(configuration).hostnameVerifier(allHostsValid).build();
-      } else if (Utility.sslContext != null) {
-        client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(configuration).hostnameVerifier(allHostsValid).build();
-      } else {
-        log.error("sendRequest() method throws AuthException");
-        throw new AuthException(
-            "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
-            Status.UNAUTHORIZED.getStatusCode());
-      }
+    if (context != null) {
+      client = ClientBuilder.newBuilder().sslContext(context).withConfig(configuration).hostnameVerifier(allHostsValid).build();
     } else {
       client = ClientBuilder.newClient(configuration);
     }
+    client.register(JacksonJsonProviderAtRest.class);
+    return client;
+  }
 
-    Builder request = client.target(UriBuilder.fromUri(uri).build()).request().header("Content-type", "application/json");
+  public static void setSSLContext(SSLContext context) {
+    sslClient = createClient(context);
+  }
+
+  public static <T> Response sendRequest(String uri, String method, T payload, SSLContext givenContext) {
+    log.info("Sending " + method + " request to: " + uri);
+
+    boolean isSecure = false;
+    if (uri == null) {
+      log.error("sendRequest received null uri");
+      throw new NullPointerException("send (HTTP) request method received null URL");
+    }
+    if (uri.startsWith("https")) {
+      isSecure = true;
+    }
+
+    if (isSecure && sslClient == null) {
+      throw new AuthException(
+          "SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
+          Status.UNAUTHORIZED.getStatusCode());
+    }
+    Client usedClient = isSecure ? givenContext != null ? createClient(givenContext) : sslClient : client;
+
+    Builder request = usedClient.target(UriBuilder.fromUri(uri).build()).request().header("Content-type", "application/json");
     Response response; // will not be null after the switch-case
     try {
       switch (method) {
@@ -133,7 +145,7 @@ public final class Utility {
   }
 
   public static <T> Response sendRequest(String uri, String method, T payload) {
-    return sendRequest(uri, method, payload, sslContext);
+    return sendRequest(uri, method, payload, null);
   }
 
   private static void handleException(Response response, String uri) {
@@ -166,28 +178,28 @@ public final class Utility {
       log.info("Request failed, response body: " + errorMessageBody);
       throw new RuntimeException("Unknown error occurred at " + uri + ". Check log for possibly more information.");
     } else {
-      log.error("Request returned with " + errorMessage.getExceptionType() + ": " + errorMessage.getErrorMessage());
+      log.error("Request returned with " + errorMessage.getExceptionType().toString() + ": " + errorMessage.getErrorMessage());
       switch (errorMessage.getExceptionType()) {
         case ARROWHEAD:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case AUTH:
-          throw new AuthException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new AuthException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case BAD_METHOD:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case BAD_PAYLOAD:
-          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new BadPayloadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case BAD_URI:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case DATA_NOT_FOUND:
-          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new DataNotFoundException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case DUPLICATE_ENTRY:
-          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new DuplicateEntryException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case GENERIC:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
-        case JSON_MAPPING:
-          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
+        case JSON_PROCESSING:
+          throw new ArrowheadException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
         case UNAVAILABLE:
-          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode());
+          throw new UnavailableServerException(errorMessage.getErrorMessage(), errorMessage.getErrorCode(), errorMessage.getOrigin());
       }
     }
   }
@@ -227,9 +239,8 @@ public final class Utility {
     return url;
   }
 
-
   public static List<String> getNeighborCloudURIs() {
-    List<NeighborCloud> cloudList = new ArrayList<>(dm.getAll(NeighborCloud.class, null));
+    List<NeighborCloud> cloudList = new ArrayList<>(DatabaseManager.getInstance().getAll(NeighborCloud.class, null));
 
     List<String> uriList = new ArrayList<>();
     for (NeighborCloud cloud : cloudList) {
@@ -242,7 +253,7 @@ public final class Utility {
   }
 
   public static ArrowheadCloud getOwnCloud() {
-    List<OwnCloud> cloudList = dm.getAll(OwnCloud.class, null);
+    List<OwnCloud> cloudList = DatabaseManager.getInstance().getAll(OwnCloud.class, null);
     if (cloudList.isEmpty()) {
       log.error("Utility:getOwnCloud not found in the database.");
       throw new DataNotFoundException("Own Cloud information not found in the database. This information is needed for the Gatekeeper System.",
@@ -271,14 +282,15 @@ public final class Utility {
       }
     } catch (UnsupportedEncodingException e) {
       log.fatal("getRequestPayload ISReader has unsupported charset set!");
-      throw new AssertionError("getRequestPayload ISReader has unsupported charset set! Code needs to be changed!", e);
+      throw new AssertionError("getRequestPayload InputStreamReader has unsupported character set! Code needs to be changed!", e);
     } catch (IOException e) {
       log.error("IOException while reading the request payload");
       throw new RuntimeException("IOException occured while reading an incoming request payload", e);
     }
 
     if (!sb.toString().isEmpty()) {
-      return toPrettyJson(sb.toString(), null);
+      String payload = toPrettyJson(sb.toString(), null);
+      return payload != null ? payload : "";
     } else {
       return "";
     }
@@ -290,17 +302,18 @@ public final class Utility {
         jsonString = jsonString.trim();
         if (jsonString.startsWith("{")) {
           Object tempObj = mapper.readValue(jsonString, Object.class);
-          return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tempObj);
+          return mapper.writeValueAsString(tempObj);
         } else {
           Object[] tempObj = mapper.readValue(jsonString, Object[].class);
-          return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tempObj);
+          return mapper.writeValueAsString(tempObj);
         }
       }
       if (obj != null) {
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        return mapper.writeValueAsString(obj);
       }
     } catch (IOException e) {
-      throw new ArrowheadException("Jackson library threw exception during JSON serialization!", e);
+      throw new ArrowheadException(
+          "Jackson library threw IOException during JSON serialization! Wrapping it in RuntimeException. Exception message: " + e.getMessage(), e);
     }
     return null;
   }
@@ -313,6 +326,21 @@ public final class Utility {
     }
   }
 
+  public static TypeSafeProperties getProp(String fileName) {
+    TypeSafeProperties prop = new TypeSafeProperties();
+    try {
+      File file = new File("config" + File.separator + fileName);
+      FileInputStream inputStream = new FileInputStream(file);
+      prop.load(inputStream);
+    } catch (FileNotFoundException ex) {
+      throw new ServiceConfigurationError(
+          fileName + " file not found, make sure you have the correct working directory set! (directory where the config folder can be found)", ex);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return prop;
+  }
+
   public static void checkProperties(Set<String> propertyNames, List<String> mandatoryProperties) {
     if (mandatoryProperties == null || mandatoryProperties.isEmpty()) {
       return;
@@ -323,6 +351,34 @@ public final class Utility {
       properties.removeIf(propertyNames::contains);
       throw new ServiceConfigurationError("Missing field(s) from app.properties file: " + properties.toString());
     }
+  }
+
+  /* If needed, this method can be used to get the IPv4 address of the host machine. Public point-to-point IP addresses are prioritized over private
+    (site local) IP addresses */
+  public static String getIpAddress() throws SocketException {
+    List<InetAddress> addresses = new ArrayList<>();
+
+    Enumeration e = NetworkInterface.getNetworkInterfaces();
+    while (e.hasMoreElements()) {
+      NetworkInterface inf = (NetworkInterface) e.nextElement();
+      Enumeration ee = inf.getInetAddresses();
+      while (ee.hasMoreElements()) {
+        addresses.add((InetAddress) ee.nextElement());
+      }
+    }
+
+    addresses = addresses.stream().filter(current -> !current.getHostAddress().contains(":")).filter(current -> !current.isLoopbackAddress())
+                         .filter(current -> !current.isMulticastAddress()).filter(current -> !current.isLinkLocalAddress())
+                         .collect(Collectors.toList());
+    if (addresses.isEmpty()) {
+      throw new SocketException("No valid addresses left after filtering");
+    }
+    for (InetAddress address : addresses) {
+      if (!address.isSiteLocalAddress()) {
+        return address.getHostAddress();
+      }
+    }
+    return addresses.get(0).getHostAddress();
   }
 
 }

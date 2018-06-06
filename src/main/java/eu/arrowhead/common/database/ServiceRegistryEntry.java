@@ -1,21 +1,23 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.messages.ArrowheadBase;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,11 +30,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import org.hibernate.annotations.Type;
 
 @Entity
-@JsonIgnoreProperties({"id", "port", "metadata", "endOfValidity"})
+@JsonIgnoreProperties({"alwaysMandatoryFields", "id", "metadata", "endOfValidity"})
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
-public class ServiceRegistryEntry {
+public class ServiceRegistryEntry extends ArrowheadBase {
+
+  @Transient
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("providedService", "provider"));
 
   @Column(name = "id")
   @Id
@@ -59,11 +65,12 @@ public class ServiceRegistryEntry {
   private Integer version = 1;
 
   @Column(name = "udp")
-  private boolean UDP = false;
+  @Type(type = "yes_no")
+  private boolean udp = false;
 
   //Time to live in seconds - endOfValidity is calculated from this upon registering and TTL is calculated from endOfValidity when queried
   @Transient
-  private int ttl;
+  private long ttl;
 
   //only for database
   @Column(name = "metadata")
@@ -95,13 +102,13 @@ public class ServiceRegistryEntry {
   }
 
   public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, Integer version,
-                              boolean UDP, int ttl, String metadata, LocalDateTime endOfValidity) {
+                              boolean udp, long ttl, String metadata, LocalDateTime endOfValidity) {
     this.providedService = providedService;
     this.provider = provider;
     this.port = port;
     this.serviceURI = serviceURI;
     this.version = version;
-    this.UDP = UDP;
+    this.udp = udp;
     this.ttl = ttl;
     this.metadata = metadata;
     this.endOfValidity = endOfValidity;
@@ -155,34 +162,19 @@ public class ServiceRegistryEntry {
     this.version = version;
   }
 
-  @JsonGetter("UDP")
-  public boolean isUDP() {
-    return UDP;
+  public boolean isUdp() {
+    return udp;
   }
 
-  //We have 2 Setters, so Jackson can parse both upper- and lowercase forms without a problem
-  @JsonSetter("UDP")
-  public void setUDP(boolean UDP) {
-    this.UDP = UDP;
+  public void setUdp(boolean udp) {
+    this.udp = udp;
   }
 
-  @JsonSetter("udp")
-  private void setUdp(boolean UDP) {
-    this.UDP = UDP;
-  }
-
-  @JsonGetter("ttl")
-  public int getTtl() {
+  public long getTtl() {
     return ttl;
   }
 
-  @JsonSetter("ttl")
-  public void setTtl(int ttl) {
-    this.ttl = ttl;
-  }
-
-  @JsonSetter("TTL")
-  private void setTTL(int ttl) {
+  public void setTtl(long ttl) {
     this.ttl = ttl;
   }
 
@@ -202,17 +194,25 @@ public class ServiceRegistryEntry {
     this.endOfValidity = endOfValidity;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return provider != null && provider.isValid() && providedService != null && providedService.isValid();
+  public Set<String> missingFields(boolean throwException, boolean forDNSSD, Set<String> mandatoryFields) {
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
+    }
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mf.removeAll(nonNullFields);
+    if (providedService != null) {
+      mf = providedService.missingFields(false, forDNSSD, mf);
+    }
+    if (provider != null) {
+      mf = provider.missingFields(false, mf);
+    }
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
+    }
+    return mf;
   }
 
-  @Override
-  public String toString() {
-    return providedService.getServiceDefinition() + ":" + provider.getSystemName();
-  }
-
-  @JsonIgnore
   public void toDatabase() {
     if (providedService.getServiceMetadata() != null && !providedService.getServiceMetadata().isEmpty()) {
       StringBuilder sb = new StringBuilder();
@@ -222,14 +222,13 @@ public class ServiceRegistryEntry {
       metadata = sb.toString().substring(0, sb.length() - 1);
     }
 
-    if (provider.getPort() != 0 && (port == null || port == 0)) {
+    if (provider.getPort() != null && (port == null || port == 0)) {
       port = provider.getPort();
     }
 
-    endOfValidity = ttl > 0 ? LocalDateTime.now().plusSeconds(ttl) : null;
+    endOfValidity = ttl > 0 ? LocalDateTime.now().plusSeconds(ttl) : LocalDateTime.now();
   }
 
-  @JsonIgnore
   public void fromDatabase() {
     ArrowheadService temp = providedService;
     providedService = new ArrowheadService();
@@ -245,7 +244,7 @@ public class ServiceRegistryEntry {
       }
     }
 
-    if (port != null && provider.getPort() == 0) {
+    if (port != null && provider.getPort() == null) {
       provider.setPort(port);
     }
 
@@ -253,11 +252,16 @@ public class ServiceRegistryEntry {
       if (LocalDateTime.now().isAfter(endOfValidity)) {
         ttl = 0;
       } else {
-        ttl = (int) Duration.between(LocalDateTime.now(), endOfValidity).toMillis() / 1000;
+        ttl = Duration.between(LocalDateTime.now(), endOfValidity).toMinutes() * 60;
       }
     } else {
       ttl = 0;
     }
+  }
+
+  @Override
+  public String toString() {
+    return provider.getSystemName() + ":" + providedService.getServiceDefinition();
   }
 
 }

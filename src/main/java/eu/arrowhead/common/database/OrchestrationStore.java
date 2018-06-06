@@ -1,18 +1,25 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.messages.ArrowheadBase;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -28,7 +35,6 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -42,10 +48,15 @@ import org.hibernate.annotations.Type;
  * @author Umlauf Zoltán
  */
 @Entity
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
 @Table(name = "orchestration_store", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"arrowhead_service_id", "consumer_system_id", "priority", "is_default"})})
 @Check(constraints = "priority >= 1 AND (provider_cloud_id IS NULL OR is_default = false)")
-public class OrchestrationStore implements Comparable<OrchestrationStore> {
+public class OrchestrationStore extends ArrowheadBase implements Comparable<OrchestrationStore> {
+
+  @Transient
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(
+      Arrays.asList("service", "consumer", "providerSystem", "priority", "defaultEntry"));
 
   @Column(name = "id")
   @Id
@@ -72,18 +83,19 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   private Integer priority;
 
   @Column(name = "is_default")
+  @Type(type = "yes_no")
   private boolean defaultEntry;
 
   @Column(name = "name")
   private String name;
 
   @Column(name = "last_updated")
-  @Type(type = "timestamp")
-  private Date lastUpdated;
+  private LocalDateTime lastUpdated;
 
   @Column(name = "instruction")
   private String instruction;
 
+  @JsonInclude(Include.NON_EMPTY)
   @ElementCollection(fetch = FetchType.LAZY)
   @LazyCollection(LazyCollectionOption.FALSE)
   @MapKeyColumn(name = "attribute_key")
@@ -91,6 +103,7 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   @CollectionTable(name = "orchestration_store_attributes", joinColumns = @JoinColumn(name = "store_entry_id"))
   private Map<String, String> attributes = new HashMap<>();
 
+  //Only to convert ServiceRegistryEntries to Store entries without data loss
   @Transient
   private String serviceURI;
 
@@ -107,8 +120,8 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
   }
 
   public OrchestrationStore(ArrowheadService service, ArrowheadSystem consumer, ArrowheadSystem providerSystem, ArrowheadCloud providerCloud,
-                            Integer priority, boolean defaultEntry, String name, Date lastUpdated, String instruction, Map<String, String> attributes,
-                            String serviceURI) {
+                            Integer priority, boolean defaultEntry, String name, LocalDateTime lastUpdated, String instruction,
+                            Map<String, String> attributes, String serviceURI) {
     this.service = service;
     this.consumer = consumer;
     this.providerSystem = providerSystem;
@@ -122,7 +135,6 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.serviceURI = serviceURI;
   }
 
-  @XmlTransient
   public Integer getId() {
     return id;
   }
@@ -187,11 +199,11 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.name = name;
   }
 
-  public Date getLastUpdated() {
+  public LocalDateTime getLastUpdated() {
     return lastUpdated;
   }
 
-  public void setLastUpdated(Date lastUpdated) {
+  public void setLastUpdated(LocalDateTime lastUpdated) {
     this.lastUpdated = lastUpdated;
   }
 
@@ -219,16 +231,45 @@ public class OrchestrationStore implements Comparable<OrchestrationStore> {
     this.serviceURI = serviceURI;
   }
 
-  /**
-   * Simple inspector method to check weather a OrchestrationStore instance is valid to be stored in the database.
-   *
-   * @return true if the instance is in compliance with all the restrictions, false otherwise
-   */
-  @JsonIgnore
-  public boolean isValid() {
-    return service != null && consumer != null && providerSystem != null && service.isValid() && consumer.isValid() && providerSystem.isValid()
-        && priority >= 1 && (!defaultEntry || providerCloud == null);
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
+    }
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mf.removeAll(nonNullFields);
+    if (service != null) {
+      mf = service.missingFields(false, false, mf);
+    }
 
+    Set<String> fromConsumer = new HashSet<>();
+    Set<String> fromProvider = new HashSet<>();
+    if (consumer != null) {
+      fromConsumer = consumer.missingFields(false, mf);
+    }
+    if (providerSystem != null) {
+      fromProvider = providerSystem.missingFields(false, mf);
+    }
+    mf = new HashSet<>(fromConsumer);
+    mf.addAll(fromProvider);
+
+    if (priority < 0) {
+      mf.add("Priority can not be negative!");
+    }
+
+    if (providerCloud != null) {
+      if (defaultEntry) {
+        mf.add("Default store entries can only have intra-cloud providers!");
+      } else {
+        Set<String> fromCloud = providerCloud.missingFields(false, new HashSet<>(Arrays.asList("ArrowheadCloud:address", "gatekeeperServiceURI")));
+        mf.addAll(fromCloud);
+      }
+    }
+
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
+    }
+    return mf;
   }
 
   /**

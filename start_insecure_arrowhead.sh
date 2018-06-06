@@ -8,4 +8,4 @@ then
     rm coresystem.log
 fi
 
-nohup java -jar arrowhead_core-M3-lightweight.jar -d -daemon > /home/pi/arrowhead/target/coresystem.log &
+nohup java -jar arrowhead_core-4.0-lw.jar -d -daemon > /home/pi/arrowhead/target/coresystem.log &

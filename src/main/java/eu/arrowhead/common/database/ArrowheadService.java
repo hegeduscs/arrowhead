@@ -1,19 +1,26 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.messages.ArrowheadBase;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -26,7 +33,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -34,8 +40,12 @@ import org.hibernate.annotations.LazyCollectionOption;
  * Entity class for storing Arrowhead Services in the database. The "service_definition" column must be unique.
  */
 @Entity
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
 @Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_definition"})})
-public class ArrowheadService {
+public class ArrowheadService extends ArrowheadBase {
+
+  @Transient
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("serviceDefinition"));
 
   @Column(name = "id")
   @Id
@@ -51,6 +61,7 @@ public class ArrowheadService {
   private List<String> interfaces = new ArrayList<>();
 
   @Transient
+  @JsonInclude(Include.NON_EMPTY)
   private Map<String, String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {
@@ -62,7 +73,6 @@ public class ArrowheadService {
     this.serviceMetadata = serviceMetadata;
   }
 
-  @XmlTransient
   public int getId() {
     return id;
   }
@@ -100,14 +110,27 @@ public class ArrowheadService {
     this.serviceMetadata = metaData;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    return (serviceDefinition != null && !interfaces.isEmpty());
-  }
+  public Set<String> missingFields(boolean throwException, boolean forDNSSD, Set<String> mandatoryFields) {
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
+    }
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mf.removeAll(nonNullFields);
 
-  @JsonIgnore
-  public boolean isValidForDatabase() {
-    return serviceDefinition != null;
+    if (forDNSSD) {
+      for (String interf : interfaces) {
+        if (interf.contains("_")) {
+          mf.add("Interfaces Can't Have Underscores!");
+        }
+      }
+    }
+
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
+    }
+
+    return mf;
   }
 
   @Override

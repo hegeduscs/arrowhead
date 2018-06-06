@@ -22,7 +22,7 @@ import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.common.messages.ConnectToProviderResponse;
 import eu.arrowhead.common.messages.GatewayEncryption;
 import eu.arrowhead.common.messages.GatewaySession;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.core.ArrowheadMain;
 import eu.arrowhead.core.gateway.thread.InsecureServerSocketThread;
 import eu.arrowhead.core.gateway.thread.InsecureSocketThread;

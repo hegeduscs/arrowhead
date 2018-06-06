@@ -16,7 +16,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.RawTokenInfo;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.core.ArrowheadMain;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;

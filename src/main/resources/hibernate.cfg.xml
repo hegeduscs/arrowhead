@@ -36,6 +36,7 @@
     <mapping class="eu.arrowhead.common.database.ArrowheadService"/>
     <mapping class="eu.arrowhead.common.database.ArrowheadSystem"/>
     <mapping class="eu.arrowhead.common.database.Broker"/>
+    <mapping class="eu.arrowhead.common.database.EventFilter"/>
     <mapping class="eu.arrowhead.common.database.InterCloudAuthorization"/>
     <mapping class="eu.arrowhead.common.database.IntraCloudAuthorization"/>
     <mapping class="eu.arrowhead.common.database.NeighborCloud"/>

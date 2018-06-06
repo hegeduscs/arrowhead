@@ -1,1 +1,1 @@
-# Arrowhead G3.2 Framework - Milestone 3 lightweight implementation
+# Arrowhead Framework G4.0 - lightweight implementation

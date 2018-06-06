@@ -13,7 +13,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.messages.ServiceRequestForm;
-import eu.arrowhead.common.security.SecurityUtils;
+import eu.arrowhead.common.misc.SecurityUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -28,6 +28,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 import org.apache.log4j.Logger;
 
+//TODO update it
 @Provider
 @Priority(Priorities.AUTHORIZATION) //2nd highest priority constant, this filter gets executed after the SecurityFilter
 public class AccessControlFilter implements ContainerRequestFilter {
@@ -61,8 +62,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
   }
 
   private boolean isGetItCalled(String method, String requestTarget) {
-    return method.equals("GET") && (requestTarget.endsWith("orchestration") || requestTarget.endsWith("gatekeeper") || requestTarget
-        .endsWith("serviceregistry") || requestTarget.endsWith("mgmt") || requestTarget.endsWith("mgmt/common") || requestTarget
+    return method.equals("GET") && (requestTarget.endsWith("orchestration") || requestTarget.endsWith("gatekeeper") || requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt") || requestTarget.endsWith("mgmt/common") || requestTarget
         .endsWith("mgmt/store"));
   }
 
@@ -96,9 +96,8 @@ public class AccessControlFilter implements ContainerRequestFilter {
         if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
           // BUT the requester system has to be the same as the first part of the common name
           log.error("Requester system name and cert common name do not match!");
-          throw new AuthException(
-              "Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-              Status.UNAUTHORIZED.getStatusCode());
+          throw new AuthException("Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+                                  Status.UNAUTHORIZED.getStatusCode());
         }
 
         return serverCN.equalsIgnoreCase(clientFields[1]);
@@ -113,9 +112,8 @@ public class AccessControlFilter implements ContainerRequestFilter {
       if (!entry.getProvider().getSystemName().equalsIgnoreCase(clientFields[0])) {
         // BUT a provider system can only register/remove its own services!
         log.error("Provider system name and cert common name do not match! SR registering/removing denied!");
-        throw new AuthException(
-            "Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-            Status.UNAUTHORIZED.getStatusCode());
+        throw new AuthException("Provider system " + entry.getProvider().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+                                Status.UNAUTHORIZED.getStatusCode());
       }
 
       return serverCN.equalsIgnoreCase(clientFields[1]);

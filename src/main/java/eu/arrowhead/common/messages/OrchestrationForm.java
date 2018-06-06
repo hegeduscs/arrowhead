@@ -1,16 +1,18 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common.messages;
 
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrchestrationForm {
 
@@ -20,6 +22,7 @@ public class OrchestrationForm {
   private String instruction;
   private String authorizationToken;
   private String signature;
+  private List<OrchestratorWarnings> warnings = new ArrayList<>();
 
   public OrchestrationForm() {
   }
@@ -31,13 +34,14 @@ public class OrchestrationForm {
   }
 
   public OrchestrationForm(ArrowheadService service, ArrowheadSystem provider, String serviceURI, String instruction, String authorizationToken,
-                           String signature) {
+                           String signature, List<OrchestratorWarnings> warnings) {
     this.service = service;
     this.provider = provider;
     this.serviceURI = serviceURI;
     this.instruction = instruction;
     this.authorizationToken = authorizationToken;
     this.signature = signature;
+    this.warnings = warnings;
   }
 
   public ArrowheadService getService() {
@@ -86,6 +90,14 @@ public class OrchestrationForm {
 
   public void setSignature(String signature) {
     this.signature = signature;
+  }
+
+  public List<OrchestratorWarnings> getWarnings() {
+    return warnings;
+  }
+
+  public void setWarnings(List<OrchestratorWarnings> warnings) {
+    this.warnings = warnings;
   }
 
 }

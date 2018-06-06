@@ -1,32 +1,39 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This is what the Orchestrator Core System receives from Arrowhead Systems trying to request services.
  */
-public class ServiceRequestForm {
+@JsonIgnoreProperties({"flagKeys", "alwaysMandatoryFields"})
+public class ServiceRequestForm extends ArrowheadBase {
 
   private static final List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
                                                                              "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
                                                                              "onlyPreferred", "enableQoS"));
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("requesterSystem"));
+
   private ArrowheadSystem requesterSystem;
   private ArrowheadCloud requesterCloud;
   private ArrowheadService requestedService;
@@ -115,18 +122,46 @@ public class ServiceRequestForm {
     this.commands = commands;
   }
 
-  /**
-   * Simple inspector method to check weather a ServiceRequestForm instance is valid to be processed by the Orchestrator. <p> The mandatory
-   * requesterSystem field can not be null and has to be valid. If the requestedService is not null, it has to be valid. PreferredProviders list can
-   * not be empty, if the onlyPreferred flag is true. RequestedQoS and commands lists can not be empty, if the enableQoS flag is true.
-   *
-   * @return true if the instance is in compliance with all the restrictions, false otherwise
-   */
-  @JsonIgnore
-  public boolean isValid() {
-    return requesterSystem != null && requesterSystem.isValid() && !(requestedService != null && !requestedService.isValid()) && !(
-        orchestrationFlags.get("onlyPreferred") && preferredProviders.isEmpty()) && !(orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty()
-        || commands.isEmpty()));
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    setOrchestrationFlags(getOrchestrationFlags());
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
+    }
+
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mf.removeAll(nonNullFields);
+    if (requesterSystem == null) {
+      mf.add("requesterSystem");
+    } else {
+      mf = requesterSystem.missingFields(false, mf);
+    }
+    if (requestedService == null && orchestrationFlags.get("overrideStore")) {
+      mf.add("requestedService can not be null when overrideStore is TRUE");
+    } else if (requestedService != null) {
+      mf.add("interfaces");
+      mf = requestedService.missingFields(false, false, mf);
+    }
+    if (orchestrationFlags.get("onlyPreferred")) {
+      List<PreferredProvider> tmp = new ArrayList<>();
+      for (PreferredProvider provider : preferredProviders) {
+        if (!provider.isValid()) {
+          tmp.add(provider);
+        }
+      }
+      preferredProviders.removeAll(tmp);
+      if (preferredProviders.isEmpty()) {
+        mf.add("There is no valid PreferredProvider, but \"onlyPreferred\" is set to true");
+      }
+    }
+    if (orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty() || commands.isEmpty())) {
+      mf.add("RequestedQoS or commands hashmap is empty while \"enableQoS\" is set to true");
+    }
+
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
+    }
+    return mf;
   }
 
   public static class Builder {
@@ -146,18 +181,15 @@ public class ServiceRequestForm {
       this.requesterSystem = requesterSystem;
     }
 
-
     public Builder requesterCloud(ArrowheadCloud cloud) {
       requesterCloud = cloud;
       return this;
     }
 
-
     public Builder requestedService(ArrowheadService service) {
       requestedService = service;
       return this;
     }
-
 
     public Builder orchestrationFlags(Map<String, Boolean> flags) {
       for (String key : flagKeys) {
@@ -169,24 +201,20 @@ public class ServiceRequestForm {
       return this;
     }
 
-
     public Builder preferredProviders(List<PreferredProvider> providers) {
       preferredProviders = providers;
       return this;
     }
-
 
     public Builder requestedQoS(Map<String, String> qos) {
       requestedQoS = qos;
       return this;
     }
 
-
     public Builder commands(Map<String, String> commands) {
       this.commands = commands;
       return this;
     }
-
 
     public ServiceRequestForm build() {
       return new ServiceRequestForm(this);

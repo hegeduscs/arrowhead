@@ -1,29 +1,37 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class IntraCloudAuthEntry {
+@JsonIgnoreProperties({"alwaysMandatoryFields"})
+public class IntraCloudAuthEntry extends ArrowheadBase {
+
+  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("serviceList", "consumer", "providerList"));
 
   private ArrowheadSystem consumer;
-  private ArrayList<ArrowheadSystem> providerList = new ArrayList<>();
-  private ArrayList<ArrowheadService> serviceList = new ArrayList<>();
+  private List<ArrowheadSystem> providerList = new ArrayList<>();
+  private List<ArrowheadService> serviceList = new ArrayList<>();
 
   public IntraCloudAuthEntry() {
   }
 
-  public IntraCloudAuthEntry(ArrowheadSystem consumer, ArrayList<ArrowheadSystem> providerList, ArrayList<ArrowheadService> serviceList) {
+  public IntraCloudAuthEntry(ArrowheadSystem consumer, List<ArrowheadSystem> providerList, List<ArrowheadService> serviceList) {
     this.consumer = consumer;
     this.providerList = providerList;
     this.serviceList = serviceList;
@@ -37,38 +45,52 @@ public class IntraCloudAuthEntry {
     this.consumer = consumer;
   }
 
-  public ArrayList<ArrowheadSystem> getProviderList() {
+  public List<ArrowheadSystem> getProviderList() {
     return providerList;
   }
 
-  public void setProviderList(ArrayList<ArrowheadSystem> providerList) {
+  public void setProviderList(List<ArrowheadSystem> providerList) {
     this.providerList = providerList;
   }
 
-  public ArrayList<ArrowheadService> getServiceList() {
+  public List<ArrowheadService> getServiceList() {
     return serviceList;
   }
 
-  public void setServiceList(ArrayList<ArrowheadService> serviceList) {
+  public void setServiceList(List<ArrowheadService> serviceList) {
     this.serviceList = serviceList;
   }
 
-  @JsonIgnore
-  public boolean isValid() {
-    if (consumer == null || serviceList.isEmpty() || providerList.isEmpty() || !consumer.isValidForDatabase()) {
-      return false;
+  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
+    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
+    if (mandatoryFields != null) {
+      mf.addAll(mandatoryFields);
     }
+    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
+    mf.removeAll(nonNullFields);
+
+    if (consumer != null) {
+      mf = consumer.missingFields(false, mf);
+    }
+
     for (ArrowheadSystem provider : providerList) {
-      if (!provider.isValidForDatabase()) {
-        return false;
+      Set<String> fields = provider.missingFields(false, null);
+      if (!fields.isEmpty()) {
+        mf.add("Provider is missing mandatory field(s): " + String.join(", ", fields));
       }
     }
+
     for (ArrowheadService service : serviceList) {
-      if (!service.isValidForDatabase()) {
-        return false;
+      Set<String> fields = service.missingFields(false, false, null);
+      if (!fields.isEmpty()) {
+        mf.add("Service is missing mandatory field(s): " + String.join(", ", fields));
       }
     }
-    return true;
+
+    if (throwException && !mf.isEmpty()) {
+      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
+    }
+    return mf;
   }
 
 }
