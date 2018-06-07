@@ -18,6 +18,11 @@ cloud_keypass=12345
 auth_keystore=config/certificates/authorization.testcloud1.jks
 auth_keystorepass=12345
 
+#Event Handler
+event_publishing_delay=60
+remove_old_filters=false
+filter_check_interval=60
+
 #Gatekeeeper
   # General
   # timeout in ms
@@ -39,5 +44,7 @@ auth_keystorepass=12345
 #Service Registry
 ping_scheduled=false
 ping_timeout=10000
-#interval in minutes
+#intervals in minutes
 ping_interval=60
+ttl_scheduled=false
+ttl_interval=10

@@ -12,15 +12,14 @@ package eu.arrowhead.core.serviceregistry;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 class RegistryUtils {
 
-  static boolean pingHost(String host, int port, int timeout) {
+  static boolean pingHost(String host, int port) {
     try (Socket socket = new Socket()) {
-      socket.connect(new InetSocketAddress(host, port), timeout);
+      socket.connect(new InetSocketAddress(host, port), ServiceRegistryService.PING_TIMEOUT);
       return true;
     } catch (Exception e) {
       return false; // Either timeout or unreachable or failed DNS lookup.
@@ -36,15 +35,7 @@ class RegistryUtils {
   }
 
   static void filterOnPing(List<ServiceRegistryEntry> fetchedList) {
-    Iterator<ServiceRegistryEntry> iterator = fetchedList.iterator();
-    while (iterator.hasNext()) {
-      ServiceRegistryEntry current = iterator.next();
-      if (current.getProvider().getAddress().equals("0.0.0.0")) {
-        iterator.remove();
-      } else if (!pingHost(current.getProvider().getAddress(), current.getProvider().getPort(), ServiceRegistryService.timeout)) {
-        iterator.remove();
-      }
-    }
+    fetchedList.removeIf(current -> !pingHost(current.getProvider().getAddress(), current.getProvider().getPort()));
   }
 
 }

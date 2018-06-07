@@ -27,6 +27,7 @@ import eu.arrowhead.common.messages.TokenGenerationResponse;
 import eu.arrowhead.core.authorization.AuthorizationService;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -236,8 +237,11 @@ public final class OrchestratorService {
       }
     }
 
+    Map<String, Boolean> registryFlags = new HashMap<>();
+    registryFlags.put("metadataSearch", orchestrationFlags.get("metadataSearch"));
+    registryFlags.put("pingProviders", orchestrationFlags.get("pingProviders"));
     // Telling the Gatekeeper to do a Global Service Discovery
-    GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(srf.getRequestedService(), preferredClouds);
+    GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(srf.getRequestedService(), preferredClouds, registryFlags);
     log.debug("triggerInterCloud: GSD results arrived back to the Orchestrator");
 
     // Picking a target Cloud from the ones that responded to the GSD poll
@@ -255,8 +259,8 @@ public final class OrchestratorService {
       // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
       List<ArrowheadSystem> preferredSystems = new ArrayList<>();
       for (PreferredProvider provider : srf.getPreferredProviders()) {
-        if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && provider
-            .getProviderSystem().isValid()) {
+        boolean validProviderSystem = provider.getProviderSystem().missingFields(false, new HashSet<>(Collections.singleton("address"))).isEmpty();
+        if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && validProviderSystem) {
           preferredSystems.add(provider.getProviderSystem());
         }
       }

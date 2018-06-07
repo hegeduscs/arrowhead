@@ -10,7 +10,8 @@
 package eu.arrowhead.core.serviceregistry;
 
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.BadPayloadException;
+import java.util.Arrays;
+import java.util.HashSet;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -38,10 +39,7 @@ public class ServiceRegistryResource {
   @POST
   @Path("register")
   public Response registerService(ServiceRegistryEntry entry) {
-    if (!entry.isValid()) {
-      log.error("registerService throws BadPayloadException");
-      throw new BadPayloadException("ServiceRegistryEntry has missing/incomplete mandatory field(s).", Status.BAD_REQUEST.getStatusCode());
-    }
+    entry.missingFields(true, false, new HashSet<>(Arrays.asList("interfaces", "address")));
 
     return Response.status(Status.CREATED).entity(ServiceRegistryService.registerService(entry)).build();
   }
@@ -49,17 +47,13 @@ public class ServiceRegistryResource {
   @PUT
   @Path("remove")
   public Response removeService(ServiceRegistryEntry entry) {
-    if (!entry.isValid()) {
-      log.error("removeService throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: ServiceRegistryEntry has missing/incomplete mandatory field(s).",
-                                    Status.BAD_REQUEST.getStatusCode());
-    }
+    entry.missingFields(true, false, null);
 
     ServiceRegistryEntry removedEntry = ServiceRegistryService.removeService(entry);
     if (removedEntry != null) {
-      return Response.status(Status.OK).entity(removedEntry).build();
+      return Response.status(Status.OK).build();
     } else {
-      return Response.status(Status.NO_CONTENT).entity(entry).build();
+      return Response.status(Status.NO_CONTENT).build();
     }
   }
 

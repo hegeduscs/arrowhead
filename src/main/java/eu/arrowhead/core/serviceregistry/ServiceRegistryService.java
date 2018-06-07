@@ -4,7 +4,6 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.core.ArrowheadMain;
@@ -15,7 +14,8 @@ import org.apache.log4j.Logger;
 public final class ServiceRegistryService {
 
   static final DatabaseManager dm = DatabaseManager.getInstance();
-  static final int timeout = ArrowheadMain.getProp().getIntProperty("ping_timeout", 10000);
+  static final int PING_TIMEOUT = ArrowheadMain.props.getIntProperty("ping_timeout", 10000);
+  static final int TTL_INTERVAL = ArrowheadMain.props.getIntProperty("ttl_interval", 10);
 
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
   private static final Logger log = Logger.getLogger(ServiceRegistryService.class.getName());
@@ -25,10 +25,7 @@ public final class ServiceRegistryService {
   }
 
   public static ServiceQueryResult queryRegistry(ServiceQueryForm queryForm) {
-    if (!queryForm.isValid()) {
-      log.error("queryRegistry throws BadPayloadException");
-      throw new BadPayloadException("ServiceQueryForm has missing/incomplete mandatory field(s).", 400, "ServiceRegistryService:queryRegistry");
-    }
+    queryForm.missingFields(true, null);
 
     restrictionMap.clear();
     restrictionMap.put("serviceDefinition", queryForm.getService().getServiceDefinition());
@@ -57,7 +54,7 @@ public final class ServiceRegistryService {
     return new ServiceQueryResult(providedServices);
   }
 
-  public static ServiceRegistryEntry registerService(ServiceRegistryEntry entry) {
+  static ServiceRegistryEntry registerService(ServiceRegistryEntry entry) {
     log.debug("SR reg service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
 
     entry.toDatabase();
@@ -91,7 +88,7 @@ public final class ServiceRegistryService {
     return savedEntry;
   }
 
-  public static ServiceRegistryEntry removeService(ServiceRegistryEntry entry) {
+  static ServiceRegistryEntry removeService(ServiceRegistryEntry entry) {
     log.debug("SR remove service: " + entry.getProvidedService() + " provider: " + entry.getProvider() + " serviceURI: " + entry.getServiceURI());
 
     restrictionMap.clear();

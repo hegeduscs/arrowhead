@@ -15,7 +15,6 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.InterCloudAuthorization;
 import eu.arrowhead.common.database.IntraCloudAuthorization;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.InterCloudAuthRequest;
@@ -33,9 +32,8 @@ import org.apache.log4j.Logger;
 
 public final class AuthorizationService {
 
-  static final DatabaseManager dm = DatabaseManager.getInstance();
-
   private static final HashMap<String, Object> restrictionMap = new HashMap<>();
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final Logger log = Logger.getLogger(AuthorizationService.class.getName());
 
   private AuthorizationService() throws AssertionError {
@@ -50,11 +48,7 @@ public final class AuthorizationService {
    * @throws DataNotFoundException, BadPayloadException
    */
   public static IntraCloudAuthResponse isSystemAuthorized(IntraCloudAuthRequest request) {
-    if (!request.isValid()) {
-      log.error("isSystemAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete consumer, service or providerList in the request.",
-                                    Status.BAD_REQUEST.getStatusCode(), "AuthorizationService:isSystemAuthorized");
-    }
+    request.missingFields(true, null);
 
     restrictionMap.clear();
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
@@ -62,7 +56,7 @@ public final class AuthorizationService {
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
       throw new DataNotFoundException("Consumer System is not in the authorization database. " + request.getConsumer().getSystemName(),
-                                      Status.NOT_FOUND.getStatusCode(), "AuthorizationService:isSystemAuthorized");
+                                      Status.NOT_FOUND.getStatusCode());
     }
 
     IntraCloudAuthResponse response = new IntraCloudAuthResponse();
@@ -114,11 +108,7 @@ public final class AuthorizationService {
    * @throws DataNotFoundException, BadPayloadException
    */
   public static InterCloudAuthResponse isCloudAuthorized(InterCloudAuthRequest request) {
-    if (!request.isValid()) {
-      log.error("isCloudAuthorized BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete cloud or service in the request payload.", Status.BAD_REQUEST.getStatusCode(),
-                                    "AuthorizationService:isCloudAuthorized");
-    }
+    request.missingFields(true, null);
 
     restrictionMap.clear();
     restrictionMap.put("operator", request.getCloud().getOperator());
@@ -127,7 +117,7 @@ public final class AuthorizationService {
     if (cloud == null) {
       log.error("Requester cloud is not in the database. isCloudAuthorized DataNotFoundException");
       throw new DataNotFoundException("Consumer Cloud is not in the authorization database. " + request.getCloud().toString(),
-                                      Status.NOT_FOUND.getStatusCode(), "AuthorizationService:isCloudAuthorized");
+                                      Status.NOT_FOUND.getStatusCode());
     }
 
     restrictionMap.clear();
@@ -159,11 +149,7 @@ public final class AuthorizationService {
    * @return TokenGenerationResponse
    */
   public static TokenGenerationResponse tokenGeneration(TokenGenerationRequest request) {
-    if (!request.isValid()) {
-      log.error("tokenGeneration BadPayloadException");
-      throw new BadPayloadException("TokenGenerationRequest has missing/incomplete fields.", Status.BAD_REQUEST.getStatusCode(),
-                                    "AuthorizationService:tokenGeneration");
-    }
+    request.missingFields(true, null);
 
     // Get the tokens from the service class (can throw run time exceptions)
     List<ArrowheadToken> tokens = TokenGenerationService.generateTokens(request);
@@ -172,7 +158,8 @@ public final class AuthorizationService {
     // Only add the successfully created tokens to the response, with the matching provider System
     for (int i = 0; i < tokens.size(); i++) {
       if (tokens.get(i) != null) {
-        TokenData tokenData = new TokenData(request.getProviders().get(i), tokens.get(i).getToken(), tokens.get(i).getSignature());
+        TokenData tokenData = new TokenData(request.getProviders().get(i), request.getService(), tokens.get(i).getToken(),
+                                            tokens.get(i).getSignature());
         tokenDataList.add(tokenData);
       }
     }

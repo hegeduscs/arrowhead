@@ -10,17 +10,14 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.common.messages.ServiceRequestForm;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -54,10 +51,7 @@ public class OrchestratorResource {
    */
   @POST
   public Response orchestrationProcess(ServiceRequestForm srf) {
-    if (!srf.isValid()) {
-      log.error("orchestrationProcess BadPayloadException");
-      throw new BadPayloadException("Bad payload: service request form has missing/incomplete mandatory fields.", Status.BAD_REQUEST.getStatusCode());
-    }
+    srf.missingFields(true, null);
 
     return Response.status(Status.OK).entity(OrchestratorService.startOrchestrationProcess(srf)).build();
   }
@@ -67,9 +61,9 @@ public class OrchestratorResource {
    */
   @GET
   @Path("{systemName}")
-  public Response storeOrchestrationProcess(@PathParam("systemName") String systemName, @Context HttpServletRequest request) {
-    ArrowheadSystem requesterSystem = new ArrowheadSystem(systemName, request.getRemoteAddr(), 0, null);
-    log.info("Received a GET Store orchestration from: " + request.getRemoteAddr() + " " + requesterSystem.getSystemName());
+  public Response storeOrchestrationProcess(@PathParam("systemName") String systemName) {
+    ArrowheadSystem requesterSystem = new ArrowheadSystem(systemName, null, 0, null);
+    log.info("Received a GET Store orchestration from: " + requesterSystem.getSystemName());
 
     ServiceRequestForm srf = new ServiceRequestForm.Builder(requesterSystem).build();
     OrchestrationResponse orchResponse = OrchestratorService.startOrchestrationProcess(srf);

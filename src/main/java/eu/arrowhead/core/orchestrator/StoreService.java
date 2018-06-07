@@ -25,7 +25,7 @@ public final class StoreService {
   /**
    * This method returns the active Orchestration Store entries for a consumer.
    */
-  public static List<OrchestrationStore> getDefaultStoreEntries(ArrowheadSystem consumer) {
+  static List<OrchestrationStore> getDefaultStoreEntries(ArrowheadSystem consumer) {
     ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemName());
     if (savedConsumer == null) {
       return new ArrayList<>();
@@ -40,7 +40,7 @@ public final class StoreService {
   /**
    * This method returns a list of Orchestration Store entries specified by the consumer system and the requested service.
    */
-  public static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service) {
+  static List<OrchestrationStore> getStoreEntries(ArrowheadSystem consumer, ArrowheadService service) {
     ArrowheadSystem savedConsumer = getConsumerSystem(consumer.getSystemName());
     ArrowheadService savedService = getRequestedService(service.getServiceDefinition());
     if (savedConsumer == null || savedService == null) {
@@ -59,7 +59,7 @@ public final class StoreService {
     return dm.getAll(OrchestrationStore.class, restrictionMap);
   }
 
-  public static List<OrchestrationStore> getStoreEntries(ArrowheadService service) {
+  static List<OrchestrationStore> getStoreEntries(ArrowheadService service) {
     ArrowheadService savedService = getRequestedService(service.getServiceDefinition());
 
     if (!savedService.getInterfaces().isEmpty()) {
@@ -91,13 +91,14 @@ public final class StoreService {
     return dm.get(ArrowheadService.class, restrictionMap);
   }
 
-  private static boolean hasMatchingInterfaces(ArrowheadService savedService, ArrowheadService givenService) {
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  static boolean hasMatchingInterfaces(ArrowheadService savedService, ArrowheadService givenService) {
     if (givenService.getInterfaces().isEmpty()) {
-      return true;
+      return savedService.getInterfaces().isEmpty();
     }
     for (String givenInterface : givenService.getInterfaces()) {
       for (String savedInterface : savedService.getInterfaces()) {
-        if (givenInterface.equals(savedInterface)) {
+        if (givenInterface.equalsIgnoreCase(savedInterface)) {
           return true;
         }
       }
@@ -108,6 +109,7 @@ public final class StoreService {
   /**
    * This method returns all the entries of the Orchestration Store.
    */
+  @SuppressWarnings("unused")
   public static List<OrchestrationStore> getAllStoreEntries() {
     restrictionMap.clear();
     return dm.getAll(OrchestrationStore.class, restrictionMap);

@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.core.authorization;
@@ -15,7 +15,6 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.InterCloudAuthorization;
 import eu.arrowhead.common.database.IntraCloudAuthorization;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.InterCloudAuthEntry;
 import eu.arrowhead.common.messages.IntraCloudAuthEntry;
@@ -44,8 +43,8 @@ import org.apache.log4j.Logger;
 public class AuthorizationApi {
 
   private final HashMap<String, Object> restrictionMap = new HashMap<>();
-  private static final DatabaseManager dm = DatabaseManager.getInstance();
   private static final Logger log = Logger.getLogger(AuthorizationApi.class.getName());
+  private static final DatabaseManager dm = DatabaseManager.getInstance();
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -164,11 +163,7 @@ public class AuthorizationApi {
   @POST
   @Path("intracloud")
   public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
-
-    if (!entry.isValid()) {
-      log.info("addSystemToAuthorized throws BadPayloadException.");
-      throw new BadPayloadException("Bad payload: Missing/incomplete consumer, serviceList or providerList in the entry payload.");
-    }
+    entry.missingFields(true, null);
 
     restrictionMap.put("systemName", entry.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
@@ -372,11 +367,7 @@ public class AuthorizationApi {
   @POST
   @Path("intercloud")
   public Response addCloudToAuthorized(InterCloudAuthEntry entry) {
-
-    if (!entry.isPayloadUsable()) {
-      log.info("addCloudToAuthorized throws BadPayloadException.");
-      throw new BadPayloadException("Bad payload: Missing/incomplete cloud or serviceList in the entry payload.");
-    }
+    entry.missingFields(true, null);
 
     restrictionMap.put("operator", entry.getCloud().getOperator());
     restrictionMap.put("cloudName", entry.getCloud().getCloudName());

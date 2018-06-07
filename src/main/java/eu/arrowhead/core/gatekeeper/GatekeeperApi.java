@@ -13,10 +13,13 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.database.NeighborCloud;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.messages.ActiveSession;
+import eu.arrowhead.core.gateway.GatewayService;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -104,7 +107,7 @@ public class GatekeeperApi {
 
     List<NeighborCloud> savedNeighborClouds = new ArrayList<>();
     for (NeighborCloud nc : neighborCloudList) {
-      if (nc.isValid()) {
+      if (nc.missingFields(false, new HashSet<>(Arrays.asList("address", "gatekeeperServiceURI"))).isEmpty()) {
         restrictionMap.clear();
         restrictionMap.put("operator", nc.getCloud().getOperator());
         restrictionMap.put("cloudName", nc.getCloud().getCloudName());
@@ -138,11 +141,7 @@ public class GatekeeperApi {
   @PUT
   @Path("neighborhood")
   public Response updateNeighborCloud(NeighborCloud nc) {
-
-    if (!nc.isValid()) {
-      log.info("GatekeeperApi:updateNeighborCloud throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete arrowheadcloud in the entry payload.");
-    }
+    nc.missingFields(true, null);
 
     restrictionMap.put("operator", nc.getCloud().getOperator());
     restrictionMap.put("cloudName", nc.getCloud().getCloudName());
@@ -252,7 +251,7 @@ public class GatekeeperApi {
 
     List<Broker> savedBrokers = new ArrayList<>();
     for (Broker broker : brokerList) {
-      if (broker.isValid()) {
+      if (broker.missingFields(false, null).isEmpty()) {
         restrictionMap.clear();
         restrictionMap.put("brokerName", broker.getBrokerName());
         Broker retrievedBroker = dm.get(Broker.class, restrictionMap);
@@ -273,12 +272,7 @@ public class GatekeeperApi {
   @PUT
   @Path("brokers")
   public Response updateBroker(Broker broker) {
-
-    if (!broker.isValid()) {
-      log.info("updateBroker throws BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing broker name or address in the entry payload.");
-    }
-
+    broker.missingFields(true, null);
     restrictionMap.put("brokerName", broker.getBrokerName());
     Broker retrievedBroker = dm.get(Broker.class, restrictionMap);
     if (retrievedBroker != null) {
@@ -305,6 +299,12 @@ public class GatekeeperApi {
       dm.delete(broker);
       return Response.ok().build();
     }
+  }
+
+  @GET
+  @Path("sessions")
+  public static List<ActiveSession> getActiveSessions() {
+    return new ArrayList<>(GatewayService.activeSessions.values());
   }
 
 }

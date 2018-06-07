@@ -14,7 +14,6 @@ import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.ConnectToProviderRequest;
 import eu.arrowhead.common.messages.ConnectToProviderResponse;
@@ -31,6 +30,7 @@ import eu.arrowhead.common.messages.PreferredProvider;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import eu.arrowhead.common.messages.ServiceRequestForm;
+import eu.arrowhead.core.ArrowheadMain;
 import eu.arrowhead.core.authorization.AuthorizationService;
 import eu.arrowhead.core.gateway.GatewayService;
 import eu.arrowhead.core.orchestrator.OrchestratorService;
@@ -70,11 +70,7 @@ public class GatekeeperResource {
   @PUT
   @Path("gsd_poll")
   public Response GSDPoll(GSDPoll gsdPoll) {
-    if (!gsdPoll.isValid()) {
-      log.error("GSDPoll BadPayloadException");
-      throw new BadPayloadException("Bad payload: requestedService/requesterCloud is missing or it is not valid.",
-                                    Status.BAD_REQUEST.getStatusCode());
-    }
+    gsdPoll.missingFields(true, null);
 
     // Polling the Authorization System about the consumer Cloud
     InterCloudAuthRequest authRequest = new InterCloudAuthRequest(gsdPoll.getRequesterCloud(), gsdPoll.getRequestedService());
@@ -111,10 +107,7 @@ public class GatekeeperResource {
   @PUT
   @Path("icn_proposal")
   public Response ICNProposal(ICNProposal icnProposal) {
-    if (!icnProposal.isValid()) {
-      log.error("ICNProposal BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNProposal.", Status.BAD_REQUEST.getStatusCode());
-    }
+    icnProposal.missingFields(true, null);
 
     // Polling the Authorization System about the consumer Cloud
     InterCloudAuthRequest authRequest = new InterCloudAuthRequest(icnProposal.getRequesterCloud(), icnProposal.getRequestedService());
@@ -132,10 +125,12 @@ public class GatekeeperResource {
     for (ArrowheadSystem preferredSystem : icnProposal.getPreferredSystems()) {
       preferredProviders.add(new PreferredProvider(preferredSystem, null));
     }
-    ArrowheadSystem consumer = new ArrowheadSystem(icnProposal.getRequesterSystem());
 
     // Changing the requesterSystem for the sake of proper token generation
     if (icnProposal.getNegotiationFlags().get("useGateway")) {
+      if (!ArrowheadMain.USE_GATEWAY) {
+        throw new ArrowheadException("The remote Gatekeeper is configured to use the Gateway Core System!");
+      }
       icnProposal.getRequesterSystem().setSystemName("gateway");
     }
     ServiceRequestForm serviceRequestForm = new ServiceRequestForm.Builder(icnProposal.getRequesterSystem())
@@ -184,6 +179,7 @@ public class GatekeeperResource {
     }
     log.debug("Common broker was chosen: " + chosenBroker.getBrokerName() + "@" + chosenBroker.getAddress());
 
+    ArrowheadSystem consumer = new ArrowheadSystem(icnProposal.getRequesterSystem());
     ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(), chosenBroker.getPort(), consumer, provider,
                                                                               icnProposal.getRequesterCloud(), Utility.getOwnCloud(),
                                                                               icnProposal.getRequestedService(), isSecure, timeout,

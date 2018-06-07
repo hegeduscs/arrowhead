@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.core.gateway.thread;
@@ -48,6 +48,7 @@ public class SecureSocketThread extends Thread {
 
   public void run() {
     try {
+      log.debug("SecureSocket thread started");
       // Creating SSLsocket for Provider
       Channel channel = gatewaySession.getChannel();
       SSLContext sslContext = GatewayService.createSSLContext();
@@ -57,10 +58,9 @@ public class SecureSocketThread extends Thread {
       sslProviderSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = sslProviderSocket.getInputStream();
       OutputStream outProvider = sslProviderSocket.getOutputStream();
-      log.info("Create SSLsocket for Provider");
+      log.info("Created SSL Socket for Provider");
 
       // Receiving messages through AMQP Broker
-
       Consumer consumer = new DefaultConsumer(channel) {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
@@ -73,7 +73,7 @@ public class SecureSocketThread extends Thread {
             gatewayEncryption.setEncryptedIVAndMessage(body);
             byte[] decryptedMessage = GatewayService.decryptMessage(gatewayEncryption);
             outProvider.write(decryptedMessage);
-            log.info("Sending the request to Provider");
+            log.info("Sending the encrypted request to Provider");
 
           }
         }
@@ -104,8 +104,9 @@ public class SecureSocketThread extends Thread {
         byte[] inputFromProvider = new byte[1024];
         byte[] inputFromProviderFinal = new byte[inProvider.read(inputFromProvider)];
         System.arraycopy(inputFromProvider, 0, inputFromProviderFinal, 0, inputFromProviderFinal.length);
-        log.info("Sending the response to Consumer");
         GatewayEncryption response = GatewayService.encryptMessage(inputFromProviderFinal, connectionRequest.getConsumerGWPublicKey());
+
+        log.info("Sending the encrypted response to Consumer");
         channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedAESKey());
         channel.basicPublish("", queueName.concat("_resp"), null, response.getEncryptedIVAndMessage());
       }

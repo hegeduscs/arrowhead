@@ -10,9 +10,7 @@
 package eu.arrowhead.common.filter;
 
 import eu.arrowhead.common.Utility;
-import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.messages.ServiceRequestForm;
 import eu.arrowhead.common.misc.SecurityUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -41,9 +39,12 @@ public class AccessControlFilter implements ContainerRequestFilter {
   public void filter(ContainerRequestContext requestContext) {
     SecurityContext sc = requestContext.getSecurityContext();
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
+
     if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
+
       String requestJson = Utility.getRequestPayload(requestContext.getEntityStream());
       String commonName = SecurityUtils.getCertCNFromSubject(sc.getUserPrincipal().getName());
+
       if (isClientAuthorized(commonName, requestTarget, requestJson)) {
         log.info("SSL identification is successful! Cert: " + commonName);
       } else {
@@ -62,8 +63,9 @@ public class AccessControlFilter implements ContainerRequestFilter {
   }
 
   private boolean isGetItCalled(String method, String requestTarget) {
-    return method.equals("GET") && (requestTarget.endsWith("orchestration") || requestTarget.endsWith("gatekeeper") || requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt") || requestTarget.endsWith("mgmt/common") || requestTarget
-        .endsWith("mgmt/store"));
+    return method.equals("GET") && (requestTarget.endsWith("orchestration") || requestTarget.endsWith("eventhandler") || requestTarget
+        .endsWith("gatekeeper") || requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt") || requestTarget.endsWith("common")
+        || requestTarget.endsWith("store"));
   }
 
   private boolean isClientAuthorized(String clientCN, String requestTarget, String requestJson) {
@@ -78,16 +80,21 @@ public class AccessControlFilter implements ContainerRequestFilter {
       return false;
     }
 
-    // Only the local HMI can use the local cloud management methods
+    if (!requestTarget.contains("gatekeeper")) {
+      String[] clientFields = clientCN.split("\\.", 2);
+      return serverCN.equalsIgnoreCase(clientFields[1]);
+    }
+
+    return true;
+    /*// Only the local HMI can use the local cloud management methods
     if (requestTarget.contains("mgmt")) {
-      return clientCN.equalsIgnoreCase("hmi." + serverCN);
+      return clientCN.equalsIgnoreCase("sysop." + serverCN);
     }
     // Request to the Orchestrator
     else if (requestTarget.contains("orchestrator")) {
-
-      ServiceRequestForm srf = Utility.fromJson(requestJson, ServiceRequestForm.class);
       String[] clientFields = clientCN.split("\\.", 2);
-
+      return serverCN.equalsIgnoreCase(clientFields[1]);
+      *//*ServiceRequestForm srf = Utility.fromJson(requestJson, ServiceRequestForm.class);
       // Only the local gatekeeper can send external service request, but the gatekeeper will use the static orch method in this build
       if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
         return false;
@@ -96,12 +103,13 @@ public class AccessControlFilter implements ContainerRequestFilter {
         if (!srf.getRequesterSystem().getSystemName().equalsIgnoreCase(clientFields[0])) {
           // BUT the requester system has to be the same as the first part of the common name
           log.error("Requester system name and cert common name do not match!");
-          throw new AuthException("Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
-                                  Status.UNAUTHORIZED.getStatusCode());
+          throw new AuthException(
+              "Requester system " + srf.getRequesterSystem().getSystemName() + " and cert common name (" + clientCN + ") do not match!",
+              Status.UNAUTHORIZED.getStatusCode());
         }
 
         return serverCN.equalsIgnoreCase(clientFields[1]);
-      }
+      }*//*
     }
     // Request to the Service Registry
     else if (requestTarget.contains("serviceregistry")) {
@@ -123,10 +131,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
       // Only requests from other Gatekeepers are allowed
       String[] clientFields = clientCN.split("\\.", 3);
       return clientFields.length == 3 && clientFields[2].endsWith("arrowhead.eu");
-    }
-
-    // Invalid URL, request denied.
-    return false;
+    }*/
   }
 
 }

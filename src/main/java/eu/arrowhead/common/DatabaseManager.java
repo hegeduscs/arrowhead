@@ -30,9 +30,9 @@ public class DatabaseManager {
 
   private static DatabaseManager instance;
   private static SessionFactory sessionFactory;
-  private static final String dbAddress = ArrowheadMain.getProp().getProperty("db_address", "jdbc:mysql://127.0.0.1:3306/log");
-  private static final String dbUser = ArrowheadMain.getProp().getProperty("db_user", "root");
-  private static final String dbPassword = ArrowheadMain.getProp().getProperty("db_password", "root");
+  private static final String dbAddress = ArrowheadMain.props.getProperty("db_address", "jdbc:mysql://127.0.0.1:3306/log");
+  private static final String dbUser = ArrowheadMain.props.getProperty("db_user", "root");
+  private static final String dbPassword = ArrowheadMain.props.getProperty("db_password", "root");
   private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
 
   static {

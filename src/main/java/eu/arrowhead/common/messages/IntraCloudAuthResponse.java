@@ -11,7 +11,7 @@ package eu.arrowhead.common.messages;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.json.ArrowheadSystemKeyDeserializer;
+import eu.arrowhead.common.misc.ArrowheadSystemKeyDeserializer;
 import java.util.HashMap;
 
 public class IntraCloudAuthResponse {

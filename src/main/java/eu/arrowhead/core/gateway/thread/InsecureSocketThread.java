@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.core.gateway.thread;
@@ -43,6 +43,7 @@ public class InsecureSocketThread extends Thread {
   }
 
   public void run() {
+    log.debug("InsecureSocket thread started");
 
     try {
       // Creating socket for Provider
@@ -51,7 +52,7 @@ public class InsecureSocketThread extends Thread {
       providerSocket.setSoTimeout(connectionRequest.getTimeout());
       InputStream inProvider = providerSocket.getInputStream();
       OutputStream outProvider = providerSocket.getOutputStream();
-      log.info("Create socket for Provider");
+      log.info("Created socket for Provider");
 
       // Receiving messages through AMQP Broker
 
@@ -88,7 +89,7 @@ public class InsecureSocketThread extends Thread {
       GatewayService.providerSideClose(gatewaySession, providerSocket, queueName);
       if (isFirstMessage) {
         log.error("Communication failed (Error occurred or remote peer closed the socket)");
-        throw new ArrowheadException(e.getMessage());
+        throw new ArrowheadException(e.getMessage(), e);
       }
     }
 

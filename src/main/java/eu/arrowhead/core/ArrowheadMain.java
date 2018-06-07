@@ -1,23 +1,17 @@
 package eu.arrowhead.core;
 
+import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.common.misc.TypeSafeProperties;
-import eu.arrowhead.core.authorization.AuthorizationApi;
+import eu.arrowhead.core.eventhandler.DeleteExpiredFiltersTask;
 import eu.arrowhead.core.gatekeeper.GatekeeperApi;
 import eu.arrowhead.core.gatekeeper.GatekeeperResource;
-import eu.arrowhead.core.gateway.GatewayApi;
-import eu.arrowhead.core.orchestrator.CommonApi;
-import eu.arrowhead.core.orchestrator.OrchestratorResource;
-import eu.arrowhead.core.orchestrator.StoreApi;
 import eu.arrowhead.core.serviceregistry.PingProvidersTask;
-import eu.arrowhead.core.serviceregistry.ServiceRegistryApi;
-import eu.arrowhead.core.serviceregistry.ServiceRegistryResource;
+import eu.arrowhead.core.serviceregistry.RemoveExpiredServicesTask;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -42,23 +36,16 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class ArrowheadMain {
 
-  public static boolean DEBUG_MODE;
+  public static TypeSafeProperties props = Utility.getProp("app.properties");
 
-  public static final boolean USE_GATEWAY = Boolean.valueOf(getProp().getProperty("use_gateway", "false"));
+  public static final boolean USE_GATEWAY = props.getBooleanProperty("use_gateway", false);
+  public static final int PUBLISH_EVENTS_DELAY = props.getIntProperty("event_publishing_delay", 60);
 
+  private static HttpServer server;
   private static HttpServer gkServer;
-  private static HttpServer orchServer;
-  private static HttpServer srServer;
-  private static TypeSafeProperties prop;
-  private static Timer timer;
 
-  private static final String SERVER_ADDRESS = getProp().getProperty("server_address", "0.0.0.0");
+  private static final String SERVER_ADDRESS = props.getProperty("server_address", "0.0.0.0");
   private static final Logger log = Logger.getLogger(ArrowheadMain.class.getName());
-
-  // Types of core systems enum
-  private enum CoreSystemType {
-    GATEKEEPER, ORCHESTRATOR, SERVICE_REGISTRY
-  }
 
   public static void main(String[] args) throws IOException {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
@@ -73,50 +60,50 @@ public class ArrowheadMain {
           System.out.println("Starting servers as daemon!");
           break;
         case "-d":
-          DEBUG_MODE = true;
+          System.setProperty("debug_mode", "true");
           System.out.println("Starting servers in debug mode!");
           break;
         case "-tls":
           List<String> allMandatoryProperties = new ArrayList<>(alwaysMandatoryProperties);
           allMandatoryProperties.addAll(Arrays.asList("cloud_keystore", "cloud_keystore_pass", "cloud_keypass", "auth_keystore", "auth_keystorepass",
                                                       "master_arrowhead_cert", "gateway_keystore", "gateway_keystore_pass"));
-          Utility.checkProperties(getProp().stringPropertyNames(), allMandatoryProperties);
+          Utility.checkProperties(props.stringPropertyNames(), allMandatoryProperties);
 
+          final String SERVER_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8441, "", true, true);
           final String GK_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8447, "", true, true);
-          final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8441, "", true, true);
-          final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8443, "", true, true);
-
-          gkServer = startSecureServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
-          orchServer = startSecureServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
-          srServer = startSecureServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
+          server = startSecureServer(SERVER_BASE_URI, false);
+          gkServer = startSecureServer(GK_BASE_URI, true);
       }
     }
-    if (srServer == null) {
-      Utility.checkProperties(getProp().stringPropertyNames(), alwaysMandatoryProperties);
-
-      final String GK_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8446, "", false, true);
-      final String ORCH_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8440, "", false, true);
-      final String SR_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8442, "", false, true);
-
-      gkServer = startServer(GK_BASE_URI, CoreSystemType.GATEKEEPER);
-      orchServer = startServer(ORCH_BASE_URI, CoreSystemType.ORCHESTRATOR);
-      srServer = startServer(SR_BASE_URI, CoreSystemType.SERVICE_REGISTRY);
+    if (server == null) {
+      Utility.checkProperties(props.stringPropertyNames(), alwaysMandatoryProperties);
+      final String SERVER_BASE_URI = Utility.getUri(SERVER_ADDRESS, 8440, "", false, true);
+      server = startServer(SERVER_BASE_URI);
     }
 
-    if (Boolean.valueOf(getProp().getProperty("ping_scheduled", "false"))) {
+    if (props.getBooleanProperty("ping_scheduled", false)) {
       TimerTask pingTask = new PingProvidersTask();
-      timer = new Timer();
-      int interval = getProp().getIntProperty("ping_interval", 10);
-      timer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
+      Timer pingTimer = new Timer();
+      int interval = props.getIntProperty("ping_interval", 60);
+      pingTimer.schedule(pingTask, 60000L, (interval * 60L * 1000L));
+    }
+    if (props.getBooleanProperty("ttl_scheduled", false)) {
+      TimerTask ttlTask = new RemoveExpiredServicesTask();
+      Timer ttlTimer = new Timer();
+      int interval = props.getIntProperty("ttl_interval", 10);
+      ttlTimer.schedule(ttlTask, 60000L, (interval * 60L * 1000L));
+    }
+    if (props.getBooleanProperty("remove_old_filters", false)) {
+      TimerTask filterTask = new DeleteExpiredFiltersTask();
+      Timer filterTimer = new Timer();
+      int interval = props.getIntProperty("filter_check_interval", 60);
+      filterTimer.schedule(filterTask, 60000L, (interval * 60L * 1000L));
     }
 
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
         System.out.println("Received TERM signal, shutting down...");
-        if (timer != null) {
-          timer.cancel();
-        }
         shutdown();
       }));
     } else {
@@ -127,69 +114,47 @@ public class ArrowheadMain {
         input = br.readLine();
       }
       br.close();
-      if (timer != null) {
-        timer.cancel();
-      }
       shutdown();
     }
   }
 
-  private static HttpServer startServer(final String url, final CoreSystemType type) throws IOException {
-    final ResourceConfig config = new ResourceConfig();
-    switch (type) {
-      case GATEKEEPER:
-        config.registerClasses(GatekeeperApi.class, GatekeeperResource.class);
-        break;
-      case ORCHESTRATOR:
-        config.registerClasses(AuthorizationApi.class, GatewayApi.class, CommonApi.class, OrchestratorResource.class, StoreApi.class);
-        break;
-      case SERVICE_REGISTRY:
-        config.registerClasses(ServiceRegistryApi.class, ServiceRegistryResource.class);
-        break;
-    }
-    config.packages("eu.arrowhead.common");
-
+  private static HttpServer startServer(final String url) {
+    final ResourceConfig config = new ResourceConfig().packages("eu.arrowhead");
     URI uri = UriBuilder.fromUri(url).build();
     try {
-      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config);
+      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(uri, config, false);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
 
-      log.info("Started " + type.toString() + " server at: " + url);
-      System.out.println("Started " + type.toString() + " server at: " + url);
+      log.info("Started arrowhead server at: " + url);
+      System.out.println("Started arrowhead server at: " + url);
       return server;
-    } catch (ProcessingException e) {
+    } catch (IOException | ProcessingException e) {
       throw new ServiceConfigurationError(
-          type.toString() + " server failed to start. Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and "
-              + "not in use already)", e);
+          "Arrowhead server failed to start at: " + url + ". Make sure you gave a valid address in the app.properties file! (Assignable to this JVM "
+              + "and not in use already)", e);
     }
   }
 
-  private static HttpServer startSecureServer(final String url, final CoreSystemType type) throws IOException {
+  private static HttpServer startSecureServer(final String url, final boolean isGatekeeper) {
     final ResourceConfig config = new ResourceConfig();
 
-    String cloudKeystorePath = getProp().getProperty("cloud_keystore");
-    String cloudKeystorePass = getProp().getProperty("cloud_keystore_pass");
-    String cloudKeyPass = getProp().getProperty("cloud_keypass");
-    String masterArrowheadCertPath = getProp().getProperty("master_arrowhead_cert");
+    String cloudKeystorePath = props.getProperty("cloud_keystore");
+    String cloudKeystorePass = props.getProperty("cloud_keystore_pass");
+    String cloudKeyPass = props.getProperty("cloud_keypass");
+    String masterArrowheadCertPath = props.getProperty("master_arrowhead_cert");
     config.property("server_common_name", getServerCN(cloudKeystorePath, cloudKeystorePass));
     config.packages("eu.arrowhead.common");
 
-    SSLContext serverContext = null;
-    switch (type) {
-      case GATEKEEPER:
-        config.registerClasses(GatekeeperApi.class, GatekeeperResource.class);
-        serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
-        Utility.setSSLContext(serverContext);
-        break;
-      case ORCHESTRATOR:
-        config.registerClasses(AuthorizationApi.class, GatewayApi.class, CommonApi.class, OrchestratorResource.class, StoreApi.class);
-        break;
-      case SERVICE_REGISTRY:
-        config.registerClasses(ServiceRegistryApi.class, ServiceRegistryResource.class);
-        break;
-    }
-    if (type != CoreSystemType.GATEKEEPER) {
+    SSLContext serverContext;
+    if (isGatekeeper) {
+      config.registerClasses(GatekeeperApi.class, GatekeeperResource.class);
+      serverContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
+      Utility.setSSLContext(serverContext);
+    } else {
+      config.packages("eu.arrowhead.core.authorization", "eu.arrowhead.core.eventhandler", "eu.arrowhead.core.orchestrator",
+                      "eu.arrowhead.core.serviceregistry");
+
       SSLContextConfigurator serverConfig = new SSLContextConfigurator();
       serverConfig.setKeyStoreFile(cloudKeystorePath);
       serverConfig.setKeyStorePass(cloudKeystorePass);
@@ -205,28 +170,26 @@ public class ArrowheadMain {
     URI uri = UriBuilder.fromUri(url).build();
     try {
       final HttpServer server = GrizzlyHttpServerFactory
-          .createHttpServer(uri, config, true, new SSLEngineConfigurator(serverContext).setClientMode(false).setNeedClientAuth(true));
+          .createHttpServer(uri, config, true, new SSLEngineConfigurator(serverContext).setClientMode(false).setNeedClientAuth(true), false);
       server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
       server.start();
-      log.info("Started secure " + type.toString() + " server at: " + url);
-      System.out.println("Started secure " + type.toString() + " server at: " + url);
+      log.info("Started secure arrowhead server at: " + url);
+      System.out.println("Started secure arrowhead server at: " + url);
       return server;
-    } catch (ProcessingException e) {
+    } catch (IOException | ProcessingException e) {
       throw new ServiceConfigurationError(
-          type.toString() + " server failed to start. Make sure you gave a valid address in the app.properties file! (Assignable to this JVM and "
-              + "not in use already)", e);
+          "Arrowhead server failed to start at " + url + ". Make sure you gave a valid address in the app.properties file! (Assignable to this "
+              + "JVM and not in use already)", e);
     }
   }
 
   private static void shutdown() {
+    DatabaseManager.closeSessionFactory();
+    if (server != null) {
+      server.shutdownNow();
+    }
     if (gkServer != null) {
       gkServer.shutdownNow();
-    }
-    if (orchServer != null) {
-      orchServer.shutdownNow();
-    }
-    if (srServer != null) {
-      srServer.shutdownNow();
     }
 
     log.info("Core System Servers stopped");
@@ -247,24 +210,6 @@ public class ArrowheadMain {
 
     log.info("Certificate of the secure server: " + serverCN);
     return serverCN;
-  }
-
-  public static synchronized TypeSafeProperties getProp() {
-    try {
-      if (prop == null) {
-        prop = new TypeSafeProperties();
-        File file = new File("config" + File.separator + "app.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        prop.load(inputStream);
-      }
-    } catch (FileNotFoundException ex) {
-      throw new ServiceConfigurationError("App.properties file not found, make sure you have the correct working directory set! (directory where "
-                                              + "the config folder can be found)", ex);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
-    return prop;
   }
 
 }

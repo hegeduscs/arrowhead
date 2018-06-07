@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2018 AITIA International Inc.
+ *  Copyright (c) 2018 AITIA International Inc.
  *
- * This work is part of the Productive 4.0 innovation project, which receives grants from the
- * European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
- * (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
- * national funding authorities from involved countries.
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
  */
 
 package eu.arrowhead.core.authorization;
@@ -13,6 +13,7 @@ import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.RawTokenInfo;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
@@ -32,7 +33,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ServiceConfigurationError;
 import javax.crypto.Cipher;
@@ -51,8 +51,8 @@ class TokenGenerationService {
   }
 
   static {
-    String keystorePath = ArrowheadMain.getProp().getProperty("auth_keystore");
-    String keystorePass = ArrowheadMain.getProp().getProperty("auth_keystorepass");
+    String keystorePath = ArrowheadMain.props.getProperty("auth_keystore");
+    String keystorePass = ArrowheadMain.props.getProperty("auth_keystorepass");
     KeyStore keyStore = SecurityUtils.loadKeyStore(keystorePath, keystorePass);
     authPrivateKey = SecurityUtils.getPrivateKey(keyStore, keystorePass);
   }
@@ -117,6 +117,10 @@ class TokenGenerationService {
 
       // There is an upper limit for the size of the token info, skip providers which exceeds this limit
       String json = Utility.toPrettyJson(null, rawTokenInfo);
+      if (json == null) {
+        log.error("RawTokenInfo serialization failed. Skipped provider.");
+        continue;
+      }
       System.out.println("Raw token info: ");
       System.out.println(json);
       if (json.length() > 244) {
@@ -154,8 +158,7 @@ class TokenGenerationService {
     }
     if (!nonNullTokenExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
-      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                   TokenGenerationService.class.getName());
+      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     return tokens;
@@ -163,31 +166,20 @@ class TokenGenerationService {
 
 
   private static List<PublicKey> getProviderPublicKeys(List<ArrowheadSystem> providers) {
-    HashMap<String, Object> restrictionMap = new HashMap<>();
     List<PublicKey> keys = new ArrayList<>();
 
     for (ArrowheadSystem provider : providers) {
-      // Get the provider from the database
-      restrictionMap.clear();
-      restrictionMap.put("systemName", provider.getSystemName());
-      ArrowheadSystem retrievedProvider = AuthorizationService.dm.get(ArrowheadSystem.class, restrictionMap);
-
-      if (retrievedProvider != null) {
-        try {
-          PublicKey key = getPublicKey(retrievedProvider.getAuthenticationInfo());
-          keys.add(key);
-        } catch (InvalidKeySpecException | NullPointerException e) {
-          log.error("The stored auth info for the ArrowheadSystem (" + provider.getSystemName()
-                        + ") is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
-          keys.add(null);
-        }
-      } else {
-        // In theory this branch will not get called, since the Orchestrator will filter out systems not in the database.
+      try {
+        PublicKey key = getPublicKey(provider.getAuthenticationInfo());
+        keys.add(key);
+      } catch (InvalidKeySpecException | NullPointerException e) {
+        log.error("The stored auth info for the ArrowheadSystem (" + provider.getSystemName()
+                      + ") is not a proper RSA public key spec, or it is incorrectly encoded. The public key can not be generated from it.");
         keys.add(null);
       }
     }
 
-    // Throw an exception if none of the public kezs could be acquired from the specs
+    // Throw an exception if none of the public keys could be acquired from the specs
     boolean nonNullKeyExists = false;
     for (PublicKey key : keys) {
       if (key != null) {
@@ -197,15 +189,21 @@ class TokenGenerationService {
     }
     if (!nonNullKeyExists) {
       log.error("None of the provider ArrowheadSystems in this orchestration have a valid RSA public key spec stored in the database.");
-      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                   TokenGenerationService.class.getName());
+      throw new ArrowheadException("Token generation failed for all the provider ArrowheadSystems.", Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     return keys;
   }
 
   private static PublicKey getPublicKey(String stringKey) throws InvalidKeySpecException {
-    byte[] byteKey = Base64.getDecoder().decode(stringKey);
+    byte[] byteKey;
+    try {
+      byteKey = Base64.getDecoder().decode(stringKey);
+    } catch (IllegalArgumentException e) {
+      throw new AuthException(
+          "Provider public key decoding failed during token generation! Make sure the database only has valid, base-64 coded provider public "
+              + "keys! Caused by: " + e.getMessage(), Status.INTERNAL_SERVER_ERROR.getStatusCode(), e);
+    }
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
     KeyFactory kf;
     try {

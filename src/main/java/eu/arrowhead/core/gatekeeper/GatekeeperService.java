@@ -15,7 +15,6 @@ import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.ConnectToConsumerRequest;
 import eu.arrowhead.common.messages.ConnectToConsumerResponse;
 import eu.arrowhead.common.messages.GSDAnswer;
@@ -32,19 +31,20 @@ import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.core.ArrowheadMain;
 import eu.arrowhead.core.gateway.GatewayService;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 
 public final class GatekeeperService {
 
-  static final int timeout = ArrowheadMain.getProp().getIntProperty("gateway_socket_timeout", 30000);
+  static final int timeout = ArrowheadMain.props.getIntProperty("gateway_socket_timeout", 30000);
   static final DatabaseManager dm = DatabaseManager.getInstance();
 
-  private static final String GATEWAY_ADDRESS = ArrowheadMain.getProp().getProperty("gateway_address");
+  private static final String GATEWAY_ADDRESS = ArrowheadMain.props.getProperty("gateway_address");
   private static final Logger log = Logger.getLogger(GatekeeperService.class.getName());
 
   private GatekeeperService() throws AssertionError {
@@ -58,14 +58,10 @@ public final class GatekeeperService {
    * @return GSDResult
    */
   public static GSDResult GSDRequest(GSDRequestForm requestForm) {
-    if (!requestForm.isValid()) {
-      log.error("GSDRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: requestedService is missing or it is not valid.", Status.BAD_REQUEST.getStatusCode(),
-                                    "GatekeeperService:GSDRequest");
-    }
+    requestForm.missingFields(true, null);
 
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
-    GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud);
+    GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud, requestForm.getRegistryFlags());
 
     // If no preferred Clouds were given, send GSD poll requests to the neighbor Clouds
     List<String> cloudURIs = new ArrayList<>();
@@ -129,12 +125,7 @@ public final class GatekeeperService {
    * @return ICNResult
    */
   public static ICNResult ICNRequest(ICNRequestForm requestForm) {
-    if (!requestForm.isValid()) {
-      log.error("ICNRequest BadPayloadException");
-      throw new BadPayloadException("Bad payload: missing/incomplete ICNRequestForm.", Status.BAD_REQUEST.getStatusCode(),
-                                    "GatekeeperService:ICNRequest");
-    }
-
+    requestForm.missingFields(true, new HashSet<>(Arrays.asList("ArrowheadCloud:address", "ArrowheadCloud:port", "gatekeeperServiceURI")));
     requestForm.getNegotiationFlags().put("useGateway", ArrowheadMain.USE_GATEWAY);
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),

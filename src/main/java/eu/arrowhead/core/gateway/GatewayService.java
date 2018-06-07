@@ -41,9 +41,9 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Date;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,8 +61,7 @@ import org.apache.log4j.Logger;
 public final class GatewayService {
 
   public static final String GATEWAY_PUBLIC_KEY;
-
-  static final ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
+  public static final ConcurrentHashMap<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
 
   private static final Logger log = Logger.getLogger(GatewayService.class.getName());
   private static final ConcurrentHashMap<Integer, Boolean> portAllocationMap;
@@ -78,18 +77,18 @@ public final class GatewayService {
   }
 
   static {
-    minPort = ArrowheadMain.getProp().getIntProperty("min_port", 8000);
-    maxPort = ArrowheadMain.getProp().getIntProperty("max_port", 8100);
-    portAllocationMap = GatewayService.initPortAllocationMap(new ConcurrentHashMap<>(), minPort, maxPort);
+    minPort = ArrowheadMain.props.getIntProperty("min_port", 8000);
+    maxPort = ArrowheadMain.props.getIntProperty("max_port", 8100);
+    portAllocationMap = GatewayService.initPortAllocationMap(new ConcurrentHashMap<>());
 
-    String cloudKeystorePath = ArrowheadMain.getProp().getProperty("cloud_keystore");
-    String cloudKeystorePass = ArrowheadMain.getProp().getProperty("cloud_keystore_pass");
-    String cloudKeyPass = ArrowheadMain.getProp().getProperty("cloud_keypass");
-    String masterArrowheadCertPath = ArrowheadMain.getProp().getProperty("master_arrowhead_cert");
+    String cloudKeystorePath = ArrowheadMain.props.getProperty("cloud_keystore");
+    String cloudKeystorePass = ArrowheadMain.props.getProperty("cloud_keystore_pass");
+    String cloudKeyPass = ArrowheadMain.props.getProperty("cloud_keypass");
+    String masterArrowheadCertPath = ArrowheadMain.props.getProperty("master_arrowhead_cert");
     cloudContext = SecurityUtils.createMasterSSLContext(cloudKeystorePath, cloudKeystorePass, cloudKeyPass, masterArrowheadCertPath);
 
-    String gatewayKeystorePath = ArrowheadMain.getProp().getProperty("gateway_keystore");
-    String gatewayKeystorePass = ArrowheadMain.getProp().getProperty("gateway_keystore_pass");
+    String gatewayKeystorePath = ArrowheadMain.props.getProperty("gateway_keystore");
+    String gatewayKeystorePass = ArrowheadMain.props.getProperty("gateway_keystore_pass");
     gatewayKeyStore = SecurityUtils.loadKeyStore(gatewayKeystorePath, gatewayKeystorePass);
     X509Certificate serverCert = SecurityUtils.getFirstCertFromKeyStore(gatewayKeyStore);
     GATEWAY_PUBLIC_KEY = Base64.getEncoder().encodeToString(serverCert.getPublicKey().getEncoded());
@@ -103,7 +102,7 @@ public final class GatewayService {
                                                     connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
                                                     connectionRequest.getService(), connectionRequest.getBrokerName(),
                                                     connectionRequest.getBrokerPort(), null, queueName, controlQueueName,
-                                                    connectionRequest.getIsSecure(), new Date(System.currentTimeMillis()));
+                                                    connectionRequest.getIsSecure(), LocalDateTime.now());
     // Add the session to the management queue
     GatewayService.activeSessions.put(queueName, activeSession);
 
@@ -130,8 +129,7 @@ public final class GatewayService {
                                                     connectionRequest.getProvider(), connectionRequest.getProviderCloud(),
                                                     connectionRequest.getService(), connectionRequest.getBrokerName(),
                                                     connectionRequest.getBrokerPort(), serverSocketPort, connectionRequest.getQueueName(),
-                                                    connectionRequest.getControlQueueName(), connectionRequest.getIsSecure(),
-                                                    new Date(System.currentTimeMillis()));
+                                                    connectionRequest.getControlQueueName(), connectionRequest.getIsSecure(), LocalDateTime.now());
     // Add the session to the management queue
     GatewayService.activeSessions.put(connectionRequest.getQueueName(), activeSession);
 
@@ -249,7 +247,7 @@ public final class GatewayService {
     byte[] decryptedMessage;
 
     try {
-      privateKey = SecurityUtils.getPrivateKey(gatewayKeyStore, ArrowheadMain.getProp().getProperty("gateway_keystore_pass"));
+      privateKey = SecurityUtils.getPrivateKey(gatewayKeyStore, ArrowheadMain.props.getProperty("gateway_keystore_pass"));
       cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
       cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
     } catch (GeneralSecurityException e) {
@@ -287,7 +285,7 @@ public final class GatewayService {
     KeyManagerFactory kmf;
     try {
       kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-      kmf.init(gatewayKeyStore, ArrowheadMain.getProp().getProperty("gateway_keystore_pass").toCharArray());
+      kmf.init(gatewayKeyStore, ArrowheadMain.props.getProperty("gateway_keystore_pass").toCharArray());
       sslContext = SSLContext.getInstance("TLS");
       sslContext.init(kmf.getKeyManagers(), SecurityUtils.createTrustManagers(), null);
 
@@ -306,14 +304,11 @@ public final class GatewayService {
    * Fill the ConcurrentHashMap with initial keys and values
    *
    * @param map ConcurrentHashMap which contains the port number and the availability
-   * @param portMin The lowest port number from the allowed range
-   * @param portMax The highest port number from the allowed range
-   *
    * @return The initialized ConcurrentHashMap
    */
   // Integer: port; Boolean: free (true) or reserved(false)
-  private static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map, int portMin, int portMax) {
-    for (int i = portMin; i <= portMax; i++) {
+  private static ConcurrentHashMap<Integer, Boolean> initPortAllocationMap(ConcurrentHashMap<Integer, Boolean> map) {
+    for (int i = GatewayService.minPort; i <= GatewayService.maxPort; i++) {
       map.put(i, true);
     }
     return map;
