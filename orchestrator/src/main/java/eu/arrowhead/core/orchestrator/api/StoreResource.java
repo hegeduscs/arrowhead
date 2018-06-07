@@ -118,8 +118,8 @@ public class StoreResource {
 
   @GET
   @Path("query/servicedef/{serviceDef}")
-  public List<OrchestrationStore> getEntriesForSecureConsumer(@PathParam("serviceDef") String serviceDef, @Context ContainerRequestContext
-      requestContext) {
+  public List<OrchestrationStore> getEntriesForSecureConsumer(@PathParam("serviceDef") String serviceDef,
+                                                              @Context ContainerRequestContext requestContext) {
     if (!requestContext.getSecurityContext().isSecure()) {
       log.error("getEntriesForSecureConsumer called in insecure mode");
       throw new ArrowheadException("This endpoint can only be called in secure mode!", Status.UNAUTHORIZED.getStatusCode());

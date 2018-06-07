@@ -38,7 +38,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
     String requestTarget = Utility.stripEndSlash(requestContext.getUriInfo().getRequestUri().toString());
     if (sc.isSecure() && !isGetItCalled(requestContext.getMethod(), requestTarget)) {
       String commonName = SecurityUtils.getCertCNFromSubject(sc.getUserPrincipal().getName());
-      if (isClientAuthorized(commonName, requestTarget)) {
+      if (isClientAuthorized(commonName, requestContext.getMethod(), requestTarget)) {
         log.info("SSL identification is successful! Cert: " + commonName);
       } else {
         log.error(commonName + " is unauthorized to access " + requestTarget);
@@ -48,10 +48,10 @@ public class AccessControlFilter implements ContainerRequestFilter {
   }
 
   private boolean isGetItCalled(String method, String requestTarget) {
-    return method.equals("GET") && (requestTarget.endsWith("authorization") || requestTarget.endsWith("mgmt"));
+    return method.equalsIgnoreCase("get") && (requestTarget.endsWith("authorization") || requestTarget.endsWith("mgmt"));
   }
 
-  private boolean isClientAuthorized(String clientCN, String requestTarget) {
+  private boolean isClientAuthorized(String clientCN, String method, String requestTarget) {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
     if (!SecurityUtils.isKeyStoreCNArrowheadValid(clientCN)) {
@@ -61,17 +61,18 @@ public class AccessControlFilter implements ContainerRequestFilter {
 
     String[] serverFields = serverCN.split("\\.", 2);
     // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
-    if (requestTarget.contains("mgmt")) {
-      // Only the local System Operator can use these methods
-      return clientCN.equalsIgnoreCase("sysop." + serverFields[1]);
-    } else {
-      // If this property is true, then every system from the local cloud can use the auth services
-      if (AuthorizationMain.enableAuthForCloud) {
+
+    if (AuthorizationMain.enableAuthForCloud) {
+      if (!requestTarget.contains("mgmt") || (requestTarget.endsWith("intracloud") && method.equalsIgnoreCase("post"))) {
         String[] clientFields = clientCN.split("\\.", 2);
         return serverFields[1].equalsIgnoreCase(clientFields[1]);
+      } else {
+        return clientCN.equalsIgnoreCase("sysop." + serverFields[1]);
       }
-      // If it is not true, only the Orchestrator and Gatekeeper can use it
-      else {
+    } else {
+      if (requestTarget.contains("mgmt")) {
+        return clientCN.equalsIgnoreCase("sysop." + serverFields[1]);
+      } else {
         return clientCN.equalsIgnoreCase("orchestrator." + serverFields[1]) || clientCN.equalsIgnoreCase("gatekeeper." + serverFields[1]);
       }
     }

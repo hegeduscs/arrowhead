@@ -130,7 +130,6 @@ public class GatekeeperInboundResource {
     for (ArrowheadSystem preferredSystem : icnProposal.getPreferredSystems()) {
       preferredProviders.add(new PreferredProvider(preferredSystem, null));
     }
-    ArrowheadSystem consumer = new ArrowheadSystem(icnProposal.getRequesterSystem());
 
     // Changing the requesterSystem for the sake of proper token generation
     if (icnProposal.getNegotiationFlags().get("useGateway")) {
@@ -186,6 +185,7 @@ public class GatekeeperInboundResource {
     }
     log.debug("Common broker was chosen: " + chosenBroker.getBrokerName() + "@" + chosenBroker.getAddress());
 
+    ArrowheadSystem consumer = new ArrowheadSystem(icnProposal.getRequesterSystem());
     ConnectToProviderRequest connectionRequest = new ConnectToProviderRequest(chosenBroker.getAddress(), chosenBroker.getPort(), consumer, provider,
                                                                               icnProposal.getRequesterCloud(), Utility.getOwnCloud(),
                                                                               icnProposal.getRequestedService(), isSecure, timeout,
