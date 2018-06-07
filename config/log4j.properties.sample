@@ -1,5 +1,7 @@
 # Define the root logger with appender file
-log4j.rootLogger=DEBUG, DB
+log4j.rootLogger=INFO, DB, FILE
+
+# Database related config
 # Define the DB appender
 log4j.appender.DB=org.apache.log4j.jdbc.JDBCAppender
 # Set Database Driver
@@ -15,3 +17,18 @@ log4j.appender.DB.sql=INSERT INTO logs VALUES(DEFAULT,'%d{yyyy-MM-dd HH:mm:ss}',
 log4j.appender.DB.layout=org.apache.log4j.PatternLayout
 # Disable Hibernate verbose logging
 log4j.logger.org.hibernate=fatal
+
+# File related config
+# Define the file appender
+log4j.appender.FILE=org.apache.log4j.FileAppender
+# Set the name of the file
+log4j.appender.FILE.File=log4j_log.txt
+# Set the immediate flush to true (default)
+log4j.appender.FILE.ImmediateFlush=true
+# Set the threshold to debug mode
+log4j.appender.FILE.Threshold=debug
+# Set the append to false, overwrite
+log4j.appender.FILE.Append=false
+# Define the layout for file appender
+log4j.appender.FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.FILE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss}, %C, %p, %m%n
