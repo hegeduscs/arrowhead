@@ -5,10 +5,14 @@
  *  national funding authorities from involved countries.
  */
 
+package eu.arrowhead.qos.drivers.implementations;
+
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.messages.QoSReservationCommand;
 import eu.arrowhead.qos.drivers.IQoSDriver;
+import eu.arrowhead.qos.drivers.ReservationInfo;
+import eu.arrowhead.qos.drivers.ReservationResponse;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +24,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-
-ackage eu.arrowhead.qos.drivers.implementations;
 
 public class FTTSE implements IQoSDriver {
 

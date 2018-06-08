@@ -5,6 +5,8 @@
  *  national funding authorities from involved countries.
  */
 
+package eu.arrowhead.qos;
+
 import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ArrowheadSystem;
@@ -22,6 +24,8 @@ import eu.arrowhead.common.messages.QoSReserve;
 import eu.arrowhead.common.messages.QoSVerificationResponse;
 import eu.arrowhead.common.messages.QoSVerifierResponse;
 import eu.arrowhead.common.messages.QoSVerify;
+import eu.arrowhead.qos.algorithms.VerifierAlgorithmFactory;
+import eu.arrowhead.qos.drivers.DriversFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +33,6 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import org.apache.log4j.Logger;
-
-ackage eu.arrowhead.qos;
 
 final class QoSManagerService {
 

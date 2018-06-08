@@ -5,6 +5,8 @@
  *  national funding authorities from involved countries.
  */
 
+package eu.arrowhead.qos;
+
 import eu.arrowhead.common.exception.DriverNotFoundException;
 import eu.arrowhead.common.exception.ReservationException;
 import eu.arrowhead.common.messages.QoSReservationResponse;
@@ -19,8 +21,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-ackage eu.arrowhead.qos;
 
 @Path("qos")
 @Consumes(MediaType.APPLICATION_JSON)

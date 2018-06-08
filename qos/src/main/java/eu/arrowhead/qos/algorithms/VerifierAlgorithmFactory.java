@@ -5,14 +5,14 @@
  *  national funding authorities from involved countries.
  */
 
+package eu.arrowhead.qos.algorithms;
+
 import eu.arrowhead.common.database.qos.ResourceReservation;
 import eu.arrowhead.common.messages.QoSVerifierResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-
-ackage eu.arrowhead.qos.algorithms;
 
 public class VerifierAlgorithmFactory {
 

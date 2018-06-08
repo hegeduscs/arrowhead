@@ -5,7 +5,7 @@
  *  national funding authorities from involved countries.
  */
 
-ackage eu.arrowhead.qos.algorithms;
+package eu.arrowhead.qos.algorithms;
 
 public interface IVerifierAlgorithm {
 

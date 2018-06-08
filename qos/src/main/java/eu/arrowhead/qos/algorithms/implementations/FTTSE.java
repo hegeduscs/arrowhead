@@ -5,7 +5,11 @@
  *  national funding authorities from involved countries.
  */
 
-ackage eu.arrowhead.qos.algorithms.implementations;
+package eu.arrowhead.qos.algorithms.implementations;
+
+import eu.arrowhead.qos.algorithms.IVerifierAlgorithm;
+import eu.arrowhead.qos.algorithms.VerificationInfo;
+import eu.arrowhead.qos.algorithms.VerificationResponse;
 
 public class FTTSE implements IVerifierAlgorithm {
 
