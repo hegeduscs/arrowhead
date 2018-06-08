@@ -9,6 +9,8 @@
 
 package eu.arrowhead.core.gateway.model;
 
+import java.util.Arrays;
+
 public class GatewayEncryption {
 
   private byte[] encryptedAESKey;
@@ -23,7 +25,7 @@ public class GatewayEncryption {
   }
 
   public byte[] getEncryptedAESKey() {
-    return encryptedAESKey;
+    return Arrays.copyOf(encryptedAESKey, encryptedAESKey.length);
   }
 
   public void setEncryptedAESKey(byte[] encryptedAESKey) {
@@ -31,7 +33,7 @@ public class GatewayEncryption {
   }
 
   public byte[] getEncryptedIVAndMessage() {
-    return encryptedIVAndMessage;
+    return Arrays.copyOf(encryptedIVAndMessage, encryptedIVAndMessage.length);
   }
 
   public void setEncryptedIVAndMessage(byte[] encryptedIVAndMessage) {

@@ -48,8 +48,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public abstract class ArrowheadMain {
 
-  public static final List<String> dbFields = Arrays.asList("db_user", "db_password", "db_address");
-  public static final List<String> certFields = Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass");
+  public static final List<String> dbFields = Collections.unmodifiableList(Arrays.asList("db_user", "db_password", "db_address"));
+  public static final List<String> certFields = Collections
+      .unmodifiableList(Arrays.asList("keystore", "keystorepass", "keypass", "truststore", "truststorepass"));
   public static final Map<String, String> secureServerMetadata = Collections.singletonMap("security", "certificate");
 
   protected String srBaseUri;

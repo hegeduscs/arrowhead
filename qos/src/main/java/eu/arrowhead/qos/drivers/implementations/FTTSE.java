@@ -82,7 +82,8 @@ public class FTTSE implements IQoSDriver {
     URI uri = UriBuilder.fromPath(url + "/configure").build();
 
     WebTarget target = client.target(uri);
-    Response response = target.request().header("Content-type", "application/json").post(Entity.json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
+    Response response = target.request().header("Content-type", "application/json")
+                              .post(Entity.json(new QoSReservationCommand(service, provider, consumer, commands, requestedQoS)));
 
     if (response.getStatus() > 199 && response.getStatus() < 300) {
       return new ReservationResponse(true, null, commands);
@@ -96,10 +97,8 @@ public class FTTSE implements IQoSDriver {
    * This method will see if there are enough parameters to generate the commands.
    */
   private boolean validateNetworkCOnfiguration(Map<String, String> networkConfiguration) {
-    if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.
-                                                                                  containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration.containsKey(NETWORK_STREAM_ID) || !networkConfiguration
-
-        .containsKey(NETWORK_MTU)) {
+    if (!networkConfiguration.containsKey(NETWORK_EC) || !networkConfiguration.containsKey(NETWORK_ENTRYPOINT_URL) || !networkConfiguration
+        .containsKey(NETWORK_STREAM_ID) || !networkConfiguration.containsKey(NETWORK_MTU)) {
       return false;
     }
 

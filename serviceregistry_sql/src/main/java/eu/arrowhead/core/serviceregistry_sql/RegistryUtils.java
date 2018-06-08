@@ -10,6 +10,7 @@
 package eu.arrowhead.core.serviceregistry_sql;
 
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
@@ -21,7 +22,7 @@ class RegistryUtils {
     try (Socket socket = new Socket()) {
       socket.connect(new InetSocketAddress(host, port), timeout);
       return true;
-    } catch (Exception e) {
+    } catch (IOException e) {
       return false; // Either timeout or unreachable or failed DNS lookup.
     }
   }

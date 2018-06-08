@@ -73,20 +73,20 @@ public class DatabaseManager {
   private DatabaseManager() {
   }
 
-  public static void init() {
+  public static synchronized void init() {
     if (instance == null) {
       instance = new DatabaseManager();
     }
   }
 
-  public static DatabaseManager getInstance() {
+  public static synchronized DatabaseManager getInstance() {
     if (instance == null) {
       instance = new DatabaseManager();
     }
     return instance;
   }
 
-  private SessionFactory getSessionFactory() {
+  private synchronized SessionFactory getSessionFactory() {
     if (sessionFactory == null) {
       Configuration configuration = new Configuration().configure("hibernate.cfg.xml").setProperty("hibernate.connection.url", dbAddress)
                                                        .setProperty("hibernate.connection.username", dbUser)
@@ -96,7 +96,7 @@ public class DatabaseManager {
     return sessionFactory;
   }
 
-  public static void closeSessionFactory() {
+  public static synchronized void closeSessionFactory() {
     if (sessionFactory != null) {
       sessionFactory.close();
     }

@@ -17,6 +17,7 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.DnsException;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
 
-public class RegistryUtils {
+class RegistryUtils {
 
   private static final Logger log = Logger.getLogger(RegistryUtils.class.getName());
 
@@ -181,7 +182,7 @@ public class RegistryUtils {
     }
 
     if (properties.containsKey("txtvers")) {
-      providerService.setVersion(new Integer(properties.get("txtvers")));
+      providerService.setVersion(Integer.valueOf(properties.get("txtvers")));
     } else {
       providerService.setVersion(1);
     }
@@ -206,7 +207,7 @@ public class RegistryUtils {
     try (Socket socket = new Socket()) {
       socket.connect(new InetSocketAddress(host, port), timeout);
       return true;
-    } catch (Exception e) {
+    } catch (IOException e) {
       return false; // Either timeout or unreachable or failed DNS lookup.
     }
   }
