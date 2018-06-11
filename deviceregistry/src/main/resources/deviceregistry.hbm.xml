@@ -1,0 +1,23 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+   <class name = "eu.arrowhead.common.deviceregistry.DeviceRegistry" table = "arrowhead.device_registry">
+      
+      <meta attribute = "class-description">
+         This class contains the system detail. 
+      </meta>
+      
+      <id name = "id" type = "string" column = "id">
+      </id>
+      
+      <property name = "mac" column = "mac" type = "string"/>
+      <property name = "host" column = "host" type = "string"/>
+      <property name = "port" column = "port" type = "int"/>
+      <property name = "path" column = "path" type = "string"/>
+      <property name = "secure" column = "secure" type = "boolean"/>
+      <property name = "metadata" column = "metadata" type = "string"/>
+   </class>
+</hibernate-mapping>
