@@ -1,7 +1,20 @@
-package eu.arrowhead.SystemRegistry;
+/*
+ *  Copyright (c) 2018 AITIA International Inc.
+ *
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
+ */
+
+package eu.arrowhead.core.systemregistry;
 
 import eu.arrowhead.common.DatabaseManager;
-
+import eu.arrowhead.common.model.HttpEndpoint;
+import eu.arrowhead.common.systemregistry.AHSystem;
+import eu.arrowhead.common.systemregistry.SystemIdentity;
+import eu.arrowhead.common.systemregistry.SystemInformation;
+import eu.arrowhead.common.systemregistry.SystemRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,11 +29,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
-import eu.arrowhead.common.systemregistry.AHSystem;
-import eu.arrowhead.common.systemregistry.SystemIdentity;
-import eu.arrowhead.common.systemregistry.SystemInformation;
-import eu.arrowhead.common.systemregistry.SystemRegistry;
-import eu.arrowhead.common.model.HttpEndpoint;
 
 public class SystemRegistryService {
 	private static final Logger log = Logger.getLogger(SystemRegistryService.class.getName());

@@ -1,18 +1,27 @@
-package eu.arrowhead.DeviceRegistry;
+/*
+ *  Copyright (c) 2018 AITIA International Inc.
+ *
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
+ */
 
+package eu.arrowhead.core.deviceregistry;
+
+import eu.arrowhead.common.deviceregistry.AHDevice;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import org.apache.log4j.Logger;
-import java.util.List;
-import javax.ws.rs.POST;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import eu.arrowhead.common.deviceregistry.AHDevice;
+import org.apache.log4j.Logger;
 
 @Path("deviceregistry")
 @Consumes(MediaType.APPLICATION_JSON)

@@ -1,4 +1,13 @@
-package eu.arrowhead.DeviceRegistry.filter;
+/*
+ *  Copyright (c) 2018 AITIA International Inc.
+ *
+ *  This work is part of the Productive 4.0 innovation project, which receives grants from the
+ *  European Commissions H2020 research and innovation programme, ECSEL Joint Undertaking
+ *  (project no. 737459), the free state of Saxony, the German Federal Ministry of Education and
+ *  national funding authorities from involved countries.
+ */
+
+package eu.arrowhead.core.systemregistry.filter;
 
 import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
@@ -52,9 +61,10 @@ public class AccessControlFilter implements ContainerRequestFilter {
 
   private boolean isGetItCalled(String method, String requestTarget) {
     //return method.equals("GET") && (requestTarget.endsWith("serviceregistry") || requestTarget.endsWith("mgmt"));
-	  return method.equals("GET") && (requestTarget.endsWith("deviceregistry") || requestTarget.endsWith("mgmt"));
+	  return method.equals("GET") && (requestTarget.endsWith("systemregistry") || requestTarget.endsWith("mgmt"));
   }
 
+  //TODO make the unique logic to the system registry
   private boolean isClientAuthorized(String clientCN, String requestTarget, String requestJson) {
     String serverCN = (String) configuration.getProperty("server_common_name");
 
