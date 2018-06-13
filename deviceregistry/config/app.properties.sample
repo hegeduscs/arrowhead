@@ -1,15 +1,3 @@
-#base_uri=http://127.0.0.1:7003/
-#base_uri_secured=https://127.0.0.1:7004/
-#sr_base_uri=http://127.0.0.1:8442/serviceregistry
-
-#Certificate properties
-#keystore=config/certificates/testcloud1/tempsensor.testcloud1.jks
-#keystorepass=12345
-#keypass=12345
-#truststore=config/certificates/testcloud1/testcloud1_cert.jks
-#truststorepass=12345
-#authorization_cert=config/certificates/testcloud1/authorization.testcloud1.crt
-
 # Database parameters
 db_user=root
 db_password=root
@@ -20,7 +8,7 @@ db_address=jdbc:mysql://127.0.0.1:3306/arrowhead
 ##########################################
 
 # Certificate related paths and passwords
-keystore=config/certificates/eventhandler.testcloud1.jks
+keystore=config/certificates/deviceregistry.testcloud1.jks
 keystorepass=12345
 keypass=12345
 truststore=config/certificates/testcloud1_cert.jks
@@ -31,11 +19,11 @@ truststorepass=12345
 ################################################
 
 # Webserver parameters
-address=127.0.0.1
+address=0.0.0.0
 insecure_port=8438
 secure_port=8439
 
 # Service Registry
-sr_address=127.0.0.1
+sr_address=0.0.0.0
 sr_insecure_port=8442
 sr_secure_port=8443
