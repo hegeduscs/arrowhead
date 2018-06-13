@@ -25,3 +25,4 @@
 /config/
 *.properties
 */target
+*.txt
