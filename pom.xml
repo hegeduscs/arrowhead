@@ -10,8 +10,8 @@
   <packaging>jar</packaging>
 
   <properties>
+    <java.version>1.8</java.version>
     <mvn.compiler.version>3.1</mvn.compiler.version>
-    <mvn.compile.target>1.8</mvn.compile.target>
     <mvn.resources.version>2.7</mvn.resources.version>
     <mvn.shade.version>3.1.0</mvn.shade.version>
     <bouncy.castle.version>1.59</bouncy.castle.version>
