@@ -68,6 +68,7 @@ public class AccessControlFilter implements ContainerRequestFilter {
         || requestTarget.endsWith("store"));
   }
 
+  //TODO
   private boolean isClientAuthorized(String clientCN, String requestTarget, String requestJson) {
     //ServerCN is the Local Cloud keystore
     String serverCN = (String) configuration.getProperty("server_common_name");
