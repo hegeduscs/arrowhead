@@ -29,7 +29,9 @@ public class UnavailableFilter implements ContainerResponseFilter {
     if (responseContext.getStatus() == Status.SERVICE_UNAVAILABLE.getStatusCode()) {
       String response = Utility.toPrettyJson(null, responseContext.getEntity());
       if (response != null && response.contains(UnavailableServerException.class.getName())) {
-        Thread querySR = new Thread(OrchestratorMain::getCoreSystemServiceUris);
+        Thread querySR = new Thread(() -> {
+          OrchestratorMain.getServicesTask.run();
+        });
 
         querySR.start();
       }

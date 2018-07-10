@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -117,7 +118,9 @@ public final class Utility {
     boolean isSecure = false;
     if (uri == null) {
       log.error("sendRequest received null uri");
-      throw new NullPointerException("send (HTTP) request method received null URL");
+      throw new NullPointerException(
+          "send (HTTP) request method received null URL. This most likely means the invoking Core System could not fetch the service"
+              + " of another Core System from the Service Registry!");
     }
     if (uri.startsWith("https")) {
       isSecure = true;
@@ -259,7 +262,7 @@ public final class Utility {
     return url;
   }
 
-  public static String[] getServiceInfo(String serviceId) {
+  public static Optional<String[]> getServiceInfo(String serviceId) {
     ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null)
                                                   : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"),
                                                                          ArrowheadMain.secureServerMetadata);
@@ -278,13 +281,11 @@ public final class Utility {
       String serviceUri = getUri(coreSystem.getAddress(), coreSystem.getPort(), entry.getServiceURI(), isSecure, false);
       if (serviceId.equals(CoreSystemService.GW_CONSUMER_SERVICE.getServiceDef()) || serviceId
           .equals(CoreSystemService.GW_PROVIDER_SERVICE.getServiceDef())) {
-        return new String[]{serviceUri, coreSystem.getSystemName(), coreSystem.getAddress(), coreSystem.getAuthenticationInfo()};
+        return Optional.of(new String[]{serviceUri, coreSystem.getSystemName(), coreSystem.getAddress(), coreSystem.getAuthenticationInfo()});
       }
-      return new String[]{serviceUri};
-    } else {
-      log.fatal("getServiceInfo: SR query came back empty for: " + serviceId);
-      throw new ServiceConfigurationError(serviceId + " (service) not found in the Service Registry!");
+      return Optional.of(new String[]{serviceUri});
     }
+    return Optional.empty();
   }
 
   public static List<String> getNeighborCloudURIs() {

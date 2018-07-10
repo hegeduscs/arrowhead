@@ -10,16 +10,25 @@
 package eu.arrowhead.core.orchestrator;
 
 import eu.arrowhead.common.ArrowheadMain;
-import eu.arrowhead.common.Utility;
 import eu.arrowhead.common.misc.CoreSystem;
 import eu.arrowhead.common.misc.CoreSystemService;
+import eu.arrowhead.common.misc.GetCoreSystemServicesTask;
+import eu.arrowhead.common.misc.NeedsCoreSystemService;
 import eu.arrowhead.core.orchestrator.support.OldOrchResource;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
-public class OrchestratorMain extends ArrowheadMain {
+public class OrchestratorMain extends ArrowheadMain implements NeedsCoreSystemService {
+
+  public static TimerTask getServicesTask;
 
   static boolean USE_GATEKEEPER = true;
   static String SR_BASE_URI;
@@ -51,18 +60,42 @@ public class OrchestratorMain extends ArrowheadMain {
       }
     }
     SR_BASE_URI = srBaseUri;
-    getCoreSystemServiceUris();
+
+    List<String> serviceDefs = new ArrayList<>(
+        Arrays.asList(CoreSystemService.AUTH_CONTROL_SERVICE.getServiceDef(), CoreSystemService.TOKEN_GEN_SERVICE.getServiceDef()));
+    if (USE_GATEKEEPER) {
+      serviceDefs.addAll(Arrays.asList(CoreSystemService.GSD_SERVICE.getServiceDef(), CoreSystemService.ICN_SERVICE.getServiceDef()));
+    }
+    getServicesTask = new GetCoreSystemServicesTask(this, serviceDefs);
+    Timer timer = new Timer();
+    timer.schedule(getServicesTask, 15L * 1000L, 10L * 60L * 1000L); //15 sec delay, 10 min period
+
     listenForInput();
   }
 
-  public static void getCoreSystemServiceUris() {
-    AUTH_CONTROL_URI = Utility.getServiceInfo(CoreSystemService.AUTH_CONTROL_SERVICE.getServiceDef())[0];
-    TOKEN_GEN_URI = Utility.getServiceInfo(CoreSystemService.TOKEN_GEN_SERVICE.getServiceDef())[0];
-    if (USE_GATEKEEPER) {
-      GSD_SERVICE_URI = Utility.getServiceInfo(CoreSystemService.GSD_SERVICE.getServiceDef())[0];
-      ICN_SERVICE_URI = Utility.getServiceInfo(CoreSystemService.ICN_SERVICE.getServiceDef())[0];
+  //NOTE if a service def is changed, it needs to be modified here too!
+  //TODO find a way to make the switch/case work without the hardcoded strings
+  @Override
+  public void getCoreSystemServiceUris(Map<String, String[]> uriMap) {
+    for (Entry<String, String[]> entry : uriMap.entrySet()) {
+      switch (entry.getKey()) {
+        case "AuthorizationControl":
+          AUTH_CONTROL_URI = entry.getValue()[0];
+          break;
+        case "TokenGeneration":
+          TOKEN_GEN_URI = entry.getValue()[0];
+          break;
+        case "GlobalServiceDiscovery":
+          GSD_SERVICE_URI = entry.getValue()[0];
+          break;
+        case "InterCloudNegotiations":
+          ICN_SERVICE_URI = entry.getValue()[0];
+          break;
+        default:
+          break;
+      }
     }
-    System.out.println("Core system URLs acquired.");
+    System.out.println("Core system URLs acquired/updated.");
   }
 
 }
