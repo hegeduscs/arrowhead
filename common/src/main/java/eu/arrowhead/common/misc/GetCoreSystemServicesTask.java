@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Timer;
 import java.util.TimerTask;
 
 public class GetCoreSystemServicesTask extends TimerTask {
@@ -38,6 +39,12 @@ public class GetCoreSystemServicesTask extends TimerTask {
     for (String serviceDef : serviceDefs) {
       Optional<String[]> optionalUri = Utility.getServiceInfo(serviceDef);
       optionalUri.ifPresent(uri -> uriMap.put(serviceDef, uri));
+    }
+
+    if (uriMap.size() < serviceDefs.size()) {
+      TimerTask task = new GetCoreSystemServicesTask(this.context, this.serviceDefs);
+      Timer timer = new Timer();
+      timer.schedule(task, 30L * 1000L); //run the same task again, 30 sec later if not all Core System Services were found
     }
 
     try {
