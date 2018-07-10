@@ -35,5 +35,3 @@ sr_secure_port=8443
 # Other
 timeout=30000
 use_gateway=false
-
-#test change for commit
