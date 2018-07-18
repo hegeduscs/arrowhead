@@ -22,6 +22,7 @@
 /.nb-gradle/
 
 ### General ###
-/config/
+/config
+*/config
 */target
 *.txt
