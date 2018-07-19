@@ -11,18 +11,20 @@ package eu.arrowhead.orchestrator.controller;
 
 import eu.arrowhead.common.dto.entity.ArrowheadService;
 import eu.arrowhead.common.repository.ArrowheadServiceRepo;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-//@RequestMapping("test")
+@RequestMapping("test")
 public class ArrowheadServiceController {
 
   private final ArrowheadServiceRepo serviceRepo;
@@ -34,10 +36,21 @@ public class ArrowheadServiceController {
 
   @GetMapping("auto")
   public String test() {
-    Set<String> interfaces = new HashSet<>(Arrays.asList("asd", "asdas21"));
+    Set<String> interfaces = new HashSet<>(Arrays.asList("a123sd", "asdas2121"));
     Map<String, String> metadata = new HashMap<>();
-    metadata.put("sajt", "bor");
-    serviceRepo.save(new ArrowheadService("theService", interfaces, metadata));
-    return LocalDateTime.now().toString();
+    metadata.put("sajt", "bokecsker");
+
+    ArrowheadService service = new ArrowheadService("theService", interfaces, metadata);
+    service.setId(1);
+
+    List<ArrowheadService> list = new ArrayList<>();
+    list = serviceRepo.findByDefinitionAndInterfacesIn("theService", interfaces);
+
+    serviceRepo.save(service);
+    if (list.isEmpty()) {
+      return "200";
+    } else {
+      return "500";
+    }
   }
 }

@@ -11,6 +11,7 @@ package eu.arrowhead.common.repository;
 
 import eu.arrowhead.common.dto.entity.ArrowheadService;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -31,4 +32,6 @@ public interface ArrowheadServiceRepo extends JpaRepository<ArrowheadService, Lo
    * @return List of services with the given name
    */
   List<ArrowheadService> findByDefinition(String definition);
+
+  List<ArrowheadService> findByDefinitionAndInterfacesIn(String definition, Set<String> interfaces);
 }

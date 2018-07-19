@@ -41,11 +41,11 @@ public class ArrowheadService {
   @Size(max = 255)
   private String definition;
 
-  @ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "arrowhead_service_interfaces", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
   private Set<String> interfaces = new HashSet<>();
 
-  @ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "arrowhead_service_metadata", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
   private Map<String, String> metadata = new HashMap<>();
 
