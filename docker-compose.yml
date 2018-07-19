@@ -1,0 +1,18 @@
+version: '3.1'
+services:
+  mysql:
+    image: mysql:5.7.22
+    ports: ["3306:3306"]
+    hostname: mysql
+    environment:
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=arrowhead_test_cloud_1
+  service-registry:
+    container_name: ah_service_registry
+    build: ./serviceregistry_sql
+    ports: ["8442:8442"]
+    tty: true
+    depends_on:
+      - mysql
+    links:
+      - mysql
