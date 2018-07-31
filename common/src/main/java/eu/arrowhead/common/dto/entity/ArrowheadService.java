@@ -38,16 +38,18 @@ public class ArrowheadService {
   private long id;
 
   @NotBlank
-  @Size(max = 255)
+  @Size(max = 255, message = "Service definition must be 255 character at max")
   private String definition;
 
+  @Size(max = 100, message = "Service can only have 100 interfaces at max")
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "arrowhead_service_interfaces", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
-  private Set<String> interfaces = new HashSet<>();
+  private Set<@NotBlank String> interfaces = new HashSet<>();
 
+  @Size(max = 100, message = "Service can only have 100 metadata key-value pairs at max")
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "arrowhead_service_metadata", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
-  private Map<String, String> metadata = new HashMap<>();
+  private Map<@NotBlank String, @NotBlank String> metadata = new HashMap<>();
 
   public ArrowheadService() {
   }
@@ -60,7 +62,7 @@ public class ArrowheadService {
    *     ArrowheadSystems). Concrete meaning of what is an interface is service specific (e.g. JSON, I2C)
    * @param metadata Arbitrary additional metadata belonging to the service, stored as key-value pairs.
    */
-  public ArrowheadService(@NotBlank @Size(max = 255) String definition, Set<String> interfaces, Map<String, String> metadata) {
+  public ArrowheadService(String definition, Set<String> interfaces, Map<String, String> metadata) {
     this.definition = definition;
     this.interfaces = interfaces;
     this.metadata = metadata;
@@ -109,7 +111,14 @@ public class ArrowheadService {
 
     ArrowheadService that = (ArrowheadService) o;
 
-    return definition.equals(that.definition);
+    if (!definition.equals(that.definition)) {
+      return false;
+    }
+
+    //2 services can be equal if they have at least 1 common interface
+    Set<String> intersection = new HashSet<>(interfaces);
+    intersection.retainAll(that.interfaces);
+    return !intersection.isEmpty();
   }
 
   @Override

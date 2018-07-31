@@ -7,7 +7,7 @@
  *  national funding authorities from involved countries.
  */
 
-package eu.arrowhead.common.repository;
+package eu.arrowhead.common.api.repository;
 
 import eu.arrowhead.common.dto.entity.ArrowheadService;
 import java.util.List;

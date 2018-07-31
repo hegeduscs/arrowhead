@@ -7,10 +7,10 @@
  *  national funding authorities from involved countries.
  */
 
-package eu.arrowhead.common.controller;
+package eu.arrowhead.common.api.controller;
 
+import eu.arrowhead.common.api.service.ArrowheadServiceCRUD;
 import eu.arrowhead.common.dto.entity.ArrowheadService;
-import eu.arrowhead.common.service.ArrowheadServiceCRUD;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -59,11 +58,6 @@ public class ArrowheadServiceController {
   @PutMapping("{serviceId}")
   public ArrowheadService updateArrowheadService(@PathVariable long serviceId, @Valid @RequestBody ArrowheadService updatedService) {
     return serviceLayer.updateArrowheadService(serviceId, updatedService);
-  }
-
-  @PatchMapping("{serviceId}")
-  public ArrowheadService updateArrowheadServicePartially(@PathVariable long serviceId, @RequestBody ArrowheadService updatedService) {
-    return serviceLayer.updateArrowheadServicePartially(serviceId, updatedService);
   }
 
   @DeleteMapping("{serviceId}")

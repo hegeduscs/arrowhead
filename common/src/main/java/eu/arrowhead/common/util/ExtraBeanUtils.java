@@ -19,6 +19,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
+//NOTE might not be needed
 public class ExtraBeanUtils {
 
   public static void copyNonNullProperties(Object source, Object destination, String... ignoreProperties) {
