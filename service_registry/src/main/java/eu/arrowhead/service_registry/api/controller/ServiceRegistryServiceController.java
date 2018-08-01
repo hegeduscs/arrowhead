@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("services")
+@RequestMapping("service_registry")
 public class ServiceRegistryServiceController {
 
   private final ServiceRegistryCRUD serviceLayer;

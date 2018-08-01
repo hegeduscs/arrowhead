@@ -15,7 +15,9 @@ import eu.arrowhead.common.dto.entity.ServiceRegistryEntry;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface ServiceRegistryRepo extends JpaRepository<ServiceRegistryEntry, Long> {
 
   //TODO test needed here (does it use equals? what happens if only bare minimum is provided, is it always 1 entry at max?)
