@@ -18,6 +18,7 @@ import java.util.List;
 public enum CoreSystem {
   AUTHORIZATION(8444, 8445, Arrays.asList("db_user", "db_password", "db_address", "keystore", "keystorepass"),
                 Arrays.asList("keypass", "truststore", "truststorepass"), Arrays.asList(CoreSystemService.AUTH_CONTROL_SERVICE, CoreSystemService.TOKEN_GEN_SERVICE)),
+  CERTIFICATE_AUTHORITY(8458, 8459, null, null, null),
   CHOREOGRAPHER(8456, 8457, null, null, null),
   EVENT_HANDLER(8454, 8455, ArrowheadMain.dbFields, ArrowheadMain.certFields,
                 Arrays.asList(CoreSystemService.EVENT_PUBLISH, CoreSystemService.EVENT_SUBSCRIPTION)),

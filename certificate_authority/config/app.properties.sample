@@ -1,0 +1,24 @@
+##########################################
+# MANDATORY PARAMETERS ONLY IN SECURE MODE
+##########################################
+
+# Certificate related paths and passwords
+keystore=config/certificates/authorization.testcloud1.jks
+keystorepass=12345
+keypass=12345
+truststore=config/certificates/testcloud1_cert.jks
+truststorepass=12345
+
+################################################
+# NON-MANDATORY PARAMETERS (defaults are showed)
+################################################
+
+# Webserver parameters
+address=0.0.0.0
+insecure_port=8458
+secure_port=8459
+
+# Service Registry
+sr_address=0.0.0.0
+sr_insecure_port=8442
+sr_secure_port=8443
