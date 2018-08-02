@@ -32,11 +32,6 @@ sr_address=0.0.0.0
 sr_insecure_port=8442
 sr_secure_port=8443
 
-# Orchestrator
-orch_address=0.0.0.0
-orch_insecure_port=8440
-orch_secure_port=8441
-
 # Other
 timeout=30000
 use_gateway=false

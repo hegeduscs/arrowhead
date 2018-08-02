@@ -19,6 +19,8 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.misc.CoreSystemService;
+import eu.arrowhead.common.misc.GetCoreSystemServicesTask;
+import eu.arrowhead.common.misc.NeedsCoreSystemService;
 import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.common.misc.TypeSafeProperties;
 import java.io.BufferedReader;
@@ -33,7 +35,11 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
@@ -45,7 +51,9 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-public class GatekeeperMain {
+public class GatekeeperMain implements NeedsCoreSystemService {
+
+  public static TimerTask getServicesTask;
 
   static boolean IS_SECURE;
   static boolean USE_GATEWAY;
@@ -58,7 +66,6 @@ public class GatekeeperMain {
   static SSLContext outboundServerContext;
   static final int TIMEOUT;
 
-  private static boolean FIRST_SR_QUERY = true;
   private static String INBOUND_BASE_URI;
   private static String OUTBOUND_BASE_URI;
   private static String BASE64_PUBLIC_KEY;
@@ -75,6 +82,16 @@ public class GatekeeperMain {
     TIMEOUT = props.getIntProperty("timeout", 30000);
   }
 
+  private GatekeeperMain() {
+    List<String> serviceDefs = new ArrayList<>(Arrays.asList(CoreSystemService.AUTH_CONTROL_SERVICE.getServiceDef(),
+                                                             CoreSystemService.GW_CONSUMER_SERVICE.getServiceDef(),
+                                                             CoreSystemService.GW_PROVIDER_SERVICE.getServiceDef(),
+                                                             CoreSystemService.ORCH_SERVICE.getServiceDef()));
+    getServicesTask = new GetCoreSystemServicesTask(this, serviceDefs);
+    Timer timer = new Timer();
+    timer.schedule(getServicesTask, 15L * 1000L, 10L * 60L * 1000L); //15 sec delay, 10 min period
+  }
+
   public static void main(String[] args) throws IOException {
     System.out.println("Working directory: " + System.getProperty("user.dir"));
     DatabaseManager.init();
@@ -88,10 +105,6 @@ public class GatekeeperMain {
     String srAddress = props.getProperty("sr_address", "0.0.0.0");
     int srInsecurePort = props.getIntProperty("sr_insecure_port", 8442);
     int srSecurePort = props.getIntProperty("sr_secure_port", 8443);
-
-    String orchAddress = props.getProperty("orch_address", "0.0.0.0");
-    int orchInsecurePort = props.getIntProperty("orch_insecure_port", 8440);
-    int orchSecurePort = props.getIntProperty("orch_secure_port", 8441);
 
     boolean daemon = false;
     List<String> alwaysMandatoryProperties = Arrays.asList("db_user", "db_password", "db_address");
@@ -113,7 +126,6 @@ public class GatekeeperMain {
           INBOUND_BASE_URI = Utility.getUri(address, internalSecurePort, null, true, true);
           OUTBOUND_BASE_URI = Utility.getUri(address, externalSecurePort, null, true, true);
           SERVICE_REGISTRY_URI = Utility.getUri(srAddress, srSecurePort, "serviceregistry", true, true);
-          ORCHESTRATOR_URI = Utility.getUri(orchAddress, orchSecurePort, "orchestrator/orchestration", true, true);
           inboundServer = startSecureServer(INBOUND_BASE_URI, true);
           outboundServer = startSecureServer(OUTBOUND_BASE_URI, false);
           useSRService(true);
@@ -126,13 +138,12 @@ public class GatekeeperMain {
       INBOUND_BASE_URI = Utility.getUri(address, internalInsecurePort, null, false, true);
       OUTBOUND_BASE_URI = Utility.getUri(address, externalInsecurePort, null, false, true);
       SERVICE_REGISTRY_URI = Utility.getUri(srAddress, srInsecurePort, "serviceregistry", false, true);
-      ORCHESTRATOR_URI = Utility.getUri(orchAddress, orchInsecurePort, "orchestrator/orchestration", false, true);
       inboundServer = startServer(INBOUND_BASE_URI, true);
       outboundServer = startServer(OUTBOUND_BASE_URI, false);
       useSRService(true);
     }
     Utility.setServiceRegistryUri(SERVICE_REGISTRY_URI);
-    getCoreSystemServiceUris();
+    new GatekeeperMain();
 
     if (daemon) {
       System.out.println("In daemon mode, process will terminate for TERM signal...");
@@ -297,17 +308,27 @@ public class GatekeeperMain {
     }
   }
 
-  public static void getCoreSystemServiceUris() {
-    AUTH_CONTROL_URI = Utility.getServiceInfo(CoreSystemService.AUTH_CONTROL_SERVICE.getServiceDef())[0];
-    if (USE_GATEWAY) {
-      GATEWAY_CONSUMER_URI = Utility.getServiceInfo(CoreSystemService.GW_CONSUMER_SERVICE.getServiceDef());
-      GATEWAY_PROVIDER_URI = Utility.getServiceInfo(CoreSystemService.GW_PROVIDER_SERVICE.getServiceDef());
+  @Override
+  public void getCoreSystemServiceUris(Map<String, String[]> uriMap) {
+    for (Entry<String, String[]> entry : uriMap.entrySet()) {
+      switch (entry.getKey()) {
+        case "AuthorizationControl":
+          AUTH_CONTROL_URI = entry.getValue()[0];
+          break;
+        case "ConnectToConsumer":
+          GATEWAY_CONSUMER_URI = entry.getValue();
+          break;
+        case "ConnectToProvider":
+          GATEWAY_PROVIDER_URI = entry.getValue();
+          break;
+        case "OrchestrationService":
+          ORCHESTRATOR_URI = entry.getValue()[0];
+          break;
+        default:
+          break;
+      }
     }
-    if (!FIRST_SR_QUERY) {
-      ORCHESTRATOR_URI = Utility.getServiceInfo(CoreSystemService.ORCH_SERVICE.getServiceDef())[0];
-    }
-    System.out.println("Core system URLs acquired.");
-    FIRST_SR_QUERY = false;
+    System.out.println("Core system URLs acquired/updated.");
   }
 
   private static String getServerCN(String certPath, String certPass, boolean inbound) {
