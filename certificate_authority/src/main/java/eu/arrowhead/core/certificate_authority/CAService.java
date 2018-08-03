@@ -35,7 +35,8 @@ public class CAService {
       PrivateKey cloudPrivateKey = SecurityUtils.getPrivateKey(CAMain.trustStore, CAMain.trustStorePass);
 
       String systemCN = systemName + "." + cloudCN;
-      X509Certificate systemCert = keyGen.getSelfCertificate(new X500Name(systemCN), new Date(), certValidity);
+      String systemDN = "CN=" + systemCN;
+      X509Certificate systemCert = keyGen.getSelfCertificate(new X500Name(systemDN), new Date(), certValidity);
       systemCert = createSignedCertificate(systemCert, cloudCert, cloudPrivateKey);
 
       String publicKey = Base64.getEncoder().encodeToString(systemCert.getPublicKey().getEncoded());
