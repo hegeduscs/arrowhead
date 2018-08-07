@@ -20,6 +20,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -41,6 +42,7 @@ public class ArrowheadCloud {
 
   @NotBlank
   @Size(max = 255, message = "Cloud operator must be 255 character at max")
+  @Pattern(regexp = "[A-Za-z0-9]+", message = "Cloud operator can only contain alphanumerical characters")
   private String operator;
 
   public ArrowheadCloud() {
