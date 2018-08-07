@@ -38,13 +38,13 @@ public class ServiceRegistryEntry {
 
   @NotNull(message = "Provided ArrowheadService cannot be null")
   @JoinColumn(name = "arrowhead_service_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadService service;
 
   @NotNull(message = "Provider ArrowheadSystem cannot be null")
   @JoinColumn(name = "provider_system_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadSystem provider;
 
@@ -93,7 +93,7 @@ public class ServiceRegistryEntry {
   }
 
   public Optional<String> getServiceUri() {
-    return Optional.of(serviceUri);
+    return Optional.ofNullable(serviceUri);
   }
 
   public void setServiceUri(String serviceUri) {
@@ -109,7 +109,7 @@ public class ServiceRegistryEntry {
   }
 
   public Optional<LocalDateTime> getEndOfValidity() {
-    return Optional.of(endOfValidity);
+    return Optional.ofNullable(endOfValidity);
   }
 
   public void setEndOfValidity(LocalDateTime endOfValidity) {

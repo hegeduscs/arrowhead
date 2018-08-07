@@ -10,5 +10,5 @@
 package eu.arrowhead.common.exception.misc;
 
 public enum ExceptionType {
-  ARROWHEAD, ENTITY_NOT_FOUND, VALIDATION
+  ARROWHEAD, GENERAL, ENTITY_NOT_FOUND, VALIDATION
 }

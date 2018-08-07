@@ -10,12 +10,15 @@
 package eu.arrowhead.common.exception.misc;
 
 import eu.arrowhead.common.exception.ArrowheadException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.util.WebUtils;
 
 @ControllerAdvice
 public class ArrowheadExceptionHandler extends ResponseEntityExceptionHandler {
@@ -32,6 +36,29 @@ public class ArrowheadExceptionHandler extends ResponseEntityExceptionHandler {
     ErrorMessage error = new ErrorMessage(LocalDateTime.now(), ex.getErrorCode(), ex.getMessage(), request.getDescription(false),
                                           ex.getExceptionType());
     return new ResponseEntity<ErrorMessage>(error, new HttpHeaders(), HttpStatus.valueOf(ex.getErrorCode()));
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status,
+                                                           WebRequest request) {
+    if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
+      request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+    }
+    if (body == null) {
+      String errorMessage;
+      ex.printStackTrace();
+      if (ex.getMessage() != null) {
+        errorMessage = ex.getMessage();
+      } else {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        errorMessage = sw.toString();
+      }
+      ErrorMessage error = new ErrorMessage(LocalDateTime.now(), status.value(), errorMessage, request.getDescription(false), ExceptionType.GENERAL);
+      return new ResponseEntity<>(error, headers, status);
+    }
+    return new ResponseEntity<>(body, headers, status);
   }
 
   @Override

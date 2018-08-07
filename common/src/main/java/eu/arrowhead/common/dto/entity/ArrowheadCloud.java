@@ -9,14 +9,20 @@
 
 package eu.arrowhead.common.dto.entity;
 
-import javax.persistence.Column;
+import java.util.Optional;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 public class ArrowheadCloud {
@@ -25,8 +31,10 @@ public class ArrowheadCloud {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private long id;
 
-  @NotNull
-  @Column(unique = true)
+  @NotNull(message = "Gatekeeper ArrowheadSystem cannot be null")
+  @JoinColumn(name = "gatekeeper_system_id", unique = true)
+  @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadSystem gatekeeper;
 
   private String serviceUri;
@@ -60,8 +68,8 @@ public class ArrowheadCloud {
     this.gatekeeper = gatekeeper;
   }
 
-  public String getServiceUri() {
-    return serviceUri;
+  public Optional<String> getServiceUri() {
+    return Optional.ofNullable(serviceUri);
   }
 
   public void setServiceUri(String serviceUri) {

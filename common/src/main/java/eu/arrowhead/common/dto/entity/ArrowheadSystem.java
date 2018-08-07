@@ -19,6 +19,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Entity
@@ -31,6 +32,7 @@ public class ArrowheadSystem {
 
   @NotBlank
   @Size(max = 255, message = "System name must be 255 character at max")
+  @Pattern(regexp = "[A-Za-z0-9]+", message = "System name can only contain alphanumerical characters")
   private String name;
 
   @NotBlank
@@ -87,7 +89,7 @@ public class ArrowheadSystem {
   }
 
   public Optional<String> getAuthenticationInfo() {
-    return Optional.of(authenticationInfo);
+    return Optional.ofNullable(authenticationInfo);
   }
 
   public void setAuthenticationInfo(String authenticationInfo) {
