@@ -18,6 +18,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -32,6 +33,7 @@ public class ArrowheadCloud {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private long id;
 
+  @Valid
   @NotNull(message = "Gatekeeper ArrowheadSystem cannot be null")
   @JoinColumn(name = "gatekeeper_system_id", unique = true)
   @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
