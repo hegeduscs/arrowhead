@@ -13,10 +13,16 @@ import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 public class OrchestrationForm {
 
+  @Valid
+  @NotNull
   private ArrowheadService service;
+  @Valid
+  @NotNull
   private ArrowheadSystem provider;
   private String serviceURI;
   private String instruction;

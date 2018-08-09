@@ -9,17 +9,8 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.json.support.ArrowheadServiceSupport;
-import eu.arrowhead.common.messages.ArrowheadBase;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.CollectionTable;
@@ -32,59 +23,61 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 /**
- * Entity class for storing Arrowhead Services in the database. The "service_definition" column must be unique.
+ * Representation of a service within Arrowhead.
+ *
+ * @author uzoltan
+ * @since 4.2
  */
 @Entity
-@JsonIgnoreProperties({"alwaysMandatoryFields"})
 @Table(name = "arrowhead_service", uniqueConstraints = {@UniqueConstraint(columnNames = {"service_definition"})})
-public class ArrowheadService extends ArrowheadBase {
+public class ArrowheadService {
 
-  @Transient
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("serviceDefinition"));
-
-  @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private long id;
 
+  @NotBlank
+  @Size(max = 255, message = "Service serviceDefinition must be 255 character at max")
   @Column(name = "service_definition")
   private String serviceDefinition;
 
-  @ElementCollection(fetch = FetchType.LAZY)
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @CollectionTable(name = "arrowhead_service_interface_list", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
-  private List<String> interfaces = new ArrayList<>();
+  @Size(max = 100, message = "Service can only have 100 interfaces at max")
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "arrowhead_service_interfaces", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
+  private Set<@NotBlank String> interfaces = new HashSet<>();
 
-  @Transient
-  @JsonInclude(Include.NON_EMPTY)
-  private Map<String, String> serviceMetadata = new HashMap<>();
+  @Size(max = 100, message = "Service can only have 100 serviceMetadata key-value pairs at max")
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "arrowhead_service_metadata", joinColumns = @JoinColumn(name = "arrowhead_service_id"))
+  private Map<@NotBlank String, @NotBlank String> serviceMetadata = new HashMap<>();
 
   public ArrowheadService() {
   }
 
-  public ArrowheadService(String serviceDefinition, List<String> interfaces, Map<String, String> serviceMetadata) {
+  /**
+   * Constructor with all the fields of the ArrowheadService class.
+   *
+   * @param serviceDefinition A descriptive name for the service
+   * @param interfaces The set of interfaces that can be used to consume this service (helps interoperability between
+   *     ArrowheadSystems). Concrete meaning of what is an interface is service specific (e.g. JSON, I2C)
+   * @param serviceMetadata Arbitrary additional serviceMetadata belonging to the service, stored as key-value pairs.
+   */
+  public ArrowheadService(String serviceDefinition, Set<String> interfaces, Map<String, String> serviceMetadata) {
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;
     this.serviceMetadata = serviceMetadata;
   }
 
-  public ArrowheadService(ArrowheadServiceSupport service) {
-    this.serviceDefinition = service.getServiceGroup() + "_" + service.getServiceDefinition();
-    this.interfaces = service.getInterfaces();
-    this.serviceMetadata = service.getServiceMetadata();
-  }
-
-  public int getId() {
+  public long getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(long id) {
     this.id = id;
   }
 
@@ -96,48 +89,20 @@ public class ArrowheadService extends ArrowheadBase {
     this.serviceDefinition = serviceDefinition;
   }
 
-  public List<String> getInterfaces() {
+  public Set<String> getInterfaces() {
     return interfaces;
   }
 
-  public void setInterfaces(List<String> interfaces) {
+  public void setInterfaces(Set<String> interfaces) {
     this.interfaces = interfaces;
-  }
-
-  public void setOneInterface(String oneInterface) {
-    this.interfaces.clear();
-    this.interfaces.add(oneInterface);
   }
 
   public Map<String, String> getServiceMetadata() {
     return serviceMetadata;
   }
 
-  public void setServiceMetadata(Map<String, String> metaData) {
-    this.serviceMetadata = metaData;
-  }
-
-  public Set<String> missingFields(boolean throwException, boolean forDNSSD, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mf.removeAll(nonNullFields);
-
-    if (forDNSSD) {
-      for (String interf : interfaces) {
-        if (interf.contains("_")) {
-          mf.add("Interfaces Can't Have Underscores!");
-        }
-      }
-    }
-
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-
-    return mf;
+  public void setServiceMetadata(Map<String, String> serviceMetadata) {
+    this.serviceMetadata = serviceMetadata;
   }
 
   @Override
@@ -145,13 +110,20 @@ public class ArrowheadService extends ArrowheadBase {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof ArrowheadService)) {
       return false;
     }
 
     ArrowheadService that = (ArrowheadService) o;
 
-    return serviceDefinition.equals(that.serviceDefinition);
+    if (!serviceDefinition.equals(that.serviceDefinition)) {
+      return false;
+    }
+
+    //2 services can be equal if they have at least 1 common interface
+    Set<String> intersection = new HashSet<>(interfaces);
+    intersection.retainAll(that.interfaces);
+    return !intersection.isEmpty();
   }
 
   @Override
@@ -161,7 +133,10 @@ public class ArrowheadService extends ArrowheadBase {
 
   @Override
   public String toString() {
-    return "\"" + serviceDefinition + "\"";
+    final StringBuilder sb = new StringBuilder("ArrowheadService{");
+    sb.append("id=").append(id);
+    sb.append(", serviceDefinition='").append(serviceDefinition).append('\'');
+    sb.append('}');
+    return sb.toString();
   }
-
 }

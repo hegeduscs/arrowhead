@@ -26,9 +26,9 @@ public class ServiceRegistryEntrySupport {
   }
 
   public ServiceRegistryEntrySupport(ServiceRegistryEntry entry) {
-    this.providedService = new ArrowheadServiceSupport(entry.getProvidedService());
+    this.providedService = new ArrowheadServiceSupport(entry.getService());
     this.provider = new ArrowheadSystemSupport(entry.getProvider());
-    this.serviceURI = entry.getServiceURI();
+    this.serviceURI = entry.getServiceUri();
   }
 
   public ServiceRegistryEntrySupport(ArrowheadServiceSupport providedService, ArrowheadSystemSupport provider, String serviceURI) {

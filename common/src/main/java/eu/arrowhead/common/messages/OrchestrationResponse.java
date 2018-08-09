@@ -11,10 +11,11 @@ package eu.arrowhead.common.messages;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 
 public class OrchestrationResponse {
 
-  private List<OrchestrationForm> response = new ArrayList<>();
+  private List<@Valid OrchestrationForm> response = new ArrayList<>();
 
   public OrchestrationResponse() {
   }

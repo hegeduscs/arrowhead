@@ -9,55 +9,49 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.messages.ArrowheadBase;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 
 @Entity
-@JsonIgnoreProperties({"alwaysMandatoryFields"})
-@Table(name = "broker", uniqueConstraints = {@UniqueConstraint(columnNames = {"broker_name"})})
-public class Broker extends ArrowheadBase {
+public class Broker {
 
-  @Transient
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("brokerName", "address", "port"));
-
-  @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private long id;
 
+  @NotBlank
   @Column(name = "broker_name")
+  @Size(max = 255, message = "Broker name must be 255 character at max")
   private String brokerName;
 
-  @Column(name = "address")
+  @NotBlank
+  @Size(min = 3, max = 255, message = "Address must be between 3 and 255 characters")
   private String address;
 
-  @Column(name = "port")
-  private Integer port;
+  @Min(value = 0, message = "Port can not be less than 0")
+  @Max(value = 65535, message = "Port can not be greater than 65535")
+  private int port;
 
   @Column(name = "is_secure")
   @Type(type = "yes_no")
   private boolean secure;
 
-  @Column(name = "authentication_info", length = 2047)
+  @Column(name = "authentication_info")
+  @Size(max = 2047, message = "Authentication information must be 2047 character at max")
   private String authenticationInfo;
 
   public Broker() {
   }
 
-  public Broker(String brokerName, String address, Integer port, boolean secure, String authenticationInfo) {
+  public Broker(String brokerName, String address, int port, boolean secure, String authenticationInfo) {
     this.brokerName = brokerName;
     this.address = address;
     this.port = port;
@@ -65,7 +59,7 @@ public class Broker extends ArrowheadBase {
     this.authenticationInfo = authenticationInfo;
   }
 
-  public int getId() {
+  public long getId() {
     return id;
   }
 
@@ -85,11 +79,11 @@ public class Broker extends ArrowheadBase {
     this.address = address;
   }
 
-  public Integer getPort() {
+  public int getPort() {
     return port;
   }
 
-  public void setPort(Integer port) {
+  public void setPort(int port) {
     this.port = port;
   }
 
@@ -109,46 +103,46 @@ public class Broker extends ArrowheadBase {
     this.authenticationInfo = authenticationInfo;
   }
 
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mf.removeAll(nonNullFields);
-
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof Broker)) {
       return false;
     }
 
     Broker broker = (Broker) o;
 
-    if (!brokerName.equals(broker.brokerName)) {
+    if (port != broker.port) {
       return false;
     }
-    if (!address.equals(broker.address)) {
+    if (secure != broker.secure) {
       return false;
     }
-    return port.equals(broker.port);
+    if (brokerName != null ? !brokerName.equals(broker.brokerName) : broker.brokerName != null) {
+      return false;
+    }
+    return address != null ? address.equals(broker.address) : broker.address == null;
   }
 
   @Override
   public int hashCode() {
-    int result = brokerName.hashCode();
-    result = 31 * result + address.hashCode();
-    result = 31 * result + port.hashCode();
+    int result = brokerName != null ? brokerName.hashCode() : 0;
+    result = 31 * result + (address != null ? address.hashCode() : 0);
+    result = 31 * result + port;
+    result = 31 * result + (secure ? 1 : 0);
     return result;
   }
 
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("Broker{");
+    sb.append("brokerName='").append(brokerName).append('\'');
+    sb.append(", address='").append(address).append('\'');
+    sb.append(", port=").append(port);
+    sb.append(", secure=").append(secure);
+    sb.append('}');
+    return sb.toString();
+  }
 }

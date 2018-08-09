@@ -9,12 +9,9 @@
 
 package eu.arrowhead.common.database;
 
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.GSDPoll;
 import eu.arrowhead.common.messages.ICNProposal;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,6 +20,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.Valid;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * JPA entity class for storing <tt>OwnCloud</tt> information in the database. The <i>cloud_id</i> column must be unique. <p> The database table
@@ -39,8 +39,10 @@ import javax.persistence.UniqueConstraint;
 public class OwnCloud implements Serializable {
 
   @Id
+  @Valid
   @JoinColumn(name = "cloud_id")
-  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadCloud cloud;
 
   public OwnCloud() {
@@ -58,20 +60,30 @@ public class OwnCloud implements Serializable {
     this.cloud = cloud;
   }
 
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>();
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-    if (cloud == null) {
-      mf.add("cloud");
-    } else {
-      mf = cloud.missingFields(false, mf);
+    if (!(o instanceof OwnCloud)) {
+      return false;
     }
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
+
+    OwnCloud ownCloud = (OwnCloud) o;
+
+    return cloud != null ? cloud.equals(ownCloud.cloud) : ownCloud.cloud == null;
   }
 
+  @Override
+  public int hashCode() {
+    return cloud != null ? cloud.hashCode() : 0;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("OwnCloud{");
+    sb.append("cloud=").append(cloud);
+    sb.append('}');
+    return sb.toString();
+  }
 }

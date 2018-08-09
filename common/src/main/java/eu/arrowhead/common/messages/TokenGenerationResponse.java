@@ -11,10 +11,11 @@ package eu.arrowhead.common.messages;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 
 public class TokenGenerationResponse {
 
-  private List<TokenData> tokenData = new ArrayList<>();
+  private List<@Valid TokenData> tokenData = new ArrayList<>();
 
   public TokenGenerationResponse() {
   }

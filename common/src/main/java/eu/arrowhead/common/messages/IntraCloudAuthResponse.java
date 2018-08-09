@@ -13,11 +13,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.json.ArrowheadSystemKeyDeserializer;
 import java.util.HashMap;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 public class IntraCloudAuthResponse {
 
   @JsonDeserialize(keyUsing = ArrowheadSystemKeyDeserializer.class)
-  private HashMap<ArrowheadSystem, Boolean> authorizationState = new HashMap<>();
+  private HashMap<@Valid @NotNull ArrowheadSystem, Boolean> authorizationState = new HashMap<>();
 
   public IntraCloudAuthResponse() {
   }

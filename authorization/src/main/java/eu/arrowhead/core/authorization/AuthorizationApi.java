@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -50,6 +51,13 @@ public class AuthorizationApi {
   @Produces(MediaType.TEXT_PLAIN)
   public String getIt() {
     return "authorization/mgmt got it";
+  }
+
+  @GET
+  @Path("intracloud/{id}")
+  public IntraCloudAuthorization getIntraCloudAuthRight(@PathParam("id") long id) {
+    return dm.get(IntraCloudAuthorization.class, id)
+             .orElseThrow(() -> new DataNotFoundException("Intra-Cloud Auhtorization entry not found with id: " + id));
   }
 
   /**
@@ -162,8 +170,7 @@ public class AuthorizationApi {
    */
   @POST
   @Path("intracloud")
-  public Response addSystemToAuthorized(IntraCloudAuthEntry entry) {
-    entry.missingFields(true, null);
+  public Response addSystemToAuthorized(@Valid IntraCloudAuthEntry entry) {
 
     restrictionMap.put("systemName", entry.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
@@ -210,23 +217,20 @@ public class AuthorizationApi {
   }
 
   /**
-   * Deletes the IntraCloudAuthorization entry with the id specified by the path parameter. Returns 200 if the delete is successful, 204 (no content)
-   * if the entry was not in the database to begin with.
+   * Deletes the IntraCloudAuthorization entry with the id specified by the path parameter.
    */
   @DELETE
   @Path("intracloud/{id}")
-  public Response deleteIntraEntry(@PathParam("id") Integer id) {
+  public Response deleteIntraEntry(@PathParam("id") long id) {
 
-    restrictionMap.put("id", id);
-    IntraCloudAuthorization entry = dm.get(IntraCloudAuthorization.class, restrictionMap);
-    if (entry == null) {
-      log.info("deleteIntraEntry had no effect.");
-      return Response.noContent().build();
-    } else {
+    return dm.get(IntraCloudAuthorization.class, id).map(entry -> {
       dm.delete(entry);
       log.info("deleteIntraEntry successfully returns.");
       return Response.ok().build();
-    }
+    }).<DataNotFoundException>orElseThrow(() -> {
+      log.info("deleteIntraEntry had no effect.");
+      throw new DataNotFoundException("Intra-Cloud Auhtorization entry not found with id: " + id);
+    });
   }
 
   /**
@@ -263,6 +267,13 @@ public class AuthorizationApi {
 
     log.info("deleteSystemRelations had no effect.");
     return Response.noContent().build();
+  }
+
+  @GET
+  @Path("intercloud/{id}")
+  public InterCloudAuthorization getInterCloudAuthRight(@PathParam("id") long id) {
+    return dm.get(InterCloudAuthorization.class, id)
+             .orElseThrow(() -> new DataNotFoundException("Inter-Cloud Auhtorization entry not found with id: " + id));
   }
 
   /**
@@ -366,8 +377,7 @@ public class AuthorizationApi {
    */
   @POST
   @Path("intercloud")
-  public Response addCloudToAuthorized(InterCloudAuthEntry entry) {
-    entry.missingFields(true, null);
+  public Response addCloudToAuthorized(@Valid InterCloudAuthEntry entry) {
 
     restrictionMap.put("operator", entry.getCloud().getOperator());
     restrictionMap.put("cloudName", entry.getCloud().getCloudName());
@@ -409,18 +419,15 @@ public class AuthorizationApi {
    */
   @DELETE
   @Path("intercloud/{id}")
-  public Response deleteInterEntry(@PathParam("id") Integer id) {
-
-    restrictionMap.put("id", id);
-    InterCloudAuthorization entry = dm.get(InterCloudAuthorization.class, restrictionMap);
-    if (entry == null) {
-      log.info("deleteInterEntry had no effect.");
-      return Response.noContent().build();
-    } else {
+  public Response deleteInterEntry(@PathParam("id") long id) {
+    return dm.get(InterCloudAuthorization.class, id).map(entry -> {
       dm.delete(entry);
       log.info("deleteInterEntry successfully returns.");
       return Response.ok().build();
-    }
+    }).<DataNotFoundException>orElseThrow(() -> {
+      log.info("deleteInterEntry had no effect.");
+      throw new DataNotFoundException("Inter-Cloud Auhtorization entry not found with id: " + id);
+    });
   }
 
   /**

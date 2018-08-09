@@ -12,10 +12,11 @@ package eu.arrowhead.common.messages;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 
 public class ServiceQueryResult {
 
-  private List<ServiceRegistryEntry> serviceQueryData = new ArrayList<>();
+  private List<@Valid ServiceRegistryEntry> serviceQueryData = new ArrayList<>();
 
   public ServiceQueryResult() {
   }

@@ -9,48 +9,44 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.json.support.ArrowheadSystemSupport;
-import eu.arrowhead.common.messages.ArrowheadBase;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
-/**
- * Entity class for storing Arrowhead Systems in the database. The "system_name" column must be unique.
- */
 @Entity
-@JsonIgnoreProperties({"alwaysMandatoryFields"})
-@Table(name = "arrowhead_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_name"})})
-public class ArrowheadSystem extends ArrowheadBase {
+@Table(name = "arrowhead_system", uniqueConstraints = {@UniqueConstraint(columnNames = {"system_name", "address", "port"})})
+public class ArrowheadSystem {
 
-  @Transient
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("systemName"));
-
-  @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private long id;
 
+  @NotBlank
+  @Size(max = 255, message = "System name must be 255 character at max")
+  @Pattern(regexp = "[A-Za-z0-9]+", message = "System name can only contain alphanumerical characters")
   @Column(name = "system_name")
   private String systemName;
 
-  @Column(name = "address")
+  @NotBlank
+  @Size(min = 3, max = 255, message = "Address must be between 3 and 255 characters")
   private String address;
 
-  @Transient
-  private Integer port;
+  @Min(value = 0, message = "Port can not be less than 0")
+  @Max(value = 65535, message = "Port can not be greater than 65535")
+  private int port;
 
-  @Column(name = "authentication_info", length = 2047)
+  @Column(name = "authentication_info")
+  @Size(max = 2047, message = "Authentication information must be 2047 character at max")
   private String authenticationInfo;
 
   public ArrowheadSystem() {
@@ -69,7 +65,7 @@ public class ArrowheadSystem extends ArrowheadBase {
 
     if (fields.length == 4) {
       this.address = fields[1].equals("null") ? null : fields[1];
-      this.port = fields[2].equals("null") ? null : Integer.valueOf(fields[2]);
+      this.port = Integer.valueOf(fields[2]);
       this.authenticationInfo = fields[3].equals("null") ? null : fields[3];
     }
   }
@@ -89,11 +85,11 @@ public class ArrowheadSystem extends ArrowheadBase {
     this.authenticationInfo = system.authenticationInfo;
   }
 
-  public int getId() {
+  public long getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(long id) {
     this.id = id;
   }
 
@@ -127,26 +123,6 @@ public class ArrowheadSystem extends ArrowheadBase {
 
   public void setAuthenticationInfo(String authenticationInfo) {
     this.authenticationInfo = authenticationInfo;
-  }
-
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    for (final String field : mf) {
-      if (field.startsWith(getClass().getSimpleName())) {
-        nonNullFields = prefixFieldNames(nonNullFields);
-        break;
-      }
-    }
-    mf.removeAll(nonNullFields);
-
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
   }
 
   public String toArrowheadCommonName(String operator, String cloudName) {

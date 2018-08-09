@@ -10,7 +10,6 @@
 package eu.arrowhead.common.database;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -20,6 +19,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * JPA entity class for storing intra-cloud (within the cloud) authorization rights in the database. The <i>consumer_system_id</i>,
@@ -35,21 +38,29 @@ import javax.persistence.UniqueConstraint;
     @UniqueConstraint(columnNames = {"consumer_system_id", "provider_system_id", "arrowhead_service_id"})})
 public class IntraCloudAuthorization {
 
-  @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private long id;
 
+  @Valid
+  @NotNull
   @JoinColumn(name = "consumer_system_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadSystem consumer;
 
+  @Valid
+  @NotNull
   @JoinColumn(name = "provider_system_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadSystem provider;
 
+  @Valid
+  @NotNull
   @JoinColumn(name = "arrowhead_service_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadService service;
 
   public IntraCloudAuthorization() {
@@ -61,11 +72,11 @@ public class IntraCloudAuthorization {
     this.service = service;
   }
 
-  public int getId() {
+  public long getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(long id) {
     this.id = id;
   }
 
@@ -93,4 +104,41 @@ public class IntraCloudAuthorization {
     this.service = service;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof IntraCloudAuthorization)) {
+      return false;
+    }
+
+    IntraCloudAuthorization that = (IntraCloudAuthorization) o;
+
+    if (!consumer.equals(that.consumer)) {
+      return false;
+    }
+    if (!provider.equals(that.provider)) {
+      return false;
+    }
+    return service.equals(that.service);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = consumer.hashCode();
+    result = 31 * result + provider.hashCode();
+    result = 31 * result + service.hashCode();
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("IntraCloudAuthorization{");
+    sb.append("consumer=").append(consumer);
+    sb.append(", provider=").append(provider);
+    sb.append(", service=").append(service);
+    sb.append('}');
+    return sb.toString();
+  }
 }

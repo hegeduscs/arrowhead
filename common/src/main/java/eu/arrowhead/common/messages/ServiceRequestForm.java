@@ -9,36 +9,37 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * This is what the Orchestrator Core System receives from Arrowhead Systems trying to request services.
  */
-@JsonIgnoreProperties({"flagKeys", "alwaysMandatoryFields"})
-public class ServiceRequestForm extends ArrowheadBase {
+//TODO cross parameter constraint: requestedService can not be null when overrideStore is TRUE, There is no valid PreferredProvider, but
+// "onlyPreferred" is set to true, RequestedQoS or commands hashmap is empty while \"enableQoS\" is set to true
+public class ServiceRequestForm {
 
   private static final List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
                                                                              "metadataSearch", "pingProviders", "overrideStore", "matchmaking",
                                                                              "onlyPreferred", "enableQoS"));
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("requesterSystem"));
-
+  @Valid
+  @NotNull
   private ArrowheadSystem requesterSystem;
+  @Valid
   private ArrowheadCloud requesterCloud;
+  @Valid
   private ArrowheadService requestedService;
   private Map<String, Boolean> orchestrationFlags = new HashMap<>();
-  private List<PreferredProvider> preferredProviders = new ArrayList<>();
+  private List<@NotNull @Valid PreferredProvider> preferredProviders = new ArrayList<>();
   private Map<String, String> requestedQoS = new HashMap<>();
   private Map<String, String> commands = new HashMap<>();
 
@@ -122,48 +123,6 @@ public class ServiceRequestForm extends ArrowheadBase {
     this.commands = commands;
   }
 
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    setOrchestrationFlags(getOrchestrationFlags());
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mf.removeAll(nonNullFields);
-    if (requesterSystem == null) {
-      mf.add("requesterSystem");
-    } else {
-      mf = requesterSystem.missingFields(false, mf);
-    }
-    if (requestedService == null && orchestrationFlags.get("overrideStore")) {
-      mf.add("requestedService can not be null when overrideStore is TRUE");
-    } else if (requestedService != null) {
-      mf.add("interfaces");
-      mf = requestedService.missingFields(false, false, mf);
-    }
-    if (orchestrationFlags.get("onlyPreferred")) {
-      List<PreferredProvider> tmp = new ArrayList<>();
-      for (PreferredProvider provider : preferredProviders) {
-        if (!provider.isValid()) {
-          tmp.add(provider);
-        }
-      }
-      preferredProviders.removeAll(tmp);
-      if (preferredProviders.isEmpty()) {
-        mf.add("There is no valid PreferredProvider, but \"onlyPreferred\" is set to true");
-      }
-    }
-    if (orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty() || commands.isEmpty())) {
-      mf.add("RequestedQoS or commands hashmap is empty while \"enableQoS\" is set to true");
-    }
-
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
-  }
-
   public static class Builder {
 
     // Required parameters
@@ -218,6 +177,29 @@ public class ServiceRequestForm extends ArrowheadBase {
 
     public ServiceRequestForm build() {
       return new ServiceRequestForm(this);
+    }
+  }
+
+  public void validateCrossParameterConstraints() {
+    if (requestedService == null && orchestrationFlags.get("overrideStore")) {
+      throw new BadPayloadException("RequestedService can not be null when overrideStore is TRUE");
+    }
+
+    if (orchestrationFlags.get("onlyPreferred")) {
+      List<PreferredProvider> tmp = new ArrayList<>();
+      for (@Valid PreferredProvider provider : preferredProviders) {
+        if (!provider.isValid()) {
+          tmp.add(provider);
+        }
+      }
+      preferredProviders.removeAll(tmp);
+      if (preferredProviders.isEmpty()) {
+        throw new BadPayloadException("There is no valid PreferredProvider, but \"onlyPreferred\" is set to true");
+      }
+    }
+
+    if (orchestrationFlags.get("enableQoS") && (requestedQoS.isEmpty() || commands.isEmpty())) {
+      throw new BadPayloadException("RequestedQoS or commands hashmap is empty while \"enableQoS\" is set to true");
     }
   }
 

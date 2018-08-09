@@ -11,10 +11,13 @@ package eu.arrowhead.common.messages;
 
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
+import javax.validation.Valid;
 
 public class TokenData {
 
+  @Valid
   private ArrowheadSystem system;
+  @Valid
   private ArrowheadService service;
   private String token;
   private String signature;

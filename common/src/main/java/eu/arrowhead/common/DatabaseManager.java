@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.Level;
@@ -127,7 +128,7 @@ public class DatabaseManager {
     return prop;
   }
 
-  public <T> T get(Class<T> queryClass, int id) {
+  public <T> Optional<T> get(Class<T> queryClass, long id) {
     T object;
     Transaction transaction = null;
 
@@ -142,7 +143,7 @@ public class DatabaseManager {
       throw e;
     }
 
-    return object;
+    return Optional.ofNullable(object);
   }
 
   @SuppressWarnings("unchecked")

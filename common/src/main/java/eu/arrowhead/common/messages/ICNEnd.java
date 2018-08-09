@@ -9,8 +9,13 @@
 
 package eu.arrowhead.common.messages;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 public class ICNEnd {
 
+  @Valid
+  @NotNull
   private OrchestrationForm orchestrationForm;
   private GatewayConnectionInfo gatewayConnInfo;
 

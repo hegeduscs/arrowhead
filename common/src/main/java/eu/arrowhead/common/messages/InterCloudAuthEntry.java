@@ -9,23 +9,21 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
-import eu.arrowhead.common.exception.BadPayloadException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
-@JsonIgnoreProperties({"alwaysMandatoryFields"})
-public class InterCloudAuthEntry extends ArrowheadBase {
+public class InterCloudAuthEntry {
 
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("serviceList", "cloud"));
-
+  @Valid
+  @NotNull
   private ArrowheadCloud cloud;
-  private List<ArrowheadService> serviceList = new ArrayList<>();
+  @NotEmpty
+  private List<@NotNull @Valid ArrowheadService> serviceList = new ArrayList<>();
 
   public InterCloudAuthEntry() {
   }
@@ -49,31 +47,6 @@ public class InterCloudAuthEntry extends ArrowheadBase {
 
   public void setServiceList(List<ArrowheadService> serviceList) {
     this.serviceList = serviceList;
-  }
-
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mf.removeAll(nonNullFields);
-
-    if (cloud != null) {
-      mf = cloud.missingFields(false, mf);
-    }
-
-    for (ArrowheadService service : serviceList) {
-      Set<String> fields = service.missingFields(false, false, null);
-      if (!fields.isEmpty()) {
-        mf.add("Service is missing mandatory field(s): " + String.join(", ", fields));
-      }
-    }
-
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
   }
 
 }

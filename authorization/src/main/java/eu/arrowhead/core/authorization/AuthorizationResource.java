@@ -27,6 +27,7 @@ import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -65,9 +66,7 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("intracloud")
-  public Response isSystemAuthorized(IntraCloudAuthRequest request) {
-    request.missingFields(true, null);
-
+  public Response isSystemAuthorized(@Valid IntraCloudAuthRequest request) {
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
@@ -126,9 +125,7 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("intercloud")
-  public Response isCloudAuthorized(InterCloudAuthRequest request) {
-    request.missingFields(true, null);
-
+  public Response isCloudAuthorized(@Valid InterCloudAuthRequest request) {
     restrictionMap.put("operator", request.getCloud().getOperator());
     restrictionMap.put("cloudName", request.getCloud().getCloudName());
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
@@ -168,9 +165,7 @@ public class AuthorizationResource {
    */
   @PUT
   @Path("token")
-  public Response tokenGeneration(TokenGenerationRequest request) {
-    request.missingFields(true, null);
-
+  public Response tokenGeneration(@Valid TokenGenerationRequest request) {
     // Get the tokens from the service class (can throw run time exceptions)
     List<ArrowheadToken> tokens = TokenGenerationService.generateTokens(request);
     List<TokenData> tokenDataList = new ArrayList<>();

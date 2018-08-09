@@ -9,65 +9,63 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.messages.ArrowheadBase;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 
-/**
- * Entity class for storing Arrowhead Clouds in the database. The "operator" and "cloud_name" columns must be unique together.
- */
 @Entity
-@JsonIgnoreProperties({"alwaysMandatoryFields"})
 @Table(name = "arrowhead_cloud", uniqueConstraints = {@UniqueConstraint(columnNames = {"operator", "cloud_name"})})
-public class ArrowheadCloud extends ArrowheadBase {
+public class ArrowheadCloud {
 
-  @Transient
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("operator", "cloudName"));
-
-  @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private long id;
 
-  @Column(name = "operator")
+  @NotBlank
+  @Size(max = 255, message = "Cloud operator must be 255 character at max")
+  @Pattern(regexp = "[A-Za-z0-9]+", message = "Cloud operator can only contain alphanumerical characters")
   private String operator;
 
+  @NotBlank
   @Column(name = "cloud_name")
+  @Size(max = 255, message = "Cloud name must be 255 character at max")
+  @Pattern(regexp = "[A-Za-z0-9]+", message = "Cloud name can only contain alphanumerical characters")
   private String cloudName;
 
-  @Column(name = "address")
+  @NotBlank
+  @Size(min = 3, max = 255, message = "Cloud address must be between 3 and 255 characters")
   private String address;
 
-  @Column(name = "port")
-  private Integer port;
+  @Min(value = 0, message = "Port can not be less than 0")
+  @Max(value = 65535, message = "Port can not be greater than 65535")
+  private int port;
 
   @Column(name = "gatekeeper_service_uri")
   private String gatekeeperServiceURI;
 
-  @Column(name = "authentication_info", length = 2047)
+  @Column(name = "authentication_info")
+  @Size(max = 2047, message = "Authentication information must be 2047 character at max")
   private String authenticationInfo;
 
   @Column(name = "is_secure")
   @Type(type = "yes_no")
-  private Boolean secure;
+  private boolean secure;
 
   public ArrowheadCloud() {
   }
 
-  public ArrowheadCloud(String operator, String cloudName, String address, Integer port, String gatekeeperServiceURI, String authenticationInfo,
-                        Boolean secure) {
+  public ArrowheadCloud(String operator, String cloudName, String address, int port, String gatekeeperServiceURI, String authenticationInfo,
+                        boolean secure) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;
@@ -77,11 +75,11 @@ public class ArrowheadCloud extends ArrowheadBase {
     this.secure = secure;
   }
 
-  public int getId() {
+  public long getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(long id) {
     this.id = id;
   }
 
@@ -109,11 +107,11 @@ public class ArrowheadCloud extends ArrowheadBase {
     this.address = address;
   }
 
-  public Integer getPort() {
+  public int getPort() {
     return port;
   }
 
-  public void setPort(Integer port) {
+  public void setPort(int port) {
     this.port = port;
   }
 
@@ -133,32 +131,12 @@ public class ArrowheadCloud extends ArrowheadBase {
     this.authenticationInfo = authenticationInfo;
   }
 
-  public Boolean isSecure() {
+  public boolean isSecure() {
     return secure;
   }
 
-  public void setSecure(Boolean secure) {
+  public void setSecure(boolean secure) {
     this.secure = secure;
-  }
-
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    for (final String field : mf) {
-      if (field.startsWith(getClass().getSimpleName())) {
-        nonNullFields = prefixFieldNames(nonNullFields);
-        break;
-      }
-    }
-    mf.removeAll(nonNullFields);
-
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
   }
 
   @Override
@@ -166,48 +144,51 @@ public class ArrowheadCloud extends ArrowheadBase {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof ArrowheadCloud)) {
       return false;
     }
 
     ArrowheadCloud that = (ArrowheadCloud) o;
 
-    if (!operator.equals(that.operator)) {
+    if (port != that.port) {
       return false;
     }
-    if (!cloudName.equals(that.cloudName)) {
+    if (secure != that.secure) {
+      return false;
+    }
+    if (operator != null ? !operator.equals(that.operator) : that.operator != null) {
+      return false;
+    }
+    if (cloudName != null ? !cloudName.equals(that.cloudName) : that.cloudName != null) {
       return false;
     }
     if (address != null ? !address.equals(that.address) : that.address != null) {
       return false;
     }
-    if (port != null ? !port.equals(that.port) : that.port != null) {
-      return false;
-    }
-    if (gatekeeperServiceURI != null ? !gatekeeperServiceURI.equals(that.gatekeeperServiceURI) : that.gatekeeperServiceURI != null) {
-      return false;
-    }
-    if (authenticationInfo != null ? !authenticationInfo.equals(that.authenticationInfo) : that.authenticationInfo != null) {
-      return false;
-    }
-    return secure != null ? secure.equals(that.secure) : that.secure == null;
+    return gatekeeperServiceURI != null ? gatekeeperServiceURI.equals(that.gatekeeperServiceURI) : that.gatekeeperServiceURI == null;
   }
 
   @Override
   public int hashCode() {
-    int result = operator.hashCode();
-    result = 31 * result + cloudName.hashCode();
+    int result = operator != null ? operator.hashCode() : 0;
+    result = 31 * result + (cloudName != null ? cloudName.hashCode() : 0);
     result = 31 * result + (address != null ? address.hashCode() : 0);
-    result = 31 * result + (port != null ? port.hashCode() : 0);
+    result = 31 * result + port;
     result = 31 * result + (gatekeeperServiceURI != null ? gatekeeperServiceURI.hashCode() : 0);
-    result = 31 * result + (authenticationInfo != null ? authenticationInfo.hashCode() : 0);
-    result = 31 * result + (secure != null ? secure.hashCode() : 0);
+    result = 31 * result + (secure ? 1 : 0);
     return result;
   }
 
   @Override
   public String toString() {
-    return "(" + operator + ":" + cloudName + ")";
+    final StringBuilder sb = new StringBuilder("ArrowheadCloud{");
+    sb.append("operator='").append(operator).append('\'');
+    sb.append(", cloudName='").append(cloudName).append('\'');
+    sb.append(", address='").append(address).append('\'');
+    sb.append(", port=").append(port);
+    sb.append(", gatekeeperServiceURI='").append(gatekeeperServiceURI).append('\'');
+    sb.append(", secure=").append(secure);
+    sb.append('}');
+    return sb.toString();
   }
-
 }

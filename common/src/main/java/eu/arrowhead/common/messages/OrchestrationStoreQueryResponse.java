@@ -12,10 +12,11 @@ package eu.arrowhead.common.messages;
 import eu.arrowhead.common.database.OrchestrationStore;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 
 public class OrchestrationStoreQueryResponse {
 
-  private List<OrchestrationStore> entryList = new ArrayList<>();
+  private List<@Valid OrchestrationStore> entryList = new ArrayList<>();
 
   public OrchestrationStoreQueryResponse() {
   }

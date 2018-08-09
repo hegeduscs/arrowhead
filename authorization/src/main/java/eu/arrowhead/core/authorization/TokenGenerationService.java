@@ -17,6 +17,7 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.messages.ArrowheadToken;
 import eu.arrowhead.common.messages.RawTokenInfo;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -86,8 +87,12 @@ class TokenGenerationService {
       }
       rawTokenInfo.setC(c);
 
+      String s = request.getService().getServiceDefinition();
       // Set service info string
-      String s = request.getService().getInterfaces().get(0) + "." + request.getService().getServiceDefinition();
+      List<String> interfaces = new ArrayList<>(request.getService().getInterfaces());
+      if (!interfaces.isEmpty()) {
+        s = interfaces.get(0) + "." + s;
+      }
       rawTokenInfo.setS(s);
 
       // Set the token validity duration
@@ -116,7 +121,7 @@ class TokenGenerationService {
       // Finally, generate the token and signature strings
       try {
         cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] tokenBytes = cipher.doFinal(json.getBytes("UTF-8"));
+        byte[] tokenBytes = cipher.doFinal(json.getBytes(StandardCharsets.UTF_8));
         System.out.println("Token bytes: " + Arrays.toString(tokenBytes));
         signature.update(tokenBytes);
         byte[] sigBytes = signature.sign();

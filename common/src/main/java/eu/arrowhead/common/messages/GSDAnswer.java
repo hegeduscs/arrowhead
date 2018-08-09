@@ -11,13 +11,13 @@ package eu.arrowhead.common.messages;
 
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadService;
-import eu.arrowhead.common.exception.BadPayloadException;
-import java.util.HashSet;
-import java.util.Set;
+import javax.validation.Valid;
 
 public class GSDAnswer {
 
+  @Valid
   private ArrowheadService requestedService;
+  @Valid
   private ArrowheadCloud providerCloud;
 
   public GSDAnswer() {
@@ -42,22 +42,6 @@ public class GSDAnswer {
 
   public void setProviderCloud(ArrowheadCloud providerCloud) {
     this.providerCloud = providerCloud;
-  }
-
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>();
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    if (providerCloud == null) {
-      mf.add("providerCloud");
-    } else {
-      mf = providerCloud.missingFields(false, mf);
-    }
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
   }
 
 }

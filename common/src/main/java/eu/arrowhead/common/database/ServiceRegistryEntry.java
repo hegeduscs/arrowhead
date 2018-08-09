@@ -9,15 +9,7 @@
 
 package eu.arrowhead.common.database;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.messages.ArrowheadBase;
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,106 +20,84 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.Valid;
+import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 @Entity
-@JsonIgnoreProperties({"alwaysMandatoryFields", "id", "metadata", "endOfValidity"})
 @Table(name = "service_registry", uniqueConstraints = {@UniqueConstraint(columnNames = {"arrowhead_service_id", "provider_system_id"})})
-public class ServiceRegistryEntry extends ArrowheadBase {
+public class ServiceRegistryEntry {
 
-  @Transient
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("providedService", "provider"));
-
-  @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private long id;
 
-  //mandatory fields for JSON
+  @Valid
+  @NotNull(message = "Provided ArrowheadService cannot be null")
   @JoinColumn(name = "arrowhead_service_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  private ArrowheadService providedService;
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private ArrowheadService service;
 
+  @Valid
+  @NotNull(message = "Provider ArrowheadSystem cannot be null")
   @JoinColumn(name = "provider_system_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadSystem provider;
 
-  //non-mandatory fields for JSON
-  @Column(name = "port")
-  private Integer port;
-
   @Column(name = "service_uri")
-  private String serviceURI;
+  @Size(max = 255, message = "Service URI must be 255 character at max")
+  private String serviceUri;
 
-  @Column(name = "version")
-  private Integer version = 1;
-
-  @Column(name = "udp")
   @Type(type = "yes_no")
-  private boolean udp = false;
-
-  //Time to live in seconds - endOfValidity is calculated from this upon registering and TTL is calculated from endOfValidity when queried
-  @Transient
-  private long ttl;
-
-  //only for database
-  @Column(name = "metadata")
-  private String metadata;
+  private boolean udp;
 
   @Column(name = "end_of_validity")
+  @FutureOrPresent(message = "End of validity date cannot be in the past")
   private LocalDateTime endOfValidity;
+
+  private int version = 1;
 
   public ServiceRegistryEntry() {
   }
 
-  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider) {
-    this.providedService = providedService;
+  public ServiceRegistryEntry(ArrowheadService service, ArrowheadSystem provider, String serviceUri) {
+    this.service = service;
     this.provider = provider;
+    this.serviceUri = serviceUri;
   }
 
-  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, String serviceURI) {
-    this.providedService = providedService;
-    this.provider = provider;
-    this.port = provider.getPort();
-    this.serviceURI = serviceURI;
-  }
 
-  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI) {
-    this.providedService = providedService;
+  public ServiceRegistryEntry(ArrowheadService service, ArrowheadSystem provider, String serviceUri, boolean udp, LocalDateTime endOfValidity,
+                              int version) {
+    this.service = service;
     this.provider = provider;
-    this.port = port;
-    this.serviceURI = serviceURI;
-  }
-
-  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, Integer port, String serviceURI, Integer version,
-                              boolean udp, long ttl, String metadata, LocalDateTime endOfValidity) {
-    this.providedService = providedService;
-    this.provider = provider;
-    this.port = port;
-    this.serviceURI = serviceURI;
-    this.version = version;
+    this.serviceUri = serviceUri;
     this.udp = udp;
-    this.ttl = ttl;
-    this.metadata = metadata;
     this.endOfValidity = endOfValidity;
+    this.version = version;
   }
 
-  public int getId() {
+  public long getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(long id) {
     this.id = id;
   }
 
-  public ArrowheadService getProvidedService() {
-    return providedService;
+  public ArrowheadService getService() {
+    return service;
   }
 
-  public void setProvidedService(ArrowheadService providedService) {
-    this.providedService = providedService;
+  public void setService(ArrowheadService service) {
+    this.service = service;
   }
 
   public ArrowheadSystem getProvider() {
@@ -138,28 +108,12 @@ public class ServiceRegistryEntry extends ArrowheadBase {
     this.provider = provider;
   }
 
-  public Integer getPort() {
-    return port;
+  public String getServiceUri() {
+    return serviceUri;
   }
 
-  public void setPort(Integer port) {
-    this.port = port;
-  }
-
-  public String getServiceURI() {
-    return serviceURI;
-  }
-
-  public void setServiceURI(String serviceURI) {
-    this.serviceURI = serviceURI;
-  }
-
-  public Integer getVersion() {
-    return version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
+  public void setServiceUri(String serviceUri) {
+    this.serviceUri = serviceUri;
   }
 
   public boolean isUdp() {
@@ -170,22 +124,6 @@ public class ServiceRegistryEntry extends ArrowheadBase {
     this.udp = udp;
   }
 
-  public long getTtl() {
-    return ttl;
-  }
-
-  public void setTtl(long ttl) {
-    this.ttl = ttl;
-  }
-
-  public String getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(String metadata) {
-    this.metadata = metadata;
-  }
-
   public LocalDateTime getEndOfValidity() {
     return endOfValidity;
   }
@@ -194,74 +132,52 @@ public class ServiceRegistryEntry extends ArrowheadBase {
     this.endOfValidity = endOfValidity;
   }
 
-  public Set<String> missingFields(boolean throwException, boolean forDNSSD, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mf.removeAll(nonNullFields);
-    if (providedService != null) {
-      mf = providedService.missingFields(false, forDNSSD, mf);
-    }
-    if (provider != null) {
-      mf = provider.missingFields(false, mf);
-    }
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
+  public int getVersion() {
+    return version;
   }
 
-  public void toDatabase() {
-    if (providedService.getServiceMetadata() != null && !providedService.getServiceMetadata().isEmpty()) {
-      StringBuilder sb = new StringBuilder();
-      for (Map.Entry<String, String> entry : providedService.getServiceMetadata().entrySet()) {
-        sb.append(entry.getKey()).append("=").append(entry.getValue()).append(",");
-      }
-      metadata = sb.toString().substring(0, sb.length() - 1);
-    }
-
-    if (provider.getPort() != null && (port == null || port == 0)) {
-      port = provider.getPort();
-    }
-
-    endOfValidity = ttl > 0 ? LocalDateTime.now().plusSeconds(ttl) : LocalDateTime.now();
+  public void setVersion(int version) {
+    this.version = version;
   }
 
-  public void fromDatabase() {
-    ArrowheadService temp = providedService;
-    providedService = new ArrowheadService();
-    providedService.setServiceDefinition(temp.getServiceDefinition());
-    providedService.setInterfaces(temp.getInterfaces());
-
-    if (metadata != null) {
-      String[] parts = metadata.split(",");
-      providedService.getServiceMetadata().clear();
-      for (String part : parts) {
-        String[] pair = part.split("=");
-        providedService.getServiceMetadata().put(pair[0], pair[1]);
-      }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ServiceRegistryEntry)) {
+      return false;
     }
 
-    if (port != null && provider.getPort() == null) {
-      provider.setPort(port);
-    }
+    ServiceRegistryEntry that = (ServiceRegistryEntry) o;
 
-    if (endOfValidity != null) {
-      if (LocalDateTime.now().isAfter(endOfValidity)) {
-        ttl = 0;
-      } else {
-        ttl = Duration.between(LocalDateTime.now(), endOfValidity).toMinutes() * 60;
-      }
-    } else {
-      ttl = 0;
+    if (version != that.version) {
+      return false;
     }
+    if (!service.equals(that.service)) {
+      return false;
+    }
+    if (!provider.equals(that.provider)) {
+      return false;
+    }
+    return serviceUri != null ? serviceUri.equals(that.serviceUri) : that.serviceUri == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = service.hashCode();
+    result = 31 * result + provider.hashCode();
+    result = 31 * result + (serviceUri != null ? serviceUri.hashCode() : 0);
+    result = 31 * result + version;
+    return result;
   }
 
   @Override
   public String toString() {
-    return provider.getSystemName() + ":" + providedService.getServiceDefinition();
+    final StringBuilder sb = new StringBuilder("ServiceRegistryEntry{");
+    sb.append("service=").append(service);
+    sb.append(", provider=").append(provider);
+    sb.append('}');
+    return sb.toString();
   }
-
 }

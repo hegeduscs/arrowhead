@@ -9,20 +9,16 @@
 
 package eu.arrowhead.common.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import eu.arrowhead.common.exception.BadPayloadException;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
-@JsonIgnoreProperties({"alwaysMandatoryFields"})
-public class Event extends ArrowheadBase {
+public class Event {
 
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Collections.singleton("type"));
-
+  @NotBlank
+  @Size(max = 255, message = "Event type must be 255 character at max")
   private String type;
   private String payload;
   private LocalDateTime timestamp;
@@ -68,20 +64,6 @@ public class Event extends ArrowheadBase {
 
   public void setEventMetadata(Map<String, String> eventMetadata) {
     this.eventMetadata = eventMetadata;
-  }
-
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mf.removeAll(nonNullFields);
-
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
   }
 
 }

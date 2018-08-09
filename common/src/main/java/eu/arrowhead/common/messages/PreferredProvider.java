@@ -12,14 +12,13 @@ package eu.arrowhead.common.messages;
 import eu.arrowhead.common.database.ArrowheadCloud;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.json.support.PreferredProviderSupport;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import javax.validation.Valid;
 
 public class PreferredProvider {
 
+  @Valid
   private ArrowheadSystem providerSystem;
+  @Valid
   private ArrowheadCloud providerCloud;
 
   public PreferredProvider() {
@@ -51,23 +50,16 @@ public class PreferredProvider {
     this.providerCloud = providerCloud;
   }
 
-  public boolean isValid() {
-    return isLocal() || isGlobal();
-  }
-
   public boolean isLocal() {
-    if (providerSystem != null) {
-      providerSystem.missingFields(true, new HashSet<>(Collections.singleton("address")));
-    }
-    return providerCloud == null;
+    return providerSystem != null && providerCloud == null;
   }
 
   public boolean isGlobal() {
-    if (providerCloud != null) {
-      Set<String> mandatoryFields = new HashSet<>(Arrays.asList("address", "gatekeeperServiceURI"));
-      providerCloud.missingFields(true, mandatoryFields);
-    }
-    return true;
+    return providerCloud != null;
+  }
+
+  public boolean isValid() {
+    return isLocal() || isGlobal();
   }
 
   @Override

@@ -10,20 +10,18 @@
 package eu.arrowhead.common.messages;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
-import eu.arrowhead.common.exception.BadPayloadException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
-@JsonIgnoreProperties({"alwaysMandatoryFields"})
-public class OrchestrationStoreQuery extends ArrowheadBase {
+public class OrchestrationStoreQuery {
 
-  private static final Set<String> alwaysMandatoryFields = new HashSet<>(Arrays.asList("requestedService", "requesterSystem"));
-
+  @Valid
+  @NotNull
   private ArrowheadService requestedService;
+  @Valid
+  @NotNull
   private ArrowheadSystem requesterSystem;
 
   public OrchestrationStoreQuery() {
@@ -48,25 +46,6 @@ public class OrchestrationStoreQuery extends ArrowheadBase {
 
   public void setRequesterSystem(ArrowheadSystem requesterSystem) {
     this.requesterSystem = requesterSystem;
-  }
-
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>(alwaysMandatoryFields);
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    Set<String> nonNullFields = getFieldNamesWithNonNullValue();
-    mf.removeAll(nonNullFields);
-    if (requestedService != null) {
-      mf = requestedService.missingFields(false, false, mf);
-    }
-    if (requesterSystem != null) {
-      mf = requesterSystem.missingFields(false, mf);
-    }
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
   }
 
 }

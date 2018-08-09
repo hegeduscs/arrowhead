@@ -10,12 +10,13 @@
 package eu.arrowhead.common.messages;
 
 import eu.arrowhead.common.database.ArrowheadService;
-import eu.arrowhead.common.exception.BadPayloadException;
-import java.util.HashSet;
-import java.util.Set;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 public class ServiceQueryForm {
 
+  @Valid
+  @NotNull
   private ArrowheadService service;
   private boolean pingProviders;
   private boolean metadataSearch;
@@ -66,25 +67,6 @@ public class ServiceQueryForm {
 
   public void setVersion(int version) {
     this.version = version;
-  }
-
-  public Set<String> missingFields(boolean throwException, Set<String> mandatoryFields) {
-    Set<String> mf = new HashSet<>();
-    if (mandatoryFields != null) {
-      mf.addAll(mandatoryFields);
-    }
-    if (service == null) {
-      mf.add("service");
-    } else {
-      if (metadataSearch) {
-        mf.add("serviceMetadata");
-      }
-      mf = service.missingFields(false, false, mf);
-    }
-    if (throwException && !mf.isEmpty()) {
-      throw new BadPayloadException("Missing mandatory fields for " + getClass().getSimpleName() + ": " + String.join(", ", mf));
-    }
-    return mf;
   }
 
 }

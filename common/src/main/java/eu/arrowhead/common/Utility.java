@@ -42,6 +42,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -263,8 +264,8 @@ public final class Utility {
   }
 
   public static Optional<String[]> getServiceInfo(String serviceId) {
-    ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singletonList("JSON"), null)
-                                                  : new ArrowheadService(createSD(serviceId, true), Collections.singletonList("JSON"),
+    ArrowheadService service = sslContext == null ? new ArrowheadService(createSD(serviceId, false), Collections.singleton("JSON"), null)
+                                                  : new ArrowheadService(createSD(serviceId, true), Collections.singleton("JSON"),
                                                                          ArrowheadMain.secureServerMetadata);
     ServiceQueryForm sqf = new ServiceQueryForm(service, true, false);
     Response response = sendRequest(SR_QUERY_URI, "PUT", sqf);
@@ -273,12 +274,10 @@ public final class Utility {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
       ArrowheadSystem coreSystem = entry.getProvider();
       boolean isSecure = false;
-      if (!entry.getProvidedService().getServiceMetadata().isEmpty()) {
-        isSecure = entry.getProvidedService().getServiceMetadata().containsKey("security");
-      } else if (entry.getMetadata() != null) {
-        isSecure = entry.getMetadata().contains("security");
+      if (!entry.getService().getServiceMetadata().isEmpty()) {
+        isSecure = entry.getService().getServiceMetadata().containsKey("security");
       }
-      String serviceUri = getUri(coreSystem.getAddress(), coreSystem.getPort(), entry.getServiceURI(), isSecure, false);
+      String serviceUri = getUri(coreSystem.getAddress(), coreSystem.getPort(), entry.getServiceUri(), isSecure, false);
       if (serviceId.equals(CoreSystemService.GW_CONSUMER_SERVICE.getServiceDef()) || serviceId
           .equals(CoreSystemService.GW_PROVIDER_SERVICE.getServiceDef())) {
         return Optional.of(new String[]{serviceUri, coreSystem.getSystemName(), coreSystem.getAddress(), coreSystem.getAuthenticationInfo()});
@@ -325,7 +324,7 @@ public final class Utility {
   public static String getRequestPayload(InputStream is) {
     StringBuilder sb = new StringBuilder();
     String line;
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
       while ((line = br.readLine()) != null) {
         sb.append(line);
       }

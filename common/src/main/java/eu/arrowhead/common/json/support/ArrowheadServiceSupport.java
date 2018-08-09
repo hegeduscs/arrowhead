@@ -35,7 +35,7 @@ public class ArrowheadServiceSupport {
     } else {
       this.serviceDefinition = service.getServiceDefinition();
     }
-    this.interfaces = service.getInterfaces();
+    this.interfaces = new ArrayList<>(service.getInterfaces());
     this.serviceMetadata = service.getServiceMetadata();
   }
 

@@ -227,7 +227,7 @@ public abstract class ArrowheadMain {
     ArrowheadSystem provider = new ArrowheadSystem(coreSystem.name(), uri.getHost(), uri.getPort(), base64PublicKey);
 
     for (CoreSystemService service : coreSystem.getServices()) {
-      ArrowheadService providedService = new ArrowheadService(Utility.createSD(service.getServiceDef(), isSecure), Collections.singletonList("JSON"),
+      ArrowheadService providedService = new ArrowheadService(Utility.createSD(service.getServiceDef(), isSecure), Collections.singleton("JSON"),
                                                               null);
       if (isSecure) {
         providedService.setServiceMetadata(ArrowheadMain.secureServerMetadata);

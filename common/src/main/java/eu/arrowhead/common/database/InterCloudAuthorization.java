@@ -10,7 +10,6 @@
 package eu.arrowhead.common.database;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -20,6 +19,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * JPA entity class for storing inter-cloud authorization rights in the database. The <i>consumer_cloud_id</i> and <i>arrowhead_service_id</i> columns
@@ -33,17 +36,22 @@ import javax.persistence.UniqueConstraint;
 @Table(name = "inter_cloud_authorization", uniqueConstraints = {@UniqueConstraint(columnNames = {"consumer_cloud_id", "arrowhead_service_id"})})
 public class InterCloudAuthorization {
 
-  @Column(name = "id")
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private long id;
 
+  @Valid
+  @NotNull
   @JoinColumn(name = "consumer_cloud_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadCloud cloud;
 
+  @Valid
+  @NotNull
   @JoinColumn(name = "arrowhead_service_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ArrowheadService service;
 
   public InterCloudAuthorization() {
@@ -54,11 +62,11 @@ public class InterCloudAuthorization {
     this.service = service;
   }
 
-  public int getId() {
+  public long getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(long id) {
     this.id = id;
   }
 
@@ -78,4 +86,36 @@ public class InterCloudAuthorization {
     this.service = service;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof InterCloudAuthorization)) {
+      return false;
+    }
+
+    InterCloudAuthorization that = (InterCloudAuthorization) o;
+
+    if (!cloud.equals(that.cloud)) {
+      return false;
+    }
+    return service.equals(that.service);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = cloud.hashCode();
+    result = 31 * result + service.hashCode();
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("InterCloudAuthorization{");
+    sb.append("cloud=").append(cloud);
+    sb.append(", service=").append(service);
+    sb.append('}');
+    return sb.toString();
+  }
 }
