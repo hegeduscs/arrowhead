@@ -10,11 +10,11 @@
 package eu.arrowhead.core.systemregistry;
 
 import eu.arrowhead.common.DatabaseManager;
-import eu.arrowhead.common.model.HttpEndpoint;
-import eu.arrowhead.common.systemregistry.AHSystem;
-import eu.arrowhead.common.systemregistry.SystemIdentity;
-import eu.arrowhead.common.systemregistry.SystemInformation;
-import eu.arrowhead.common.systemregistry.SystemRegistry;
+import eu.arrowhead.core.systemregistry.model.AHSystem;
+import eu.arrowhead.core.systemregistry.model.HttpEndpoint;
+import eu.arrowhead.core.systemregistry.model.SystemIdentity;
+import eu.arrowhead.core.systemregistry.model.SystemInformation;
+import eu.arrowhead.core.systemregistry.model.SystemRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,8 +64,8 @@ public class SystemRegistryService {
 			for (Iterator iterator = systems.iterator(); iterator.hasNext();) {
 				SystemRegistry ahSystem = (SystemRegistry) iterator.next();
 				SystemInformation information = new SystemInformation(
-						new SystemIdentity(ahSystem.getId(), ahSystem.getType()), new HttpEndpoint(ahSystem.getHost(),
-								ahSystem.getPort(), ahSystem.getPath(), ahSystem.getSecure()),
+						new SystemIdentity(ahSystem.getId(), ahSystem.getType()), new HttpEndpoint(ahSystem.getHost(), ahSystem.getPort(), ahSystem.getPath(),
+																																											 ahSystem.getSecure()),
 						null, null);
 
 				ret_systems.add(new AHSystem(information));
@@ -101,8 +101,7 @@ public class SystemRegistryService {
 			try {
 				tx = session.beginTransaction();
 
-				SystemRegistry newSystem = new SystemRegistry("OS", "test-host", 7000, "test-path", false, "",
-						"Device1");
+				SystemRegistry newSystem = new SystemRegistry("OS", "test-host", 7000, "test-path", false, "", "Device1");
 				newSystem.setId(id);
 
 				session.save(newSystem);

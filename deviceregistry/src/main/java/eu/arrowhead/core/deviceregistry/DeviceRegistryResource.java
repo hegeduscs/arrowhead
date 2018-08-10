@@ -9,7 +9,7 @@
 
 package eu.arrowhead.core.deviceregistry;
 
-import eu.arrowhead.common.deviceregistry.AHDevice;
+import eu.arrowhead.core.deviceregistry.model.AHDevice;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

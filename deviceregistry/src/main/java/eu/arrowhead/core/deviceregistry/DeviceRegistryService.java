@@ -10,11 +10,11 @@
 package eu.arrowhead.core.deviceregistry;
 
 import eu.arrowhead.common.DatabaseManager;
-import eu.arrowhead.common.deviceregistry.AHDevice;
-import eu.arrowhead.common.deviceregistry.DeviceIdentity;
-import eu.arrowhead.common.deviceregistry.DeviceInformation;
-import eu.arrowhead.common.deviceregistry.DeviceRegistry;
-import eu.arrowhead.common.model.HttpEndpoint;
+import eu.arrowhead.core.deviceregistry.model.AHDevice;
+import eu.arrowhead.core.deviceregistry.model.DeviceIdentity;
+import eu.arrowhead.core.deviceregistry.model.DeviceInformation;
+import eu.arrowhead.core.deviceregistry.model.DeviceRegistry;
+import eu.arrowhead.core.deviceregistry.model.HttpEndpoint;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,8 +64,8 @@ public class DeviceRegistryService {
 			for (Iterator iterator = devices.iterator(); iterator.hasNext();) {
 				DeviceRegistry ahDevice = (DeviceRegistry) iterator.next();
 				DeviceInformation information = new DeviceInformation(
-						new DeviceIdentity(ahDevice.getId(), ahDevice.getMac()), new HttpEndpoint(ahDevice.getHost(),
-								ahDevice.getPort(), ahDevice.getPath(), ahDevice.getSecure()),
+						new DeviceIdentity(ahDevice.getId(), ahDevice.getMac()), new HttpEndpoint(ahDevice.getHost(), ahDevice.getPort(), ahDevice.getPath(),
+																																											ahDevice.getSecure()),
 						null, null);
 
 				ret_devices.add(new AHDevice(information));
