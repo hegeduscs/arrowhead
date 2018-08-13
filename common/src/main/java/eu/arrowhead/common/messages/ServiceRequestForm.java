@@ -24,8 +24,6 @@ import javax.validation.constraints.NotNull;
 /**
  * This is what the Orchestrator Core System receives from Arrowhead Systems trying to request services.
  */
-//TODO cross parameter constraint: requestedService can not be null when overrideStore is TRUE, There is no valid PreferredProvider, but
-// "onlyPreferred" is set to true, RequestedQoS or commands hashmap is empty while \"enableQoS\" is set to true
 public class ServiceRequestForm {
 
   private static final List<String> flagKeys = new ArrayList<>(Arrays.asList("triggerInterCloud", "externalServiceRequest", "enableInterCloud",

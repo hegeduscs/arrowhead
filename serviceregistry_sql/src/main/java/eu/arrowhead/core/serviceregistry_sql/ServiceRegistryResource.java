@@ -13,12 +13,12 @@ import eu.arrowhead.common.DatabaseManager;
 import eu.arrowhead.common.database.ArrowheadService;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.database.ServiceRegistryEntry;
+import eu.arrowhead.common.exception.DuplicateEntryException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -48,10 +48,7 @@ public class ServiceRegistryResource {
 
   @POST
   @Path("register")
-  public Response registerService(ServiceRegistryEntry entry) {
-    entry.missingFields(true, false, new HashSet<>(Arrays.asList("interfaces", "address")));
-    entry.toDatabase();
-
+  public Response registerService(@Valid ServiceRegistryEntry entry) {
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -74,17 +71,23 @@ public class ServiceRegistryResource {
     }
     entry.setProvider(provider);
 
-    ServiceRegistryEntry savedEntry = dm.save(entry);
-    savedEntry.fromDatabase();
-    log.info("New ServiceRegistryEntry " + entry.toString() + " is saved.");
+    restrictionMap.clear();
+    restrictionMap.put("provider", provider);
+    restrictionMap.put("providedService", service);
+    ServiceRegistryEntry savedEntry = dm.get(ServiceRegistryEntry.class, restrictionMap);
+    if (savedEntry == null) {
+      savedEntry = dm.save(entry);
+    } else {
+      throw new DuplicateEntryException("There is already a Service Registry entry with this provider and providedService.");
+    }
+
+    log.info("New " + entry.toString() + " is saved.");
     return Response.status(Status.CREATED).entity(savedEntry).build();
   }
 
   @PUT
   @Path("query")
-  public Response queryRegistry(ServiceQueryForm queryForm) {
-    queryForm.missingFields(true, null);
-
+  public Response queryRegistry(@Valid ServiceQueryForm queryForm) {
     restrictionMap.put("serviceDefinition", queryForm.getService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -95,10 +98,6 @@ public class ServiceRegistryResource {
     restrictionMap.clear();
     restrictionMap.put("providedService", service);
     List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, restrictionMap);
-    for (ServiceRegistryEntry entry : providedServices) {
-      entry.fromDatabase();
-    }
-
     //NOTE add version filter too later, if deemed needed
     if (queryForm.isMetadataSearch()) {
       RegistryUtils.filterOnMeta(providedServices, queryForm.getService().getServiceMetadata());
@@ -114,9 +113,7 @@ public class ServiceRegistryResource {
 
   @PUT
   @Path("remove")
-  public Response removeService(ServiceRegistryEntry entry) {
-    entry.missingFields(true, false, null);
-
+  public Response removeService(@Valid ServiceRegistryEntry entry) {
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
 
@@ -130,11 +127,10 @@ public class ServiceRegistryResource {
     ServiceRegistryEntry retrievedEntry = dm.get(ServiceRegistryEntry.class, restrictionMap);
     if (retrievedEntry != null) {
       dm.delete(retrievedEntry);
-      retrievedEntry.fromDatabase();
-      log.info("ServiceRegistryEntry " + retrievedEntry.toString() + " deleted.");
+      log.info(retrievedEntry.toString() + " deleted.");
       return Response.status(Status.OK).entity(retrievedEntry).build();
     } else {
-      log.info("ServiceRegistryEntry " + entry.toString() + " was not found in the SR to delete.");
+      log.info(entry.toString() + " was not found in the SR to delete.");
       return Response.status(Status.NO_CONTENT).entity(entry).build();
     }
   }

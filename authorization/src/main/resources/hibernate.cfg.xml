@@ -14,7 +14,7 @@
 <hibernate-configuration>
   <session-factory>
     <property name="show_sql">true</property>
-    <property name="hibernate.hbm2ddl.auto">create</property>
+    <property name="hibernate.hbm2ddl.auto">update</property>
 
     <property name="connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
     <property name="hikari.maximumPoolSize">10</property>

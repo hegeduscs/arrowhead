@@ -22,8 +22,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -60,7 +60,7 @@ public class StoreApi {
    */
   @GET
   @Path("{id}")
-  public Response getStoreEntry(@PathParam("id") int id) {
+  public Response getStoreEntry(@PathParam("id") long id) {
 
     restrictionMap.put("id", id);
     OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
@@ -121,8 +121,7 @@ public class StoreApi {
    * @throws BadPayloadException, DataNotFoundException
    */
   @PUT
-  public Response getStoreEntries(OrchestrationStoreQuery query) {
-    query.missingFields(true, new HashSet<>(Collections.singleton("address")));
+  public Response getStoreEntries(@Valid OrchestrationStoreQuery query) {
     List<OrchestrationStore> store;
     if (query.getRequestedService() == null) {
       store = StoreService.getDefaultStoreEntries(query.getRequesterSystem());
@@ -147,11 +146,10 @@ public class StoreApi {
    */
 
   @POST
-  public List<OrchestrationStore> addStoreEntries(List<OrchestrationStore> storeEntries) {
-
+  public List<OrchestrationStore> addStoreEntries(@Valid List<OrchestrationStore> storeEntries) {
     List<OrchestrationStore> store = new ArrayList<>();
     for (OrchestrationStore entry : storeEntries) {
-      entry.missingFields(true, new HashSet<>(Collections.singleton("address")));
+      entry.validateCrossParameterConstraints();
       restrictionMap.clear();
       restrictionMap.put("systemName", entry.getConsumer().getSystemName());
       ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
@@ -175,7 +173,6 @@ public class StoreApi {
 
       ArrowheadCloud providerCloud = null;
       if (entry.getProviderCloud() != null) {
-        entry.getProviderCloud().missingFields(true, null);
         restrictionMap.clear();
         restrictionMap.put("operator", entry.getProviderCloud().getOperator());
         restrictionMap.put("cloudName", entry.getProviderCloud().getCloudName());
@@ -215,7 +212,7 @@ public class StoreApi {
    */
   @GET
   @Path("default/{id}")
-  public Response toggleIsDefault(@PathParam("id") int id) {
+  public Response toggleIsDefault(@PathParam("id") long id) {
 
     restrictionMap.put("id", id);
     OrchestrationStore entry = dm.get(OrchestrationStore.class, restrictionMap);
@@ -242,15 +239,10 @@ public class StoreApi {
    * @throws BadPayloadException, DataNotFoundException
    */
   @PUT
-  @Path("update")
-  public Response updateEntry(OrchestrationStore payload) {
-
-    if (payload.getId() == 0) {
-      log.info("updateEntry throws BadPayloadException.");
-      throw new BadPayloadException("Bad payload: id field is missing from the payload.");
-    }
-
-    restrictionMap.put("id", payload.getId());
+  @Path("update/{id}")
+  public Response updateEntry(@PathParam("id") long id, @Valid OrchestrationStore payload) {
+    payload.validateCrossParameterConstraints();
+    restrictionMap.put("id", id);
     OrchestrationStore storeEntry = dm.get(OrchestrationStore.class, restrictionMap);
     if (storeEntry == null) {
       log.info("updateEntry throws DataNotFoundException.");

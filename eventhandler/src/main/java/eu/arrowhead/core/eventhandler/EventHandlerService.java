@@ -18,8 +18,10 @@ import eu.arrowhead.common.messages.Event;
 import eu.arrowhead.common.messages.PublishEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -41,7 +43,7 @@ final class EventHandlerService {
     filters.removeIf(current -> current.getStartDate() != null && pe.getEvent().getTimestamp().isBefore(current.getStartDate()));
     filters.removeIf(current -> current.getEndDate() != null && pe.getEvent().getTimestamp().isAfter(current.getEndDate()));
     // Remove the filter if MatchMetadata = true and the event and filter metadata do not match perfectly
-    filters.removeIf(current -> current.getMatchMetadata() && !pe.getEvent().getEventMetadata().equals(current.getFilterMetadata()));
+    filters.removeIf(current -> current.isMatchMetadata() && !pe.getEvent().getEventMetadata().equals(current.getFilterMetadata()));
 
     return filters;
   }
@@ -66,7 +68,7 @@ final class EventHandlerService {
       String url;
       try {
         boolean isSecure = filter.getConsumer().getAuthenticationInfo() != null;
-        url = Utility.getUri(filter.getConsumer().getAddress(), filter.getPort(), filter.getNotifyUri(), isSecure, false);
+        url = Utility.getUri(filter.getConsumer().getAddress(), filter.getConsumer().getPort(), filter.getNotifyUri(), isSecure, false);
       } catch (ArrowheadException | NullPointerException e) {
         e.printStackTrace();
         continue;
@@ -101,7 +103,7 @@ final class EventHandlerService {
     if (retrievedFilter == null) {
       filter.setConsumer(consumer);
 
-      List<ArrowheadSystem> sources = new ArrayList<>();
+      Set<ArrowheadSystem> sources = new HashSet<>();
       for (ArrowheadSystem source : filter.getSources()) {
         restrictionMap.clear();
         restrictionMap.put("systemName", source.getSystemName());

@@ -46,10 +46,11 @@ public class ArrowheadCloud {
   @Size(min = 3, max = 255, message = "Cloud address must be between 3 and 255 characters")
   private String address;
 
-  @Min(value = 0, message = "Port can not be less than 0")
+  @Min(value = 1, message = "Port can not be less than 1")
   @Max(value = 65535, message = "Port can not be greater than 65535")
-  private int port;
+  private Integer port;
 
+  @NotBlank
   @Column(name = "gatekeeper_service_uri")
   private String gatekeeperServiceURI;
 
@@ -59,13 +60,13 @@ public class ArrowheadCloud {
 
   @Column(name = "is_secure")
   @Type(type = "yes_no")
-  private boolean secure;
+  private Boolean secure;
 
   public ArrowheadCloud() {
   }
 
-  public ArrowheadCloud(String operator, String cloudName, String address, int port, String gatekeeperServiceURI, String authenticationInfo,
-                        boolean secure) {
+  public ArrowheadCloud(String operator, String cloudName, String address, Integer port, String gatekeeperServiceURI, String authenticationInfo,
+                        Boolean secure) {
     this.operator = operator;
     this.cloudName = cloudName;
     this.address = address;
@@ -107,11 +108,11 @@ public class ArrowheadCloud {
     this.address = address;
   }
 
-  public int getPort() {
+  public Integer getPort() {
     return port;
   }
 
-  public void setPort(int port) {
+  public void setPort(Integer port) {
     this.port = port;
   }
 
@@ -131,11 +132,11 @@ public class ArrowheadCloud {
     this.authenticationInfo = authenticationInfo;
   }
 
-  public boolean isSecure() {
+  public Boolean isSecure() {
     return secure;
   }
 
-  public void setSecure(boolean secure) {
+  public void setSecure(Boolean secure) {
     this.secure = secure;
   }
 
@@ -190,5 +191,15 @@ public class ArrowheadCloud {
     sb.append(", secure=").append(secure);
     sb.append('}');
     return sb.toString();
+  }
+
+  public void partialUpdate(ArrowheadCloud other) {
+    this.operator = other.getOperator() != null ? other.getOperator() : this.operator;
+    this.cloudName = other.getCloudName() != null ? other.getCloudName() : this.cloudName;
+    this.address = other.getAddress() != null ? other.getAddress() : this.address;
+    this.port = other.getPort() != null ? other.getPort() : this.port;
+    this.gatekeeperServiceURI = other.getGatekeeperServiceURI() != null ? other.getGatekeeperServiceURI() : this.gatekeeperServiceURI;
+    this.authenticationInfo = other.getAuthenticationInfo() != null ? other.getAuthenticationInfo() : this.authenticationInfo;
+    this.secure = other.isSecure() != null ? other.isSecure() : this.secure;
   }
 }

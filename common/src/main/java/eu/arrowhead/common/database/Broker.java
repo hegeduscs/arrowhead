@@ -36,7 +36,7 @@ public class Broker {
   @Size(min = 3, max = 255, message = "Address must be between 3 and 255 characters")
   private String address;
 
-  @Min(value = 0, message = "Port can not be less than 0")
+  @Min(value = 1, message = "Port can not be less than 1")
   @Max(value = 65535, message = "Port can not be greater than 65535")
   private int port;
 

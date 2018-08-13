@@ -15,10 +15,9 @@ import eu.arrowhead.common.database.Broker;
 import eu.arrowhead.common.database.NeighborCloud;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -101,28 +100,26 @@ public class GatekeeperApi {
    */
   @POST
   @Path("neighborhood")
-  public Response addNeighborClouds(List<NeighborCloud> neighborCloudList) {
+  public Response addNeighborClouds(@Valid List<NeighborCloud> neighborCloudList) {
 
     List<NeighborCloud> savedNeighborClouds = new ArrayList<>();
     for (NeighborCloud nc : neighborCloudList) {
-      if (nc.missingFields(false, new HashSet<>(Arrays.asList("address", "gatekeeperServiceURI"))).isEmpty()) {
-        restrictionMap.clear();
-        restrictionMap.put("operator", nc.getCloud().getOperator());
-        restrictionMap.put("cloudName", nc.getCloud().getCloudName());
-        ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
-        if (cloud == null) {
-          dm.save(nc.getCloud());
-        } else {
-          nc.setCloud(cloud);
-        }
+      restrictionMap.clear();
+      restrictionMap.put("operator", nc.getCloud().getOperator());
+      restrictionMap.put("cloudName", nc.getCloud().getCloudName());
+      ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
+      if (cloud == null) {
+        dm.save(nc.getCloud());
+      } else {
+        nc.setCloud(cloud);
+      }
 
-        restrictionMap.clear();
-        restrictionMap.put("cloud", cloud);
-        NeighborCloud neighborCloud = dm.get(NeighborCloud.class, restrictionMap);
-        if (neighborCloud == null) {
-          dm.save(nc);
-          savedNeighborClouds.add(nc);
-        }
+      restrictionMap.clear();
+      restrictionMap.put("cloud", cloud);
+      NeighborCloud neighborCloud = dm.get(NeighborCloud.class, restrictionMap);
+      if (neighborCloud == null) {
+        dm.save(nc);
+        savedNeighborClouds.add(nc);
       }
     }
 
@@ -138,9 +135,7 @@ public class GatekeeperApi {
    */
   @PUT
   @Path("neighborhood")
-  public Response updateNeighborCloud(NeighborCloud nc) {
-    nc.missingFields(true, null);
-
+  public Response updateNeighborCloud(@Valid NeighborCloud nc) {
     restrictionMap.put("operator", nc.getCloud().getOperator());
     restrictionMap.put("cloudName", nc.getCloud().getCloudName());
     ArrowheadCloud cloud = dm.get(ArrowheadCloud.class, restrictionMap);
@@ -245,18 +240,16 @@ public class GatekeeperApi {
 
   @POST
   @Path("brokers")
-  public Response addBrokers(List<Broker> brokerList) {
+  public Response addBrokers(@Valid List<Broker> brokerList) {
 
     List<Broker> savedBrokers = new ArrayList<>();
     for (Broker broker : brokerList) {
-      if (broker.missingFields(false, null).isEmpty()) {
-        restrictionMap.clear();
-        restrictionMap.put("brokerName", broker.getBrokerName());
-        Broker retrievedBroker = dm.get(Broker.class, restrictionMap);
-        if (retrievedBroker == null) {
-          dm.save(broker);
-          savedBrokers.add(broker);
-        }
+      restrictionMap.clear();
+      restrictionMap.put("brokerName", broker.getBrokerName());
+      Broker retrievedBroker = dm.get(Broker.class, restrictionMap);
+      if (retrievedBroker == null) {
+        dm.save(broker);
+        savedBrokers.add(broker);
       }
     }
 
@@ -269,8 +262,7 @@ public class GatekeeperApi {
 
   @PUT
   @Path("brokers")
-  public Response updateBroker(Broker broker) {
-    broker.missingFields(true, null);
+  public Response updateBroker(@Valid Broker broker) {
     restrictionMap.put("brokerName", broker.getBrokerName());
     Broker retrievedBroker = dm.get(Broker.class, restrictionMap);
     if (retrievedBroker != null) {

@@ -34,6 +34,7 @@ import eu.arrowhead.common.messages.ServiceRequestForm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -67,9 +68,7 @@ public class GatekeeperInboundResource {
    */
   @PUT
   @Path("gsd_poll")
-  public Response GSDPoll(GSDPoll gsdPoll) {
-    gsdPoll.missingFields(true, null);
-
+  public Response GSDPoll(@Valid GSDPoll gsdPoll) {
     // Polling the Authorization System about the consumer Cloud
     InterCloudAuthRequest authRequest = new InterCloudAuthRequest(gsdPoll.getRequesterCloud(), gsdPoll.getRequestedService());
     String authUri = UriBuilder.fromPath(GatekeeperMain.AUTH_CONTROL_URI).path("intercloud").toString();
@@ -110,9 +109,7 @@ public class GatekeeperInboundResource {
    */
   @PUT
   @Path("icn_proposal")
-  public Response ICNProposal(ICNProposal icnProposal) {
-    icnProposal.missingFields(true, null);
-
+  public Response ICNProposal(@Valid ICNProposal icnProposal) {
     // Polling the Authorization System about the consumer Cloud
     InterCloudAuthRequest authRequest = new InterCloudAuthRequest(icnProposal.getRequesterCloud(), icnProposal.getRequestedService());
     String authUri = UriBuilder.fromPath(GatekeeperMain.AUTH_CONTROL_URI).path("intercloud").toString();

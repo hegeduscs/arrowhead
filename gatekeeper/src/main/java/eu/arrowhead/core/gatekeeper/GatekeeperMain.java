@@ -23,6 +23,7 @@ import eu.arrowhead.common.misc.GetCoreSystemServicesTask;
 import eu.arrowhead.common.misc.NeedsCoreSystemService;
 import eu.arrowhead.common.misc.SecurityUtils;
 import eu.arrowhead.common.misc.TypeSafeProperties;
+import eu.arrowhead.common.web.ArrowheadCloudApi;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -166,11 +167,11 @@ public class GatekeeperMain implements NeedsCoreSystemService {
   private static HttpServer startServer(final String url, final boolean inbound) {
     final ResourceConfig config = new ResourceConfig();
     if (inbound) {
-      config.registerClasses(GatekeeperInboundResource.class);
+      config.registerClasses(GatekeeperInboundResource.class, ArrowheadCloudApi.class);
     } else {
-      config.registerClasses(GatekeeperApi.class, GatekeeperOutboundResource.class);
+      config.registerClasses(GatekeeperApi.class, GatekeeperOutboundResource.class, ArrowheadCloudApi.class);
     }
-    config.packages("eu.arrowhead.common", "eu.arrowhead.core.gatekeeper.filter");
+    config.packages("eu.arrowhead.common.exception", "eu.arrowhead.common.json", "eu.arrowhead.core.gatekeeper.filter");
 
     URI uri = UriBuilder.fromUri(url).build();
     try {
@@ -194,11 +195,11 @@ public class GatekeeperMain implements NeedsCoreSystemService {
   private static HttpServer startSecureServer(final String url, final boolean inbound) {
     final ResourceConfig config = new ResourceConfig();
     if (inbound) {
-      config.registerClasses(GatekeeperInboundResource.class);
+      config.registerClasses(GatekeeperInboundResource.class, ArrowheadCloudApi.class);
     } else {
-      config.registerClasses(GatekeeperApi.class, GatekeeperOutboundResource.class);
+      config.registerClasses(GatekeeperApi.class, GatekeeperOutboundResource.class, ArrowheadCloudApi.class);
     }
-    config.packages("eu.arrowhead.common", "eu.arrowhead.core.gatekeeper.filter");
+    config.packages("eu.arrowhead.common.exception", "eu.arrowhead.common.json", "eu.arrowhead.core.gatekeeper.filter");
 
     String gatekeeperKeystorePath = props.getProperty("gatekeeper_keystore");
     String gatekeeperKeystorePass = props.getProperty("gatekeeper_keystore_pass");
@@ -268,9 +269,9 @@ public class GatekeeperMain implements NeedsCoreSystemService {
     boolean isSecure = uri.getScheme().equals("https");
     ArrowheadSystem gkSystem = new ArrowheadSystem("gatekeeper", uri.getHost(), uri.getPort(), BASE64_PUBLIC_KEY);
     ArrowheadService gsdService = new ArrowheadService(Utility.createSD(CoreSystemService.GSD_SERVICE.getServiceDef(), isSecure),
-                                                       Collections.singletonList("JSON"), null);
+                                                       Collections.singleton("JSON"), null);
     ArrowheadService icnService = new ArrowheadService(Utility.createSD(CoreSystemService.ICN_SERVICE.getServiceDef(), isSecure),
-                                                       Collections.singletonList("JSON"), null);
+                                                       Collections.singleton("JSON"), null);
     if (isSecure) {
       gsdService.setServiceMetadata(ArrowheadMain.secureServerMetadata);
       icnService.setServiceMetadata(ArrowheadMain.secureServerMetadata);

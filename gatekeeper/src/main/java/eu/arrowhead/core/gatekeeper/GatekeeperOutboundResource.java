@@ -29,11 +29,10 @@ import eu.arrowhead.common.messages.ICNResult;
 import eu.arrowhead.common.messages.OrchestrationForm;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -70,8 +69,7 @@ public class GatekeeperOutboundResource {
    */
   @PUT
   @Path("init_gsd")
-  public Response GSDRequest(GSDRequestForm requestForm) {
-    requestForm.missingFields(true, null);
+  public Response GSDRequest(@Valid GSDRequestForm requestForm) {
     ArrowheadCloud ownCloud = Utility.getOwnCloud();
     GSDPoll gsdPoll = new GSDPoll(requestForm.getRequestedService(), ownCloud, requestForm.getRegistryFlags());
 
@@ -123,20 +121,13 @@ public class GatekeeperOutboundResource {
         i++;
       }
 
-      //Response validation
-      Set<String> mandatoryFields = new HashSet<>(Arrays.asList("address", "port", "gatekeeperServiceURI"));
-      if (GatekeeperMain.IS_SECURE) {
-        mandatoryFields.add("authenticationInfo");
+      try {
+        @Valid GSDAnswer answer = response.readEntity(GSDAnswer.class);
+        gsdAnswerList.add(answer);
+      } catch (ConstraintViolationException e) {
+        e.printStackTrace();
+        log.info("GSDAnswer from " + uri + " is not valid! Skipping it from GSDResult!");
       }
-      GSDAnswer answer = response.readEntity(GSDAnswer.class);
-      mandatoryFields = answer.missingFields(false, mandatoryFields);
-
-      if (!mandatoryFields.isEmpty()) {
-        log.info("GSDAnswer from " + uri + " missing fields:" + String.join(", ", mandatoryFields) + " (skipping it from GSDResult)");
-        continue;
-      }
-      //All is good, add the answer to the result list
-      gsdAnswerList.add(answer);
     }
 
     // Sending back the results. The orchestrator will validate the results (result list might be empty) and decide how to proceed.
@@ -153,8 +144,7 @@ public class GatekeeperOutboundResource {
    */
   @PUT
   @Path("init_icn")
-  public Response ICNRequest(ICNRequestForm requestForm) {
-    requestForm.missingFields(true, new HashSet<>(Arrays.asList("ArrowheadCloud:address", "ArrowheadCloud:port", "gatekeeperServiceURI")));
+  public Response ICNRequest(@Valid ICNRequestForm requestForm) {
     requestForm.getNegotiationFlags().put("useGateway", GatekeeperMain.USE_GATEWAY);
     // Compiling the payload and then getting the request URI
     ICNProposal icnProposal = new ICNProposal(requestForm.getRequestedService(), Utility.getOwnCloud(), requestForm.getRequesterSystem(),

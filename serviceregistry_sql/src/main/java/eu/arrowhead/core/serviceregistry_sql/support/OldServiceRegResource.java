@@ -32,7 +32,7 @@ public class OldServiceRegResource {
   public Response registerServiceSupport(ServiceRegistryEntrySupport supportEntry) {
     ArrowheadService service = new ArrowheadService(supportEntry.getProvidedService());
     ArrowheadSystem system = new ArrowheadSystem(supportEntry.getProvider());
-    ServiceRegistryEntry entry = new ServiceRegistryEntry(service, system, system.getPort(), supportEntry.getServiceURI());
+    ServiceRegistryEntry entry = new ServiceRegistryEntry(service, system, supportEntry.getServiceURI());
 
     ServiceRegistryResource serviceRegResource = new ServiceRegistryResource();
     Response response = serviceRegResource.registerService(entry);
@@ -45,7 +45,7 @@ public class OldServiceRegResource {
   public Response removeServiceSupport(ServiceRegistryEntrySupport supportEntry) {
     ArrowheadService service = new ArrowheadService(supportEntry.getProvidedService());
     ArrowheadSystem system = new ArrowheadSystem(supportEntry.getProvider());
-    ServiceRegistryEntry entry = new ServiceRegistryEntry(service, system, system.getPort(), supportEntry.getServiceURI());
+    ServiceRegistryEntry entry = new ServiceRegistryEntry(service, system, supportEntry.getServiceURI());
 
     ServiceRegistryResource serviceRegResource = new ServiceRegistryResource();
     Response response = serviceRegResource.removeService(entry);

@@ -53,6 +53,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
@@ -274,8 +278,8 @@ public final class Utility {
       ServiceRegistryEntry entry = result.getServiceQueryData().get(0);
       ArrowheadSystem coreSystem = entry.getProvider();
       boolean isSecure = false;
-      if (!entry.getService().getServiceMetadata().isEmpty()) {
-        isSecure = entry.getService().getServiceMetadata().containsKey("security");
+      if (!entry.getProvidedService().getServiceMetadata().isEmpty()) {
+        isSecure = entry.getProvidedService().getServiceMetadata().containsKey("security");
       }
       String serviceUri = getUri(coreSystem.getAddress(), coreSystem.getPort(), entry.getServiceUri(), isSecure, false);
       if (serviceId.equals(CoreSystemService.GW_CONSUMER_SERVICE.getServiceDef()) || serviceId
@@ -435,6 +439,13 @@ public final class Utility {
       }
     }
     return addresses.get(0).getHostAddress();
+  }
+
+  public static <T> boolean isBeanValid(T bean) {
+    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    Validator validator = factory.getValidator();
+    Set<ConstraintViolation<T>> violations = validator.validate(bean);
+    return violations.isEmpty();
   }
 
 }

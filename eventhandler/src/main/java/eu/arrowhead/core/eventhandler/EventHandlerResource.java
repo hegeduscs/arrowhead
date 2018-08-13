@@ -14,9 +14,8 @@ import eu.arrowhead.common.database.EventFilter;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.messages.PublishEvent;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -50,8 +49,7 @@ public class EventHandlerResource {
 
   @POST
   @Path("publish")
-  public Response publishEvent(PublishEvent eventPublished, @Context ContainerRequestContext requestContext) {
-    eventPublished.missingFields(true, null);
+  public Response publishEvent(@Valid PublishEvent eventPublished, @Context ContainerRequestContext requestContext) {
     if (eventPublished.getEvent().getTimestamp() == null) {
       eventPublished.getEvent().setTimestamp(LocalDateTime.now());
     }
@@ -85,13 +83,10 @@ public class EventHandlerResource {
 
   @POST
   @Path("subscription")
-  public Response subscribe(EventFilter filter) {
-    filter.missingFields(true, new HashSet<>(Arrays.asList("ArrowheadSystem:port", "notifyUri")));
-    filter.toDatabase();
+  public Response subscribe(@Valid EventFilter filter) {
     EventFilter savedFilter = EventHandlerService.saveEventFilter(filter);
     if (savedFilter != null) {
       log.info("EventFilter was saved.");
-      savedFilter.fromDatabase();
       return Response.status(Status.CREATED.getStatusCode()).entity(savedFilter).build();
     } else {
       log.info("EventFilter was already in the database, nothing happened.");
@@ -109,8 +104,7 @@ public class EventHandlerResource {
 
   @PUT
   @Path("subscription")
-  public Response unsubscribe(EventFilter filter) {
-    filter.missingFields(true, null);
+  public Response unsubscribe(@Valid EventFilter filter) {
     int statusCode = EventHandlerService.deleteEventFilter(filter.getEventType(), filter.getConsumer().getSystemName());
     log.info("deleteEventFilter returned with status code: " + statusCode);
     return Response.status(statusCode).build();

@@ -12,6 +12,7 @@ package eu.arrowhead.core.orchestrator;
 import eu.arrowhead.common.database.ArrowheadSystem;
 import eu.arrowhead.common.messages.OrchestrationResponse;
 import eu.arrowhead.common.messages.ServiceRequestForm;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -50,8 +51,8 @@ public class OrchestratorResource {
    * @return OrchestrationResponse
    */
   @POST
-  public Response orchestrationProcess(ServiceRequestForm srf) {
-    srf.missingFields(true, null);
+  public Response orchestrationProcess(@Valid ServiceRequestForm srf) {
+    srf.validateCrossParameterConstraints();
 
     OrchestrationResponse orchResponse;
     if (srf.getOrchestrationFlags().get("externalServiceRequest")) {
@@ -82,7 +83,6 @@ public class OrchestratorResource {
     log.info("Received a GET Store orchestration from: " + requesterSystem.getSystemName());
 
     ServiceRequestForm srf = new ServiceRequestForm.Builder(requesterSystem).build();
-    srf.missingFields(true, null);
     OrchestrationResponse orchResponse = OrchestratorService.orchestrationFromStore(srf);
 
     log.info("Default store orchestration returned with " + orchResponse.getResponse().size() + " orchestration forms.");

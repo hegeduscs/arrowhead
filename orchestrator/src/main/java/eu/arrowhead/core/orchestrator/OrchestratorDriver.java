@@ -33,7 +33,6 @@ import eu.arrowhead.common.messages.TokenGenHelper;
 import eu.arrowhead.common.messages.TokenGenerationRequest;
 import eu.arrowhead.common.messages.TokenGenerationResponse;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,9 +83,10 @@ final class OrchestratorDriver {
     // If there are non-valid entries in the Service Registry response, we filter those out
     List<ServiceRegistryEntry> temp = new ArrayList<>();
     for (ServiceRegistryEntry entry : serviceQueryResult.getServiceQueryData()) {
-      if (!entry.missingFields(false, false, new HashSet<>(Arrays.asList("interfaces", "address"))).isEmpty()) {
+      if (!Utility.isBeanValid(entry)) {
         temp.add(entry);
       }
+      //TODO this should be done on the SR side I think
       if (!StoreService.hasMatchingInterfaces(service, entry.getProvidedService())) {
         temp.add(entry);
       }
@@ -253,7 +253,7 @@ final class OrchestratorDriver {
       // Removing non-valid Store entries from the results
       List<OrchestrationStore> temp = new ArrayList<>();
       for (OrchestrationStore entry : retrievedList) {
-        if (!entry.missingFields(false, new HashSet<>(Collections.singleton("address"))).isEmpty()) {
+        if (!Utility.isBeanValid(entry)) {
           temp.add(entry);
         }
       }
@@ -364,7 +364,7 @@ final class OrchestratorDriver {
           //This will include the service metadata and port, which is only stored in the Service Registry
           storeEntry.setService(srEntry.getProvidedService());
           storeEntry.setProviderSystem(srEntry.getProvider());
-          storeEntry.setServiceURI(srEntry.getServiceURI());
+          storeEntry.setServiceURI(srEntry.getServiceUri());
         }
       }
     }
@@ -462,8 +462,7 @@ final class OrchestratorDriver {
     // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
     List<ArrowheadSystem> preferredSystems = new ArrayList<>();
     for (PreferredProvider provider : srf.getPreferredProviders()) {
-      boolean validProviderSystem = provider.getProviderSystem().missingFields(false, new HashSet<>(Collections.singleton("address"))).isEmpty();
-      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null && validProviderSystem) {
+      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null) {
         preferredSystems.add(provider.getProviderSystem());
       }
     }

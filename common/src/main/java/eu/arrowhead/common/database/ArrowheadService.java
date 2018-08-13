@@ -9,6 +9,7 @@
 
 package eu.arrowhead.common.database;
 
+import eu.arrowhead.common.json.support.ArrowheadServiceSupport;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -71,6 +72,12 @@ public class ArrowheadService {
     this.serviceDefinition = serviceDefinition;
     this.interfaces = interfaces;
     this.serviceMetadata = serviceMetadata;
+  }
+
+  public ArrowheadService(ArrowheadServiceSupport service) {
+    this.serviceDefinition = service.getServiceGroup() + "_" + service.getServiceDefinition();
+    this.interfaces = new HashSet<>(service.getInterfaces());
+    this.serviceMetadata = service.getServiceMetadata();
   }
 
   public long getId() {
@@ -138,5 +145,11 @@ public class ArrowheadService {
     sb.append(", serviceDefinition='").append(serviceDefinition).append('\'');
     sb.append('}');
     return sb.toString();
+  }
+
+  public void partialUpdate(ArrowheadService other) {
+    this.serviceDefinition = other.getServiceDefinition() != null ? other.getServiceDefinition() : this.serviceDefinition;
+    this.interfaces = other.getInterfaces().isEmpty() ? this.interfaces : other.getInterfaces();
+    this.serviceMetadata = other.getServiceMetadata().isEmpty() ? this.serviceMetadata : other.getServiceMetadata();
   }
 }

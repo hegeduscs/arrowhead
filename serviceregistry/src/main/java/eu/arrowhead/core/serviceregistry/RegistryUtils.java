@@ -21,10 +21,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Logger;
 
 class RegistryUtils {
@@ -63,8 +64,8 @@ class RegistryUtils {
     if (registryEntry.getProvider().getAuthenticationInfo() != null) {
       properties.put("ahsysauth", registryEntry.getProvider().getAuthenticationInfo());
     }
-    if (registryEntry.getServiceURI() != null) {
-      properties.put("path", registryEntry.getServiceURI());
+    if (registryEntry.getServiceUri() != null) {
+      properties.put("path", registryEntry.getServiceUri());
     }
 
     LocalDateTime date = registryEntry.getEndOfValidity();
@@ -119,7 +120,7 @@ class RegistryUtils {
       serviceName = serviceName.substring(0, serviceNameLength);
       String[] array = serviceName.split("_");
       if (serviceName.startsWith("_") && array.length == 3) {
-        List<String> intf = new ArrayList<>();
+        Set<String> intf = new HashSet<>();
         intf.add(array[2]);
         if (array[1].contains("ahf-")) {
           arrowheadService.setServiceDefinition(array[1].substring(4));
@@ -178,7 +179,7 @@ class RegistryUtils {
     }
 
     if (properties.containsKey("path")) {
-      providerService.setServiceURI(properties.get("path"));
+      providerService.setServiceUri(properties.get("path"));
     }
 
     if (properties.containsKey("txtvers")) {

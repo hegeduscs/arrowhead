@@ -21,6 +21,8 @@ import eu.arrowhead.common.database.ServiceRegistryEntry;
 import eu.arrowhead.common.exception.DnsException;
 import eu.arrowhead.common.messages.ServiceQueryForm;
 import eu.arrowhead.common.messages.ServiceQueryResult;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -55,8 +57,9 @@ class ServiceRegistry {
 
       try {
         DnsSDRegistrator registrator = RegistryUtils.createRegistrator();
-        if (entry.getTtl() > 0) {
-          registrator.setTimeToLive(Math.toIntExact(entry.getTtl()));
+        if (entry.getEndOfValidity().isAfter(LocalDateTime.now())) {
+          long timeToLive = Duration.between(LocalDateTime.now(), entry.getEndOfValidity()).getSeconds();
+          registrator.setTimeToLive(Math.toIntExact(timeToLive));
         }
         ServiceName name = registrator.makeServiceName(providerInstance, ServiceType.valueOf(serviceType));
 

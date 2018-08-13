@@ -42,7 +42,7 @@ public class ServiceRegistryEntry {
   @JoinColumn(name = "arrowhead_service_id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @OnDelete(action = OnDeleteAction.CASCADE)
-  private ArrowheadService service;
+  private ArrowheadService providedService;
 
   @Valid
   @NotNull(message = "Provider ArrowheadSystem cannot be null")
@@ -67,16 +67,16 @@ public class ServiceRegistryEntry {
   public ServiceRegistryEntry() {
   }
 
-  public ServiceRegistryEntry(ArrowheadService service, ArrowheadSystem provider, String serviceUri) {
-    this.service = service;
+  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, String serviceUri) {
+    this.providedService = providedService;
     this.provider = provider;
     this.serviceUri = serviceUri;
   }
 
 
-  public ServiceRegistryEntry(ArrowheadService service, ArrowheadSystem provider, String serviceUri, boolean udp, LocalDateTime endOfValidity,
+  public ServiceRegistryEntry(ArrowheadService providedService, ArrowheadSystem provider, String serviceUri, boolean udp, LocalDateTime endOfValidity,
                               int version) {
-    this.service = service;
+    this.providedService = providedService;
     this.provider = provider;
     this.serviceUri = serviceUri;
     this.udp = udp;
@@ -92,12 +92,12 @@ public class ServiceRegistryEntry {
     this.id = id;
   }
 
-  public ArrowheadService getService() {
-    return service;
+  public ArrowheadService getProvidedService() {
+    return providedService;
   }
 
-  public void setService(ArrowheadService service) {
-    this.service = service;
+  public void setProvidedService(ArrowheadService providedService) {
+    this.providedService = providedService;
   }
 
   public ArrowheadSystem getProvider() {
@@ -154,7 +154,7 @@ public class ServiceRegistryEntry {
     if (version != that.version) {
       return false;
     }
-    if (!service.equals(that.service)) {
+    if (!providedService.equals(that.providedService)) {
       return false;
     }
     if (!provider.equals(that.provider)) {
@@ -165,7 +165,7 @@ public class ServiceRegistryEntry {
 
   @Override
   public int hashCode() {
-    int result = service.hashCode();
+    int result = providedService.hashCode();
     result = 31 * result + provider.hashCode();
     result = 31 * result + (serviceUri != null ? serviceUri.hashCode() : 0);
     result = 31 * result + version;
@@ -175,7 +175,7 @@ public class ServiceRegistryEntry {
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder("ServiceRegistryEntry{");
-    sb.append("service=").append(service);
+    sb.append("providedService=").append(providedService);
     sb.append(", provider=").append(provider);
     sb.append('}');
     return sb.toString();

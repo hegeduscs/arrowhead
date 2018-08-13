@@ -17,6 +17,7 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.messages.ServiceQueryResult;
 import java.util.HashMap;
 import java.util.List;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -48,11 +49,6 @@ public class ServiceRegistryApi {
   @Path("all")
   public Response getAllServices() {
     List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, null);
-
-    for (ServiceRegistryEntry entry : providedServices) {
-      entry.fromDatabase();
-    }
-
     ServiceQueryResult result = new ServiceQueryResult(providedServices);
     log.info("getAllServices returns " + result.getServiceQueryData().size() + " entries");
     if (result.getServiceQueryData().isEmpty()) {
@@ -95,10 +91,6 @@ public class ServiceRegistryApi {
       throw new DataNotFoundException("There are no Service Registry entries with the requested ArrowheadSystem in the database.");
     }
 
-    for (ServiceRegistryEntry entry : srList) {
-      entry.fromDatabase();
-    }
-
     log.info("getAllByProvider returns " + srList.size() + " entries");
     return srList;
   }
@@ -121,20 +113,13 @@ public class ServiceRegistryApi {
       throw new DataNotFoundException("There are no Service Registry entries with the requested ArrowheadService in the database.");
     }
 
-    for (ServiceRegistryEntry entry : srList) {
-      entry.fromDatabase();
-    }
-
     log.info("getAllByService returns " + srList.size() + " entries");
     return srList;
   }
 
   @PUT
   @Path("update")
-  public Response updateServiceRegistryEntry(ServiceRegistryEntry entry) {
-    entry.missingFields(true, false, null);
-    entry.toDatabase();
-
+  public Response updateServiceRegistryEntry(@Valid ServiceRegistryEntry entry) {
     restrictionMap.put("serviceDefinition", entry.getProvidedService().getServiceDefinition());
     ArrowheadService service = dm.get(ArrowheadService.class, restrictionMap);
     if (service == null) {
@@ -158,14 +143,9 @@ public class ServiceRegistryApi {
       log.info("updateServiceRegistryEntry throws DataNotFoundException");
       throw new DataNotFoundException("Requested Service Registry entry not found in the database.");
     }
-    retreivedEntry.setServiceURI(entry.getServiceURI());
-    if (entry.getPort() > 0) {
-      retreivedEntry.setPort(entry.getPort());
-    }
-    retreivedEntry.setMetadata(entry.getMetadata());
+    retreivedEntry.setServiceUri(entry.getServiceUri());
     retreivedEntry.setEndOfValidity(entry.getEndOfValidity());
     retreivedEntry = dm.merge(retreivedEntry);
-    retreivedEntry.fromDatabase();
 
     log.info("updateServiceRegistryEntry successfully returns.");
     return Response.status(Status.ACCEPTED).entity(retreivedEntry).build();
