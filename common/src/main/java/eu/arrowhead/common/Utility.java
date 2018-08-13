@@ -403,4 +403,5 @@ public final class Utility {
       throw new ServiceConfigurationError("Missing field(s) from app.properties file: " + properties.toString());
     }
   }
+
 }
