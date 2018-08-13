@@ -415,6 +415,7 @@ public final class Utility {
 
   /* If needed, this method can be used to get the IPv4 address of the host machine. Public point-to-point IP addresses are prioritized over private
     (site local) IP addresses */
+  @SuppressWarnings("unused")
   public static String getIpAddress() throws SocketException {
     List<InetAddress> addresses = new ArrayList<>();
 
@@ -441,6 +442,7 @@ public final class Utility {
     return addresses.get(0).getHostAddress();
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public static <T> boolean isBeanValid(T bean) {
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     Validator validator = factory.getValidator();
