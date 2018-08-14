@@ -90,6 +90,8 @@ final class EventHandlerService {
   static EventFilter saveEventFilter(EventFilter filter) {
     restrictionMap.clear();
     restrictionMap.put("systemName", filter.getConsumer().getSystemName());
+    restrictionMap.put("address", filter.getConsumer().getAddress());
+    restrictionMap.put("port", filter.getConsumer().getPort());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.info("Consumer System " + filter.getConsumer().getSystemName() + " was not in the database, saving it now.");
@@ -107,6 +109,8 @@ final class EventHandlerService {
       for (ArrowheadSystem source : filter.getSources()) {
         restrictionMap.clear();
         restrictionMap.put("systemName", source.getSystemName());
+        restrictionMap.put("address", source.getAddress());
+        restrictionMap.put("port", source.getPort());
         ArrowheadSystem retrievedSource = dm.get(ArrowheadSystem.class, restrictionMap);
         if (retrievedSource == null) {
           retrievedSource = dm.save(source);
@@ -124,21 +128,21 @@ final class EventHandlerService {
   static int deleteEventFilter(String eventType, String consumerName) {
     restrictionMap.clear();
     restrictionMap.put("systemName", consumerName);
-    ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
-    if (consumer == null) {
+    List<ArrowheadSystem> consumers = dm.getAll(ArrowheadSystem.class, restrictionMap);
+    if (consumers.isEmpty()) {
       return 204; //NO CONTENT ~ call had no effect
     }
 
-    restrictionMap.clear();
-    restrictionMap.put("eventType", eventType);
-    restrictionMap.put("consumer", consumer);
-    EventFilter filter = dm.get(EventFilter.class, restrictionMap);
-    if (filter == null) {
-      return 204;
-    } else {
-      dm.delete(filter);
-      return 200; //OK ~ delete was successful
+    for (ArrowheadSystem consumer : consumers) {
+      restrictionMap.clear();
+      restrictionMap.put("eventType", eventType);
+      restrictionMap.put("consumer", consumer);
+      EventFilter filter = dm.get(EventFilter.class, restrictionMap);
+      if (filter != null) {
+        dm.delete(filter);
+      }
     }
+    return 200; //OK ~ delete was successful
   }
 
 }

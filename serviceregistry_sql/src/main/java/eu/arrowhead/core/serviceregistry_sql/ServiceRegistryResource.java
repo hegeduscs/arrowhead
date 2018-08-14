@@ -61,6 +61,8 @@ public class ServiceRegistryResource {
 
     restrictionMap.clear();
     restrictionMap.put("systemName", entry.getProvider().getSystemName());
+    restrictionMap.put("address", entry.getProvider().getAddress());
+    restrictionMap.put("port", entry.getProvider().getPort());
     ArrowheadSystem provider = dm.get(ArrowheadSystem.class, restrictionMap);
     if (provider == null) {
       provider = dm.save(entry.getProvider());
@@ -119,6 +121,8 @@ public class ServiceRegistryResource {
 
     restrictionMap.clear();
     restrictionMap.put("systemName", entry.getProvider().getSystemName());
+    restrictionMap.put("address", entry.getProvider().getAddress());
+    restrictionMap.put("port", entry.getProvider().getPort());
     ArrowheadSystem provider = dm.get(ArrowheadSystem.class, restrictionMap);
 
     restrictionMap.clear();

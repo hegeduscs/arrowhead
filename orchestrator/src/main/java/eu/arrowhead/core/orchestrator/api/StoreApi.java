@@ -152,6 +152,8 @@ public class StoreApi {
       entry.validateCrossParameterConstraints();
       restrictionMap.clear();
       restrictionMap.put("systemName", entry.getConsumer().getSystemName());
+      restrictionMap.put("address", entry.getConsumer().getAddress());
+      restrictionMap.put("port", entry.getConsumer().getPort());
       ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
       if (consumer == null) {
         consumer = dm.save(entry.getConsumer());
@@ -166,6 +168,8 @@ public class StoreApi {
 
       restrictionMap.clear();
       restrictionMap.put("systemName", entry.getProviderSystem().getSystemName());
+      restrictionMap.put("address", entry.getProviderSystem().getAddress());
+      restrictionMap.put("port", entry.getProviderSystem().getPort());
       ArrowheadSystem providerSystem = dm.get(ArrowheadSystem.class, restrictionMap);
       if (providerSystem == null) {
         providerSystem = dm.save(entry.getProviderSystem());
@@ -292,11 +296,13 @@ public class StoreApi {
    * no matching entries were in the database to begin with.
    */
   @DELETE
-  @Path("consumername/{systemName}")
-  public Response deleteEntries(@PathParam("systemName") String systemName) {
-
-    restrictionMap.put("systemName", systemName);
+  @Path("consumerId/{systemId}")
+  public Response deleteEntries(@PathParam("systemId") long systemId) {
+    restrictionMap.put("id", systemId);
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
+    if (consumer == null) {
+      return Response.noContent().build();
+    }
 
     restrictionMap.clear();
     restrictionMap.put("consumer", consumer);

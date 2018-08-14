@@ -68,6 +68,8 @@ public class AuthorizationResource {
   @Path("intracloud")
   public Response isSystemAuthorized(@Valid IntraCloudAuthRequest request) {
     restrictionMap.put("systemName", request.getConsumer().getSystemName());
+    restrictionMap.put("address", request.getConsumer().getAddress());
+    restrictionMap.put("port", request.getConsumer().getPort());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.error("Consumer is not in the database. isSystemAuthorized DataNotFoundException");
@@ -94,6 +96,8 @@ public class AuthorizationResource {
     for (ArrowheadSystem provider : request.getProviders()) {
       restrictionMap.clear();
       restrictionMap.put("systemName", provider.getSystemName());
+      restrictionMap.put("address", provider.getAddress());
+      restrictionMap.put("port", provider.getPort());
       ArrowheadSystem retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
 
       restrictionMap.clear();

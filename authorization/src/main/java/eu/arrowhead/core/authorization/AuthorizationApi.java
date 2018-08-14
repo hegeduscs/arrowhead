@@ -86,17 +86,13 @@ public class AuthorizationApi {
    */
 
   @GET
-  @Path("intracloud/systemname/{systemName}/services")
-  public Set<ArrowheadService> getSystemServices(@PathParam("systemName") String systemName, @QueryParam("provider_side") boolean providerSide) {
-
-    restrictionMap.put("systemName", systemName);
-    ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
-    if (system == null) {
+  @Path("intracloud/systemId/{systemId}/services")
+  public Set<ArrowheadService> getSystemServices(@PathParam("systemId") long systemId, @QueryParam("provider_side") boolean providerSide) {
+    ArrowheadSystem system = dm.get(ArrowheadSystem.class, systemId).orElseThrow(() -> {
       log.info("getSystemServices throws DataNotFoundException.");
-      throw new DataNotFoundException("The system " + systemName + " is not in the authorization database");
-    }
+      throw new DataNotFoundException("ArrowheadSystem not found with id:" + systemId);
+    });
 
-    restrictionMap.clear();
     if (!providerSide) {
       restrictionMap.put("consumer", system);
     } else {
@@ -117,17 +113,13 @@ public class AuthorizationApi {
   }
 
   @GET
-  @Path("intracloud/systemname/{systemName}")
-  public List<IntraCloudAuthorization> getSystemAuthRights(@PathParam("systemName") String systemName) {
-
-    restrictionMap.put("systemName", systemName);
-    ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
-    if (system == null) {
+  @Path("intracloud/systemId/{systemId}")
+  public List<IntraCloudAuthorization> getSystemAuthRights(@PathParam("systemId") long systemId) {
+    ArrowheadSystem system = dm.get(ArrowheadSystem.class, systemId).orElseThrow(() -> {
       log.info("getSystemAuthRights throws DataNotFoundException.");
-      throw new DataNotFoundException("The system " + systemName + " is not in the authorization database");
-    }
+      throw new DataNotFoundException("ArrowheadSystem not found with id:" + systemId);
+    });
 
-    restrictionMap.clear();
     restrictionMap.put("consumer", system);
     restrictionMap.put("provider", system);
     List<IntraCloudAuthorization> authRights = dm.getAllOfEither(IntraCloudAuthorization.class, restrictionMap);
@@ -171,8 +163,9 @@ public class AuthorizationApi {
   @POST
   @Path("intracloud")
   public Response addSystemToAuthorized(@Valid IntraCloudAuthEntry entry) {
-
     restrictionMap.put("systemName", entry.getConsumer().getSystemName());
+    restrictionMap.put("address", entry.getConsumer().getAddress());
+    restrictionMap.put("port", entry.getConsumer().getPort());
     ArrowheadSystem consumer = dm.get(ArrowheadSystem.class, restrictionMap);
     if (consumer == null) {
       log.info("Consumer System " + entry.getConsumer().getSystemName() + " was not in the database, saving it now.");
@@ -185,6 +178,8 @@ public class AuthorizationApi {
     for (ArrowheadSystem providerSystem : entry.getProviderList()) {
       restrictionMap.clear();
       restrictionMap.put("systemName", providerSystem.getSystemName());
+      restrictionMap.put("address", providerSystem.getAddress());
+      restrictionMap.put("port", providerSystem.getPort());
       retrievedSystem = dm.get(ArrowheadSystem.class, restrictionMap);
       if (retrievedSystem == null) {
         log.info("Provider System " + providerSystem.getSystemName() + " was not in the database, saving it now.");
@@ -222,7 +217,6 @@ public class AuthorizationApi {
   @DELETE
   @Path("intracloud/{id}")
   public Response deleteIntraEntry(@PathParam("id") long id) {
-
     return dm.get(IntraCloudAuthorization.class, id).map(entry -> {
       dm.delete(entry);
       log.info("deleteIntraEntry successfully returns.");
@@ -239,17 +233,13 @@ public class AuthorizationApi {
    * @return JAX-RS Response with status code 200 (if delete is succesxfull) or 204 (if nothing happens).
    */
   @DELETE
-  @Path("intracloud/systemname/{systemName}")
-  public Response deleteSystemRelations(@PathParam("systemName") String systemName, @QueryParam("provider_side") boolean providerSide) {
+  @Path("intracloud/systemId/{systemId}")
+  public Response deleteSystemRelations(@PathParam("systemId") long systemId, @QueryParam("provider_side") boolean providerSide) {
+    ArrowheadSystem system = dm.get(ArrowheadSystem.class, systemId).orElseThrow(() -> {
+      log.info("deleteSystemRelations throws DNF.");
+      throw new DataNotFoundException("ArrowheadSystem not found with id: " + systemId);
+    });
 
-    restrictionMap.put("systemName", systemName);
-    ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
-    if (system == null) {
-      log.info("deleteSystemRelations had no effect.");
-      return Response.noContent().build();
-    }
-
-    restrictionMap.clear();
     if (!providerSide) {
       restrictionMap.put("consumer", system);
     } else {

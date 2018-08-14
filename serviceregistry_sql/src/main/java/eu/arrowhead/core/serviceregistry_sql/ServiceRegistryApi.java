@@ -46,6 +46,12 @@ public class ServiceRegistryApi {
   }
 
   @GET
+  @Path("id/{id}")
+  public ServiceRegistryEntry getServiceRegEntry(@PathParam("id") long id) {
+    return dm.get(ServiceRegistryEntry.class, id).orElseThrow(() -> new DataNotFoundException("ServiceRegistryEntry not found with id: " + id));
+  }
+
+  @GET
   @Path("all")
   public Response getAllServices() {
     List<ServiceRegistryEntry> providedServices = dm.getAll(ServiceRegistryEntry.class, null);
@@ -74,16 +80,13 @@ public class ServiceRegistryApi {
   }
 
   @GET
-  @Path("systemname/{systemName}")
-  public List<ServiceRegistryEntry> getAllByProvider(@PathParam("systemName") String systemName) {
-    restrictionMap.put("systemName", systemName);
-    ArrowheadSystem system = dm.get(ArrowheadSystem.class, restrictionMap);
-    if (system == null) {
+  @Path("systemId/{systemId}")
+  public List<ServiceRegistryEntry> getAllByProvider(@PathParam("systemId") long systemId) {
+    ArrowheadSystem system = dm.get(ArrowheadSystem.class, systemId).orElseThrow(() -> {
       log.info("getAllByProvider throws DataNotFoundException");
       throw new DataNotFoundException("There are no Service Registry entries with the requested ArrowheadSystem in the database.");
-    }
+    });
 
-    restrictionMap.clear();
     restrictionMap.put("provider", system);
     List<ServiceRegistryEntry> srList = dm.getAll(ServiceRegistryEntry.class, restrictionMap);
     if (srList.isEmpty()) {
@@ -129,6 +132,8 @@ public class ServiceRegistryApi {
 
     restrictionMap.clear();
     restrictionMap.put("systemName", entry.getProvider().getSystemName());
+    restrictionMap.put("address", entry.getProvider().getAddress());
+    restrictionMap.put("port", entry.getProvider().getPort());
     ArrowheadSystem provider = dm.get(ArrowheadSystem.class, restrictionMap);
     if (provider == null) {
       log.info("updateServiceRegistryEntry throws DataNotFoundException");
