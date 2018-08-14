@@ -449,5 +449,4 @@ public final class Utility {
     Set<ConstraintViolation<T>> violations = validator.validate(bean);
     return violations.isEmpty();
   }
-
 }
